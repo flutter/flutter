@@ -2041,7 +2041,7 @@ void main() {
     expect(selection.extentOffset, 7);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
+    List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(selection),
       renderEditable,
     );
@@ -2064,6 +2064,36 @@ void main() {
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    newHandlePos = textOffsetToPosition(tester, 2);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(controller.selection.baseOffset, 11);
+        expect(controller.selection.extentOffset, 2);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection.baseOffset, 2);
+        expect(controller.selection.extentOffset, 11);
+        break;
+    }
+
+    // Drag the left handle 2 letters to the left again.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
     newHandlePos = textOffsetToPosition(tester, 0);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
@@ -2072,9 +2102,24 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 11);
-  });
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // The left handle was already the extent, and it remains so.
+        expect(controller.selection.baseOffset, 11);
+        expect(controller.selection.extentOffset, 0);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 11);
+        break;
+    }
+  },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -5115,11 +5160,12 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
+        if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
+        } else if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -5191,8 +5237,9 @@ void main() {
     const String clipboardContent = 'I love Flutter!';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.getData')
+        if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -5240,11 +5287,12 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
+        if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
+        } else if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -11339,57 +11387,158 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/pull/103228
-    final FocusNode focusNode1 = FocusNode();
-    final FocusNode focusNode2 = FocusNode();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              TextField(
-                key: key1,
-                focusNode: focusNode1,
-              ),
-              TextField(
-                key: key2,
-                focusNode: focusNode2,
-              ),
-            ],
+  group('Right click focus', () {
+    testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/103228
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  key: key1,
+                  focusNode: focusNode1,
+                ),
+                TextField(
+                  key: key2,
+                  focusNode: focusNode2,
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Interact with the field to establish the input connection.
-    await tester.tapAt(
-      tester.getCenter(find.byKey(key1)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
+      // Interact with the field to establish the input connection.
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
 
-    expect(focusNode1.hasFocus, isTrue);
-    expect(focusNode2.hasFocus, isFalse);
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
 
-    await tester.tapAt(
-      tester.getCenter(find.byKey(key2)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key2)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
 
-    expect(focusNode1.hasFocus, isFalse);
-    expect(focusNode2.hasFocus, isTrue);
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
 
-    await tester.tapAt(
-      tester.getCenter(find.byKey(key1)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
 
-    expect(focusNode1.hasFocus, isTrue);
-    expect(focusNode2.hasFocus, isFalse);
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+    });
+
+    testWidgets('Can right click to focus on previously selected word on Apple platforms', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+      final TextEditingController controller = TextEditingController(
+        text: 'first second',
+      );
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  key: key1,
+                  controller: controller,
+                  focusNode: focusNode1,
+                ),
+                Focus(
+                  focusNode: focusNode2,
+                  child: const Text('focusable'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Interact with the field to establish the input connection.
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+
+      // Select the second word.
+      controller.selection = const TextSelection(
+        baseOffset: 6,
+        extentOffset: 12,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.isCollapsed, isFalse);
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 12);
+
+      // Unfocus the first field.
+      focusNode2.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
+
+      // Right click the second word in the first field, which is still selected
+      // even though the selection is not visible.
+      await tester.tapAt(
+        textOffsetToPosition(tester, 8),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 12);
+
+      // Select everything.
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 12,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 12);
+
+      // Unfocus the first field.
+      focusNode2.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Right click the first word in the first field.
+      await tester.tapAt(
+        textOffsetToPosition(tester, 2),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 5);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 }

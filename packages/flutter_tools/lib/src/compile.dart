@@ -329,6 +329,8 @@ class KernelCompiler {
         'package:flutter/src/dart_plugin_registrant.dart',
         '-Dflutter.dart_plugin_registrant=${dartPluginRegistrant.uri}',
       ],
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
       ...?extraFrontEndOptions,
       mainUri,
     ];
@@ -795,6 +797,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
         platformDill!,
       ],
       if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
       ...?extraFrontEndOptions,
     ];
     _logger.printTrace(command.join(' '));

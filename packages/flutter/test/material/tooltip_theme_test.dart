@@ -1355,7 +1355,8 @@ void main() {
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null)
+  if (object.debugSemantics != null) {
     return object.debugSemantics!;
-  return findDebugSemantics(object.parent!);
+  }
+  return findDebugSemantics(object.parent! as RenderObject);
 }

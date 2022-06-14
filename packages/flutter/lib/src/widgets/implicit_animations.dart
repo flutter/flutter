@@ -415,8 +415,9 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   }
 
   void _updateTween(Tween<dynamic>? tween, dynamic targetValue) {
-    if (tween == null)
+    if (tween == null) {
       return;
+    }
     tween
       ..begin = tween.evaluate(_animation)
       ..end = targetValue;
@@ -427,10 +428,11 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
       if (targetValue != null) {
         tween ??= constructor(targetValue);
-        if (_shouldAnimateTween(tween, targetValue))
+        if (_shouldAnimateTween(tween, targetValue)) {
           shouldStartAnimation = true;
-        else
+        } else {
           tween.end ??= tween.begin;
+        }
       } else {
         tween = null;
       }

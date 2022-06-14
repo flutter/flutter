@@ -214,7 +214,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 class _SliderDemoState extends State<SliderDemo> {
   @override
   Widget build(BuildContext context) {
-    final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
+    const List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
         tabName: 'SINGLE',
         description: 'Sliders containing 1 thumb',
@@ -229,7 +229,7 @@ class _SliderDemoState extends State<SliderDemo> {
       ),
     ];
 
-    return TabbedComponentDemoScaffold(
+    return const TabbedComponentDemoScaffold(
       title: 'Sliders',
       demos: demos,
       isScrollable: false,
@@ -239,6 +239,8 @@ class _SliderDemoState extends State<SliderDemo> {
 }
 
 class _Sliders extends StatefulWidget {
+  const _Sliders();
+
   @override
   _SlidersState createState() => _SlidersState();
 }
@@ -357,6 +359,8 @@ class _SlidersState extends State<_Sliders> {
 }
 
 class _RangeSliders extends StatefulWidget {
+  const _RangeSliders();
+
   @override
   _RangeSlidersState createState() => _RangeSlidersState();
 }

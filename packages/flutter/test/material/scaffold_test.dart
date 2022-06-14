@@ -276,12 +276,17 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.only(bottom: 20.0),
+          viewPadding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
       ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    expect(
+      tester.getBottomLeft(find.byType(Placeholder)).dy,
+      moreOrLessEquals(600.0 - 20.0 - kFloatingActionButtonMargin)
+    );
+
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
       MediaQuery(
@@ -294,6 +299,37 @@ void main() {
     );
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
     expect(initialPoint, finalPoint);
+  });
+
+  testWidgets('viewPadding change should trigger _ScaffoldLayout re-layout', (WidgetTester tester) async {
+    Widget buildFrame(EdgeInsets viewPadding) {
+      return MediaQuery(
+        data: MediaQueryData(
+          viewPadding: viewPadding,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Container(),
+            floatingActionButton: const Placeholder(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const EdgeInsets.only(bottom: 300)));
+
+    final RenderBox renderBox = tester.renderObject<RenderBox>(find.byType(CustomMultiChildLayout));
+    expect(renderBox.debugNeedsLayout, false);
+
+    await tester.pumpWidget(
+      buildFrame(const EdgeInsets.only(bottom: 400)),
+      null,
+      EnginePhase.build,
+    );
+
+    expect(renderBox.debugNeedsLayout, true);
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
@@ -1236,7 +1272,7 @@ void main() {
             bottomNavigationBar: ConstrainedBox(
               key: key,
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
             ),
       )));
 
@@ -1255,7 +1291,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
             ),
       )));
 
@@ -1337,7 +1373,7 @@ void main() {
             body: Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
               onPressed: () { },
             ),
       )));
@@ -1358,7 +1394,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
             ),
       )));
 
@@ -1376,7 +1412,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
             ),
       )));
 
@@ -1384,7 +1420,7 @@ void main() {
             body: Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
               onPressed: () { },
             ),
       )));
@@ -1439,7 +1475,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
             ),
       )));
 
@@ -1452,7 +1488,7 @@ void main() {
             body: Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
-              child: _GeometryListener(),
+              child: const _GeometryListener(),
               onPressed: () { },
             ),
       )));
@@ -1777,7 +1813,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets('Drawer does not open with a drag gesture when it is disabled', (WidgetTester tester) async {
+  testWidgets('Drawer does not open with a drag gesture when it is disabled on mobile', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1839,7 +1875,47 @@ void main() {
     await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
     await tester.pumpAndSettle();
     expect(scaffoldState.isDrawerOpen, false);
-  });
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('Drawer does not open with a drag gesture on dekstop', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
+    final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
+
+    // Test that we cannot open the drawer with a drag gesture.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+
+    // Test that we can open the drawer with a tap gesture on drawer icon button.
+    final Finder drawerOpenButton = find.byType(IconButton).first;
+    await tester.tap(drawerOpenButton);
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+
+    // Test that we cannot close the drawer with a drag gesture.
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+
+    // Test that we can close the drawer with a tap gesture in the body.
+    await tester.tapAt(const Offset(500, 300));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('End drawer does not open with a drag gesture when it is disabled', (WidgetTester tester) async {
     late double screenWidth;
@@ -2424,6 +2500,8 @@ void main() {
 }
 
 class _GeometryListener extends StatefulWidget {
+  const _GeometryListener();
+
   @override
   _GeometryListenerState createState() => _GeometryListenerState();
 }
@@ -2444,11 +2522,13 @@ class _GeometryListenerState extends State<_GeometryListener> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
-    if (geometryListenable == newListenable)
+    if (geometryListenable == newListenable) {
       return;
+    }
 
-    if (geometryListenable != null)
+    if (geometryListenable != null) {
       geometryListenable!.removeListener(onGeometryChanged);
+    }
 
     geometryListenable = newListenable;
     geometryListenable!.addListener(onGeometryChanged);

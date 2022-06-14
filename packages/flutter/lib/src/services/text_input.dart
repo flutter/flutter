@@ -20,7 +20,6 @@ import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
-import 'system_chrome.dart';
 import 'text_editing.dart';
 import 'text_editing_delta.dart';
 
@@ -916,8 +915,9 @@ class TextEditingValue {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is TextEditingValue
         && other.text == text
         && other.selection == selection
@@ -1165,10 +1165,12 @@ class SelectionRect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is SelectionRect
         && other.position == position
         && other.bounds   == bounds;
@@ -1330,8 +1332,9 @@ class TextInputConnection {
   /// platform.
   void setComposingRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedRect)
+    if (rect == _cachedRect) {
       return;
+    }
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
@@ -1348,8 +1351,9 @@ class TextInputConnection {
   /// the accent selection menu.
   void setCaretRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedCaretRect)
+    if (rect == _cachedCaretRect) {
       return;
+    }
     _cachedCaretRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setCaretRect(
@@ -1662,8 +1666,9 @@ class TextInput {
       final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
       return _scribbleClients.keys.where((String elementIdentifier) {
         final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false))
+        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
           return false;
+        }
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
         return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
       }).map((String elementIdentifier) {
@@ -1677,8 +1682,9 @@ class TextInput {
       _scribbleInProgress = false;
       return;
     }
-    if (_currentConnection == null)
+    if (_currentConnection == null) {
       return;
+    }
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
@@ -1723,12 +1729,14 @@ class TextInput {
         // In debug builds we allow "-1" as a magical client ID that ignores
         // this verification step so that tests can always get through, even
         // when they are not mocking the engine side of text input.
-        if (client == -1)
+        if (client == -1) {
           debugAllowAnyway = true;
+        }
         return true;
       }());
-      if (!debugAllowAnyway)
+      if (!debugAllowAnyway) {
         return;
+      }
     }
 
     switch (method) {
@@ -1787,8 +1795,9 @@ class TextInput {
   bool _hidePending = false;
 
   void _scheduleHide() {
-    if (_hidePending)
+    if (_hidePending) {
       return;
+    }
     _hidePending = true;
 
     // Schedule a deferred task that hides the text input. If someone else
@@ -1796,8 +1805,9 @@ class TextInput {
     // nothing.
     scheduleMicrotask(() {
       _hidePending = false;
-      if (_currentConnection == null)
+      if (_currentConnection == null) {
         _channel.invokeMethod<void>('TextInput.hide');
+      }
     });
   }
 

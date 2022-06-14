@@ -135,8 +135,9 @@ class BannerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!_prepared)
+    if (!_prepared) {
       _prepare();
+    }
     canvas
       ..translate(_translationX(size.width), _translationY(size.height))
       ..rotate(_rotation)

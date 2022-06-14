@@ -84,10 +84,12 @@ void main() {
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
+      if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
-      if (methodCall.method == 'Clipboard.hasStrings')
+      }
+      if (methodCall.method == 'Clipboard.hasStrings') {
         return <String, dynamic>{'value': clipboardContent.isNotEmpty};
+      }
       return null;
     });
 
@@ -138,10 +140,12 @@ void main() {
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
+      if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
-      if (methodCall.method == 'Clipboard.hasStrings')
+      }
+      if (methodCall.method == 'Clipboard.hasStrings') {
         return <String, dynamic>{'value': clipboardContent.isNotEmpty};
+      }
       return null;
     });
 
@@ -859,10 +863,12 @@ void main() {
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
+      if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
-      if (methodCall.method == 'Clipboard.hasStrings')
+      }
+      if (methodCall.method == 'Clipboard.hasStrings') {
         return <String, dynamic>{'value': clipboardContent.isNotEmpty};
+      }
       return null;
     });
 
@@ -919,10 +925,12 @@ void main() {
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
+      if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
-      if (methodCall.method == 'Clipboard.hasStrings')
+      }
+      if (methodCall.method == 'Clipboard.hasStrings') {
         return <String, dynamic>{'value': clipboardContent.isNotEmpty};
+      }
       return null;
     });
 

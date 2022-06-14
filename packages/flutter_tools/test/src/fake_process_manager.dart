@@ -158,6 +158,8 @@ class FakeProcess implements io.Process {
     } else if (outputFollowsExit) {
       // Wait for the process to exit before emitting stderr.
       this.stderr = Stream<List<int>>.fromFuture(this.exitCode.then((_) {
+        // Return a Future so stderr isn't immediately available to those who
+        // await exitCode, but is available asynchronously later.
         return Future<List<int>>(() => _stderr);
       }));
     } else {
@@ -169,6 +171,8 @@ class FakeProcess implements io.Process {
     } else if (outputFollowsExit) {
       // Wait for the process to exit before emitting stdout.
       this.stdout = Stream<List<int>>.fromFuture(this.exitCode.then((_) {
+        // Return a Future so stdout isn't immediately available to those who
+        // await exitCode, but is available asynchronously later.
         return Future<List<int>>(() => _stdout);
       }));
     } else {

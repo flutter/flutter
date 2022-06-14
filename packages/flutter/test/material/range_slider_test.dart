@@ -1276,8 +1276,10 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..paragraph(),
+        ..paragraph()
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
@@ -1360,7 +1362,7 @@ void main() {
     );
 
     // Represents the Raised Button and Range Slider.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 4));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 6));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
 
     await tester.tap(find.text('Next'));
@@ -1370,11 +1372,11 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-       paints
-         ..path(color: fillColor)
-         ..paragraph()
-         ..path(color: fillColor)
-         ..paragraph(),
+      paints
+        ..path(color: fillColor)
+        ..paragraph()
+        ..path(color: fillColor)
+        ..paragraph(),
       ),
     );
 
@@ -1519,6 +1521,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1594,6 +1598,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1938,8 +1944,9 @@ void main() {
 
     late Rect activeTrackRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect)
+      if (method != #drawRect) {
         return false;
+      }
       activeTrackRect = arguments[0] as Rect;
       return true;
     }));

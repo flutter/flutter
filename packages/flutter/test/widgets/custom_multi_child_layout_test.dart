@@ -12,8 +12,9 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   Size getSize(BoxConstraints constraints) {
-    if (!RenderObject.debugCheckingIntrinsics)
+    if (!RenderObject.debugCheckingIntrinsics) {
       getSizeConstraints = constraints;
+    }
     return const Size(200.0, 300.0);
   }
 

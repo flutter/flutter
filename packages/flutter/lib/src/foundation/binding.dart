@@ -14,10 +14,11 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'diagnostics.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+
+export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
 // Examples can assume:
 // mixin BarBinding on BindingBase { }
@@ -827,8 +828,9 @@ abstract class BindingBase {
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
-        if (debugInstrumentationEnabled)
+        if (debugInstrumentationEnabled) {
           debugPrint('service extension method received: $method($parameters)');
+        }
         return true;
       }());
 

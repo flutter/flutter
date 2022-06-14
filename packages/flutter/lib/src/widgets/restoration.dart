@@ -473,7 +473,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 
   @override
   void dispose() {
-    assert(debugAssertNotDisposed()); // FYI, This uses ChangeNotifier's _debugDisposed, not _disposed.
+    assert(ChangeNotifier.debugAssertNotDisposed(this)); // FYI, This uses ChangeNotifier's _debugDisposed, not _disposed.
     _owner?._unregister(this);
     super.dispose();
     _disposed = true;
@@ -483,14 +483,14 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   String? _restorationId;
   RestorationMixin? _owner;
   void _register(String restorationId, RestorationMixin owner) {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(restorationId != null);
     assert(owner != null);
     _restorationId = restorationId;
     _owner = owner;
   }
   void _unregister() {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(_restorationId != null);
     assert(_owner != null);
     _restorationId = null;
@@ -503,14 +503,14 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   @protected
   State get state {
     assert(isRegistered);
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     return _owner!;
   }
 
   /// Whether this property is currently registered with a [RestorationMixin].
   @protected
   bool get isRegistered {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     return _restorationId != null;
   }
 }
@@ -739,8 +739,9 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     if (!property.isRegistered) {
       property._register(restorationId, this);
       void listener() {
-        if (bucket == null)
+        if (bucket == null) {
           return;
+        }
         _updateProperty(property);
       }
       property.addListener(listener);

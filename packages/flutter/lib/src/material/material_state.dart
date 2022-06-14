@@ -658,6 +658,36 @@ abstract class MaterialStateProperty<T> {
   // a dart fix that will replace this with MaterialStatePropertyAll:
   // https://github.com/dart-lang/sdk/issues/49056.
   static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
+
+  /// Linearly interpolate between two [MaterialStateProperty]s.
+  static MaterialStateProperty<T?>? lerp<T>(
+    MaterialStateProperty<T>? a,
+    MaterialStateProperty<T>? b,
+    double t,
+    T? Function(T?, T?, double) lerpFunction,
+  ) {
+    // Avoid creating a _LerpProperties object for a common case.
+    if (a == null && b == null) {
+      return null;
+    }
+    return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+}
+
+class _LerpProperties<T> implements MaterialStateProperty<T?> {
+  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
+
+  final MaterialStateProperty<T>? a;
+  final MaterialStateProperty<T>? b;
+  final double t;
+  final T? Function(T?, T?, double) lerpFunction;
+
+  @override
+  T? resolve(Set<MaterialState> states) {
+    final T? resolvedA = a?.resolve(states);
+    final T? resolvedB = b?.resolve(states);
+    return lerpFunction(resolvedA, resolvedB, t);
+  }
 }
 
 class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
@@ -685,4 +715,27 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 
   @override
   String toString() => 'MaterialStatePropertyAll($value)';
+}
+
+/// Manages a set of [MaterialState]s and notifies listeners of changes.
+///
+/// Used by widgets that expose their internal state for the sake of
+/// extensions that add support for additional states. See
+/// [TextButton.statesController] for example.
+///
+/// The controller's [value] is its current set of states. Listeners
+/// are notified whenever the [value] changes. The [value] should only be
+/// changed with [update]; it should not be modified directly.
+class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
+  /// Creates a MaterialStatesController.
+  MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
+
+  /// Adds [state] to [value] if [add] is true, and removes it otherwise,
+  /// and notifies listeners if [value] has changed.
+  void update(MaterialState state, bool add) {
+    final bool valueChanged = add ? value.add(state) : value.remove(state);
+    if (valueChanged) {
+      notifyListeners();
+    }
+  }
 }

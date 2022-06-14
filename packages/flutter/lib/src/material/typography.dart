@@ -77,6 +77,7 @@ enum ScriptCategory {
 /// See also:
 ///
 ///  * <https://material.io/design/typography/>
+///  * <https://m3.material.io/styles/typography>
 @immutable
 class Typography with Diagnosticable {
   /// Creates a typography instance.
@@ -157,6 +158,9 @@ class Typography with Diagnosticable {
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2021], [dense2021], and [tall2021].
+  ///
+  /// See also:
+  ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
     TargetPlatform? platform = TargetPlatform.android,
     TextTheme? black,
@@ -322,10 +326,12 @@ class Typography with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Typography
         && other.black == black
         && other.white == white
@@ -729,7 +735,7 @@ class Typography with Diagnosticable {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_99
 class _M3Typography {
   _M3Typography._();
 

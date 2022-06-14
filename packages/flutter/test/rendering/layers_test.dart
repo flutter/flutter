@@ -965,6 +965,21 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a1.subtreeHasCompositionCallbacks, false);
   });
+
+  test('Double removing a observe callback throws', () {
+    final ContainerLayer root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) { });
+    callback();
+
+    expect(() => callback(), throwsAssertionError);
+  });
+
+  test('Removing an observe callback on a disposed layer does not throw', () {
+    final ContainerLayer root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) { });
+    root.dispose();
+    expect(() => callback(), returnsNormally);
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {

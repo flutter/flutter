@@ -358,12 +358,14 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
-    if (_viewportFraction == value)
+    if (_viewportFraction == value) {
       return;
+    }
     final double? oldPage = page;
     _viewportFraction = value;
-    if (oldPage != null)
+    if (oldPage != null) {
       forcePixels(getPixelsFromPage(oldPage));
+    }
   }
 
   // The amount of offset that will be added to [minScrollExtent] and subtracted
@@ -408,8 +410,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   void restoreScrollOffset() {
     if (!hasPixels) {
       final double? value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as double?;
-      if (value != null)
+      if (value != null) {
         _pageToUseOnStartup = value;
+      }
     }
   }
 
@@ -457,6 +460,20 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return false;
     }
     return result;
+  }
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_cachedPage == null);
+
+    if (other is! _PagePosition) {
+      return;
+    }
+
+    if (other._cachedPage != null) {
+      _cachedPage = other._cachedPage;
+    }
   }
 
   @override
@@ -525,23 +542,26 @@ class PageScrollPhysics extends ScrollPhysics {
   }
 
   double _getPage(ScrollMetrics position) {
-    if (position is _PagePosition)
+    if (position is _PagePosition) {
       return position.page!;
+    }
     return position.pixels / position.viewportDimension;
   }
 
   double _getPixels(ScrollMetrics position, double page) {
-    if (position is _PagePosition)
+    if (position is _PagePosition) {
       return position.getPixelsFromPage(page);
+    }
     return page * position.viewportDimension;
   }
 
   double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
     double page = _getPage(position);
-    if (velocity < -tolerance.velocity)
+    if (velocity < -tolerance.velocity) {
       page -= 0.5;
-    else if (velocity > tolerance.velocity)
+    } else if (velocity > tolerance.velocity) {
       page += 0.5;
+    }
     return _getPixels(position, page.roundToDouble());
   }
 
@@ -550,12 +570,14 @@ class PageScrollPhysics extends ScrollPhysics {
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at a page boundary.
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
-        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent))
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);
+    }
     final Tolerance tolerance = this.tolerance;
     final double target = _getTargetPixels(position, tolerance, velocity);
-    if (target != position.pixels)
+    if (target != position.pixels) {
       return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
+    }
     return null;
   }
 

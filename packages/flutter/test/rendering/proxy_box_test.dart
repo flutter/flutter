@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
@@ -689,9 +688,9 @@ void main() {
 
   test('Offstage implements paintsChild correctly', () {
     final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderProxyBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
-    parent.child  = offstage;
+    parent.adoptChild(offstage);
 
     expect(offstage.paintsChild(box), true);
 
@@ -702,9 +701,9 @@ void main() {
 
   test('Opacity implements paintsChild correctly', () {
     final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderProxyBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final RenderOpacity opacity = RenderOpacity(child: box);
-    parent.child = opacity;
+    parent.adoptChild(opacity);
 
     expect(opacity.paintsChild(box), true);
 
@@ -714,11 +713,11 @@ void main() {
   });
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
-    final RenderProxyBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderProxyBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
     final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
-    parent.child = opacity;
+    parent.adoptChild(opacity);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -732,10 +731,10 @@ void main() {
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
     final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
-    final RenderSliverPadding parent = RenderSliverPadding(padding: const EdgeInsets.all(4));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
     final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
-    parent.child = opacity;
+    parent.adoptChild(opacity);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());

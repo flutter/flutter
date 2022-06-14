@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -20,9 +18,9 @@ import '../src/fakes.dart';
 
 /// Matches a doctor validation result.
 Matcher _matchDoctorValidation({
-  ValidationType validationType,
-  String statusInfo,
-  dynamic messages
+  required ValidationType validationType,
+  required String statusInfo,
+  required Object messages
 }) {
   return const TypeMatcher<ValidationResult>()
       .having((ValidationResult result) => result.type, 'type', validationType)
@@ -235,7 +233,7 @@ void main() {
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  FakeOperatingSystemUtils({this.name});
+  FakeOperatingSystemUtils({required this.name});
 
   @override
   final String name;

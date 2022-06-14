@@ -108,8 +108,9 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   @protected
   ValueChanged<bool> updateMaterialState(MaterialState key, {ValueChanged<bool>? onChanged}) {
     return (bool value) {
-      if (materialStates.contains(key) == value)
+      if (materialStates.contains(key) == value) {
         return;
+      }
       setMaterialState(key, value);
       onChanged?.call(value);
     };
@@ -124,15 +125,17 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// Mutator to mark a [MaterialState] value as active.
   @protected
   void addMaterialState(MaterialState state) {
-    if (materialStates.add(state))
+    if (materialStates.add(state)) {
       setState((){});
+    }
   }
 
   /// Mutator to mark a [MaterialState] value as inactive.
   @protected
   void removeMaterialState(MaterialState state) {
-    if (materialStates.remove(state))
+    if (materialStates.remove(state)) {
       setState((){});
+    }
   }
 
   /// Getter for whether this class considers [MaterialState.disabled] to be active.

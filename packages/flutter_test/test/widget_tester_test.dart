@@ -440,7 +440,7 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 400));
 
       await tester.pageBack();
       await tester.pump();
@@ -780,31 +780,6 @@ class FakeMatcher extends AsyncMatcher {
 
   @override
   Description describe(Description description) => description.add('--fake--');
-}
-
-class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest();
-
-  @override
-  _SingleTickerTestState createState() => _SingleTickerTestState();
-}
-
-class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 100),
-    )  ;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
 }
 
 class _AlwaysAnimating extends StatefulWidget {

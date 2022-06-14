@@ -233,8 +233,9 @@ class Visibility extends StatelessWidget {
     assert(!maintainSize);
     if (maintainState) {
       Widget result = child;
-      if (!maintainAnimation)
+      if (!maintainAnimation) {
         result = TickerMode(enabled: visible, child: child);
+      }
       return Offstage(
         offstage: !visible,
         child: result,
@@ -470,8 +471,9 @@ class SliverVisibility extends StatelessWidget {
     assert(!maintainSize);
     if (maintainState) {
       Widget result = sliver;
-      if (!maintainAnimation)
+      if (!maintainAnimation) {
         result = TickerMode(enabled: visible, child: sliver);
+      }
       return SliverOffstage(
         sliver: result,
         offstage: !visible,

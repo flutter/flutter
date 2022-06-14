@@ -427,6 +427,12 @@ class _LicensePageState extends State<LicensePage> {
   final ValueNotifier<int?> selectedId = ValueNotifier<int?>(null);
 
   @override
+  void dispose() {
+    selectedId.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
       detailPageFABlessGutterWidth: _getGutterSize(context),
@@ -1319,6 +1325,12 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
     detailPageFABGutterWidth = _kDetailPageFABGutterWidth;
     masterViewWidth = _kMasterViewWidth;
     floatingActionButtonLocation = FloatingActionButtonLocation.endTop;
+  }
+
+  @override
+  void dispose() {
+    _detailArguments.dispose();
+    super.dispose();
   }
 
   @override

@@ -67,8 +67,6 @@ double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmar
 double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
 // ignore: avoid_dynamic_calls
 double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
-// ignore: avoid_dynamic_calls
-double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAnimation?.value as double;
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -177,8 +175,9 @@ bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle)
+        if (method != #drawCircle) {
           return false;
+        }
         final Offset center = arguments[0] as Offset;
         final double radius = arguments[1] as double;
         return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
@@ -192,12 +191,14 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
 PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..everything((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle)
+        if (method != #drawCircle) {
           return true;
+        }
         final Offset center = arguments[0] as Offset;
         final double radius = arguments[1] as double;
-        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
+        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius)) {
           return true;
+        }
         throw '''
               Expected: center == $expectedCenter, radius == $expectedRadius
               Found: center == $center radius == $radius''';
@@ -2553,20 +2554,25 @@ void main() {
     const Color disabledColor = Color(0x00000006);
 
     Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return disabledColor;
+      }
 
-      if (states.contains(MaterialState.pressed))
+      if (states.contains(MaterialState.pressed)) {
         return pressedColor;
+      }
 
-      if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered)) {
         return hoverColor;
+      }
 
-      if (states.contains(MaterialState.focused))
+      if (states.contains(MaterialState.focused)) {
         return focusedColor;
+      }
 
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         return selectedColor;
+      }
 
       return defaultColor;
     }
@@ -2638,20 +2644,17 @@ void main() {
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color sideColor = defaultColor;
 
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         sideColor = disabledColor;
-
-      else if (states.contains(MaterialState.pressed))
+      } else if (states.contains(MaterialState.pressed)) {
         sideColor = pressedColor;
-
-      else if (states.contains(MaterialState.hovered))
+      } else if (states.contains(MaterialState.hovered)) {
         sideColor = hoverColor;
-
-      else if (states.contains(MaterialState.focused))
+      } else if (states.contains(MaterialState.focused)) {
         sideColor = focusedColor;
-
-      else if (states.contains(MaterialState.selected))
+      } else if (states.contains(MaterialState.selected)) {
         sideColor = selectedColor;
+      }
 
       return BorderSide(color: sideColor);
     }
@@ -2720,20 +2723,17 @@ void main() {
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color sideColor = defaultColor;
 
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         sideColor = disabledColor;
-
-      else if (states.contains(MaterialState.pressed))
+      } else if (states.contains(MaterialState.pressed)) {
         sideColor = pressedColor;
-
-      else if (states.contains(MaterialState.hovered))
+      } else if (states.contains(MaterialState.hovered)) {
         sideColor = hoverColor;
-
-      else if (states.contains(MaterialState.focused))
+      } else if (states.contains(MaterialState.focused)) {
         sideColor = focusedColor;
-
-      else if (states.contains(MaterialState.selected))
+      } else if (states.contains(MaterialState.selected)) {
         sideColor = selectedColor;
+      }
 
       return BorderSide(color: sideColor);
     }
@@ -2805,20 +2805,17 @@ void main() {
     BorderSide? getBorderSide(Set<MaterialState> states) {
       Color sideColor = defaultColor;
 
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         sideColor = disabledColor;
-
-      else if (states.contains(MaterialState.pressed))
+      } else if (states.contains(MaterialState.pressed)) {
         sideColor = pressedColor;
-
-      else if (states.contains(MaterialState.hovered))
+      } else if (states.contains(MaterialState.hovered)) {
         sideColor = hoverColor;
-
-      else if (states.contains(MaterialState.focused))
+      } else if (states.contains(MaterialState.focused)) {
         sideColor = focusedColor;
-
-      else if (states.contains(MaterialState.selected))
+      } else if (states.contains(MaterialState.selected)) {
         return null;
+      }
 
       return BorderSide(color: sideColor);
     }
@@ -2885,20 +2882,17 @@ void main() {
     final FocusNode focusNode = FocusNode();
     OutlinedBorder? getShape(Set<MaterialState> states) {
 
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return const BeveledRectangleBorder();
-
-      else if (states.contains(MaterialState.pressed))
+      } else if (states.contains(MaterialState.pressed)) {
         return const CircleBorder();
-
-      else if (states.contains(MaterialState.hovered))
+      } else if (states.contains(MaterialState.hovered)) {
         return const ContinuousRectangleBorder();
-
-      else if (states.contains(MaterialState.focused))
+      } else if (states.contains(MaterialState.focused)) {
         return const RoundedRectangleBorder();
-
-      else if (states.contains(MaterialState.selected))
+      } else if (states.contains(MaterialState.selected)) {
         return const BeveledRectangleBorder();
+      }
 
       return null;
     }
@@ -2961,14 +2955,16 @@ void main() {
     const BorderSide selectedBorderSide = BorderSide(color: Color(0x00000002));
 
     OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         return selectedShape;
+      }
       return null;
     }
 
     BorderSide? getBorderSide(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         return selectedBorderSide;
+      }
       return null;
     }
 

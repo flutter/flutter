@@ -1062,19 +1062,6 @@ class FakeSimpleArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
-class FakeDownloadedArtifact extends CachedArtifact {
-  FakeDownloadedArtifact(this.downloadedFile, Cache cache) : super(
-    'fake',
-    cache,
-    DevelopmentArtifact.universal,
-  );
-
-  final File downloadedFile;
-
-  @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
-}
-
 class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;

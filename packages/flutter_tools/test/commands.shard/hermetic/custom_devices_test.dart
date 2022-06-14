@@ -163,13 +163,6 @@ const String defaultConfigLinux2 = r'''
 }
 ''';
 
-final Platform linuxPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': linuxFlutterRoot,
-    'HOME': '/',
-  }
-);
-
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
@@ -330,7 +323,7 @@ CustomDevicesCommand createCustomDevicesCommand({
       hostPlatform: platform.isLinux ? HostPlatform.linux_x64
         : platform.isWindows ? HostPlatform.windows_x64
         : platform.isMacOS ? HostPlatform.darwin_x64
-        : throw FallThroughError()
+        : throw UnsupportedError('Unsupported operating system')
     ),
     terminal: terminal != null
       ? terminal(platform)

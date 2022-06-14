@@ -1261,6 +1261,11 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   Future<ChromeTab> getTab(bool Function(ChromeTab tab) accept, {Duration retryFor}) async {
     return tabs.firstWhere(accept);
   }
+
+  @override
+  Future<List<ChromeTab>> getTabs({Duration retryFor}) async {
+    return tabs;
+  }
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
@@ -1312,6 +1317,11 @@ class TestChromiumLauncher implements ChromiumLauncher {
 
   @override
   Future<Chromium> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir}) async {
+    return currentCompleter.future;
+  }
+
+  @override
+  Future<Chromium> connect(Chromium chrome, bool skipCheck) {
     return currentCompleter.future;
   }
 }

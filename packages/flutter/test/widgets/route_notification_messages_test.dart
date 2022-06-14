@@ -29,13 +29,6 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-Map<String, dynamic> convertRouteInformationToMap(RouteInformation routeInformation) {
-  return <String, dynamic>{
-    'location': routeInformation.location,
-    'state': routeInformation.state,
-  };
-}
-
 void main() {
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -358,8 +351,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   RouteInformation? get currentConfiguration {
-    if (reportConfiguration)
+    if (reportConfiguration) {
       return routeInformation;
+    }
     return null;
   }
 
@@ -371,8 +365,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Future<bool> popRoute() {
-    if (onPopRoute != null)
+    if (onPopRoute != null) {
       return onPopRoute!();
+    }
     return SynchronousFuture<bool>(true);
   }
 

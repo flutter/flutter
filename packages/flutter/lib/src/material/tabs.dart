@@ -151,12 +151,13 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize {
-    if (height != null)
+    if (height != null) {
       return Size.fromHeight(height!);
-    else if ((text != null || child != null) && icon != null)
+    } else if ((text != null || child != null) && icon != null) {
       return const Size.fromHeight(_kTextAndIconTabHeight);
-    else
+    } else {
       return const Size.fromHeight(_kTabHeight);
+    }
   }
 }
 
@@ -310,8 +311,9 @@ double _indexChangeProgress(TabController controller) {
 
   // The controller's offset is changing because the user is dragging the
   // TabBarView's PageView to the left or right.
-  if (!controller.indexIsChanging)
+  if (!controller.indexIsChanging) {
     return clampDouble((currentIndex - controllerValue).abs(), 0.0, 1.0);
+  }
 
   // The TabController animation's value is changing from previousIndex to currentIndex.
   return (controllerValue - currentIndex).abs() / (currentIndex - previousIndex).abs();
@@ -328,8 +330,9 @@ class _IndicatorPainter extends CustomPainter {
   }) : assert(controller != null),
        assert(indicator != null),
        super(repaint: controller.animation) {
-    if (old != null)
+    if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
+    }
   }
 
   final TabController controller;
@@ -452,14 +455,16 @@ class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<d
 
   @override
   void removeStatusListener(AnimationStatusListener listener) {
-    if (controller.animation != null)
+    if (controller.animation != null) {
       super.removeStatusListener(listener);
+    }
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    if (controller.animation != null)
+    if (controller.animation != null) {
       super.removeListener(listener);
+    }
   }
 
   @override
@@ -477,14 +482,16 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 
   @override
   void removeStatusListener(AnimationStatusListener listener) {
-    if (controller.animation != null)
+    if (controller.animation != null) {
       super.removeStatusListener(listener);
+    }
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    if (controller.animation != null)
+    if (controller.animation != null) {
       super.removeListener(listener);
+    }
   }
 
   @override
@@ -888,8 +895,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   bool get tabHasTextAndIcon {
     for (final Widget item in tabs) {
       if (item is PreferredSizeWidget) {
-        if (item.preferredSize.height == _kTextAndIconTabHeight)
+        if (item.preferredSize.height == _kTextAndIconTabHeight) {
           return true;
+        }
       }
     }
     return false;
@@ -906,6 +914,7 @@ class _TabBarState extends State<TabBar> {
   int? _currentIndex;
   late double _tabStripWidth;
   late List<GlobalKey> _tabKeys;
+  bool _debugHasScheduledValidTabsCountCheck = false;
 
   @override
   void initState() {
@@ -916,11 +925,13 @@ class _TabBarState extends State<TabBar> {
   }
 
   Decoration get _indicator {
-    if (widget.indicator != null)
+    if (widget.indicator != null) {
       return widget.indicator!;
+    }
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    if (tabBarTheme.indicator != null)
+    if (tabBarTheme.indicator != null) {
       return tabBarTheme.indicator!;
+    }
 
     Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
@@ -937,8 +948,9 @@ class _TabBarState extends State<TabBar> {
     // TODO(xu-baolin): Remove automatic adjustment to white color indicator
     // with a better long-term solution.
     // https://github.com/flutter/flutter/pull/68171#pullrequestreview-517753917
-    if (widget.automaticIndicatorColorAdjustment && color.value == Material.of(context)?.color?.value)
+    if (widget.automaticIndicatorColorAdjustment && color.value == Material.of(context)?.color?.value) {
       color = Colors.white;
+    }
 
     return UnderlineTabIndicator(
       borderSide: BorderSide(
@@ -968,8 +980,9 @@ class _TabBarState extends State<TabBar> {
       return true;
     }());
 
-    if (newController == _controller)
+    if (newController == _controller) {
       return;
+    }
 
     if (_controllerIsValid) {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
@@ -1038,8 +1051,9 @@ class _TabBarState extends State<TabBar> {
   int get maxTabIndex => _indicatorPainter!.maxTabIndex;
 
   double _tabScrollOffset(int index, double viewportWidth, double minExtent, double maxExtent) {
-    if (!widget.isScrollable)
+    if (!widget.isScrollable) {
       return 0.0;
+    }
     double tabCenter = _indicatorPainter!.centerOf(index);
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
@@ -1073,16 +1087,17 @@ class _TabBarState extends State<TabBar> {
     final double index = _controller!.index.toDouble();
     final double value = _controller!.animation!.value;
     final double offset;
-    if (value == index - 1.0)
+    if (value == index - 1.0) {
       offset = leadingPosition ?? middlePosition;
-    else if (value == index + 1.0)
+    } else if (value == index + 1.0) {
       offset = trailingPosition ?? middlePosition;
-    else if (value == index)
+    } else if (value == index) {
       offset = middlePosition;
-    else if (value < index)
+    } else if (value < index) {
       offset = leadingPosition == null ? middlePosition : lerpDouble(middlePosition, leadingPosition, index - value)!;
-    else
+    } else {
       offset = trailingPosition == null ? middlePosition : lerpDouble(middlePosition, trailingPosition, value - index)!;
+    }
 
     _scrollController!.jumpTo(offset);
   }
@@ -1099,8 +1114,9 @@ class _TabBarState extends State<TabBar> {
   void _handleTabControllerTick() {
     if (_controller!.index != _currentIndex) {
       _currentIndex = _controller!.index;
-      if (widget.isScrollable)
+      if (widget.isScrollable) {
         _scrollToCurrentIndex();
+      }
     }
     setState(() {
       // Rebuild the tabs after a (potentially animated) index change
@@ -1132,18 +1148,34 @@ class _TabBarState extends State<TabBar> {
     );
   }
 
+  bool _debugScheduleCheckHasValidTabsCount() {
+    if (_debugHasScheduledValidTabsCountCheck) {
+      return true;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      _debugHasScheduledValidTabsCountCheck = false;
+      if (!mounted) {
+        return;
+      }
+      assert(() {
+        if (_controller!.length != widget.tabs.length) {
+          throw FlutterError(
+            "Controller's length property (${_controller!.length}) does not match the "
+            "number of tabs (${widget.tabs.length}) present in TabBar's tabs property.",
+          );
+        }
+        return true;
+      }());
+    });
+    _debugHasScheduledValidTabsCountCheck = true;
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    assert(() {
-      if (_controller!.length != widget.tabs.length) {
-        throw FlutterError(
-          "Controller's length property (${_controller!.length}) does not match the "
-          "number of tabs (${widget.tabs.length}) present in TabBar's tabs property.",
-        );
-      }
-      return true;
-    }());
+    assert(_debugScheduleCheckHasValidTabsCount());
+
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
       return Container(
@@ -1244,8 +1276,9 @@ class _TabBarState extends State<TabBar> {
           ),
         ),
       );
-      if (!widget.isScrollable)
+      if (!widget.isScrollable) {
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
+      }
     }
 
     Widget tabBar = CustomPaint(
@@ -1359,6 +1392,7 @@ class _TabBarViewState extends State<TabBarView> {
   late List<Widget> _childrenWithKey;
   int? _currentIndex;
   int _warpUnderwayCount = 0;
+  bool _debugHasScheduledValidChildrenCountCheck = false;
 
   // If the TabBarView is rebuilt with a new tab controller, the caller should
   // dispose the old one. In that case the old controller's animation will be
@@ -1380,14 +1414,17 @@ class _TabBarViewState extends State<TabBarView> {
       return true;
     }());
 
-    if (newController == _controller)
+    if (newController == _controller) {
       return;
+    }
 
-    if (_controllerIsValid)
+    if (_controllerIsValid) {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
+    }
     _controller = newController;
-    if (_controller != null)
+    if (_controller != null) {
       _controller!.animation!.addListener(_handleTabControllerAnimationTick);
+    }
   }
 
   @override
@@ -1417,14 +1454,16 @@ class _TabBarViewState extends State<TabBarView> {
       _pageController.jumpToPage(_currentIndex!);
       _warpUnderwayCount -= 1;
     }
-    if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
+    if (widget.children != oldWidget.children && _warpUnderwayCount == 0) {
       _updateChildren();
+    }
   }
 
   @override
   void dispose() {
-    if (_controllerIsValid)
+    if (_controllerIsValid) {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
+    }
     _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
@@ -1436,8 +1475,9 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _handleTabControllerAnimationTick() {
-    if (_warpUnderwayCount > 0 || !_controller!.indexIsChanging)
-      return; // This widget is driving the controller's animation.
+    if (_warpUnderwayCount > 0 || !_controller!.indexIsChanging) {
+      return;
+    } // This widget is driving the controller's animation.
 
     if (_controller!.index != _currentIndex) {
       _currentIndex = _controller!.index;
@@ -1446,11 +1486,13 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   Future<void> _warpToCurrentIndex() async {
-    if (!mounted)
+    if (!mounted) {
       return Future<void>.value();
+    }
 
-    if (_pageController.page == _currentIndex!.toDouble())
+    if (_pageController.page == _currentIndex!.toDouble()) {
       return Future<void>.value();
+    }
 
     final Duration duration = _controller!.animationDuration;
 
@@ -1484,8 +1526,9 @@ class _TabBarViewState extends State<TabBarView> {
     _pageController.jumpToPage(initialPage);
 
     await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
-    if (!mounted)
+    if (!mounted) {
       return Future<void>.value();
+    }
     setState(() {
       _warpUnderwayCount -= 1;
       if (widget.children != _children) {
@@ -1498,11 +1541,13 @@ class _TabBarViewState extends State<TabBarView> {
 
   // Called when the PageView scrolls
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (_warpUnderwayCount > 0)
+    if (_warpUnderwayCount > 0) {
       return false;
+    }
 
-    if (notification.depth != 0)
+    if (notification.depth != 0) {
       return false;
+    }
 
     _warpUnderwayCount += 1;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
@@ -1514,25 +1559,42 @@ class _TabBarViewState extends State<TabBarView> {
     } else if (notification is ScrollEndNotification) {
       _controller!.index = _pageController.page!.round();
       _currentIndex = _controller!.index;
-      if (!_controller!.indexIsChanging)
+      if (!_controller!.indexIsChanging) {
         _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
+      }
     }
     _warpUnderwayCount -= 1;
 
     return false;
   }
 
+  bool _debugScheduleCheckHasValidChildrenCount() {
+    if (_debugHasScheduledValidChildrenCountCheck) {
+      return true;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      _debugHasScheduledValidChildrenCountCheck = false;
+      if (!mounted) {
+        return;
+      }
+      assert(() {
+        if (_controller!.length != widget.children.length) {
+          throw FlutterError(
+            "Controller's length property (${_controller!.length}) does not match the "
+            "number of children (${widget.children.length}) present in TabBarView's children property.",
+          );
+        }
+        return true;
+      }());
+    });
+    _debugHasScheduledValidChildrenCountCheck = true;
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    assert(() {
-      if (_controller!.length != widget.children.length) {
-        throw FlutterError(
-          "Controller's length property (${_controller!.length}) does not match the "
-          "number of tabs (${widget.children.length}) present in TabBar's tabs property.",
-        );
-      }
-      return true;
-    }());
+    assert(_debugScheduleCheckHasValidChildrenCount());
+
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView(
@@ -1652,12 +1714,13 @@ class TabPageSelector extends StatelessWidget {
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
       final double t = 1.0 - _indexChangeProgress(tabController);
-      if (tabController.index == tabIndex)
+      if (tabController.index == tabIndex) {
         background = selectedColorTween.lerp(t)!;
-      else if (tabController.previousIndex == tabIndex)
+      } else if (tabController.previousIndex == tabIndex) {
         background = previousColorTween.lerp(t)!;
-      else
+      } else {
         background = selectedColorTween.begin!;
+      }
     } else {
       // The selection's offset reflects how far the TabBarView has / been dragged
       // to the previous page (-1.0 to 0.0) or the next page (0.0 to 1.0).

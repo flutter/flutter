@@ -55,10 +55,12 @@ class TableRow {
   String toString() {
     final StringBuffer result = StringBuffer();
     result.write('TableRow(');
-    if (key != null)
+    if (key != null) {
       result.write('$key, ');
-    if (decoration != null)
+    }
+    if (decoration != null) {
       result.write('$decoration, ');
+    }
     if (children == null) {
       result.write('child list is null');
     } else if (children!.isEmpty) {
@@ -368,10 +370,12 @@ class _TableElement extends RenderObjectElement {
         children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren, slots: slots),
       ));
     }
-    while (oldUnkeyedRows.moveNext())
+    while (oldUnkeyedRows.moveNext()) {
       updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
-    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
+    }
+    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list))) {
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
+    }
 
     _children = newChildren;
     _updateRenderObjectChildren();
@@ -398,8 +402,9 @@ class _TableElement extends RenderObjectElement {
   @override
   void visitChildren(ElementVisitor visitor) {
     for (final Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
-      if (!_forgottenChildren.contains(child))
+      if (!_forgottenChildren.contains(child)) {
         visitor(child);
+      }
     }
   }
 
@@ -433,9 +438,10 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
     final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent != null)
+      final AbstractNode? targetParent = renderObject.parent;
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -458,8 +464,9 @@ class _TableSlot with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _TableSlot
         && column == other.column
         && row == other.row;

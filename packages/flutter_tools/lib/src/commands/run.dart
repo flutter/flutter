@@ -112,7 +112,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag('trace-systrace',
         negatable: false,
         help: 'Enable tracing to the system tracer. This is only useful on '
-              'platforms where such a tracer is available (Android and Fuchsia).',
+              'platforms where such a tracer is available (Android, iOS, '
+              'macOS and Fuchsia).',
       )
       ..addFlag('trace-skia',
         negatable: false,
@@ -132,6 +133,19 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'Filters out all Skia trace events except those that are specified in '
               'this comma separated list of allowed prefixes.',
         valueHelp: 'skia.gpu,skia.shaders',
+      )
+      ..addFlag('enable-software-rendering',
+        negatable: false,
+        help: 'Enable rendering using the Skia software backend. '
+            'This is useful when testing Flutter on emulators. By default, '
+            'Flutter will attempt to either use OpenGL or Vulkan and fall back '
+            'to software when neither is available.',
+      )
+      ..addFlag('skia-deterministic-rendering',
+        negatable: false,
+        help: 'When combined with "--enable-software-rendering", this should provide completely '
+            'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
+            '(e.g. when comparing screenshots).',
       )
       ..addMultiOption('dart-entrypoint-args',
         abbr: 'a',
@@ -184,6 +198,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   String get traceAllowlist => stringArgDeprecated('trace-allowlist');
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
+  @visibleForTesting
+  @protected
   Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
@@ -268,19 +284,6 @@ class RunCommand extends RunCommandBase {
     addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
-      ..addFlag('enable-software-rendering',
-        negatable: false,
-        help: 'Enable rendering using the Skia software backend. '
-              'This is useful when testing Flutter on emulators. By default, '
-              'Flutter will attempt to either use OpenGL or Vulkan and fall back '
-              'to software when neither is available.',
-      )
-      ..addFlag('skia-deterministic-rendering',
-        negatable: false,
-        help: 'When combined with "--enable-software-rendering", this should provide completely '
-              'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
-              '(e.g. when comparing screenshots).',
-      )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
         help: 'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
@@ -713,6 +716,10 @@ class RunCommand extends RunCommandBase {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
+    } finally {
+      // However we exited from the runner, ensure the terminal has line mode
+      // and echo mode enabled before we return the user to the shell.
+      globals.terminal.singleCharMode = false;
     }
     return FlutterCommandResult(
       ExitStatus.success,
