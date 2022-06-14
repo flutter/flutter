@@ -63,6 +63,88 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
   SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
 };
 
+/// An abstract class for describing cascading menu hierarchies that are part of
+/// a [MenuBar].
+///
+/// This class is abstract, and so can't be used directly. Typically subclasses
+/// like [MenuBarItem] and [MenuItemGroup] are used in practice.
+///
+/// See also:
+///
+///  * [MenuBar], a widget that renders menus in Flutter with a Material design
+///    style.
+///  * [PlatformMenuBar], a widget that renders menu items using platform APIs
+///    instead of Flutter.
+abstract class MenuItem with Diagnosticable {
+  /// Allows subclasses to have const constructors.
+  const MenuItem();
+
+  /// The optional shortcut that selects this [MenuItem].
+  ///
+  /// This shortcut is only enabled when [onSelected] is set.
+  MenuSerializableShortcut? get shortcut => null;
+
+  /// Returns any child [MenuItem]s of this item.
+  ///
+  /// Returns an empty list if this type of menu item doesn't have
+  /// children.
+  List<MenuItem> get menus => const <MenuItem>[];
+
+  /// Returns all descendant [MenuItem]s of this item.
+  ///
+  /// Returns an empty list if this type of menu item doesn't have
+  /// descendants.
+  List<MenuItem> get descendants => const <MenuItem>[];
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.selectedCallback" method call from the platform for this item.
+  ///
+  /// Only items that do not have submenus will have this callback invoked.
+  ///
+  /// Only one of [onSelected] or [onSelectedIntent] may be specified.
+  ///
+  /// If neither [onSelected] nor [onSelectedIntent] are specified, then this
+  /// menu item is considered to be disabled.
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onSelected => null;
+
+  /// Returns an intent, if any, to be invoked if the platform receives a
+  /// "Menu.selectedCallback" method call from the platform for this item.
+  ///
+  /// Only items that do not have submenus will have this intent invoked.
+  ///
+  /// Only one of [onSelected] or [onSelectedIntent] may be specified.
+  ///
+  /// If neither [onSelected] nor [onSelectedIntent] are specified, then this
+  /// menu item is considered to be disabled.
+  ///
+  /// The default implementation returns null.
+  Intent? get onSelectedIntent => null;
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.opened" method call from the platform for this item.
+  ///
+  /// Only items that have submenus will have this callback invoked.
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onOpen => null;
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.closed" method call from the platform for this item.
+  ///
+  /// Only items that have submenus will have this callback invoked.
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onClose => null;
+
+  /// Returns the list of group members if this menu item is a "grouping" menu
+  /// item, such as [PlatformMenuItemGroup].
+  ///
+  /// Defaults to an empty list.
+  List<MenuItem> get members => const <MenuItem>[];
+}
+
 /// A menu bar with cascading child menus.
 ///
 /// This is a Material Design menu bar that typically resides above the main
@@ -98,18 +180,6 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 /// ** See code in examples/api/lib/material/menu_bar/menu_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool sample}
-/// This example shows a [MenuBar] that contains a simple menu for a desktop
-/// application. It is set up to be adaptive, so that on macOS it will use the
-/// system menu bar, and on other systems will use a Material [MenuBar].
-///
-/// On macOS, it will add the "About" and "Quit" system-provided menu items.
-///
-/// The menu items are all identified by an enum value (`MenuSelection`).
-///
-/// ** See code in examples/api/lib/material/menu_bar/menu_bar.1.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [MenuBarMenu], a menu item which manages a submenu.
@@ -134,82 +204,22 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     this.padding,
     this.elevation,
     this.menus = const <MenuBarItem>[],
-  }) : _usePlatformMenu = false;
-
-  // A private constructor for the MenuBar.adaptive factory constructor to use.
-  const MenuBar._({
-    super.key,
-    this.controller,
-    this.enabled = true,
-    this.backgroundColor,
-    this.minimumHeight,
-    this.padding,
-    this.elevation,
-    required bool isPlatformMenu,
-    this.menus = const <MenuBarItem>[],
-  }) : _usePlatformMenu = isPlatformMenu;
-
-  /// Creates an adaptive [MenuBar] that renders using platform APIs with a
-  /// [PlatformMenuBar] on platforms that support it, currently only macOS, and
-  /// using Flutter rendering on platforms that don't (everywhere else).
-  ///
-  /// Some aspects of [MenuBar] are ignored when they are rendered by the
-  /// platform, such as any visual attributes (geometry, colors). Platform menus
-  /// also can't be closed with [MenuBarController.closeAll].
-  ///
-  /// See also:
-  ///
-  ///  * [PlatformMenuBar], which will configure platform provided menus on
-  ///    macOS only.
-  ///  * [PlatformMenuItem], which is the base class for [MenuBarButton], and
-  ///    shows which parameters are supported on platform provided menus.
-  factory MenuBar.adaptive({
-    Key? key,
-    MenuBarController? controller,
-    bool enabled = true,
-    MaterialStateProperty<Color?>? backgroundColor,
-    double? minimumHeight,
-    EdgeInsets? padding,
-    MaterialStateProperty<double?>? elevation,
-    List<MenuBarItem> menus = const <MenuBarItem>[],
-  }) {
-    bool isPlatformMenu;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        isPlatformMenu = false;
-        break;
-      case TargetPlatform.macOS:
-        isPlatformMenu = true;
-        break;
-    }
-
-    return MenuBar._(
-      key: key,
-      controller: controller,
-      enabled: enabled,
-      backgroundColor: backgroundColor,
-      minimumHeight: minimumHeight,
-      padding: padding,
-      elevation: elevation,
-      isPlatformMenu: isPlatformMenu,
-      menus: menus,
-    );
-  }
+  });
 
   /// The list of menu items that are the top level children of the
-  /// [PlatformMenuBar].
+  /// [MenuBar].
   ///
-  /// The `menus` member contains [MenuItem]s. They will not be part
-  /// of the widget tree, since they are not widgets. They are provided to
-  /// configure the properties of the menus on the platform menu bar.
+  /// The `menus` member contains [MenuItem]s, which are specialized widgets
+  /// that provide additional API allowing them to form a hierarchy that can be
+  /// traversed even when the widgets are not visible, and are thus are only
+  /// part of the regular widget hierarchy when the associated menus are open.
+  ///
+  /// Shortcuts defined on the menus in the hierarchy are in effect even if the
+  /// menu item they are attached to is not currently visible.
   ///
   /// Also, a Widget in Flutter is immutable, so directly modifying the
   /// `menus` with `List` APIs such as
-  /// `somePlatformMenuBarWidget.menus.add(...)` will result in incorrect
+  /// `someMenuBarWidget.menus.add(...)` will result in incorrect
   /// behaviors. Whenever the menus list is modified, a new list object
   /// should be provided.
   final List<MenuBarItem> menus;
@@ -221,40 +231,27 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   ///
   /// Descendants of the [MenuBar] can access its [MenuBarController] using
   /// [MenuBarController.of].
-  ///
-  /// {@template flutter.material.MenuBar.ignored_for_platform_provided_menus}
-  /// This attribute is ignored if [MenuBar.adaptive] is used on a platform that
-  /// supports platform provided menus (e.g. macOS).
-  /// {@endtemplate}
   final MenuBarController? controller;
 
   /// Whether or not this menu bar is enabled.
   ///
   /// When disabled, all menus are closed, the menu bar buttons are disabled,
   /// and menu shortcuts are ignored.
-  ///
-  /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final bool enabled;
 
   /// The background color of the menu bar.
   ///
   /// Defaults to [MenuThemeData.barBackgroundColor] if null.
-  ///
-  /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The preferred minimum height of the menu bar.
   ///
   /// Defaults to the value of [MenuThemeData.barMinimumHeight] if null.
-  ///
-  /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final double? minimumHeight;
 
   /// The padding around the contents of the menu bar itself.
   ///
   /// Defaults to the value of [MenuThemeData.barPadding] if null.
-  ///
-  /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final EdgeInsets? padding;
 
   /// The Material elevation of the menu bar (if any).
@@ -262,25 +259,13 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   /// Defaults to the [MenuThemeData.barElevation] value of the ambient
   /// [MenuTheme].
   ///
-  /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   /// See also:
   ///
   ///  * [Material.elevation] for a description of what elevation implies.
   final MaterialStateProperty<double?>? elevation;
 
-  /// Whether or not this should be rendered as a [PlatformMenuBar] or a
-  /// Material [_MenuBar].
-  ///
-  /// If true, then a [PlatformMenuBar] will be substituted with the same
-  /// [menus], [child], and [enabled] but none of the visual attributes will
-  /// be passed along.
-  final bool _usePlatformMenu;
-
   @override
   Widget build(BuildContext context) {
-    if (_usePlatformMenu) {
-      return PlatformMenuBar(menus: menus);
-    }
     return _MenuBar(
       controller: controller,
       enabled: enabled,
@@ -323,7 +308,7 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   });
 
   /// The list of menu items that are the top level children of the
-  /// [PlatformMenuBar].
+  /// [MenuBar].
   final List<MenuBarItem> menus;
 
   /// An optional controller that allows outside control of the menu bar.
@@ -986,7 +971,7 @@ class MenuBarController with ChangeNotifier {
 /// class for the [MenuBarButton], [MenuItemGroup] and [MenuBarMenu] classes to make their
 /// declarations simpler, and free of members that are irrelevant for each of
 /// them.
-mixin MenuBarItem implements PlatformMenuItem, Widget {
+mixin MenuBarItem implements MenuItem, Widget {
   /// A required label displayed on the entry for this item in the menu.
   ///
   /// This is rendered by default in a [Text] widget.
@@ -994,7 +979,6 @@ mixin MenuBarItem implements PlatformMenuItem, Widget {
   /// a different widget in its place.
   ///
   /// This label is also used as the default [semanticsLabel].
-  @override
   String get label;
 
   /// An optional widget that will be displayed in place of the default [Text]
@@ -1031,6 +1015,19 @@ mixin MenuBarItem implements PlatformMenuItem, Widget {
 
   @override
   List<MenuBarItem> get members => const <MenuBarItem>[];
+
+  /// Returns all descendants of the given item.
+  ///
+  /// This API is supplied so that implementers of [MenuBarItem] can share
+  /// this implementation.
+  static List<MenuItem> getDescendants(MenuBarMenu item) {
+    return <MenuItem>[
+      for (final MenuItem child in item.menus) ...<MenuItem>[
+        child,
+        ...child.descendants,
+      ],
+    ];
+  }
 
   @override
   String toStringShort() => '${describeIdentity(this)}($label)';
@@ -1234,12 +1231,6 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
 
   @override
   State<MenuBarButton> createState() => _MenuBarButtonState();
-
-  @override
-  Iterable<Map<String, Object?>> toChannelRepresentation(PlatformMenuDelegate delegate,
-      {required int Function(MenuItem) getId}) {
-    return <Map<String, Object?>>[PlatformMenuItem.serialize(this, delegate, getId)];
-  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1528,8 +1519,8 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 ///  * [MenuBar], a widget that renders data in a menu hierarchy using
 ///    Flutter-rendered widgets in a Material Design style.
 ///  * [PlatformMenuBar], a widget that renders similar menu bar items from a
-///    [MenuBarItem] using platform-native APIs.
-class MenuBarMenu extends StatefulWidget with MenuBarItem implements PlatformMenu {
+///    [PlatformMenuItem] using platform-native APIs.
+class MenuBarMenu extends StatefulWidget with MenuBarItem {
   /// Creates a const [MenuBarMenu].
   ///
   /// The [label] attribute is required.
@@ -1661,13 +1652,7 @@ class MenuBarMenu extends StatefulWidget with MenuBarItem implements PlatformMen
   State<MenuBarMenu> createState() => _MenuBarMenuState();
 
   @override
-  Iterable<Map<String, Object?>> toChannelRepresentation(PlatformMenuDelegate delegate,
-      {required int Function(MenuItem) getId}) {
-    return <Map<String, Object?>>[PlatformMenu.serialize(this, delegate, getId)];
-  }
-
-  @override
-  List<MenuBarItem> get descendants => PlatformMenu.getDescendants(this).cast<MenuBarItem>();
+  List<MenuBarItem> get descendants => MenuBarItem.getDescendants(this).cast<MenuBarItem>();
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
@@ -1844,17 +1829,6 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
   /// It empty, then this group will not appear in the menu.
   @override
   final List<MenuBarItem> members;
-
-  /// Converts this [MenuItemGroup] into a data structure accepted by the
-  /// 'flutter/menu' method channel method 'Menu.SetMenu'.
-  ///
-  /// This is used by [PlatformMenuBar] when rendering this [MenuItemGroup]
-  /// using platform APIs.
-  @override
-  Iterable<Map<String, Object?>> toChannelRepresentation(PlatformMenuDelegate delegate,
-      {required int Function(MenuItem) getId}) {
-    return PlatformMenuItemGroup.serialize(this, delegate, getId: getId);
-  }
 
   @override
   Widget build(BuildContext context) {
