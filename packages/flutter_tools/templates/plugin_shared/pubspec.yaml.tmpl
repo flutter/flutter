@@ -23,8 +23,11 @@ dependencies:
 
 dev_dependencies:
 {{#withFfiPluginHook}}
-  ffi: ^1.2.1
-  ffigen: ^5.0.1
+  ffi: ^2.0.0
+  ffigen:
+    git:
+      url: git@github.com:dart-lang/ffigen.git
+      ref: find-libclang-linux
 {{/withFfiPluginHook}}
   flutter_test:
     sdk: flutter
