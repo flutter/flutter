@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/contents/snapshot.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/renderer/snapshot.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {

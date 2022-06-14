@@ -28,6 +28,10 @@ bool AiksContext::IsValid() const {
   return is_valid_;
 }
 
+std::shared_ptr<Context> AiksContext::GetContext() const {
+  return context_;
+}
+
 bool AiksContext::Render(const Picture& picture, RenderTarget& render_target) {
   if (!IsValid()) {
     return false;
