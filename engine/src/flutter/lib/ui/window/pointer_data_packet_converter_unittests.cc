@@ -556,7 +556,7 @@ TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
 
 TEST(PointerDataPacketConverterTest, CanConvetScroll) {
   PointerDataPacketConverter converter;
-  auto packet = std::make_unique<PointerDataPacket>(5);
+  auto packet = std::make_unique<PointerDataPacket>(6);
   PointerData data;
   CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
                                   PointerData::SignalKind::kNone, 0, 0.0, 0.0,
@@ -578,12 +578,16 @@ TEST(PointerDataPacketConverterTest, CanConvetScroll) {
                                   PointerData::SignalKind::kScroll, 1, 49.0,
                                   49.0, 50.0, 0.0, 0);
   packet->SetPointerData(4, data);
+  CreateSimulatedMousePointerData(data, PointerData::Change::kHover,
+                                  PointerData::SignalKind::kScroll, 2, 10.0,
+                                  20.0, 30.0, 40.0, 0);
+  packet->SetPointerData(5, data);
   auto converted_packet = converter.Convert(std::move(packet));
 
   std::vector<PointerData> result;
   UnpackPointerPacket(result, std::move(converted_packet));
 
-  ASSERT_EQ(result.size(), (size_t)7);
+  ASSERT_EQ(result.size(), (size_t)9);
   ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
   ASSERT_EQ(result[0].signal_kind, PointerData::SignalKind::kNone);
   ASSERT_EQ(result[0].device, 0);
@@ -642,6 +646,22 @@ TEST(PointerDataPacketConverterTest, CanConvetScroll) {
   ASSERT_EQ(result[6].physical_y, 49.0);
   ASSERT_EQ(result[6].scroll_delta_x, 50.0);
   ASSERT_EQ(result[6].scroll_delta_y, 0.0);
+
+  // Converter will synthesize an add for device 2.
+  ASSERT_EQ(result[7].change, PointerData::Change::kAdd);
+  ASSERT_EQ(result[7].signal_kind, PointerData::SignalKind::kNone);
+  ASSERT_EQ(result[7].device, 2);
+  ASSERT_EQ(result[7].physical_x, 10.0);
+  ASSERT_EQ(result[7].physical_y, 20.0);
+  ASSERT_EQ(result[7].synthesized, 1);
+
+  ASSERT_EQ(result[8].change, PointerData::Change::kHover);
+  ASSERT_EQ(result[8].signal_kind, PointerData::SignalKind::kScroll);
+  ASSERT_EQ(result[8].device, 2);
+  ASSERT_EQ(result[8].physical_x, 10.0);
+  ASSERT_EQ(result[8].physical_y, 20.0);
+  ASSERT_EQ(result[8].scroll_delta_x, 30.0);
+  ASSERT_EQ(result[8].scroll_delta_y, 40.0);
 }
 
 TEST(PointerDataPacketConverterTest, CanConvertTrackpadGesture) {

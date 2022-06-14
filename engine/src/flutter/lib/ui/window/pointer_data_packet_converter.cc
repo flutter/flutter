@@ -300,9 +300,21 @@ void PointerDataPacketConverter::ConvertPointerData(
       case PointerData::SignalKind::kScroll: {
         // Makes sure we have an existing pointer
         auto iter = states_.find(pointer_data.device);
-        FML_DCHECK(iter != states_.end());
+        PointerState state;
 
-        PointerState state = iter->second;
+        if (iter == states_.end()) {
+          // Synthesizes a add event if the pointer is not previously added.
+          PointerData synthesized_add_event = pointer_data;
+          synthesized_add_event.signal_kind = PointerData::SignalKind::kNone;
+          synthesized_add_event.change = PointerData::Change::kAdd;
+          synthesized_add_event.synthesized = 1;
+          synthesized_add_event.buttons = 0;
+          state = EnsurePointerState(synthesized_add_event);
+          converted_pointers.push_back(synthesized_add_event);
+        } else {
+          state = iter->second;
+        }
+
         if (LocationNeedsUpdate(pointer_data, state)) {
           if (state.is_down) {
             // Synthesizes a move event if the pointer is down.
