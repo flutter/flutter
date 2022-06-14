@@ -23,9 +23,9 @@ void main() {
     extra.childDirectory('dir').createSync();
     extra.childDirectory('dir').childFile('third.file').writeAsBytesSync(<int>[0]);
     joinCaches(
-        fileSystem: fileSystem,
-        globalCachePath: target.path,
-        localCachePath: extra.path
+      fileSystem: fileSystem,
+      globalCachePath: target.path,
+      localCachePath: extra.path,
     );
 
     expect(target.childFile('second.file').existsSync(), true);
@@ -33,32 +33,59 @@ void main() {
     expect(extra.childDirectory('dir').childFile('third.file').existsSync(), true);
   });
 
-  testWithoutContext('needs to join cache', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem();
-    final Directory local = fileSystem.currentDirectory.childDirectory('local');
-    final Directory global = fileSystem.currentDirectory.childDirectory('global');
+  group('needs to join cache', (){
+    testWithoutContext('make join', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final Directory local = fileSystem.currentDirectory.childDirectory('local');
+      final Directory global = fileSystem.currentDirectory.childDirectory('global');
 
-    for (final Directory directory in <Directory>[local, global]) {
-      directory.createSync();
-      directory.childDirectory('hosted').createSync();
-      directory.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
-    }
-    final bool pass = needsToJoinCache(
+      for (final Directory directory in <Directory>[local, global]) {
+        directory.createSync();
+        directory.childDirectory('hosted').createSync();
+        directory.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
+      }
+      final bool pass = needsToJoinCache(
         fileSystem: fileSystem,
         localCachePath: local.path,
-        globalCachePath: global.path
-    );
-    expect(pass, true);
+        globalDirectory: global,
+      );
+      expect(pass, true);
+    });
 
-    local.childDirectory('hosted').deleteSync(recursive: true);
-    expect(
-      needsToJoinCache(
+    testWithoutContext("don't join", () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final Directory local = fileSystem.currentDirectory.childDirectory('local');
+      final Directory global = fileSystem.currentDirectory.childDirectory('global');
+      local.createSync();
+      global.createSync();
+      local.childDirectory('hosted').createSync();
+      local.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
+
+      expect(
+        needsToJoinCache(
           fileSystem: fileSystem,
           localCachePath: local.path,
-          globalCachePath: global.path
-      ),
-      false
-    );
+          globalDirectory: global
+        ),
+        false
+      );
+    });
+    testWithoutContext("don't join global directory null", () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final Directory local = fileSystem.currentDirectory.childDirectory('local');
+      const Directory? global = null;
+      local.createSync();
+      local.childDirectory('hosted').createSync();
+      local.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
 
+      expect(
+        needsToJoinCache(
+          fileSystem: fileSystem,
+          localCachePath: local.path,
+          globalDirectory: global
+        ),
+        false
+      );
+    });
   });
 }

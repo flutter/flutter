@@ -55,9 +55,9 @@ void joinCaches({
         final Directory newDirectory = globalDirectory.childDirectory(entity.basename);
         newDirectory.createSync();
         joinCaches(
-            fileSystem: fileSystem,
-            globalCachePath: newDirectory.path,
-            localCachePath: currentDirectory.path,
+          fileSystem: fileSystem,
+          globalCachePath: newDirectory.path,
+          localCachePath: currentDirectory.path,
         );
       }
     }
@@ -71,13 +71,15 @@ void joinCaches({
 bool needsToJoinCache({
   required FileSystem fileSystem,
   required String localCachePath,
-  required String globalCachePath
+  required Directory? globalDirectory,
 }) {
-  final Directory globalDirectory = fileSystem.directory(globalCachePath);
+  if (globalDirectory == null) {
+    return false;
+  }
   final Directory localDirectory = fileSystem.directory(localCachePath);
 
   return globalDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync() &&
-      localDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync();
+    localDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync();
 }
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -539,59 +541,69 @@ class _DefaultPub implements Pub {
     return values.join(':');
   }
 
-  /// There is 3 ways to get the pub cache location
+  /// There are 3 ways to get the pub cache location
   ///
   /// 1) Provide the _kPubCacheEnvironmentKey.
-  /// 2) localPath (flutterRoot) but not globalPath ($HOME) .pubCache in which case we use the available (and vice versa).
-  /// 3) If both local and global are available joinCaches is called and local deleted
+  /// 2) There is a local cache (in the Flutter SDK) but not a global one (in the user's home directory).
+  /// 3) If both local and global are available then merge the local into global and return the global.
   String? _getLocalPubCacheIfAvailable() {
     if (_platform.environment.containsKey(_kPubCacheEnvironmentKey)) {
       return _platform.environment[_kPubCacheEnvironmentKey];
     }
 
     final String localCachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
-    final Directory globalDirectory;
+    final Directory? globalDirectory;
     if (_platform.isWindows) {
-      // %LOCALAPPDATA% is preferred as the cache location over %APPDATA%, because the latter is synchronised between
-      // devices when the user roams between them, whereas the former is not.
-      // The default cache dir used to be in %APPDATA%, so to avoid breaking old installs,
-      // we use the old dir in %APPDATA% if it exists. Else, we use the new default location
-      // in %LOCALAPPDATA%.
-      final String appData = _platform.environment['APPDATA'] ?? '';
-      final Directory appDataDir = _fileSystem.directory(_fileSystem.path.join(appData, 'Pub', 'Cache'));
-
-      if (appDataDir.existsSync()) {
-        globalDirectory = appDataDir;
-      } else {
-        final String localAppData = _platform.environment['LOCALAPPDATA'] ?? '';
-        globalDirectory = _fileSystem.directory(_fileSystem.path.join(localAppData, 'Pub', 'Cache'));
-      }
+      globalDirectory = _getWindowsGlobalDirectory;
     }
     else {
-      final String homeDirectory = _platform.environment['HOME'] ?? '';
-      globalDirectory = _fileSystem.directory(_fileSystem.path.join(homeDirectory, '.pub-cache'));
+      if (_platform.environment['HOME'] == null) {
+        globalDirectory = null;
+      } else {
+        final String homeDirectoryPath = _platform.environment['HOME']!;
+        globalDirectory = _fileSystem.directory(_fileSystem.path.join(homeDirectoryPath, '.pub-cache'));
+      }
     }
 
     if (needsToJoinCache(
-        fileSystem: _fileSystem,
-        localCachePath: localCachePath,
-        globalCachePath: globalDirectory.path,
+      fileSystem: _fileSystem,
+      localCachePath: localCachePath,
+      globalDirectory: globalDirectory,
     )) {
       final Directory localDirectoryPub = _fileSystem.directory(
-          _fileSystem.path.join(localCachePath, 'hosted', 'pub.dartlang.org')
+        _fileSystem.path.join(localCachePath, 'hosted', 'pub.dartlang.org')
       );
       final Directory globalDirectoryPub = _fileSystem.directory(
-          _fileSystem.path.join(globalDirectory.path, 'hosted', 'pub.dartlang.org')
+        _fileSystem.path.join(globalDirectory!.path, 'hosted', 'pub.dartlang.org')
       );
       
       joinCaches(
-          fileSystem: _fileSystem,
-          globalCachePath: globalDirectoryPub.path,
-          localCachePath: localDirectoryPub.path,
+        fileSystem: _fileSystem,
+        globalCachePath: globalDirectoryPub.path,
+        localCachePath: localDirectoryPub.path,
       );
       _fileSystem.directory(localCachePath).deleteSync(recursive: true);
     }
     // Use pub's default location by returning null.
+    return null;
+  }
+
+  Directory? get _getWindowsGlobalDirectory {
+    // %LOCALAPPDATA% is preferred as the cache location over %APPDATA%, because the latter is synchronised between
+    // devices when the user roams between them, whereas the former is not.
+    // The default cache dir used to be in %APPDATA%, so to avoid breaking old installs,
+    // we use the old dir in %APPDATA% if it exists. Else, we use the new default location
+    // in %LOCALAPPDATA%.
+    //final String homePath = _platform.environment['APPDATA'] ?? '';
+    for (final String envVariable in <String>['APPDATA', 'LOCALAPPDATA']) {
+      if (_platform.environment[envVariable] != null) {
+        final String homePath = _platform.environment[envVariable]!;
+        final Directory globalDirectory = _fileSystem.directory(_fileSystem.path.join(homePath, 'Pub', 'Cache'));
+        if (globalDirectory.existsSync()) {
+          return globalDirectory;
+        }
+      }
+    }
     return null;
   }
 
