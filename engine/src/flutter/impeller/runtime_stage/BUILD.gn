@@ -1,0 +1,45 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//third_party/flatbuffers/flatbuffers.gni")
+import("../tools/impeller.gni")
+
+config("runtime_stage_config") {
+  configs = [ "//flutter/impeller:impeller_public_config" ]
+  include_dirs = [ "$root_gen_dir/flutter" ]
+}
+
+flatbuffers("runtime_stage_flatbuffers") {
+  flatbuffers = [ "runtime_stage.fbs" ]
+  public_configs = [ ":runtime_stage_config" ]
+  public_deps = [ "//third_party/flatbuffers" ]
+}
+
+impeller_component("runtime_stage") {
+  sources = [
+    "runtime_stage.cc",
+    "runtime_stage.h",
+  ]
+  public_deps = [
+    ":runtime_stage_flatbuffers",
+    "../base",
+    "../renderer",
+    "//flutter/fml",
+  ]
+}
+
+impeller_component("runtime_stage_unittests") {
+  testonly = true
+
+  sources = [
+    "runtime_stage_playground.cc",
+    "runtime_stage_playground.h",
+    "runtime_stage_unittests.cc",
+  ]
+  deps = [
+    ":runtime_stage",
+    "../playground",
+    "//flutter/testing",
+  ]
+}

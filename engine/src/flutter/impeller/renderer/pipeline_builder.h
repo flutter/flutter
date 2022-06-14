@@ -61,7 +61,7 @@ struct PipelineBuilder {
       const Context& context,
       PipelineDescriptor& desc) {
     // Setup debug instrumentation.
-    desc.SetLabel(SPrintF("%s Pipeline", VertexShader::kLabel.data()));
+    desc.SetLabel(SPrintF("%s Pipeline", FragmentShader::kLabel.data()));
 
     // Resolve pipeline entrypoints.
     {

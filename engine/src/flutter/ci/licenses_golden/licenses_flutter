@@ -475,6 +475,8 @@ FILE: ../../../flutter/impeller/compiler/includer.h
 FILE: ../../../flutter/impeller/compiler/logger.h
 FILE: ../../../flutter/impeller/compiler/reflector.cc
 FILE: ../../../flutter/impeller/compiler/reflector.h
+FILE: ../../../flutter/impeller/compiler/runtime_stage_data.cc
+FILE: ../../../flutter/impeller/compiler/runtime_stage_data.h
 FILE: ../../../flutter/impeller/compiler/source_options.cc
 FILE: ../../../flutter/impeller/compiler/source_options.h
 FILE: ../../../flutter/impeller/compiler/switches.cc
@@ -780,6 +782,12 @@ FILE: ../../../flutter/impeller/renderer/vertex_buffer_builder.cc
 FILE: ../../../flutter/impeller/renderer/vertex_buffer_builder.h
 FILE: ../../../flutter/impeller/renderer/vertex_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/vertex_descriptor.h
+FILE: ../../../flutter/impeller/runtime_stage/runtime_stage.cc
+FILE: ../../../flutter/impeller/runtime_stage/runtime_stage.fbs
+FILE: ../../../flutter/impeller/runtime_stage/runtime_stage.h
+FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.cc
+FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.h
+FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_unittests.cc
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.h
 FILE: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart

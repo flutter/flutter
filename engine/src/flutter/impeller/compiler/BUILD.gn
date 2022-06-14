@@ -18,6 +18,8 @@ impeller_component("compiler_lib") {
     "logger.h",
     "reflector.cc",
     "reflector.h",
+    "runtime_stage_data.cc",
+    "runtime_stage_data.h",
     "source_options.cc",
     "source_options.h",
     "switches.cc",
@@ -31,6 +33,7 @@ impeller_component("compiler_lib") {
   public_deps = [
     "../base",
     "../geometry",
+    "../runtime_stage",
     "//flutter/fml",
 
     # All third_party deps must be reflected below in the impellerc_license

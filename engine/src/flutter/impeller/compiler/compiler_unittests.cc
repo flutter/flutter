@@ -49,6 +49,7 @@ TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
     // This is a failure of reflection which this target doesn't perform.
     GTEST_SKIP();
   }
+  ScopedValidationDisable disable_validation;
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
 

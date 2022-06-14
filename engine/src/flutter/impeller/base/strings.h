@@ -15,6 +15,8 @@ std::string SPrintF(const char* format, ...);
 
 bool HasPrefix(const std::string& string, const std::string& prefix);
 
+bool HasSuffix(const std::string& string, const std::string& suffix);
+
 std::string StripPrefix(const std::string& string, const std::string& to_strip);
 
 }  // namespace impeller

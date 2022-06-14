@@ -496,6 +496,10 @@ template("impeller_shaders") {
     }
   }
 
+  if (!impeller_shaders_supports_platform) {
+    not_needed(invoker, "*")
+  }
+
   group(target_name) {
     public_deps = []
     if (impeller_enable_metal) {

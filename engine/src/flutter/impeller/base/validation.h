@@ -26,6 +26,14 @@ class ValidationLog {
 
 void ImpellerValidationBreak();
 
+struct ScopedValidationDisable {
+  ScopedValidationDisable();
+
+  ~ScopedValidationDisable();
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ScopedValidationDisable);
+};
+
 }  // namespace impeller
 
 #define VALIDATION_LOG ::impeller::ValidationLog{}.GetStream()

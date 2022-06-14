@@ -9,6 +9,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "impeller/base/strings.h"
 #include "impeller/compiler/compiler.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
@@ -51,6 +52,7 @@ bool Main(const fml::CommandLine& command_line) {
       SourceTypeFromFileName(switches.source_file_name));
 
   Reflector::Options reflector_options;
+  reflector_options.target_platform = switches.target_platform;
   reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name =
       InferShaderNameFromPath(switches.source_file_name);
@@ -79,12 +81,39 @@ bool Main(const fml::CommandLine& command_line) {
   if (TargetPlatformNeedsSL(options.target_platform)) {
     auto sl_file_name = std::filesystem::absolute(
         std::filesystem::current_path() / switches.sl_file_name);
-    if (!fml::WriteAtomically(*switches.working_directory,
-                              sl_file_name.string().c_str(),
-                              *compiler.GetSLShaderSource())) {
-      std::cerr << "Could not write file to " << switches.spirv_file_name
-                << std::endl;
-      return false;
+    const bool is_runtime_stage_data = HasSuffix(switches.sl_file_name, "iplr");
+    if (is_runtime_stage_data) {
+      auto reflector = compiler.GetReflector();
+      if (reflector == nullptr) {
+        std::cerr << "Could not create reflector." << std::endl;
+        return false;
+      }
+      auto stage_data = reflector->GetRuntimeStageData();
+      if (!stage_data) {
+        std::cerr << "Runtime stage information was nil." << std::endl;
+        return false;
+      }
+      auto stage_data_mapping = stage_data->CreateMapping();
+      if (!stage_data_mapping) {
+        std::cerr << "Runtime stage data could not be created." << std::endl;
+        return false;
+      }
+      if (!fml::WriteAtomically(*switches.working_directory,    //
+                                sl_file_name.string().c_str(),  //
+                                *stage_data_mapping             //
+                                )) {
+        std::cerr << "Could not write file to " << switches.sl_file_name
+                  << std::endl;
+        return false;
+      }
+    } else {
+      if (!fml::WriteAtomically(*switches.working_directory,
+                                sl_file_name.string().c_str(),
+                                *compiler.GetSLShaderSource())) {
+        std::cerr << "Could not write file to " << switches.sl_file_name
+                  << std::endl;
+        return false;
+      }
     }
   }
 
@@ -137,6 +166,8 @@ bool Main(const fml::CommandLine& command_line) {
       case TargetPlatform::kMetalIOS:
       case TargetPlatform::kOpenGLES:
       case TargetPlatform::kOpenGLDesktop:
+      case TargetPlatform::kRuntimeStageMetal:
+      case TargetPlatform::kRuntimeStageGLES:
         result_file = switches.sl_file_name;
         break;
       case TargetPlatform::kFlutterSPIRV:

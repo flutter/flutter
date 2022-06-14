@@ -10,4 +10,13 @@ ShaderLibrary::ShaderLibrary() = default;
 
 ShaderLibrary::~ShaderLibrary() = default;
 
+void ShaderLibrary::RegisterFunction(std::string name,
+                                     ShaderStage stage,
+                                     std::shared_ptr<fml::Mapping> code,
+                                     RegistrationCallback callback) {
+  if (callback) {
+    callback(false);
+  }
+}
+
 }  // namespace impeller
