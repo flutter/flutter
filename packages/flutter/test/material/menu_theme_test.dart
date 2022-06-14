@@ -21,24 +21,28 @@ void main() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarMenuList');
   }
 
+  Finder findMenuBarMenuMaterial() {
+    return find.ancestor(of: findMenuBarMenu().last, matching: find.byType(Material)).first;
+  }
+
   Finder findMenuTopLevelBar() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarTopLevelBar');
+  }
+
+  Finder findMenuTopLevelBarMaterial() {
+    return find.descendant(of: findMenuTopLevelBar(), matching: find.byType(Material)).first;
   }
 
   Finder findSubMenuItem() {
     return find.descendant(of: findMenuBarMenu().last, matching: find.byType(MenuBarButton));
   }
 
-  Material getMenuBarMaterial(WidgetTester tester) {
-    return tester.widget<Material>(
-      find.descendant(of: findMenuTopLevelBar(), matching: find.byType(Material)).first,
-    );
+  Material getMenuTopLevelBarMaterial(WidgetTester tester) {
+    return tester.widget<Material>(findMenuTopLevelBarMaterial());
   }
 
-  Material getSubMenuMaterial(WidgetTester tester) {
-    return tester.widget<Material>(
-      find.descendant(of: findMenuBarMenu().last, matching: find.byType(Material)).first,
-    );
+  Material getMenuBarMenuMaterial(WidgetTester tester) {
+    return tester.widget<Material>(findMenuBarMenuMaterial().first);
   }
 
   DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
@@ -60,7 +64,7 @@ void main() {
                 barBackgroundColor: MaterialStateProperty.all<Color?>(Colors.green),
                 itemTextStyle: MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.titleMedium),
                 barElevation: MaterialStateProperty.all<double?>(20.0),
-                barHeight: 52.0,
+                barMinimumHeight: 52.0,
                 menuBackgroundColor: MaterialStateProperty.all<Color?>(Colors.red),
                 menuElevation: MaterialStateProperty.all<double?>(15.0),
                 menuShape: MaterialStateProperty.all<ShapeBorder?>(const StadiumBorder()),
@@ -84,12 +88,12 @@ void main() {
     await tester.tap(find.text(TestMenu.mainMenu1.label));
     await tester.pump();
     expect(tester.getRect(findMenuTopLevelBar()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 52.0)));
-    final Material menuBarMaterial = getMenuBarMaterial(tester);
+    final Material menuBarMaterial = getMenuTopLevelBarMaterial(tester);
     expect(menuBarMaterial.elevation, equals(20));
     expect(menuBarMaterial.color, equals(Colors.green));
 
-    final Material subMenuMaterial = getSubMenuMaterial(tester);
-    expect(tester.getRect(findMenuBarMenu().last), equals(const Rect.fromLTRB(108.0, 52.0, 412.0, 232.0)));
+    final Material subMenuMaterial = getMenuBarMenuMaterial(tester);
+    expect(tester.getRect(findMenuBarMenuMaterial().last), equals(const Rect.fromLTRB(108.0, 50.0, 412.0, 230.0)));
     expect(subMenuMaterial.elevation, equals(15));
     expect(subMenuMaterial.color, equals(Colors.red));
   });
@@ -104,7 +108,7 @@ void main() {
                 barBackgroundColor: MaterialStateProperty.all<Color?>(Colors.green),
                 itemTextStyle: MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.titleMedium),
                 barElevation: MaterialStateProperty.all<double?>(20.0),
-                barHeight: 52.0,
+                barMinimumHeight: 52.0,
                 menuBackgroundColor: MaterialStateProperty.all<Color?>(Colors.red),
                 menuElevation: MaterialStateProperty.all<double?>(15.0),
                 menuShape: MaterialStateProperty.all<ShapeBorder?>(const StadiumBorder()),
@@ -126,7 +130,7 @@ void main() {
                       itemShape: const BeveledRectangleBorder(),
                     ),
                     backgroundColor: MaterialStateProperty.all<Color?>(Colors.blue),
-                    height: 50.0,
+                    minimumHeight: 50.0,
                     elevation: MaterialStateProperty.all<double?>(10.0),
                     padding: const EdgeInsets.all(12.0),
                   ),
@@ -143,19 +147,19 @@ void main() {
     await tester.tap(find.text(TestMenu.mainMenu1.label));
     await tester.pump();
 
-    expect(tester.getRect(findMenuTopLevelBar()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-    final Material menuBarMaterial = getMenuBarMaterial(tester);
+    expect(tester.getRect(findMenuTopLevelBar()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 74.0)));
+    final Material menuBarMaterial = getMenuTopLevelBarMaterial(tester);
     expect(menuBarMaterial.elevation, equals(10.0));
     expect(menuBarMaterial.color, equals(Colors.blue));
 
-    final Material subMenuMaterial = getSubMenuMaterial(tester);
-    expect(tester.getRect(findMenuBarMenu().last), equals(const Rect.fromLTRB(116.0, 62.0, 428.0, 250.0)));
+    final Material subMenuMaterial = getMenuBarMenuMaterial(tester);
+    expect(tester.getRect(findMenuBarMenuMaterial().last), equals(const Rect.fromLTRB(116.0, 61.0, 428.0, 249.0)));
     expect(subMenuMaterial.elevation, equals(15));
     expect(subMenuMaterial.color, equals(Colors.cyan));
     expect(subMenuMaterial.shape, equals(const BeveledRectangleBorder()));
 
     final Finder menuItem = findSubMenuItem();
-    expect(tester.getRect(menuItem.first), equals(const Rect.fromLTRB(130.0, 76.0, 414.0, 124.0)));
+    expect(tester.getRect(menuItem.first), equals(const Rect.fromLTRB(130.0, 75.0, 414.0, 123.0)));
     final Material menuItemMaterial = tester.widget<Material>(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).first);
     expect(menuItemMaterial.color, equals(Colors.amber));
     expect(menuItemMaterial.elevation, equals(0.0));

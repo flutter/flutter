@@ -48,6 +48,7 @@ class _HomeState extends State<Home> {
   double _extraPadding = 0;
   bool _enabled = true;
   bool _addItem = false;
+  bool _transparent = false;
 
   void _itemSelected(TestMenu item) {
     debugPrint('App: Selected item ${item.label}');
@@ -70,7 +71,18 @@ class _HomeState extends State<Home> {
         textDirection: _textDirection,
         child: Builder(builder: (BuildContext context) {
           return Theme(
-            data: theme.copyWith(visualDensity: _density),
+            data: theme.copyWith(
+              visualDensity: _density,
+              menuTheme: _transparent
+                  ? Theme.of(context).menuTheme.copyWith(
+                        barBackgroundColor: MaterialStatePropertyAll<Color?>(Colors.red.withOpacity(0.12)),
+                        menuBackgroundColor: MaterialStatePropertyAll<Color?>(Colors.red.withOpacity(0.12)),
+                        itemBackgroundColor: const MaterialStatePropertyAll<Color?>(Colors.transparent),
+                        menuElevation: const MaterialStatePropertyAll<double?>(0),
+                        barElevation: const MaterialStatePropertyAll<double?>(0),
+                      )
+                  : null,
+            ),
             child: Column(
               children: <Widget>[
                 MenuBar(
@@ -92,7 +104,8 @@ class _HomeState extends State<Home> {
                             LogicalKeyboardKey.keyB,
                             control: true,
                           ),
-                          leadingIcon: _addItem ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
+                          leadingIcon:
+                              _addItem ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
                           trailingIcon: const Icon(Icons.assessment),
                           onSelected: () {
                             _itemSelected(TestMenu.subMenu1);
@@ -219,6 +232,7 @@ class _HomeState extends State<Home> {
                     density: _density,
                     enabled: _enabled,
                     addItem: _addItem,
+                    transparent: _transparent,
                     extraPadding: _extraPadding,
                     textDirection: _textDirection,
                     onDensityChanged: (VisualDensity value) {
@@ -246,6 +260,11 @@ class _HomeState extends State<Home> {
                         _addItem = value;
                       });
                     },
+                    onTransparentChanged: (bool value) {
+                      setState(() {
+                        _transparent = value;
+                      });
+                    },
                   ),
                 ),
               ],
@@ -264,11 +283,13 @@ class _Controls extends StatelessWidget {
     required this.extraPadding,
     this.enabled = true,
     this.addItem = false,
+    this.transparent = false,
     required this.onDensityChanged,
     required this.onTextDirectionChanged,
     required this.onExtraPaddingChanged,
     required this.onEnabledChanged,
     required this.onAddItemChanged,
+    required this.onTransparentChanged,
   });
 
   final VisualDensity density;
@@ -276,15 +297,19 @@ class _Controls extends StatelessWidget {
   final double extraPadding;
   final bool enabled;
   final bool addItem;
+  final bool transparent;
   final ValueChanged<VisualDensity> onDensityChanged;
   final ValueChanged<TextDirection> onTextDirectionChanged;
   final ValueChanged<double> onExtraPaddingChanged;
   final ValueChanged<bool> onEnabledChanged;
   final ValueChanged<bool> onAddItemChanged;
+  final ValueChanged<bool> onTransparentChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Container(
+      color: Colors.lightBlueAccent,
+      alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -341,52 +366,73 @@ class _Controls extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Checkbox(
-                value: textDirection == TextDirection.rtl,
-                onChanged: (bool? value) {
-                  if (value ?? false) {
-                    onTextDirectionChanged(TextDirection.rtl);
-                  } else {
-                    onTextDirectionChanged(TextDirection.ltr);
-                  }
-                },
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Checkbox(
+                    value: textDirection == TextDirection.rtl,
+                    onChanged: (bool? value) {
+                      if (value ?? false) {
+                        onTextDirectionChanged(TextDirection.rtl);
+                      } else {
+                        onTextDirectionChanged(TextDirection.ltr);
+                      }
+                    },
+                  ),
+                  const Text('RTL Text')
+                ],
               ),
-              const Text('RTL Text')
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Checkbox(
-                value: enabled,
-                onChanged: (bool? value) {
-                  if (value ?? false) {
-                    onEnabledChanged(true);
-                  } else {
-                    onEnabledChanged(false);
-                  }
-                },
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Checkbox(
+                    value: enabled,
+                    onChanged: (bool? value) {
+                      if (value ?? false) {
+                        onEnabledChanged(true);
+                      } else {
+                        onEnabledChanged(false);
+                      }
+                    },
+                  ),
+                  const Text('Enabled')
+                ],
               ),
-              const Text('Enabled')
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Checkbox(
-                value: addItem,
-                onChanged: (bool? value) {
-                  if (value ?? false) {
-                    onAddItemChanged(true);
-                  } else {
-                    onAddItemChanged(false);
-                  }
-                },
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Checkbox(
+                    value: addItem,
+                    onChanged: (bool? value) {
+                      if (value ?? false) {
+                        onAddItemChanged(true);
+                      } else {
+                        onAddItemChanged(false);
+                      }
+                    },
+                  ),
+                  const Text('Add Item')
+                ],
               ),
-              const Text('Add Item')
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Checkbox(
+                    value: transparent,
+                    onChanged: (bool? value) {
+                      if (value ?? false) {
+                        onTransparentChanged(true);
+                      } else {
+                        onTransparentChanged(false);
+                      }
+                    },
+                  ),
+                  const Text('Transparent')
+                ],
+              ),
             ],
           ),
         ],

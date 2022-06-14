@@ -130,7 +130,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     this.controller,
     this.enabled = true,
     this.backgroundColor,
-    this.height,
+    this.minimumHeight,
     this.padding,
     this.elevation,
     this.menus = const <MenuBarItem>[],
@@ -142,7 +142,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     this.controller,
     this.enabled = true,
     this.backgroundColor,
-    this.height,
+    this.minimumHeight,
     this.padding,
     this.elevation,
     required bool isPlatformMenu,
@@ -168,7 +168,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     MenuBarController? controller,
     bool enabled = true,
     MaterialStateProperty<Color?>? backgroundColor,
-    double? height,
+    double? minimumHeight,
     EdgeInsets? padding,
     MaterialStateProperty<double?>? elevation,
     List<MenuBarItem> menus = const <MenuBarItem>[],
@@ -192,7 +192,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
       controller: controller,
       enabled: enabled,
       backgroundColor: backgroundColor,
-      height: height,
+      minimumHeight: minimumHeight,
       padding: padding,
       elevation: elevation,
       isPlatformMenu: isPlatformMenu,
@@ -245,10 +245,10 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
 
   /// The preferred minimum height of the menu bar.
   ///
-  /// Defaults to the value of [MenuThemeData.barHeight] if null.
+  /// Defaults to the value of [MenuThemeData.barMinimumHeight] if null.
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
-  final double? height;
+  final double? minimumHeight;
 
   /// The padding around the contents of the menu bar itself.
   ///
@@ -285,7 +285,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
       controller: controller,
       enabled: enabled,
       backgroundColor: backgroundColor,
-      height: height,
+      height: minimumHeight,
       padding: padding,
       elevation: elevation,
       menus: menus,
@@ -304,7 +304,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty<MenuBarController>('controller', controller, defaultValue: null));
     properties.add(
         DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(DoubleProperty('height', minimumHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
   }
@@ -313,7 +313,6 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
 class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// Creates a const [MenuBar].
   const _MenuBar({
-    super.key,
     this.controller,
     this.enabled = true,
     this.backgroundColor,
@@ -345,8 +344,8 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   /// The preferred minimum height of the menu bar.
   ///
-  /// The default value is [MenuThemeData.barHeight]. If
-  /// [MenuThemeData.barHeight] is null, then the default value
+  /// The default value is [MenuThemeData.barMinimumHeight]. If
+  /// [MenuThemeData.barMinimumHeight] is null, then the default value
   /// is 48 pixels.
   final double? height;
 
@@ -582,7 +581,7 @@ class _MenuBarState extends State<_MenuBar> {
                   child: _MenuBarTopLevelBar(
                     elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
                         .resolve(state)!,
-                    height: widget.height ?? menuTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
+                    height: widget.height ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
                     enabled: widget.enabled,
                     color: (widget.backgroundColor ??
                             menuTheme.barBackgroundColor ??
@@ -1324,8 +1323,8 @@ class _MenuBarButtonState extends State<MenuBarButton> {
       resolvedPadding =
           MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuTheme.barPadding ?? defaultTheme.barPadding);
     } else {
-      resolvedPadding = MaterialStateProperty.all<EdgeInsets?>(
-          widget.padding ?? menuTheme.itemPadding ?? defaultTheme.itemPadding);
+      resolvedPadding =
+          MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuTheme.itemPadding ?? defaultTheme.itemPadding);
     }
     return Semantics(
       enabled: _enabled,
@@ -1335,10 +1334,8 @@ class _MenuBarButtonState extends State<MenuBarButton> {
       child: TextButton(
         style: (TextButtonTheme.of(context).style ?? const ButtonStyle()).copyWith(
           minimumSize: MaterialStateProperty.all<Size?>(densityAdjustedSize),
-          backgroundColor:
-              widget.backgroundColor ?? menuTheme.itemBackgroundColor ?? defaultTheme.itemBackgroundColor,
-          foregroundColor:
-              widget.foregroundColor ?? menuTheme.itemForegroundColor ?? defaultTheme.itemForegroundColor,
+          backgroundColor: widget.backgroundColor ?? menuTheme.itemBackgroundColor ?? defaultTheme.itemBackgroundColor,
+          foregroundColor: widget.foregroundColor ?? menuTheme.itemForegroundColor ?? defaultTheme.itemForegroundColor,
           overlayColor: widget.overlayColor ?? menuTheme.itemOverlayColor ?? defaultTheme.itemOverlayColor,
           padding: resolvedPadding,
           shape: widget.shape ?? menuTheme.itemShape ?? defaultTheme.itemShape,
@@ -1448,18 +1445,22 @@ class _MenuBarButtonState extends State<MenuBarButton> {
                 menu: menuButtonNode,
                 child: _MenuBarMarker(
                   state: _menuBar,
-                  child: _MenuBarMenuList(
-                    direction: Axis.vertical,
-                    elevation: (widget._menuElevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation)
-                        .resolve(disabled)!,
-                    shape: (widget._menuShape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
-                    backgroundColor: (widget._menuBackgroundColor ??
+                  child: Material(
+                    color: (widget._menuBackgroundColor ??
                             menuTheme.menuBackgroundColor ??
                             defaultTheme.menuBackgroundColor)
+                        .resolve(disabled),
+                    shape: (widget._menuShape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled),
+                    elevation: (widget._menuElevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation)
                         .resolve(disabled)!,
-                    menuPadding: widget._menuPadding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
-                    textDirection: Directionality.of(context),
-                    children: _expandGroups(menuButtonNode.item),
+                    child: Padding(
+                      padding: widget._menuPadding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
+                      child: _MenuBarMenuList(
+                        direction: Axis.vertical,
+                        textDirection: Directionality.of(context),
+                        children: _expandGroups(menuButtonNode.item),
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -2311,15 +2312,19 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
 
     return _MenuNodeWrapper(
       menu: menuBar._root,
-      child: _MenuBarMenuList(
-        backgroundColor: color,
-        textDirection: Directionality.of(context),
-        direction: Axis.horizontal,
-        elevation: elevation,
-        menuPadding: padding,
-        crossAxisMinSize: height,
+      child: Material(
+        color: color,
         shape: const RoundedRectangleBorder(),
-        children: _expandGroups(menuBar),
+        elevation: elevation,
+        child: Padding(
+          padding: padding,
+          child: _MenuBarMenuList(
+            textDirection: Directionality.of(context),
+            direction: Axis.horizontal,
+            crossAxisMinSize: height,
+            children: _expandGroups(menuBar),
+          ),
+        ),
       ),
     );
   }
@@ -2426,10 +2431,6 @@ class _MenuBarMenuList extends StatefulWidget {
   /// All parameters except `key` and [shape] are required.
   const _MenuBarMenuList({
     required this.direction,
-    required this.backgroundColor,
-    required this.shape,
-    required this.elevation,
-    required this.menuPadding,
     required this.textDirection,
     required this.children,
     this.crossAxisMinSize = 0.0,
@@ -2438,24 +2439,6 @@ class _MenuBarMenuList extends StatefulWidget {
   /// The main axis direction of the list.
   final Axis direction;
 
-  /// The background color of this submenu.
-  final Color backgroundColor;
-
-  /// The shape of the border on this submenu.
-  ///
-  /// Defaults to a rectangle.
-  final ShapeBorder shape;
-
-  /// The Material elevation for the menu's shadow.
-  ///
-  /// See also:
-  ///
-  ///  * [Material.elevation] for a description of what elevation implies.
-  final double elevation;
-
-  /// The padding around the inside of the menu panel.
-  final EdgeInsets menuPadding;
-
   /// The text direction to use for rendering this menu.
   final TextDirection textDirection;
 
@@ -2463,7 +2446,7 @@ class _MenuBarMenuList extends StatefulWidget {
   ///
   /// Mainly used to enforce the main menu height.
   ///
-  /// If null, then defaults to zero.
+  /// Defaults to zero.
   final double crossAxisMinSize;
 
   /// The menu items that fill this submenu.
@@ -2535,10 +2518,7 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
     }
   }
 
-  BoxConstraints? _getMinSizeConstraint() {
-    if (widget.crossAxisMinSize == null) {
-      return null;
-    }
+  BoxConstraints _getMinSizeConstraint() {
     switch (widget.direction) {
       case Axis.horizontal:
         return BoxConstraints(minHeight: widget.crossAxisMinSize);
@@ -2551,25 +2531,17 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
   Widget build(BuildContext context) {
     return _RegisteredRenderBox(
       menuBar: _menuBar,
-      child: Container(
+      child: ConstrainedBox(
         constraints: _getMinSizeConstraint(),
-        child: Material(
-          color: widget.backgroundColor,
-          shape: widget.shape,
-          elevation: widget.elevation,
-          child: _intrinsicCrossSize(
-            child: Padding(
-              padding: widget.menuPadding,
-              child: Flex(
-                textDirection: widget.textDirection,
-                direction: widget.direction,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ..._expandGroups(),
-                  if (widget.direction == Axis.horizontal) const Spacer(),
-                ],
-              ),
-            ),
+        child: _intrinsicCrossSize(
+          child: Flex(
+            textDirection: widget.textDirection,
+            direction: widget.direction,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ..._expandGroups(),
+              if (widget.direction == Axis.horizontal) const Spacer(),
+            ],
           ),
         ),
       ),
@@ -3170,7 +3142,7 @@ class _TokenDefaultsM3 extends MenuThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  double get barHeight {
+  double get barMinimumHeight {
     return 40 + Theme.of(context).visualDensity.baseSizeAdjustment.dy;
   }
 

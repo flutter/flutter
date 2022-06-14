@@ -66,7 +66,7 @@ void main() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuItemDivider');
   }
 
-  Finder findMenuBarMenuLists() {
+  Finder findMenuBarMenus() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarMenuList');
   }
 
@@ -180,7 +180,7 @@ void main() {
         tester.getRect(find.text(TestMenu.subMenu10.label)),
         equals(const Rect.fromLTRB(120.0, 73.0, 274.0, 87.0)),
       );
-      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
+      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
           equals(const Rect.fromLTRB(96.0, 48.0, 358.0, 224.0)));
       expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(96.0, 104.0, 358.0, 120.0)));
 
@@ -221,7 +221,7 @@ void main() {
         tester.getRect(find.text(TestMenu.subMenu10.label)),
         equals(const Rect.fromLTRB(526.0, 73.0, 680.0, 87.0)),
       );
-      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
+      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
           equals(const Rect.fromLTRB(442.0, 48.0, 704.0, 224.0)));
       expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(442.0, 104.0, 704.0, 120.0)));
 
@@ -266,7 +266,7 @@ void main() {
         equals(const Rect.fromLTRB(142.0, 95.0, 296.0, 109.0)),
       );
       expect(
-        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
+        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
         equals(const Rect.fromLTRB(118.0, 70.0, 380.0, 246.0)),
       );
       expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(118.0, 126.0, 380.0, 142.0)));
@@ -315,7 +315,7 @@ void main() {
         equals(const Rect.fromLTRB(504.0, 95.0, 658.0, 109.0)),
       );
       expect(
-        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
+        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
         equals(const Rect.fromLTRB(420.0, 70.0, 682.0, 246.0)),
       );
       expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(420.0, 126.0, 682.0, 142.0)));
@@ -333,7 +333,7 @@ void main() {
             child: Column(
               children: <Widget>[
                 MenuBar(
-                  height: 50,
+                  minimumHeight: 50,
                   elevation: MaterialStateProperty.all<double?>(10),
                   backgroundColor: MaterialStateProperty.all(Colors.red),
                   menus: createTestMenus(onSelected: onSelected),
@@ -484,7 +484,7 @@ void main() {
         controller: MenuBarController(),
         enabled: false,
         backgroundColor: MaterialStateProperty.all(Colors.red),
-        height: 40,
+        minimumHeight: 40,
         elevation: MaterialStateProperty.all<double?>(10.0),
         menus: const <MenuBarItem>[item],
       );
@@ -1055,7 +1055,7 @@ void main() {
       // Children of the top level menu bar should be in the right order (with
       // the dividers between the right items).
       final Finder topLevelMenuBar = findMenuTopLevelBars().first;
-      final Finder topLevelList = find.descendant(of: topLevelMenuBar, matching: findMenuBarMenuLists().first);
+      final Finder topLevelList = find.descendant(of: topLevelMenuBar, matching: findMenuBarMenus().first);
       // ignore: avoid_dynamic_calls
       final List<Widget> children = (tester.widget(topLevelList) as dynamic).children as List<Widget>;
       expect(
@@ -1100,7 +1100,7 @@ void main() {
       // The menu item that is open.
       final Finder firstMenuList = find.descendant(
         of: find.byWidget(Navigator.of(menuKey.currentContext!).overlay!.widget),
-        matching: findMenuBarMenuLists().first,
+        matching: findMenuBarMenus().first,
       );
       // ignore: avoid_dynamic_calls
       final List<Widget> children = (tester.widget(firstMenuList) as dynamic).children as List<Widget>;
