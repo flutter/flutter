@@ -63,8 +63,8 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
   SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
 };
 
-/// An abstract class for describing cascading menu hierarchies that are part of
-/// a [MenuBar].
+/// A mixin for describing cascading menu hierarchies that are part of
+/// a [MenuBar] or other cascading menu.
 ///
 /// This class is abstract, and so can't be used directly. Typically subclasses
 /// like [MenuBarItem] and [MenuItemGroup] are used in practice.
@@ -75,9 +75,22 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 ///    style.
 ///  * [PlatformMenuBar], a widget that renders menu items using platform APIs
 ///    instead of Flutter.
-abstract class MenuItem with Diagnosticable {
-  /// Allows subclasses to have const constructors.
-  const MenuItem();
+mixin MenuItem on Diagnosticable implements Widget {
+  /// A required label displayed on the entry for this item in the menu.
+  ///
+  /// This is rendered by default in a [Text] widget.
+  /// The label appearance can be overridden by using a [labelWidget] to render
+  /// a different widget in its place.
+  ///
+  /// This label is also used as the default [semanticsLabel].
+  String get label;
+
+  /// An optional widget that will be displayed in place of the default [Text]
+  /// widget containing the [label].
+  ///
+  /// If both the `labelWidget` and [semanticsLabel] are provided, the
+  /// [semanticsLabel] will take precedence for defining semantic information.
+  Widget? get labelWidget => null;
 
   /// The optional shortcut that selects this [MenuItem].
   ///
@@ -95,6 +108,10 @@ abstract class MenuItem with Diagnosticable {
   /// Returns an empty list if this type of menu item doesn't have
   /// descendants.
   List<MenuItem> get descendants => const <MenuItem>[];
+
+  /// The function called when the mouse leaves or enters this menu item's
+  /// button.
+  ValueChanged<bool>? get onHover => null;
 
   /// Returns a callback, if any, to be invoked if the platform menu receives a
   /// "Menu.selectedCallback" method call from the platform for this item.
@@ -143,6 +160,22 @@ abstract class MenuItem with Diagnosticable {
   ///
   /// Defaults to an empty list.
   List<MenuItem> get members => const <MenuItem>[];
+
+  /// Returns all descendants of the given item.
+  ///
+  /// This API is supplied so that implementers of [MenuBarItem] can share
+  /// this implementation.
+  static List<MenuItem> getDescendants(MenuBarMenu item) {
+    return <MenuItem>[
+      for (final MenuItem child in item.menus) ...<MenuItem>[
+        child,
+        ...child.descendants,
+      ],
+    ];
+  }
+
+  @override
+  String toStringShort() => '${describeIdentity(this)}($label)';
 }
 
 /// A menu bar with cascading child menus.
@@ -203,7 +236,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     this.minimumHeight,
     this.padding,
     this.elevation,
-    this.menus = const <MenuBarItem>[],
+    this.menus = const <MenuItem>[],
   });
 
   /// The list of menu items that are the top level children of the
@@ -222,7 +255,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   /// `someMenuBarWidget.menus.add(...)` will result in incorrect
   /// behaviors. Whenever the menus list is modified, a new list object
   /// should be provided.
-  final List<MenuBarItem> menus;
+  final List<MenuItem> menus;
 
   /// An optional controller that allows outside control of the menu bar.
   ///
@@ -279,7 +312,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuBarItem item) => item.toDiagnosticsNode())];
+    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuItem item) => item.toDiagnosticsNode())];
   }
 
   @override
@@ -304,12 +337,12 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
     this.height,
     this.padding,
     this.elevation,
-    this.menus = const <MenuBarItem>[],
+    this.menus = const <MenuItem>[],
   });
 
   /// The list of menu items that are the top level children of the
   /// [MenuBar].
-  final List<MenuBarItem> menus;
+  final List<MenuItem> menus;
 
   /// An optional controller that allows outside control of the menu bar.
   final MenuBarController? controller;
@@ -352,7 +385,7 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuBarItem item) => item.toDiagnosticsNode())];
+    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuItem item) => item.toDiagnosticsNode())];
   }
 
   @override
@@ -488,9 +521,9 @@ class _MenuBarState extends State<_MenuBar> {
     final Map<VoidCallback, MenuItem> callbackToMenuItem = <VoidCallback, MenuItem>{};
     final Map<Intent, MenuItem> intentToMenuItem = <Intent, MenuItem>{};
 
-    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuBarItem> children) {
+    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuItem> children) {
       final Map<MenuSerializableShortcut, Intent> shortcuts = <MenuSerializableShortcut, Intent>{};
-      for (final MenuBarItem child in children) {
+      for (final MenuItem child in children) {
         if (child.onSelected != null) {
           callbackToMenuItem[child.onSelected!] = child;
         }
@@ -593,9 +626,9 @@ class _MenuBarState extends State<_MenuBar> {
 
   Map<MenuSerializableShortcut, Intent> _getShortcuts() {
     assert(_debugCheckForDuplicateShortcuts());
-    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuBarItem> children) {
+    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuItem> children) {
       final Map<MenuSerializableShortcut, Intent> newShortcuts = <MenuSerializableShortcut, Intent>{};
-      for (final MenuBarItem child in children) {
+      for (final MenuItem child in children) {
         if (child.menus.isNotEmpty) {
           // Short circuit if it's a menu item with a submenu.
           newShortcuts.addAll(collectChildShortcuts(child.menus));
@@ -718,12 +751,12 @@ class _MenuBarState extends State<_MenuBar> {
   }
 
   // Build the node hierarchy based upon the MenuItem hierarchy.
-  void _createMenuTree(List<MenuBarItem> topLevel) {
+  void _createMenuTree(List<MenuItem> topLevel) {
     _root.children.clear();
     _focusNodes.clear();
     _previousFocus = null;
     _pendingFocusedMenu = null;
-    for (final MenuBarItem item in topLevel) {
+    for (final MenuItem item in topLevel) {
       _MenuNode(item: item, parent: _root).createChildren();
     }
   }
@@ -965,74 +998,6 @@ class MenuBarController with ChangeNotifier {
   _MenuBarState? _menuBar;
 }
 
-/// The base type for all menu items in a [MenuBar] widget.
-///
-/// Provides default implementations for [MenuItem] members, to serve as a mixin
-/// class for the [MenuBarButton], [MenuItemGroup] and [MenuBarMenu] classes to make their
-/// declarations simpler, and free of members that are irrelevant for each of
-/// them.
-mixin MenuBarItem implements MenuItem, Widget {
-  /// A required label displayed on the entry for this item in the menu.
-  ///
-  /// This is rendered by default in a [Text] widget.
-  /// The label appearance can be overridden by using a [labelWidget] to render
-  /// a different widget in its place.
-  ///
-  /// This label is also used as the default [semanticsLabel].
-  String get label;
-
-  /// An optional widget that will be displayed in place of the default [Text]
-  /// widget containing the [label].
-  ///
-  /// If both the `labelWidget` and [semanticsLabel] are provided, the
-  /// [semanticsLabel] will take precedence for defining semantic information.
-  Widget? get labelWidget => null;
-
-  @override
-  MenuSerializableShortcut? get shortcut => null;
-
-  /// The function called when the mouse leaves or enters this menu item's
-  /// button.
-  ValueChanged<bool>? get onHover => null;
-
-  @override
-  List<MenuBarItem> get menus => const <MenuBarItem>[];
-
-  @override
-  List<MenuBarItem> get descendants => const <MenuBarItem>[];
-
-  @override
-  Intent? get onSelectedIntent => null;
-
-  @override
-  VoidCallback? get onSelected => null;
-
-  @override
-  VoidCallback? get onOpen => null;
-
-  @override
-  VoidCallback? get onClose => null;
-
-  @override
-  List<MenuBarItem> get members => const <MenuBarItem>[];
-
-  /// Returns all descendants of the given item.
-  ///
-  /// This API is supplied so that implementers of [MenuBarItem] can share
-  /// this implementation.
-  static List<MenuItem> getDescendants(MenuBarMenu item) {
-    return <MenuItem>[
-      for (final MenuItem child in item.menus) ...<MenuItem>[
-        child,
-        ...child.descendants,
-      ],
-    ];
-  }
-
-  @override
-  String toStringShort() => '${describeIdentity(this)}($label)';
-}
-
 /// An item in a [MenuBar] that can be activated by click, keyboard navigation,
 /// or via a shortcut.
 ///
@@ -1051,7 +1016,7 @@ mixin MenuBarItem implements MenuItem, Widget {
 ///    Flutter-rendered widgets in a Material Design style.
 ///  * [PlatformMenuBar], a class that renders similar menu bar items from a
 ///    [PlatformMenuItem] using platform-native APIs.
-class MenuBarButton extends StatefulWidget with MenuBarItem {
+class MenuBarButton extends StatefulWidget with MenuItem {
   /// Creates a const [MenuBarButton].
   ///
   /// The [label] attribute is required.
@@ -1347,10 +1312,10 @@ class _MenuBarButtonState extends State<MenuBarButton> {
   }
 
   // Expands groups and adds dividers when necessary.
-  List<Widget> _expandGroups(MenuBarItem parent) {
+  List<Widget> _expandGroups(MenuItem parent) {
     final List<Widget> expanded = <Widget>[];
     bool lastWasGroup = false;
-    for (final MenuBarItem item in parent.menus) {
+    for (final MenuItem item in parent.menus) {
       if (lastWasGroup) {
         expanded.add(const _MenuItemDivider());
       }
@@ -1520,7 +1485,7 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 ///    Flutter-rendered widgets in a Material Design style.
 ///  * [PlatformMenuBar], a widget that renders similar menu bar items from a
 ///    [PlatformMenuItem] using platform-native APIs.
-class MenuBarMenu extends StatefulWidget with MenuBarItem {
+class MenuBarMenu extends StatefulWidget with MenuItem {
   /// Creates a const [MenuBarMenu].
   ///
   /// The [label] attribute is required.
@@ -1546,7 +1511,7 @@ class MenuBarMenu extends StatefulWidget with MenuBarItem {
     this.onOpen,
     this.onClose,
     this.onHover,
-    this.menus = const <MenuBarItem>[],
+    this.menus = const <MenuItem>[],
   });
 
   /// An optional icon to display before the label text.
@@ -1646,13 +1611,13 @@ class MenuBarMenu extends StatefulWidget with MenuBarItem {
   final VoidCallback? onClose;
 
   @override
-  final List<MenuBarItem> menus;
+  final List<MenuItem> menus;
 
   @override
   State<MenuBarMenu> createState() => _MenuBarMenuState();
 
   @override
-  List<MenuBarItem> get descendants => MenuBarItem.getDescendants(this).cast<MenuBarItem>();
+  List<MenuItem> get descendants => MenuItem.getDescendants(this);
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
@@ -1705,7 +1670,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
   void initState() {
     super.initState();
     if (widget.focusNode == null) {
-      _internalFocusNode = FocusNode(debugLabel: 'MenuBarItem');
+      _internalFocusNode = FocusNode();
       assert(() {
         _internalFocusNode!.debugLabel = 'MenuBarMenu(${widget.label})';
         return true;
@@ -1818,7 +1783,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
 ///
 /// It inserts dividers as necessary before and after the group, only inserting
 /// them if there are other menu items before or after this group in the menu.
-class MenuItemGroup extends StatelessWidget with MenuBarItem {
+class MenuItemGroup extends StatelessWidget with MenuItem {
   /// Creates a const [MenuItemGroup].
   ///
   /// The [members] attribute is required.
@@ -1828,7 +1793,7 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
   ///
   /// It empty, then this group will not appear in the menu.
   @override
-  final List<MenuBarItem> members;
+  final List<MenuItem> members;
 
   @override
   Widget build(BuildContext context) {
@@ -1858,7 +1823,7 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<MenuBarItem>('members', members));
+    properties.add(IterableProperty<MenuItem>('members', members));
   }
 
   @override
@@ -1972,12 +1937,12 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
     if (isGroup) {
       // Don't add groups to the parent, just the members of the group. This
       // attaches nodes for each of the members, but not this group item itself.
-      for (final MenuBarItem member in item.members) {
+      for (final MenuItem member in item.members) {
         _MenuNode(item: member, parent: parent).createChildren();
       }
     } else {
       assert(parent?.children.contains(this) ?? true);
-      for (final MenuBarItem child in item.menus) {
+      for (final MenuItem child in item.menus) {
         // Children get automatically linked into the menu tree by attaching
         // this node.
         _MenuNode(item: child, parent: this).createChildren();
@@ -1997,7 +1962,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   /// The widget/menu item with the menu data in it.
   // declared late final so that the root constructor can make one without
   // setting the item.
-  late final MenuBarItem item;
+  late final MenuItem item;
 
   /// Whether or not this menu item is currently open, in order to avoid
   /// duplicate calls to [onOpen] or [onClose].
@@ -2170,7 +2135,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MenuBarItem>('item', item));
+    properties.add(DiagnosticsProperty<MenuItem>('item', item));
     properties.add(DiagnosticsProperty<_MenuNode>('parent', parent, defaultValue: null));
     properties.add(IntProperty('numChildren', children.length, defaultValue: null));
   }
@@ -2246,13 +2211,13 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
   /// The list of widgets to use as children of this menu bar.
   ///
   /// These are the top level [MenuBarMenu]s.
-  final List<MenuBarItem> children;
+  final List<MenuItem> children;
 
   List<Widget> _expandGroups(_MenuBarState menuBar) {
     final List<Widget> expanded = <Widget>[];
     int index = 0;
     bool lastWasGroup = false;
-    for (final MenuBarItem item in children) {
+    for (final MenuItem item in children) {
       if (lastWasGroup) {
         expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
       }
@@ -2260,7 +2225,7 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
         if (!lastWasGroup && expanded.isNotEmpty) {
           expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
         }
-        for (final MenuBarItem member in item.members) {
+        for (final MenuItem member in item.members) {
           expanded.add(_MenuNodeWrapper(
             menu: menuBar._root.children[index],
             child: member,
@@ -2446,9 +2411,8 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
         expanded.add(child);
         continue;
       }
-      final MenuItem childMenuItem = child as MenuItem;
       assert(index < parentMenu.children.length);
-      if (childMenuItem.members.isEmpty) {
+      if (child.members.isEmpty) {
         expanded.add(
           _MenuNodeWrapper(
             menu: parentMenu.children[index],
@@ -2458,7 +2422,7 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
         index += 1;
       } else {
         // Groups are expanded in the node tree, so expand them here too.
-        expanded.addAll(childMenuItem.members.map<Widget>((MenuItem member) {
+        expanded.addAll(child.members.map<Widget>((MenuItem member) {
           final Widget wrapper = _MenuNodeWrapper(
             menu: parentMenu.children[index],
             child: child,
@@ -2918,7 +2882,7 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
           node != menuBar._root &&
           (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
     }).toList();
-    final List<MenuBarItem> enabledItems = enabledNodes.map<MenuBarItem>((_MenuNode node) => node.item).toList();
+    final List<MenuItem> enabledItems = enabledNodes.map<MenuItem>((_MenuNode node) => node.item).toList();
     if (enabledNodes.isEmpty) {
       return;
     }
