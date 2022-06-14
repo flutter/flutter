@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:gen_defaults/app_bar_template.dart';
+import 'package:gen_defaults/banner_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
@@ -103,6 +104,7 @@ Future<void> main(List<String> args) async {
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
+  BannerTemplate('Banner', '$materialLib/banner.dart', tokens).updateFile();
   ButtonTemplate('md.comp.elevated-button', 'ElevatedButton', '$materialLib/elevated_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-button', 'FilledButton', '$materialLib/filled_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-tonal-button', 'FilledTonalButton', '$materialLib/filled_button.dart', tokens).updateFile();
