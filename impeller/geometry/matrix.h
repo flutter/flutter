@@ -329,6 +329,33 @@ struct Matrix {
     const auto translate = MakeTranslation({-1.0, 1.0, 0.5});
     return translate * scale;
   }
+
+  static constexpr Matrix MakePerspective(Radians fov_y,
+                                          Scalar aspect_ratio,
+                                          Scalar z_near,
+                                          Scalar z_far) {
+    Scalar height = std::tan(fov_y.radians * 0.5);
+    Scalar width = height * aspect_ratio;
+    Scalar z_diff = z_near - z_far;
+
+    // clang-format off
+    return {
+      1.0f / width, 0.0f,          0.0f,                              0.0f,
+      0.0f,         1.0f / height, 0.0f,                              0.0f,
+      0.0f,         0.0f,          (z_near + z_far) / z_diff,        -1.0f,
+      0.0f,         0.0f,          (2.0f * z_near * z_far) / z_diff,  0.0f
+    };
+    // clang-format on
+  }
+
+  template <class T>
+  static constexpr Matrix MakePerspective(Radians fov_y,
+                                          TSize<T> size,
+                                          Scalar z_near,
+                                          Scalar z_far) {
+    return MakePerspective(fov_y, static_cast<Scalar>(size.width) / size.height,
+                           z_near, z_far);
+  }
 };
 
 static_assert(sizeof(struct Matrix) == sizeof(Scalar) * 16,

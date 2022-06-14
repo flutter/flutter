@@ -10,6 +10,8 @@ impeller_shaders("shader_fixtures") {
   shaders = [
     "box_fade.frag",
     "box_fade.vert",
+    "colors.vert",
+    "colors.frag",
     "impeller.frag",
     "impeller.vert",
     "instanced_draw.frag",
