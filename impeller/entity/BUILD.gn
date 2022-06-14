@@ -71,8 +71,6 @@ impeller_component("entity") {
     "contents/filters/inputs/texture_filter_input.h",
     "contents/linear_gradient_contents.cc",
     "contents/linear_gradient_contents.h",
-    "contents/snapshot.cc",
-    "contents/snapshot.h",
     "contents/solid_color_contents.cc",
     "contents/solid_color_contents.h",
     "contents/solid_stroke_contents.cc",

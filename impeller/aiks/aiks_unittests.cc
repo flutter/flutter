@@ -14,6 +14,7 @@
 #include "impeller/geometry/geometry_unittests.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/snapshot.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
 #include "third_party/skia/include/core/SkData.h"
@@ -595,6 +596,9 @@ TEST_P(AiksTest, ColorWheel) {
     }
   };
 
+  std::shared_ptr<Image> color_wheel;
+  Matrix color_wheel_transform;
+
   bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     if (first_frame) {
@@ -621,22 +625,47 @@ TEST_P(AiksTest, ColorWheel) {
     }
     ImGui::End();
 
-    Canvas canvas;
-    canvas.Scale(GetContentScale());
-    Paint paint;
-    // Default blend is kSourceOver.
-    paint.color = Color::White();
-    canvas.DrawPaint(paint);
+    static Point content_scale;
+    Point new_content_scale = GetContentScale();
 
+    if (new_content_scale != content_scale) {
+      content_scale = new_content_scale;
+
+      // Render the color wheel to an image.
+
+      Canvas canvas;
+      canvas.Scale(content_scale);
+
+      canvas.Translate(Vector2(500, 400));
+      canvas.Scale(Vector2(3, 3));
+
+      draw_color_wheel(canvas);
+      auto color_wheel_picture = canvas.EndRecordingAsPicture();
+      auto snapshot = color_wheel_picture.Snapshot(renderer);
+      if (!snapshot.has_value() || !snapshot->texture) {
+        return false;
+      }
+      color_wheel = std::make_shared<Image>(snapshot->texture);
+      color_wheel_transform = snapshot->transform;
+    }
+
+    Canvas canvas;
+    canvas.DrawPaint({.color = Color::White()});
+
+    canvas.Save();
+    canvas.Transform(color_wheel_transform);
+    canvas.DrawImage(color_wheel, Point(), Paint());
+    canvas.Restore();
+
+    canvas.Scale(content_scale);
     canvas.Translate(Vector2(500, 400));
     canvas.Scale(Vector2(3, 3));
-
-    draw_color_wheel(canvas);
 
     // Draw 3 circles to a subpass and blend it in.
     canvas.SaveLayer({.color = Color::White().WithAlpha(alpha),
                       .blend_mode = blend_mode_values[current_blend_index]});
     {
+      Paint paint;
       paint.blend_mode = Entity::BlendMode::kPlus;
       const Scalar x = std::sin(k2Pi / 3);
       const Scalar y = -std::cos(k2Pi / 3);
