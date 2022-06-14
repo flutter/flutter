@@ -40,6 +40,7 @@ extension DomWindowExtension on DomWindow {
   external DomURL get URL;
   external bool dispatchEvent(DomEvent event);
   external DomMediaQueryList matchMedia(String? query);
+  external DomCSSStyleDeclaration getComputedStyle(DomElement elt);
 }
 
 @JS()
@@ -187,6 +188,7 @@ extension DomNodeExtension on DomNode {
   set text(String? value) =>
       js_util.setProperty<String?>(this, 'textContent', value);
   external DomNode cloneNode(bool? deep);
+  external bool contains(DomNode? other);
 }
 
 @JS()
@@ -917,6 +919,63 @@ class DomPath2D {}
 DomPath2D createDomPath2D([Object? path]) =>
     domCallConstructorString('Path2D', <Object>[if (path != null) path])!
         as DomPath2D;
+
+@JS()
+@staticInterop
+class DomMouseEvent extends DomUIEvent {}
+
+extension DomMouseEventExtension on DomMouseEvent {
+  external num get clientX;
+  external num get clientY;
+  external int get button;
+  external int? get buttons;
+  external bool getModifierState(String keyArg);
+}
+
+@JS()
+@staticInterop
+class DomPointerEvent extends DomMouseEvent {}
+
+extension DomPointerEventExtension on DomPointerEvent {
+  external int? get pointerId;
+  external String? get pointerType;
+  external num? get pressure;
+  external int? get tiltX;
+  external int? get tiltY;
+  List<DomPointerEvent> getCoalescedEvents() =>
+      js_util.callMethod<List<Object?>>(
+          this, 'getCoalescedEvents', <Object>[]).cast<DomPointerEvent>();
+}
+
+@JS()
+@staticInterop
+class DomWheelEvent extends DomMouseEvent {}
+
+extension DomWheelEventExtension on DomWheelEvent {
+  external num get deltaX;
+  external num get deltaY;
+  external int get deltaMode;
+}
+
+@JS()
+@staticInterop
+class DomTouchEvent extends DomUIEvent {}
+
+extension DomTouchEventExtension on DomTouchEvent {
+  List<DomTouch>? get changedTouches => js_util
+      .getProperty<List<Object?>?>(this, 'changedTouches')
+      ?.cast<DomTouch>();
+}
+
+@JS()
+@staticInterop
+class DomTouch {}
+
+extension DomTouchExtension on DomTouch {
+  external int? get identifier;
+  external num? get clientX;
+  external num? get clientY;
+}
 
 Object? domGetConstructor(String constructorName) =>
     js_util.getProperty(domWindow, constructorName);
