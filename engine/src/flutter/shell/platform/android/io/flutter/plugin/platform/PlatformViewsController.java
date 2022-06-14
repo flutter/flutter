@@ -223,17 +223,28 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           layoutParams.leftMargin = physicalLeft;
           wrapperView.setLayoutParams(layoutParams);
 
-          final View view = platformView.getView();
-          if (view == null) {
+          final View embeddedView = platformView.getView();
+          if (embeddedView == null) {
             throw new IllegalStateException(
                 "PlatformView#getView() returned null, but an Android view reference was expected.");
-          } else if (view.getParent() != null) {
+          } else if (embeddedView.getParent() != null) {
             throw new IllegalStateException(
                 "The Android view returned from PlatformView#getView() was already added to a parent view.");
           }
-          view.setLayoutParams(new FrameLayout.LayoutParams(physicalWidth, physicalHeight));
-          view.setLayoutDirection(request.direction);
-          wrapperView.addView(view);
+          embeddedView.setLayoutParams(new FrameLayout.LayoutParams(physicalWidth, physicalHeight));
+          embeddedView.setLayoutDirection(request.direction);
+
+          // Accessibility in the embedded view is initially disabled because if a Flutter app
+          // disabled accessibility in the first frame, the embedding won't receive an update to
+          // disable accessibility since the embedding never received an update to enable it.
+          // The AccessibilityBridge keeps track of the accessibility nodes, and handles the deltas
+          // when the framework sends a new a11y tree to the embedding.
+          // To prevent races, the framework populate the SemanticsNode after the platform view has
+          // been created.
+          embeddedView.setImportantForAccessibility(
+              View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+
+          wrapperView.addView(embeddedView);
           wrapperView.setOnDescendantFocusChangeListener(
               (v, hasFocus) -> {
                 if (hasFocus) {
@@ -738,6 +749,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    *     testing.
    */
   @VisibleForTesting
+  @TargetApi(Build.VERSION_CODES.KITKAT)
   void initializePlatformViewIfNeeded(int viewId) {
     final PlatformView platformView = platformViews.get(viewId);
     if (platformView == null) {
@@ -747,11 +759,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     if (platformViewParent.get(viewId) != null) {
       return;
     }
-    if (platformView.getView() == null) {
+    final View embeddedView = platformView.getView();
+    if (embeddedView == null) {
       throw new IllegalStateException(
           "PlatformView#getView() returned null, but an Android view reference was expected.");
     }
-    if (platformView.getView().getParent() != null) {
+    if (embeddedView.getParent() != null) {
       throw new IllegalStateException(
           "The Android view returned from PlatformView#getView() was already added to a parent view.");
     }
@@ -769,7 +782,17 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         });
 
     platformViewParent.put(viewId, parentView);
-    parentView.addView(platformView.getView());
+
+    // Accessibility in the embedded view is initially disabled because if a Flutter app disabled
+    // accessibility in the first frame, the embedding won't receive an update to disable
+    // accessibility since the embedding never received an update to enable it.
+    // The AccessibilityBridge keeps track of the accessibility nodes, and handles the deltas when
+    // the framework sends a new a11y tree to the embedding.
+    // To prevent races, the framework populate the SemanticsNode after the platform view has been
+    // created.
+    embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+
+    parentView.addView(embeddedView);
     flutterView.addView(parentView);
   }
 

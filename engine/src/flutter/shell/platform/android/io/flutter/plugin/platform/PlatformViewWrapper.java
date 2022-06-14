@@ -21,6 +21,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -240,6 +241,21 @@ class PlatformViewWrapper extends FrameLayout {
   @Override
   public boolean onInterceptTouchEvent(@NonNull MotionEvent event) {
     return true;
+  }
+
+  @Override
+  public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+    final View embeddedView = getChildAt(0);
+    if (embeddedView != null
+        && embeddedView.getImportantForAccessibility()
+            == View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS) {
+      return false;
+    }
+    // Forward the request only if the embedded view is in the Flutter accessibility tree.
+    // The embedded view may be ignored when the framework doesn't populate a SemanticNode
+    // for the current platform view.
+    // See AccessibilityBridge for more.
+    return super.requestSendAccessibilityEvent(child, event);
   }
 
   /** Used on Android O+, {@link invalidateChildInParent} used for previous versions. */

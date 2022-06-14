@@ -3,6 +3,7 @@ package io.flutter.embedding.engine.mutatorsstack;
 import static android.view.View.OnFocusChangeListener;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -10,6 +11,7 @@ import android.graphics.Path;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +23,7 @@ import io.flutter.util.ViewUtils;
  * A view that applies the {@link io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack} to
  * its children.
  */
+@TargetApi(19)
 public class FlutterMutatorView extends FrameLayout {
   private FlutterMutatorsStack mutatorsStack;
   private float screenDensity;
@@ -158,6 +161,21 @@ public class FlutterMutatorView extends FrameLayout {
   @Override
   public boolean onInterceptTouchEvent(MotionEvent event) {
     return true;
+  }
+
+  @Override
+  public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+    final View embeddedView = getChildAt(0);
+    if (embeddedView != null
+        && embeddedView.getImportantForAccessibility()
+            == View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS) {
+      return false;
+    }
+    // Forward the request only if the embedded view is in the Flutter accessibility tree.
+    // The embedded view may be ignored when the framework doesn't populate a SemanticNode
+    // for the current platform view.
+    // See AccessibilityBridge for more.
+    return super.requestSendAccessibilityEvent(child, event);
   }
 
   @Override
