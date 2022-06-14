@@ -253,6 +253,54 @@ TEST(GeometryTest, MatrixGetMaxBasisLength) {
   }
 }
 
+TEST(GeometryTest, MatrixMakeOrthographic) {
+  {
+    auto m = Matrix::MakeOrthographic(Size(100, 200));
+    auto expect = Matrix{
+        0.02, 0,     0,   0,  //
+        0,    -0.01, 0,   0,  //
+        0,    0,     1,   0,  //
+        -1,   1,     0.5, 1,  //
+    };
+    ASSERT_MATRIX_NEAR(m, expect);
+  }
+
+  {
+    auto m = Matrix::MakeOrthographic(Size(400, 100));
+    auto expect = Matrix{
+        0.005, 0,     0,   0,  //
+        0,     -0.02, 0,   0,  //
+        0,     0,     1,   0,  //
+        -1,    1,     0.5, 1,  //
+    };
+    ASSERT_MATRIX_NEAR(m, expect);
+  }
+}
+
+TEST(GeometryTest, MatrixMakePerspective) {
+  {
+    auto m = Matrix::MakePerspective(Degrees(60), Size(100, 200), 1, 10);
+    auto expect = Matrix{
+        3.4641, 0,       0,        0,   //
+        0,      1.73205, 0,        0,   //
+        0,      0,       -1.22222, -1,  //
+        0,      0,       -2.22222, 0,   //
+    };
+    ASSERT_MATRIX_NEAR(m, expect);
+  }
+
+  {
+    auto m = Matrix::MakePerspective(Radians(1), 2, 10, 20);
+    auto expect = Matrix{
+        0.915244, 0,       0,   0,   //
+        0,        1.83049, 0,   0,   //
+        0,        0,       -3,  -1,  //
+        0,        0,       -40, 0,   //
+    };
+    ASSERT_MATRIX_NEAR(m, expect);
+  }
+}
+
 TEST(GeometryTest, QuaternionLerp) {
   auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
   auto q2 = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
