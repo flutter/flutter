@@ -1083,10 +1083,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@endtemplate}
   bool get fixedCursorHeight => _fixedCursorHeight;
   bool _fixedCursorHeight = false;
-  set fixedCursorHeight(bool value) {
-    if (_fixedCursorHeight == value) return;
-    _fixedCursorHeight = value;
-  }
 
   /// {@template flutter.rendering.RenderEditable.paintCursorAboveText}
   /// If the cursor should be painted on top of the text or underneath it.
