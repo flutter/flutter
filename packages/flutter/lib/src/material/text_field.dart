@@ -608,7 +608,7 @@ class TextField extends StatefulWidget {
   final double? cursorHeight;
 
   /// {@macro flutter.widgets.editableText.fixedCursorHeight}
-  final bool? fixedCursorHeight;
+  final bool fixedCursorHeight;
 
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius? cursorRadius;

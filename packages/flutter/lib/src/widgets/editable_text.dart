@@ -3464,6 +3464,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         rendererIgnoresPointer: widget.rendererIgnoresPointer,
                         cursorWidth: widget.cursorWidth,
                         cursorHeight: widget.cursorHeight,
+                        fixedCursorHeight: widget.fixedCursorHeight,
                         cursorRadius: widget.cursorRadius,
                         cursorOffset: widget.cursorOffset ?? Offset.zero,
                         selectionHeightStyle: widget.selectionHeightStyle,
@@ -3567,6 +3568,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
     this.cursorHeight,
+    this.fixedCursorHeight = false,
     this.cursorRadius,
     required this.cursorOffset,
     required this.paintCursorAboveText,
@@ -3623,6 +3625,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final double? cursorHeight;
+  final bool fixedCursorHeight;
   final Radius? cursorRadius;
   final Offset cursorOffset;
   final bool paintCursorAboveText;
@@ -3666,6 +3669,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
       cursorHeight: cursorHeight,
+      fixedCursorHeight: fixedCursorHeight,
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
       paintCursorAboveText: paintCursorAboveText,
