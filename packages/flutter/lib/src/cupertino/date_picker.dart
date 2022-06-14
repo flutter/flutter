@@ -946,11 +946,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate! : widget.maximumDate!;
-      _scrollToDate(targetDate, selectedDate);
+      _scrollToDate(targetDate, selectedDate, minCheck);
     }
   }
 
-  void _scrollToDate(DateTime newDate, DateTime fromDate) {
+  void _scrollToDate(DateTime newDate, DateTime fromDate, bool minCheck) {
     assert(newDate != null);
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (fromDate.year != newDate.year || fromDate.month != newDate.month || fromDate.day != newDate.day) {
@@ -977,7 +977,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       }
 
       if (fromDate.minute != newDate.minute) {
-        _animateColumnControllerToItem(minuteController, (newDate.minute / widget.minuteInterval).ceil());
+        final positionDouble = newDate.minute ~/ widget.minuteInterval;
+        final position = minCheck ? positionDouble.ceil() : positionDouble.floor();
+        _animateColumnControllerToItem(minuteController, position);
       }
     });
   }
