@@ -159,111 +159,6 @@ mixin MenuSerializableShortcut {
   ShortcutSerialization serializeForMenu();
 }
 
-/// An abstract class for describing cascading menu hierarchies that are part of
-/// a [MenuBar] or [PlatformMenuBar].
-///
-/// This type is also used by [PlatformMenuDelegate.setMenus] to accept the menu
-/// hierarchy to be sent to the platform, and by [PlatformMenuBar] to define the
-/// menu hierarchy.
-///
-/// This class is abstract, and so can't be used directly. Typically subclasses
-/// like [MenuBarItem] and [PlatformMenuItem] are used in practice.
-///
-/// See also:
-///
-///  * [MenuBar], a widget that renders menus in Flutter with a Material design
-///    style.
-///  * [PlatformMenuBar], a widget that renders menu items using platform APIs
-///    instead of Flutter.
-///  * [MenuBar.adaptive], a factory constructor for [MenuBar] that renders the
-///    given menu hierarchy using [PlatformMenuBar] on platforms that support
-///    it, and [MenuBar] everywhere else.
-abstract class MenuItem with Diagnosticable {
-  /// Allows subclasses to have const constructors.
-  const MenuItem();
-
-  /// Converts the representation of this item into a map suitable for sending
-  /// over the default "flutter/menu" channel used by [DefaultPlatformMenuDelegate].
-  ///
-  /// The `delegate` is the [PlatformMenuDelegate] that is requesting the
-  /// serialization. The `index` is the position of this menu item in the list
-  /// of [menus] of the [PlatformMenu] it belongs to, and `count` is the number
-  /// of [menus] in the [PlatformMenu] it belongs to.
-  ///
-  /// The `getId` parameter is a [MenuItemSerializableIdGenerator] function that
-  /// generates a unique ID for each menu item, which is to be returned in the
-  /// "id" field of the menu item data.
-  Iterable<Map<String, Object?>> toChannelRepresentation(
-    PlatformMenuDelegate delegate, {
-    required MenuItemSerializableIdGenerator getId,
-  });
-
-  /// The optional shortcut that selects this [MenuItem].
-  ///
-  /// This shortcut is only enabled when [onSelected] is set.
-  MenuSerializableShortcut? get shortcut => null;
-
-  /// Returns any child [MenuItem]s of this item.
-  ///
-  /// Returns an empty list if this type of menu item doesn't have
-  /// children.
-  List<MenuItem> get menus => const <MenuItem>[];
-
-  /// Returns all descendant [MenuItem]s of this item.
-  ///
-  /// Returns an empty list if this type of menu item doesn't have
-  /// descendants.
-  List<MenuItem> get descendants => const <MenuItem>[];
-
-  /// Returns a callback, if any, to be invoked if the platform menu receives a
-  /// "Menu.selectedCallback" method call from the platform for this item.
-  ///
-  /// Only items that do not have submenus will have this callback invoked.
-  ///
-  /// Only one of [onSelected] or [onSelectedIntent] may be specified.
-  ///
-  /// If neither [onSelected] nor [onSelectedIntent] are specified, then this
-  /// menu item is considered to be disabled.
-  ///
-  /// The default implementation returns null.
-  VoidCallback? get onSelected => null;
-
-  /// Returns an intent, if any, to be invoked if the platform receives a
-  /// "Menu.selectedCallback" method call from the platform for this item.
-  ///
-  /// Only items that do not have submenus will have this intent invoked.
-  ///
-  /// Only one of [onSelected] or [onSelectedIntent] may be specified.
-  ///
-  /// If neither [onSelected] nor [onSelectedIntent] are specified, then this
-  /// menu item is considered to be disabled.
-  ///
-  /// The default implementation returns null.
-  Intent? get onSelectedIntent => null;
-
-  /// Returns a callback, if any, to be invoked if the platform menu receives a
-  /// "Menu.opened" method call from the platform for this item.
-  ///
-  /// Only items that have submenus will have this callback invoked.
-  ///
-  /// The default implementation returns null.
-  VoidCallback? get onOpen => null;
-
-  /// Returns a callback, if any, to be invoked if the platform menu receives a
-  /// "Menu.closed" method call from the platform for this item.
-  ///
-  /// Only items that have submenus will have this callback invoked.
-  ///
-  /// The default implementation returns null.
-  VoidCallback? get onClose => null;
-
-  /// Returns the list of group members if this menu item is a "grouping" menu
-  /// item, such as [PlatformMenuItemGroup].
-  ///
-  /// Defaults to an empty list.
-  List<MenuItem> get members => const <MenuItem>[];
-}
-
 /// An abstract delegate class that can be used to set
 /// [WidgetsBinding.platformMenuDelegate] to provide for managing platform
 /// menus.
@@ -313,7 +208,7 @@ abstract class PlatformMenuDelegate {
   ///    that appear in a cascading menu.
   ///  * [PlatformMenuItem], the class that describes the leaves of a menu
   ///    hierarchy.
-  void setMenus(List<MenuItem> topLevelMenus);
+  void setMenus(List<PlatformMenuItem> topLevelMenus);
 
   /// Clears any existing platform-rendered menus and leaves the application
   /// with no menus.
@@ -352,7 +247,7 @@ abstract class PlatformMenuDelegate {
 
 /// The signature for a function that generates unique menu item IDs for
 /// serialization of a [MenuItem].
-typedef MenuItemSerializableIdGenerator = int Function(MenuItem item);
+typedef MenuItemSerializableIdGenerator = int Function(PlatformMenuItem item);
 
 /// The platform menu delegate that handles the built-in macOS platform menu
 /// generation using the 'flutter/menu' channel.
@@ -375,12 +270,12 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   /// with the platform. It defaults to [SystemChannels.menu] if not supplied.
   DefaultPlatformMenuDelegate({MethodChannel? channel})
       : channel = channel ?? SystemChannels.menu,
-        _idMap = <int, MenuItem>{} {
+        _idMap = <int, PlatformMenuItem>{} {
     this.channel.setMethodCallHandler(_methodCallHandler);
   }
 
   // Map of distributed IDs to menu items.
-  final Map<int, MenuItem> _idMap;
+  final Map<int, PlatformMenuItem> _idMap;
   // An ever increasing value used to dole out IDs.
   int _serial = 0;
   // The context used to "lock" this delegate to a specific instance of
@@ -388,14 +283,14 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   BuildContext? _lockedContext;
 
   @override
-  void clearMenus() => setMenus(<MenuItem>[]);
+  void clearMenus() => setMenus(<PlatformMenuItem>[]);
 
   @override
-  void setMenus(List<MenuItem> topLevelMenus) {
+  void setMenus(List<PlatformMenuItem> topLevelMenus) {
     _idMap.clear();
     final List<Map<String, Object?>> representation = <Map<String, Object?>>[];
     if (topLevelMenus.isNotEmpty) {
-      for (final MenuItem childItem in topLevelMenus) {
+      for (final PlatformMenuItem childItem in topLevelMenus) {
         representation.addAll(childItem.toChannelRepresentation(this, getId: _getId));
       }
     }
@@ -417,7 +312,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   ///
   /// This is called by each DefaultPlatformMenuDelegateSerializer when
   /// serializing a new object so that it has a unique ID.
-  int _getId(MenuItem item) {
+  int _getId(PlatformMenuItem item) {
     _serial += 1;
     _idMap[_serial] = item;
     return _serial;
@@ -462,7 +357,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     if (!_idMap.containsKey(id)) {
       return;
     }
-    final MenuItem item = _idMap[id]!;
+    final PlatformMenuItem item = _idMap[id]!;
     if (call.method == _kMenuSelectedCallbackMethod) {
       assert(item.onSelected == null || item.onSelectedIntent == null,
         'Only one of MenuItem.onSelected or MenuItem.onSelectedIntent may be specified');
@@ -554,19 +449,19 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// `somePlatformMenuBarWidget.menus.add(...)` will result in incorrect
   /// behaviors. Whenever the menus list is modified, a new list object
   /// should be provided.
-  final List<MenuItem> menus;
+  final List<PlatformMenuItem> menus;
 
   @override
   State<PlatformMenuBar> createState() => _PlatformMenuBarState();
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return menus.map<DiagnosticsNode>((MenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus.map<DiagnosticsNode>((PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
   }
 }
 
 class _PlatformMenuBarState extends State<PlatformMenuBar> {
-  List<MenuItem> descendants = <MenuItem>[];
+  List<PlatformMenuItem> descendants = <PlatformMenuItem>[];
 
   @override
   void initState() {
@@ -590,8 +485,8 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
   @override
   void didUpdateWidget(PlatformMenuBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final List<MenuItem> newDescendants = <MenuItem>[
-      for (final MenuItem item in widget.menus) ...<MenuItem>[
+    final List<PlatformMenuItem> newDescendants = <PlatformMenuItem>[
+      for (final PlatformMenuItem item in widget.menus) ...<PlatformMenuItem>[
         item,
         ...item.descendants,
       ],
@@ -622,45 +517,39 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
 ///
 ///  * [PlatformMenuItem], a class representing a leaf menu item in a
 ///    [PlatformMenuBar].
-class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
+class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
   /// Creates a const [PlatformMenu].
   ///
   /// The [label] and [menus] fields are required.
   const PlatformMenu({
-    required this.label,
+    required super.label,
     this.onOpen,
     this.onClose,
     required this.menus,
   });
 
-  /// The label that will appear on the menu.
-  final String label;
-
-  /// The callback that is called when this menu is opened.
   @override
   final VoidCallback? onOpen;
 
-  /// The callback that is called when this menu is closed.
   @override
   final VoidCallback? onClose;
 
   /// The menu items in the submenu opened by this menu item.
   ///
   /// If this is an empty list, this [PlatformMenu] will be disabled.
-  @override
-  final List<MenuItem> menus;
+  final List<PlatformMenuItem> menus;
 
   /// Returns all descendant [MenuItem]s of this item.
   @override
-  List<MenuItem> get descendants => getDescendants(this);
+  List<PlatformMenuItem> get descendants => getDescendants(this);
 
   /// Returns all descendants of the given item.
   ///
   /// This API is supplied so that implementers of [PlatformMenu] can share
   /// this implementation.
-  static List<MenuItem> getDescendants(PlatformMenu item) {
-    return <MenuItem>[
-      for (final MenuItem child in item.menus) ...<MenuItem>[
+  static List<PlatformMenuItem> getDescendants(PlatformMenu item) {
+    return <PlatformMenuItem>[
+      for (final PlatformMenuItem child in item.menus) ...<PlatformMenuItem>[
         child,
         ...child.descendants,
       ],
@@ -686,7 +575,7 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
     MenuItemSerializableIdGenerator getId,
   ) {
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
-    for (final MenuItem childItem in item.menus) {
+    for (final PlatformMenuItem childItem in item.menus) {
       result.addAll(childItem.toChannelRepresentation(
         delegate,
         getId: getId,
@@ -722,7 +611,7 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return menus.map<DiagnosticsNode>((MenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus.map<DiagnosticsNode>((PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
   }
 
   @override
@@ -738,17 +627,17 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
 /// Visual dividers will be added before and after this group if other menu
 /// items appear in the [PlatformMenu], and the leading one omitted if it is
 /// first and the trailing one omitted if it is last in the menu.
-class PlatformMenuItemGroup extends MenuItem {
+class PlatformMenuItemGroup extends PlatformMenuItem {
   /// Creates a const [PlatformMenuItemGroup].
   ///
   /// The [members] field is required.
-  const PlatformMenuItemGroup({required this.members});
+  const PlatformMenuItemGroup({required this.members}) : super(label: '');
 
   /// The [MenuItem]s that are members of this menu item group.
   ///
   /// An assertion will be thrown if there isn't at least one member of the group.
   @override
-  final List<MenuItem> members;
+  final List<PlatformMenuItem> members;
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
@@ -765,7 +654,7 @@ class PlatformMenuItemGroup extends MenuItem {
   /// This API is supplied so that implementers of [PlatformMenuItemGroup] can share
   /// this implementation.
   static Iterable<Map<String, Object?>> serialize(
-    MenuItem group,
+    PlatformMenuItem group,
     PlatformMenuDelegate delegate, {
     required MenuItemSerializableIdGenerator getId,
   }) {
@@ -774,7 +663,7 @@ class PlatformMenuItemGroup extends MenuItem {
       _kIdKey: getId(group),
       _kIsDividerKey: true,
     });
-    for (final MenuItem item in group.members) {
+    for (final PlatformMenuItem item in group.members) {
       result.addAll(item.toChannelRepresentation(
         delegate,
         getId: getId,
@@ -790,7 +679,7 @@ class PlatformMenuItemGroup extends MenuItem {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<MenuItem>('members', members));
+    properties.add(IterableProperty<PlatformMenuItem>('members', members));
   }
 }
 
@@ -804,7 +693,7 @@ class PlatformMenuItemGroup extends MenuItem {
 /// See also:
 ///
 ///  * [PlatformMenu], a menu item that opens a submenu.
-class PlatformMenuItem extends MenuItem {
+class PlatformMenuItem with Diagnosticable {
   /// Creates a const [PlatformMenuItem].
   ///
   /// The [label] attribute is required.
@@ -821,24 +710,59 @@ class PlatformMenuItem extends MenuItem {
   /// The optional shortcut that selects this [PlatformMenuItem].
   ///
   /// This shortcut is only enabled when [onSelected] is set.
-  @override
   final MenuSerializableShortcut? shortcut;
 
   /// An optional callback that is called when this [PlatformMenuItem] is
   /// selected.
   ///
   /// If unset, this menu item will be disabled.
-  @override
   final VoidCallback? onSelected;
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.opened" method call from the platform for this item.
+  ///
+  /// Only items that have submenus will have this callback invoked.
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onOpen => null;
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.closed" method call from the platform for this item.
+  ///
+  /// Only items that have submenus will have this callback invoked.
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onClose => null;
 
   /// An optional intent that is invoked when this [PlatformMenuItem] is
   /// selected.
   ///
   /// If unset, this menu item will be disabled.
-  @override
   final Intent? onSelectedIntent;
 
-  @override
+  /// Returns all descendant [MenuItem]s of this item.
+  ///
+  /// Returns an empty list if this type of menu item doesn't have
+  /// descendants.
+  List<PlatformMenuItem> get descendants => const <PlatformMenuItem>[];
+
+  /// Returns the list of group members if this menu item is a "grouping" menu
+  /// item, such as [PlatformMenuItemGroup].
+  ///
+  /// Defaults to an empty list.
+  List<PlatformMenuItem> get members => const <PlatformMenuItem>[];
+
+  /// Converts the representation of this item into a map suitable for sending
+  /// over the default "flutter/menu" channel used by [DefaultPlatformMenuDelegate].
+  ///
+  /// The `delegate` is the [PlatformMenuDelegate] that is requesting the
+  /// serialization. The `index` is the position of this menu item in the list
+  /// of [menus] of the [PlatformMenu] it belongs to, and `count` is the number
+  /// of [menus] in the [PlatformMenu] it belongs to.
+  ///
+  /// The `getId` parameter is a [MenuItemSerializableIdGenerator] function that
+  /// generates a unique ID for each menu item, which is to be returned in the
+  /// "id" field of the menu item data.
   Iterable<Map<String, Object?>> toChannelRepresentation(
     PlatformMenuDelegate delegate, {
     required MenuItemSerializableIdGenerator getId,
