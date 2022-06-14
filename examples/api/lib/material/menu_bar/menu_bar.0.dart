@@ -105,11 +105,11 @@ class _MyMenuBarState extends State<MyMenuBar> {
     return Column(
       children: <Widget>[
         MenuBar(
-          menus: <MenuBarItem>[
+          menus: <MenuItem>[
             MenuBarMenu(
               autofocus: true,
               label: 'Menu App',
-              menus: <MenuBarItem>[
+              menus: <MenuItem>[
                 MenuBarButton(
                   label: MenuSelection.about.label,
                   onSelected: () => _activate(MenuSelection.about),
@@ -128,8 +128,8 @@ class _MyMenuBarState extends State<MyMenuBar> {
                 ),
                 MenuBarMenu(
                   label: 'Background Color',
-                  menus: <MenuBarItem>[
-                    MenuItemGroup(members: <MenuBarItem>[
+                  menus: <MenuItem>[
+                    MenuItemGroup(members: <MenuItem>[
                       MenuBarButton(
                         onSelected: () => _activate(MenuSelection.colorRed),
                         label: MenuSelection.colorRed.label,

@@ -191,7 +191,7 @@ enum TestMenu {
   final String label;
 }
 
-List<MenuBarItem> createTestMenus({
+List<MenuItem> createTestMenus({
   void Function(TestMenu)? onSelected,
   void Function(TestMenu)? onOpen,
   void Function(TestMenu)? onClose,
@@ -207,12 +207,12 @@ List<MenuBarItem> createTestMenus({
   double? menuElevation,
   OutlinedBorder? itemShape,
 }) {
-  final List<MenuBarItem> result = <MenuBarItem>[
+  final List<MenuItem> result = <MenuItem>[
     MenuBarMenu(
       label: TestMenu.mainMenu0.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
-      menus: <MenuBarItem>[
+      menus: <MenuItem>[
         MenuBarButton(
           label: TestMenu.subMenu00.label,
           onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu00) : null,
@@ -228,9 +228,9 @@ List<MenuBarItem> createTestMenus({
       backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color?>(menuBackground) : null,
       elevation: menuElevation != null ? MaterialStatePropertyAll<double?>(menuElevation) : null,
       shape: menuShape != null ? MaterialStatePropertyAll<ShapeBorder?>(menuShape) : null,
-      menus: <MenuBarItem>[
+      menus: <MenuItem>[
         MenuItemGroup(
-          members: <MenuBarItem>[
+          members: <MenuItem>[
             MenuBarButton(
               label: TestMenu.subMenu10.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu10) : null,
@@ -247,9 +247,9 @@ List<MenuBarItem> createTestMenus({
           label: TestMenu.subMenu11.label,
           onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
           onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
-          menus: <MenuBarItem>[
+          menus: <MenuItem>[
             MenuItemGroup(
-              members: <MenuBarItem>[
+              members: <MenuItem>[
                 MenuBarButton(
                   label: TestMenu.subSubMenu100.label,
                   onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu100) : null,
@@ -285,7 +285,7 @@ List<MenuBarItem> createTestMenus({
       label: TestMenu.mainMenu2.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
-      menus: <MenuBarItem>[
+      menus: <MenuItem>[
         MenuBarButton(
           // Always disabled.
           label: TestMenu.subMenu20.label,
