@@ -497,7 +497,6 @@ class IconButton extends StatelessWidget {
         );
       }
       return _IconButtonM3(
-        key: key,
         style: adjustedStyle,
         onPressed: onPressed,
         autofocus: autofocus,
@@ -577,7 +576,6 @@ class IconButton extends StatelessWidget {
 
 class _IconButtonM3 extends ButtonStyleButton {
   const _IconButtonM3({
-    super.key,
     required super.onPressed,
     super.style,
     super.focusNode,
