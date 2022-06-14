@@ -1598,13 +1598,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         return true;
       }
 
-      if (owner._debugAllowMutationsToDirtySubtrees && _needsLayout) {
-        result = true;
-        return true;
-      }
-
       RenderObject? activeLayoutRoot = this;
       while (activeLayoutRoot != null && !activeLayoutRoot._debugMutationsLocked) {
+        final bool mutationsToDirtySubtreesAllowed = activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
+        if (mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout) {
+          result = true;
+          return true;
+        }
         final AbstractNode? p = activeLayoutRoot.parent;
         activeLayoutRoot = p is RenderObject ? p : null;
       }
