@@ -19,7 +19,7 @@ import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
-import 'menu_bar_theme.dart';
+import 'menu_theme.dart';
 import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'text_theme.dart';
@@ -238,29 +238,29 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
 
   /// The background color of the menu bar.
   ///
-  /// Defaults to [MenuBarThemeData.barBackgroundColor] if null.
+  /// Defaults to [MenuThemeData.barBackgroundColor] if null.
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The preferred minimum height of the menu bar.
   ///
-  /// Defaults to the value of [MenuBarThemeData.barHeight] if null.
+  /// Defaults to the value of [MenuThemeData.barHeight] if null.
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final double? height;
 
   /// The padding around the contents of the menu bar itself.
   ///
-  /// Defaults to the value of [MenuBarThemeData.barPadding] if null.
+  /// Defaults to the value of [MenuThemeData.barPadding] if null.
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final EdgeInsets? padding;
 
   /// The Material elevation of the menu bar (if any).
   ///
-  /// Defaults to the [MenuBarThemeData.barElevation] value of the ambient
-  /// [MenuBarTheme].
+  /// Defaults to the [MenuThemeData.barElevation] value of the ambient
+  /// [MenuTheme].
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   /// See also:
@@ -338,29 +338,29 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   /// The background color of the menu bar.
   ///
-  /// The default value is [MenuBarThemeData.barBackgroundColor]. If
-  /// [MenuBarThemeData.barBackgroundColor] is null, then the default value
+  /// The default value is [MenuThemeData.barBackgroundColor]. If
+  /// [MenuThemeData.barBackgroundColor] is null, then the default value
   /// is based on the [ColorScheme.surface] of [ThemeData.colorScheme].
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The preferred minimum height of the menu bar.
   ///
-  /// The default value is [MenuBarThemeData.barHeight]. If
-  /// [MenuBarThemeData.barHeight] is null, then the default value
+  /// The default value is [MenuThemeData.barHeight]. If
+  /// [MenuThemeData.barHeight] is null, then the default value
   /// is 48 pixels.
   final double? height;
 
   /// The padding around the contents of the menu bar itself.
   ///
-  /// The default value is [MenuBarThemeData.barPadding]. If
-  /// [MenuBarThemeData.barPadding] is null, then the default value
+  /// The default value is [MenuThemeData.barPadding]. If
+  /// [MenuThemeData.barPadding] is null, then the default value
   /// is 4 pixels horizontally.
   final EdgeInsets? padding;
 
   /// The Material elevation of the menu bar (if any).
   ///
-  /// Defaults to the [MenuBarThemeData.barElevation] value of the ambient
-  /// [MenuBarTheme].
+  /// Defaults to the [MenuThemeData.barElevation] value of the ambient
+  /// [MenuTheme].
   final MaterialStateProperty<double?>? elevation;
 
   @override
@@ -552,7 +552,7 @@ class _MenuBarState extends State<_MenuBar> {
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
     final Set<MaterialState> state = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
-    final MenuBarThemeData menuBarTheme = MenuBarTheme.of(context);
+    final MenuThemeData menuTheme = MenuTheme.of(context);
     return _MenuBarMarker(
       state: this,
       child: Actions(
@@ -580,15 +580,15 @@ class _MenuBarState extends State<_MenuBar> {
                   // since there we have to be able to traverse menus.
                   shortcuts: _kMenuTraversalShortcuts,
                   child: _MenuBarTopLevelBar(
-                    elevation: (widget.elevation ?? menuBarTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
+                    elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
                         .resolve(state)!,
-                    height: widget.height ?? menuBarTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
+                    height: widget.height ?? menuTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
                     enabled: widget.enabled,
                     color: (widget.backgroundColor ??
-                            menuBarTheme.barBackgroundColor ??
+                            menuTheme.barBackgroundColor ??
                             _TokenDefaultsM3(context).barBackgroundColor)
                         .resolve(state)!,
-                    padding: widget.padding ?? menuBarTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
+                    padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
                     children: widget.menus,
                   ),
                 ),
@@ -1155,7 +1155,7 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
   ///
   /// See also:
   ///
-  ///  * [MenuBarThemeData.itemBackgroundColor], for the value in the [MenuBarTheme] that
+  ///  * [MenuThemeData.itemBackgroundColor], for the value in the [MenuTheme] that
   ///    can be set instead of this property.
   final MaterialStateProperty<Color?>? backgroundColor;
 
@@ -1165,7 +1165,7 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
   ///
   /// See also:
   ///
-  ///  * [MenuBarThemeData.itemForegroundColor], for the value in the [MenuBarTheme] that
+  ///  * [MenuThemeData.itemForegroundColor], for the value in the [MenuTheme] that
   ///    can be set instead of this property.
   final MaterialStateProperty<Color?>? foregroundColor;
 
@@ -1176,7 +1176,7 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
   ///
   /// See also:
   ///
-  ///  * [MenuBarThemeData.itemOverlayColor], for the value in the [MenuBarTheme] that
+  ///  * [MenuThemeData.itemOverlayColor], for the value in the [MenuTheme] that
   ///    can be set instead of this property.
   final MaterialStateProperty<Color?>? overlayColor;
 
@@ -1187,7 +1187,7 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
   ///
   /// See also:
   ///
-  ///  * [MenuBarThemeData.itemPadding], for the value in the [MenuBarTheme] that
+  ///  * [MenuThemeData.itemPadding], for the value in the [MenuTheme] that
   ///    can be set instead of this property.
   final EdgeInsets? padding;
 
@@ -1199,7 +1199,7 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
   ///
   /// See also:
   ///
-  ///  * [MenuBarThemeData.itemTextStyle], for the value in the [MenuBarTheme] that
+  ///  * [MenuThemeData.itemTextStyle], for the value in the [MenuTheme] that
   ///    can be set instead of this property.
   final MaterialStateProperty<TextStyle?>? textStyle;
 
@@ -1210,7 +1210,7 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
   ///
   /// See also:
   ///
-  ///  * [MenuBarThemeData.itemShape], for the value in the [MenuBarTheme] that
+  ///  * [MenuThemeData.itemShape], for the value in the [MenuTheme] that
   ///    can be set instead of this property.
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
@@ -1316,16 +1316,16 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   @override
   Widget build(BuildContext context) {
-    final MenuBarThemeData menuBarTheme = MenuBarTheme.of(context);
+    final MenuThemeData menuTheme = MenuTheme.of(context);
     final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(context);
     final Size densityAdjustedSize = const Size(64, 48) + Theme.of(context).visualDensity.baseSizeAdjustment;
     final MaterialStateProperty<EdgeInsets?> resolvedPadding;
     if (widget._hasMenu && _menu!.isTopLevel) {
       resolvedPadding =
-          MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuBarTheme.barPadding ?? defaultTheme.barPadding);
+          MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuTheme.barPadding ?? defaultTheme.barPadding);
     } else {
       resolvedPadding = MaterialStateProperty.all<EdgeInsets?>(
-          widget.padding ?? menuBarTheme.itemPadding ?? defaultTheme.itemPadding);
+          widget.padding ?? menuTheme.itemPadding ?? defaultTheme.itemPadding);
     }
     return Semantics(
       enabled: _enabled,
@@ -1336,13 +1336,13 @@ class _MenuBarButtonState extends State<MenuBarButton> {
         style: (TextButtonTheme.of(context).style ?? const ButtonStyle()).copyWith(
           minimumSize: MaterialStateProperty.all<Size?>(densityAdjustedSize),
           backgroundColor:
-              widget.backgroundColor ?? menuBarTheme.itemBackgroundColor ?? defaultTheme.itemBackgroundColor,
+              widget.backgroundColor ?? menuTheme.itemBackgroundColor ?? defaultTheme.itemBackgroundColor,
           foregroundColor:
-              widget.foregroundColor ?? menuBarTheme.itemForegroundColor ?? defaultTheme.itemForegroundColor,
-          overlayColor: widget.overlayColor ?? menuBarTheme.itemOverlayColor ?? defaultTheme.itemOverlayColor,
+              widget.foregroundColor ?? menuTheme.itemForegroundColor ?? defaultTheme.itemForegroundColor,
+          overlayColor: widget.overlayColor ?? menuTheme.itemOverlayColor ?? defaultTheme.itemOverlayColor,
           padding: resolvedPadding,
-          shape: widget.shape ?? menuBarTheme.itemShape ?? defaultTheme.itemShape,
-          textStyle: widget.textStyle ?? menuBarTheme.itemTextStyle ?? defaultTheme.itemTextStyle,
+          shape: widget.shape ?? menuTheme.itemShape ?? defaultTheme.itemShape,
+          textStyle: widget.textStyle ?? menuTheme.itemTextStyle ?? defaultTheme.itemTextStyle,
         ),
         focusNode: _focusNode,
         onHover: _enabled ? _handleHover : null,
@@ -1393,7 +1393,7 @@ class _MenuBarButtonState extends State<MenuBarButton> {
     final RenderBox overlay = Overlay.of(menuButtonContext)!.context.findRenderObject()! as RenderBox;
 
     final EdgeInsets menuPadding =
-        widget._menuPadding ?? MenuBarTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding;
+        widget._menuPadding ?? MenuTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding;
     Offset menuOrigin;
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1428,7 +1428,7 @@ class _MenuBarButtonState extends State<MenuBarButton> {
   // button whose context is given.
   Widget _buildPositionedMenu(_MenuNode menuButtonNode) {
     final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(_menuBar.context);
-    final MenuBarThemeData menuBarTheme = MenuBarTheme.of(_menuBar.context);
+    final MenuThemeData menuTheme = MenuTheme.of(_menuBar.context);
     final TextDirection textDirection = Directionality.of(_menuBar.context);
     final Set<MaterialState> disabled = <MaterialState>{
       if (!_enabled) MaterialState.disabled,
@@ -1450,14 +1450,14 @@ class _MenuBarButtonState extends State<MenuBarButton> {
                   state: _menuBar,
                   child: _MenuBarMenuList(
                     direction: Axis.vertical,
-                    elevation: (widget._menuElevation ?? menuBarTheme.menuElevation ?? defaultTheme.menuElevation)
+                    elevation: (widget._menuElevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation)
                         .resolve(disabled)!,
-                    shape: (widget._menuShape ?? menuBarTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
+                    shape: (widget._menuShape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
                     backgroundColor: (widget._menuBackgroundColor ??
-                            menuBarTheme.menuBackgroundColor ??
+                            menuTheme.menuBackgroundColor ??
                             defaultTheme.menuBackgroundColor)
                         .resolve(disabled)!,
-                    menuPadding: widget._menuPadding ?? menuBarTheme.menuPadding ?? defaultTheme.menuPadding,
+                    menuPadding: widget._menuPadding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
                     textDirection: Directionality.of(context),
                     children: _expandGroups(menuButtonNode.item),
                   ),
@@ -1580,20 +1580,20 @@ class MenuBarMenu extends StatefulWidget with MenuBarItem implements PlatformMen
 
   /// The background color of the cascading menu specified by [menus].
   ///
-  /// Defaults to the value of [MenuBarThemeData.menuBackgroundColor] value of the
-  /// ambient [MenuBarTheme].
+  /// Defaults to the value of [MenuThemeData.menuBackgroundColor] value of the
+  /// ambient [MenuTheme].
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The shape of the cascading menu specified by [menus].
   ///
-  /// Defaults to the value of [MenuBarThemeData.menuShape] value of the
-  /// ambient [MenuBarTheme].
+  /// Defaults to the value of [MenuThemeData.menuShape] value of the
+  /// ambient [MenuTheme].
   final MaterialStateProperty<ShapeBorder?>? shape;
 
   /// The Material elevation of the submenu (if any).
   ///
-  /// Defaults to the [MenuBarThemeData.barElevation] value of the ambient
-  /// [MenuBarTheme].
+  /// Defaults to the [MenuThemeData.barElevation] value of the ambient
+  /// [MenuTheme].
   ///
   /// See also:
   ///
@@ -1602,39 +1602,39 @@ class MenuBarMenu extends StatefulWidget with MenuBarItem implements PlatformMen
 
   /// The padding around the outside of the contents of a [MenuBarMenu].
   ///
-  /// Defaults to the [MenuBarThemeData.menuPadding] value of the ambient
-  /// [MenuBarTheme].
+  /// Defaults to the [MenuThemeData.menuPadding] value of the ambient
+  /// [MenuTheme].
   final EdgeInsets? padding;
 
   /// The padding around the outside of the button that opens a [MenuBarMenu]'s
   /// submenu.
   ///
-  /// Defaults to the [MenuBarThemeData.itemPadding] value of the ambient
-  /// [MenuBarTheme].
+  /// Defaults to the [MenuThemeData.itemPadding] value of the ambient
+  /// [MenuTheme].
   final EdgeInsets? buttonPadding;
 
   /// The background color of the button that opens the submenu.
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemBackgroundColor] value of
-  /// the ambient [MenuBarTheme].
+  /// Defaults to the value of [MenuThemeData.itemBackgroundColor] value of
+  /// the ambient [MenuTheme].
   final MaterialStateProperty<Color?>? buttonBackgroundColor;
 
   /// The foreground color of the button that opens the submenu.
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemForegroundColor] value of
-  /// the ambient [MenuBarTheme].
+  /// Defaults to the value of [MenuThemeData.itemForegroundColor] value of
+  /// the ambient [MenuTheme].
   final MaterialStateProperty<Color?>? buttonForegroundColor;
 
   /// The overlay color of the button that opens the submenu.
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemOverlayColor] value of
-  /// the ambient [MenuBarTheme].
+  /// Defaults to the value of [MenuThemeData.itemOverlayColor] value of
+  /// the ambient [MenuTheme].
   final MaterialStateProperty<Color?>? buttonOverlayColor;
 
   /// The shape of the button that opens the submenu.
   ///
-  /// Defaults to the value of [MenuBarThemeData.menuShape] value of the
-  /// ambient [MenuBarTheme].
+  /// Defaults to the value of [MenuThemeData.menuShape] value of the
+  /// ambient [MenuTheme].
   final MaterialStateProperty<OutlinedBorder?>? buttonShape;
 
   /// The text style of the button that opens the submenu.
@@ -3151,7 +3151,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
 
 // This class will eventually be auto-generated, so it should remain at the end
 // of the file.
-class _TokenDefaultsM3 extends MenuBarThemeData {
+class _TokenDefaultsM3 extends MenuThemeData {
   _TokenDefaultsM3(this.context)
       : super(
           barElevation: MaterialStateProperty.all<double?>(2.0),

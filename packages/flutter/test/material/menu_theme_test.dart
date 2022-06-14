@@ -55,8 +55,8 @@ void main() {
       MaterialApp(
         home: Material(
           child: Builder(builder: (BuildContext context) {
-            return MenuBarTheme(
-              data: MenuBarTheme.of(context).copyWith(
+            return MenuTheme(
+              data: MenuTheme.of(context).copyWith(
                 barBackgroundColor: MaterialStateProperty.all<Color?>(Colors.green),
                 itemTextStyle: MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.titleMedium),
                 barElevation: MaterialStateProperty.all<double?>(20.0),
@@ -99,8 +99,8 @@ void main() {
       MaterialApp(
         home: Material(
           child: Builder(builder: (BuildContext context) {
-            return MenuBarTheme(
-              data: MenuBarTheme.of(context).copyWith(
+            return MenuTheme(
+              data: MenuTheme.of(context).copyWith(
                 barBackgroundColor: MaterialStateProperty.all<Color?>(Colors.green),
                 itemTextStyle: MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.titleMedium),
                 barElevation: MaterialStateProperty.all<double?>(20.0),
