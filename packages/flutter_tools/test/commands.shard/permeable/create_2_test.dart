@@ -6,14 +6,17 @@
 
 import 'dart:io' as io;
 
+import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Directory tempDir;
@@ -40,18 +43,27 @@ void main() {
     final String dart = io.Platform.resolvedExecutable;
     printOnFailure('dart: $dart');
 
-    // GitHub actions do not have access to the full Flutter checkout with the
-    // cache folder, run from source via bin/ instead of with CommandRunner.
-    await Process.run(
-      dart,
-      <String>[
-        'bin/flutter_tools.dart',
-        'create',
-        '--no-pub',
-        '--template=plugin_ffi',
-        projectDir.path,
-      ],
-    );
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      projectDir.path,
+    ]);
+
+    // // GitHub actions do not have access to the full Flutter checkout with the
+    // // cache folder, run from source via bin/ instead of with CommandRunner.
+    // await Process.run(
+    //   dart,
+    //   <String>[
+    //     'bin/flutter_tools.dart',
+    //     'create',
+    //     '--no-pub',
+    //     '--template=plugin_ffi',
+    //     projectDir.path,
+    //   ],
+    // );
     expect(projectDir.childFile('ffigen.yaml'), exists);
     final File generatedBindings = projectDir
         .childDirectory('lib')
