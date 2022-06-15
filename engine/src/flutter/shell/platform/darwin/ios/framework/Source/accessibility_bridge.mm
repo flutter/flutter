@@ -211,9 +211,15 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     }
 
     if (layoutChanged) {
+      SemanticsObject* next = FindNextFocusableIfNecessary();
+      SemanticsObject* lastFocused =
+          [objects_.get() objectForKey:@(last_focused_semantics_object_id_)];
+      // Only specify the focus item if the new focus is different, avoiding double focuses on the
+      // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a route
+      // change, we always refocus.
       ios_delegate_->PostAccessibilityNotification(
           UIAccessibilityLayoutChangedNotification,
-          FindNextFocusableIfNecessary().nativeAccessibility);
+          (routeChanged || next != lastFocused) ? next.nativeAccessibility : NULL);
     } else if (scrollOccured) {
       // TODO(chunhtai): figure out what string to use for notification. At this
       // point, it is guarantee the previous focused object is still in the tree
@@ -327,11 +333,9 @@ SemanticsObject* AccessibilityBridge::FindNextFocusableIfNecessary() {
 
 SemanticsObject* AccessibilityBridge::FindFirstFocusable(SemanticsObject* parent) {
   SemanticsObject* currentObject = parent ?: objects_.get()[@(kRootNodeId)];
-  ;
   if (!currentObject) {
     return nil;
   }
-
   if (currentObject.isAccessibilityElement) {
     return currentObject;
   }

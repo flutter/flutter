@@ -743,10 +743,83 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/new_actions);
 
   XCTAssertEqual([accessibility_notifications count], 1ul);
-  SemanticsObject* focusObject = accessibility_notifications[0][@"argument"];
-  // Make sure refocus event is sent with the nativeAccessibility of root node
-  // which is a FlutterSemanticsScrollView.
-  XCTAssertTrue([focusObject isKindOfClass:[FlutterSemanticsScrollView class]]);
+  id focusObject = accessibility_notifications[0][@"argument"];
+
+  // Make sure the focused item is not specificed when it stays the same.
+  // See: https://github.com/flutter/flutter/issues/104176
+  XCTAssertEqualObjects(focusObject, [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityLayoutChangedNotification);
+}
+
+- (void)testLayoutChangeDoesCallNativeAccessibilityWhenFocusChanged {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[[NSMutableArray alloc] init] autorelease];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+  flutter::SemanticsNodeUpdates nodes;
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+  node1.label = "node1";
+  nodes[node1.id] = node1;
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = "root";
+  root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  root_node.childrenInTraversalOrder = {1};
+  root_node.childrenInHitTestOrder = {1};
+  nodes[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
+
+  // Simulates the focusing on the node 1.
+  bridge->AccessibilityObjectDidBecomeFocused(1);
+
+  // Remove node 1 to trigger a layout change notification, and focus should be one root
+  flutter::CustomAccessibilityActionUpdates new_actions;
+  flutter::SemanticsNodeUpdates new_nodes;
+
+  flutter::SemanticsNode new_root_node;
+  new_root_node.id = kRootNodeId;
+  new_root_node.label = "root";
+  new_root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  new_nodes[new_root_node.id] = new_root_node;
+  bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/new_actions);
+
+  XCTAssertEqual([accessibility_notifications count], 1ul);
+  SemanticsObject* focusObject2 = accessibility_notifications[0][@"argument"];
+
+  // Bridge should ask accessibility to focus on root because node 1 is moved from screen.
+  XCTAssertTrue([focusObject2 isKindOfClass:[FlutterSemanticsScrollView class]]);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityLayoutChangedNotification);
 }
@@ -896,7 +969,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
                  UIAccessibilityScreenChangedNotification);
   SemanticsObject* focusObject = accessibility_notifications[2][@"argument"];
-  // It should still focus the root.
   XCTAssertEqual([focusObject uid], 0);
   XCTAssertEqual([accessibility_notifications[2][@"notification"] unsignedIntValue],
                  UIAccessibilityLayoutChangedNotification);
@@ -1211,7 +1283,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                  UIAccessibilityLayoutChangedNotification);
 }
 
-- (void)testAnnouncesLayoutChangeWithLastFocused {
+- (void)testAnnouncesLayoutChangeWithTheSameItemFocused {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -1276,10 +1348,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   new_root_node.childrenInHitTestOrder = {1};
   second_update[root_node.id] = new_root_node;
   bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
-  SemanticsObject* focusObject = accessibility_notifications[0][@"argument"];
-  // Since we have focused on the node 1 right before the layout changed, the bridge should refocus
-  // the node 1.
-  XCTAssertEqual([focusObject uid], 1);
+  id focusObject = accessibility_notifications[0][@"argument"];
+  // Since we have focused on the node 1 right before the layout changed, the bridge should not ask
+  // to refocus again on the same node.
+  XCTAssertEqualObjects(focusObject, [NSNull null]);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityLayoutChangedNotification);
 }
