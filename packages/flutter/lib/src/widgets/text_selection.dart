@@ -1710,7 +1710,7 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onSecondaryTapDown], which triggers this
   ///    callback.
-  ///  * [onSecondaryTap], which is typically called after this.
+  ///  * [onSecondaryTapUp], which is typically called after this.
   @protected
   void onSecondaryTapDown(TapDownDetails details) {
     renderEditable.handleSecondaryTapDown(details);
