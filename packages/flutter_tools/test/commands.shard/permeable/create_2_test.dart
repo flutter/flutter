@@ -35,12 +35,10 @@ void main() {
   testUsingContext('create an FFI plugin, then run ffigen', () async {
     Cache.flutterRoot = '../..';
 
-    final String flutter =
-        const LocalPlatform().isWindows ? 'flutter.exe' : 'flutter';
     // GitHub actions do not have access to the full Flutter checkout with
     // the cache folder, run from source via bin/ instead.
     await Process.run(
-      flutter,
+      'flutter',
       <String>[
         'pub',
         'run',
@@ -63,7 +61,7 @@ void main() {
     await generatedBindings.delete();
 
     final ProcessResult pubGetResult = await Process.run(
-      flutter,
+      'flutter',
       <String>[
         'pub',
         'get',
@@ -76,7 +74,7 @@ void main() {
     expect(pubGetResult.exitCode, 0);
 
     final ProcessResult ffigenResult = await Process.run(
-      flutter,
+      'flutter',
       <String>[
         'pub',
         'run',
