@@ -75,9 +75,13 @@ that increase our test coverage, writing tests for issues others have filed, all
 are really valuable contributions to open source projects.
 
 If this interests you, you can jump in and submit bugs without needing anyone's permission!
-The #hackers-tests channel on our [Discord server](https://github.com/flutter/flutter/wiki/Chat)
-is a good place to talk about what you're doing. If you want to contribute test cases, you
-can also submit PRs, see the next section for how to set up your development environment.
+The #qa channel on our [Discord server](https://github.com/flutter/flutter/wiki/Chat)
+is a good place to talk about what you're doing. We're especially eager for QA testing when
+we announce a beta release, see https://github.com/flutter/flutter/wiki/Quality-Assurance for
+more details.
+
+If you want to contribute test cases, you can also submit PRs, see the next section
+for how to set up your development environment, or ask in #hackers-test on Discord.
 
 > As a personal side note, this is exactly the kind of work that first got me into open
 > source. I was a Quality Assurance volunteer on the Mozilla project, writing test cases for
