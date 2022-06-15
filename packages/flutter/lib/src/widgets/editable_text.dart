@@ -3065,6 +3065,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
     clipboardStatus?.update();
+    print('justin showToolbar');
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3083,6 +3084,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Toggles the visibility of the toolbar.
   void toggleToolbar() {
     assert(_selectionOverlay != null);
+    print('justin toogleToolbar, is it ivisble? ${_selectionOverlay!.toolbarIsVisible}');
     if (_selectionOverlay!.toolbarIsVisible) {
       hideToolbar();
     } else {

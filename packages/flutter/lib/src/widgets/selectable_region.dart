@@ -870,6 +870,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionDelegate.dispose();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
+    ContextMenuController.hide();
     super.dispose();
   }
 

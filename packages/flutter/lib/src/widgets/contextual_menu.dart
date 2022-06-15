@@ -304,7 +304,6 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
 
   /// Returns true if the given [EditableTextState] supports paste.
   static bool canPaste(EditableTextState editableTextState, ClipboardStatus clipboardStatus) {
-    print('justin canpaste? $clipboardStatus');
     return !editableTextState.widget.readOnly
         && clipboardStatus == ClipboardStatus.pasteable;
   }
@@ -588,6 +587,12 @@ class _ContextMenuState extends State<ContextMenu> {
 
   void _hide() {
     ContextMenuController.hide();
+  }
+
+  @override
+  void dispose() {
+    _hide();
+    super.dispose();
   }
 
   @override
