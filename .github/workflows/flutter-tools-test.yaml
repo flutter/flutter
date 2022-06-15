@@ -1,0 +1,24 @@
+name: Flutter Tools Test
+
+on:
+  # Run on PRs and pushes to the default branch.
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'master' # This will be the last released version not the PR version
+      - name: Install libclang-10-dev
+        run: sudo apt-get install libclang-10-dev
+      - name: Build test dylib and bindings
+        run: flutter pub run test test/commands.shard/permeable/create_test.dart -n ffigen
