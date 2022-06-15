@@ -862,7 +862,6 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)applicationBecameActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationBecameActive");
-  self.view.accessibilityElementsHidden = NO;
   if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
   }
@@ -871,9 +870,6 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationWillResignActive");
-  if ([FlutterViewController isUIAccessibilityIsVoiceOverRunning]) {
-    self.view.accessibilityElementsHidden = YES;
-  }
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
