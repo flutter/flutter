@@ -26,15 +26,6 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// The time after a menu item is opened via hover during which clicks on a child
-// menu item with a submenu will be ignored by the menu item. This is so that
-// users aren't surprised by hovering over a main menu to open it, and then
-// quickly moving to a submenu and clicking on it to open it. Without this
-// delay, it often just feels like the menu opened briefly and closed when
-// clicked on, when in reality they opened it via the hover before they ever
-// clicked on it.
-const Duration _kMenuHoverClickBanDelay = Duration(milliseconds: 500);
-
 // The default size of the arrow that indicates that a menu has a submenu.
 const double _kDefaultSubmenuIconSize = 24.0;
 
@@ -1657,8 +1648,6 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
 class _MenuBarMenuState extends State<MenuBarMenu> {
   _MenuNode? _menu;
   late _MenuBarState _menuBar;
-  Timer? _clickBanTimer;
-  bool _clickBan = false;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
 
@@ -1735,12 +1724,6 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
   // Shows the submenu if there is one, and it wasn't visible. Hides the menu if
   // it was already visible.
   void _maybeToggleShowMenu() {
-    if (_clickBan) {
-      // If we just opened the menu because the user is hovering, then ignore
-      // clicks for a bit.
-      return;
-    }
-
     if (_isAnOpenMenu) {
       _menuBar.close(_menu!);
     } else {
@@ -1750,11 +1733,6 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
 
   // Called when the pointer is hovering over the menu button.
   void _handleMenuHover(bool hovering) {
-    // Cancel any click ban in place if hover changes.
-    _clickBanTimer?.cancel();
-    _clickBanTimer = null;
-    _clickBan = false;
-
     // Don't open the top level menu bar buttons on hover unless something else
     // is already open. This means that the user has to first open the menu bar
     // before hovering allows them to traverse it.
@@ -1764,16 +1742,6 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
 
     if (hovering && !_isAnOpenMenu) {
       _menuBar.openMenu = _menu;
-      // If we just opened the menu because the user is hovering, then just
-      // ignore any clicks for a bit. Otherwise, the user hovers to the
-      // submenu, and sometimes clicks to open it just after the hover timer
-      // has run out, causing the menu to open briefly, then immediately
-      // close, which is surprising to the user.
-      _clickBan = true;
-      _clickBanTimer = Timer(_kMenuHoverClickBanDelay, () {
-        _clickBan = false;
-        _clickBanTimer = null;
-      });
     }
   }
 }
