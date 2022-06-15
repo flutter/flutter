@@ -423,7 +423,7 @@ class SkiaGoldClient {
     final File currentScript = File.fromUri(Platform.script);
     final ProcessResult revParse = await process.run(
       <String>['git', 'rev-parse', 'HEAD'],
-      workingDirectory: currentScript.path,
+      workingDirectory: currentScript.parent.absolute.path,
     );
     if (revParse.exitCode != 0) {
       throw Exception('Current commit of the engine can not be found from path ${currentScript.path}.');
