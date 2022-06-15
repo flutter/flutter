@@ -24,6 +24,12 @@ import 'tooltip.dart';
 /// Signature for [DataColumn.onSort] callback.
 typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
 
+
+/// A builder to customize [DataCell] child.
+///
+/// Used by [DataCell.builder].
+typedef DataCellBuilder = Widget Function(BuildContext context, Widget child);
+
 /// Column configuration for a [DataTable].
 ///
 /// One column configuration must be provided for each column to
@@ -225,6 +231,7 @@ class DataCell {
     this.onTapDown,
     this.onDoubleTap,
     this.onTapCancel,
+    this.builder,
   }) : assert(child != null);
 
   /// A cell that has no content and has zero width and height.
@@ -296,6 +303,20 @@ class DataCell {
   /// tapping the cell will attempt to select the
   /// row (if [DataRow.onSelectChanged] is provided).
   final GestureTapCancelCallback? onTapCancel;
+
+  /// A builder to customize the widget provided to [DataCell]'s [child].
+  ///
+  /// When the builder is implemented, the customized widget will be displayed.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a [DataTable] with a customized [DataRow] for calorie numbers.
+  ///
+  /// ** See code in examples/api/lib/material/data_table/data_table.builder.0.dart **
+  /// {@end-tool}
+  ///
+  /// If this callback is null, the widget provided to [DataCell]'s [child] will be
+  /// displayed.
+  final DataCellBuilder? builder;
 
   bool get _debugInteractive => onTap != null ||
       onDoubleTap != null ||
@@ -807,15 +828,22 @@ class DataTable extends StatelessWidget {
     required GestureTapCancelCallback? onTapCancel,
     required MaterialStateProperty<Color?>? overlayColor,
     required GestureLongPressCallback? onRowLongPress,
+    required DataCellBuilder? builder,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
     if (showEditIcon) {
       const Widget icon = Icon(Icons.edit, size: 18.0);
-      label = Expanded(child: label);
+      label = Expanded(child: builder != null ? builder(context, label) : label);
       label = Row(
         textDirection: numeric ? TextDirection.rtl : null,
-        children: <Widget>[ label, icon ],
+        children: <Widget>[
+          if (builder != null)
+            builder(context, label)
+          else
+           label,
+          icon,
+        ],
       );
     }
 
@@ -835,7 +863,9 @@ class DataTable extends StatelessWidget {
         style: effectiveDataTextStyle.copyWith(
           color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
         ),
-        child: DropdownButtonHideUnderline(child: label),
+        child: DropdownButtonHideUnderline(
+          child: builder != null ? builder(context, label) : label,
+        ),
       ),
     );
     if (onTap != null ||
@@ -1031,6 +1061,7 @@ class DataTable extends StatelessWidget {
           onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
+          builder: cell.builder,
         );
         rowIndex += 1;
       }

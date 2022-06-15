@@ -1895,4 +1895,73 @@ void main() {
     // Go without crashes.
 
   });
+
+  testWidgets('DataCell builder', (WidgetTester tester) async {
+    const String greenText = '159';
+    const String redText = '305';
+
+    BoxDecoration getBoxDecoration(String text) {
+      return tester.widget<DecoratedBox>(
+        find.widgetWithText(DecoratedBox, text),
+      ).decoration as BoxDecoration;
+    }
+
+    Widget buildTable() {
+      return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Name'),
+          ),
+          DataColumn(
+            label: Text('Calories'),
+            numeric: true,
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                builder: (BuildContext context, Widget child) {
+                  if (dessert.calories > 300) {
+                    return Container(
+                      padding: const EdgeInsets.all(4.0),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: child,
+                    );
+                  } else {
+                    return Container(
+                      padding: const EdgeInsets.all(4.0),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: child,
+                    );
+                  }
+                },
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    expect(find.text(greenText), findsOneWidget);
+    expect(find.text(redText), findsOneWidget);
+
+    expect(getBoxDecoration(greenText).color, Colors.green);
+    expect(getBoxDecoration(redText).color, Colors.red);
+  });
 }
