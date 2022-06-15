@@ -1342,7 +1342,7 @@ class VoidCallbackAction extends Action<VoidCallbackIntent> {
 ///    handlers in the focus chain.
 class DoNothingIntent extends Intent {
   /// Creates a const [DoNothingIntent].
-  factory DoNothingIntent() => const DoNothingIntent._();
+  const factory DoNothingIntent() = DoNothingIntent._;
 
   // Make DoNothingIntent constructor private so it can't be subclassed.
   const DoNothingIntent._();
@@ -1367,7 +1367,7 @@ class DoNothingIntent extends Intent {
 ///  * [DoNothingIntent], a similar intent that will handle the key event.
 class DoNothingAndStopPropagationIntent extends Intent {
   /// Creates a const [DoNothingAndStopPropagationIntent].
-  factory DoNothingAndStopPropagationIntent() => const DoNothingAndStopPropagationIntent._();
+  const factory DoNothingAndStopPropagationIntent() = DoNothingAndStopPropagationIntent._;
 
   // Make DoNothingAndStopPropagationIntent constructor private so it can't be subclassed.
   const DoNothingAndStopPropagationIntent._();
