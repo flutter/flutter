@@ -181,7 +181,7 @@ NSData* currentKeyboardLayoutData() {
  * dispatched to various Flutter key responders, and whether the event is
  * propagated to the next NSResponder.
  */
-@property(nonatomic) FlutterKeyboardManager* keyboardManager;
+@property(nonatomic, readonly, nonnull) FlutterKeyboardManager* keyboardManager;
 
 @property(nonatomic) KeyboardLayoutNotifier keyboardLayoutNotifier;
 
@@ -341,6 +341,10 @@ static void CommonInit(FlutterViewController* controller) {
   return self;
 }
 
+- (BOOL)isDispatchingKeyEvent:(NSEvent*)event {
+  return [_keyboardManager isDispatchingKeyEvent:event];
+}
+
 - (void)loadView {
   FlutterView* flutterView;
   if ([FlutterRenderingBackend renderUsingMetal]) {
@@ -431,10 +435,11 @@ static void CommonInit(FlutterViewController* controller) {
       addLocalMonitorForEventsMatchingMask:NSEventMaskKeyUp
                                    handler:^NSEvent*(NSEvent* event) {
                                      // Intercept keyUp only for events triggered on the current
-                                     // view.
+                                     // view or textInputPlugin.
+                                     NSResponder* firstResponder = [[event window] firstResponder];
                                      if (weakSelf.viewLoaded && weakSelf.flutterView &&
-                                         ([[event window] firstResponder] ==
-                                          weakSelf.flutterView) &&
+                                         (firstResponder == weakSelf.flutterView ||
+                                          firstResponder == weakSelf.textInputPlugin) &&
                                          ([event modifierFlags] & NSEventModifierFlagCommand) &&
                                          ([event type] == NSEventTypeKeyUp)) {
                                        [weakSelf keyUp:event];
@@ -481,7 +486,6 @@ static void CommonInit(FlutterViewController* controller) {
   // TODO(goderbauer): Seperate keyboard/textinput stuff into ViewController specific and Engine
   // global parts. Move the global parts to FlutterEngine.
   __weak FlutterViewController* weakSelf = self;
-  _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:weakSelf];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithViewDelegate:weakSelf];
 }
 
@@ -635,16 +639,11 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)onAccessibilityStatusChanged:(BOOL)enabled {
   if (!enabled && self.viewLoaded && [_textInputPlugin isFirstResponder]) {
-    // The client (i.e. the FlutterTextField) of the textInputPlugin is a sibling
-    // of the FlutterView. macOS will pick the ancestor to be the next responder
-    // when the client is removed from the view hierarchy, which is the result of
-    // turning off semantics. This will cause the keyboard focus to stick at the
-    // NSWindow.
-    //
-    // Since the view controller creates the illustion that the FlutterTextField is
-    // below the FlutterView in accessibility (See FlutterViewWrapper), it has to
-    // manually pick the next responder.
-    [self.view.window makeFirstResponder:_flutterView];
+    // Normally TextInputPlugin, when editing, is child of FlutterViewWrapper.
+    // When accessiblity is enabled the TextInputPlugin gets added as an indirect
+    // child to FlutterTextField. When disabling the plugin needs to be reparented
+    // back.
+    [self.view addSubview:_textInputPlugin];
   }
 }
 
@@ -738,27 +737,6 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)keyUp:(NSEvent*)event {
   [_keyboardManager handleEvent:event];
-}
-
-- (BOOL)performKeyEquivalent:(NSEvent*)event {
-  [_keyboardManager handleEvent:event];
-  if (event.type == NSEventTypeKeyDown) {
-    // macOS only sends keydown for performKeyEquivalent, but the Flutter framework
-    // always expects a keyup for every keydown. Synthesizes a key up event so that
-    // the Flutter framework continues to work.
-    NSEvent* synthesizedUp = [NSEvent keyEventWithType:NSEventTypeKeyUp
-                                              location:event.locationInWindow
-                                         modifierFlags:event.modifierFlags
-                                             timestamp:event.timestamp
-                                          windowNumber:event.windowNumber
-                                               context:event.context
-                                            characters:event.characters
-                           charactersIgnoringModifiers:event.charactersIgnoringModifiers
-                                             isARepeat:event.isARepeat
-                                               keyCode:event.keyCode];
-    [_keyboardManager handleEvent:synthesizedUp];
-  }
-  return YES;
 }
 
 - (void)flagsChanged:(NSEvent*)event {
