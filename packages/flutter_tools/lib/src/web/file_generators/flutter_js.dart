@@ -166,7 +166,7 @@ _flutter.loader = null;
         });
       }
 
-      return Promise.any([loader, timeout]);
+      return Promise.race([loader, timeout]);
     }
   }
 
