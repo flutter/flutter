@@ -871,7 +871,7 @@ void main() {
                 },
                 child: Shortcuts(
                   shortcuts: <LogicalKeySet, Intent>{
-                    LogicalKeySet(LogicalKeyboardKey.keyA): DoNothingAndStopPropagationIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.keyA): const DoNothingAndStopPropagationIntent(),
                   },
                   child: TextField(key: textFieldKey, autofocus: true),
                 ),
@@ -1710,8 +1710,8 @@ void main() {
 
     testWidgets('using a disposed token asserts', (WidgetTester tester) async {
       final ShortcutRegistry registry = ShortcutRegistry();
-      final ShortcutRegistryEntry token = registry.addAll(<ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
+      final ShortcutRegistryEntry token = registry.addAll(const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
       });
       token.dispose();
       expect(() {token.replaceAll(<ShortcutActivator, Intent>{}); }, throwsFlutterError);
@@ -1719,8 +1719,8 @@ void main() {
 
     testWidgets('setting duplicate bindings asserts', (WidgetTester tester) async {
       final ShortcutRegistry registry = ShortcutRegistry();
-      final ShortcutRegistryEntry token = registry.addAll(<ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
+      final ShortcutRegistryEntry token = registry.addAll(const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
       });
       expect(() {
         final ShortcutRegistryEntry token2 = registry.addAll(const <ShortcutActivator, Intent>{
