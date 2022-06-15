@@ -31,6 +31,11 @@
                                nibName:(nullable NSString*)nibName
                                 bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
+/**
+ * Returns YES if provided event is being currently redispatched by keyboard manager.
+ */
+- (BOOL)isDispatchingKeyEvent:(nonnull NSEvent*)event;
+
 @end
 
 // Private methods made visible for testing

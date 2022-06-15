@@ -128,7 +128,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
         // first responder.
         FlutterTextField* native_text_field = (FlutterTextField*)focused;
         if (native_text_field == mac_platform_node_delegate->GetFocus()) {
-          [native_text_field becomeFirstResponder];
+          [native_text_field startEditing];
         }
         break;
       }
@@ -172,7 +172,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
             (FlutterTextField*)mac_platform_node_delegate->GetNativeViewAccessible();
         id focused = mac_platform_node_delegate->GetFocus();
         if (!focused || native_text_field == focused) {
-          [native_text_field becomeFirstResponder];
+          [native_text_field startEditing];
         }
         break;
       }
