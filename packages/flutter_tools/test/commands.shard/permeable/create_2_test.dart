@@ -56,6 +56,12 @@ void main() {
         .childFile('${projectDir.basename}_bindings_generated.dart');
     expect(generatedBindings, exists);
 
+    printOnFailure('projectDir.path:');
+    printOnFailure(projectDir.path);
+
+    printOnFailure('pubspec.yaml contents:');
+    printOnFailure(await projectDir.childFile('pubspec.yaml').readAsString());
+
     final String generatedBindingsFromTemplate =
         (await generatedBindings.readAsString()).replaceAll('\r', '');
 
@@ -69,7 +75,7 @@ void main() {
       ],
       workingDirectory: projectDir.path,
     );
-    printOnFailure('Results of running ffigen:');
+    printOnFailure('Results of running pub get:');
     printOnFailure(pubGetResult.stdout.toString());
     printOnFailure(pubGetResult.stderr.toString());
     expect(pubGetResult.exitCode, 0);
