@@ -660,6 +660,11 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   void _onFocusChange(bool isFocused) {
+    assert(_controller != null, 'warning: attempt to focus a UIKitView when it is not ready. ');
+    if (_controller == null) {
+      return;
+    }
+
     if (!isFocused) {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically
@@ -668,8 +673,6 @@ class _UiKitViewState extends State<UiKitView> {
     }
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
-      // _controller must not be nil because _controller and _focusNode are
-      // set at the same time, and this function is triggered by _focusNode.
       <String, dynamic>{'platformViewId': _controller!.id},
     );
   }
