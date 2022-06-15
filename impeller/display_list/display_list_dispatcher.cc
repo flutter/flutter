@@ -324,9 +324,12 @@ void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
   }
 }
 
-// |flutter::Dispatcher|
-void DisplayListDispatcher::setImageFilter(
+static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
     const flutter::DlImageFilter* filter) {
+  if (filter == nullptr) {
+    return std::nullopt;
+  }
+
   switch (filter->type()) {
     case flutter::DlImageFilterType::kBlur: {
       auto blur = filter->asBlur();
@@ -338,7 +341,7 @@ void DisplayListDispatcher::setImageFilter(
         UNIMPLEMENTED;
       }
 
-      paint_.image_filter = [sigma_x, sigma_y](FilterInput::Ref input) {
+      return [sigma_x, sigma_y](FilterInput::Ref input) {
         return FilterContents::MakeGaussianBlur(input, sigma_x, sigma_y);
       };
 
@@ -350,9 +353,14 @@ void DisplayListDispatcher::setImageFilter(
     case flutter::DlImageFilterType::kComposeFilter:
     case flutter::DlImageFilterType::kColorFilter:
     case flutter::DlImageFilterType::kUnknown:
-      UNIMPLEMENTED;
-      break;
+      return std::nullopt;
   }
+}
+
+// |flutter::Dispatcher|
+void DisplayListDispatcher::setImageFilter(
+    const flutter::DlImageFilter* filter) {
+  paint_.image_filter = ToImageFilterProc(filter);
 }
 
 // |flutter::Dispatcher|
@@ -371,11 +379,8 @@ static std::optional<Rect> ToRect(const SkRect* rect) {
 void DisplayListDispatcher::saveLayer(const SkRect* bounds,
                                       const flutter::SaveLayerOptions options,
                                       const flutter::DlImageFilter* backdrop) {
-  if (backdrop) {
-    UNIMPLEMENTED;
-  }
-  canvas_.SaveLayer(options.renders_with_attributes() ? paint_ : Paint{},
-                    ToRect(bounds));
+  auto paint = options.renders_with_attributes() ? paint_ : Paint{};
+  canvas_.SaveLayer(paint, ToRect(bounds), ToImageFilterProc(backdrop));
 }
 
 // |flutter::Dispatcher|
