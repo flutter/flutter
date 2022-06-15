@@ -1,4 +1,4 @@
-Signature: 43b1c6ac38bc5ed424f7a2cfb75520ae
+Signature: 02ea5504a0f93171f1a1ea14720ae802
 
 UNUSED LICENSES:
 
@@ -5912,7 +5912,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack_graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.h
-FILE: ../../../third_party/skia/src/gpu/graphite/DrawGeometry.h
+FILE: ../../../third_party/skia/src/gpu/graphite/DrawParams.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GlobalCache.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/GlobalCache.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GpuWorkSubmission.cpp
@@ -5936,6 +5936,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.h
+FILE: ../../../third_party/skia/src/gpu/graphite/geom/Geometry.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.cpp
