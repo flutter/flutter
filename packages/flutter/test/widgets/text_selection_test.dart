@@ -558,7 +558,8 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        expect(renderEditable.selectWordEdgeCalled, isTrue);
+        expect(renderEditable.getPositionForPointIsCalled, isTrue);
+        expect(renderEditable.getWordBoundaryIsCalled, isTrue);
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1386,6 +1387,20 @@ class FakeRenderEditable extends RenderEditable {
       offset: 0,
     ),
   );
+
+  bool getPositionForPointIsCalled = false;
+  @override
+  TextPosition getPositionForPoint(Offset globalPosition) {
+    getPositionForPointIsCalled = true;
+    return super.getPositionForPoint(globalPosition);
+  }
+
+  bool getWordBoundaryIsCalled = false;
+  @override
+  TextRange getWordBoundary(TextPosition position) {
+    getWordBoundaryIsCalled = true;
+    return super.getWordBoundary(position);
+  }
 
   bool selectWordsInRangeCalled = false;
   @override
