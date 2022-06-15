@@ -41,7 +41,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
     case Entity::BlendMode::kSource:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
-      color0.src_alpha_blend_factor = BlendFactor::kSourceAlpha;
+      color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
     case Entity::BlendMode::kDestination:
