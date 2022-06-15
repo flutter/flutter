@@ -160,7 +160,7 @@ _flutter.loader = null;
         });
       }
 
-      return Promise.race([loader, timeout]);
+      return Promise.any([loader, timeout]);
     }
   }
 
