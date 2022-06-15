@@ -62,6 +62,11 @@ void main() {
     printOnFailure('pubspec.yaml contents:');
     printOnFailure(await projectDir.childFile('pubspec.yaml').readAsString());
 
+    final io.File template =
+        io.File('templates/plugin_shared/pubspec.yaml.tmpl');
+    printOnFailure('templates/plugin_shared/pubspec.yaml.tmpl contents:');
+    printOnFailure(await template.readAsString());
+
     final String generatedBindingsFromTemplate =
         (await generatedBindings.readAsString()).replaceAll('\r', '');
 
