@@ -95,9 +95,7 @@ class XcodeProjectInterpreter {
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
   final Usage _usage;
-
-  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
-  static final RegExp _buildRegex = RegExp(r'Build version ([a-zA-Z0-9]+)');
+  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
   void _updateVersion() {
     if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
@@ -113,19 +111,17 @@ class XcodeProjectInterpreter {
         }
         _versionText = result.stdout.trim().replaceAll('\n', ', ');
       }
-      final Match? matchVersion = _versionRegex.firstMatch(versionText!);
-      final Match? matchBuild = _buildRegex.firstMatch(versionText!);
-      if (matchVersion != null) {
-        final String version = matchVersion.group(1)!;
-        final List<String> components = version.split('.');
-        final int majorVersion = int.parse(components[0]);
-        final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
-        final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
-        _version = Version(majorVersion, minorVersion, patchVersion);
+      final Match? match = _versionRegex.firstMatch(versionText!);
+      if (match == null) {
+        return;
       }
-      if (matchBuild != null) {
-        _build = matchBuild.group(1);
-      }
+      final String version = match.group(1)!;
+      final List<String> components = version.split('.');
+      final int majorVersion = int.parse(components[0]);
+      final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
+      final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
+      _version = Version(majorVersion, minorVersion, patchVersion);
+      _build = match.group(2);
     } on ProcessException {
       // Ignored, leave values null.
     }
