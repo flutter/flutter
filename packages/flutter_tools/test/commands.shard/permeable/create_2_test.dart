@@ -36,14 +36,16 @@ void main() {
   testUsingContext('create an FFI plugin, then run ffigen', () async {
     Cache.flutterRoot = '../..';
 
+    // Find the Flutter and Dart executable from the GitHub action.
+    final String dart = io.Platform.resolvedExecutable;
+    printOnFailure('dart: $dart');
+
     // GitHub actions do not have access to the full Flutter checkout with the
     // cache folder, run from source via bin/ instead of with CommandRunner.
     await Process.run(
-      io.Platform.resolvedExecutable,
+      dart,
       <String>[
-        'pub',
-        'run',
-        'flutter_tools',
+        'bin/flutter_tools.dart',
         'create',
         '--no-pub',
         '--template=plugin_ffi',
@@ -56,9 +58,7 @@ void main() {
         .childFile('${projectDir.basename}_bindings_generated.dart');
     expect(generatedBindings, exists);
 
-    printOnFailure('projectDir.path:');
-    printOnFailure(projectDir.path);
-
+    printOnFailure('projectDir.path: ${projectDir.path}');
     printOnFailure('pubspec.yaml contents:');
     printOnFailure(await projectDir.childFile('pubspec.yaml').readAsString());
 
@@ -68,7 +68,7 @@ void main() {
     await generatedBindings.delete();
 
     final ProcessResult pubGetResult = await Process.run(
-      io.Platform.resolvedExecutable,
+      dart,
       <String>[
         'pub',
         'get',
@@ -81,7 +81,7 @@ void main() {
     expect(pubGetResult.exitCode, 0);
 
     final ProcessResult ffigenResult = await Process.run(
-      io.Platform.resolvedExecutable,
+      dart,
       <String>[
         'pub',
         'run',
