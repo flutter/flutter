@@ -87,7 +87,7 @@
                     "include_paths": [
                         "out/android_debug/zip_archives/android-arm/symbols.zip",
                         "out/android_debug/zip_archives/flutter_download_io",
-                        "out/android_debug/zip_archives/android-arm/sky_engine.zip",
+                        "out/android_debug/zip_archives/sky_engine.zip",
                         "out/android_debug/zip_archives/android-javadoc.zip"
                     ]
                 }
@@ -106,7 +106,7 @@
                 "config": "android_debug",
                 "targets": [
                     "flutter",
-                    "flutter/sky/dist:zip",
+                    "flutter/sky/dist:zip_old_location",
                     "flutter/shell/platform/android:embedding_jars",
                     "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:robolectric_tests"

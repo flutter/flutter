@@ -37,6 +37,19 @@ if (is_android) {
     ]
     deps = [ ":sky_engine" ]
   }
+
+  zip_bundle("zip_old_location") {
+    # TODO godofredoc: remove after we migrate the tool to use the new location.
+    # Bug: https://github.com/flutter/flutter/issues/105351
+    output = "sky_engine.zip"
+    files = [
+      {
+        source = "$root_build_dir/dist/packages/sky_engine"
+        destination = "sky_engine"
+      },
+    ]
+    deps = [ ":sky_engine" ]
+  }
 }
 
 group("dist") {
