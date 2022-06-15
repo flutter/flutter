@@ -308,12 +308,6 @@ class DataCell {
   ///
   /// When the builder is implemented, the customized widget will be displayed.
   ///
-  /// {@tool dartpad}
-  /// This sample shows a [DataTable] with a customized [DataRow] for calorie numbers.
-  ///
-  /// ** See code in examples/api/lib/material/data_table/data_table.builder.0.dart **
-  /// {@end-tool}
-  ///
   /// If this callback is null, the widget provided to [DataCell]'s [child] will be
   /// displayed.
   final DataCellBuilder? builder;
