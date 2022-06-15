@@ -36,9 +36,33 @@ SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../../.."; pwd -P)"
 OUT_DIR="$SRC_DIR/out/$BUILD_VARIANT"
 
+# Dump the logcat and symbolize stack traces before exiting.
+function dumpLogcat {
+  ndkstack="windows-x86_64"
+  if [ "$(uname)" == "Darwin" ]; then
+    ndkstack="darwin-x86_64"
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    ndkstack="linux-x86_64"
+  fi
+
+  echo "-> Symbolize stack traces"
+  "$SRC_DIR"/third_party/android_tools/ndk/prebuilt/"$ndkstack"/bin/ndk-stack \
+    -sym "$OUT_DIR" \
+    -dump "$OUT_DIR"/scenario_app/logcat.txt
+  echo "<- Done"
+
+  echo "-> Dump full logcat"
+  cat "$OUT_DIR"/scenario_app/logcat.txt
+  echo "<- Done"
+}
+
+trap dumpLogcat EXIT
+
 cd $SCRIPT_DIR
 
-"$SRC_DIR/third_party/dart/tools/sdks/dart-sdk/bin/dart" run \
-  "$SCRIPT_DIR/bin/android_integration_tests.dart" \
+"$SRC_DIR"/third_party/dart/tools/sdks/dart-sdk/bin/dart pub get
+
+"$SRC_DIR"/third_party/dart/tools/sdks/dart-sdk/bin/dart run \
+  "$SCRIPT_DIR"/bin/android_integration_tests.dart \
   --adb="$SRC_DIR"/third_party/android_tools/sdk/platform-tools/adb \
   --out-dir="$OUT_DIR"
