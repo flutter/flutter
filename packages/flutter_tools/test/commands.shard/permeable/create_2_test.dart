@@ -37,6 +37,8 @@ void main() {
 
     final String flutter =
         const LocalPlatform().isWindows ? 'flutter.exe' : 'flutter';
+    // GitHub actions do not have access to the full Flutter checkout with
+    // the cache folder, run from source via bin/ instead.
     await Process.run(
       flutter,
       <String>[

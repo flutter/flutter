@@ -25,7 +25,7 @@ jobs:
         run: flutter pub get
       - name: Run plugin_ffi ffigen test
         working-directory: ./packages/flutter_tools/
-        run: flutter pub run test test/commands.shard/permeable/create_test_2.dart -n ffigen
+        run: flutter pub run test test/commands.shard/permeable/create_2_test.dart -n ffigen
 
   test-macos:
     runs-on: macos-latest
@@ -39,7 +39,7 @@ jobs:
         run: flutter pub get
       - name: Run plugin_ffi ffigen test
         working-directory: ./packages/flutter_tools/
-        run: flutter pub run test test/commands.shard/permeable/create_test_2.dart -n ffigen
+        run: flutter pub run test test/commands.shard/permeable/create_2_test.dart -n ffigen
 
   test-windows:
     runs-on: windows-latest
@@ -53,4 +53,4 @@ jobs:
         run: flutter pub get
       - name: Run plugin_ffi ffigen test
         working-directory: ./packages/flutter_tools/
-        run: flutter pub run test test/commands.shard/permeable/create_test_2.dart -n ffigen
+        run: flutter pub run test test/commands.shard/permeable/create_2_test.dart -n ffigen
