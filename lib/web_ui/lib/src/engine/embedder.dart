@@ -311,7 +311,7 @@ class FlutterViewEmbedder {
 
     final html.Element _accessibilityPlaceholder = EngineSemanticsOwner
         .instance.semanticsHelper
-        .prepareAccessibilityPlaceholder();
+        .prepareAccessibilityPlaceholder() as html.Element;
 
     glassPaneElementHostNode.nodes.addAll(<html.Node>[
       _accessibilityPlaceholder,
