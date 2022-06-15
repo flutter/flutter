@@ -20,6 +20,13 @@ add_executable(${BINARY_NAME} WIN32
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
 
+# Add preprocessor definitions for the build version.
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_BUILD_NAME=\"${FLUTTER_BUILD_NAME}\"")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_BUILD_MAJOR=${FLUTTER_BUILD_MAJOR}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_BUILD_MINOR=${FLUTTER_BUILD_MINOR}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_BUILD_PATCH=${FLUTTER_BUILD_PATCH}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_BUILD_NUMBER=${FLUTTER_BUILD_NUMBER}")
+
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 

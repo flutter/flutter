@@ -60,21 +60,31 @@ END
 // Version
 //
 
-#ifdef FLUTTER_BUILD_NUMBER
-#define VERSION_AS_NUMBER FLUTTER_BUILD_NUMBER
+// The extra level of indirection is necessary to make the preprocessor expand
+// the macro to the token's value instead of the token itself.
+// See: https://stackoverflow.com/a/5459929
+#define _TOSTRING(x) #x
+#define TOSTRING(x) _TOSTRING(x)
+
+#if defined(FLUTTER_BUILD_MAJOR) && defined(FLUTTER_BUILD_MINOR) && defined(FLUTTER_BUILD_PATCH) && defined(FLUTTER_BUILD_NUMBER)
+#define FILE_VERSION_AS_NUMBER FLUTTER_BUILD_MAJOR,FLUTTER_BUILD_MINOR,FLUTTER_BUILD_PATCH,FLUTTER_BUILD_NUMBER
+#define PRODUCT_VERSION_AS_NUMBER FLUTTER_BUILD_MAJOR,FLUTTER_BUILD_MINOR,FLUTTER_BUILD_PATCH
 #else
-#define VERSION_AS_NUMBER 1,0,0
+#define FILE_VERSION_AS_NUMBER 1,0,0,1
+#define PRODUCT_VERSION_AS_NUMBER 1,0,0
 #endif
 
-#ifdef FLUTTER_BUILD_NAME
-#define VERSION_AS_STRING #FLUTTER_BUILD_NAME
+#if defined(FLUTTER_BUILD_NAME) && defined(FLUTTER_BUILD_NUMBER)
+#define FILE_VERSION_AS_STRING FLUTTER_BUILD_NAME "." TOSTRING(FLUTTER_BUILD_NUMBER)
+#define PRODUCT_VERSION_AS_STRING FLUTTER_BUILD_NAME
 #else
-#define VERSION_AS_STRING "1.0.0"
+#define FILE_VERSION_AS_STRING "1.0.0.1"
+#define PRODUCT_VERSION_AS_STRING "1.0.0"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION VERSION_AS_NUMBER
- PRODUCTVERSION VERSION_AS_NUMBER
+ FILEVERSION FILE_VERSION_AS_NUMBER
+ PRODUCTVERSION PRODUCT_VERSION_AS_NUMBER
  FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -91,12 +101,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
             VALUE "FileDescription", "A new Flutter project." "\0"
-            VALUE "FileVersion", VERSION_AS_STRING "\0"
+            VALUE "FileVersion", FILE_VERSION_AS_STRING "\0"
             VALUE "InternalName", "flutter_gallery" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2021 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "flutter_gallery.exe" "\0"
             VALUE "ProductName", "flutter_gallery" "\0"
-            VALUE "ProductVersion", VERSION_AS_STRING "\0"
+            VALUE "ProductVersion", PRODUCT_VERSION_AS_STRING "\0"
         END
     END
     BLOCK "VarFileInfo"

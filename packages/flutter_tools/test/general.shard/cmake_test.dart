@@ -5,6 +5,8 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cmake.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -17,10 +19,12 @@ const String _kTestWindowsFlutterRoot = r'C:\flutter';
 void main() {
   late FileSystem fileSystem;
   late ProcessManager processManager;
+  late BufferLogger logger;
 
   setUp(() {
     processManager = FakeProcessManager.any();
     fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
   });
 
   testUsingContext('parses executable name from cmake file', () async {
@@ -54,11 +58,13 @@ void main() {
   testUsingContext('generates config', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
     final Map<String, String> environment = <String, String>{};
 
     writeGeneratedCmakeConfig(
       _kTestFlutterRoot,
       cmakeProject,
+      buildInfo,
       environment,
     );
 
@@ -72,6 +78,12 @@ void main() {
       r'# Generated code do not commit.',
       r'file(TO_CMAKE_PATH "/flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "/" PROJECT_DIR)',
+
+      r'set(FLUTTER_BUILD_NAME "1.0.0" PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_MINOR 0 PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_PATCH 0 PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_NUMBER 1 PARENT_SCOPE)',
 
       r'# Environment variables to pass to tool_backend.sh',
       r'list(APPEND FLUTTER_TOOL_ENVIRONMENT',
@@ -89,6 +101,7 @@ void main() {
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
 
     final Map<String, String> environment = <String, String>{
       'TEST': r'hello\world',
@@ -97,6 +110,7 @@ void main() {
     writeGeneratedCmakeConfig(
       _kTestWindowsFlutterRoot,
       cmakeProject,
+      buildInfo,
       environment,
     );
 
@@ -111,6 +125,12 @@ void main() {
       r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
 
+      r'set(FLUTTER_BUILD_NAME "1.0.0" PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_MINOR 0 PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_PATCH 0 PARENT_SCOPE)',
+      r'set(FLUTTER_BUILD_NUMBER 1 PARENT_SCOPE)',
+
       r'# Environment variables to pass to tool_backend.sh',
       r'list(APPEND FLUTTER_TOOL_ENVIRONMENT',
       r'  "FLUTTER_ROOT=C:\\flutter"',
@@ -121,6 +141,157 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+  });
+
+  testUsingContext('generated config uses pubspec version', () async {
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('version: 1.2.3+4');
+
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+    final Map<String, String> environment = <String, String>{};
+
+    writeGeneratedCmakeConfig(
+      _kTestFlutterRoot,
+      cmakeProject,
+      buildInfo,
+      environment,
+    );
+
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+
+    expect(cmakeConfig, exists);
+
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
+
+    expect(configLines, containsAll(<String>[
+      'set(FLUTTER_BUILD_NAME "1.2.3" PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MINOR 2 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_PATCH 3 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_NUMBER 4 PARENT_SCOPE)',
+    ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('generated config uses build name and build number', () async {
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '1.2.3',
+      buildNumber: '4',
+      treeShakeIcons: false,
+    );
+    final Map<String, String> environment = <String, String>{};
+
+    writeGeneratedCmakeConfig(
+      _kTestFlutterRoot,
+      cmakeProject,
+      buildInfo,
+      environment,
+    );
+
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+
+    expect(cmakeConfig, exists);
+
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
+
+    expect(configLines, containsAll(<String>[
+      'set(FLUTTER_BUILD_NAME "1.2.3" PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MINOR 2 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_PATCH 3 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_NUMBER 4 PARENT_SCOPE)',
+    ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('generated config uses build name and build number over pubspec version', () async {
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('version: 9.9.9+9');
+
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '1.2.3',
+      buildNumber: '4',
+      treeShakeIcons: false,
+    );
+    final Map<String, String> environment = <String, String>{};
+
+    writeGeneratedCmakeConfig(
+      _kTestFlutterRoot,
+      cmakeProject,
+      buildInfo,
+      environment,
+    );
+
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+
+    expect(cmakeConfig, exists);
+
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
+
+    expect(configLines, containsAll(<String>[
+      'set(FLUTTER_BUILD_NAME "1.2.3" PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MINOR 2 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_PATCH 3 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_NUMBER 4 PARENT_SCOPE)',
+    ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('generated config ignores invalid build name', () async {
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: 'hello.world',
+      treeShakeIcons: false,
+    );
+    final Map<String, String> environment = <String, String>{};
+
+    writeGeneratedCmakeConfig(
+      _kTestFlutterRoot,
+      cmakeProject,
+      buildInfo,
+      environment,
+    );
+
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+
+    expect(cmakeConfig, exists);
+
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
+
+    expect(configLines, containsAll(<String>[
+      'set(FLUTTER_BUILD_NAME "1.0.0" PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_MINOR 0 PARENT_SCOPE)',
+      'set(FLUTTER_BUILD_PATCH 0 PARENT_SCOPE)',
+    ]));
+
+    expect(logger.warningText, contains('Warning: could not parse build name hello.world, defaulting to 1.0.0.'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Logger: () => logger,
   });
 }
 
