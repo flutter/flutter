@@ -89,4 +89,10 @@ class FlutterTextPlatformNode : public ui::AXPlatformNodeBase {
  */
 - (void)updateString:(NSString*)string withSelection:(NSRange)selection;
 
+/**
+ * Makes the field editor (plugin) current editor for this TextField, meaning
+ * that the text field will start getting editing events.
+ */
+- (void)startEditing;
+
 @end

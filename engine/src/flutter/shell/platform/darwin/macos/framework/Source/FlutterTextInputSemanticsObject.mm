@@ -103,50 +103,42 @@
   _node->GetDelegate()->AccessibilityPerformAction(data);
 }
 
-#pragma mark - NSResponder
-
-- (BOOL)becomeFirstResponder {
+- (void)startEditing {
   if (!_plugin) {
-    return NO;
+    return;
   }
-  if (_plugin.client == self && [_plugin isFirstResponder]) {
-    // This text field is already the first responder.
-    return YES;
+  if (self.currentEditor == _plugin) {
+    return;
   }
-  BOOL result = [super becomeFirstResponder];
-  if (result) {
-    _plugin.client = self;
-    // The default implementation of the becomeFirstResponder will change the
-    // text editing state. Need to manually set it back.
-    NSString* textValue = @(_node->GetStringAttribute(ax::mojom::StringAttribute::kValue).data());
-    int start = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelStart);
-    int end = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelEnd);
-    NSAssert((start >= 0 && end >= 0) || (start == -1 && end == -1), @"selection is invalid");
-    NSRange selection;
-    if (start >= 0 && end >= 0) {
-      selection = NSMakeRange(MIN(start, end), ABS(end - start));
-    } else {
-      // The native behavior is to place the cursor at the end of the string if
-      // there is no selection.
-      selection = NSMakeRange([self stringValue].length, 0);
-    }
-    [self updateString:textValue withSelection:selection];
-  }
-  return result;
-}
+  // Selecting text seems to be the only way to make the field editor
+  // current editor.
+  [self selectText:self];
+  NSAssert(self.currentEditor == _plugin, @"Failed to set current editor");
 
-- (BOOL)resignFirstResponder {
-  BOOL result = [super resignFirstResponder];
-  if (result && _plugin.client == self) {
-    _plugin.client = nil;
+  _plugin.client = self;
+
+  // Restore previous selection.
+  NSString* textValue = @(_node->GetStringAttribute(ax::mojom::StringAttribute::kValue).data());
+  int start = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelStart);
+  int end = _node->GetIntAttribute(ax::mojom::IntAttribute::kTextSelEnd);
+  NSAssert((start >= 0 && end >= 0) || (start == -1 && end == -1), @"selection is invalid");
+  NSRange selection;
+  if (start >= 0 && end >= 0) {
+    selection = NSMakeRange(MIN(start, end), ABS(end - start));
+  } else {
+    // The native behavior is to place the cursor at the end of the string if
+    // there is no selection.
+    selection = NSMakeRange([self stringValue].length, 0);
   }
-  return result;
+  [self updateString:textValue withSelection:selection];
 }
 
 #pragma mark - NSObject
 
 - (void)dealloc {
-  [self resignFirstResponder];
+  if (_plugin.client == self) {
+    _plugin.client = nil;
+  }
 }
 
 @end

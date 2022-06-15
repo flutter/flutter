@@ -293,9 +293,8 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   EXPECT_EQ(NSEqualRects(native_text_field.frame, NSMakeRect(0, 600 - expectedFrameSize,
                                                              expectedFrameSize, expectedFrameSize)),
             YES);
-  // The text of TextInputPlugin only starts syncing editing state to the
-  // native text field when it becomes the first responder.
-  [native_text_field becomeFirstResponder];
+
+  [native_text_field startEditing];
   EXPECT_EQ([native_text_field.stringValue isEqualToString:@"textfield"], YES);
 }
 

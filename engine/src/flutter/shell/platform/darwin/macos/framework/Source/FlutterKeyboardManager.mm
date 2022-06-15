@@ -70,6 +70,8 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
 
 @property(nonatomic) NSMutableDictionary<NSNumber*, NSNumber*>* layoutMap;
 
+@property(nonatomic, nullable) NSEvent* eventBeingDispatched;
+
 /**
  * Add a primary responder, which asynchronously decides whether to handle an
  * event.
@@ -168,6 +170,10 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
   [self processNextEvent];
 }
 
+- (BOOL)isDispatchingKeyEvent:(NSEvent*)event {
+  return _eventBeingDispatched == event;
+}
+
 #pragma mark - Private
 
 - (void)processNextEvent {
@@ -230,6 +236,8 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
   if (nextResponder == nil) {
     return;
   }
+  NSAssert(_eventBeingDispatched == nil, @"An event is already being dispached.");
+  _eventBeingDispatched = event;
   switch (event.type) {
     case NSEventTypeKeyDown:
       if ([nextResponder respondsToSelector:@selector(keyDown:)]) {
@@ -249,6 +257,8 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
     default:
       NSAssert(false, @"Unexpected key event type (got %lu).", event.type);
   }
+  NSAssert(_eventBeingDispatched != nil, @"_eventBeingDispatched was cleared unexpectedly.");
+  _eventBeingDispatched = nil;
 }
 
 - (void)buildLayout {

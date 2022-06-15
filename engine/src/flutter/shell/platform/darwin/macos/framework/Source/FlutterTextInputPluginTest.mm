@@ -250,60 +250,6 @@
   return true;
 }
 
-- (bool)testInputContextIsKeptActive {
-  id engineMock = OCMClassMock([FlutterEngine class]);
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
-                                                                                nibName:@""
-                                                                                 bundle:nil];
-
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
-
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
-                    result:^(id){
-                    }];
-
-  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
-                                                             arguments:@{
-                                                               @"text" : @"",
-                                                               @"selectionBase" : @(0),
-                                                               @"selectionExtent" : @(0),
-                                                               @"composingBase" : @(-1),
-                                                               @"composingExtent" : @(-1),
-                                                             }]
-                    result:^(id){
-                    }];
-
-  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show"
-                                                             arguments:@[]]
-                    result:^(id){
-                    }];
-
-  [plugin.inputContext deactivate];
-  EXPECT_EQ(plugin.inputContext.isActive, NO);
-  NSEvent* keyEvent = [NSEvent keyEventWithType:NSEventTypeKeyDown
-                                       location:NSZeroPoint
-                                  modifierFlags:0x100
-                                      timestamp:0
-                                   windowNumber:0
-                                        context:nil
-                                     characters:@""
-                    charactersIgnoringModifiers:@""
-                                      isARepeat:NO
-                                        keyCode:0x50];
-
-  [plugin handleKeyEvent:keyEvent];
-  EXPECT_EQ(plugin.inputContext.isActive, YES);
-  return true;
-}
-
 - (bool)testClearClientDuringComposing {
   // Set up FlutterTextInputPlugin.
   id engineMock = OCMClassMock([FlutterEngine class]);
@@ -917,6 +863,63 @@
   return true;
 }
 
+- (bool)testPerformKeyEquivalent {
+  __block NSEvent* eventBeingDispatchedByKeyboardManager = nil;
+  FlutterViewController* viewControllerMock = OCMClassMock([FlutterViewController class]);
+  OCMStub([viewControllerMock isDispatchingKeyEvent:[OCMArg any]])
+      .andDo(^(NSInvocation* invocation) {
+        NSEvent* event;
+        [invocation getArgument:(void*)&event atIndex:2];
+        BOOL result = event == eventBeingDispatchedByKeyboardManager;
+        [invocation setReturnValue:&result];
+      });
+
+  NSEvent* event = [NSEvent keyEventWithType:NSEventTypeKeyDown
+                                    location:NSZeroPoint
+                               modifierFlags:0x100
+                                   timestamp:0
+                                windowNumber:0
+                                     context:nil
+                                  characters:@""
+                 charactersIgnoringModifiers:@""
+                                   isARepeat:NO
+                                     keyCode:0x50];
+
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewControllerMock];
+
+  OCMExpect([viewControllerMock keyDown:event]);
+
+  // Require that event is handled (returns YES)
+  if (![plugin performKeyEquivalent:event]) {
+    return false;
+  };
+
+  @try {
+    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
+        [viewControllerMock keyDown:event]);
+  } @catch (...) {
+    return false;
+  }
+
+  // performKeyEquivalent must not forward event if it is being
+  // dispatched by keyboard manager
+  eventBeingDispatchedByKeyboardManager = event;
+
+  OCMReject([viewControllerMock keyDown:event]);
+  @try {
+    // Require that event is not handled (returns NO) and not
+    // forwarded to controller
+    if ([plugin performKeyEquivalent:event]) {
+      return false;
+    };
+  } @catch (...) {
+    return false;
+  }
+
+  return true;
+}
+
 - (bool)testLocalTextAndSelectionUpdateAfterDelta {
   id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
@@ -1005,10 +1008,6 @@ TEST(FlutterTextInputPluginTest, TestComposingRegionRemovedByFramework) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testComposingRegionRemovedByFramework]);
 }
 
-TEST(FlutterTextInputPluginTest, TestTextInputContextIsKeptAlive) {
-  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testInputContextIsKeptActive]);
-}
-
 TEST(FlutterTextInputPluginTest, TestClearClientDuringComposing) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testClearClientDuringComposing]);
 }
@@ -1035,6 +1034,10 @@ TEST(FlutterTextInputPluginTest, testComposingWithDeltasWhenSelectionIsActive) {
 
 TEST(FlutterTextInputPluginTest, TestLocalTextAndSelectionUpdateAfterDelta) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testLocalTextAndSelectionUpdateAfterDelta]);
+}
+
+TEST(FlutterTextInputPluginTest, TestPerformKeyEquivalent) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testPerformKeyEquivalent]);
 }
 
 TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
@@ -1069,7 +1072,7 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
       [[FlutterTextFieldMock alloc] initWithPlatformNode:&text_platform_node
                                              fieldEditor:viewController.textInputPlugin];
   [viewController.view addSubview:mockTextField];
-  [mockTextField becomeFirstResponder];
+  [mockTextField startEditing];
 
   NSDictionary* arguments = @{
     @"inputAction" : @"action",
@@ -1131,6 +1134,42 @@ TEST(FlutterTextInputPluginTest, CanNotBecomeResponderIfNoViewController) {
   FlutterTextPlatformNode text_platform_node_no_controller(&delegate, nil);
   textField = text_platform_node_no_controller.GetNativeViewAccessible();
   EXPECT_EQ([textField becomeFirstResponder], NO);
+}
+
+TEST(FlutterTextInputPluginTest, IsAddedAndRemovedFromViewHierarchy) {
+  FlutterEngine* engine = CreateTestEngine();
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  [viewController loadView];
+  [engine setViewController:viewController];
+
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+
+  ASSERT_EQ(viewController.textInputPlugin.superview, nil);
+  ASSERT_FALSE(window.firstResponder == viewController.textInputPlugin);
+
+  [viewController.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show" arguments:@[]]
+                result:^(id){
+                }];
+
+  ASSERT_EQ(viewController.textInputPlugin.superview, viewController.view);
+  ASSERT_TRUE(window.firstResponder == viewController.textInputPlugin);
+
+  [viewController.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.hide" arguments:@[]]
+                result:^(id){
+                }];
+
+  ASSERT_EQ(viewController.textInputPlugin.superview, nil);
+  ASSERT_FALSE(window.firstResponder == viewController.textInputPlugin);
 }
 
 }  // namespace flutter::testing
