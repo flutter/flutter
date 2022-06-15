@@ -4220,10 +4220,6 @@ void main() {
       ),
     );
 
-    final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
-    final RenderEditable renderEditable = state.renderEditable;
-
     await tester.longPressAt(const Offset(20, 10));
     await tester.pumpAndSettle();
 
@@ -4253,7 +4249,6 @@ void main() {
     final RenderEditable renderEditable =
         tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
 
-    // await tester.longPressAt(const Offset(20, 10)); Why doesn't this work?
     renderEditable.selectWordsInRange(from: const Offset(20, 10), cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
