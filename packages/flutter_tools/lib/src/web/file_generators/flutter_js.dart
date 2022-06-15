@@ -145,6 +145,11 @@ _flutter.loader = null;
               console.debug("Loading app from service worker.");
               return this._loadEntrypoint(entrypointUrl);
             }
+          })
+          .catch((error) => {
+            // Some exception happened while registering/activating the service worker.
+            console.warn("Failed to register or activate service worker:", error);
+            return this._loadEntrypoint(entrypointUrl);
           });
 
       // Timeout race promise
