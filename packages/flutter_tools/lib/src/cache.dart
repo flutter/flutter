@@ -520,7 +520,7 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
-    _logger.printStatus(
+    _logger.printError(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
     );
