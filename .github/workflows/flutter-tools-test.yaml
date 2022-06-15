@@ -20,6 +20,6 @@ jobs:
           channel: 'master' # This will be the last released version not the PR version
       - name: Install libclang-10-dev
         run: sudo apt-get install libclang-10-dev
-      - name: Build test dylib and bindings
-        working-directory: cd ./packages/flutter_tools/
+      - name: Run plugin_ffi ffigen test
+        working-directory: ./packages/flutter_tools/
         run: flutter pub run test test/commands.shard/permeable/create_test.dart -n ffigen
