@@ -4,10 +4,11 @@
 
 // @dart = 2.8
 
+import 'dart:io' as io;
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -35,10 +36,10 @@ void main() {
   testUsingContext('create an FFI plugin, then run ffigen', () async {
     Cache.flutterRoot = '../..';
 
-    // GitHub actions do not have access to the full Flutter checkout with
-    // the cache folder, run from source via bin/ instead.
+    // GitHub actions do not have access to the full Flutter checkout with the
+    // cache folder, run from source via bin/ instead of with CommandRunner.
     await Process.run(
-      'flutter',
+      io.Platform.resolvedExecutable,
       <String>[
         'pub',
         'run',
@@ -61,7 +62,7 @@ void main() {
     await generatedBindings.delete();
 
     final ProcessResult pubGetResult = await Process.run(
-      'flutter',
+      io.Platform.resolvedExecutable,
       <String>[
         'pub',
         'get',
@@ -74,7 +75,7 @@ void main() {
     expect(pubGetResult.exitCode, 0);
 
     final ProcessResult ffigenResult = await Process.run(
-      'flutter',
+      io.Platform.resolvedExecutable,
       <String>[
         'pub',
         'run',
