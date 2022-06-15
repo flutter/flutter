@@ -57,7 +57,7 @@ void main() {
     expect(generatedBindings, exists);
 
     final String generatedBindingsFromTemplate =
-        await generatedBindings.readAsString();
+        (await generatedBindings.readAsString()).replaceAll('\r', '');
 
     await generatedBindings.delete();
 
@@ -91,7 +91,7 @@ void main() {
     expect(ffigenResult.exitCode, 0);
 
     final String generatedBindingsFromFfigen =
-        await generatedBindings.readAsString();
+        (await generatedBindings.readAsString()).replaceAll('\r', '');
 
     expect(generatedBindingsFromFfigen, generatedBindingsFromTemplate);
   });

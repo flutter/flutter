@@ -2870,7 +2870,7 @@ testUsingContext('create an FFI plugin, then run ffigen', () async {
     expect(generatedBindings, exists);
 
     final String generatedBindingsFromTemplate =
-        await generatedBindings.readAsString();
+        (await generatedBindings.readAsString()).replaceAll('\r', '');
 
     await generatedBindings.delete();
 
@@ -2906,7 +2906,7 @@ testUsingContext('create an FFI plugin, then run ffigen', () async {
     expect(ffigenResult.exitCode, 0);
 
     final String generatedBindingsFromFfigen =
-        await generatedBindings.readAsString();
+        (await generatedBindings.readAsString()).replaceAll('\r', '');
 
     expect(generatedBindingsFromFfigen, generatedBindingsFromTemplate);
   });
