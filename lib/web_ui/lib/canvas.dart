@@ -100,10 +100,13 @@ abstract class Canvas {
   void rotate(double radians);
   void skew(double sx, double sy);
   void transform(Float64List matrix4);
+  Float64List getTransform();
   void clipRect(Rect rect,
       {ClipOp clipOp = ClipOp.intersect, bool doAntiAlias = true});
   void clipRRect(RRect rrect, {bool doAntiAlias = true});
   void clipPath(Path path, {bool doAntiAlias = true});
+  Rect getLocalClipBounds();
+  Rect getDestinationClipBounds();
   void drawColor(Color color, BlendMode blendMode);
   void drawLine(Offset p1, Offset p2, Paint paint);
   void drawPaint(Paint paint);

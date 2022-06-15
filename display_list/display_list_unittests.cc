@@ -1957,5 +1957,299 @@ TEST(DisplayList, FlutterSvgIssue661BoundsWereEmpty) {
   EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 304u);
 }
 
+TEST(DisplayList, TranslateAffectsCurrentTransform) {
+  DisplayListBuilder builder;
+  builder.translate(12.3, 14.5);
+  SkMatrix matrix = SkMatrix::Translate(12.3, 14.5);
+  SkM44 m44 = SkM44(matrix);
+  SkM44 curM44 = builder.getTransformFullPerspective();
+  SkMatrix curMatrix = builder.getTransform();
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+  builder.translate(10, 10);
+  // CurrentTransform has changed
+  ASSERT_NE(builder.getTransformFullPerspective(), m44);
+  ASSERT_NE(builder.getTransform(), curMatrix);
+  // Previous return values have not
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+}
+
+TEST(DisplayList, ScaleAffectsCurrentTransform) {
+  DisplayListBuilder builder;
+  builder.scale(12.3, 14.5);
+  SkMatrix matrix = SkMatrix::Scale(12.3, 14.5);
+  SkM44 m44 = SkM44(matrix);
+  SkM44 curM44 = builder.getTransformFullPerspective();
+  SkMatrix curMatrix = builder.getTransform();
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+  builder.translate(10, 10);
+  // CurrentTransform has changed
+  ASSERT_NE(builder.getTransformFullPerspective(), m44);
+  ASSERT_NE(builder.getTransform(), curMatrix);
+  // Previous return values have not
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+}
+
+TEST(DisplayList, RotateAffectsCurrentTransform) {
+  DisplayListBuilder builder;
+  builder.rotate(12.3);
+  SkMatrix matrix = SkMatrix::RotateDeg(12.3);
+  SkM44 m44 = SkM44(matrix);
+  SkM44 curM44 = builder.getTransformFullPerspective();
+  SkMatrix curMatrix = builder.getTransform();
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+  builder.translate(10, 10);
+  // CurrentTransform has changed
+  ASSERT_NE(builder.getTransformFullPerspective(), m44);
+  ASSERT_NE(builder.getTransform(), curMatrix);
+  // Previous return values have not
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+}
+
+TEST(DisplayList, SkewAffectsCurrentTransform) {
+  DisplayListBuilder builder;
+  builder.skew(12.3, 14.5);
+  SkMatrix matrix = SkMatrix::Skew(12.3, 14.5);
+  SkM44 m44 = SkM44(matrix);
+  SkM44 curM44 = builder.getTransformFullPerspective();
+  SkMatrix curMatrix = builder.getTransform();
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+  builder.translate(10, 10);
+  // CurrentTransform has changed
+  ASSERT_NE(builder.getTransformFullPerspective(), m44);
+  ASSERT_NE(builder.getTransform(), curMatrix);
+  // Previous return values have not
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+}
+
+TEST(DisplayList, TransformAffectsCurrentTransform) {
+  DisplayListBuilder builder;
+  builder.transform2DAffine(3, 0, 12.3,  //
+                            1, 5, 14.5);
+  SkMatrix matrix = SkMatrix::MakeAll(3, 0, 12.3,  //
+                                      1, 5, 14.5,  //
+                                      0, 0, 1);
+  SkM44 m44 = SkM44(matrix);
+  SkM44 curM44 = builder.getTransformFullPerspective();
+  SkMatrix curMatrix = builder.getTransform();
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+  builder.translate(10, 10);
+  // CurrentTransform has changed
+  ASSERT_NE(builder.getTransformFullPerspective(), m44);
+  ASSERT_NE(builder.getTransform(), curMatrix);
+  // Previous return values have not
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+}
+
+TEST(DisplayList, FullTransformAffectsCurrentTransform) {
+  DisplayListBuilder builder;
+  builder.transformFullPerspective(3, 0, 4, 12.3,  //
+                                   1, 5, 3, 14.5,  //
+                                   0, 0, 7, 16.2,  //
+                                   0, 0, 0, 1);
+  SkMatrix matrix = SkMatrix::MakeAll(3, 0, 12.3,  //
+                                      1, 5, 14.5,  //
+                                      0, 0, 1);
+  SkM44 m44 = SkM44(3, 0, 4, 12.3,  //
+                    1, 5, 3, 14.5,  //
+                    0, 0, 7, 16.2,  //
+                    0, 0, 0, 1);
+  SkM44 curM44 = builder.getTransformFullPerspective();
+  SkMatrix curMatrix = builder.getTransform();
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+  builder.translate(10, 10);
+  // CurrentTransform has changed
+  ASSERT_NE(builder.getTransformFullPerspective(), m44);
+  ASSERT_NE(builder.getTransform(), curMatrix);
+  // Previous return values have not
+  ASSERT_EQ(curM44, m44);
+  ASSERT_EQ(curMatrix, matrix);
+}
+
+TEST(DisplayList, ClipRectAffectsClipBounds) {
+  DisplayListBuilder builder;
+  SkRect clipBounds = SkRect::MakeLTRB(10.2, 11.3, 20.4, 25.7);
+  SkRect clipExpandedBounds = SkRect::MakeLTRB(10, 11, 21, 26);
+  builder.clipRect(clipBounds, SkClipOp::kIntersect, false);
+
+  // Save initial return values for testing restored values
+  SkRect initialLocalBounds = builder.getLocalClipBounds();
+  SkRect initialDestinationBounds = builder.getDestinationClipBounds();
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+
+  builder.save();
+  builder.clipRect({0, 0, 15, 15}, SkClipOp::kIntersect, false);
+  // Both clip bounds have changed
+  ASSERT_NE(builder.getLocalClipBounds(), clipExpandedBounds);
+  ASSERT_NE(builder.getDestinationClipBounds(), clipBounds);
+  // Previous return values have not changed
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+  builder.restore();
+
+  // save/restore returned the values to their original values
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+
+  builder.save();
+  builder.scale(2, 2);
+  SkRect scaledExpandedBounds = SkRect::MakeLTRB(5, 5.5, 10.5, 13);
+  ASSERT_EQ(builder.getLocalClipBounds(), scaledExpandedBounds);
+  // Destination bounds are unaffected by transform
+  ASSERT_EQ(builder.getDestinationClipBounds(), clipBounds);
+  builder.restore();
+
+  // save/restore returned the values to their original values
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
+TEST(DisplayList, ClipRRectAffectsClipBounds) {
+  DisplayListBuilder builder;
+  SkRect clipBounds = SkRect::MakeLTRB(10.2, 11.3, 20.4, 25.7);
+  SkRect clipExpandedBounds = SkRect::MakeLTRB(10, 11, 21, 26);
+  SkRRect clip = SkRRect::MakeRectXY(clipBounds, 3, 2);
+  builder.clipRRect(clip, SkClipOp::kIntersect, false);
+
+  // Save initial return values for testing restored values
+  SkRect initialLocalBounds = builder.getLocalClipBounds();
+  SkRect initialDestinationBounds = builder.getDestinationClipBounds();
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+
+  builder.save();
+  builder.clipRect({0, 0, 15, 15}, SkClipOp::kIntersect, false);
+  // Both clip bounds have changed
+  ASSERT_NE(builder.getLocalClipBounds(), clipExpandedBounds);
+  ASSERT_NE(builder.getDestinationClipBounds(), clipBounds);
+  // Previous return values have not changed
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+  builder.restore();
+
+  // save/restore returned the values to their original values
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+
+  builder.save();
+  builder.scale(2, 2);
+  SkRect scaledExpandedBounds = SkRect::MakeLTRB(5, 5.5, 10.5, 13);
+  ASSERT_EQ(builder.getLocalClipBounds(), scaledExpandedBounds);
+  // Destination bounds are unaffected by transform
+  ASSERT_EQ(builder.getDestinationClipBounds(), clipBounds);
+  builder.restore();
+
+  // save/restore returned the values to their original values
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
+TEST(DisplayList, ClipPathAffectsClipBounds) {
+  DisplayListBuilder builder;
+  SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
+  SkRect clipBounds = SkRect::MakeLTRB(8.2, 9.3, 22.4, 27.7);
+  SkRect clipExpandedBounds = SkRect::MakeLTRB(8, 9, 23, 28);
+  builder.clipPath(clip, SkClipOp::kIntersect, false);
+
+  // Save initial return values for testing restored values
+  SkRect initialLocalBounds = builder.getLocalClipBounds();
+  SkRect initialDestinationBounds = builder.getDestinationClipBounds();
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+
+  builder.save();
+  builder.clipRect({0, 0, 15, 15}, SkClipOp::kIntersect, false);
+  // Both clip bounds have changed
+  ASSERT_NE(builder.getLocalClipBounds(), clipExpandedBounds);
+  ASSERT_NE(builder.getDestinationClipBounds(), clipBounds);
+  // Previous return values have not changed
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+  builder.restore();
+
+  // save/restore returned the values to their original values
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+
+  builder.save();
+  builder.scale(2, 2);
+  SkRect scaledExpandedBounds = SkRect::MakeLTRB(4, 4.5, 11.5, 14);
+  ASSERT_EQ(builder.getLocalClipBounds(), scaledExpandedBounds);
+  // Destination bounds are unaffected by transform
+  ASSERT_EQ(builder.getDestinationClipBounds(), clipBounds);
+  builder.restore();
+
+  // save/restore returned the values to their original values
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
+TEST(DisplayList, DiffClipRectDoesNotAffectClipBounds) {
+  DisplayListBuilder builder;
+  SkRect diff_clip = SkRect::MakeLTRB(0, 0, 15, 15);
+  SkRect clipBounds = SkRect::MakeLTRB(10.2, 11.3, 20.4, 25.7);
+  SkRect clipExpandedBounds = SkRect::MakeLTRB(10, 11, 21, 26);
+  builder.clipRect(clipBounds, SkClipOp::kIntersect, false);
+
+  // Save initial return values for testing after kDifference clip
+  SkRect initialLocalBounds = builder.getLocalClipBounds();
+  SkRect initialDestinationBounds = builder.getDestinationClipBounds();
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+
+  builder.clipRect(diff_clip, SkClipOp::kDifference, false);
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
+TEST(DisplayList, DiffClipRRectDoesNotAffectClipBounds) {
+  DisplayListBuilder builder;
+  SkRRect diff_clip = SkRRect::MakeRectXY({0, 0, 15, 15}, 1, 1);
+  SkRect clipBounds = SkRect::MakeLTRB(10.2, 11.3, 20.4, 25.7);
+  SkRect clipExpandedBounds = SkRect::MakeLTRB(10, 11, 21, 26);
+  SkRRect clip = SkRRect::MakeRectXY({10.2, 11.3, 20.4, 25.7}, 3, 2);
+  builder.clipRRect(clip, SkClipOp::kIntersect, false);
+
+  // Save initial return values for testing after kDifference clip
+  SkRect initialLocalBounds = builder.getLocalClipBounds();
+  SkRect initialDestinationBounds = builder.getDestinationClipBounds();
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+
+  builder.clipRRect(diff_clip, SkClipOp::kDifference, false);
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
+TEST(DisplayList, DiffClipPathDoesNotAffectClipBounds) {
+  DisplayListBuilder builder;
+  SkPath diff_clip = SkPath().addRect({0, 0, 15, 15});
+  SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
+  SkRect clipBounds = SkRect::MakeLTRB(8.2, 9.3, 22.4, 27.7);
+  SkRect clipExpandedBounds = SkRect::MakeLTRB(8, 9, 23, 28);
+  builder.clipPath(clip, SkClipOp::kIntersect, false);
+
+  // Save initial return values for testing after kDifference clip
+  SkRect initialLocalBounds = builder.getLocalClipBounds();
+  SkRect initialDestinationBounds = builder.getDestinationClipBounds();
+  ASSERT_EQ(initialLocalBounds, clipExpandedBounds);
+  ASSERT_EQ(initialDestinationBounds, clipBounds);
+
+  builder.clipPath(diff_clip, SkClipOp::kDifference, false);
+  ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
 }  // namespace testing
 }  // namespace flutter
