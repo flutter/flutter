@@ -3107,6 +3107,7 @@ targets:
     scheduler: luci
 
   - name: Mac_android run_release_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/106032
     recipe: devicelab/devicelab_drone
     runIf:
       - dev/**
