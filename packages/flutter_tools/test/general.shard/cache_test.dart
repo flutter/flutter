@@ -319,6 +319,22 @@ void main() {
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
+
+    testWithoutContext('overridden storage base url prints warning to STDERR', () async {
+      final BufferLogger logger = BufferLogger.test();
+      const String baseUrl = 'https://storage.com';
+      final Cache cache = Cache.test(
+        platform: FakePlatform(environment: <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': baseUrl,
+        }),
+        processManager: FakeProcessManager.any(),
+        logger: logger,
+      );
+
+      expect(cache.storageBaseUrl, baseUrl);
+      expect(logger.errorText, contains('Flutter assets will be downloaded from $baseUrl'));
+      expect(logger.statusText, isEmpty);
+    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {
