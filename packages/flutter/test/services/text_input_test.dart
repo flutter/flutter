@@ -379,7 +379,7 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
-    test('TextInputClient performSelector method is called', () async {
+    test('TextInputClient performSelectors method is called', () async {
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
