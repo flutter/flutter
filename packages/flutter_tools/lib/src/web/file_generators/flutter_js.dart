@@ -76,6 +76,7 @@ _flutter.loader = null;
 
     _loadEntrypoint(entrypointUrl) {
       if (!this._scriptLoaded) {
+        console.debug("Injecting <script> tag.");
         this._scriptLoaded = new Promise((resolve, reject) => {
           let scriptTag = document.createElement("script");
           scriptTag.src = entrypointUrl;
@@ -96,7 +97,7 @@ _flutter.loader = null;
     _waitForServiceWorkerActivation(serviceWorker, entrypointUrl) {
       if (!serviceWorker || serviceWorker.state == "activated") {
         if (!serviceWorker) {
-          console.warn("Cannot activate a null service worker. Falling back to plain <script> tag.");
+          console.warn("Cannot activate a null service worker.");
         } else {
           console.debug("Service worker already active.");
         }
@@ -114,7 +115,7 @@ _flutter.loader = null;
 
     _loadWithServiceWorker(entrypointUrl, serviceWorkerOptions) {
       if (!("serviceWorker" in navigator) || serviceWorkerOptions == null) {
-        console.warn("Service worker not supported (or configured). Falling back to plain <script> tag.", serviceWorkerOptions);
+        console.warn("Service worker not supported (or configured).", serviceWorkerOptions);
         return this._loadEntrypoint(entrypointUrl);
       }
 
@@ -158,7 +159,7 @@ _flutter.loader = null;
         timeout = new Promise((resolve, _) => {
           setTimeout(() => {
             if (!this._scriptLoaded) {
-              console.warn("Failed to load app from service worker. Falling back to plain <script> tag.");
+              console.warn("Loading from service worker timed out after", timeoutMillis, "milliseconds.");
               resolve(this._loadEntrypoint(entrypointUrl));
             }
           }, timeoutMillis);
