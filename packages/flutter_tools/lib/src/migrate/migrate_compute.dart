@@ -131,15 +131,6 @@ Future<MigrateResult?> computeMigration({
   logger.printStatus('Obtaining revisions.', indent: 2, color: TerminalColor.grey);
   status.resume();
 
-  final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
-  final MigrateConfig config = metadata.migrateConfig;
-
-  // We call populate in case MigrateConfig is empty. If it is filled, populate should not do anything.
-  config.populate(
-    projectDirectory: flutterProject.directory,
-    logger: logger,
-  );
-
   final Set<String?> blacklistPrefixes = <String?>{};
   platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
   for (final SupportedPlatform platform in SupportedPlatform.values) {
@@ -151,51 +142,16 @@ Future<MigrateResult?> computeMigration({
   blacklistPrefixes.remove('root');
   blacklistPrefixes.remove(null);
 
-  final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
-  final String? metadataRevision = metadata.versionRevision;
-  targetRevision ??= version.frameworkRevision;
-  String rootBaseRevision = '';
-  final Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
-  final Set<String> revisions = <String>{};
-  if (baseRevision == null) {
-    for (final MigratePlatformConfig platform in config.platformConfigs.values) {
-      final String effectiveRevision = platform.baseRevision == null ?
-          metadataRevision ?? _getFallbackBaseRevision(allowFallbackBaseRevision, verbose, logger, status) :
-          platform.baseRevision!;
-      if (platforms != null && !platforms.contains(platform.platform)) {
-        continue;
-      }
-      if (platform.platform == SupportedPlatform.root) {
-        rootBaseRevision = effectiveRevision;
-      }
-      revisions.add(effectiveRevision);
-      if (revisionToConfigs[effectiveRevision] == null) {
-        revisionToConfigs[effectiveRevision] = <MigratePlatformConfig>[];
-      }
-      revisionToConfigs[effectiveRevision]!.add(platform);
-    }
-  } else {
-    rootBaseRevision = baseRevision;
-    revisionToConfigs[baseRevision] = <MigratePlatformConfig>[];
-    for (final SupportedPlatform platform in platforms) {
-      revisionToConfigs[baseRevision]!.add(MigratePlatformConfig(platform: platform, baseRevision: baseRevision));
-    }
-  }
-  // Reorder such that the root revision is created first.
-  revisions.remove(rootBaseRevision);
-  final List<String> revisionsList = List<String>.from(revisions);
-  if (rootBaseRevision != '') {
-    revisionsList.insert(0, rootBaseRevision);
-  }
-  if (verbose) {
-    logger.printStatus('Potential base revisions: $revisionsList');
-  }
-  final fallbackRevision = _getFallbackBaseRevision(true, verbose, logger, status);
-  if (revisionsList.contains(fallbackRevision) && baseRevision != fallbackRevision && metadataRevision != fallbackRevision) {
-    status.pause();
-    logger.printStatus('Using Flutter v1.0.0 ($fallbackRevision) as the base revision since a valid base revision could not be found in the .metadata file. This may result in more merge conflicts than normally expected.', indent: 4, color: TerminalColor.grey);
-    status.resume();
-  }
+  final MigrateRevisionConfig revisionConfig = MigrateRevisionConfig(
+    flutterProject: flutterProject,
+    baseRevision: baseRevision,
+    allowFallbackBaseRevision: allowFallbackBaseRevision,
+    platforms: platforms,
+    blacklistPrefixes: blacklistPrefixes,
+    logger: logger,
+    verbose: verbose,
+    status: status,
+  );
 
   // Extract the files/paths that should be ignored by the migrate tool.
   // These paths are absolute paths.
@@ -205,7 +161,7 @@ Future<MigrateResult?> computeMigration({
   final List<String> unmanagedFiles = <String>[];
   final List<String> unmanagedDirectories = <String>[];
   final String basePath = flutterProject.directory.path;
-  for (final String localPath in config.unmanagedFiles) {
+  for (final String localPath in revisionConfig.config.unmanagedFiles) {
     if (localPath.endsWith(fileSystem.path.separator)) {
       unmanagedDirectories.add(fileSystem.path.join(basePath, localPath));
     } else {
@@ -252,45 +208,47 @@ Future<MigrateResult?> computeMigration({
   // This step clones the base flutter sdk, and uses it to create a new vanilla app.
   // The vanilla base app is used as part of a 3 way merge between the base app, target
   // app, and the current user-owned app.
-  await createBase(
+  MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
+    path: baseAppPath,
+    name: name,
+    androidLanguage: androidLanguage,
+    iosLanguage: iosLanguage,
+    platformWhitelist: platforms,
+    migrateUtils: migrateUtils,
+  );
+  await baseProject.createProject(
     migrateResult,
     flutterProject,
-    baseAppPath,
-    revisionsList,
-    revisionToConfigs,
-    baseRevision ?? metadataRevision ?? _getFallbackBaseRevision(allowFallbackBaseRevision, verbose, logger, status),
-    targetRevision,
-    name,
-    androidLanguage,
-    iosLanguage,
+    revisionConfig.revisionsList,
+    revisionConfig.revisionToConfigs,
+    baseRevision ?? revisionConfig.metadataRevision ?? _getFallbackBaseRevision(allowFallbackBaseRevision, verbose, logger, status),
+    revisionConfig.targetRevision,
     targetFlutterDirectory,
-    platforms,
     logger,
     fileSystem,
     status,
-    migrateUtils,
   );
 
   // Create target reference app when not provided.
   //
   // This step directly calls flutter create with the target (the current installed revision)
   // flutter sdk.
-  if (targetAppPath == null) {
-    // Create target
-    status.pause();
-    logger.printStatus('Creating target app with revision $targetRevision.', indent: 2, color: TerminalColor.grey);
-    status.resume();
-    if (verbose) {
-      logger.printStatus('Creating target app.');
-    }
-    await migrateUtils.createFromTemplates(
-      targetFlutterDirectory.childDirectory('bin').absolute.path,
-      name: name,
-      androidLanguage: androidLanguage,
-      iosLanguage: iosLanguage,
-      outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path,
-    );
-  }
+  MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
+    path: baseAppPath,
+    name: name,
+    androidLanguage: androidLanguage,
+    iosLanguage: iosLanguage,
+    platformWhitelist: platforms,
+    migrateUtils: migrateUtils,
+  );
+  await targetProject.createProject(
+    migrateResult,
+    revisionConfig.targetRevision,
+    targetFlutterDirectory,
+    logger,
+    status,
+    verbose,
+  );
 
   await migrateUtils.gitInit(flutterProject.directory.absolute.path);
 
@@ -393,102 +351,245 @@ String _getFallbackBaseRevision(bool allowFallbackBaseRevision, bool verbose, Lo
   return '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
 }
 
-/// Creates the base reference app based off of the migrate config in the .metadata file.
-Future<void> createBase(
-  MigrateResult migrateResult,
-  FlutterProject flutterProject,
-  String? baseAppPath,
-  List<String> revisionsList,
-  Map<String, List<MigratePlatformConfig>> revisionToConfigs,
-  String fallbackRevision,
-  String targetRevision,
-  String name,
-  String androidLanguage,
-  String iosLanguage,
-  Directory targetFlutterDirectory,
-  List<SupportedPlatform>? platformWhitelist,
-  Logger logger,
-  FileSystem fileSystem,
-  Status status,
-  MigrateUtils migrateUtils,
-) async {
-  // Create base
-  // Clone base flutter
-  if (baseAppPath == null) {
-    final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
-    for (final String revision in revisionsList) {
-      final List<String> platforms = <String>[];
-      for (final MigratePlatformConfig config in revisionToConfigs[revision]!) {
-        platforms.add(config.platform.toString().split('.').last);
-      }
-      platforms.remove('root'); // Root does not need to be listed and is not a valid platform
+abstract class MigrateFlutterProject {
+  MigrateFlutterProject({
+    required this.path,
+    required this.name,
+    required this.androidLanguage,
+    required this.iosLanguage,
+    this.platformWhitelist,
+    required this.migrateUtils,
+  });
 
-      // In the case of the revision being invalid or not a hash of the master branch,
-      // we want to fallback in the following order:
-      //   - parsed revision
-      //   - fallback revision
-      //   - target revision (currently installed flutter)
-      late Directory sdkDir;
-      final List<String> revisionsToTry = <String>[revision];
-      if (revision != fallbackRevision) {
-        revisionsToTry.add(fallbackRevision);
-      }
-      bool sdkAvailable = false;
-      int index = 0;
-      do {
-        if (index < revisionsToTry.length) {
-          final String activeRevision = revisionsToTry[index++];
-          if (activeRevision != revision && revisionToFlutterSdkDir.containsKey(activeRevision)) {
-            sdkDir = revisionToFlutterSdkDir[activeRevision]!;
+  final String? path;
+  final String name;
+  final String androidLanguage;
+  final String iosLanguage;
+  final List<SupportedPlatform>? platformWhitelist;
+  final MigrateUtils migrateUtils;
+}
+
+/// The base reference project used in a migration computation.
+class MigrateBaseFlutterProject extends MigrateFlutterProject {
+  MigrateBaseFlutterProject({
+    required super.path,
+    required super.name,
+    required super.androidLanguage,
+    required super.iosLanguage,
+    super.platformWhitelist,
+    required super.migrateUtils,
+  });
+
+  /// Creates the base reference app based off of the migrate config in the .metadata file.
+  Future<void> createProject(
+    MigrateResult migrateResult,
+    FlutterProject flutterProject,
+    List<String> revisionsList,
+    Map<String, List<MigratePlatformConfig>> revisionToConfigs,
+    String fallbackRevision,
+    String targetRevision,
+    Directory targetFlutterDirectory,
+    Logger logger,
+    FileSystem fileSystem,
+    Status status,
+  ) async {
+    // Create base
+    // Clone base flutter
+    if (path == null) {
+      final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
+      for (final String revision in revisionsList) {
+        final List<String> platforms = <String>[];
+        for (final MigratePlatformConfig config in revisionToConfigs[revision]!) {
+          platforms.add(config.platform.toString().split('.').last);
+        }
+        platforms.remove('root'); // Root does not need to be listed and is not a valid platform
+
+        // In the case of the revision being invalid or not a hash of the master branch,
+        // we want to fallback in the following order:
+        //   - parsed revision
+        //   - fallback revision
+        //   - target revision (currently installed flutter)
+        late Directory sdkDir;
+        final List<String> revisionsToTry = <String>[revision];
+        if (revision != fallbackRevision) {
+          revisionsToTry.add(fallbackRevision);
+        }
+        bool sdkAvailable = false;
+        int index = 0;
+        do {
+          if (index < revisionsToTry.length) {
+            final String activeRevision = revisionsToTry[index++];
+            if (activeRevision != revision && revisionToFlutterSdkDir.containsKey(activeRevision)) {
+              sdkDir = revisionToFlutterSdkDir[activeRevision]!;
+              revisionToFlutterSdkDir[revision] = sdkDir;
+              sdkAvailable = true;
+            } else {
+              sdkDir = fileSystem.systemTempDirectory.createTempSync('flutter_$activeRevision');
+              migrateResult.sdkDirs[activeRevision] = sdkDir;
+              status.pause();
+              logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
+              status.resume();
+              sdkAvailable = await migrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
+              revisionToFlutterSdkDir[revision] = sdkDir;
+            }
+          } else {
+            // fallback to just using the modern target version of flutter.
+            sdkDir = targetFlutterDirectory;
             revisionToFlutterSdkDir[revision] = sdkDir;
             sdkAvailable = true;
-          } else {
-            sdkDir = fileSystem.systemTempDirectory.createTempSync('flutter_$activeRevision');
-            migrateResult.sdkDirs[activeRevision] = sdkDir;
-            status.pause();
-            logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
-            status.resume();
-            sdkAvailable = await migrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
-            revisionToFlutterSdkDir[revision] = sdkDir;
           }
-        } else {
-          // fallback to just using the modern target version of flutter.
-          sdkDir = targetFlutterDirectory;
-          revisionToFlutterSdkDir[revision] = sdkDir;
-          sdkAvailable = true;
+        } while (!sdkAvailable);
+        status.pause();
+        logger.printStatus('Creating base app for $platforms with revision $revision.', indent: 2, color: TerminalColor.grey);
+        status.resume();
+        final String newDirectoryPath = await migrateUtils.createFromTemplates(
+          sdkDir.childDirectory('bin').absolute.path,
+          name: name,
+          androidLanguage: androidLanguage,
+          iosLanguage: iosLanguage,
+          outputDirectory: migrateResult.generatedBaseTemplateDirectory!.absolute.path,
+          platforms: platforms,
+        );
+        if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory?.path) {
+          migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
         }
-      } while (!sdkAvailable);
+        // Determine merge type for each newly generated file.
+        final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
+        for (final FileSystemEntity entity in generatedBaseFiles) {
+          if (entity is! File) {
+            continue;
+          }
+          final File baseTemplateFile = entity.absolute;
+          final String localPath = getLocalPath(baseTemplateFile.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path, fileSystem);
+          if (!migrateResult.mergeTypeMap.containsKey(localPath)) {
+            // Use two way merge when the base revision is the same as the target revision.
+            migrateResult.mergeTypeMap[localPath] = revision == targetRevision ? MergeType.twoWay : MergeType.threeWay;
+          }
+        }
+        if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory?.path) {
+          migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
+          break; // The create command is old and does not distinguish between platforms so it only needs to be called once.
+        }
+      }
+    }
+  }
+}
+
+class MigrateTargetFlutterProject extends MigrateFlutterProject {
+  MigrateTargetFlutterProject({
+    required super.path,
+    required super.name,
+    required super.androidLanguage,
+    required super.iosLanguage,
+    super.platformWhitelist,
+    required super.migrateUtils,
+  });
+
+  /// Creates the base reference app based off of the migrate config in the .metadata file.
+  Future<void> createProject(
+    MigrateResult migrateResult,
+    String targetRevision,
+    Directory targetFlutterDirectory,
+    Logger logger,
+    Status status,
+    bool verbose,
+  ) async {
+    if (path == null) {
+      // Create target
       status.pause();
-      logger.printStatus('Creating base app for $platforms with revision $revision.', indent: 2, color: TerminalColor.grey);
+      logger.printStatus('Creating target app with revision $targetRevision.', indent: 2, color: TerminalColor.grey);
       status.resume();
-      final String newDirectoryPath = await migrateUtils.createFromTemplates(
-        sdkDir.childDirectory('bin').absolute.path,
+      if (verbose) {
+        logger.printStatus('Creating target app.');
+      }
+      await migrateUtils.createFromTemplates(
+        targetFlutterDirectory.childDirectory('bin').absolute.path,
         name: name,
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
-        outputDirectory: migrateResult.generatedBaseTemplateDirectory!.absolute.path,
-        platforms: platforms,
+        outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path,
       );
-      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory?.path) {
-        migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
-      }
-      // Determine merge type for each newly generated file.
-      final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
-      for (final FileSystemEntity entity in generatedBaseFiles) {
-        if (entity is! File) {
+    }
+  }
+}
+
+/// Parses the metadata of the flutter project, extracts, computes, and stores the
+/// revisions that the migration should use to migrate between.
+class MigrateRevisionConfig {
+  MigrateRevisionConfig({
+    required FlutterProject flutterProject,
+    required String? baseRevision,
+    required bool allowFallbackBaseRevision,
+    required List<SupportedPlatform> platforms,
+    required Set<String?> blacklistPrefixes,
+    required Logger logger,
+    required bool verbose,
+    required Status status,
+  }) {
+    _computeRevisions(flutterProject, baseRevision, allowFallbackBaseRevision, platforms, logger, verbose, status);
+  }
+
+  late List<String> revisionsList;
+  late Map<String, List<MigratePlatformConfig>> revisionToConfigs;
+  late String fallbackRevision;
+  late String targetRevision;
+  late String? metadataRevision;
+  late MigrateConfig config;
+
+  void _computeRevisions(FlutterProject flutterProject, String? baseRevision, bool allowFallbackBaseRevision, List<SupportedPlatform> platforms, Logger logger, bool verbose, Status status) {
+    final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
+    config = metadata.migrateConfig;
+
+    // We call populate in case MigrateConfig is empty. If it is filled, populate should not do anything.
+    config.populate(
+      projectDirectory: flutterProject.directory,
+      logger: logger,
+    );
+
+    final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
+    final String? metadataRevision = metadata.versionRevision;
+    targetRevision ??= version.frameworkRevision;
+    String rootBaseRevision = '';
+    revisionToConfigs = <String, List<MigratePlatformConfig>>{};
+    final Set<String> revisions = <String>{};
+    if (baseRevision == null) {
+      for (final MigratePlatformConfig platform in config.platformConfigs.values) {
+        final String effectiveRevision = platform.baseRevision == null ?
+            metadataRevision ?? _getFallbackBaseRevision(allowFallbackBaseRevision, verbose, logger, status) :
+            platform.baseRevision!;
+        if (platforms != null && !platforms.contains(platform.platform)) {
           continue;
         }
-        final File baseTemplateFile = entity.absolute;
-        final String localPath = getLocalPath(baseTemplateFile.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path, fileSystem);
-        if (!migrateResult.mergeTypeMap.containsKey(localPath)) {
-          // Use two way merge when the base revision is the same as the target revision.
-          migrateResult.mergeTypeMap[localPath] = revision == targetRevision ? MergeType.twoWay : MergeType.threeWay;
+        if (platform.platform == SupportedPlatform.root) {
+          rootBaseRevision = effectiveRevision;
         }
+        revisions.add(effectiveRevision);
+        if (revisionToConfigs[effectiveRevision] == null) {
+          revisionToConfigs[effectiveRevision] = <MigratePlatformConfig>[];
+        }
+        revisionToConfigs[effectiveRevision]!.add(platform);
       }
-      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory?.path) {
-        migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
-        break; // The create command is old and does not distinguish between platforms so it only needs to be called once.
+    } else {
+      rootBaseRevision = baseRevision;
+      revisionToConfigs[baseRevision] = <MigratePlatformConfig>[];
+      for (final SupportedPlatform platform in platforms) {
+        revisionToConfigs[baseRevision]!.add(MigratePlatformConfig(platform: platform, baseRevision: baseRevision));
       }
+    }
+    // Reorder such that the root revision is created first.
+    revisions.remove(rootBaseRevision);
+    revisionsList = List<String>.from(revisions);
+    if (rootBaseRevision != '') {
+      revisionsList.insert(0, rootBaseRevision);
+    }
+    if (verbose) {
+      logger.printStatus('Potential base revisions: $revisionsList');
+    }
+    fallbackRevision = _getFallbackBaseRevision(true, verbose, logger, status);
+    if (revisionsList.contains(fallbackRevision) && baseRevision != fallbackRevision && metadataRevision != fallbackRevision) {
+      status.pause();
+      logger.printStatus('Using Flutter v1.0.0 ($fallbackRevision) as the base revision since a valid base revision could not be found in the .metadata file. This may result in more merge conflicts than normally expected.', indent: 4, color: TerminalColor.grey);
+      status.resume();
     }
   }
 }
