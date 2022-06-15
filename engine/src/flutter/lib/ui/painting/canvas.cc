@@ -35,37 +35,40 @@ static void Canvas_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
 
-#define FOR_EACH_BINDING(V)         \
-  V(Canvas, save)                   \
-  V(Canvas, saveLayerWithoutBounds) \
-  V(Canvas, saveLayer)              \
-  V(Canvas, restore)                \
-  V(Canvas, getSaveCount)           \
-  V(Canvas, translate)              \
-  V(Canvas, scale)                  \
-  V(Canvas, rotate)                 \
-  V(Canvas, skew)                   \
-  V(Canvas, transform)              \
-  V(Canvas, clipRect)               \
-  V(Canvas, clipRRect)              \
-  V(Canvas, clipPath)               \
-  V(Canvas, drawColor)              \
-  V(Canvas, drawLine)               \
-  V(Canvas, drawPaint)              \
-  V(Canvas, drawRect)               \
-  V(Canvas, drawRRect)              \
-  V(Canvas, drawDRRect)             \
-  V(Canvas, drawOval)               \
-  V(Canvas, drawCircle)             \
-  V(Canvas, drawArc)                \
-  V(Canvas, drawPath)               \
-  V(Canvas, drawImage)              \
-  V(Canvas, drawImageRect)          \
-  V(Canvas, drawImageNine)          \
-  V(Canvas, drawPicture)            \
-  V(Canvas, drawPoints)             \
-  V(Canvas, drawVertices)           \
-  V(Canvas, drawAtlas)              \
+#define FOR_EACH_BINDING(V)           \
+  V(Canvas, save)                     \
+  V(Canvas, saveLayerWithoutBounds)   \
+  V(Canvas, saveLayer)                \
+  V(Canvas, restore)                  \
+  V(Canvas, getSaveCount)             \
+  V(Canvas, translate)                \
+  V(Canvas, scale)                    \
+  V(Canvas, rotate)                   \
+  V(Canvas, skew)                     \
+  V(Canvas, transform)                \
+  V(Canvas, getTransform)             \
+  V(Canvas, clipRect)                 \
+  V(Canvas, clipRRect)                \
+  V(Canvas, clipPath)                 \
+  V(Canvas, getLocalClipBounds)       \
+  V(Canvas, getDestinationClipBounds) \
+  V(Canvas, drawColor)                \
+  V(Canvas, drawLine)                 \
+  V(Canvas, drawPaint)                \
+  V(Canvas, drawRect)                 \
+  V(Canvas, drawRRect)                \
+  V(Canvas, drawDRRect)               \
+  V(Canvas, drawOval)                 \
+  V(Canvas, drawCircle)               \
+  V(Canvas, drawArc)                  \
+  V(Canvas, drawPath)                 \
+  V(Canvas, drawImage)                \
+  V(Canvas, drawImageRect)            \
+  V(Canvas, drawImageNine)            \
+  V(Canvas, drawPicture)              \
+  V(Canvas, drawPoints)               \
+  V(Canvas, drawVertices)             \
+  V(Canvas, drawAtlas)                \
   V(Canvas, drawShadow)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
@@ -219,6 +222,19 @@ void Canvas::transform(const tonic::Float64List& matrix4) {
   }
 }
 
+void Canvas::getTransform(tonic::Float64List& matrix4) {
+  SkM44 sk_m44 =
+      display_list_recorder_
+          ? display_list_recorder_->builder()->getTransformFullPerspective()
+          : canvas_->getLocalToDevice();
+  SkScalar m44_values[16];
+  // The Float array stored by Dart Matrix4 is in column-major order
+  sk_m44.getColMajor(m44_values);
+  for (int i = 0; i < 16; i++) {
+    matrix4[i] = m44_values[i];
+  }
+}
+
 void Canvas::clipRect(double left,
                       double top,
                       double right,
@@ -253,6 +269,32 @@ void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
   } else if (canvas_) {
     canvas_->clipPath(path->path(), doAntiAlias);
   }
+}
+
+void Canvas::getDestinationClipBounds(tonic::Float64List& rect) {
+  if (display_list_recorder_) {
+    SkRect bounds = builder()->getDestinationClipBounds();
+    rect[0] = bounds.fLeft;
+    rect[1] = bounds.fTop;
+    rect[2] = bounds.fRight;
+    rect[3] = bounds.fBottom;
+  } else {
+    SkIRect bounds = canvas_->getDeviceClipBounds();
+    rect[0] = bounds.fLeft;
+    rect[1] = bounds.fTop;
+    rect[2] = bounds.fRight;
+    rect[3] = bounds.fBottom;
+  }
+}
+
+void Canvas::getLocalClipBounds(tonic::Float64List& rect) {
+  SkRect bounds = display_list_recorder_
+                      ? display_list_recorder_->builder()->getLocalClipBounds()
+                      : canvas_->getLocalClipBounds();
+  rect[0] = bounds.fLeft;
+  rect[1] = bounds.fTop;
+  rect[2] = bounds.fRight;
+  rect[3] = bounds.fBottom;
 }
 
 void Canvas::drawColor(SkColor color, DlBlendMode blend_mode) {

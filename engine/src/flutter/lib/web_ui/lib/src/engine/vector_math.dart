@@ -1429,6 +1429,39 @@ Float32List toMatrix32(Float64List matrix64) {
   return matrix32;
 }
 
+/// Converts a matrix represented using [Float32List] to one represented using
+/// [Float64List].
+///
+/// 32-bit precision is sufficient because Flutter Engine itself (as well as
+/// Skia) use 32-bit precision under the hood anyway.
+///
+/// 32-bit matrices require 2x less memory and in V8 they are allocated on the
+/// JavaScript heap, thus avoiding a malloc.
+///
+/// See also:
+/// * https://bugs.chromium.org/p/v8/issues/detail?id=9199
+/// * https://bugs.chromium.org/p/v8/issues/detail?id=2022
+Float64List toMatrix64(Float32List matrix32) {
+  final Float64List matrix64 = Float64List(16);
+  matrix64[15] = matrix32[15];
+  matrix64[14] = matrix32[14];
+  matrix64[13] = matrix32[13];
+  matrix64[12] = matrix32[12];
+  matrix64[11] = matrix32[11];
+  matrix64[10] = matrix32[10];
+  matrix64[9] = matrix32[9];
+  matrix64[8] = matrix32[8];
+  matrix64[7] = matrix32[7];
+  matrix64[6] = matrix32[6];
+  matrix64[5] = matrix32[5];
+  matrix64[4] = matrix32[4];
+  matrix64[3] = matrix32[3];
+  matrix64[2] = matrix32[2];
+  matrix64[1] = matrix32[1];
+  matrix64[0] = matrix32[0];
+  return matrix64;
+}
+
 // Stores matrix in a form that allows zero allocation transforms.
 // TODO(yjbanov): re-evaluate the need for this class. It may be an
 //                over-optimization. It is only used by `GradientLinear` in the

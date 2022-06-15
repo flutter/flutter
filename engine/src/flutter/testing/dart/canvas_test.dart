@@ -270,8 +270,8 @@ void main() {
   });
 
   test('Canvas preserves perspective data in Matrix4', () async {
-    final double rotateAroundX = pi / 6;  // 30 degrees
-    final double rotateAroundY = pi / 9;  // 20 degrees
+    const double rotateAroundX = pi / 6;  // 30 degrees
+    const double rotateAroundY = pi / 9;  // 20 degrees
     const int width = 150;
     const int height = 150;
     const Color black = Color.fromARGB(255, 0, 0, 0);
@@ -434,5 +434,264 @@ void main() {
     } else {
       expect(error, isNull);
     }
+  });
+
+  Matcher closeToTransform(Float64List expected) => (dynamic v) {
+    Expect.type<Float64List>(v);
+    final Float64List value = v;
+    expect(expected.length, equals(16));
+    expect(value.length, equals(16));
+    for (int r = 0; r < 4; r++) {
+      for (int c = 0; c < 4; c++) {
+        final double vActual = value[r*4 + c];
+        final double vExpected = expected[r*4 + c];
+        if ((vActual - vExpected).abs() > 1e-10) {
+          Expect.fail('matrix mismatch at $r, $c, $vActual not close to $vExpected');
+        }
+      }
+    }
+  };
+
+  Matcher notCloseToTransform(Float64List expected) => (dynamic v) {
+    Expect.type<Float64List>(v);
+    final Float64List value = v;
+    expect(expected.length, equals(16));
+    expect(value.length, equals(16));
+    for (int r = 0; r < 4; r++) {
+      for (int c = 0; c < 4; c++) {
+        final double vActual = value[r*4 + c];
+        final double vExpected = expected[r*4 + c];
+        if ((vActual - vExpected).abs() > 1e-10) {
+          return;
+        }
+      }
+    }
+    Expect.fail('$value is too close to $expected');
+  };
+
+  test('Canvas.translate affects canvas.getTransform', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.translate(12, 14.5);
+    final Float64List matrix = Matrix4.translationValues(12, 14.5, 0).storage;
+    final Float64List curMatrix = canvas.getTransform();
+    expect(curMatrix, closeToTransform(matrix));
+    canvas.translate(10, 10);
+    final Float64List newCurMatrix = canvas.getTransform();
+    expect(newCurMatrix, notCloseToTransform(matrix));
+    expect(curMatrix, closeToTransform(matrix));
+  });
+
+  test('Canvas.scale affects canvas.getTransform', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.scale(12, 14.5);
+    final Float64List matrix = Matrix4.diagonal3Values(12, 14.5, 1).storage;
+    final Float64List curMatrix = canvas.getTransform();
+    expect(curMatrix, closeToTransform(matrix));
+    canvas.scale(10, 10);
+    final Float64List newCurMatrix = canvas.getTransform();
+    expect(newCurMatrix, notCloseToTransform(matrix));
+    expect(curMatrix, closeToTransform(matrix));
+  });
+
+  test('Canvas.rotate affects canvas.getTransform', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.rotate(pi);
+    final Float64List matrix = Matrix4.rotationZ(pi).storage;
+    final Float64List curMatrix = canvas.getTransform();
+    expect(curMatrix, closeToTransform(matrix));
+    canvas.rotate(pi / 2);
+    final Float64List newCurMatrix = canvas.getTransform();
+    expect(newCurMatrix, notCloseToTransform(matrix));
+    expect(curMatrix, closeToTransform(matrix));
+  });
+
+  test('Canvas.skew affects canvas.getTransform', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.skew(12, 14.5);
+    final Float64List matrix = (Matrix4.identity()..setEntry(0, 1, 12)..setEntry(1, 0, 14.5)).storage;
+    final Float64List curMatrix = canvas.getTransform();
+    expect(curMatrix, closeToTransform(matrix));
+    canvas.skew(10, 10);
+    final Float64List newCurMatrix = canvas.getTransform();
+    expect(newCurMatrix, notCloseToTransform(matrix));
+    expect(curMatrix, closeToTransform(matrix));
+  });
+
+  test('Canvas.transform affects canvas.getTransform', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Float64List matrix = (Matrix4.identity()..translate(12.0, 14.5)..scale(12.0, 14.5)).storage;
+    canvas.transform(matrix);
+    final Float64List curMatrix = canvas.getTransform();
+    expect(curMatrix, closeToTransform(matrix));
+    canvas.translate(10, 10);
+    final Float64List newCurMatrix = canvas.getTransform();
+    expect(newCurMatrix, notCloseToTransform(matrix));
+    expect(curMatrix, closeToTransform(matrix));
+  });
+
+  Matcher closeToRect(Rect expected) => (dynamic v) {
+    Expect.type<Rect>(v);
+    final Rect value = v;
+    expect(value.left,   closeTo(expected.left,   1e-6));
+    expect(value.top,    closeTo(expected.top,    1e-6));
+    expect(value.right,  closeTo(expected.right,  1e-6));
+    expect(value.bottom, closeTo(expected.bottom, 1e-6));
+  };
+
+  Matcher notCloseToRect(Rect expected) => (dynamic v) {
+    Expect.type<Rect>(v);
+    final Rect value = v;
+    if ((value.left - expected.left).abs() > 1e-6 ||
+        (value.top - expected.top).abs() > 1e-6 ||
+        (value.right - expected.right).abs() > 1e-6 ||
+        (value.bottom - expected.bottom).abs() > 1e-6) {
+      return;
+    }
+    Expect.fail('$value is too close to $expected');
+  };
+
+  test('Canvas.clipRect affects canvas.getClipBounds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
+    canvas.clipRect(clipBounds);
+
+    // Save initial return values for testing restored values
+    final Rect initialLocalBounds = canvas.getLocalClipBounds();
+    final Rect initialDestinationBounds = canvas.getDestinationClipBounds();
+    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+    expect(initialDestinationBounds, closeToRect(clipBounds));
+
+    canvas.save();
+    canvas.clipRect(const Rect.fromLTRB(0, 0, 15, 15));
+    // Both clip bounds have changed
+    expect(canvas.getLocalClipBounds(), notCloseToRect(clipExpandedBounds));
+    expect(canvas.getDestinationClipBounds(), notCloseToRect(clipBounds));
+    // Previous return values have not changed
+    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+    expect(initialDestinationBounds, closeToRect(clipBounds));
+    canvas.restore();
+
+    // save/restore returned the values to their original values
+    expect(canvas.getLocalClipBounds(), initialLocalBounds);
+    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+
+    canvas.save();
+    canvas.scale(2, 2);
+    const Rect scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
+    expect(canvas.getLocalClipBounds(), closeToRect(scaledExpandedBounds));
+    // Destination bounds are unaffected by transform
+    expect(canvas.getDestinationClipBounds(), closeToRect(clipBounds));
+    canvas.restore();
+
+    // save/restore returned the values to their original values
+    expect(canvas.getLocalClipBounds(), initialLocalBounds);
+    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+  });
+
+  test('Canvas.clipRRect affects canvas.getClipBounds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
+    final RRect clip = RRect.fromRectAndRadius(clipBounds, const Radius.circular(3));
+    canvas.clipRRect(clip);
+
+    // Save initial return values for testing restored values
+    final Rect initialLocalBounds = canvas.getLocalClipBounds();
+    final Rect initialDestinationBounds = canvas.getDestinationClipBounds();
+    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+    expect(initialDestinationBounds, closeToRect(clipBounds));
+
+    canvas.save();
+    canvas.clipRect(const Rect.fromLTRB(0, 0, 15, 15));
+    // Both clip bounds have changed
+    expect(canvas.getLocalClipBounds(), notCloseToRect(clipExpandedBounds));
+    expect(canvas.getDestinationClipBounds(), notCloseToRect(clipBounds));
+    // Previous return values have not changed
+    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+    expect(initialDestinationBounds, closeToRect(clipBounds));
+    canvas.restore();
+
+    // save/restore returned the values to their original values
+    expect(canvas.getLocalClipBounds(), initialLocalBounds);
+    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+
+    canvas.save();
+    canvas.scale(2, 2);
+    const Rect scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
+    expect(canvas.getLocalClipBounds(), closeToRect(scaledExpandedBounds));
+    // Destination bounds are unaffected by transform
+    expect(canvas.getDestinationClipBounds(), closeToRect(clipBounds));
+    canvas.restore();
+
+    // save/restore returned the values to their original values
+    expect(canvas.getLocalClipBounds(), initialLocalBounds);
+    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+  });
+
+  test('Canvas.clipPath affects canvas.getClipBounds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
+    final Path clip = Path()..addRect(clipBounds)..addOval(clipBounds);
+    canvas.clipPath(clip);
+
+    // Save initial return values for testing restored values
+    final Rect initialLocalBounds = canvas.getLocalClipBounds();
+    final Rect initialDestinationBounds = canvas.getDestinationClipBounds();
+    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+    expect(initialDestinationBounds, closeToRect(clipBounds));
+
+    canvas.save();
+    canvas.clipRect(const Rect.fromLTRB(0, 0, 15, 15));
+    // Both clip bounds have changed
+    expect(canvas.getLocalClipBounds(), notCloseToRect(clipExpandedBounds));
+    expect(canvas.getDestinationClipBounds(), notCloseToRect(clipBounds));
+    // Previous return values have not changed
+    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+    expect(initialDestinationBounds, closeToRect(clipBounds));
+    canvas.restore();
+
+    // save/restore returned the values to their original values
+    expect(canvas.getLocalClipBounds(), initialLocalBounds);
+    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+
+    canvas.save();
+    canvas.scale(2, 2);
+    const Rect scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
+    expect(canvas.getLocalClipBounds(), closeToRect(scaledExpandedBounds));
+    // Destination bounds are unaffected by transform
+    expect(canvas.getDestinationClipBounds(), closeToRect(clipBounds));
+    canvas.restore();
+
+    // save/restore returned the values to their original values
+    expect(canvas.getLocalClipBounds(), initialLocalBounds);
+    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+  });
+
+  test('Canvas.clipRect(diff) does not affect canvas.getClipBounds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
+    canvas.clipRect(clipBounds);
+
+    // Save initial return values for testing restored values
+    final Rect initialLocalBounds = canvas.getLocalClipBounds();
+    final Rect initialDestinationBounds = canvas.getDestinationClipBounds();
+    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+    expect(initialDestinationBounds, closeToRect(clipBounds));
+
+    canvas.clipRect(const Rect.fromLTRB(0, 0, 15, 15), clipOp: ClipOp.difference);
+    expect(canvas.getLocalClipBounds(), initialLocalBounds);
+    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
   });
 }

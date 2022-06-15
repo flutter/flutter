@@ -65,7 +65,7 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
 
 DisplayListBuilder::DisplayListBuilder(const SkRect& cull_rect)
     : cull_rect_(cull_rect) {
-  layer_stack_.emplace_back();
+  layer_stack_.emplace_back(SkM44(), cull_rect);
   current_layer_ = &layer_stack_.back();
 }
 
@@ -415,7 +415,7 @@ void DisplayListBuilder::setAttributesFromPaint(
 
 void DisplayListBuilder::save() {
   Push<SaveOp>(0, 1);
-  layer_stack_.emplace_back();
+  layer_stack_.emplace_back(current_layer_);
   current_layer_ = &layer_stack_.back();
 }
 void DisplayListBuilder::restore() {
@@ -476,7 +476,7 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
         : Push<SaveLayerOp>(0, 1, options);
   }
   CheckLayerOpacityCompatibility(options.renders_with_attributes());
-  layer_stack_.emplace_back(save_layer_offset, true);
+  layer_stack_.emplace_back(current_layer_, save_layer_offset, true);
   current_layer_ = &layer_stack_.back();
   if (options.renders_with_attributes()) {
     // |current_opacity_compatibility_| does not take an ImageFilter into
@@ -505,23 +505,27 @@ void DisplayListBuilder::translate(SkScalar tx, SkScalar ty) {
   if (SkScalarIsFinite(tx) && SkScalarIsFinite(ty) &&
       (tx != 0.0 || ty != 0.0)) {
     Push<TranslateOp>(0, 1, tx, ty);
+    current_layer_->matrix.preTranslate(tx, ty);
   }
 }
 void DisplayListBuilder::scale(SkScalar sx, SkScalar sy) {
   if (SkScalarIsFinite(sx) && SkScalarIsFinite(sy) &&
       (sx != 1.0 || sy != 1.0)) {
     Push<ScaleOp>(0, 1, sx, sy);
+    current_layer_->matrix.preScale(sx, sy);
   }
 }
 void DisplayListBuilder::rotate(SkScalar degrees) {
   if (SkScalarMod(degrees, 360.0) != 0.0) {
     Push<RotateOp>(0, 1, degrees);
+    current_layer_->matrix.preConcat(SkMatrix::RotateDeg(degrees));
   }
 }
 void DisplayListBuilder::skew(SkScalar sx, SkScalar sy) {
   if (SkScalarIsFinite(sx) && SkScalarIsFinite(sy) &&
       (sx != 0.0 || sy != 0.0)) {
     Push<SkewOp>(0, 1, sx, sy);
+    current_layer_->matrix.preConcat(SkMatrix::Skew(sx, sy));
   }
 }
 
@@ -539,6 +543,10 @@ void DisplayListBuilder::transform2DAffine(
     Push<Transform2DAffineOp>(0, 1,
                               mxx, mxy, mxt,
                               myx, myy, myt);
+    current_layer_->matrix.preConcat(SkM44(mxx, mxy,  0,  mxt,
+                                           myx, myy,  0,  myt,
+                                            0,   0,   1,   0,
+                                            0,   0,   0,   1));
   }
 }
 // full 4x4 transform in row major order
@@ -562,11 +570,16 @@ void DisplayListBuilder::transformFullPerspective(
                                      myx, myy, myz, myt,
                                      mzx, mzy, mzz, mzt,
                                      mwx, mwy, mwz, mwt);
+    current_layer_->matrix.preConcat(SkM44(mxx, mxy, mxz, mxt,
+                                           myx, myy, myz, myt,
+                                           mzx, mzy, mzz, mzt,
+                                           mwx, mwy, mwz, mwt));
   }
 }
 // clang-format on
 void DisplayListBuilder::transformReset() {
   Push<TransformResetOp>(0, 0);
+  current_layer_->matrix.setIdentity();
 }
 void DisplayListBuilder::transform(const SkMatrix* matrix) {
   if (matrix != nullptr) {
@@ -586,9 +599,17 @@ void DisplayListBuilder::transform(const SkM44* m44) {
 void DisplayListBuilder::clipRect(const SkRect& rect,
                                   SkClipOp clip_op,
                                   bool is_aa) {
-  clip_op == SkClipOp::kIntersect  //
-      ? Push<ClipIntersectRectOp>(0, 1, rect, is_aa)
-      : Push<ClipDifferenceRectOp>(0, 1, rect, is_aa);
+  switch (clip_op) {
+    case SkClipOp::kIntersect:
+      Push<ClipIntersectRectOp>(0, 1, rect, is_aa);
+      if (!current_layer_->clip_bounds.intersect(rect)) {
+        current_layer_->clip_bounds.setEmpty();
+      }
+      break;
+    case SkClipOp::kDifference:
+      Push<ClipDifferenceRectOp>(0, 1, rect, is_aa);
+      break;
+  }
 }
 void DisplayListBuilder::clipRRect(const SkRRect& rrect,
                                    SkClipOp clip_op,
@@ -596,9 +617,17 @@ void DisplayListBuilder::clipRRect(const SkRRect& rrect,
   if (rrect.isRect()) {
     clipRect(rrect.rect(), clip_op, is_aa);
   } else {
-    clip_op == SkClipOp::kIntersect  //
-        ? Push<ClipIntersectRRectOp>(0, 1, rrect, is_aa)
-        : Push<ClipDifferenceRRectOp>(0, 1, rrect, is_aa);
+    switch (clip_op) {
+      case SkClipOp::kIntersect:
+        Push<ClipIntersectRRectOp>(0, 1, rrect, is_aa);
+        if (!current_layer_->clip_bounds.intersect(rrect.getBounds())) {
+          current_layer_->clip_bounds.setEmpty();
+        }
+        break;
+      case SkClipOp::kDifference:
+        Push<ClipDifferenceRRectOp>(0, 1, rrect, is_aa);
+        break;
+    }
   }
 }
 void DisplayListBuilder::clipPath(const SkPath& path,
@@ -621,9 +650,26 @@ void DisplayListBuilder::clipPath(const SkPath& path,
       return;
     }
   }
-  clip_op == SkClipOp::kIntersect  //
-      ? Push<ClipIntersectPathOp>(0, 1, path, is_aa)
-      : Push<ClipDifferencePathOp>(0, 1, path, is_aa);
+  switch (clip_op) {
+    case SkClipOp::kIntersect:
+      Push<ClipIntersectPathOp>(0, 1, path, is_aa);
+      if (!current_layer_->clip_bounds.intersect(path.getBounds())) {
+        current_layer_->clip_bounds.setEmpty();
+      }
+      break;
+    case SkClipOp::kDifference:
+      Push<ClipDifferencePathOp>(0, 1, path, is_aa);
+      break;
+  }
+}
+SkRect DisplayListBuilder::getLocalClipBounds() {
+  SkM44 inverse;
+  if (current_layer_->matrix.invert(&inverse)) {
+    SkRect devBounds;
+    current_layer_->clip_bounds.roundOut(&devBounds);
+    return inverse.asM33().mapRect(devBounds);
+  }
+  return kMaxCullRect_;
 }
 
 void DisplayListBuilder::drawPaint() {
