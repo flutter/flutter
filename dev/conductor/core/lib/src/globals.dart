@@ -45,6 +45,21 @@ const String hotfixDocumentationBestPractices =
 
 const String cocoonDashboard = 'https://flutter-dashboard.appspot.com/#/build';
 
+const String discordReleaseChannel =
+    'https://discord.com/channels/608014603317936148/783492179922124850';
+
+const String flutterReleaseHotline =
+    'https://mail.google.com/chat/u/0/#chat/space/AAAA6RKcK2k';
+
+const String hotfixToStableWiki =
+    'https://github.com/flutter/flutter/wiki/Hotfixes-to-the-Stable-Channel';
+
+const String flutterAnnounceGroup =
+    'https://groups.google.com/g/flutter-announce';
+
+const String hotfixDocumentationBestPractices =
+    'https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices';
+
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
 );
