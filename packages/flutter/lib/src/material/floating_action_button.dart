@@ -786,7 +786,7 @@ class _M2Defaults extends FloatingActionButtonThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_99
+// Generated version v0_101
 class _TokenDefaultsM3 extends FloatingActionButtonThemeData {
   _TokenDefaultsM3(this.context, this.type, this.hasChild)
     : super(
