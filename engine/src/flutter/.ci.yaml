@@ -100,16 +100,24 @@ targets:
     timeout: 60
 
   - name: Linux Android Emulator Tests
-    bringup: true # Recipe issue https://github.com/flutter/flutter/issues/86427
     recipe: engine/scenarios
+    enabled_branches:
+      - main
+      - master
     properties:
       dependencies: >-
         [
-          {"dependency": "android_virtual_device", "version": "31"}
+          {"dependency": "android_virtual_device", "version": "31"},
+          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       upload_packages: "true"
       clobber: "true"
     timeout: 60
+    runIf:
+      - DEPS
+      - .ci.yaml
+      - testing/**
+      - shell/platforms/android/**
 
   - name: Linux Benchmarks
     enabled_branches:

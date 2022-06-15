@@ -6,6 +6,7 @@ package dev.flutter.scenarios;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.view.Choreographer;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -13,7 +14,7 @@ import androidx.annotation.Nullable;
 import io.flutter.plugin.platform.PlatformView;
 
 public class TextPlatformView implements PlatformView {
-  private final TextView textView;
+  final TextView textView;
 
   @SuppressWarnings("unchecked")
   TextPlatformView(@NonNull final Context context, int id, @Nullable String params) {
@@ -21,6 +22,17 @@ public class TextPlatformView implements PlatformView {
     textView.setTextSize(72);
     textView.setBackgroundColor(Color.rgb(255, 255, 255));
     textView.setText(params);
+
+    // Investigate why this is needed to pass some gold tests.
+    Choreographer.getInstance()
+        .postFrameCallbackDelayed(
+            new Choreographer.FrameCallback() {
+              @Override
+              public void doFrame(long frameTimeNanos) {
+                textView.invalidate();
+              }
+            },
+            500);
   }
 
   @Override

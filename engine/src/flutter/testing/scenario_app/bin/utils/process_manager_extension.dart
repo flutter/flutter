@@ -8,8 +8,12 @@ import 'dart:io';
 
 import 'package:process/process.dart';
 
-/// Pipes the [process] streams and writes them to [out].
-Future<int> pipeProcessStreams(Process process, {StringSink? out}) async {
+/// Pipes the [process] streams and writes them to [out] sink.
+/// If [out] is null, then the current [Process.stdout] is used as the sink.
+Future<int> pipeProcessStreams(
+  Process process, {
+  StringSink? out,
+}) async {
   out ??= stdout;
   final Completer<void> stdoutCompleter = Completer<void>();
   final StreamSubscription<String> stdoutSub = process.stdout
@@ -28,11 +32,11 @@ Future<int> pipeProcessStreams(Process process, {StringSink? out}) async {
     }, onDone: stderrCompleter.complete);
 
   final int exitCode = await process.exitCode;
+  await stderrSub.cancel();
+  await stdoutSub.cancel();
+
   await stdoutCompleter.future;
   await stderrCompleter.future;
-
-  stderrSub.cancel();
-  stdoutSub.cancel();
   return exitCode;
 }
 
