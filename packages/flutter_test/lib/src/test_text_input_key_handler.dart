@@ -16,7 +16,8 @@ abstract class TestTextInputKeyHandler {
   Future<void> handleKeyUpEvent(LogicalKeyboardKey key);
 }
 
-/// MacOS specific key input handler
+/// MacOS specific key input handler. This class translates standard macOS text editing shortcuts
+/// into appropriate selectors similarly to what NSTextInputContext does in Flutter Engine.
 class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   /// Create a new macOS specific text input handler.
   MacOSTestTextInputKeyHandler(this.client);
