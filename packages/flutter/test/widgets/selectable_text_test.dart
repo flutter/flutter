@@ -4224,8 +4224,7 @@ void main() {
     tester.state<EditableTextState>(find.byType(EditableText));
     final RenderEditable renderEditable = state.renderEditable;
 
-    await tester.tapAt(const Offset(20, 10));
-    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.longPressAt(const Offset(20, 10));
     await tester.pumpAndSettle();
 
     final List<FadeTransition> transitions = find.descendant(
@@ -4254,8 +4253,8 @@ void main() {
     final RenderEditable renderEditable =
         tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
 
-    await tester.tapAt(const Offset(20, 10));
-    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    // await tester.longPressAt(const Offset(20, 10)); Why doesn't this work?
+    renderEditable.selectWordsInRange(from: const Offset(20, 10), cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
     final List<Widget> transitions =

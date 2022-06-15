@@ -1330,14 +1330,13 @@ class TextSelectionGestureDetectorBuilder {
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
   /// Returns true if lastSecondaryTapDownPosition was on selection.
-  bool get _lastSecondaryTapWasOnSelection {
-    assert(renderEditable.lastSecondaryTapDownPosition != null);
+  bool _lastSecondaryTapWasOnSelection(Offset secondaryTapUpPosition) {
     if (renderEditable.selection == null) {
       return false;
     }
 
     final TextPosition textPosition = renderEditable.getPositionForPoint(
-      renderEditable.lastSecondaryTapDownPosition!,
+      secondaryTapUpPosition,
     );
 
     return renderEditable.selection!.start <= textPosition.offset
@@ -1406,6 +1405,35 @@ class TextSelectionGestureDetectorBuilder {
     );
   }
 
+  /// Move the selection to the beginning or end of a word closest to the given
+  /// position.
+  @protected
+  void selectWordEdge(Offset position, SelectionChangedCause cause) {
+    final TextPosition textPosition = renderEditable.getPositionForPoint(position);
+    final TextRange word = renderEditable.getWordBoundary(textPosition);
+    late TextSelection newSelection;
+    if (textPosition.offset - word.start <= 1) {
+      newSelection = TextSelection.collapsed(offset: word.start);
+    } else {
+      newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
+    }
+
+    if (newSelection.isValid) {
+      final int textLength = editableText.textEditingValue.text.length;
+      newSelection = newSelection.copyWith(
+        baseOffset: math.min(newSelection.baseOffset, textLength),
+        extentOffset: math.min(newSelection.extentOffset, textLength),
+      );
+    }
+
+    editableText.userUpdateTextEditingValue(
+      editableText.textEditingValue.copyWith(
+        selection: newSelection,
+      ),
+      cause,
+    );
+  }
+
   /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
@@ -1454,7 +1482,6 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
   void onTapDown(TapDownDetails details) {
-    renderEditable.handleTapDown(details);//remove
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
@@ -1568,7 +1595,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.unknown:
               // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
               // of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              selectWordEdge(details.globalPosition, SelectionChangedCause.tap);
               break;
           }
           break;
@@ -1646,19 +1673,19 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
-  /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
+  /// Handler for [TextSelectionGestureDetector.onSecondaryTapUp].
   ///
   /// By default, selects the word if possible and shows the toolbar.
   @protected
-  void onSecondaryTap() {
+  void onSecondaryTapUp(TapUpDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (!_lastSecondaryTapWasOnSelection || !renderEditable.hasFocus) {
-          renderEditable.selectWord(cause: SelectionChangedCause.tap);
+        if (!_lastSecondaryTapWasOnSelection(details.globalPosition) || !renderEditable.hasFocus) {
+          renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
         }
         if (shouldShowSelectionToolbar) {
           editableText.hideToolbar();
@@ -1670,7 +1697,7 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (!renderEditable.hasFocus) {
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          renderEditable.selectPositionAt(from: details.globalPosition, cause: SelectionChangedCause.tap);
         }
         editableText.toggleToolbar();
         break;
@@ -1853,7 +1880,7 @@ class TextSelectionGestureDetectorBuilder {
       onTapDown: onTapDown,
       onForcePressStart: delegate.forcePressEnabled ? onForcePressStart : null,
       onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
-      onSecondaryTap: onSecondaryTap,
+      onSecondaryTapUp: onSecondaryTapUp,
       onSecondaryTapDown: onSecondaryTapDown,
       onSingleTapUp: onSingleTapUp,
       onSingleTapCancel: onSingleTapCancel,
@@ -1892,7 +1919,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onTapDown,
     this.onForcePressStart,
     this.onForcePressEnd,
-    this.onSecondaryTap,
+    this.onSecondaryTapUp,
     this.onSecondaryTapDown,
     this.onSingleTapUp,
     this.onSingleTapCancel,
@@ -1920,8 +1947,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// lifted off the screen.
   final GestureForcePressEndCallback? onForcePressEnd;
 
-  /// Called for a tap event with the secondary mouse button.
-  final GestureTapCallback? onSecondaryTap;
+  /// Called for a tap up event with the secondary mouse button.
+  final GestureTapUpCallback? onSecondaryTapUp;
 
   /// Called for a tap down event with the secondary mouse button.
   final GestureTapDownCallback? onSecondaryTapDown;
@@ -2120,7 +2147,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       () => TapGestureRecognizer(debugOwner: this),
       (TapGestureRecognizer instance) {
         instance
-          ..onSecondaryTap = widget.onSecondaryTap
+          ..onSecondaryTapUp = widget.onSecondaryTapUp
           ..onSecondaryTapDown = widget.onSecondaryTapDown
           ..onTapDown = _handleTapDown
           ..onTapUp = _handleTapUp

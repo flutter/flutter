@@ -3553,8 +3553,8 @@ void main() {
     final RenderEditable renderEditable =
       tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
 
-    await tester.tapAt(textOffsetToPosition(tester, 5));
-    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    // await tester.longPressAt(textOffsetToPosition(tester, 5)); why doesn't this work?
+    renderEditable.selectWordsInRange(from: textOffsetToPosition(tester, 5), cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
     final List<Widget> transitions =

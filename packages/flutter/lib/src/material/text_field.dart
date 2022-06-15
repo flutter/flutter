@@ -105,7 +105,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
           break;
       }
