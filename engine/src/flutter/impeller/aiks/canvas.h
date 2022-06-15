@@ -35,7 +35,10 @@ class Canvas {
 
   void Save();
 
-  void SaveLayer(Paint paint, std::optional<Rect> bounds = std::nullopt);
+  void SaveLayer(
+      Paint paint,
+      std::optional<Rect> bounds = std::nullopt,
+      std::optional<Paint::ImageFilterProc> backdrop_filter = std::nullopt);
 
   bool Restore();
 
