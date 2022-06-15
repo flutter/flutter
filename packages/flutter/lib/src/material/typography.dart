@@ -735,7 +735,7 @@ class Typography with Diagnosticable {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_99
+// Generated version v0_101
 class _M3Typography {
   _M3Typography._();
 
