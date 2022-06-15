@@ -57,20 +57,22 @@ void main() {
   });
 
   testWidgets('selectors are called on macOS', (WidgetTester tester) async {
-    String? selectorName;
+    List<dynamic>? selectorNames;
+    await SystemChannels.textInput.invokeMethod('TextInput.setClient', <dynamic>[1, <String, dynamic>{}]);
     await SystemChannels.textInput.invokeMethod('TextInput.show');
     SystemChannels.textInput.setMethodCallHandler((MethodCall call) async {
-      if (call.method == 'TextInputClient.performSelector') {
-        selectorName = (call.arguments as List<dynamic>)[1] as String;
+      if (call.method == 'TextInputClient.performSelectors') {
+        selectorNames = (call.arguments as List<dynamic>)[1] as List<dynamic>;
       }
     });
     await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
 
     if (defaultTargetPlatform == TargetPlatform.macOS) {
-      expect(selectorName, 'moveToBeginningOfParagraph:');
+      expect(selectorNames, <dynamic>['moveBackward:', 'moveToBeginningOfParagraph:']);
     } else {
-      expect(selectorName, isNull);
+      expect(selectorNames, isNull);
     }
-  });
+  }, variant: TargetPlatformVariant.all());
 }
