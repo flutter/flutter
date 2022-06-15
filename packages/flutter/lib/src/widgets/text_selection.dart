@@ -1454,7 +1454,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
   void onTapDown(TapDownDetails details) {
-    renderEditable.handleTapDown(details);
+    renderEditable.handleTapDown(details);//remove
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
@@ -1562,7 +1562,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
               // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+              renderEditable.selectPositionAt(from: details.globalPosition, cause: SelectionChangedCause.tap);
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
@@ -1576,7 +1576,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          renderEditable.selectPositionAt(from: details.globalPosition, cause: SelectionChangedCause.tap);
           break;
       }
     }
@@ -1702,7 +1702,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.tap);
+      renderEditable.selectWordsInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
       }
