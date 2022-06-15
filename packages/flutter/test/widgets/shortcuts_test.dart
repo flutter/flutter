@@ -871,7 +871,7 @@ void main() {
                 },
                 child: Shortcuts(
                   shortcuts: <LogicalKeySet, Intent>{
-                    LogicalKeySet(LogicalKeyboardKey.keyA): DoNothingAndStopPropagationIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.keyA): const DoNothingAndStopPropagationIntent(),
                   },
                   child: TextField(key: textFieldKey, autofocus: true),
                 ),
