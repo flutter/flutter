@@ -173,14 +173,6 @@ void main() {
       await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
-
-    testUsingContext('as null when set to null', () async {
-      platform.environment = <String, String>{'FLUTTER_TEST': null};
-      processManager.addCommand(flutterTestCommand(null));
-
-      await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
-    });
   });
 
   group('Dart Entrypoint Args', () {

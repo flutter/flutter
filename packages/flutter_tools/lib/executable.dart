@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import 'runner.dart' as runner;
 import 'src/artifacts.dart';
 import 'src/base/context.dart';
@@ -110,7 +106,7 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        dartExecutable: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
@@ -134,8 +130,8 @@ Future<void> main(List<String> args) async {
 }
 
 List<FlutterCommand> generateCommands({
-  @required bool verboseHelp,
-  @required bool verbose,
+  required bool verboseHelp,
+  required bool verbose,
 }) => <FlutterCommand>[
   AnalyzeCommand(
     verboseHelp: verboseHelp,
@@ -144,7 +140,7 @@ List<FlutterCommand> generateCommands({
     processManager: globals.processManager,
     logger: globals.logger,
     terminal: globals.terminal,
-    artifacts: globals.artifacts,
+    artifacts: globals.artifacts!,
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
@@ -210,9 +206,9 @@ List<FlutterCommand> generateCommands({
 /// Our logger class hierarchy and runtime requirements are overly complicated.
 class LoggerFactory {
   LoggerFactory({
-    @required Terminal terminal,
-    @required Stdio stdio,
-    @required OutputPreferences outputPreferences,
+    required Terminal terminal,
+    required Stdio stdio,
+    required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _terminal = terminal,
        _stdio = stdio,
@@ -226,11 +222,11 @@ class LoggerFactory {
 
   /// Create the appropriate logger for the current platform and configuration.
   Logger createLogger({
-    @required bool verbose,
-    @required bool prefixedErrors,
-    @required bool machine,
-    @required bool daemon,
-    @required bool windows,
+    required bool verbose,
+    required bool prefixedErrors,
+    required bool machine,
+    required bool daemon,
+    required bool windows,
   }) {
     Logger logger;
     if (windows) {
