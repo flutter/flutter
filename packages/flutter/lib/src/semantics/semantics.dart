@@ -3534,8 +3534,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3552,8 +3552,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
@@ -3570,8 +3570,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3588,8 +3588,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
