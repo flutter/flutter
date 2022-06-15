@@ -4,36 +4,15 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-
-const String frameworkRevision = '12345678';
-const String frameworkChannel = 'omega';
-
-// This needs to be created from the local platform due to re-entrant flutter calls made in this test.
-FakePlatform _kNoColorTerminalPlatform() =>
-    FakePlatform.fromPlatform(const LocalPlatform())
-      ..stdoutSupportsAnsi = false;
-
-final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorTerminalPlatform,
-};
-
-const String samplesIndexJson = '''
-[
-  { "id": "sample1" },
-  { "id": "sample2" }
-]''';
 
 void main() {
   Directory tempDir;
@@ -115,34 +94,4 @@ void main() {
 
     expect(generatedBindingsFromFfigen, generatedBindingsFromTemplate);
   });
-}
-
-/// A ProcessManager that invokes a real process manager, but keeps
-/// track of all commands sent to it.
-class LoggingProcessManager extends LocalProcessManager {
-  List<List<String>> commands = <List<String>>[];
-
-  @override
-  Future<Process> start(
-    List<Object> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.normal,
-  }) {
-    commands.add(command.map((Object arg) => arg.toString()).toList());
-    return super.start(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      mode: mode,
-    );
-  }
-
-  void clear() {
-    commands.clear();
-  }
 }
