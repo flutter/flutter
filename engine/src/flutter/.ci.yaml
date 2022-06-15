@@ -330,8 +330,6 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      os: Mac-10.15
-      xcode: 12c33 # xcode 12.3
     timeout: 60
     runIf:
       - DEPS
