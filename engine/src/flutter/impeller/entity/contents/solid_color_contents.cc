@@ -35,6 +35,9 @@ void SolidColorContents::SetCover(bool cover) {
 
 std::optional<Rect> SolidColorContents::GetCoverage(
     const Entity& entity) const {
+  if (color_.IsTransparent()) {
+    return std::nullopt;
+  }
   return path_.GetTransformedBoundingBox(entity.GetTransformation());
 };
 
@@ -60,10 +63,6 @@ VertexBuffer SolidColorContents::CreateSolidFillVertices(const Path& path,
 bool SolidColorContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
-  if (color_.IsTransparent()) {
-    return true;
-  }
-
   using VS = SolidFillPipeline::VertexShader;
 
   Command cmd;

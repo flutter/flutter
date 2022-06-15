@@ -4,6 +4,8 @@
 
 #include "texture_contents.h"
 
+#include <optional>
+
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/texture_fill.frag.h"
@@ -35,6 +37,9 @@ void TextureContents::SetOpacity(Scalar opacity) {
 }
 
 std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
+  if (opacity_ == 0) {
+    return std::nullopt;
+  }
   return path_.GetTransformedBoundingBox(entity.GetTransformation());
 };
 

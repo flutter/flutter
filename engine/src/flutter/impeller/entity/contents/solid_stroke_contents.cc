@@ -35,6 +35,10 @@ void SolidStrokeContents::SetPath(Path path) {
 
 std::optional<Rect> SolidStrokeContents::GetCoverage(
     const Entity& entity) const {
+  if (color_.IsTransparent()) {
+    return std::nullopt;
+  }
+
   auto path_bounds = path_.GetBoundingBox();
   if (!path_bounds.has_value()) {
     return std::nullopt;
@@ -173,7 +177,7 @@ static VertexBuffer CreateSolidStrokeVertices(
 bool SolidStrokeContents::Render(const ContentContext& renderer,
                                  const Entity& entity,
                                  RenderPass& pass) const {
-  if (color_.IsTransparent() || stroke_size_ <= 0.0) {
+  if (stroke_size_ <= 0.0) {
     return true;
   }
 
