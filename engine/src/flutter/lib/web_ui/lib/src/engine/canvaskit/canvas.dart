@@ -66,6 +66,10 @@ class CkCanvas {
     );
   }
 
+  ui.Rect getDeviceClipBounds() {
+    return rectFromSkIRect(skCanvas.getDeviceClipBounds());
+  }
+
   void drawArc(
     ui.Rect oval,
     double startAngle,
@@ -311,6 +315,17 @@ class CkCanvas {
 
   void translate(double dx, double dy) {
     skCanvas.translate(dx, dy);
+  }
+
+  Float32List getLocalToDevice() {
+    final List<dynamic> list = skCanvas.getLocalToDevice();
+    final Float32List matrix4 = Float32List(16);
+    for (int r = 0; r < 4; r++) {
+      for (int c = 0; c < 4; c++) {
+        matrix4[c * 4 + r] = list[r * 4 + c].toDouble();
+      }
+    }
+    return matrix4;
   }
 
   CkPictureSnapshot? get pictureSnapshot => null;

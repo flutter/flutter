@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../util.dart';
 import '../validators.dart';
 import '../vector_math.dart';
 import 'canvas.dart';
@@ -105,6 +106,11 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   @override
+  Float64List getTransform() {
+    return toMatrix64(_canvas.getLocalToDevice());
+  }
+
+  @override
   void clipRect(ui.Rect rect,
       {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
     assert(rectIsValid(rect));
@@ -134,6 +140,21 @@ class CanvasKitCanvas implements ui.Canvas {
     assert(path != null); // path is checked on the engine side
     assert(doAntiAlias != null); // ignore: unnecessary_null_comparison
     _canvas.clipPath(path as CkPath, doAntiAlias);
+  }
+
+  @override
+  ui.Rect getLocalClipBounds() {
+    final Matrix4 transform = Matrix4.fromFloat32List(_canvas.getLocalToDevice());
+    if (transform.invert() == 0) {
+      // non-invertible transforms collapse space to a line or point
+      return ui.Rect.zero;
+    }
+    return transformRect(transform, _canvas.getDeviceClipBounds());
+  }
+
+  @override
+  ui.Rect getDestinationClipBounds() {
+    return _canvas.getDeviceClipBounds();
   }
 
   @override

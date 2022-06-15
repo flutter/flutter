@@ -1569,6 +1569,15 @@ ui.Rect fromSkRect(Float32List skRect) {
   return ui.Rect.fromLTRB(skRect[0], skRect[1], skRect[2], skRect[3]);
 }
 
+ui.Rect rectFromSkIRect(Int32List skIRect) {
+  return ui.Rect.fromLTRB(
+    skIRect[0].toDouble(),
+    skIRect[1].toDouble(),
+    skIRect[2].toDouble(),
+    skIRect[3].toDouble(),
+  );
+}
+
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
 Float32List toSkRRect(ui.RRect rrect) {
   final Float32List skRRect = Float32List(12);
@@ -1683,6 +1692,7 @@ extension SkCanvasExtension on SkCanvas {
     SkClipOp clipOp,
     bool doAntiAlias,
   );
+  external Int32List getDeviceClipBounds();
   external void drawArc(
     Float32List oval,
     double startAngleDegrees,
@@ -1816,6 +1826,7 @@ extension SkCanvasExtension on SkCanvas {
   external void skew(double x, double y);
   external void concat(Float32List matrix);
   external void translate(double x, double y);
+  external List<dynamic> getLocalToDevice();
   external void drawPicture(SkPicture picture);
   external void drawParagraph(
     SkParagraph paragraph,
