@@ -24,6 +24,9 @@ void main() {
 
   setUpAll(() async {
     Cache.disableLocking();
+
+    // GitHub actions do not have access to the full Flutter checkout with the
+    // cache folder, so we don't use `flutter_tools.snapshot`.
   });
 
   setUp(() {
@@ -52,18 +55,6 @@ void main() {
       projectDir.path,
     ]);
 
-    // // GitHub actions do not have access to the full Flutter checkout with the
-    // // cache folder, run from source via bin/ instead of with CommandRunner.
-    // await Process.run(
-    //   dart,
-    //   <String>[
-    //     'bin/flutter_tools.dart',
-    //     'create',
-    //     '--no-pub',
-    //     '--template=plugin_ffi',
-    //     projectDir.path,
-    //   ],
-    // );
     expect(projectDir.childFile('ffigen.yaml'), exists);
     final File generatedBindings = projectDir
         .childDirectory('lib')
