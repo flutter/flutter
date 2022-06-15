@@ -21,6 +21,5 @@ jobs:
       - name: Install libclang-10-dev
         run: sudo apt-get install libclang-10-dev
       - name: Build test dylib and bindings
-        run: |
-          cd packages/flutter_tools/
-          flutter pub run test test/commands.shard/permeable/create_test.dart -n ffigen
+        working-directory: cd ./packages/flutter_tools/
+        run: flutter pub run test test/commands.shard/permeable/create_test.dart -n ffigen
