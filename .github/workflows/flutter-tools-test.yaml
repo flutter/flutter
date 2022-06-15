@@ -25,4 +25,4 @@ jobs:
         run: flutter pub get
       - name: Run plugin_ffi ffigen test
         working-directory: ./packages/flutter_tools/
-        run: flutter pub run test test/commands.shard/permeable/create_test.dart -n ffigen
+        run: flutter pub run test test/commands.shard/permeable/create_test_2.dart -n ffigen
