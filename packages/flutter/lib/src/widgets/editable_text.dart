@@ -174,9 +174,12 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 
     bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing;
 
-    //TODO: I think the configuration will never will be null, so just need to check if disabled and if there are any results.
+    //TODO: Find a way to shorten this. Should the configuration even be nullable?
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null) {
-        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults!);
+       TextSpan w = spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults!);
+      print(w.children);
+      print(w);
+      return w;
     } else {
       if (composingWithinCurrentTextRange) {
         return TextSpan(style: style, text: text);
@@ -1645,7 +1648,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   SpellCheckConfiguration? _spellCheckConfiguration;
 
-  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined : widget.spellCheckEnabled;
+  bool? _spellCheckEnabled;
+  bool? get spellCheckEnabled => _spellCheckEnabled;
 
 
   /// Whether to create an input connection with the platform for text editing
@@ -1880,6 +1884,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
     }
 
+    _spellCheckEnabled = (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined : widget.spellCheckEnabled;
     if (_spellCheckEnabled!) {
       SpellCheckService? spellCheckService = widget.spellCheckService ?? DefaultSpellCheckService();
       SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);

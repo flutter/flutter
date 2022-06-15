@@ -207,6 +207,9 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     TextStyle misspelledJointStyle =
         style?.merge(misspelledStyle) ?? misspelledStyle;
 
+    print("STYLE: ${style}");
+    print("MISPELLED STYLE: ${misspelledJointStyle}");
+
     int scss_pointer = 0;
 
     while (text_pointer < text.length && spellCheckSuggestions != null &&
@@ -222,15 +225,15 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           && composingRegion.end <= end_index && !composingWithinCurrentTextRange;
 
         if (isComposingWithin) {
-        addComposingRegionTextSpans(
-          tsTreeChildren, text, text_pointer, composingRegion, style, composingStyle);
-        tsTreeChildren.add(TextSpan(
-          style: style,
-          text: text.substring(composingRegion.end, end_index)));
-        } else {
-                  tsTreeChildren.add(TextSpan(
+          addComposingRegionTextSpans(
+            tsTreeChildren, text, text_pointer, composingRegion, style, composingStyle);
+          tsTreeChildren.add(TextSpan(
             style: style,
-            text: text.substring(text_pointer, end_index)));
+            text: text.substring(composingRegion.end, end_index)));
+        } else {
+            tsTreeChildren.add(TextSpan(
+              style: style,
+              text: text.substring(text_pointer, end_index)));
         }
 
         text_pointer = end_index;
