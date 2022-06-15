@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -2129,8 +2128,14 @@ class _MenuNodeWrapper extends InheritedWidget {
 
   static _MenuNode of(BuildContext context) {
     final _MenuNodeWrapper? wrapper = context.dependOnInheritedWidgetOfExactType<_MenuNodeWrapper>();
-    assert(wrapper != null, 'Missing _MenuNodeWrapper for $context');
-    return wrapper!.menu;
+    if (wrapper == null) {
+      throw FlutterError('A menu was created without a $MenuBarController.\n'
+          'A menu must have a $MenuBarController ancestor, and one was not found '
+          'in the widget tree. The widget that was created outside of a '
+          '$MenuBarController was: $context');
+    }
+
+    return wrapper.menu;
   }
 
   @override

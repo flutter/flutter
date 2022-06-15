@@ -313,6 +313,19 @@ class _Controls extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          MenuBarMenu(
+            label: 'Menu Bar Button',
+            menus: <MenuItem>[
+              MenuBarButton(
+                label: TestMenu.subMenu2.label,
+                leadingIcon: const Icon(Icons.send),
+                trailingIcon: const Icon(Icons.mail),
+                onSelected: () {
+                  debugPrint('Floating button selected');
+                },
+              ),
+            ],
+          ),
           ConstrainedBox(
             constraints: const BoxConstraints.tightFor(width: 400),
             child: Row(
