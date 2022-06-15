@@ -387,7 +387,7 @@ void main() {
       expect(client.performedSelectors, isEmpty);
       expect(client.latestMethodCall, isEmpty);
 
-      // Send performPrivateCommand message.
+      // Send performSelectors message.
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
