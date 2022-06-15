@@ -977,8 +977,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       }
 
       if (fromDate.minute != newDate.minute) {
-        final positionDouble = newDate.minute ~/ widget.minuteInterval;
-        final position = minCheck ? positionDouble.ceil() : positionDouble.floor();
+        final double positionDouble = newDate.minute / widget.minuteInterval;
+        final int position = minCheck ? positionDouble.ceil() : positionDouble.floor();
         _animateColumnControllerToItem(minuteController, position);
       }
     });
