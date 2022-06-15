@@ -259,6 +259,12 @@ class PhysicalKeyEntry {
   /// The Chromium event code for the key.
   final String? chromiumCode;
 
+  Iterable<String> webCodes() sync* {
+    if (chromiumCode != null) {
+      yield chromiumCode!;
+    }
+  }
+
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
     return removeEmptyValues(<String, dynamic>{
