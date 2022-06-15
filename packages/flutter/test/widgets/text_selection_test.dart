@@ -471,23 +471,23 @@ void main() {
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
-    expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.selectWordsInRangeCalled, isTrue);
 
     // Right clicking on a word within a selection shouldn't change the selection
-    renderEditable.selectWordCalled = false;
+    renderEditable.selectWordsInRangeCalled = false;
     renderEditable.selection = const TextSelection(baseOffset: 3, extentOffset: 20);
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
-    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectWordsInRangeCalled, isFalse);
 
     // Right clicking on a word within a reverse (right-to-left) selection shouldn't change the selection
-    renderEditable.selectWordCalled = false;
+    renderEditable.selectWordsInRangeCalled = false;
     renderEditable.selection = const TextSelection(baseOffset: 20, extentOffset: 3);
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
-    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectWordsInRangeCalled, isFalse);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
@@ -516,19 +516,19 @@ void main() {
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
-    expect(renderEditable.selectWordCalled, isFalse);
-    expect(renderEditable.selectPositionCalled, isTrue);
+    expect(renderEditable.selectWordsInRangeCalled, isFalse);
+    expect(renderEditable.selectPositionAtCalled, isTrue);
 
     // Right clicking on a focused field with selection shouldn't change the
     // selection.
-    renderEditable.selectPositionCalled = false;
+    renderEditable.selectPositionAtCalled = false;
     renderEditable.selection = const TextSelection(baseOffset: 3, extentOffset: 20);
     renderEditable.hasFocus = true;
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
-    expect(renderEditable.selectWordCalled, isFalse);
-    expect(renderEditable.selectPositionCalled, isFalse);
+    expect(renderEditable.selectWordsInRangeCalled, isFalse);
+    expect(renderEditable.selectPositionAtCalled, isFalse);
 
     // Right clicking on a focused field with a reverse (right to left)
     // selection shouldn't change the selection.
@@ -536,8 +536,8 @@ void main() {
     await gesture.down(globalCharLocation);
     await gesture.up();
     await tester.pump();
-    expect(renderEditable.selectWordCalled, isFalse);
-    expect(renderEditable.selectPositionCalled, isFalse);
+    expect(renderEditable.selectWordsInRangeCalled, isFalse);
+    expect(renderEditable.selectPositionAtCalled, isFalse);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
   );
@@ -585,7 +585,7 @@ void main() {
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
-    expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.selectWordsInRangeCalled, isTrue);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
