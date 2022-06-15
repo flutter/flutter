@@ -356,7 +356,7 @@ void _testEngineSemanticsOwner() {
         ..debugOverrideTimestampFunction(fakeAsync.getClock(_testTime).now)
         ..semanticsEnabled = true;
       expect(semantics().shouldAcceptBrowserGesture('click'), isTrue);
-      semantics().receiveGlobalEvent(html.Event('pointermove'));
+      semantics().receiveGlobalEvent(createDomEvent('Event', 'pointermove'));
       expect(semantics().shouldAcceptBrowserGesture('click'), isFalse);
 
       // After 1 second of inactivity a browser gestures counts as standalone.
@@ -368,21 +368,21 @@ void _testEngineSemanticsOwner() {
   test('checks shouldEnableSemantics for every global event', () {
     final MockSemanticsEnabler mockSemanticsEnabler = MockSemanticsEnabler();
     semantics().semanticsHelper.semanticsEnabler = mockSemanticsEnabler;
-    final html.Event pointerEvent = html.Event('pointermove');
+    final DomEvent pointerEvent = createDomEvent('Event', 'pointermove');
 
     semantics().receiveGlobalEvent(pointerEvent);
 
     // Verify the interactions.
     expect(
       mockSemanticsEnabler.shouldEnableSemanticsEvents,
-      <html.Event>[pointerEvent],
+      <DomEvent>[pointerEvent],
     );
   });
 
   test('forwards events to framework if shouldEnableSemantics returns true', () {
     final MockSemanticsEnabler mockSemanticsEnabler = MockSemanticsEnabler();
     semantics().semanticsHelper.semanticsEnabler = mockSemanticsEnabler;
-    final html.Event pointerEvent = html.Event('pointermove');
+    final DomEvent pointerEvent = createDomEvent('Event', 'pointermove');
     mockSemanticsEnabler.shouldEnableSemanticsReturnValue = true;
     expect(semantics().receiveGlobalEvent(pointerEvent), isTrue);
   });
@@ -397,21 +397,21 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   bool get isWaitingToEnableSemantics => throw UnimplementedError();
 
   @override
-  html.Element prepareAccessibilityPlaceholder() {
+  DomElement prepareAccessibilityPlaceholder() {
     throw UnimplementedError();
   }
 
   bool shouldEnableSemanticsReturnValue = false;
-  final List<html.Event> shouldEnableSemanticsEvents = <html.Event>[];
+  final List<DomEvent> shouldEnableSemanticsEvents = <DomEvent>[];
 
   @override
-  bool shouldEnableSemantics(html.Event event) {
+  bool shouldEnableSemantics(DomEvent event) {
     shouldEnableSemanticsEvents.add(event);
     return shouldEnableSemanticsReturnValue;
   }
 
   @override
-  bool tryEnableSemantics(html.Event event) {
+  bool tryEnableSemantics(DomEvent event) {
     throw UnimplementedError();
   }
 }

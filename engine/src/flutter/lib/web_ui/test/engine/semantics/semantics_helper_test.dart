@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/pointer_binding.dart';
 import 'package:ui/src/engine/semantics.dart';
 
@@ -19,13 +18,13 @@ void main() {
 void testMain() {
   group('$DesktopSemanticsEnabler', () {
     late DesktopSemanticsEnabler desktopSemanticsEnabler;
-    late html.Element? _placeholder;
+    late DomElement? _placeholder;
 
     setUp(() {
       EngineSemanticsOwner.instance.semanticsEnabled = false;
       desktopSemanticsEnabler = DesktopSemanticsEnabler();
       _placeholder = desktopSemanticsEnabler.prepareAccessibilityPlaceholder();
-      html.document.body!.append(_placeholder!);
+      domDocument.body!.append(_placeholder!);
     });
 
     tearDown(() {
@@ -40,9 +39,9 @@ void testMain() {
       expect(_placeholder!.getAttribute('aria-live'), 'polite');
       expect(_placeholder!.getAttribute('tabindex'), '0');
 
-      html.document.body!.append(_placeholder!);
+      domDocument.body!.append(_placeholder!);
 
-      expect(html.document.getElementsByTagName('flt-semantics-placeholder'),
+      expect(domDocument.getElementsByTagName('flt-semantics-placeholder'),
           isNotEmpty);
 
       expect(_placeholder!.getBoundingClientRect().height, 1);
@@ -53,9 +52,9 @@ void testMain() {
 
     test('Not relevant events should be forwarded to the framework', () async {
       // Attach the placeholder to dom.
-      html.document.body!.append(_placeholder!);
+      domDocument.body!.append(_placeholder!);
 
-      html.Event event = html.MouseEvent('mousemove');
+      DomEvent event = createDomEvent('Event', 'mousemove');
       bool shouldForwardToFramework =
           desktopSemanticsEnabler.tryEnableSemantics(event);
 
@@ -63,7 +62,7 @@ void testMain() {
 
       // Pointer events are not defined in webkit.
       if (browserEngine != BrowserEngine.webkit) {
-        event = html.PointerEvent('pointermove');
+        event = createDomEvent('Event', 'pointermove');
         shouldForwardToFramework =
             desktopSemanticsEnabler.tryEnableSemantics(event);
 
@@ -74,7 +73,7 @@ void testMain() {
     test(
         'Relevant events targeting placeholder should not be forwarded to the framework',
         () async {
-      final html.Event event = html.MouseEvent('mousedown');
+      final DomEvent event = createDomEvent('Event', 'mousedown');
       _placeholder!.dispatchEvent(event);
 
       final bool shouldForwardToFramework =
@@ -84,7 +83,7 @@ void testMain() {
     });
 
     test('disposes of the placeholder', () {
-      html.document.body!.append(_placeholder!);
+      domDocument.body!.append(_placeholder!);
 
       expect(_placeholder!.isConnected, isTrue);
       desktopSemanticsEnabler.dispose();
@@ -96,13 +95,13 @@ void testMain() {
     '$MobileSemanticsEnabler',
     () {
       late MobileSemanticsEnabler mobileSemanticsEnabler;
-      html.Element? _placeholder;
+      DomElement? _placeholder;
 
       setUp(() {
         EngineSemanticsOwner.instance.semanticsEnabled = false;
         mobileSemanticsEnabler = MobileSemanticsEnabler();
         _placeholder = mobileSemanticsEnabler.prepareAccessibilityPlaceholder();
-        html.document.body!.append(_placeholder!);
+        domDocument.body!.append(_placeholder!);
       });
 
       tearDown(() {
@@ -114,8 +113,8 @@ void testMain() {
         expect(_placeholder!.getAttribute('role'), 'button');
 
         // Placeholder should cover all the screen on a mobile device.
-        final num bodyHeight = html.window.innerHeight!;
-        final num bodyWidth = html.window.innerWidth!;
+        final num bodyHeight = domWindow.innerHeight!;
+        final num bodyWidth = domWindow.innerWidth!;
 
         expect(_placeholder!.getBoundingClientRect().height, bodyHeight);
         expect(_placeholder!.getBoundingClientRect().width, bodyWidth);
@@ -123,13 +122,13 @@ void testMain() {
 
       test('Non-relevant events should be forwarded to the framework',
           () async {
-        html.Event event;
+        DomEvent event;
         if (_defaultSupportDetector.hasPointerEvents) {
-          event = html.PointerEvent('pointermove');
+          event = createDomPointerEvent('pointermove');
         } else if (_defaultSupportDetector.hasTouchEvents) {
-          event = html.TouchEvent('touchcancel');
+          event = createDomTouchEvent('touchcancel');
         } else {
-          event = html.MouseEvent('mousemove');
+          event = createDomMouseEvent('mousemove');
         }
 
         final bool shouldForwardToFramework =
@@ -142,15 +141,17 @@ void testMain() {
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNull);
 
         // Send a click off center
-        _placeholder!.dispatchEvent(html.MouseEvent(
+        _placeholder!.dispatchEvent(createDomMouseEvent(
           'click',
-          clientX: 0,
-          clientY: 0,
+          <Object?, Object?>{
+            'clientX': 0,
+            'clientY': 0,
+          }
         ));
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNull);
 
         // Send a click at center
-        final html.Rectangle<num> activatingElementRect =
+        final DomRect activatingElementRect =
             _placeholder!.getBoundingClientRect();
         final int midX = (activatingElementRect.left +
                 (activatingElementRect.right - activatingElementRect.left) / 2)
@@ -158,10 +159,12 @@ void testMain() {
         final int midY = (activatingElementRect.top +
                 (activatingElementRect.bottom - activatingElementRect.top) / 2)
             .toInt();
-        _placeholder!.dispatchEvent(html.MouseEvent(
+        _placeholder!.dispatchEvent(createDomMouseEvent(
           'click',
-          clientX: midX,
-          clientY: midY,
+          <Object?, Object?>{
+            'clientX': midX,
+            'clientY': midY,
+          }
         ));
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNotNull);
       });

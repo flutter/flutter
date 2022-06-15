@@ -7,6 +7,7 @@ import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
@@ -244,7 +245,7 @@ class TextField extends RoleManager {
       ..left = '0'
       ..width = '${semanticsObject.rect!.width}px'
       ..height = '${semanticsObject.rect!.height}px';
-    semanticsObject.element.append(editableElement);
+    semanticsObject.element.append(editableElement as DomNode);
 
     switch (browserEngine) {
       case BrowserEngine.blink:

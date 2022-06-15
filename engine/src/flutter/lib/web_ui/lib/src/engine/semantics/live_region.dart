@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../dom.dart';
 import 'semantics.dart';
 
 /// Manages semantics configurations that represent live regions.
@@ -31,7 +32,7 @@ class LiveRegion extends RoleManager {
   }
 
   void _cleanupDom() {
-    semanticsObject.element.attributes.remove('aria-live');
+    semanticsObject.element.removeAttribute('aria-live');
   }
 
   @override

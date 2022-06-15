@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -293,7 +292,7 @@ abstract class _BaseAdapter {
       // Report the event to semantics. This information is used to debounce
       // browser gestures. Semantics tells us whether it is safe to forward
       // the event to the framework.
-      if (EngineSemanticsOwner.instance.receiveGlobalEvent(event as html.Event)) {
+      if (EngineSemanticsOwner.instance.receiveGlobalEvent(event)) {
         handler(event);
       }
     }
@@ -868,8 +867,8 @@ class _TouchAdapter extends _BaseAdapter {
       kind: ui.PointerDeviceKind.touch,
       signalKind: ui.PointerSignalKind.none,
       device: touch.identifier!,
-      physicalX: touch.clientX!.toDouble() * ui.window.devicePixelRatio,
-      physicalY: touch.clientY!.toDouble() * ui.window.devicePixelRatio,
+      physicalX: touch.clientX.toDouble() * ui.window.devicePixelRatio,
+      physicalY: touch.clientY.toDouble() * ui.window.devicePixelRatio,
       buttons: pressed ? _kPrimaryMouseButton : 0,
       pressure: 1.0,
       pressureMin: 0.0,
