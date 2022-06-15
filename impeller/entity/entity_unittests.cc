@@ -925,6 +925,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
     contents->SetStrokeCap(SolidStrokeContents::Cap::kButt);
     contents->SetStrokeJoin(SolidStrokeContents::Join::kBevel);
     contents->SetStrokeSize(4);
+    contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
     auto expected = Rect::MakeLTRB(-2, -2, 12, 12);
@@ -940,6 +941,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
     contents->SetStrokeCap(SolidStrokeContents::Cap::kSquare);
     contents->SetStrokeJoin(SolidStrokeContents::Join::kBevel);
     contents->SetStrokeSize(4);
+    contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
     auto expected =
@@ -957,6 +959,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
     contents->SetStrokeJoin(SolidStrokeContents::Join::kMiter);
     contents->SetStrokeSize(4);
     contents->SetStrokeMiter(2);
+    contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
     auto expected = Rect::MakeLTRB(-4, -4, 14, 14);
@@ -1009,6 +1012,48 @@ TEST_P(EntityTest, DrawVerticesSolidColorTrianglesWithoutIndex) {
   e.SetContents(contents);
 
   ASSERT_TRUE(OpenPlaygroundHere(e));
+}
+
+TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
+  // No transform
+  {
+    auto fill = std::make_shared<SolidColorContents>();
+    fill->SetColor(Color::CornflowerBlue());
+    auto expected = Rect::MakeLTRB(100, 110, 200, 220);
+    fill->SetPath(PathBuilder{}.AddRect(expected).TakePath());
+
+    auto coverage = fill->GetCoverage({});
+    ASSERT_TRUE(coverage.has_value());
+    ASSERT_RECT_NEAR(coverage.value(), expected);
+  }
+
+  // Entity transform
+  {
+    auto fill = std::make_shared<SolidColorContents>();
+    fill->SetColor(Color::CornflowerBlue());
+    fill->SetPath(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(100, 110, 200, 220)).TakePath());
+
+    Entity entity;
+    entity.SetTransformation(Matrix::MakeTranslation(Vector2(4, 5)));
+    entity.SetContents(std::move(fill));
+
+    auto coverage = entity.GetCoverage();
+    auto expected = Rect::MakeLTRB(104, 115, 204, 225);
+    ASSERT_TRUE(coverage.has_value());
+    ASSERT_RECT_NEAR(coverage.value(), expected);
+  }
+
+  // No coverage for fully transparent colors
+  {
+    auto fill = std::make_shared<SolidColorContents>();
+    fill->SetColor(Color::WhiteTransparent());
+    fill->SetPath(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(100, 110, 200, 220)).TakePath());
+
+    auto coverage = fill->GetCoverage({});
+    ASSERT_FALSE(coverage.has_value());
+  }
 }
 
 }  // namespace testing
