@@ -265,14 +265,17 @@ size_t Canvas::GetStencilDepth() const {
   return xformation_stack_.back().stencil_depth;
 }
 
-void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
+void Canvas::SaveLayer(Paint paint,
+                       std::optional<Rect> bounds,
+                       std::optional<Paint::ImageFilterProc> backdrop_filter) {
   Save(true, paint.blend_mode);
 
   auto& new_layer_pass = GetCurrentPass();
   new_layer_pass.SetDelegate(
       std::make_unique<PaintPassDelegate>(paint, bounds));
+  new_layer_pass.SetBackdropFilter(backdrop_filter);
 
-  if (bounds.has_value()) {
+  if (bounds.has_value() && !backdrop_filter.has_value()) {
     // Render target switches due to a save layer can be elided. In such cases
     // where passes are collapsed into their parent, the clipping effect to
     // the size of the render target that would have been allocated will be

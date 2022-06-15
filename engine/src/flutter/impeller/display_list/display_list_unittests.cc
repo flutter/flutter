@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #include "display_list/display_list_blend_mode.h"
+#include "display_list/display_list_color.h"
 #include "display_list/display_list_color_filter.h"
 #include "display_list/display_list_image_filter.h"
+#include "display_list/display_list_paint.h"
 #include "display_list/display_list_tile_mode.h"
 #include "gtest/gtest.h"
 #include "third_party/imgui/imgui.h"
@@ -278,6 +280,65 @@ TEST_P(DisplayListTest, CanDrawWithImageBlurFilter) {
     builder.setImageFilter(&filter);
     builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(200, 200),
                       SkSamplingOptions{}, true);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(DisplayListTest, CanDrawBackdropFilter) {
+  auto texture = CreateTextureForFixture("embarcadero.jpg");
+
+  bool first_frame = true;
+  auto callback = [&]() {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({400, 100});
+      ImGui::SetNextWindowPos({300, 650});
+    }
+
+    static float sigma[] = {10, 10};
+    static bool use_bounds = true;
+    static bool draw_circle = true;
+
+    ImGui::Begin("Controls");
+    ImGui::SliderFloat2("Sigma", sigma, 0, 100);
+    ImGui::Checkbox("Use SaveLayer bounds", &use_bounds);
+    ImGui::Checkbox("Draw child element", &draw_circle);
+    ImGui::End();
+
+    flutter::DisplayListBuilder builder;
+
+    Vector2 scale = GetContentScale();
+    builder.scale(scale.x, scale.y);
+
+    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
+                                             flutter::DlTileMode::kClamp);
+
+    std::optional<SkRect> bounds;
+    if (use_bounds) {
+      auto [p1, p2] = IMPELLER_PLAYGROUND_LINE(
+          Point(250, 150), Point(800, 600), 20, Color::White(), Color::White());
+      bounds = SkRect::MakeLTRB(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(200, 200),
+                      SkSamplingOptions{}, true);
+    builder.saveLayer(bounds.has_value() ? &bounds.value() : nullptr, nullptr,
+                      &filter);
+
+    if (draw_circle) {
+      auto circle_center =
+          IMPELLER_PLAYGROUND_POINT(Point(500, 400), 20, Color::Red());
+
+      builder.setStyle(flutter::DlDrawStyle::kStroke);
+      builder.setStrokeCap(flutter::DlStrokeCap::kButt);
+      builder.setStrokeJoin(flutter::DlStrokeJoin::kBevel);
+      builder.setStrokeWidth(10);
+      builder.setColor(flutter::DlColor::kRed().withAlpha(100));
+      builder.drawCircle({circle_center.x, circle_center.y}, 100);
+    }
 
     return builder.Build();
   };
