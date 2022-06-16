@@ -297,6 +297,9 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   Version get version => Version(13, null, null);
 
   @override
+  String get build => '13C100';
+
+  @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
     XcodeProjectBuildContext buildContext,

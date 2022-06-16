@@ -146,6 +146,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.version, Version(11, 4, 1));
+    expect(xcodeProjectInterpreter.build, '11N111s');
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -173,6 +174,7 @@ void main() {
       ),
     ]);
     expect(xcodeProjectInterpreter.version, isNull);
+    expect(xcodeProjectInterpreter.build, isNull);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
