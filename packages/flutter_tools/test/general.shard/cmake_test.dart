@@ -79,7 +79,7 @@ void main() {
       r'list(APPEND FLUTTER_TOOL_ENVIRONMENT',
       r'  "FLUTTER_ROOT=/flutter"',
       r'  "PROJECT_DIR=/"',
-      ')',
+      r')',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -118,7 +118,7 @@ void main() {
       r'  "FLUTTER_ROOT=C:\\flutter"',
       r'  "PROJECT_DIR=C:\\"',
       r'  "TEST=hello\\world"',
-      ')',
+      r')',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
