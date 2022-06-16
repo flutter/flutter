@@ -263,10 +263,18 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// [EditableText] and its derived widgets have their own default [ToolbarOptions].
 /// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
 /// option.
+@Deprecated(
+  'Use `buildContextMenu` instead. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
 class ToolbarOptions {
   /// Create a toolbar configuration with given options.
   ///
   /// All options default to false if they are not explicitly set.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   const ToolbarOptions({
     this.copy = false,
     this.cut = false,
@@ -595,6 +603,7 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -3065,7 +3074,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
     clipboardStatus?.update();
-    print('justin showToolbar');
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3084,7 +3092,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Toggles the visibility of the toolbar.
   void toggleToolbar() {
     assert(_selectionOverlay != null);
-    print('justin toogleToolbar, is it ivisble? ${_selectionOverlay!.toolbarIsVisible}');
     if (_selectionOverlay!.toolbarIsVisible) {
       hideToolbar();
     } else {

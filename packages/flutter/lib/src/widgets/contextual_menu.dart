@@ -331,6 +331,76 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
     }
   }
 
+  // TODO(justinmc): Document.
+  static void handleCut(EditableTextState editableTextState) {
+    editableTextState.cutSelection(SelectionChangedCause.toolbar);
+  }
+
+  static void handleCopy(EditableTextState editableTextState) {
+    editableTextState.copySelection(SelectionChangedCause.toolbar);
+  }
+
+  static void handlePaste(EditableTextState editableTextState) {
+    editableTextState.pasteText(SelectionChangedCause.toolbar);
+  }
+
+  // TODO(justinmc): Really though, why isn't this in EditableTextState?
+  static void handleSelectAll(EditableTextState editableTextState) {
+    editableTextState.selectAll(SelectionChangedCause.toolbar);
+    editableTextState.bringIntoView(
+      editableTextState.textEditingValue.selection.extent,
+    );
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        editableTextState.hideToolbar();
+    }
+  }
+
+  /// Returns the [ContextualMenuButtonData]s for the given [ToolbarOptions].
+  @Deprecated(
+    'Use `buildContextMenu` instead of `toolbarOptions`. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
+  static List<ContextualMenuButtonData>? buttonDatasForToolbarOptions(ToolbarOptions? toolbarOptions, EditableTextState editableTextState) {
+    return toolbarOptions == null ? null : <ContextualMenuButtonData>[
+      if (toolbarOptions.cut)
+        ContextualMenuButtonData(
+          onPressed: () {
+            TextSelectionToolbarButtonDatasBuilder.handleSelectAll(editableTextState);
+          },
+          type: DefaultContextualMenuButtonType.selectAll,
+        ),
+      if (toolbarOptions.copy)
+        ContextualMenuButtonData(
+          onPressed: () {
+            TextSelectionToolbarButtonDatasBuilder.handleCopy(editableTextState);
+          },
+          type: DefaultContextualMenuButtonType.copy,
+        ),
+      if (toolbarOptions.paste)
+        ContextualMenuButtonData(
+          onPressed: () {
+            TextSelectionToolbarButtonDatasBuilder.handlePaste(editableTextState);
+          },
+          type: DefaultContextualMenuButtonType.paste,
+        ),
+      if (toolbarOptions.selectAll)
+        ContextualMenuButtonData(
+          onPressed: () {
+            TextSelectionToolbarButtonDatasBuilder.handleSelectAll(editableTextState);
+          },
+          type: DefaultContextualMenuButtonType.selectAll,
+        ),
+    ];
+  }
+
   @override
   State<TextSelectionToolbarButtonDatasBuilder> createState() => _TextSelectionToolbarButtonDatasBuilderState();
 }
@@ -343,33 +413,19 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
   bool get _selectAllEnabled => TextSelectionToolbarButtonDatasBuilder.canSelectAll(widget.editableTextState);
 
   void _handleCut() {
-    widget.editableTextState.cutSelection(SelectionChangedCause.toolbar);
+    return TextSelectionToolbarButtonDatasBuilder.handleCut(widget.editableTextState);
   }
 
   void _handleCopy() {
-    widget.editableTextState.copySelection(SelectionChangedCause.toolbar);
+    return TextSelectionToolbarButtonDatasBuilder.handleCopy(widget.editableTextState);
   }
 
   void _handlePaste() {
-    widget.editableTextState.pasteText(SelectionChangedCause.toolbar);
+    return TextSelectionToolbarButtonDatasBuilder.handlePaste(widget.editableTextState);
   }
 
   void _handleSelectAll() {
-    widget.editableTextState.selectAll(SelectionChangedCause.toolbar);
-    widget.editableTextState.bringIntoView(
-      widget.editableTextState.textEditingValue.selection.extent,
-    );
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        break;
-      case TargetPlatform.macOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        widget.editableTextState.hideToolbar();
-    }
+    return TextSelectionToolbarButtonDatasBuilder.handleSelectAll(widget.editableTextState);
   }
 
   @override
