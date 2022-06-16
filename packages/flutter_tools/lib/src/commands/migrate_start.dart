@@ -218,4 +218,45 @@ class MigrateStartCommand extends FlutterCommand {
       }
     }
   }
+  
+  /// Writes the files into the working directory for the developer to review and resolve any conflicts.
+  Future<void> writeStagingDir(MigrateResult migrateResult, Logger logger, {bool verbose = false, FlutterProject? flutterProject}) async {
+    flutterProject ??= FlutterProject.current();
+    final Directory stagingDir = flutterProject.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
+    if (verbose) {
+      logger.printStatus('Writing migrate staging directory at `${stagingDir.path}`');
+    }
+    // Write files in working dir
+    for (final MergeResult result in migrateResult.mergeResults) {
+      final File file = stagingDir.childFile(result.localPath);
+      file.createSync(recursive: true);
+      if (result is StringMergeResult) {
+        file.writeAsStringSync(result.mergedString, flush: true);
+      } else {
+        file.writeAsBytesSync((result as BinaryMergeResult).mergedBytes, flush: true);
+      }
+    }
+    // Write all files that are newly added in target
+    for (final FilePendingMigration addedFile in migrateResult.addedFiles) {
+      final File file = stagingDir.childFile(addedFile.localPath);
+      file.createSync(recursive: true);
+      try {
+        file.writeAsStringSync(addedFile.file.readAsStringSync(), flush: true);
+      } on FileSystemException {
+        file.writeAsBytesSync(addedFile.file.readAsBytesSync(), flush: true);
+      }
+    }
+
+    // Write the MigrateManifest.
+    final MigrateManifest manifest = MigrateManifest(
+      migrateRootDir: stagingDir,
+      migrateResult: migrateResult,
+    );
+    manifest.writeFile();
+
+    // output the manifest contents.
+    checkAndPrintMigrateStatus(manifest, stagingDir, logger: logger);
+
+    logger.printBox('Staging directory created at `${stagingDir.path}`');
+  }
 }
