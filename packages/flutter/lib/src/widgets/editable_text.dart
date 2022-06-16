@@ -3018,7 +3018,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
   @override
-  bool showToolbar() {
+  bool showToolbar([Offset? locationToDisplayToolbar]) {
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
@@ -3031,7 +3031,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
     _clipboardStatus?.update();
-    _selectionOverlay!.showToolbar();
+    _selectionOverlay!.showToolbar(locationToDisplayToolbar);
     return true;
   }
 
@@ -3047,12 +3047,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Toggles the visibility of the toolbar.
-  void toggleToolbar() {
+  void toggleToolbar([Offset? locationToDisplayToolbar]) {
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
       hideToolbar();
     } else {
-      showToolbar();
+      showToolbar(locationToDisplayToolbar);
     }
   }
 

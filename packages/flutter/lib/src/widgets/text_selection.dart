@@ -335,8 +335,8 @@ class TextSelectionOverlay {
   void hideHandles() => _selectionOverlay.hideHandles();
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
-  void showToolbar() {
-    _updateSelectionOverlay();
+  void showToolbar([Offset? locationToDisplayToolbar]) {
+    _updateSelectionOverlay(locationToDisplayToolbar);
     _selectionOverlay.showToolbar();
   }
 
@@ -357,7 +357,7 @@ class TextSelectionOverlay {
     _updateSelectionOverlay();
   }
 
-  void _updateSelectionOverlay() {
+  void _updateSelectionOverlay([Offset? locationToDisplayToolbar]) {
     _selectionOverlay
       // Update selection handle metrics.
       ..startHandleType = _chooseType(
@@ -374,7 +374,7 @@ class TextSelectionOverlay {
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
       ..selectionEndPoints = renderObject.getEndpointsForSelection(_selection)
-      ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
+      ..toolbarLocation = locationToDisplayToolbar ?? renderObject.lastSecondaryTapDownPosition;
   }
 
   /// Causes the overlay to update its rendering.
@@ -1689,7 +1689,7 @@ class TextSelectionGestureDetectorBuilder {
         }
         if (shouldShowSelectionToolbar) {
           editableText.hideToolbar();
-          editableText.showToolbar();
+          editableText.showToolbar(details.globalPosition);
         }
         break;
       case TargetPlatform.android:
@@ -1699,7 +1699,7 @@ class TextSelectionGestureDetectorBuilder {
         if (!renderEditable.hasFocus) {
           renderEditable.selectPositionAt(from: details.globalPosition, cause: SelectionChangedCause.tap);
         }
-        editableText.toggleToolbar();
+        editableText.toggleToolbar(details.globalPosition);
         break;
     }
   }
@@ -1713,7 +1713,6 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [onSecondaryTapUp], which is typically called after this.
   @protected
   void onSecondaryTapDown(TapDownDetails details) {
-    renderEditable.handleSecondaryTapDown(details);
     _shouldShowSelectionToolbar = true;
   }
 
