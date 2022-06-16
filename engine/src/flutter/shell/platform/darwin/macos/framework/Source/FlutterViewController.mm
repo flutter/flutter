@@ -429,7 +429,11 @@ static void CommonInit(FlutterViewController* controller) {
 // ViewController as a listener for a keyUp event before it's handled by NSApplication, and should
 // NOT modify the event to avoid any unexpected behavior.
 - (void)listenForMetaModifiedKeyUpEvents {
-  NSAssert(_keyUpMonitor == nil, @"_keyUpMonitor was already created");
+  if (_keyUpMonitor != nil) {
+    // It is possible for [NSViewController viewWillAppear] to be invoked multiple times
+    // in a row. https://github.com/flutter/flutter/issues/105963
+    return;
+  }
   FlutterViewController* __weak weakSelf = self;
   _keyUpMonitor = [NSEvent
       addLocalMonitorForEventsMatchingMask:NSEventMaskKeyUp
