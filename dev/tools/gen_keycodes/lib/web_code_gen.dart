@@ -37,9 +37,9 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get _webPhysicalKeyCodeMap {
     final OutputLines<String> lines = OutputLines<String>('Web physical map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.name != null) {
-        lines.add(entry.name,
-            "  '${entry.name}': ${toHex(entry.usbHidCode)}, // ${entry.constantName}");
+      for (final String webCode in entry.webCodes()) {
+        lines.add(webCode,
+            "  '$webCode': ${toHex(entry.usbHidCode)}, // ${entry.constantName}");
       }
     }
     return lines.sortedJoin().trimRight();
