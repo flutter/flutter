@@ -8,7 +8,8 @@ It generates multiple files across Flutter. For framework, it generates
 * [`keyboard_key.dart`](../../../packages/flutter/lib/src/services/keyboard_key.dart), which contains the definition and list of logical keys and physical keys; and
 * [`keyboard_maps.dart`](../../../packages/flutter/lib/src/services/keyboard_maps.dart), which contains platform-specific immutable maps used for the `RawKeyboard` API.
 
-For engine, it generates one key mapping file for each platform.
+For engine, it generates one key mapping file for each platform, as well as some
+files for testing purposes.
 
 It draws information from various source bases, including online
 repositories, and manual mapping in the `data` subdirectory. It incorporates
@@ -54,7 +55,7 @@ meaning, since the coding scheme could change at any time and the meaning is
 likely to be retrievable more reliably and correctly from the API.
 
 However, if you are porting Flutter to a new platform, you should follow the
-following guidelines for specifying logical key codes.
+following guidelines for specifying key codes.
 
 The key code is a 52-bit integer (due to the limitation of JavaScript). The
 entire namespace is divided into 32-bit *planes*. The upper 20 bits of the ID
@@ -112,8 +113,7 @@ The planes are planned as follows:
   recognized by Flutter.
 
   The value scheme within a platform plane is decided by the platform,
-  typically using the field from the platform's native key event that
-  represents the key's logical effect (such as `keycode`, `virtual key`, etc).
+  typically using the other fields from the platform's native key event.
 
   In time, keys that originally belong to a platform plane might be added to
   Flutter, especially if a key is found shared by multiple platforms. The values
