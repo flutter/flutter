@@ -42,6 +42,7 @@ def main():
   parser.add_argument('--json', dest='json', action='store', required=True)
   parser.add_argument('--fidlgen-output-root', dest='fidlgen_output_root', action='store', required=False)
   parser.add_argument('--output-c-tables', dest='output_c_tables', action='store', required=True)
+  parser.add_argument('--target-api-level', dest='target_api_level', action='store', required=False)
 
   args = parser.parse_args()
 
@@ -58,6 +59,12 @@ def main():
     '--json',
     args.json
   ]
+
+  if args.target_api_level:
+    fidlc_command += [
+      '--available',
+      'fuchsia:{api_level}'.format(api_level=args.target_api_level),
+    ]
 
   # Create an iterator that works on both python3 and python2
   try:

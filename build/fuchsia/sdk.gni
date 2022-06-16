@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/fuchsia/config.gni")
+
 declare_args() {
   # The path to where GN targets derived from the Fuchsia SDK are instantiated.
   fuchsia_sdk_root = "//build/fuchsia"
@@ -112,6 +114,13 @@ template("_fuchsia_fidl_library") {
       "--output-c-tables",
       rebase_path("$target_gen_dir/$library_name_slashes/cpp/tables.c"),
     ]
+
+    if (fuchsia_target_api_level != -1) {
+      args += [
+        "--target-api-level",
+        "${fuchsia_target_api_level}",
+      ]
+    }
 
     if (!defined(invoker.only_generate_tables) ||
         !invoker.only_generate_tables) {
