@@ -305,8 +305,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _webPhysicalKeyMap {
     final OutputLines<String> lines = OutputLines<String>('Web physical key map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.name != null) {
-        lines.add(entry.name, "  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
+      for (final String webCodes in entry.webCodes()) {
+        lines.add(entry.name, "  '$webCodes': PhysicalKeyboardKey.${entry.constantName},");
       }
     }
     return lines.sortedJoin().trimRight();

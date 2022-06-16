@@ -35,7 +35,7 @@ class KeyCodesJavaGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Physical Key list');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
-  public static final long PHYSICAL_${_toUpperSnake(entry.constantName)} = ${toHex(entry.usbHidCode)}l;''');
+  public static final long PHYSICAL_${_toUpperSnake(entry.constantName)} = ${toHex(entry.usbHidCode)}L;''');
     }
     return lines.sortedJoin().trimRight();
   }
@@ -45,7 +45,7 @@ class KeyCodesJavaGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Logical Key list');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '''
-  public static final long LOGICAL_${_toUpperSnake(entry.constantName)} = ${toHex(entry.value, digits: 11)}l;''');
+  public static final long LOGICAL_${_toUpperSnake(entry.constantName)} = ${toHex(entry.value, digits: 11)}L;''');
     }
     return lines.sortedJoin().trimRight();
   }

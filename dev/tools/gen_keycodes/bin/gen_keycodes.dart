@@ -65,7 +65,7 @@ Future<String> getGlfwKeyCodes() async {
 }
 
 Future<String> getGtkKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
+  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/gtk-3-24/gdk/gdkkeysyms.h');
   return http.read(keyCodesUri);
 }
 

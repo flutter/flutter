@@ -372,6 +372,9 @@ class LogicalKeyData {
 
     glfwNameToKeyCode.forEach((String glfwName, int value) {
       final String? name = nameToFlutterName[glfwName];
+      if (name == null) {
+        return;
+      }
       final LogicalKeyEntry? entry = data[nameToFlutterName[glfwName]];
       if (entry == null) {
         print('Invalid logical entry by name $name (from GLFW $glfwName)');
