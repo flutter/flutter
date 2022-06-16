@@ -297,6 +297,7 @@ class ToolbarOptions {
   final bool selectAll;
 }
 
+// A time-value pair that represents a key frame in an animation.
 class _KeyFrame {
   const _KeyFrame(this.time, this.value);
   // Values extracted from iOS 15.4 UIKit.
@@ -311,19 +312,29 @@ class _KeyFrame {
     _KeyFrame(0.8875,  0.25),  // 7
     _KeyFrame(0.925,   0.5),   // 8
     _KeyFrame(0.9625,  0.75),  // 9
+    _KeyFrame(1,       1),     // 10
   ];
 
+  // The timing, in seconds, of the specified animation `value`.
   final double time;
   final double value;
 }
 
 class _DiscreteKeyFrameSimulation extends Simulation {
-  _DiscreteKeyFrameSimulation.iOSBlinkingCaret() : this._(_KeyFrame.iOSBlinkingCaretKeyFrames);
-  _DiscreteKeyFrameSimulation._(this._keyFrames)
+  _DiscreteKeyFrameSimulation.iOSBlinkingCaret() : this._(_KeyFrame.iOSBlinkingCaretKeyFrames, 1);
+  _DiscreteKeyFrameSimulation._(this._keyFrames, this.maxDuration)
     : assert(_keyFrames.isNotEmpty),
-      assert(_keyFrames.last.time < maxDuration);
+      assert(_keyFrames.last.time <= maxDuration),
+      assert(() {
+        for (int i = 0; i < _keyFrames.length -1; i += 1) {
+          if (_keyFrames[i].time > _keyFrames[i + 1].time) {
+            return false;
+          }
+        }
+        return true;
+      }(), 'The key frame sequence must be sorted by time.');
 
-  static const int maxDuration = 1;
+  final double maxDuration;
 
   final List<_KeyFrame> _keyFrames;
 
@@ -338,7 +349,6 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 
   @override
   double x(double time) {
-    time = time % maxDuration;
     final int length = _keyFrames.length;
 
     // Perform a linear search in the sorted key frame list, starting from the
@@ -347,7 +357,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
     int searchIndex;
     final int endIndex;
     if (_keyFrames[_lastKeyFrameIndex].time > time) {
-      // `time` has wrapped aroud. Search within the index range
+      // The simulation may have restarted. Search within the index range
       // [0, _lastKeyFrameIndex).
       searchIndex = 0;
       endIndex = _lastKeyFrameIndex;
