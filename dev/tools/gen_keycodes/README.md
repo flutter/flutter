@@ -5,8 +5,8 @@ the `LogicalKeyboardKey` and `PhysicalKeyboardKey` classes.
 
 It generates multiple files across Flutter. For framework, it generates
 
-* [`keyboard_key.dart`](../../../packages/flutter/lib/src/services/keyboard_key.dart), which contains the definition and list of logical keys and physical keys; and
-* [`keyboard_maps.dart`](../../../packages/flutter/lib/src/services/keyboard_maps.dart), which contains platform-specific immutable maps used for the `RawKeyboard` API.
+* [`keyboard_key.g.dart`](../../../packages/flutter/lib/src/services/keyboard_key.g.dart), which contains the definition and list of logical keys and physical keys; and
+* [`keyboard_maps.g.dart`](../../../packages/flutter/lib/src/services/keyboard_maps.g.dart), which contains platform-specific immutable maps used for the `RawKeyboard` API.
 
 For engine, it generates one key mapping file for each platform, as well as some
 files for testing purposes.
@@ -14,9 +14,9 @@ files for testing purposes.
 It draws information from various source bases, including online
 repositories, and manual mapping in the `data` subdirectory. It incorporates
 this information into a giant list of physical keys
-([`physical_key_data.json`](data/physical_key_data.json)),
+([`physical_key_data.g.json`](data/physical_key_data.g.json)),
 and another for logical keys
-([`logical_key_data.json`](data/logical_key_data.json)).
+([`logical_key_data.g.json`](data/logical_key_data.g.json)).
 The two files are checked in, and can be used as the data source next time so that
 output files can be generated without the Internet.
 
@@ -35,7 +35,7 @@ anew before generating the files. To do this, run:
 /PATH/TO/ROOT/bin/gen_keycodes --collect
 ```
 
-This will generate `physical_key_data.json` and `logical_key_data.json`. These
+This will generate `physical_key_data.g.json` and `logical_key_data.g.json`. These
 files should be checked in.
 
 By default this tool assumes that the gclient directory for flutter/engine
@@ -121,7 +121,7 @@ The planes are planned as follows:
   platforms managed by Flutter will start to send the new value, making it a
   breaking change. Therefore, when handling an unrecognized key on a platform
   managed by Flutter, it is recommended to file a new issue to add this value
-  to `keyboard_key.dart` instead of using the platform-plane value. However,
+  to `keyboard_key.g.dart` instead of using the platform-plane value. However,
   for a custom platform (see below), since the platform author has full control
   over key mapping, such change will not cause breakage and it is recommended
   to use the platform-plane value to avoid adding platform-exclusive values

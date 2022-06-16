@@ -23,9 +23,9 @@ String readDataFile(String fileName) {
 }
 
 final PhysicalKeyData physicalData = PhysicalKeyData.fromJson(
-    json.decode(readDataFile('physical_key_data.json')) as Map<String, dynamic>);
+    json.decode(readDataFile('physical_key_data.g.json')) as Map<String, dynamic>);
 final LogicalKeyData logicalData = LogicalKeyData.fromJson(
-    json.decode(readDataFile('logical_key_data.json')) as Map<String, dynamic>);
+    json.decode(readDataFile('logical_key_data.g.json')) as Map<String, dynamic>);
 final Map<String, bool> keyGoals = parseMapOfBool(
     readDataFile('layout_goals.json'));
 

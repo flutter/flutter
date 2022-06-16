@@ -66,7 +66,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'lib', 'web_ui', 'lib', 'src', 'engine', 'key_map.dart');
+      'lib', 'web_ui', 'lib', 'src', 'engine', 'key_map.g.dart');
 
   @override
   Map<String, String> mappings() {
