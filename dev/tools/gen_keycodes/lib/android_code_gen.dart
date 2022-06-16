@@ -88,7 +88,6 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     const List<MaskConstant> maskConstants = <MaskConstant>[
       kValueMask,
       kUnicodePlane,
-      kLogicalPlane,
       kAndroidPlane,
     ];
     for (final MaskConstant constant in maskConstants) {
