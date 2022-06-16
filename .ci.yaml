@@ -38,7 +38,7 @@ platform_properties:
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       os: Linux
-      device_os: "msm8952"
+      device_type: "msm8952"
   linux_samsung_s10:
     properties:
       dependencies: >-
