@@ -16,7 +16,9 @@ if [ ! -d myapp ]; then
 fi
 pushd myapp > /dev/null
 #cp ../../main.dart lib/main.dart
-flutter build bundle
+flutter build bundle \
+        --local-engine-src-path ../../../../../ \
+        --local-engine=host_debug_unopt
 popd > /dev/null
 
 #################################################################
