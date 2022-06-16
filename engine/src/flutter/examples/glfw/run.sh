@@ -19,7 +19,9 @@ if [ ! -d myapp ]; then
 fi
 cd myapp
 cp ../../main.dart lib/main.dart
-flutter build bundle
+flutter build bundle \
+        --local-engine-src-path ../../../../../ \
+        --local-engine=host_debug_unopt
 cd -
 
 #################################################################

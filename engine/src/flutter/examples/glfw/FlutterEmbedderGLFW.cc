@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <embedder.h>
-#include <glfw3.h>
-
 #include <cassert>
 #include <chrono>
 #include <iostream>
+
+#include "GLFW/glfw3.h"
+#include "embedder.h"
 
 // This value is calculated after the window is created.
 static double g_pixelRatio = 1.0;
