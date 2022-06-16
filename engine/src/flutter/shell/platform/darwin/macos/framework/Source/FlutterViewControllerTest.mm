@@ -22,6 +22,7 @@
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled;
 - (bool)testKeyboardIsRestartedOnEngineRestart;
 - (bool)testTrackpadGesturesAreSentToFramework;
+- (bool)testViewWillAppearCalledMultipleTimes;
 
 + (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
                         callback:(nullable FlutterKeyEventCallback)callback
@@ -132,6 +133,10 @@ TEST(FlutterViewControllerTest, TestKeyboardIsRestartedOnEngineRestart) {
 
 TEST(FlutterViewControllerTest, TestTrackpadGesturesAreSentToFramework) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testTrackpadGesturesAreSentToFramework]);
+}
+
+TEST(FlutterViewControllerTest, testViewWillAppearCalledMultipleTimes) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testViewWillAppearCalledMultipleTimes]);
 }
 
 }  // namespace flutter::testing
@@ -515,6 +520,16 @@ TEST(FlutterViewControllerTest, TestTrackpadGesturesAreSentToFramework) {
   EXPECT_EQ(last_event.scroll_delta_x, -40 * viewController.flutterView.layer.contentsScale);
   EXPECT_EQ(last_event.scroll_delta_y, -80 * viewController.flutterView.layer.contentsScale);
 
+  return true;
+}
+
+- (bool)testViewWillAppearCalledMultipleTimes {
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  [viewController viewWillAppear];
+  [viewController viewWillAppear];
   return true;
 }
 
