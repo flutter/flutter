@@ -22,23 +22,6 @@ String? getCmakeExecutableName(CmakeBasedProject project) {
   return null;
 }
 
-/// Extracts the `PACKAGE_GUID` from a project's CMake file.
-///
-/// Returns `null` if it cannot be found.
-String? getCmakePackageGuid(File cmakeFile) {
-  if (!cmakeFile.existsSync()) {
-    return null;
-  }
-  final RegExp nameSetPattern = RegExp(r'^\s*set\(PACKAGE_GUID\s*"(.*)"\s*\)\s*$');
-  for (final String line in cmakeFile.readAsLinesSync()) {
-    final RegExpMatch? match = nameSetPattern.firstMatch(line);
-    if (match != null) {
-      return match.group(1);
-    }
-  }
-  return null;
-}
-
 String _escapeBackslashes(String s) {
   return s.replaceAll(r'\', r'\\');
 }
