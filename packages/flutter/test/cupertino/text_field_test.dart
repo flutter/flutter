@@ -2919,14 +2919,16 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection.collapsed(offset: 5));
+    expect(controller.selection.baseOffset, 5);
+    expect(controller.selection.extentOffset, 5);
 
     await gesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
 
     await gesture.down(gPos);
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection.collapsed(offset: 8));
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 8);
   },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.macOS, TargetPlatform.windows })
   );
@@ -2958,11 +2960,13 @@ void main() {
 
     await gesture.down(gPos);
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection.collapsed(offset: 5));
+    expect(controller.selection.baseOffset, 5);
+    expect(controller.selection.extentOffset, 5);
 
     await gesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(controller.selection, const TextSelection.collapsed(offset: 8));
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 8);
 
     final TestGesture touchGesture = await tester.startGesture(ePos);
     await touchGesture.up();
@@ -2971,11 +2975,13 @@ void main() {
     await touchGesture.down(gPos);
     await tester.pumpAndSettle();
     // On iOS a tap to select, selects the word edge instead of the exact tap position.
-    expect(controller.selection, TextSelection.collapsed(offset: isTargetPlatformApple ? 4 : 5));
+    expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
+    expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
 
     await touchGesture.up();
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection.collapsed(offset: 8));
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 8);
   },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.iOS })
   );
