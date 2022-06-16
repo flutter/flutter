@@ -77,7 +77,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
   buffer.writeln(
-      '\tPost-submit cocoon dashboard: ${globals.cocoonDashboard}');
+      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
@@ -95,7 +95,8 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
-  buffer.writeln('\tPost-submit cocoon dashboard: ${globals.cocoonDashboard}');
+  buffer.writeln(
+      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln(
         '${state.framework.cherrypicks.length} Framework Cherrypicks:');
