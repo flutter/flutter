@@ -217,6 +217,25 @@ void main() {
     await verifyKeyFrame(opacity: 1.0,  at: 1000000);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
+  testWidgets('Cursor does not animate on non-iOS platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: TextField(maxLines: 3)),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    // Wait for the current animation to finish. If the cursor never stops its
+    // blinking animation the test will timeout.
+    await tester.pumpAndSettle();
+
+    for (int i = 0; i < 40; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.hasRunningAnimations, false);
+    }
+  }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()..remove(TargetPlatform.iOS)));
+
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     const Widget widget = MaterialApp(
