@@ -4,8 +4,9 @@
 
 import '../base/file_system.dart';
 import 'migrate_utils.dart';
+import 'migrate_compute.dart';
 
-/// Data class that holds all results and generated directories from a computeMigration run.
+/// Class that holds all results and generated directories from a computeMigration run.
 ///
 /// mergeResults, addedFiles, and deletedFiles includes the sets of files to be migrated while
 /// the other members track the temporary sdk and generated app directories created by the tool.
@@ -13,7 +14,7 @@ import 'migrate_utils.dart';
 /// The compute function does not clean up the temp directories, as the directories may be reused,
 /// so this must be done manually afterwards.
 class MigrateResult {
-  /// Explicitly initialize the MigrateResult.
+  /// Explicitly initialize the 
   MigrateResult({
     required this.mergeResults,
     required this.addedFiles,
@@ -57,8 +58,12 @@ class MigrateResult {
   /// The root directory of the base app.
   Directory? generatedBaseTemplateDirectory;
 
+  MigrateBaseFlutterProject? baseProject;
+
   /// The root directory of the target app.
   Directory? generatedTargetTemplateDirectory;
+
+  MigrateTargetFlutterProject? targetProject;
 
   /// The root directories of the Flutter SDK for each revision.
   Map<String, Directory> sdkDirs;

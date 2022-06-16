@@ -41,30 +41,22 @@ enum SupportedPlatform {
 
 String? platformToSubdirectoryPrefix(SupportedPlatform platform) {
   switch(platform) {
-    case SupportedPlatform.android: {
+    case SupportedPlatform.android:
       return 'android';
-    }
-    case SupportedPlatform.ios: {
+    case SupportedPlatform.ios:
       return 'ios';
-    }
-    case SupportedPlatform.linux: {
+    case SupportedPlatform.linux:
       return 'linux';
-    }
-    case SupportedPlatform.macos: {
+    case SupportedPlatform.macos:
       return 'macos';
-    }
-    case SupportedPlatform.web: {
+    case SupportedPlatform.web:
       return 'web';
-    }
-    case SupportedPlatform.windows: {
+    case SupportedPlatform.windows:
       return 'windows';
-    }
-    case SupportedPlatform.fuchsia: {
+    case SupportedPlatform.fuchsia:
       return 'fuchsia';
-    }
-    case SupportedPlatform.root: {
+    case SupportedPlatform.root:
       return 'root';
-    }
   }
 }
 

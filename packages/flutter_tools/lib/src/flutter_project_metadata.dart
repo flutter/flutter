@@ -109,7 +109,7 @@ class FlutterProjectMetadata {
     }
   }
 
-  /// Creates a MigrateConfig by explicitly providing all values.
+  /// Creates a FlutterProjectMetadata by explicitly providing all values.
   FlutterProjectMetadata.explicit({
     File? file,
     required String? versionRevision,
@@ -149,7 +149,9 @@ class FlutterProjectMetadata {
   void writeFile({File? outputFile}) {
     outputFile = outputFile ?? _metadataFile;
     if (outputFile == null) {
-      _logger.printError('No outputFile specified to write .metadata to.');
+      // In-memory FlutterProjectMetadata instances requires an output file to
+      // be passed or specified in the constructor.
+      throw FileSystemException('No outputFile specified to write .metadata to. Initialize with a file or provide one when writing.');
       return;
     }
     outputFile
@@ -203,7 +205,12 @@ ${migrateConfig.getOutputFileString()}''';
   }
 
   /// Performs a biased 3-way-merge between a current user-owned metadata file, a base version, and a target.
-  static FlutterProjectMetadata merge(FlutterProjectMetadata current, FlutterProjectMetadata base, FlutterProjectMetadata target, Logger logger) {
+  static FlutterProjectMetadata merge(
+    FlutterProjectMetadata current,
+    FlutterProjectMetadata base,
+    FlutterProjectMetadata target,
+    Logger logger
+  ) {
     // Prefer to update the version revision and channel to latest version.
     final String? versionRevision = target.versionRevision ?? current.versionRevision ?? base.versionRevision;
     final String? versionChannel = target.versionChannel ?? current.versionChannel ?? base.versionChannel;
@@ -266,8 +273,7 @@ class MigrateConfig {
     bool update = true,
     required Logger logger,
   }) {
-    final FlutterProject flutterProject =
-      projectDirectory == null ||
+    final FlutterProject flutterProject = projectDirectory == null ||
         FlutterProject.current().directory.path == projectDirectory.path ?
         FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);

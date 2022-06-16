@@ -204,10 +204,18 @@ class MigrateStartCommand extends FlutterCommand {
   /// Deletes the files or directories at the provided paths.
   void _deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
     for (final Directory d in directories) {
-      d.deleteSync(recursive: true);
+      try {
+        d.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        logger.printError('Unabled to delete ${d.path} due to ${e.message}, please clean up manually.');
+      }
     }
     for (final String p in paths) {
-      fileSystem.directory(p).deleteSync(recursive: true);
+      try {
+        fileSystem.directory(p).deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        logger.printError('Unabled to delete ${d.path} due to ${e.message}, please clean up manually.');
+      }
     }
   }
 }
