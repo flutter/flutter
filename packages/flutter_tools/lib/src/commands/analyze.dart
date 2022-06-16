@@ -148,10 +148,10 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = workingDirectory!.path;
       }
       return ValidateProject(
-          fileSystem: _fileSystem,
-          logger: _logger,
-          allProjectValidators: _allProjectValidators,
-          userPath: directoryPath,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        allProjectValidators: _allProjectValidators,
+        userPath: directoryPath,
       ).run();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
