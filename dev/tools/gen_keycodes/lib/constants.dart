@@ -61,6 +61,15 @@ const MaskConstant kFlutterPlane = MaskConstant(
   description: 'The plane value for keys defined by Flutter.',
 );
 
+const MaskConstant kLogicalPlane = MaskConstant(
+  name: 'Logical Plane',
+  value: 0x0300000000,
+  description: 'The plane value for physical keys minted from logical keys.\n'
+    '\n'
+    'This is used to assign unique physical keys for identification to events '
+    'that contain no empty scan codes, which possibly come from event simulation.',
+);
+
 const MaskConstant kStartOfPlatformPlanes = MaskConstant(
   name: 'Start Of Platform Planes',
   value: 0x1100000000,

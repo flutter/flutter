@@ -3,7 +3,7 @@
 This directory contains a keycode generator that can generate Dart code for
 the `LogicalKeyboardKey` and `PhysicalKeyboardKey` classes.
 
-It generates multiple files across Flutter.  For framework, it generates
+It generates multiple files across Flutter. For framework, it generates
 
 * [`keyboard_key.dart`](../../../packages/flutter/lib/src/services/keyboard_key.dart), which contains the definition and list of logical keys and physical keys; and
 * [`keyboard_maps.dart`](../../../packages/flutter/lib/src/services/keyboard_maps.dart), which contains platform-specific immutable maps used for the `RawKeyboard` API.
@@ -11,7 +11,7 @@ It generates multiple files across Flutter.  For framework, it generates
 For engine, it generates one key mapping file for each platform.
 
 It draws information from various source bases, including online
-repositories, and manual mapping in the `data` subdirectory.  It incorporates
+repositories, and manual mapping in the `data` subdirectory. It incorporates
 this information into a giant list of physical keys
 ([`physical_key_data.json`](data/physical_key_data.json)),
 and another for logical keys
@@ -38,46 +38,45 @@ This will generate `physical_key_data.json` and `logical_key_data.json`. These
 files should be checked in.
 
 By default this tool assumes that the gclient directory for flutter/engine
-and the root for the flutter/flutter are placed at the same folder.  If not,
+and the root for the flutter/flutter are placed at the same folder. If not,
 use `--engine-root=/ENGINE/GCLIENT/ROOT` to specify the engine root.
 
 Other options can be found using `--help`.
 
-## Logical Key ID Scheme
+## Key ID Scheme
 
-To provide logical keys with unique ID codes, Flutter uses a scheme
-to assign logical keycodes which keeps us out of the business of minting new
-codes ourselves. This only applies to logical key codes: Flutter's
-physical key codes are just defined as USB HID codes.
+To provide keys with unique ID codes, Flutter uses a scheme to assign keycodes
+which keeps us out of the business of minting new codes ourselves. This applies
+both logical keys and physical keys.
 
-The logical codes are meant to be opaque to the user, and should never be
-unpacked for meaning, since the coding scheme could change at any time and the
-meaning is likely to be retrievable more reliably and correctly from
-the API.
+The codes are meant to be opaque to the user, and should never be unpacked for
+meaning, since the coding scheme could change at any time and the meaning is
+likely to be retrievable more reliably and correctly from the API.
 
 However, if you are porting Flutter to a new platform, you should follow the
 following guidelines for specifying logical key codes.
 
-The logical key code is a 52-bit integer (due to the limitation of JavaScript).
-The entire namespace is divided into 32-bit *planes*. The upper 20 bits of the
-ID represent the plane ID, while the lower 32 bits represent values in the
-plane.  For example, plane 0x1 refers to the range 0x1 0000 0000 -
-0x1 FFFF FFFF.  Each plane manages how the values within the range are assigned.
+The key code is a 52-bit integer (due to the limitation of JavaScript). The
+entire namespace is divided into 32-bit *planes*. The upper 20 bits of the ID
+represent the plane ID, while the lower 32 bits represent values in the plane.
+For example, plane 0x1 refers to the range 0x1 0000 0000 - 0x1 FFFF FFFF. Each
+plane manages how the values within the range are assigned.
 
 The planes are planned as follows:
 
-- **Plane 0x00**: The Unicode plane. This plane contains keys that generate Unicode
-  characters when pressed (this includes dead keys, but not e.g. function keys
-  or shift keys). The value is defined as the Unicode code point corresponding
-  to the character, lower case and without modifier keys if possible.
-  Examples are Key A (0x61), Digit 1 (0x31), Colon (0x3A), and Key Ù (0xD9).
-  (The "Colon" key represents a keyboard key that prints the ":"
-  character without modifiers, which can be found on the French layout.  On the
-  US layout, the key that prints ":" is the Semicolon key.)
-  This plane also contains key None (0x0).
+- **Plane 0x00**: The Unicode plane. For logical keys, this plane contains keys
+  that generate Unicode characters when pressed (this includes dead keys, but
+  not e.g. function keys or shift keys). The value is defined as the Unicode
+  code point corresponding to the character, lower case and without modifier
+  keys if possible. Examples are Key A (0x61), Digit 1 (0x31), Colon (0x3A),
+  and Key Ù (0xD9). (The "Colon" key represents a keyboard key that prints the
+  ":" character without modifiers, which can be found on the French layout. On
+  the US layout, the key that prints ":" is the Semicolon key.) For physical
+  keys, this plane contains keys from USB HID usages.
 
-- **Plane 0x01**: The unprintable plane. This plane contains keys that are defined
-  by the [Chromium key list](https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc)
+- **Plane 0x01**: The unprintable plane. This plane contains logical keys that
+  are defined by the [Chromium key
+  list](https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc)
   and do not generate Unicode characters. The value is defined as the macro
   value defined by the Chromium key list. Examples are CapsLock (0x105),
   ArrowUp (0x304), F1 (0x801), Hiragata (0x716), and TVPower (0xD4B).
@@ -92,7 +91,12 @@ The planes are planned as follows:
   while the web doesn't (only has "Shift").
   Other examples are numpad keys and gamepad keys.
 
-- **Plane 0x03-0x0F**: Reserved.
+- **Plane 0x03**: The logical plane. This plane contains physical keys that are
+  minted from the logical key of the same event. This is used to assign unique
+  physical keys for identification to events that contain no empty scan codes,
+  which possibly come from event simulation.
+
+- **Plane 0x04-0x0F**: Reserved.
 
 - **Plane 0x10-0x1F**: Platform planes managed by Flutter. Each platform plane
   corresponds to a Flutter embedding officially supported by Flutter. The
@@ -129,5 +133,5 @@ The planes are planned as follows:
   to use the platform-plane value to avoid adding platform-exclusive values
   to the framework.
 
-- **Plane 0x20-0x2F**: Custom platform planes.  Similar to Flutter's platform
+- **Plane 0x20-0x2F**: Custom platform planes. Similar to Flutter's platform
   planes, but for private use by custom platforms.
