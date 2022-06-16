@@ -54,7 +54,6 @@ class LogicalKeyData {
     PhysicalKeyData physicalKeyData,
   ) {
     final Map<String, LogicalKeyEntry> data = _readKeyEntries(chromiumKeys);
-    print(data.keys.toList());
     _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
     _readGtkKeyCodes(data, gtkKeyCodeHeader, parseMapOfListOfString(gtkNameMap));
     _readAndroidKeyCodes(data, androidKeyCodeHeader, parseMapOfListOfString(androidNameMap));
