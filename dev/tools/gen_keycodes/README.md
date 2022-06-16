@@ -85,18 +85,12 @@ The planes are planned as follows:
   information.
 
 - **Plane 0x02**: The Flutter plane. This plane contains keys that are
-  defined by Flutter. The values are also manually assigned by Flutter.
-  Modifier keys are placed in this plane, because Flutter distinguishes
-  between sided modifier keys (for example "ShiftLeft" and "ShiftRight"),
-  while the web doesn't (only has "Shift").
-  Other examples are numpad keys and gamepad keys.
+  defined by Flutter. Modifier keys are placed in this plane, because Flutter
+  distinguishes between sided modifier keys (for example "ShiftLeft" and
+  "ShiftRight"), while the web doesn't (only has "Shift"). Other examples are
+  numpad keys and gamepad keys.
 
-- **Plane 0x03**: The logical plane. This plane contains physical keys that are
-  minted from the logical key of the same event. This is used to assign unique
-  physical keys for identification to events that contain no empty scan codes,
-  which possibly come from event simulation.
-
-- **Plane 0x04-0x0F**: Reserved.
+- **Plane 0x03-0x0F**: Reserved.
 
 - **Plane 0x10-0x1F**: Platform planes managed by Flutter. Each platform plane
   corresponds to a Flutter embedding officially supported by Flutter. The
