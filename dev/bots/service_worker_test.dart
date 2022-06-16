@@ -39,7 +39,7 @@ Future<void> main() async {
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
-  await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true);
+  await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
 }
 
 Future<void> _setAppVersion(int version) async {
