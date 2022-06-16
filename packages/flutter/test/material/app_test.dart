@@ -11,6 +11,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1263,6 +1264,83 @@ void main() {
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets(
+    'ListView clip behavior updates overscroll indicator clip behavior', (WidgetTester tester) async {
+      Widget buildFrame(Clip clipBehavior) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: 20,
+                  clipBehavior: clipBehavior,
+                  itemBuilder: (BuildContext context, int index){
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text('Index $index'),
+                    );
+                  },
+                ),
+              ),
+              Opacity(
+                opacity: 0.5,
+                child: Container(
+                  color: const Color(0xD0FF0000),
+                  height: 100,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // Test default clip behavior.
+      await tester.pumpWidget(buildFrame(Clip.hardEdge));
+
+      expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+      expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+      expect(find.text('Index 1'), findsOneWidget);
+
+      RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Currently not clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+      // Overscroll the start.
+      await gesture.moveBy(const Offset(0.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(find.text('Index 1'), findsOneWidget);
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Now clipping
+      expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Test custom clip behavior.
+      await tester.pumpWidget(buildFrame(Clip.none));
+
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Currently not clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+      // Overscroll the start.
+      await gesture.moveBy(const Offset(0.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(find.text('Index 1'), findsOneWidget);
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Now clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
