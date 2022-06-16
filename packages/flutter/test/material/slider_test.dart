@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -2840,5 +2841,112 @@ void main() {
       material,
       paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: color),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/103566
+  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+    double value = 0.5;
+    bool dragStarted = false;
+    final Key sliderKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 20)),
+                      child: Slider(
+                        value: value,
+                        key: sliderKey,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    // Less than configured touch slop, more than default touch slop
+    await drag.moveBy(const Offset(19.0, 0));
+    await tester.pump();
+
+    expect(value, 0.5);
+    expect(dragStarted, true);
+
+    dragStarted = false;
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    bool sliderEnd = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 10)),
+                      child: Slider(
+                        value: value,
+                        key: sliderKey,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                        onChangeEnd: (double endValue) {
+                          sliderEnd = true;
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // More than touch slop.
+    await drag.moveBy(const Offset(12.0, 0));
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(sliderEnd, true);
+    expect(dragStarted, false);
   });
 }
