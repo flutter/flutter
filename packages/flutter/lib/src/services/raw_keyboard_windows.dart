@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_key.g.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
 
 // Virtual key VK_PROCESSKEY in Win32 API.

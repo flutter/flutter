@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'binding.dart';
-import 'keyboard_key.dart';
+import 'keyboard_key.g.dart';
 import 'raw_keyboard.dart';
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
