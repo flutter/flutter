@@ -56,7 +56,6 @@ MessageLoopImpl::~MessageLoopImpl() {
 void MessageLoopImpl::PostTask(const fml::closure& task,
                                fml::TimePoint target_time) {
   FML_DCHECK(task != nullptr);
-  FML_DCHECK(task != nullptr);
   if (terminated_) {
     // If the message loop has already been terminated, PostTask should destruct
     // |task| synchronously within this function.
