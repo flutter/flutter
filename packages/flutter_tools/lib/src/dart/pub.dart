@@ -576,7 +576,6 @@ class _DefaultPub implements Pub {
       final Directory globalDirectoryPub = _fileSystem.directory(
         _fileSystem.path.join(globalDirectory!.path, 'hosted', 'pub.dartlang.org')
       );
-      
       joinCaches(
         fileSystem: _fileSystem,
         globalCachePath: globalDirectoryPub.path,
