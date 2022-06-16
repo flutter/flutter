@@ -122,6 +122,41 @@
         {
             "archives": [
                 {
+                    "name": "android_profile_arm64",
+                    "type": "gcs",
+                    "base_path": "out/android_profile_arm64/zip_archives/",
+                    "include_paths": [
+                        "out/android_profile_arm64/zip_archives/android-arm64-profile/linux-x64.zip"
+                    ]
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--android",
+                "--runtime-mode",
+                "profile",
+                "--android-cpu",
+                "arm64"
+            ],
+            "name": "android_profile_arm64",
+            "ninja": {
+                "config": "android_profile_arm64",
+                "targets": [
+                    "default",
+                    "clang_x64/gen_snapshot"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
                     "name": "android_profile_x64",
                     "type": "gcs",
                     "base_path": "out/android_profile_x64/zip_archives/",
