@@ -71,12 +71,12 @@ void main() {
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      '# Generated code do not commit.',
+      r'# Generated code do not commit.',
       r'file(TO_CMAKE_PATH "/flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "/" PROJECT_DIR)',
 
-      '# Environment variables to pass to tool_backend.sh',
-      'list(APPEND FLUTTER_TOOL_ENVIRONMENT',
+      r'# Environment variables to pass to tool_backend.sh',
+      r'list(APPEND FLUTTER_TOOL_ENVIRONMENT',
       r'  "FLUTTER_ROOT=/flutter"',
       r'  "PROJECT_DIR=/"',
       ')',
@@ -109,12 +109,12 @@ void main() {
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      '# Generated code do not commit.',
+      r'# Generated code do not commit.',
       r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
 
-      '# Environment variables to pass to tool_backend.sh',
-      'list(APPEND FLUTTER_TOOL_ENVIRONMENT',
+      r'# Environment variables to pass to tool_backend.sh',
+      r'list(APPEND FLUTTER_TOOL_ENVIRONMENT',
       r'  "FLUTTER_ROOT=C:\\flutter"',
       r'  "PROJECT_DIR=C:\\"',
       r'  "TEST=hello\\world"',
