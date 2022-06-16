@@ -6,9 +6,12 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/commands/validate_project.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 import 'package:flutter_tools/src/project_validator_result.dart';
@@ -70,26 +73,36 @@ class ProjectValidatorCrash extends ProjectValidator {
 
 void main() {
   FileSystem fileSystem;
+  Terminal terminal;
+  ProcessManager processManager;
+  Platform platform;
 
-  group('analyze project command', () {
+  group('analyze --suggestions command', () {
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
+      terminal = Terminal.test();
+      processManager = FakeProcessManager.empty();
+      platform = FakePlatform();
     });
 
     testUsingContext('success, error and warning', () async {
       final BufferLogger loggerTest = BufferLogger.test();
-      final ValidateProjectCommand command = ValidateProjectCommand(
-          fileSystem: fileSystem,
-          logger: loggerTest,
-          allProjectValidators: <ProjectValidator>[
-            ProjectValidatorDummy(),
-            ProjectValidatorSecondDummy()
-          ]
+      final AnalyzeCommand command = AnalyzeCommand(
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: loggerTest,
+        platform: platform,
+        terminal: terminal,
+        processManager: processManager,
+        allProjectValidators: <ProjectValidator>[
+          ProjectValidatorDummy(),
+          ProjectValidatorSecondDummy()
+        ]
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['validate-project']);
+      await runner.run(<String>['analyze', '--suggestions', './']);
 
       const String expected = '\n'
           '┌──────────────────────────────────────────┐\n'
@@ -107,14 +120,20 @@ void main() {
 
     testUsingContext('crash', () async {
       final BufferLogger loggerTest = BufferLogger.test();
-      final ValidateProjectCommand command = ValidateProjectCommand(
+      final AnalyzeCommand command = AnalyzeCommand(
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: loggerTest,
-          allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()]
+          platform: platform,
+          terminal: terminal,
+          processManager: processManager,
+          allProjectValidators: <ProjectValidator>[
+            ProjectValidatorCrash(),
+          ]
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['validate-project']);
+      await runner.run(<String>['analyze', '--suggestions', './']);
 
       const String expected = '[☠] Exception: my exception: #0      ProjectValidatorCrash.start';
 

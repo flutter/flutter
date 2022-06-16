@@ -9,9 +9,11 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../project_validator.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
+import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
@@ -23,11 +25,13 @@ class AnalyzeCommand extends FlutterCommand {
     required Logger logger,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    List<ProjectValidator>? allProjectValidators,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
+       _allProjectValidators = allProjectValidators ?? [] ,
        _platform = platform {
     argParser.addFlag('flutter-repo',
         negatable: false,
@@ -56,6 +60,9 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'The path to write the request and response protocol. This is '
               'only intended to be used for debugging the tooling.',
         hide: !verboseHelp);
+    argParser.addOption('suggestions',
+        help: 'Show suggestions about the current flutter project'
+    );
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
@@ -92,6 +99,7 @@ class AnalyzeCommand extends FlutterCommand {
   final Terminal _terminal;
   final ProcessManager _processManager;
   final Platform _platform;
+  final List<ProjectValidator> _allProjectValidators;
 
   @override
   String get name => 'analyze';
@@ -119,7 +127,15 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (boolArgDeprecated('watch')) {
+    final String? suggestionFlag = stringArg('suggestions');
+    if (suggestionFlag != null) {
+      return ValidateProject(
+          fileSystem: _fileSystem,
+          logger: _logger,
+          allProjectValidators: _allProjectValidators,
+          userPath: suggestionFlag
+      ).run();
+    } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoRoots(),
