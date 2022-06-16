@@ -16,6 +16,9 @@ import 'theme.dart';
 import 'tooltip_theme.dart';
 import 'tooltip_visibility.dart';
 
+/// Signature for when a tooltip is triggered.
+typedef TooltipTriggeredCallback = void Function();
+
 /// A Material Design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
@@ -103,11 +106,13 @@ class Tooltip extends StatefulWidget {
     this.excludeFromSemantics,
     this.decoration,
     this.textStyle,
+    this.textAlign,
     this.waitDuration,
     this.showDuration,
-    this.child,
     this.triggerMode,
     this.enableFeedback,
+    this.onTriggered,
+    this.child,
   }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
         assert(
           richMessage == null || textStyle == null,
@@ -133,7 +138,8 @@ class Tooltip extends StatefulWidget {
 
   /// The amount of space by which to inset the tooltip's [child].
   ///
-  /// Defaults to 16.0 logical pixels in each direction.
+  /// On mobile, defaults to 16.0 logical pixels horizontally and 4.0 vertically.
+  /// On desktop, defaults to 8.0 logical pixels horizontally and 4.0 vertically.
   final EdgeInsetsGeometry? padding;
 
   /// The empty space that surrounds the tooltip.
@@ -197,17 +203,26 @@ class Tooltip extends StatefulWidget {
   /// used with [Colors.black].
   final TextStyle? textStyle;
 
+  /// How the message of the tooltip is aligned horizontally.
+  ///
+  /// If this property is null, then [TooltipThemeData.textAlign] is used.
+  /// If [TooltipThemeData.textAlign] is also null, the default value is
+  /// [TextAlign.start].
+  final TextAlign? textAlign;
+
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   ///
   /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
   final Duration? waitDuration;
 
-  /// The length of time that the tooltip will be shown after a long press
-  /// is released or mouse pointer exits the widget.
+  /// The length of time that the tooltip will be shown after a long press is
+  /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
+  /// released (if triggerMode is [TooltipTriggerMode.tap]) or mouse pointer
+  /// exits the widget.
   ///
-  /// Defaults to 1.5 seconds for long press released or 0.1 seconds for mouse
-  /// pointer exits the widget.
+  /// Defaults to 1.5 seconds for long press and tap released or 0.1 seconds
+  /// for mouse pointer exits the widget.
   final Duration? showDuration;
 
   /// The [TooltipTriggerMode] that will show the tooltip.
@@ -228,6 +243,12 @@ class Tooltip extends StatefulWidget {
   ///
   ///  * [Feedback], for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
+
+  /// Called when the Tooltip is triggered.
+  ///
+  /// The tooltip is triggered after a tap when [triggerMode] is [TooltipTriggerMode.tap]
+  /// or after a long press when [triggerMode] is [TooltipTriggerMode.longPress].
+  final TooltipTriggeredCallback? onTriggered;
 
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
@@ -298,6 +319,7 @@ class Tooltip extends StatefulWidget {
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
+    properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
   }
 }
 
@@ -317,12 +339,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const bool _defaultExcludeFromSemantics = false;
   static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
   static const bool _defaultEnableFeedback = true;
+  static const TextAlign _defaultTextAlign = TextAlign.start;
 
   late double _height;
   late EdgeInsetsGeometry _padding;
   late EdgeInsetsGeometry _margin;
   late Decoration _decoration;
   late TextStyle _textStyle;
+  late TextAlign _textAlign;
   late double _verticalOffset;
   late bool _preferBelow;
   late bool _excludeFromSemantics;
@@ -392,11 +416,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return const EdgeInsets.symmetric(horizontal: 8.0);
+        return const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
+        return const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
     }
   }
 
@@ -473,7 +497,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _dismissTimer = null;
     _showTimer?.cancel();
     _showTimer = null;
-    if (_entry!= null) {
+    if (_entry != null) {
       _entry!.remove();
     }
     _controller.reverse();
@@ -505,8 +529,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
   bool ensureTooltipVisible() {
-    if (!_visible)
+    if (!_visible) {
       return false;
+    }
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
@@ -570,6 +595,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         onExit: _mouseIsConnected ? (_) => _handleMouseExit() : null,
         decoration: _decoration,
         textStyle: _textStyle,
+        textAlign: _textAlign,
         animation: CurvedAnimation(
           parent: _controller,
           curve: Curves.fastOutSlowIn,
@@ -643,11 +669,25 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _pressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
     if (tooltipCreated && _enableFeedback) {
-      if (_triggerMode == TooltipTriggerMode.longPress)
+      if (_triggerMode == TooltipTriggerMode.longPress) {
         Feedback.forLongPress(context);
-      else
+      } else {
         Feedback.forTap(context);
+      }
     }
+    widget.onTriggered?.call();
+  }
+
+  void _handleTap() {
+    _handlePress();
+    // When triggerMode is not [TooltipTriggerMode.tap] the tooltip is dismissed
+    // by _handlePointerEvent, which listens to the global pointer events.
+    // When triggerMode is [TooltipTriggerMode.tap] and the Tooltip GestureDetector
+    // competes with other GestureDetectors, the disambiguation process will complete
+    // after the global pointer event is received. As we can't rely on the global
+    // pointer events to dismiss the Tooltip, we have to call _handleMouseExit
+    // to dismiss the tooltip after _showDuration expired.
+    _handleMouseExit();
   }
 
   @override
@@ -691,6 +731,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
     _decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
     _textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
+    _textAlign = widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign;
     _waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
     _showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
     _hoverShowDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultHoverShowDuration;
@@ -708,9 +749,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_visible) {
       result = GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ?
-        _handlePress : null,
-        onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
+        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
+        onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
         excludeFromSemantics: true,
         child: result,
       );
@@ -786,6 +826,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.margin,
     this.decoration,
     this.textStyle,
+    this.textAlign,
     required this.animation,
     required this.target,
     required this.verticalOffset,
@@ -800,6 +841,7 @@ class _TooltipOverlay extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
   final TextStyle? textStyle;
+  final TextAlign? textAlign;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -826,6 +868,7 @@ class _TooltipOverlay extends StatelessWidget {
                 child: Text.rich(
                   richMessage,
                   style: textStyle,
+                  textAlign: textAlign,
                 ),
               ),
             ),
@@ -841,6 +884,7 @@ class _TooltipOverlay extends StatelessWidget {
       );
     }
     return Positioned.fill(
+      bottom: MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0,
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,

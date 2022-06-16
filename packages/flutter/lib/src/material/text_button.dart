@@ -57,11 +57,19 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/text_button/text_button.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates using the [statesController] parameter to create a button
+/// that adds support for [MaterialState.selected].
+///
+/// ** See code in examples/api/lib/material/text_button/text_button.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons.html>
+///  * <https://m3.material.io/components/buttons>
 class TextButton extends ButtonStyleButton {
   /// Create a TextButton.
   ///
@@ -76,6 +84,7 @@ class TextButton extends ButtonStyleButton {
     super.focusNode,
     super.autofocus = false,
     super.clipBehavior = Clip.none,
+    super.statesController,
     required Widget super.child,
   });
 
@@ -349,8 +358,9 @@ class _TextButtonDefaultForeground extends MaterialStateProperty<Color?> {
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return onSurface?.withOpacity(0.38);
+    }
     return primary;
   }
 
@@ -368,10 +378,12 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered))
+    if (states.contains(MaterialState.hovered)) {
       return primary.withOpacity(0.04);
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+    }
+    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
       return primary.withOpacity(0.12);
+    }
     return null;
   }
 
@@ -390,8 +402,9 @@ class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
+    }
     return enabledCursor;
   }
 }
@@ -426,7 +439,7 @@ class _TextButtonWithIcon extends TextButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
+      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }
@@ -457,7 +470,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_101
 class _TokenDefaultsM3 extends ButtonStyle {
   _TokenDefaultsM3(this.context)
    : super(
@@ -471,7 +484,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
-    MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+    MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
@@ -480,20 +493,24 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
+      }
       return _colors.primary;
     });
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
-      if (states.contains(MaterialState.focused))
+      }
+      if (states.contains(MaterialState.focused)) {
         return _colors.primary.withOpacity(0.12);
-      if (states.contains(MaterialState.pressed))
+      }
+      if (states.contains(MaterialState.pressed)) {
         return _colors.primary.withOpacity(0.12);
+      }
       return null;
     });
 
@@ -528,8 +545,9 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
+      }
       return SystemMouseCursors.click;
     });
 

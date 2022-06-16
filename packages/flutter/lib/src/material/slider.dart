@@ -523,7 +523,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       vsync: this,
     );
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
-    positionController.value = _unlerp(widget.value);
+    positionController.value = _convert(widget.value);
     _actionMap = <Type, Action<Intent>>{
       _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(
         onInvoke: _actionHandler,
@@ -621,6 +621,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(value >= 0.0);
     assert(value <= 1.0);
     return value * (widget.max - widget.min) + widget.min;
+  }
+
+  double _discretize(double value) {
+    assert(widget.divisions != null);
+    assert(value >= 0.0 && value <= 1.0);
+
+    final int divisions = widget.divisions!;
+    return (value * divisions).round() / divisions;
+  }
+
+  double _convert(double value) {
+    double ret = _unlerp(value);
+    if (widget.divisions != null) {
+      ret = _discretize(ret);
+    }
+    return ret;
   }
 
   // Returns a number between 0.0 and 1.0, given a value between min and max.
@@ -771,7 +787,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           link: _layerLink,
           child: _SliderRenderObjectWidget(
             key: _renderObjectKey,
-            value: _unlerp(widget.value),
+            value: _convert(widget.value),
             divisions: widget.divisions,
             label: widget.label,
             sliderTheme: sliderTheme,
@@ -881,6 +897,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
+      gestureSettings: MediaQuery.of(context).gestureSettings,
     );
   }
 
@@ -902,7 +919,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
-      ..hovering = hovering;
+      ..hovering = hovering
+      ..gestureSettings = MediaQuery.of(context).gestureSettings;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -925,6 +943,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required TextDirection textDirection,
     required bool hasFocus,
     required bool hovering,
+    required DeviceGestureSettings gestureSettings,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
         assert(state != null),
         assert(textDirection != null),
@@ -948,11 +967,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _endInteraction;
+      ..onCancel = _endInteraction
+      ..gestureSettings = gestureSettings;
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp;
+      ..onTapUp = _handleTapUp
+      ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -1037,11 +1058,18 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsSemanticsUpdate();
   }
 
+  DeviceGestureSettings? get gestureSettings => _drag.gestureSettings;
+  set gestureSettings(DeviceGestureSettings? gestureSettings) {
+    _drag.gestureSettings = gestureSettings;
+    _tap.gestureSettings = gestureSettings;
+  }
+
   TargetPlatform _platform;
   TargetPlatform get platform => _platform;
   set platform(TargetPlatform value) {
-    if (_platform == value)
+    if (_platform == value) {
       return;
+    }
     _platform = value;
     markNeedsSemanticsUpdate();
   }
@@ -1049,8 +1077,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   SemanticFormatterCallback? _semanticFormatterCallback;
   SemanticFormatterCallback? get semanticFormatterCallback => _semanticFormatterCallback;
   set semanticFormatterCallback(SemanticFormatterCallback? value) {
-    if (_semanticFormatterCallback == value)
+    if (_semanticFormatterCallback == value) {
       return;
+    }
     _semanticFormatterCallback = value;
     markNeedsSemanticsUpdate();
   }
@@ -1143,8 +1172,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hasFocus;
   set hasFocus(bool value) {
     assert(value != null);
-    if (value == _hasFocus)
+    if (value == _hasFocus) {
       return;
+    }
     _hasFocus = value;
     _updateForFocusOrHover(_hasFocus);
     markNeedsSemanticsUpdate();
@@ -1155,8 +1185,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hovering;
   set hovering(bool value) {
     assert(value != null);
-    if (value == _hovering)
+    if (value == _hovering) {
       return;
+    }
     _hovering = value;
     _updateForFocusOrHover(_hovering);
   }
@@ -1262,7 +1293,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double _discretize(double value) {
-    double result = value.clamp(0.0, 1.0);
+    double result = clampDouble(value, 0.0, 1.0);
     if (isDiscrete) {
       result = (result * divisions!).round() / divisions!;
     }
@@ -1529,12 +1560,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
-      config.increasedValue = semanticFormatterCallback!(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
-      config.decreasedValue = semanticFormatterCallback!(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
+      config.increasedValue = semanticFormatterCallback!(_state._lerp(clampDouble(value + _semanticActionUnit, 0.0, 1.0)));
+      config.decreasedValue = semanticFormatterCallback!(_state._lerp(clampDouble(value - _semanticActionUnit, 0.0, 1.0)));
     } else {
       config.value = '${(value * 100).round()}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.increasedValue = '${(clampDouble(value + _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${(clampDouble(value - _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
     }
   }
 
@@ -1542,13 +1573,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void increaseAction() {
     if (isInteractive) {
-      onChanged!((value + _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
     }
   }
 
   void decreaseAction() {
     if (isInteractive) {
-      onChanged!((value - _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
     }
   }
 }

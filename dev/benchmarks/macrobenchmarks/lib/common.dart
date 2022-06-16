@@ -14,6 +14,7 @@ const String kLargeImagesRouteName = '/large_images';
 const String kTextRouteName = '/text';
 const String kFullscreenTextRouteName = '/fullscreen_text';
 const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
+const String kClipperCacheRouteName = '/clipper_cache';
 const String kColorFilterAndFadeRouteName = '/color_filter_and_fade';
 const String kColorFilterCacheRouteName = '/color_filter_cache';
 const String kFadingChildAnimationRouteName = '/fading_child_animation';
@@ -28,6 +29,7 @@ const String kAnimatedImageRouteName = '/animated_image';
 const String kOpacityPeepholeRouteName = '/opacity_peephole';
 const String kGradientPerfRouteName = '/gradient_perf';
 const String kAnimatedComplexOpacityPerfRouteName = '/animated_complex_opacity';
+const String kListTextLayoutRouteName = '/list_text_layout';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';

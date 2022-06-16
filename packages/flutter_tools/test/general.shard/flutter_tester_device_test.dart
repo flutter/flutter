@@ -87,6 +87,7 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
         'example.dill',
       ], environment: <String, String>{
@@ -131,6 +132,7 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
         'example.dill',
       ], environment: <String, String>{
@@ -171,14 +173,6 @@ void main() {
       await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
-
-    testUsingContext('as null when set to null', () async {
-      platform.environment = <String, String>{'FLUTTER_TEST': null};
-      processManager.addCommand(flutterTestCommand(null));
-
-      await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
-    });
   });
 
   group('Dart Entrypoint Args', () {
@@ -203,6 +197,7 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
             '--foo',
             '--bar',
@@ -244,6 +239,7 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
             'example.dill',
           ],
@@ -293,7 +289,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     enableObservatory: enableObservatory,
     machine: false,
     host: InternetAddress.loopbackIPv6,
-    buildTestAssets: false,
+    testAssetDirectory: null,
     flutterProject: null,
     icudtlPath: null,
     compileExpression: null,

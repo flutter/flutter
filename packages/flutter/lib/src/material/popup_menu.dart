@@ -347,8 +347,9 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1!;
 
-    if (!widget.enabled)
+    if (!widget.enabled) {
       style = style.copyWith(color: theme.disabledColor);
+    }
 
     Widget item = AnimatedDefaultTextStyle(
       style: style,
@@ -460,6 +461,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     super.enabled,
     super.padding,
     super.height,
+    super.mouseCursor,
     super.child,
   }) : assert(checked != null);
 
@@ -503,22 +505,25 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   @override
   void handleTap() {
     // This fades the checkmark in or out when tapped.
-    if (widget.checked)
+    if (widget.checked) {
       _controller.reverse();
-    else
+    } else {
       _controller.forward();
+    }
     super.handleTap();
   }
 
   @override
   Widget buildChild() {
-    return ListTile(
-      enabled: widget.enabled,
-      leading: FadeTransition(
-        opacity: _opacity,
-        child: Icon(_controller.isDismissed ? null : Icons.done),
+    return IgnorePointer(
+      child: ListTile(
+        enabled: widget.enabled,
+        leading: FadeTransition(
+          opacity: _opacity,
+          child: Icon(_controller.isDismissed ? null : Icons.done),
+        ),
+        title: widget.child,
       ),
-      title: widget.child,
     );
   }
 }
@@ -543,7 +548,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
       final CurvedAnimation opacity = CurvedAnimation(
         parent: route.animation!,
         curve: Interval(start, end),
@@ -673,8 +678,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     double y = position.top;
     if (selectedItemIndex != null && itemSizes != null) {
       double selectedItemOffset = _kMenuVerticalPadding;
-      for (int index = 0; index < selectedItemIndex!; index += 1)
+      for (int index = 0; index < selectedItemIndex!; index += 1) {
         selectedItemOffset += itemSizes[index]!.height;
+      }
       selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
       y = y + buttonHeight / 2.0 - selectedItemOffset;
     }
@@ -721,14 +727,16 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
-    if (x < screen.left + _kMenuScreenPadding + padding.left)
+    if (x < screen.left + _kMenuScreenPadding + padding.left) {
       x = screen.left + _kMenuScreenPadding + padding.left;
-    else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right)
+    } else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right) {
       x = screen.right - childSize.width - _kMenuScreenPadding - padding.right;
-    if (y < screen.top + _kMenuScreenPadding + padding.top)
+    }
+    if (y < screen.top + _kMenuScreenPadding + padding.top) {
       y = _kMenuScreenPadding + padding.top;
-    else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom)
+    } else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom) {
       y = screen.bottom - childSize.height - _kMenuScreenPadding - padding.bottom;
+    }
 
     return Offset(x,y);
   }
@@ -801,8 +809,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     int? selectedItemIndex;
     if (initialValue != null) {
       for (int index = 0; selectedItemIndex == null && index < items.length; index += 1) {
-        if (items[index].represents(initialValue))
+        if (items[index].represents(initialValue)) {
           selectedItemIndex = index;
+        }
       }
     }
 
@@ -1188,8 +1197,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         constraints: widget.constraints,
       )
       .then<void>((T? newValue) {
-        if (!mounted)
+        if (!mounted) {
           return null;
+        }
         if (newValue == null) {
           widget.onCanceled?.call();
           return null;
@@ -1218,7 +1228,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     assert(debugCheckHasMaterialLocalizations(context));
 
-    if (widget.child != null)
+    if (widget.child != null) {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
@@ -1229,6 +1239,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: widget.child,
         ),
       );
+    }
 
     return IconButton(
       icon: widget.icon ?? Icon(Icons.adaptive.more),

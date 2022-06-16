@@ -43,8 +43,9 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null)
+    if (widget.child != null) {
       return widget.child!;
+    }
     return Container();
   }
 }
@@ -204,8 +205,9 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
   void drawLine(Offset p1, Offset p2, Paint paint) {
     // Assuming that the indicatorWeight is 2.0, the default.
     const double indicatorWeight = 2.0;
-    if (paint.color == indicatorColor)
+    if (paint.color == indicatorColor) {
       indicatorRect = Rect.fromPoints(p1, p2).inflate(indicatorWeight / 2.0);
+    }
   }
 }
 
@@ -812,8 +814,9 @@ void main() {
     ));
 
     tabController.animation!.addListener(() {
-      if (tabController.animation!.status == AnimationStatus.forward)
+      if (tabController.animation!.status == AnimationStatus.forward) {
         tabController.index = 2;
+      }
       expect(tabController.indexIsChanging, true);
     });
 
@@ -3030,7 +3033,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -3208,10 +3210,12 @@ void main() {
               ],
               overlayColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
-                 if (states.contains(MaterialState.hovered))
-                    return const Color(0xff00ff00);
-                  if (states.contains(MaterialState.pressed))
+                 if (states.contains(MaterialState.hovered)) {
+                   return const Color(0xff00ff00);
+                 }
+                  if (states.contains(MaterialState.pressed)) {
                     return const Color(0xf00fffff);
+                  }
                   return const Color(0xffbadbad); // Shouldn't happen.
                 },
               ),
@@ -3221,7 +3225,6 @@ void main() {
       );
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byType(Tab)));
       await tester.pumpAndSettle();
       final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
@@ -3242,10 +3245,12 @@ void main() {
                 ],
                 overlayColor: MaterialStateProperty.resolveWith<Color>(
                   (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered))
+                    if (states.contains(MaterialState.hovered)) {
                       return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.pressed))
+                    }
+                    if (states.contains(MaterialState.pressed)) {
                       return splashColor;
+                    }
                     return const Color(0xffbadbad); // Shouldn't happen.
                   },
                 ),
@@ -4611,6 +4616,131 @@ void main() {
       ),
     );
     gesture.removePointer();
+  });
+
+  testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/104994.
+    List<String> tabTextContent = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabTextContent.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Default TabBar Preview'),
+                  bottom: tabTextContent.isNotEmpty
+                      ? TabBar(
+                    isScrollable: true,
+                    tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
+                  )
+                      : null,
+                ),
+                body: LayoutBuilder(
+                  builder: (_, __) {
+                    return tabTextContent.isNotEmpty
+                      ? TabBarView(
+                        children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList(),
+                      )
+                      : const Center(child: Text('No tabs'));
+                  },
+                ),
+                bottomNavigationBar: BottomAppBar(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconButton(
+                        key: const Key('Add tab'),
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..add('Tab ${tabTextContent.length + 1}');
+                          });
+                        },
+                      ),
+                      IconButton(
+                        key: const Key('Delete tab'),
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..removeLast();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs properly
+    expect(find.text('No tabs'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('Add tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text("Tab 1's view"), findsOneWidget);
+
+    // Dynamically updates to zero tabs properly
+    await tester.tap(find.byKey(const Key('Delete tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('No tabs'), findsOneWidget);
+  });
+
+  testWidgets("Throw if the controller's length mismatch the tabs count", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets("Throw if the controller's length mismatch the TabBarView‘s children count", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[
+                Icon(Icons.directions_car),
+                Icon(Icons.directions_transit),
+                Icon(Icons.directions_bike),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
   });
 }
 

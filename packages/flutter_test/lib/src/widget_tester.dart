@@ -69,8 +69,9 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
       foundMatching = true;
     }
   }
-  if (foundMatching)
+  if (foundMatching) {
     return result;
+  }
   return null;
 }
 
@@ -414,8 +415,9 @@ Future<void> benchmarkWidgets(
   bool semanticsEnabled = false,
 }) {
   assert(() {
-    if (mayRunWithAsserts)
+    if (mayRunWithAsserts) {
       return true;
+    }
     debugPrint(kDebugWarning);
     return true;
   }());
@@ -499,8 +501,9 @@ Future<void> expectLater(
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(super.binding) {
-    if (binding is LiveTestWidgetsFlutterBinding)
+    if (binding is LiveTestWidgetsFlutterBinding) {
       (binding as LiveTestWidgetsFlutterBinding).deviceEventDispatcher = this;
+    }
   }
 
   /// The description string of the test currently being run.
@@ -663,8 +666,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final DateTime endTime = binding.clock.fromNowBy(timeout);
       int count = 0;
       do {
-        if (binding.clock.now().isAfter(endTime))
+        if (binding.clock.now().isAfter(endTime)) {
           throw FlutterError('pumpAndSettle timed out');
+        }
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
@@ -837,8 +841,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int totalNumber = 0;
       printToConsole('Some possible finders for the widgets at ${event.position}:');
       for (final Element element in candidates) {
-        if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
+        if (totalNumber > 13) {
           break;
+        }
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
         final Widget widget = element.widget;
@@ -912,8 +917,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
         totalNumber -= 1; // if we got here, we didn't actually find something to say about it
       }
-      if (totalNumber == 0)
+      if (totalNumber == 0) {
         printToConsole('  <could not come up with any unique finders>');
+      }
     }
   }
 

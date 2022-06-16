@@ -281,8 +281,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
     _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
-    if (!locked)
+    if (!locked) {
       _flushPointerEventQueue();
+    }
   }
 
   /// Dispatch a [PointerCancelEvent] for the given pointer soon.
@@ -290,16 +291,18 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// The pointer event will be dispatched before the next pointer event and
   /// before the end of the microtask but not within this function call.
   void cancelPointer(int pointer) {
-    if (_pendingPointerEvents.isEmpty && !locked)
+    if (_pendingPointerEvents.isEmpty && !locked) {
       scheduleMicrotask(_flushPointerEventQueue);
+    }
     _pendingPointerEvents.addFirst(PointerCancelEvent(pointer: pointer));
   }
 
   void _flushPointerEventQueue() {
     assert(!locked);
 
-    while (_pendingPointerEvents.isNotEmpty)
+    while (_pendingPointerEvents.isNotEmpty) {
       handlePointerEvent(_pendingPointerEvents.removeFirst());
+    }
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -354,8 +357,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
         _hitTests[event.pointer] = hitTestResult;
       }
       assert(() {
-        if (debugPrintHitTestResults)
+        if (debugPrintHitTestResults) {
           debugPrint('$event: $hitTestResult');
+        }
         return true;
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
@@ -369,8 +373,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       hitTestResult = _hitTests[event.pointer];
     }
     assert(() {
-      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent) {
         debugPrint('$event');
+      }
       return true;
     }());
     if (hitTestResult != null ||
@@ -399,9 +404,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @pragma('vm:notify-debugger-on-exception')
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
-    // No hit test information implies that this is a [PointerHoverEvent],
-    // [PointerAddedEvent], or [PointerRemovedEvent]. These events are specially
-    // routed here; other events will be routed through the `handleEvent` below.
+    // No hit test information implies that this is a [PointerAddedEvent] or
+    // [PointerRemovedEvent]. These events are specially routed here; other
+    // events will be routed through the `handleEvent` below.
     if (hitTestResult == null) {
       assert(event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
@@ -483,8 +488,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     SamplingClock value = SamplingClock();
     assert(() {
       final SamplingClock? debugValue = debugSamplingClock;
-      if (debugValue != null)
+      if (debugValue != null) {
         value = debugValue;
+      }
       return true;
     }());
     return value;

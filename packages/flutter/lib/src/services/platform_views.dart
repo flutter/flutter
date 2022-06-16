@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -199,6 +198,8 @@ class PlatformViewsService {
   /// factory for this view type must have been registered on the platform side.
   /// Platform view factories are typically registered by plugin code.
   ///
+  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
+  /// get the input focus.
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   static Future<UiKitViewController> initUiKitView({
@@ -207,6 +208,7 @@ class PlatformViewsService {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
   }) async {
     assert(id != null);
     assert(viewType != null);
@@ -227,6 +229,9 @@ class PlatformViewsService {
       );
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
     return UiKitViewController._(id, layoutDirection);
   }
 }
@@ -854,16 +859,18 @@ abstract class AndroidViewController extends PlatformViewController {
       'trying to set a layout direction for a disposed UIView. View id: $viewId',
     );
 
-    if (layoutDirection == _layoutDirection)
+    if (layoutDirection == _layoutDirection) {
       return;
+    }
 
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
 
     // If the view was not yet created we just update _layoutDirection and return, as the new
     // direction will be used in _create.
-    if (_state == _AndroidViewState.waitingForSize)
+    if (_state == _AndroidViewState.waitingForSize) {
       return;
+    }
 
     await SystemChannels.platform_views
         .invokeMethod<void>('setDirection', <String, dynamic>{
@@ -925,8 +932,9 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   @override
   Future<void> dispose() async {
-    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created)
+    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created) {
       await _sendDisposeMessage();
+    }
     _platformViewCreatedCallbacks.clear();
     _state = _AndroidViewState.disposed;
     PlatformViewsService._instance._focusCallbacks.remove(viewId);
@@ -1052,8 +1060,9 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> create({Size? size}) async {
-    if (size == null)
+    if (size == null) {
       return;
+    }
     assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
     assert(!size.isEmpty);
     return super.create(size: size);
@@ -1061,14 +1070,16 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> setOffset(Offset off) async {
-    if (off == _off)
+    if (off == _off) {
       return;
+    }
 
     // Don't set the offset unless the Android view has been created.
     // The implementation of this method channel throws if the Android view for this viewId
     // isn't addressable.
-    if (_state != _AndroidViewState.created)
+    if (_state != _AndroidViewState.created) {
       return;
+    }
 
     _off = off;
 
@@ -1084,8 +1095,9 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendCreateMessage({Size? size}) async {
-    if (size == null)
+    if (size == null) {
       return;
+    }
 
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
@@ -1143,8 +1155,9 @@ class UiKitViewController {
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
 
-    if (layoutDirection == _layoutDirection)
+    if (layoutDirection == _layoutDirection) {
       return;
+    }
 
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;

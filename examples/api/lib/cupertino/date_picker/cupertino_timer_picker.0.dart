@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const TimerPickerApp());
 
 class TimerPickerApp extends StatelessWidget {
-  const TimerPickerApp({Key? key}) : super(key: key);
+  const TimerPickerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class TimerPickerApp extends StatelessWidget {
 }
 
 class TimerPickerExample extends StatefulWidget {
-  const TimerPickerExample({Key? key}) : super(key: key);
+  const TimerPickerExample({super.key});
 
   @override
   State<TimerPickerExample> createState() => _TimerPickerExampleState();

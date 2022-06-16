@@ -135,7 +135,7 @@ enum AnimationBehavior {
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {
-///   const Foo({ Key? key, required this.duration }) : super(key: key);
+///   const Foo({ super.key, required this.duration });
 ///
 ///   final Duration duration;
 ///
@@ -389,13 +389,14 @@ class AnimationController extends Animation<double>
   /// If [isAnimating] is false, then [value] is not changing and the rate of
   /// change is zero.
   double get velocity {
-    if (!isAnimating)
+    if (!isAnimating) {
       return 0.0;
+    }
     return _simulation!.dx(lastElapsedDuration!.inMicroseconds.toDouble() / Duration.microsecondsPerSecond);
   }
 
   void _internalSetValue(double newValue) {
-    _value = newValue.clamp(lowerBound, upperBound);
+    _value = clampDouble(newValue, lowerBound, upperBound);
     if (_value == lowerBound) {
       _status = AnimationStatus.dismissed;
     } else if (_value == upperBound) {
@@ -456,8 +457,9 @@ class AnimationController extends Animation<double>
       'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.forward;
-    if (from != null)
+    if (from != null) {
       value = from;
+    }
     return _animateToInternal(upperBound);
   }
 
@@ -489,8 +491,9 @@ class AnimationController extends Animation<double>
       'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.reverse;
-    if (from != null)
+    if (from != null) {
       value = from;
+    }
     return _animateToInternal(lowerBound);
   }
 
@@ -598,7 +601,7 @@ class AnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.zero) {
       if (value != target) {
-        _value = target.clamp(lowerBound, upperBound);
+        _value = clampDouble(target, lowerBound, upperBound);
         notifyListeners();
       }
       _status = (_direction == _AnimationDirection.forward) ?
@@ -741,7 +744,7 @@ class AnimationController extends Animation<double>
     assert(!isAnimating);
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
-    _value = simulation.x(0.0).clamp(lowerBound, upperBound);
+    _value = clampDouble(simulation.x(0.0), lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
     _status = (_direction == _AnimationDirection.forward) ?
       AnimationStatus.forward :
@@ -820,7 +823,7 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
-    _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound);
+    _value = clampDouble(_simulation!.x(elapsedInSeconds), lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
@@ -855,13 +858,14 @@ class _InterpolationSimulation extends Simulation {
 
   @override
   double x(double timeInSeconds) {
-    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
-    if (t == 0.0)
+    final double t = clampDouble(timeInSeconds / _durationInSeconds, 0.0, 1.0);
+    if (t == 0.0) {
       return _begin;
-    else if (t == 1.0)
+    } else if (t == 1.0) {
       return _end;
-    else
+    } else {
       return _begin + (_end - _begin) * _curve.transform(t);
+    }
   }
 
   @override

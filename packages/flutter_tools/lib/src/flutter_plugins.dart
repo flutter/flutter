@@ -550,23 +550,32 @@ Depends on all your plugins, and provides a function to register them.
 end
 ''';
 
-const String _dartPluginRegistryTemplate = '''
+const String _noopDartPluginRegistryTemplate = '''
+// Flutter web plugin registrant file.
 //
 // Generated file. Do not edit.
 //
 
-// ignore_for_file: directives_ordering
-// ignore_for_file: lines_longer_than_80_chars
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: type=lint
+
+void registerPlugins() {}
+''';
+
+const String _dartPluginRegistryTemplate = '''
+// Flutter web plugin registrant file.
+//
+// Generated file. Do not edit.
+//
+
+// ignore_for_file: type=lint
 
 {{#methodChannelPlugins}}
 import 'package:{{name}}/{{file}}';
 {{/methodChannelPlugins}}
-
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-// ignore: public_member_api_docs
-void registerPlugins(final Registrar registrar) {
+void registerPlugins([final Registrar? pluginRegistrar]) {
+  final Registrar registrar = pluginRegistrar ?? webPluginRegistrar;
 {{#methodChannelPlugins}}
   {{class}}.registerWith(registrar);
 {{/methodChannelPlugins}}
@@ -937,22 +946,22 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object
   );
 }
 
-Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins, Directory destination) async {
   final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'methodChannelPlugins': webPlugins,
   };
-  final File pluginFile = project.web.libDirectory.childFile('generated_plugin_registrant.dart');
-  if (webPlugins.isEmpty) {
-    ErrorHandlingFileSystem.deleteIfExists(pluginFile);
-  } else {
-    _renderTemplateToFile(
-      _dartPluginRegistryTemplate,
-      context,
-      pluginFile,
-      globals.templateRenderer,
-    );
-  }
+
+  final File pluginFile = destination.childFile('web_plugin_registrant.dart');
+
+  final String template = webPlugins.isEmpty ? _noopDartPluginRegistryTemplate : _dartPluginRegistryTemplate;
+
+  _renderTemplateToFile(
+    template,
+    context,
+    pluginFile,
+    globals.templateRenderer,
+  );
 }
 
 /// For each platform that uses them, creates symlinks within the platform
@@ -1068,7 +1077,40 @@ Future<void> refreshPluginsList(
   }
 }
 
+/// Injects plugins found in `pubspec.yaml` into the platform-specific projects
+/// only at build-time.
+///
+/// This method is similar to [injectPlugins], but used only for platforms where
+/// the plugin files are not required when the app is created (currently: Web).
+///
+/// This method will create files in the temporary flutter build directory
+/// specified by `destination`.
+///
+/// In the Web platform, `destination` can point to a real filesystem (`flutter build`)
+/// or an in-memory filesystem (`flutter run`).
+Future<void> injectBuildTimePluginFiles(
+  FlutterProject project, {
+  required Directory destination,
+  bool webPlatform = false,
+}) async {
+  final List<Plugin> plugins = await findPlugins(project);
+  // Sort the plugins by name to keep ordering stable in generated files.
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+  if (webPlatform) {
+    await _writeWebPluginRegistrant(project, plugins, destination);
+  }
+}
+
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
+///
+/// The injected files are required by the flutter app as soon as possible, so
+/// it can be built.
+///
+/// Files written by this method end up in platform-specific locations that are
+/// configured by each [FlutterProject] subclass (except for the Web).
+///
+/// Web tooling uses [injectBuildTimePluginFiles] instead, which places files in the
+/// current build (temp) directory, and doesn't modify the users' working copy.
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(
@@ -1078,7 +1120,6 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
-  bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1113,9 +1154,6 @@ Future<void> injectPlugins(
         globals.cocoaPods?.addPodsDependencyToFlutterXcconfig(subproject);
       }
     }
-  }
-  if (webPlatform) {
-    await _writeWebPluginRegistrant(project, plugins);
   }
 }
 

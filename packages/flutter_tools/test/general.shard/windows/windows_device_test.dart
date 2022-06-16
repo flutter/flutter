@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,13 +15,14 @@ import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('WindowsDevice defaults', () async {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
-    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
+    final File dummyFile = MemoryFileSystem.test().file('dummy');
+    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo', applicationPackage: dummyFile);
 
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_x64);
     expect(windowsDevice.name, 'Windows');
@@ -117,9 +116,9 @@ FlutterProject setUpFlutterProject(Directory directory) {
 }
 
 WindowsDevice setUpWindowsDevice({
-  FileSystem fileSystem,
-  Logger logger,
-  ProcessManager processManager,
+  FileSystem? fileSystem,
+  Logger? logger,
+  ProcessManager? processManager,
 }) {
   return WindowsDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),

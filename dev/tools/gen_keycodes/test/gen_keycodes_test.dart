@@ -26,6 +26,8 @@ final PhysicalKeyData physicalData = PhysicalKeyData.fromJson(
     json.decode(readDataFile('physical_key_data.json')) as Map<String, dynamic>);
 final LogicalKeyData logicalData = LogicalKeyData.fromJson(
     json.decode(readDataFile('logical_key_data.json')) as Map<String, dynamic>);
+final Map<String, bool> keyGoals = parseMapOfBool(
+    readDataFile('layout_goals.json'));
 
 void main() {
   setUp(() {
@@ -65,6 +67,7 @@ void main() {
     final PlatformCodeGenerator codeGenerator = MacOSCodeGenerator(
       physicalData,
       logicalData,
+      keyGoals,
     );
     final String output = codeGenerator.generate();
 
@@ -119,6 +122,7 @@ void main() {
       logicalData,
       readDataFile(path.join(dataRoot, 'gtk_modifier_bit_mapping.json')),
       readDataFile(path.join(dataRoot, 'gtk_lock_bit_mapping.json')),
+      keyGoals,
     );
     final String output = codeGenerator.generate();
 

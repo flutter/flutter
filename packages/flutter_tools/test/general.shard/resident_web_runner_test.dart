@@ -159,7 +159,6 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -188,7 +187,6 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -207,7 +205,6 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -220,7 +217,6 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -322,7 +318,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
@@ -346,7 +341,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -463,7 +457,6 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -789,6 +782,7 @@ void main() {
 
   testUsingContext('cleanup of resources is safe to call multiple times', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+    mockDevice.dds = DartDevelopmentService();
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);
@@ -882,7 +876,6 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
@@ -925,7 +918,6 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
@@ -1075,7 +1067,6 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
-    urlTunneller: null,
     usage: globals.flutterUsage,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
@@ -1261,6 +1252,11 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   Future<ChromeTab> getTab(bool Function(ChromeTab tab) accept, {Duration retryFor}) async {
     return tabs.firstWhere(accept);
   }
+
+  @override
+  Future<List<ChromeTab>> getTabs({Duration retryFor}) async {
+    return tabs;
+  }
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
@@ -1312,6 +1308,11 @@ class TestChromiumLauncher implements ChromiumLauncher {
 
   @override
   Future<Chromium> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir}) async {
+    return currentCompleter.future;
+  }
+
+  @override
+  Future<Chromium> connect(Chromium chrome, bool skipCheck) {
     return currentCompleter.future;
   }
 }

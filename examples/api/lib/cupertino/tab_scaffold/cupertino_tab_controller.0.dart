@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const TabControllerApp());
 
 class TabControllerApp extends StatelessWidget {
-  const TabControllerApp({Key? key}) : super(key: key);
+  const TabControllerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class TabControllerApp extends StatelessWidget {
 }
 
 class TabControllerExample extends StatefulWidget {
-  const TabControllerExample({Key? key}) : super(key: key);
+  const TabControllerExample({super.key});
 
   @override
   State<TabControllerExample> createState() => _TabControllerExampleState();

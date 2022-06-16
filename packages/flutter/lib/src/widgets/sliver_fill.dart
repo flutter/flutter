@@ -60,7 +60,7 @@ class SliverFillViewport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SliverFractionalPadding(
-      viewportFraction: padEnds ? (1 - viewportFraction).clamp(0, 1) / 2 : 0,
+      viewportFraction: padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
         viewportFraction: viewportFraction,
         delegate: delegate,
@@ -124,8 +124,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   double _viewportFraction;
   set viewportFraction(double newValue) {
     assert(newValue != null);
-    if (_viewportFraction == newValue)
+    if (_viewportFraction == newValue) {
       return;
+    }
     _viewportFraction = newValue;
     _markNeedsResolution();
   }
@@ -140,8 +141,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   void _resolve() {
-    if (_resolvedPadding != null && _lastResolvedConstraints == constraints)
+    if (_resolvedPadding != null && _lastResolvedConstraints == constraints) {
       return;
+    }
 
     assert(constraints.axis != null);
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
@@ -294,10 +296,12 @@ class SliverFillRemaining extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (hasScrollBody)
+    if (hasScrollBody) {
       return _SliverFillRemainingWithScrollable(child: child);
-    if (!fillOverscroll)
+    }
+    if (!fillOverscroll) {
       return _SliverFillRemainingWithoutScrollable(child: child);
+    }
     return _SliverFillRemainingAndOverscroll(child: child);
   }
 
@@ -314,8 +318,9 @@ class SliverFillRemaining extends StatelessWidget {
       if (hasScrollBody) 'scrollable',
       if (fillOverscroll) 'fillOverscroll',
     ];
-    if (flags.isEmpty)
+    if (flags.isEmpty) {
       flags.add('nonscrollable');
+    }
     properties.add(IterableProperty<String>('mode', flags));
   }
 }

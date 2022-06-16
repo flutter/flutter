@@ -17733,7 +17733,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'Tab $tabIndex dari $tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
   String get timePickerDialHelpText => 'PILIH WAKTU';

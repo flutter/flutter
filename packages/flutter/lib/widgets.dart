@@ -16,6 +16,7 @@ export 'package:characters/characters.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'foundation.dart' show UniqueKey;
+export 'rendering.dart' show TextSelectionHandleType;
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';
@@ -110,6 +111,8 @@ export 'src/widgets/scroll_simulation.dart';
 export 'src/widgets/scroll_view.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollbar.dart';
+export 'src/widgets/selectable_region.dart';
+export 'src/widgets/selection_container.dart';
 export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/shared_app_data.dart';
 export 'src/widgets/shortcuts.dart';

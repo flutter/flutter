@@ -6,7 +6,6 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -21,8 +20,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-
-typedef InvokeProcess = Future<ProcessResult> Function();
 
 void main() {
   FileSystem fileSystem;
@@ -153,13 +150,13 @@ void main() {
 
     testWithoutContext('detects below minimum version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.6.0');
+      pretendPodVersionIs('1.9.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);
     });
 
     testWithoutContext('detects below recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.9.0');
+      pretendPodVersionIs('1.10.5');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
     });
 

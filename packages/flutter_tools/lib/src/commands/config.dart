@@ -101,12 +101,12 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (boolArg('machine')) {
+    if (boolArgDeprecated('machine')) {
       await handleMachine();
       return FlutterCommandResult.success();
     }
 
-    if (boolArg('clear-features')) {
+    if (boolArgDeprecated('clear-features')) {
       for (final Feature feature in allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
@@ -117,7 +117,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults?.wasParsed('analytics') ?? false) {
-      final bool value = boolArg('analytics');
+      final bool value = boolArgDeprecated('analytics');
       // The tool sends the analytics event *before* toggling the flag
       // intentionally to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
@@ -157,7 +157,7 @@ class ConfigCommand extends FlutterCommand {
         continue;
       }
       if (argResults?.wasParsed(configSetting) ?? false) {
-        final bool keyValue = boolArg(configSetting);
+        final bool keyValue = boolArgDeprecated(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
       }

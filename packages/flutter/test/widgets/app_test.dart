@@ -707,7 +707,7 @@ void main() {
     expect(selectAllSpy.invoked, isTrue);
     expect(copySpy.invoked, isTrue);
     expect(pasteSpy.invoked, isTrue);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }), skip: kIsWeb); // [intended] Web uses a different set of shortcuts.
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);

@@ -17,8 +17,9 @@ class ButtonTemplate extends TokenTemplate {
       return '''
 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.container')};
+      }
       return ${componentColor('$tokenGroup.container')};
     })''';
     }
@@ -32,14 +33,18 @@ class ButtonTemplate extends TokenTemplate {
       return '''
 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return ${elevation("$tokenGroup.disabled.container")};
-      if (states.contains(MaterialState.hovered))
+      }
+      if (states.contains(MaterialState.hovered)) {
         return ${elevation("$tokenGroup.hover.container")};
-      if (states.contains(MaterialState.focused))
+      }
+      if (states.contains(MaterialState.focused)) {
         return ${elevation("$tokenGroup.focus.container")};
-      if (states.contains(MaterialState.pressed))
+      }
+      if (states.contains(MaterialState.pressed)) {
         return ${elevation("$tokenGroup.pressed.container")};
+      }
       return ${elevation("$tokenGroup.container")};
     })''';
     }
@@ -64,7 +69,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
-    MaterialStateProperty.all<TextStyle?>(${textStyle("$tokenGroup.label-text")});
+    MaterialStatePropertyAll<TextStyle?>(${textStyle("$tokenGroup.label-text")});
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
@@ -72,20 +77,24 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.label-text')};
+      }
       return ${componentColor('$tokenGroup.label-text')};
     });
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered)) {
         return ${componentColor('$tokenGroup.hover.state-layer')};
-      if (states.contains(MaterialState.focused))
+      }
+      if (states.contains(MaterialState.focused)) {
         return ${componentColor('$tokenGroup.focus.state-layer')};
-      if (states.contains(MaterialState.pressed))
+      }
+      if (states.contains(MaterialState.pressed)) {
         return ${componentColor('$tokenGroup.pressed.state-layer')};
+      }
       return null;
     });
 
@@ -122,8 +131,9 @@ ${tokens.containsKey("$tokenGroup.outline.color") ? '''
   @override
   MaterialStateProperty<BorderSide>? get side =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return ${border("$tokenGroup.disabled.outline")};
+    }
     return ${border("$tokenGroup.outline")};
   });''' : '''
   // No default side'''}
@@ -135,8 +145,9 @@ ${tokens.containsKey("$tokenGroup.outline.color") ? '''
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
+      }
       return SystemMouseCursors.click;
     });
 

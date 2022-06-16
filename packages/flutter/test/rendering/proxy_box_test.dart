@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
@@ -685,6 +684,91 @@ void main() {
     childBox.markNeedsCompositingBitsUpdate();
 
     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
+
+  test('Offstage implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
+    parent.adoptChild(offstage);
+
+    expect(offstage.paintsChild(box), true);
+
+    offstage.offstage = true;
+
+    expect(offstage.paintsChild(box), false);
+  });
+
+  test('Opacity implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOpacity opacity = RenderOpacity(child: box);
+    parent.adoptChild(opacity);
+
+    expect(opacity.paintsChild(box), true);
+
+    opacity.opacity = 0;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(box), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
+    final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(sliver), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(sliver), false);
+  });
+
+  test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
+    final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+    final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: Clip.none, child: child);
+    layout(renderClipRect);
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      null,
+    );
+    renderClipRect.clipBehavior = Clip.hardEdge;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAlias;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAliasWithSaveLayer;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
   });
 }
 

@@ -132,8 +132,9 @@ class ScrollStartNotification extends ScrollNotification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (dragDetails != null)
+    if (dragDetails != null) {
       description.add('$dragDetails');
+    }
   }
 }
 
@@ -173,8 +174,9 @@ class ScrollUpdateNotification extends ScrollNotification {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('scrollDelta: $scrollDelta');
-    if (dragDetails != null)
+    if (dragDetails != null) {
       description.add('$dragDetails');
+    }
   }
 }
 
@@ -226,8 +228,9 @@ class OverscrollNotification extends ScrollNotification {
     super.debugFillDescription(description);
     description.add('overscroll: ${overscroll.toStringAsFixed(1)}');
     description.add('velocity: ${velocity.toStringAsFixed(1)}');
-    if (dragDetails != null)
+    if (dragDetails != null) {
       description.add('$dragDetails');
+    }
   }
 }
 
@@ -261,8 +264,9 @@ class ScrollEndNotification extends ScrollNotification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (dragDetails != null)
+    if (dragDetails != null) {
       description.add('$dragDetails');
+    }
   }
 }
 

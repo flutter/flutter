@@ -416,12 +416,13 @@ void main() {
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -472,12 +473,13 @@ void main() {
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -503,12 +505,13 @@ void main() {
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -535,12 +538,13 @@ void main() {
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -599,12 +603,13 @@ void main() {
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );

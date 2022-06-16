@@ -25,8 +25,9 @@ class _SaltedKey<S, V> extends LocalKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _SaltedKey<S, V>
         && other.salt == salt
         && other.value == value;
@@ -312,8 +313,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         final ExpansionPanelRadio child = widget.children[childIndex] as ExpansionPanelRadio;
         if (widget.expansionCallback != null &&
             childIndex != index &&
-            child.value == _currentOpenPanel?.value)
+            child.value == _currentOpenPanel?.value) {
           widget.expansionCallback!(childIndex, false);
+        }
       }
 
       setState(() {
@@ -324,8 +326,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
     for (final ExpansionPanelRadio panel in panels) {
-      if (panel.value == value)
+      if (panel.value == value) {
         return panel;
+      }
     }
     return null;
   }
@@ -340,8 +343,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
 
     for (int index = 0; index < widget.children.length; index += 1) {
-      if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
+      if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
         items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
+      }
 
       final ExpansionPanel child = widget.children[index];
       final Widget headerWidget = child.headerBuilder(
@@ -412,8 +416,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         ),
       );
 
-      if (_isChildExpanded(index) && index != widget.children.length - 1)
+      if (_isChildExpanded(index) && index != widget.children.length - 1) {
         items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
+      }
     }
 
     return MergeableMaterial(

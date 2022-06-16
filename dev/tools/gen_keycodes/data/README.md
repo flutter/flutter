@@ -11,6 +11,7 @@
 | [`chromium_modifiers.json`](chromium_modifiers.json) | Maps the web's `key` for modifier keys to the names of the logical keys for these keys' left and right variations.This is used when generating logical keys to provide independent values for sided logical keys. Web uses the same `key` for modifier keys of different sides, but Flutter's logical key model treats them as different keys.|
 | [`printable.json`](printable.json) | Maps Flutter key name to its printable character. This character is used as the key label.|
 | [`synonyms.json`](synonyms.json) | Maps pseudo-keys that represent other keys to the sets of keys they represent. For example, this contains the "shift" key that represents either a "shiftLeft" or "shiftRight" key.|
+| [`layout_goals.json`](layout_goals.json) | A list of layout goals, keys that the platform keyboard manager should find mappings for. Each key in this file is the key name of the goal, both logical and physical simultaneously, while its value represents whether the goal is mandatory. A mandatory goal must be fulfilled, and the manager will use the default value from this file if a mapping can not be found. A non-mandatory goal is suggestive, only used if the key mapping information is malformed (e.g. contains no ASCII characters.) |
 
 ### Framework
 

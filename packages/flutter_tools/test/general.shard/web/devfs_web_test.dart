@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:io' hide Directory, File;
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -76,28 +78,26 @@ void main() {
     });
   });
 
-  test('.log() filters events', () => testbed.run(() {
-    // harmless warning that should be filtered out
-    const String harmlessMessage = 'Unresolved uri: dart:ui';
-    // serious warning
-    const String seriousMessage = 'Something bad happened';
+  test('.log() reports warnings', () => testbed.run(() {
+    const String unresolvedUriMessage = 'Unresolved uri:';
+    const String otherMessage = 'Something bad happened';
 
     final List<logging.LogRecord> events = <logging.LogRecord>[
       logging.LogRecord(
         logging.Level.WARNING,
-        harmlessMessage,
+        unresolvedUriMessage,
         'DartUri',
       ),
       logging.LogRecord(
         logging.Level.WARNING,
-        seriousMessage,
+        otherMessage,
         'DartUri',
       ),
     ];
 
     events.forEach(log);
-    expect(logger.warningText, contains(seriousMessage));
-    expect(logger.warningText, isNot(contains(harmlessMessage)));
+    expect(logger.warningText, contains(unresolvedUriMessage));
+    expect(logger.warningText, contains(otherMessage));
   }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {

@@ -247,7 +247,7 @@ class DraggableScrollableController extends ChangeNotifier {
 ///
 /// ```dart
 /// class HomePage extends StatelessWidget {
-///   const HomePage({Key? key}) : super(key: key);
+///   const HomePage({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -541,7 +541,7 @@ class _DraggableSheetExtent {
   /// or a user drag.
   void updateSize(double newSize, BuildContext context) {
     assert(newSize != null);
-    _currentSize.value = newSize.clamp(minSize, maxSize);
+    _currentSize.value = clampDouble(newSize, minSize, maxSize);
     DraggableScrollableNotification(
       minExtent: minSize,
       maxExtent: maxSize,
@@ -580,7 +580,7 @@ class _DraggableSheetExtent {
       onSizeChanged: onSizeChanged,
       // Use the possibly updated initialSize if the user hasn't dragged yet.
       currentSize: ValueNotifier<double>(hasDragged
-          ? _currentSize.value.clamp(minSize, maxSize)
+          ? clampDouble(_currentSize.value, minSize, maxSize)
           : initialSize),
       hasDragged: hasDragged,
     );
@@ -809,6 +809,21 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   bool get listShouldScroll => pixels > 0.0;
 
   _DraggableSheetExtent get extent => getExtent();
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_dragCancelCallback == null);
+
+    if (other is! _DraggableScrollableSheetScrollPosition) {
+      return;
+    }
+
+    if (other._dragCancelCallback != null) {
+      _dragCancelCallback = other._dragCancelCallback;
+      other._dragCancelCallback = null;
+    }
+  }
 
   @override
   void beginActivity(ScrollActivity? newActivity) {

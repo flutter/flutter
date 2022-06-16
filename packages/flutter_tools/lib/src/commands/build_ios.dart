@@ -44,10 +44,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
 
   @override
-  EnvironmentType get environmentType => boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  EnvironmentType get environmentType => boolArgDeprecated('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => boolArgDeprecated('config-only');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
@@ -305,7 +305,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   EnvironmentType get environmentType;
   bool get configOnly;
 
-  bool get shouldCodesign => boolArg('codesign');
+  bool get shouldCodesign => boolArgDeprecated('codesign');
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 

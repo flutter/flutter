@@ -58,7 +58,6 @@ class PackagesCommand extends FlutterCommand {
 
 class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this.name, this.upgrade) {
-    requiresPubspecYaml();
     argParser.addFlag('offline',
       negatable: false,
       help: 'Use cached packages instead of accessing the network.',
@@ -96,7 +95,6 @@ class PackagesGetCommand extends FlutterCommand {
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-      && rootProject.packagesFile.existsSync()
       && rootProject.packageConfigFile.existsSync();
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
@@ -143,7 +141,7 @@ class PackagesGetCommand extends FlutterCommand {
         directory: directory,
         upgrade: upgrade,
         shouldSkipThirdPartyGenerator: false,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
       pubGetTimer.stop();

@@ -51,11 +51,7 @@ FlutterProjectType? stringToProjectType(String value) {
 }
 
   /// Verifies the expected yaml keys are present in the file.
-  bool _validateMetadataMap(Object? yamlRoot, Map<String, Type> validations, Logger logger) {
-    if (yamlRoot != null && yamlRoot is! YamlMap) {
-      return false;
-    }
-    final YamlMap map = yamlRoot! as YamlMap;
+  bool _validateMetadataMap(YamlMap map, Map<String, Type> validations, Logger logger) {
     bool isValid = true;
     for (final MapEntry<String, Object> entry in validations.entries) {
       if (!map.keys.contains(entry.key)) {
@@ -63,9 +59,10 @@ FlutterProjectType? stringToProjectType(String value) {
         logger.printTrace('The key `${entry.key}` was not found');
         break;
       }
-      if (map[entry.key] != null && (map[entry.key] as Object).runtimeType != entry.value) {
+      final Object? metadataValue = map[entry.key];
+      if (metadataValue.runtimeType != entry.value) {
         isValid = false;
-        logger.printTrace('The value of key `${entry.key}` in .metadata was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
+        logger.printTrace('The value of key `${entry.key}` in .metadata was expected to be ${entry.value} but was ${metadataValue.runtimeType}');
         break;
       }
     }
@@ -89,28 +86,26 @@ class FlutterProjectMetadata {
     } on YamlException {
       // Handled in _validate below.
     }
-    if (yamlRoot == null || yamlRoot is! YamlMap) {
+    if (yamlRoot is! YamlMap) {
       _logger.printTrace('.metadata file at ${_metadataFile.path} was empty or malformed.');
       return;
     }
-    final YamlMap map = yamlRoot;
     if (_validateMetadataMap(yamlRoot, <String, Type>{'version': YamlMap}, _logger)) {
-      final Object? versionYaml = map['version'];
-      if (_validateMetadataMap(versionYaml, <String, Type>{
+      final Object? versionYamlMap = yamlRoot['version'];
+      if (versionYamlMap is YamlMap && _validateMetadataMap(versionYamlMap, <String, Type>{
             'revision': String,
             'channel': String,
           }, _logger)) {
-        final YamlMap versionYamlMap = versionYaml! as YamlMap;
         _versionRevision = versionYamlMap['revision'] as String?;
         _versionChannel = versionYamlMap['channel'] as String?;
       }
     }
     if (_validateMetadataMap(yamlRoot, <String, Type>{'project_type': String}, _logger)) {
-      _projectType = stringToProjectType(map['project_type'] as String);
+      _projectType = stringToProjectType(yamlRoot['project_type'] as String);
     }
-    final Object? migrationYaml = map['migration'];
-    if (migrationYaml != null && migrationYaml is YamlMap) {
-      migrateConfig.parseYaml(map['migration'] as YamlMap, _logger);
+    final Object? migrationYaml = yamlRoot['migration'];
+    if (migrationYaml is YamlMap) {
+      migrateConfig.parseYaml(migrationYaml, _logger);
     }
   }
 
@@ -289,13 +284,12 @@ migration:
     final Object? platformsYaml = map['platforms'];
     if (_validateMetadataMap(map, <String, Type>{'platforms': YamlList}, logger)) {
       if (platformsYaml is YamlList && platformsYaml.isNotEmpty) {
-        for (final Object? platform in platformsYaml) {
-          if (_validateMetadataMap(platform, <String, Type>{
+        for (final YamlMap platformYamlMap in platformsYaml.whereType<YamlMap>()) {
+          if (_validateMetadataMap(platformYamlMap, <String, Type>{
                 'platform': String,
                 'create_revision': String,
                 'base_revision': String,
               }, logger)) {
-            final YamlMap platformYamlMap = platform! as YamlMap;
             final SupportedPlatform platformString = SupportedPlatform.values.firstWhere(
               (SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
             );

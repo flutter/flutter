@@ -64,7 +64,7 @@ class ChipTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
-  ///   const Spaceship({Key? key}) : super(key: key);
+  ///   const Spaceship({super.key});
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -123,7 +123,7 @@ class ChipTheme extends InheritedTheme {
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
-///   const CarColor({Key? key}) : super(key: key);
+///   const CarColor({super.key});
 ///
 ///   @override
 ///   State createState() => _CarColorState();
@@ -459,8 +459,9 @@ class ChipThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
@@ -484,19 +485,23 @@ class ChipThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments.
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
-    if (b == null)
+    }
+    if (b == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
+    }
     return BorderSide.lerp(a, b, t);
   }
 
   // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
   static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
   }
 

@@ -67,12 +67,12 @@ class _DropdownMenuPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double selectedItemOffset = getSelectedItemOffset();
     final Tween<double> top = Tween<double>(
-      begin: selectedItemOffset.clamp(0.0, math.max(size.height - _kMenuItemHeight, 0.0)),
+      begin: clampDouble(selectedItemOffset, 0.0, math.max(size.height - _kMenuItemHeight, 0.0)),
       end: 0.0,
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: (top.begin! + _kMenuItemHeight).clamp(math.min(_kMenuItemHeight, size.height), size.height),
+      begin: clampDouble(top.begin! + _kMenuItemHeight, math.min(_kMenuItemHeight, size.height), size.height),
       end: size.height,
     );
 
@@ -166,8 +166,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     if (widget.itemIndex == widget.route.selectedIndex) {
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: const Threshold(0.0));
     } else {
-      final double start = (0.5 + (widget.itemIndex + 1) * unit).clamp(0.0, 1.0);
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double start = clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
+      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
     }
     Widget child = Container(
@@ -288,6 +288,9 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           label: localizations.popupMenuLabel,
           child: ClipRRect(
             borderRadius: widget.borderRadius ?? BorderRadius.zero,
+            clipBehavior: widget.borderRadius != null
+              ? Clip.antiAlias
+              : Clip.none,
             child: Material(
               type: MaterialType.transparency,
               textStyle: route.style,
@@ -306,6 +309,8 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                   child: Scrollbar(
                     thumbVisibility: true,
                     child: ListView(
+                      // Ensure this always inherits the PrimaryScrollController
+                      primary: true,
                       padding: kMaterialListPadding,
                       shrinkWrap: true,
                       children: children,
@@ -371,10 +376,10 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     final double left;
     switch (textDirection!) {
       case TextDirection.rtl:
-        left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
+        left = clampDouble(buttonRect.right, 0.0, size.width) - childSize.width;
         break;
       case TextDirection.ltr:
-        left = buttonRect.left.clamp(0.0, size.width - childSize.width);
+        left = clampDouble(buttonRect.left, 0.0, size.width - childSize.width);
         break;
     }
 
@@ -521,8 +526,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
     double menuTop = (buttonTop - selectedItemOffset) - (itemHeights[selectedIndex] - buttonRect.height) / 2.0;
     double preferredMenuHeight = kMaterialListPadding.vertical;
-    if (items.isNotEmpty)
+    if (items.isNotEmpty) {
       preferredMenuHeight += itemHeights.reduce((double total, double height) => total + height);
+    }
 
     // If there are too many elements in the menu, we need to shrink it down
     // so it is at most the computedMaxHeight.
@@ -1279,8 +1285,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           // of each menu item before laying them out, not having the _DropdownRoute
           // collect each item's height to lay out is fine since the route is
           // already on its way out.
-          if (_dropdownRoute == null)
+          if (_dropdownRoute == null) {
             return;
+          }
 
           _dropdownRoute!.itemHeights[index] = size.height;
         },
@@ -1310,8 +1317,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     focusNode?.requestFocus();
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
-      if (!mounted || newValue == null)
+      if (!mounted || newValue == null) {
         return;
+      }
       widget.onChanged?.call(newValue.result);
     });
 
@@ -1330,8 +1338,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Color get _iconColor {
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
-      if (widget.iconEnabledColor != null)
+      if (widget.iconEnabledColor != null) {
         return widget.iconEnabledColor!;
+      }
 
       switch (Theme.of(context).brightness) {
         case Brightness.light:
@@ -1340,8 +1349,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           return Colors.white70;
       }
     } else {
-      if (widget.iconDisabledColor != null)
+      if (widget.iconDisabledColor != null) {
         return widget.iconDisabledColor!;
+      }
 
       switch (Theme.of(context).brightness) {
         case Brightness.light:
@@ -1388,8 +1398,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       Widget displayedHint = _enabled ? widget.hint! : widget.disabledHint ?? widget.hint!;
-      if (widget.selectedItemBuilder == null)
+      if (widget.selectedItemBuilder == null) {
         displayedHint = _DropdownMenuItemContainer(alignment: widget.alignment, child: displayedHint);
+      }
 
       hintIndex = items.length;
       items.add(DefaultTextStyle(

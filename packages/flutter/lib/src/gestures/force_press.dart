@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'arena.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -287,8 +288,9 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
-    if (_state == _ForceState.possible)
+    if (_state == _ForceState.possible) {
       _state = _ForceState.accepted;
+    }
 
     if (onStart != null && _state == _ForceState.started) {
       invokeCallback<void>('onStart', () => onStart!(ForcePressDetails(
@@ -330,8 +332,9 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
 
     // If the device incorrectly reports a pressure outside of pressureMin
     // and pressureMax, we still want this recognizer to respond normally.
-    if (!value.isNaN)
-      value = value.clamp(0.0, 1.0);
+    if (!value.isNaN) {
+      value = clampDouble(value, 0.0, 1.0);
+    }
     return value;
   }
 

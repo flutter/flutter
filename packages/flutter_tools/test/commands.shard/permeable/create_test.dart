@@ -675,7 +675,7 @@ void main() {
       '.android/settings.gradle',
       '.gitignore',
       '.metadata',
-      '.packages',
+      '.dart_tool/package_config.json',
       'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.lock',

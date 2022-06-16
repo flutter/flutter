@@ -26,7 +26,6 @@ void main() {
 
     final TestGesture gesture =
         await tester.startGesture(tester.getCenter(find.byType(_HitTestCounter)), kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.up();
 
     expect(hitCount, 1);

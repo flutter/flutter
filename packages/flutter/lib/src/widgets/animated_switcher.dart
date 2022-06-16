@@ -272,8 +272,9 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     // transitions.
     if (widget.transitionBuilder != oldWidget.transitionBuilder) {
       _outgoingEntries.forEach(_updateTransitionForEntry);
-      if (_currentEntry != null)
+      if (_currentEntry != null) {
         _updateTransitionForEntry(_currentEntry!);
+      }
       _markChildWidgetCacheAsDirty();
     }
 
@@ -307,8 +308,9 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
-    if (widget.child == null)
+    if (widget.child == null) {
       return;
+    }
     final AnimationController controller = AnimationController(
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
@@ -380,10 +382,12 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   @override
   void dispose() {
-    if (_currentEntry != null)
+    if (_currentEntry != null) {
       _currentEntry!.controller.dispose();
-    for (final _ChildEntry entry in _outgoingEntries)
+    }
+    for (final _ChildEntry entry in _outgoingEntries) {
       entry.controller.dispose();
+    }
     super.dispose();
   }
 

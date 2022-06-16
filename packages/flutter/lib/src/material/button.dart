@@ -365,7 +365,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         right: densityAdjustment.dx,
         bottom: densityAdjustment.dy,
       ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
 
     final Widget result = ConstrainedBox(
@@ -467,37 +467,42 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
+    if (_minSize == value) {
       return;
+    }
     _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 

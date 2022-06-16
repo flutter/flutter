@@ -28,7 +28,7 @@ import 'theme_data.dart';
 /// }
 ///
 /// class CastFilter extends StatefulWidget {
-///   const CastFilter({Key? key}) : super(key: key);
+///   const CastFilter({super.key});
 ///
 ///   @override
 ///   State createState() => CastFilterState();

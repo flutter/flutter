@@ -30,7 +30,7 @@ class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
 }
 
 Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   final Stopwatch wallClockWatch = Stopwatch();
