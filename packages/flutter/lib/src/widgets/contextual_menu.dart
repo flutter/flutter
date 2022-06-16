@@ -332,17 +332,18 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
     }
 
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
       case TargetPlatform.macOS:
+        return false;
+      case TargetPlatform.iOS:
+        return editableTextState.textEditingValue.text.isNotEmpty
+            && editableTextState.textEditingValue.selection.isCollapsed;
+      case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return editableTextState.textEditingValue.text.isNotEmpty
            && !(editableTextState.textEditingValue.selection.start == 0
                && editableTextState.textEditingValue.selection.end == editableTextState.textEditingValue.text.length);
-      case TargetPlatform.iOS:
-        return editableTextState.textEditingValue.text.isNotEmpty
-            && editableTextState.textEditingValue.selection.isCollapsed;
     }
   }
 
@@ -385,28 +386,32 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   )
   static List<ContextualMenuButtonData>? buttonDatasForToolbarOptions(ToolbarOptions? toolbarOptions, EditableTextState editableTextState) {
     return toolbarOptions == null ? null : <ContextualMenuButtonData>[
-      if (toolbarOptions.cut)
+      if (toolbarOptions.cut
+          && TextSelectionToolbarButtonDatasBuilder.canCut(editableTextState))
         ContextualMenuButtonData(
           onPressed: () {
             TextSelectionToolbarButtonDatasBuilder.handleSelectAll(editableTextState);
           },
           type: DefaultContextualMenuButtonType.selectAll,
         ),
-      if (toolbarOptions.copy)
+      if (toolbarOptions.copy
+          && TextSelectionToolbarButtonDatasBuilder.canCopy(editableTextState))
         ContextualMenuButtonData(
           onPressed: () {
             TextSelectionToolbarButtonDatasBuilder.handleCopy(editableTextState);
           },
           type: DefaultContextualMenuButtonType.copy,
         ),
-      if (toolbarOptions.paste)
+      if (toolbarOptions.paste && editableTextState.clipboardStatus != null
+          && TextSelectionToolbarButtonDatasBuilder.canPaste(editableTextState, editableTextState.clipboardStatus!.value))
         ContextualMenuButtonData(
           onPressed: () {
             TextSelectionToolbarButtonDatasBuilder.handlePaste(editableTextState);
           },
           type: DefaultContextualMenuButtonType.paste,
         ),
-      if (toolbarOptions.selectAll)
+      if (toolbarOptions.selectAll
+          && TextSelectionToolbarButtonDatasBuilder.canSelectAll(editableTextState))
         ContextualMenuButtonData(
           onPressed: () {
             TextSelectionToolbarButtonDatasBuilder.handleSelectAll(editableTextState);

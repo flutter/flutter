@@ -132,6 +132,9 @@ class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+        // TODO(justinmc): This and Android will crash if using a mouse and right clicking.
+        // Internally, maybe these toolbars should just display at the first anchor
+        // if given only one.
         return CupertinoTextSelectionToolbar(
           anchorAbove: primaryAnchor,
           anchorBelow: secondaryAnchor!,
