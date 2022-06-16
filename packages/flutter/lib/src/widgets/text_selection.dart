@@ -405,8 +405,6 @@ class TextSelectionOverlay {
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          // TODO(justinmc): Should ContextMenuController be a singleton to enforce
-          // that there can be only one?
           ContextMenuController.show(
             context: context,
             primaryAnchor: renderObject.lastSecondaryTapDownPosition!,
@@ -918,6 +916,7 @@ class SelectionOverlay {
   /// second is hidden when the selection is collapsed.
   List<OverlayEntry>? _handles;
 
+  // TODO(justinmc): Get rid of this.
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
@@ -1016,6 +1015,7 @@ class SelectionOverlay {
           _handles![1].markNeedsBuild();
         }
         _toolbar?.markNeedsBuild();
+        ContextMenuController.markNeedsBuild();
       });
     } else {
       if (_handles != null) {
@@ -1023,6 +1023,7 @@ class SelectionOverlay {
         _handles![1].markNeedsBuild();
       }
       _toolbar?.markNeedsBuild();
+      ContextMenuController.markNeedsBuild();
     }
   }
 

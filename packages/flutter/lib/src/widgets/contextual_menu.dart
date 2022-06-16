@@ -63,6 +63,9 @@ class ContextMenuController {
   // displayed at one time.
   static OverlayEntry? _menuOverlayEntry;
 
+  /// True iff the menu is currently being displayed.
+  static bool get isShown => _menuOverlayEntry != null;
+
   // TODO(justinmc): Update method for efficiency of moving the menu?
   /// Shows the given context menu at the location.
   static void show({
@@ -94,8 +97,20 @@ class ContextMenuController {
     overlayState!.insert(_menuOverlayEntry!);
   }
 
-  /// True iff the menu is currently being displayed.
-  static bool get isShown => _menuOverlayEntry != null;
+  /// Cause the underlying [OverlayEntry] to rebuild during the next pipeline
+  /// flush.
+  ///
+  /// You need to call this function if the output of [buildContextMenu] has
+  /// changed.
+  ///
+  /// If the context menu is not currently shown, does nothing.
+  ///
+  /// See also:
+  ///
+  ///  * [OverlayEntry.markNeedsBuild]
+  static void markNeedsBuild() {
+    _menuOverlayEntry?.markNeedsBuild();
+  }
 
   /// Remove the menu.
   static void hide() {
