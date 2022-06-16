@@ -395,8 +395,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// subsequently be reported using [FlutterError.onError].
   ///
   /// The [exception] must not be null; other arguments can be left to
-  /// their default values. (`throw null` results in a
-  /// [NullThrownError] exception.)
+  /// their default values.
   const FlutterErrorDetails({
     required this.exception,
     this.stack,
@@ -671,7 +670,7 @@ class FlutterErrorDetails with Diagnosticable {
     super.debugFillProperties(properties);
     final DiagnosticsNode verb = ErrorDescription('thrown${ context != null ? ErrorDescription(" $context") : ""}');
     final Diagnosticable? diagnosticable = _exceptionToDiagnosticable();
-    if (exception is NullThrownError) {
+    if (exception is NullThrownError) { // ignore: deprecated_member_use
       properties.add(ErrorDescription('The null value was $verb.'));
     } else if (exception is num) {
       properties.add(ErrorDescription('The number $exception was $verb.'));
