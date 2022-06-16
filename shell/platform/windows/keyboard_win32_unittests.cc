@@ -46,6 +46,7 @@ constexpr uint64_t kScanCodeKeyO = 0x18;
 constexpr uint64_t kScanCodeKeyQ = 0x10;
 constexpr uint64_t kScanCodeKeyW = 0x11;
 constexpr uint64_t kScanCodeDigit1 = 0x02;
+constexpr uint64_t kScanCodeDigit2 = 0x03;
 constexpr uint64_t kScanCodeDigit6 = 0x07;
 // constexpr uint64_t kScanCodeNumpad1 = 0x4f;
 // constexpr uint64_t kScanCodeNumLock = 0x45;
@@ -1913,6 +1914,44 @@ TEST(KeyboardTest, ImeExtendedEventsAreIgnored) {
                        kNotSynthesized);
   clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+}
+
+// Ensures that synthesization works correctly when a Shift key is pressed and
+// (only) its up event is labeled as an IME event (VK_PROCESSKEY).
+//
+// Regression test for https://github.com/flutter/flutter/issues/104169. These
+// are real messages recorded when pressing Shift-2 using Microsoft Pinyin IME
+// on Win 10 Enterprise, which crashed the app before the fix.
+TEST(KeyboardTest, UpOnlyImeEventsAreCorrectlyHandled) {
+  KeyboardTester tester;
+  tester.Responding(true);
+
+  // US Keyboard layout.
+
+  // Press CtrlRight in IME mode.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, true, false},
+      WmKeyDownInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmKeyDownInfo{VK_PROCESSKEY, kScanCodeDigit2, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      KeyStateChange{VK_LSHIFT, false, true},
+      WmKeyUpInfo{VK_PROCESSKEY, kScanCodeShiftLeft, kNotExtended}.Build(
+          kWmResultZero),
+      WmKeyUpInfo{'2', kScanCodeDigit2, kNotExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 4);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalShiftLeft, kLogicalShiftLeft, "",
+                       kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(key_calls[1], kFlutterKeyEventTypeDown, 0, 0, "",
+                       kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(key_calls[2], kFlutterKeyEventTypeUp, kPhysicalShiftLeft,
+                       kLogicalShiftLeft, "", kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(key_calls[3], kFlutterKeyEventTypeDown, 0, 0, "",
+                       kNotSynthesized);
+  clear_key_calls();
 }
 
 TEST(KeyboardTest, DisorderlyRespondedEvents) {
