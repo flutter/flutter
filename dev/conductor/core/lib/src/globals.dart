@@ -14,13 +14,19 @@ const String kForceFlag = 'force';
 
 const List<String> kBaseReleaseChannels = <String>['stable', 'beta'];
 
-const List<String> kReleaseChannels = <String>[...kBaseReleaseChannels, FrameworkRepository.defaultBranch];
+const List<String> kReleaseChannels = <String>[
+  ...kBaseReleaseChannels,
+  FrameworkRepository.defaultBranch
+];
 
-const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
+const String kReleaseDocumentationUrl =
+    'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
 
-const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
+const String kLuciPackagingConsoleLink =
+    'https://ci.chromium.org/p/flutter/g/packaging/console';
 
-const String kWebsiteReleasesUrl = 'https://docs.flutter.dev/development/tools/sdk/releases';
+const String kWebsiteReleasesUrl =
+    'https://docs.flutter.dev/development/tools/sdk/releases';
 
 const String discordReleaseChannel =
     'https://discord.com/channels/608014603317936148/783492179922124850';
@@ -36,6 +42,8 @@ const String flutterAnnounceGroup =
 
 const String hotfixDocumentationBestPractices =
     'https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices';
+
+const String cocoonDashboard = 'https://flutter-dashboard.appspot.com/#/build';
 
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
@@ -96,7 +104,8 @@ String? getValueFromEnvOrArgs(
   if (allowNull) {
     return null;
   }
-  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+  throw ConductorException(
+      'Expected either the CLI arg --$name or the environment variable $envName '
       'to be provided!');
 }
 
@@ -135,7 +144,8 @@ List<String> getValuesFromEnvOrArgs(
     return argValues;
   }
 
-  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+  throw ConductorException(
+      'Expected either the CLI arg --$name or the environment variable $envName '
       'to be provided!');
 }
 
@@ -171,7 +181,8 @@ String getNewPrLink({
       repoLabel = 'Engine';
       break;
     default:
-      throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.');
+      throw ConductorException(
+          'Expected repoName to be one of flutter or engine but got $repoName.');
   }
   assert(candidateBranch.isNotEmpty);
   assert(workingBranch.isNotEmpty);
@@ -188,12 +199,14 @@ String getNewPrLink({
     if (state.engine.dartRevision.isNotEmpty) {
       // shorten hashes to make final link manageable
       // prefix with github org/repo so GitHub will auto-generate a hyperlink
-      body.writeln('- Roll dart revision: dart-lang/sdk@${state.engine.dartRevision.substring(0, 9)}');
+      body.writeln(
+          '- Roll dart revision: dart-lang/sdk@${state.engine.dartRevision.substring(0, 9)}');
     }
     for (final pb.Cherrypick cp in state.engine.cherrypicks) {
       // Only list commits that map to a commit that exists upstream.
       if (cp.trunkRevision.isNotEmpty) {
-        body.writeln('- commit: flutter/engine@${cp.trunkRevision.substring(0, 9)}');
+        body.writeln(
+            '- commit: flutter/engine@${cp.trunkRevision.substring(0, 9)}');
       }
     }
   } else {
