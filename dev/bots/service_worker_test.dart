@@ -21,9 +21,11 @@ final String _testAppWebDirectory = path.join(_testAppDirectory, 'web');
 final String _appBuildDirectory = path.join(_testAppDirectory, 'build', 'web');
 final String _target = path.join('lib', 'service_worker_test.dart');
 final String _targetWithCachedResources = path.join('lib', 'service_worker_test_cached_resources.dart');
+final String _targetWithBlockedServiceWorkers = path.join('lib', 'service_worker_test_blocked_service_workers.dart');
 final String _targetPath = path.join(_testAppDirectory, _target);
 
 enum ServiceWorkerTestType {
+  blockedServiceWorkers,
   withoutFlutterJs,
   withFlutterJs,
   withFlutterJsShort,
@@ -37,6 +39,7 @@ Future<void> main() async {
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
+  await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true);
 }
 
 Future<void> _setAppVersion(int version) async {
@@ -52,6 +55,9 @@ Future<void> _setAppVersion(int version) async {
 String _testTypeToIndexFile(ServiceWorkerTestType type) {
   late String indexFile;
   switch (type) {
+    case ServiceWorkerTestType.blockedServiceWorkers:
+      indexFile = 'index_with_blocked_service_workers.html';
+      break;
     case ServiceWorkerTestType.withFlutterJs:
       indexFile = 'index_with_flutterjs.html';
       break;
@@ -561,4 +567,90 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
   }
 
   print('END runWebServiceWorkerTestWithCachingResources(headless: $headless, testType: $testType)\n');
+}
+
+Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({
+  required bool headless
+}) async {
+  final Map<String, int> requestedPathCounts = <String, int>{};
+  void expectRequestCounts(Map<String, int> expectedCounts) =>
+      _expectRequestCounts(expectedCounts, requestedPathCounts);
+
+  AppServer? server;
+  Future<void> waitForAppToLoad(Map<String, int> waitForCounts) async =>
+      _waitForAppToLoad(waitForCounts, requestedPathCounts, server);
+
+  Future<void> startAppServer({
+    required String cacheControl,
+  }) async {
+    final int serverPort = await findAvailablePort();
+    final int browserDebugPort = await findAvailablePort();
+    server = await AppServer.start(
+      headless: headless,
+      cacheControl: cacheControl,
+      // TODO(yjbanov): use a better port disambiguation strategy than trying
+      //                to guess what ports other tests use.
+      appUrl: 'http://localhost:$serverPort/index.html',
+      serverPort: serverPort,
+      browserDebugPort: browserDebugPort,
+      appDirectory: _appBuildDirectory,
+      additionalRequestHandlers: <Handler>[
+        (Request request) {
+          final String requestedPath = request.url.path;
+          requestedPathCounts.putIfAbsent(requestedPath, () => 0);
+          requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
+          if (requestedPath == 'CLOSE') {
+            return Response.ok('OK');
+          }
+          return Response.notFound('');
+        },
+      ],
+    );
+  }
+
+  // Preserve old index.html as index_og.html so we can restore it later for other tests
+  await runCommand(
+    'mv',
+    <String>[
+      'index.html',
+      'index_og.html',
+    ],
+    workingDirectory: _testAppWebDirectory,
+  );
+
+  print('BEGIN runWebServiceWorkerTestWithBlockedServiceWorkers(headless: $headless)\n');
+  try {
+    await _rebuildApp(version: 1, testType: ServiceWorkerTestType.blockedServiceWorkers, target: _targetWithBlockedServiceWorkers);
+
+    print('Ensure app starts (when service workers are blocked)');
+    await startAppServer(cacheControl: 'max-age=3600');
+    await waitForAppToLoad(<String, int>{
+      'CLOSE': 1,
+    });
+    expectRequestCounts(<String, int>{
+      'index.html': 1,
+      'flutter.js': 1,
+      'main.dart.js': 1,
+      'assets/FontManifest.json': 1,
+      'assets/fonts/MaterialIcons-Regular.otf': 1,
+      'CLOSE': 1,
+      // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
+      if (!headless)
+        ...<String, int>{
+          'manifest.json': 1,
+          'favicon.ico': 1,
+        },
+    });
+  } finally {
+    await runCommand(
+      'mv',
+      <String>[
+        'index_og.html',
+        'index.html',
+      ],
+      workingDirectory: _testAppWebDirectory,
+    );
+    await server?.stop();
+  }
+  print('END runWebServiceWorkerTestWithBlockedServiceWorkers(headless: $headless)\n');
 }
