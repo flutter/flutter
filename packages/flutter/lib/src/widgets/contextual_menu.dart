@@ -83,7 +83,7 @@ class ContextMenuController {
     );
     final CapturedThemes capturedThemes = InheritedTheme.capture(
       from: context,
-      to: Navigator.of(context).context,
+      to: Navigator.maybeOf(context)?.context,
     );
 
     _menuOverlayEntry = OverlayEntry(
