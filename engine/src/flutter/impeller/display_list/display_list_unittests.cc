@@ -324,7 +324,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     }
 
     builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(200, 200),
-                      SkSamplingOptions{}, true);
+                      flutter::DlImageSampling::kNearestNeighbor, true);
     builder.saveLayer(bounds.has_value() ? &bounds.value() : nullptr, nullptr,
                       &filter);
 
