@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../dom.dart';
 import '../platform_dispatcher.dart';
+import '../safe_browser_api.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
 
@@ -137,9 +136,14 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(activeDomElement.onInput.listen(handleChange));
-    subscriptions.add(activeDomElement.onKeyDown.listen(maybeSendAction));
-    subscriptions.add(html.document.onSelectionChange.listen(handleChange));
+    subscriptions.add(
+        DomSubscription(activeDomElement, 'input', allowInterop(handleChange)));
+    subscriptions.add(
+        DomSubscription(activeDomElement, 'keydown',
+            allowInterop(maybeSendAction)));
+    subscriptions.add(
+        DomSubscription(domDocument, 'selectionchange',
+            allowInterop(handleChange)));
     preventDefaultForMouseEvents();
   }
 
@@ -210,13 +214,13 @@ class TextField extends RoleManager {
       : super(Role.textField, semanticsObject) {
     editableElement =
         semanticsObject.hasFlag(ui.SemanticsFlag.isMultiline)
-            ? html.TextAreaElement()
-            : html.InputElement();
+            ? createDomHTMLTextAreaElement()
+            : createDomHTMLInputElement();
     _setupDomElement();
   }
 
   /// The element used for editing, e.g. `<input>`, `<textarea>`.
-  late final html.HtmlElement editableElement;
+  late final DomHTMLElement editableElement;
 
   void _setupDomElement() {
     // On iOS, even though the semantic text field is transparent, the cursor
@@ -245,7 +249,7 @@ class TextField extends RoleManager {
       ..left = '0'
       ..width = '${semanticsObject.rect!.width}px'
       ..height = '${semanticsObject.rect!.height}px';
-    semanticsObject.element.append(editableElement as DomNode);
+    semanticsObject.element.append(editableElement);
 
     switch (browserEngine) {
       case BrowserEngine.blink:
@@ -267,14 +271,15 @@ class TextField extends RoleManager {
   /// When in browser gesture mode, the focus is forwarded to the framework as
   /// a tap to initialize editing.
   void _initializeForBlink() {
-    editableElement.addEventListener('focus', (html.Event event) {
-      if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
-        return;
-      }
+    editableElement.addEventListener(
+        'focus', allowInterop((DomEvent event) {
+          if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
+            return;
+          }
 
-      EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-          semanticsObject.id, ui.SemanticsAction.tap, null);
-    });
+          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+              semanticsObject.id, ui.SemanticsAction.tap, null);
+        }));
   }
 
   /// Safari on iOS reports text field activation via touch events.
@@ -291,19 +296,21 @@ class TextField extends RoleManager {
     num? lastTouchStartOffsetX;
     num? lastTouchStartOffsetY;
 
-    editableElement.addEventListener('touchstart', (html.Event event) {
-      final html.TouchEvent touchEvent = event as html.TouchEvent;
-      lastTouchStartOffsetX = touchEvent.changedTouches!.last.client.x;
-      lastTouchStartOffsetY = touchEvent.changedTouches!.last.client.y;
-    }, true);
+    editableElement.addEventListener('touchstart',
+        allowInterop((DomEvent event) {
+          final DomTouchEvent touchEvent = event as DomTouchEvent;
+          lastTouchStartOffsetX = touchEvent.changedTouches!.last.clientX;
+          lastTouchStartOffsetY = touchEvent.changedTouches!.last.clientY;
+        }), true);
 
-    editableElement.addEventListener('touchend', (html.Event event) {
-      final html.TouchEvent touchEvent = event as html.TouchEvent;
+    editableElement.addEventListener(
+        'touchend', allowInterop((DomEvent event) {
+      final DomTouchEvent touchEvent = event as DomTouchEvent;
 
       if (lastTouchStartOffsetX != null) {
         assert(lastTouchStartOffsetY != null);
-        final num offsetX = touchEvent.changedTouches!.last.client.x;
-        final num offsetY = touchEvent.changedTouches!.last.client.y;
+        final num offsetX = touchEvent.changedTouches!.last.clientX;
+        final num offsetY = touchEvent.changedTouches!.last.clientY;
 
         // This should match the similar constant defined in:
         //
@@ -323,7 +330,7 @@ class TextField extends RoleManager {
 
       lastTouchStartOffsetX = null;
       lastTouchStartOffsetY = null;
-    }, true);
+    }), true);
   }
 
   bool _hasFocused = false;
@@ -360,7 +367,7 @@ class TextField extends RoleManager {
         SemanticsTextEditingStrategy.instance.activate(this);
         needsDomFocusRequest = true;
       }
-      if (html.document.activeElement != editableElement) {
+      if (domDocument.activeElement != editableElement) {
         needsDomFocusRequest = true;
       }
       // Focused elements should have full text editing state applied.
@@ -371,7 +378,7 @@ class TextField extends RoleManager {
       // Only apply text, because this node is not focused.
       editingState.applyTextToDomElement(editableElement);
 
-      if (_hasFocused && html.document.activeElement == editableElement) {
+      if (_hasFocused && domDocument.activeElement == editableElement) {
         // Unlike `editableElement.focus()` we don't need to schedule `blur`
         // post-update because `document.activeElement` implies that the
         // element is already attached to the DOM. If it's not, it can't
@@ -385,7 +392,7 @@ class TextField extends RoleManager {
       // Schedule focus post-update to make sure the element is attached to
       // the document. Otherwise focus() has no effect.
       semanticsObject.owner.addOneTimePostUpdateCallback(() {
-        if (html.document.activeElement != editableElement) {
+        if (domDocument.activeElement != editableElement) {
           editableElement.focus();
         }
       });
