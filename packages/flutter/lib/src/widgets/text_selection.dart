@@ -1479,8 +1479,8 @@ class TextSelectionGestureDetectorBuilder {
         }
         break;
       case TargetPlatform.macOS:
-        // On these platforms, a shift-tapped unfocused field expands from 0,
-        // not from the previous selection.
+        // On macOS, a shift-tapped unfocused field expands from 0, not from the
+        // previous selection.
         if (isShiftPressedValid) {
           _isShiftTapping = true;
           final TextSelection? fromSelection = renderEditable.hasFocus
@@ -1501,10 +1501,9 @@ class TextSelectionGestureDetectorBuilder {
           // Precise devices should place the cursor at a precise position.
             renderEditable.selectPosition(cause: SelectionChangedCause.tap);
             break;
+          // On macOS a touch tap places the cursor at the edge of the word.
           case PointerDeviceKind.touch:
           case PointerDeviceKind.unknown:
-          // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-          // of the word.
           case null:
             renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
             break;
@@ -1601,8 +1600,8 @@ class TextSelectionGestureDetectorBuilder {
           break;
         case TargetPlatform.iOS:
           if (isShiftPressedValid) {
-            // On these platforms, a shift-tapped unfocused field expands from 0,
-            // not from the previous selection.
+            // On iOS, a shift-tapped unfocused field expands from 0, not from
+            // the previous selection.
             _isShiftTapping = true;
             final TextSelection? fromSelection = renderEditable.hasFocus
                 ? null
@@ -1622,10 +1621,9 @@ class TextSelectionGestureDetectorBuilder {
             // Precise devices should place the cursor at a precise position.
               renderEditable.selectPosition(cause: SelectionChangedCause.tap);
               break;
+            // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-            // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-            // of the word.
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
               break;
           }

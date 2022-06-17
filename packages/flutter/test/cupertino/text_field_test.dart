@@ -2929,6 +2929,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 8);
+
+    // This should do nothing. The selection is set on tap down on desktop platforms.
+    await gesture.up();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 8);
   },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.macOS, TargetPlatform.windows })
   );
@@ -2971,10 +2976,13 @@ void main() {
     final TestGesture touchGesture = await tester.startGesture(ePos);
     await touchGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
+    // On iOS, a tap to select, selects the word edge instead of the exact tap position.
+    expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
+    expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
 
+    // Selection should stay the same since it is set on tap up for mobile platforms.
     await touchGesture.down(gPos);
     await tester.pumpAndSettle();
-    // On iOS a tap to select, selects the word edge instead of the exact tap position.
     expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
     expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
 
