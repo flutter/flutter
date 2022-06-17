@@ -91,13 +91,7 @@ mixin MenuItem on Diagnosticable implements Widget {
   ///
   /// Returns an empty list if this type of menu item doesn't have
   /// children.
-  List<MenuItem> get menus => const <MenuItem>[];
-
-  /// Returns all descendant [MenuItem]s of this item.
-  ///
-  /// Returns an empty list if this type of menu item doesn't have
-  /// descendants.
-  List<MenuItem> get descendants => const <MenuItem>[];
+  List<Widget> get menus => const <Widget>[];
 
   /// The function called when the mouse leaves or enters this menu item's
   /// button.
@@ -151,19 +145,6 @@ mixin MenuItem on Diagnosticable implements Widget {
   /// Defaults to an empty list.
   List<MenuItem> get members => const <MenuItem>[];
 
-  /// Returns all descendants of the given item.
-  ///
-  /// This API is supplied so that implementers of [MenuBarItem] can share
-  /// this implementation.
-  static List<MenuItem> getDescendants(MenuBarMenu item) {
-    return <MenuItem>[
-      for (final MenuItem child in item.menus) ...<MenuItem>[
-        child,
-        ...child.descendants,
-      ],
-    ];
-  }
-
   @override
   String toStringShort() => '${describeIdentity(this)}($label)';
 }
@@ -216,7 +197,7 @@ mixin MenuItem on Diagnosticable implements Widget {
 ///    platform instead of by Flutter (on macOS, for example).
 ///  * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///    application, used by the `MenuBar` to register its shortcuts.
-class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
+class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// Creates a const [MenuBar].
   const MenuBar({
     super.key,
@@ -288,17 +269,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   final MaterialStateProperty<double?>? elevation;
 
   @override
-  Widget build(BuildContext context) {
-    return _MenuBar(
-      controller: controller,
-      enabled: enabled,
-      backgroundColor: backgroundColor,
-      height: minimumHeight,
-      padding: padding,
-      elevation: elevation,
-      menus: menus,
-    );
-  }
+  State<MenuBar> createState() => _MenuBarState();
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
@@ -312,99 +283,13 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty<MenuBarController>('controller', controller, defaultValue: null));
     properties.add(
         DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DoubleProperty('height', minimumHeight, defaultValue: null));
+    properties.add(DoubleProperty('minimumHeight', minimumHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
   }
 }
 
-class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
-  /// Creates a const [MenuBar].
-  const _MenuBar({
-    this.controller,
-    this.enabled = true,
-    this.backgroundColor,
-    this.height,
-    this.padding,
-    this.elevation,
-    this.menus = const <MenuItem>[],
-  });
-
-  /// The list of menu items that are the top level children of the
-  /// [MenuBar].
-  final List<MenuItem> menus;
-
-  /// An optional controller that allows outside control of the menu bar.
-  final MenuBarController? controller;
-
-  /// Whether or not this menu bar is enabled.
-  ///
-  /// When disabled, all menus are closed, the menu bar buttons are disabled,
-  /// and menu shortcuts are ignored.
-  final bool enabled;
-
-  /// The background color of the menu bar.
-  ///
-  /// The default value is [MenuThemeData.barBackgroundColor]. If
-  /// [MenuThemeData.barBackgroundColor] is null, then the default value
-  /// is based on the [ColorScheme.surface] of [ThemeData.colorScheme].
-  final MaterialStateProperty<Color?>? backgroundColor;
-
-  /// The preferred minimum height of the menu bar.
-  ///
-  /// The default value is [MenuThemeData.barMinimumHeight]. If
-  /// [MenuThemeData.barMinimumHeight] is null, then the default value
-  /// is 48 pixels.
-  final double? height;
-
-  /// The padding around the contents of the menu bar itself.
-  ///
-  /// The default value is [MenuThemeData.barPadding]. If
-  /// [MenuThemeData.barPadding] is null, then the default value
-  /// is 4 pixels horizontally.
-  final EdgeInsets? padding;
-
-  /// The Material elevation of the menu bar (if any).
-  ///
-  /// Defaults to the [MenuThemeData.barElevation] value of the ambient
-  /// [MenuTheme].
-  final MaterialStateProperty<double?>? elevation;
-
-  @override
-  State<_MenuBar> createState() => _MenuBarState();
-
-  @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuItem item) => item.toDiagnosticsNode())];
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED'));
-    properties.add(DiagnosticsProperty<MenuBarController>('controller', controller, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DoubleProperty('height', height, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
-  }
-}
-
-class _MenuBarState extends State<_MenuBar> {
-  // The shortcuts registered with the ShortcutRegistry when the menu bar is
-  // enabled.
-  late Map<MenuSerializableShortcut, Intent> _shortcuts;
-
-  // The root of the menu node tree. The tree has the same lifetime as the menu
-  // bar, whereas the individual menu widgets are only around when they are
-  // displayed.
-  final _MenuNode _root = _MenuNode.root();
-
-  // The map of focus nodes to menus. This is used to look up which menu node
-  // goes with which focus node when finding the currently focused menu node.
-  final Map<FocusNode, _MenuNode> _focusNodes = <FocusNode, _MenuNode>{};
-
+class _MenuBarState extends State<MenuBar> {
   // The render boxes of all the MenuBarMenus that are displaying menu items.
   // This is used to do hit testing to make sure that a pointer down has not hit
   // a menu, and so to close all the menus.
@@ -422,15 +307,14 @@ class _MenuBarState extends State<_MenuBar> {
   // be captured immediately before the FocusTrap unfocuses to the scope.
   FocusNode? _focusBeforeClick;
 
-  // A menu that has been opened, but the menu widgets haven't been created yet.
-  // Once they are, then request focus on it.
-  _MenuNode? _pendingFocusedMenu;
-
   // Used to tell if we've already been disposed, for both debug checks, and to
   // avoid causing widget changes after being disposed.
   bool _disposed = false;
 
-  bool get menuIsOpen => openMenu != null;
+  // The set of menus that are currently open.
+  final Map<_MenuBarMenuState, WidgetBuilder> _openMenus = <_MenuBarMenuState, WidgetBuilder>{};
+
+  bool get menuIsOpen => _openMenus.isNotEmpty;
   bool get enabled => widget.enabled;
 
   final FocusScopeNode menuBarScope = FocusScopeNode(debugLabel: 'MenuBar');
@@ -451,10 +335,8 @@ class _MenuBarState extends State<_MenuBar> {
   @override
   void initState() {
     super.initState();
-    _shortcuts = _getShortcuts();
-    widget.controller?._attach(this);
-    _createMenuTree(widget.menus);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    widget.controller?._attach(this);
     widget.controller?._menuBarStateChanged();
   }
 
@@ -475,84 +357,26 @@ class _MenuBarState extends State<_MenuBar> {
     widget.controller?._detach(this);
     menuBarScope.dispose();
     overlayScope.dispose();
-    _root.children.clear();
-    _focusNodes.clear();
     _previousFocus = null;
     _focusBeforeClick = null;
-    _pendingFocusedMenu = null;
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     super.dispose();
     _disposed = true;
   }
 
   @override
-  void didUpdateWidget(_MenuBar oldWidget) {
+  void didUpdateWidget(MenuBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _shortcuts = _getShortcuts();
     if (widget.controller != oldWidget.controller) {
       assert(widget.controller?._menuBar == this || widget.controller?._menuBar == null);
       oldWidget.controller?._menuBar = null;
       assert(widget.controller?._menuBar == null);
       widget.controller?._menuBar = this;
     }
-    if (widget.menus != oldWidget.menus) {
-      _createMenuTree(widget.menus);
-    }
     if (!widget.enabled) {
       closeAll();
     }
     _markMenuDirtyAndDelayIfNecessary();
-  }
-
-  // These are only used in debug mode to make sure there aren't any duplicate
-  // shortcut definitions.
-  bool _debugCheckForDuplicateShortcuts() {
-    final Map<MenuSerializableShortcut, VoidCallback> shortcutCallbacks = <MenuSerializableShortcut, VoidCallback>{};
-    final Map<VoidCallback, MenuItem> callbackToMenuItem = <VoidCallback, MenuItem>{};
-    final Map<Intent, MenuItem> intentToMenuItem = <Intent, MenuItem>{};
-
-    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuItem> children) {
-      final Map<MenuSerializableShortcut, Intent> shortcuts = <MenuSerializableShortcut, Intent>{};
-      for (final MenuItem child in children) {
-        if (child.onSelected != null) {
-          callbackToMenuItem[child.onSelected!] = child;
-        }
-        if (child.onSelectedIntent != null) {
-          intentToMenuItem[child.onSelectedIntent!] = child;
-        }
-        if (child.menus.isNotEmpty) {
-          shortcuts.addAll(collectChildShortcuts(child.menus));
-        } else if (child.shortcut != null && child.onSelected != null) {
-          if (shortcuts.containsKey(child.shortcut) &&
-              (shortcutCallbacks[child.shortcut!] != child.onSelected ||
-                  shortcuts[child.shortcut] is! VoidCallbackIntent)) {
-            throw FlutterError('Duplicate callback shortcut detected.\n'
-                'The same shortcut has been bound to two different menus with '
-                'different select functions or intents: ${child.shortcut} is bound to both '
-                '${shortcuts[child.shortcut] is VoidCallbackIntent ? callbackToMenuItem[shortcutCallbacks[child.shortcut!]] : intentToMenuItem[shortcuts[child.shortcut!]]} and '
-                ' menu $child with different select callbacks or intents.');
-          }
-          shortcutCallbacks[child.shortcut!] = child.onSelected!;
-          shortcuts[child.shortcut!] = VoidCallbackIntent(child.onSelected!);
-        } else if (child.shortcut != null && child.onSelectedIntent != null) {
-          if (shortcuts.containsKey(child.shortcut) && shortcuts[child.shortcut!] != child.onSelectedIntent) {
-            throw FlutterError('Duplicate intent shortcut mapping detected.\n'
-                'The same shortcut has been bound to '
-                'two different intents: ${child.shortcut} is bound to '
-                '${shortcuts[child.shortcut!]} on '
-                '${intentToMenuItem[shortcuts[child.shortcut!]]} and '
-                '${child.onSelectedIntent} on menu $child.');
-          }
-          shortcuts[child.shortcut!] = child.onSelectedIntent!;
-        } else if (child.members.isNotEmpty) {
-          shortcuts.addAll(collectChildShortcuts(child.members));
-        }
-      }
-      return shortcuts;
-    }
-
-    collectChildShortcuts(widget.menus);
-    return true;
   }
 
   @override
@@ -572,32 +396,29 @@ class _MenuBarState extends State<_MenuBar> {
           DismissIntent: _MenuDismissAction(menuBar: this),
         },
         child: Builder(builder: (BuildContext context) {
-          return _ShortcutRegistration(
-            shortcuts: widget.enabled ? _shortcuts : const <MenuSerializableShortcut, Intent>{},
-            child: ExcludeFocus(
-              excluding: !widget.enabled || !menuIsOpen,
-              child: FocusScope(
-                node: menuBarScope,
-                child: Shortcuts(
-                  // Make sure that these override any shortcut bindings from
-                  // the menu items when a menu is open. If someone wants to
-                  // bind an arrow or tab to a menu item, it would otherwise
-                  // override the default traversal keys. We want their
-                  // shortcut to apply everywhere but in the menu itself,
-                  // since there we have to be able to traverse menus.
-                  shortcuts: _kMenuTraversalShortcuts,
-                  child: _MenuBarTopLevelBar(
-                    elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
-                        .resolve(state)!,
-                    height: widget.height ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
-                    enabled: widget.enabled,
-                    color: (widget.backgroundColor ??
-                            menuTheme.barBackgroundColor ??
-                            _TokenDefaultsM3(context).barBackgroundColor)
-                        .resolve(state)!,
-                    padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                    children: widget.menus,
-                  ),
+          return ExcludeFocus(
+            excluding: !widget.enabled || !menuIsOpen,
+            child: FocusScope(
+              node: menuBarScope,
+              child: Shortcuts(
+                // Make sure that these override any shortcut bindings from
+                // the menu items when a menu is open. If someone wants to
+                // bind an arrow or tab to a menu item, it would otherwise
+                // override the default traversal keys. We want their
+                // shortcut to apply everywhere but in the menu itself,
+                // since there we have to be able to traverse menus.
+                shortcuts: _kMenuTraversalShortcuts,
+                child: _MenuBarTopLevelBar(
+                  elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
+                      .resolve(state)!,
+                  height: widget.minimumHeight ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
+                  enabled: widget.enabled,
+                  color: (widget.backgroundColor ??
+                          menuTheme.barBackgroundColor ??
+                          _TokenDefaultsM3(context).barBackgroundColor)
+                      .resolve(state)!,
+                  padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
+                  children: widget.menus,
                 ),
               ),
             ),
@@ -607,101 +428,30 @@ class _MenuBarState extends State<_MenuBar> {
     );
   }
 
-  void _doSelect(Intent onSelected) {
-    if (widget.enabled) {
-      Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, onSelected);
-    }
-    closeAll();
-  }
-
-  Map<MenuSerializableShortcut, Intent> _getShortcuts() {
-    assert(_debugCheckForDuplicateShortcuts());
-    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuItem> children) {
-      final Map<MenuSerializableShortcut, Intent> newShortcuts = <MenuSerializableShortcut, Intent>{};
-      for (final MenuItem child in children) {
-        if (child.menus.isNotEmpty) {
-          // Short circuit if it's a menu item with a submenu.
-          newShortcuts.addAll(collectChildShortcuts(child.menus));
-        } else if (child.shortcut != null && child.onSelected != null) {
-          // onSelected takes priority over onSelectedIntent (they can't specify
-          // both anyhow).
-          newShortcuts[child.shortcut!] = VoidCallbackIntent(child.onSelected!);
-        } else if (child.shortcut != null && child.onSelectedIntent != null) {
-          newShortcuts[child.shortcut!] = child.onSelectedIntent!;
-        } else if (child.members.isNotEmpty) {
-          // Groups can't have onSelected/onSelectedIntent or menus.
-          newShortcuts.addAll(collectChildShortcuts(child.members));
-        }
-      }
-      return newShortcuts;
-    }
-
-    final Map<MenuSerializableShortcut, Intent> collectedShortcuts = collectChildShortcuts(widget.menus);
-    return collectedShortcuts.map<MenuSerializableShortcut, Intent>((MenuSerializableShortcut key, Intent value) {
-      return MapEntry<MenuSerializableShortcut, Intent>(key, VoidCallbackIntent(() => _doSelect(value)));
-    });
-  }
-
-  List<_MenuNode> get openMenus {
-    if (openMenu == null) {
-      return const <_MenuNode>[];
-    }
-    return <_MenuNode>[...openMenu!.ancestors, openMenu!];
-  }
-
-  _MenuNode? get openMenu => _openMenu;
-  _MenuNode? _openMenu;
-  set openMenu(_MenuNode? value) {
-    assert(value != _root);
-    if (_openMenu == value) {
-      // Nothing changed.
-      return;
-    }
-    if (value != null && _openMenu == null) {
+  void openMenu(_MenuBarMenuState menu, WidgetBuilder builder) {
+    if (_openMenus.isEmpty) {
       // We're opening the first menu, so cache the primary focus so that we can
       // try to return to it when the menu is dismissed.
       // If we captured a focus before the click, then use that, otherwise use
       // the current primary focus.
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
-    } else if (value == null && _openMenu != null) {
-      // Closing all menus, so restore the previous focus.
-      _previousFocus?.requestFocus();
-      _previousFocus = null;
     }
     _focusBeforeClick = null;
-    if (!mounted) {
-      _openMenu = value;
-      return;
-    }
-    final _MenuNode? oldMenu = _openMenu;
-    setState(() {
-      _openMenu = value;
-    });
-    oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
-      node.close();
-    });
-    _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
-      node.open();
-    });
-    if (value != null && value.focusNode?.hasPrimaryFocus != true) {
-      // Request focus on the new thing that is now open, if any, so that
-      // focus traversal starts from that location.
-      if (value.focusNode == null) {
-        // If we don't have a focus node to ask yet, then keep the menu until it
-        // gets registered, or something else sets the menu.
-        _pendingFocusedMenu = value;
-      } else if (!value.focusNode!.canRequestFocus) {
-        // The node is currently under an ExcludeFocus, but presumably that will no
-        // longer be the case after this frame.
-        _pendingFocusedMenu = null;
-        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-          value.focusNode!.requestFocus();
-        });
-      } else {
-        _pendingFocusedMenu = null;
-        value.focusNode!.requestFocus();
-      }
-    }
+    _openMenus[menu] = builder;
+    _manageOverlayEntry();
+    _markMenuDirtyAndDelayIfNecessary();
+  }
+  
+  void closeMenu(_MenuBarMenuState menu) {
+    _openMenus.remove(menu);
+    _manageOverlayEntry();
+    _markMenuDirtyAndDelayIfNecessary();
+  }
+
+  void closeAll() {
+    _focusBeforeClick = null;
+    _openMenus.clear();
+    _previousFocus?.requestFocus();
     _manageOverlayEntry();
     _markMenuDirtyAndDelayIfNecessary();
   }
@@ -740,49 +490,8 @@ class _MenuBarState extends State<_MenuBar> {
     }
   }
 
-  // Build the node hierarchy based upon the MenuItem hierarchy.
-  void _createMenuTree(List<MenuItem> topLevel) {
-    _root.children.clear();
-    _focusNodes.clear();
-    _previousFocus = null;
-    _pendingFocusedMenu = null;
-    for (final MenuItem item in topLevel) {
-      _MenuNode(item: item, parent: _root).createChildren();
-    }
-  }
-
-  // Closes the given menu, and any open descendant menus.
-  //
-  // Leaves ancestor menus open, if any.
-  //
-  // Notifies listeners if the menu changed.
-  void close(_MenuNode node) {
-    if (openMenu == null) {
-      // Everything is already closed.
-      return;
-    }
-    if (isAnOpenMenu(node)) {
-      // Don't call onClose, notifyListeners, etc, here, because setting
-      // openMenu will call them if needed.
-      if (node.parent == _root) {
-        openMenu = null;
-      } else {
-        openMenu = node.parent;
-      }
-    }
-  }
-
-  void closeAll() {
-    openMenu = null;
-  }
-
   // Returns true if the given menu or one of its ancestors is open.
-  bool isAnOpenMenu(_MenuNode menu) {
-    if (_openMenu == null) {
-      return false;
-    }
-    return _openMenu == menu || (_openMenu?.ancestors.contains(menu) ?? false);
-  }
+  bool isAnOpenMenu(_MenuBarMenuState menu) => _openMenus.containsKey(menu);
 
   // Handles any pointer events that occur in the app, checking them against
   // open menus to see if the menus should be closed or not.
@@ -812,48 +521,6 @@ class _MenuBarState extends State<_MenuBar> {
     }
   }
 
-  // Registers the given menu in the _MenuBarState whenever a menu item
-  // widget is created or updated.
-  void registerMenu({
-    required BuildContext menuContext,
-    required _MenuNode node,
-    WidgetBuilder? menuBuilder,
-    FocusNode? buttonFocus,
-  }) {
-    if (node.focusNode != buttonFocus) {
-      node.focusNode?.removeListener(_handleItemFocus);
-      node.focusNode = buttonFocus;
-      node.focusNode?.addListener(_handleItemFocus);
-      if (buttonFocus != null) {
-        _focusNodes[buttonFocus] = node;
-      }
-    }
-
-    node.menuBuilder = menuBuilder;
-
-    if (node == _pendingFocusedMenu) {
-      node.focusNode?.requestFocus();
-      _pendingFocusedMenu = null;
-    }
-  }
-
-  // Unregisters the given context from the _MenuBarState.
-  //
-  // If the given context corresponds to the currently open menu, then close
-  // it.
-  void unregisterMenu(_MenuNode node) {
-    node.focusNode?.removeListener(_handleItemFocus);
-    node.focusNode = null;
-    node.menuBuilder = null;
-    _focusNodes.remove(node.focusNode);
-    if (node == _pendingFocusedMenu) {
-      _pendingFocusedMenu = null;
-    }
-    if (openMenu == node) {
-      close(node);
-    }
-  }
-
   // Used to register the menu's render box whenever it changes, so that it can
   // be used to do hit detection and find out if a pointer event hit a menu or
   // not without participating in the gesture arena.
@@ -867,34 +534,11 @@ class _MenuBarState extends State<_MenuBar> {
     _menuRenderBoxes.remove(menu);
   }
 
-  // Handles focus notifications for menu items so that the focused item can be
-  // set as the currently open menu.
-  void _handleItemFocus() {
-    if (openMenu == null) {
-      // Don't traverse the menu hierarchy on focus unless the user opened a
-      // menu already.
-      return;
-    }
-    final _MenuNode? focused = focusedItem;
-    if (focused != null && !isAnOpenMenu(focused)) {
-      openMenu = focused;
-    }
-  }
-
-  _MenuNode? get focusedItem {
-    final Iterable<FocusNode> focusedItems = _focusNodes.keys.where((FocusNode node) => node.hasFocus);
-    assert(
-        focusedItems.length <= 1,
-        'The same focus node is registered to more than one MenuItem '
-        'menu:\n  ${focusedItems.first}');
-    return focusedItems.isNotEmpty ? _focusNodes[focusedItems.first] : null;
-  }
-
   String? get debugCurrentItem {
     String? result;
     assert(() {
       if (openMenu != null) {
-        result = openMenus.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
+        result = _openMenus.keys.map<String>((_MenuBarMenuState node) => node.toStringShort()).join(' > ');
       }
       return true;
     }());
@@ -905,7 +549,7 @@ class _MenuBarState extends State<_MenuBar> {
     String? result;
     assert(() {
       if (primaryFocus?.context != null) {
-        result = _focusNodes[primaryFocus]?.toStringShort();
+        result = primaryFocus?.toStringShort();
       }
       return true;
     }());
@@ -1028,41 +672,8 @@ class MenuBarButton extends StatefulWidget with MenuItem {
     this.textStyle,
     this.padding,
     this.shape,
-  })  : _hasMenu = false,
-        _menuPadding = null,
-        _menuBackgroundColor = null,
-        _menuShape = null,
-        _menuElevation = null,
-        assert(onSelected == null || onSelectedIntent == null,
+  })  : assert(onSelected == null || onSelectedIntent == null,
             'Only one of onSelected or onSelectedIntent may be specified');
-
-  // Used for MenuBarMenu's button, which has some slightly different behavior.
-  const MenuBarButton._forMenu({
-    required this.label,
-    this.labelWidget,
-    this.onSelected,
-    this.onHover,
-    this.focusNode,
-    this.leadingIcon,
-    this.trailingIcon,
-    this.semanticsLabel,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.overlayColor,
-    this.textStyle,
-    this.padding,
-    EdgeInsets? menuPadding,
-    MaterialStateProperty<Color?>? menuBackgroundColor,
-    MaterialStateProperty<ShapeBorder?>? menuShape,
-    MaterialStateProperty<double?>? menuElevation,
-    this.shape,
-  })  : _hasMenu = true,
-        onSelectedIntent = null,
-        shortcut = null,
-        _menuPadding = menuPadding,
-        _menuBackgroundColor = menuBackgroundColor,
-        _menuShape = menuShape,
-        _menuElevation = menuElevation;
 
   @override
   final String label;
@@ -1165,25 +776,6 @@ class MenuBarButton extends StatefulWidget with MenuItem {
   ///    can be set instead of this property.
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
-  // Indicates that this is a button for a submenu, not just a regular item.
-  final bool _hasMenu;
-
-  // The properties below here only apply to menu items that are hosts for a
-  // submenu, when the menu item is created by calling MenuItem._forMenu.
-
-  // The padding around the edges of a submenu. Passed in from the MenuBarMenu
-  // so that it can be given during registration with the _MenuBarState.
-  final EdgeInsets? _menuPadding;
-
-  // The background color of the submenu, when _hasMenu is true.
-  final MaterialStateProperty<Color?>? _menuBackgroundColor;
-
-  // The shape of the submenu, when _hasMenu is true.
-  final MaterialStateProperty<ShapeBorder?>? _menuShape;
-
-  // The elevation of the submenu, when _hasMenu is true.
-  final MaterialStateProperty<double?>? _menuElevation;
-
   @override
   State<MenuBarButton> createState() => _MenuBarButtonState();
 
@@ -1195,7 +787,7 @@ class MenuBarButton extends StatefulWidget with MenuItem {
     properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
     properties.add(StringProperty('label', label));
     properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
-    properties.add(StringProperty('semanticLabel', semanticsLabel, defaultValue: null));
+    properties.add(StringProperty('semanticsLabel', semanticsLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
     properties.add(
         DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
@@ -1208,7 +800,6 @@ class MenuBarButton extends StatefulWidget with MenuItem {
 }
 
 class _MenuBarButtonState extends State<MenuBarButton> {
-  _MenuNode? _menu;
   late _MenuBarState _menuBar;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
@@ -1231,7 +822,6 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   @override
   void dispose() {
-    _menuBar.unregisterMenu(_menu!);
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -1264,14 +854,8 @@ class _MenuBarButtonState extends State<MenuBarButton> {
     final MenuThemeData menuTheme = MenuTheme.of(context);
     final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(context);
     final Size densityAdjustedSize = const Size(64, 48) + Theme.of(context).visualDensity.baseSizeAdjustment;
-    final MaterialStateProperty<EdgeInsets?> resolvedPadding;
-    if (widget._hasMenu && _menu!.isTopLevel) {
-      resolvedPadding =
-          MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuTheme.barPadding ?? defaultTheme.barPadding);
-    } else {
-      resolvedPadding =
+    final MaterialStateProperty<EdgeInsets?> resolvedPadding =
           MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuTheme.itemPadding ?? defaultTheme.itemPadding);
-    }
     return Semantics(
       enabled: _enabled,
       // Will default to the label in the Text widget or labelWidget below if
@@ -1295,159 +879,26 @@ class _MenuBarButtonState extends State<MenuBarButton> {
           label: widget.labelWidget ?? Text(widget.label),
           shortcut: widget.shortcut,
           trailingIcon: widget.trailingIcon,
-          hasSubmenu: widget._hasMenu,
-        ),
-      ),
-    );
-  }
-
-  // Expands groups and adds dividers when necessary.
-  List<Widget> _expandGroups(MenuItem parent) {
-    final List<Widget> expanded = <Widget>[];
-    bool lastWasGroup = false;
-    for (final MenuItem item in parent.menus) {
-      if (lastWasGroup) {
-        expanded.add(const _MenuItemDivider());
-      }
-      if (item.members.isNotEmpty) {
-        if (!lastWasGroup && expanded.isNotEmpty) {
-          expanded.add(const _MenuItemDivider());
-        }
-        expanded.addAll(item.members);
-        lastWasGroup = true;
-      } else {
-        expanded.add(item);
-        lastWasGroup = false;
-      }
-    }
-    return expanded;
-  }
-
-  // Wraps the given child with the appropriate Positioned widget for the
-  // submenu.
-  Widget _wrapWithPosition({
-    required BuildContext menuButtonContext,
-    required _MenuNode menuButtonNode,
-    required Widget child,
-  }) {
-    final TextDirection textDirection = Directionality.of(menuButtonContext);
-    final RenderBox button = menuButtonContext.findRenderObject()! as RenderBox;
-    final RenderBox menuBarBox = _menuBar.context.findRenderObject()! as RenderBox;
-    final RenderBox overlay = Overlay.of(menuButtonContext)!.context.findRenderObject()! as RenderBox;
-
-    final EdgeInsets menuPadding =
-        widget._menuPadding ?? MenuTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding;
-    Offset menuOrigin;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        final Offset menuBarOrigin = menuBarBox.localToGlobal(menuBarBox.paintBounds.topRight, ancestor: overlay);
-        if (menuButtonNode.isTopLevel) {
-          menuOrigin = button.localToGlobal(button.paintBounds.bottomRight, ancestor: menuBarBox);
-          menuOrigin = Offset(menuBarOrigin.dx - menuOrigin.dx, menuBarOrigin.dy + menuOrigin.dy);
-        } else {
-          menuOrigin = button.localToGlobal(button.paintBounds.topLeft, ancestor: overlay);
-          menuOrigin =
-              Offset(menuBarOrigin.dx - menuOrigin.dx, menuOrigin.dy) + Offset(-menuPadding.left, -menuPadding.top);
-        }
-        break;
-      case TextDirection.ltr:
-        if (menuButtonNode.isTopLevel) {
-          menuOrigin = button.localToGlobal(button.paintBounds.bottomLeft, ancestor: overlay);
-        } else {
-          menuOrigin = button.localToGlobal(button.paintBounds.topRight, ancestor: overlay) +
-              Offset(menuPadding.left, -menuPadding.top);
-        }
-        break;
-    }
-    return Positioned.directional(
-      textDirection: textDirection,
-      top: menuOrigin.dy,
-      start: menuOrigin.dx,
-      child: child,
-    );
-  }
-
-  // A builder for a submenu that should be positioned relative to the menu
-  // button whose context is given.
-  Widget _buildPositionedMenu(_MenuNode menuButtonNode) {
-    final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(_menuBar.context);
-    final MenuThemeData menuTheme = MenuTheme.of(_menuBar.context);
-    final TextDirection textDirection = Directionality.of(_menuBar.context);
-    final Set<MaterialState> disabled = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-    };
-    // Because this is all in the overlay, we have to duplicate a lot of state
-    // that exists in the context of the menu button.
-    return _wrapWithPosition(
-      menuButtonContext: context,
-      menuButtonNode: menuButtonNode,
-      child: Directionality(
-        textDirection: textDirection,
-        child: InheritedTheme.captureAll(
-          _menuBar.context,
-          Builder(
-            builder: (BuildContext context) {
-              return _MenuNodeWrapper(
-                menu: menuButtonNode,
-                child: _MenuBarMarker(
-                  state: _menuBar,
-                  child: Material(
-                    color: (widget._menuBackgroundColor ??
-                            menuTheme.menuBackgroundColor ??
-                            defaultTheme.menuBackgroundColor)
-                        .resolve(disabled),
-                    shape: (widget._menuShape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled),
-                    elevation: (widget._menuElevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation)
-                        .resolve(disabled)!,
-                    child: Padding(
-                      padding: widget._menuPadding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
-                      child: _MenuBarMenuList(
-                        direction: Axis.vertical,
-                        textDirection: Directionality.of(context),
-                        children: _expandGroups(menuButtonNode.item),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+          hasSubmenu: false,
         ),
       ),
     );
   }
 
   void _updateMenuRegistration() {
-    final _MenuNode newMenu = _MenuNodeWrapper.of(context);
     final _MenuBarState newMenuBar = _MenuBarState.of(context);
-    if (newMenu != _menu || newMenuBar != _menuBar) {
+    if (newMenuBar != _menuBar) {
       _menuBar = newMenuBar;
-      _menu = newMenu;
-      newMenuBar.registerMenu(
-        menuContext: context,
-        node: newMenu,
-        buttonFocus: _focusNode,
-        menuBuilder: _menu!.hasSubmenu ? (BuildContext context) => _buildPositionedMenu(_menu!) : null,
-      );
     }
   }
 
   void _handleSelect() {
     widget.onSelected?.call();
-
-    if (!widget._hasMenu) {
-      _menuBar.closeAll();
-    }
+    _menuBar.closeAll();
   }
 
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
-
-    if (!widget._hasMenu && hovering && !_menuBar.isAnOpenMenu(_menu!)) {
-      setState(() {
-        _menuBar.openMenu = _menu;
-      });
-    }
   }
 }
 
@@ -1485,7 +936,7 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
     this.labelWidget,
     this.leadingIcon,
     this.trailingIcon,
-    this.semanticLabel,
+    this.semanticsLabel,
     this.focusNode,
     this.autofocus = false,
     this.backgroundColor,
@@ -1516,8 +967,14 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
   /// An optional icon to display after the label text.
   final Widget? trailingIcon;
 
-  /// The semantic label to use for this menu item for its [Semantics].
-  final String? semanticLabel;
+  /// The semantic label of the menu item used by accessibility frameworks to
+  /// announce its label when the menu is focused.
+  ///
+  /// If this label is not provided, it will default to [label].
+  ///
+  /// If [labelWidget] is also provided, this semantics label will take
+  /// precedence over semantics information provided in [labelWidget].
+  final String? semanticsLabel;
 
   /// The focus node to use for the menu item button.
   final FocusNode? focusNode;
@@ -1601,18 +1058,15 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
   final VoidCallback? onClose;
 
   @override
-  final List<MenuItem> menus;
+  final List<Widget> menus;
 
   @override
   State<MenuBarMenu> createState() => _MenuBarMenuState();
 
   @override
-  List<MenuItem> get descendants => MenuItem.getDescendants(this);
-
-  @override
   List<DiagnosticsNode> debugDescribeChildren() {
     return <DiagnosticsNode>[
-      ...menus.map<DiagnosticsNode>((MenuItem child) {
+      ...menus.map<DiagnosticsNode>((Widget child) {
         return child.toDiagnosticsNode();
       })
     ];
@@ -1624,7 +1078,7 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
     properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
     properties.add(StringProperty('label', label));
     properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
-    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(StringProperty('semanticsLabel', semanticsLabel, defaultValue: null));
     properties.add(
         DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<ShapeBorder?>>('shape', shape, defaultValue: null));
@@ -1645,14 +1099,13 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
 }
 
 class _MenuBarMenuState extends State<MenuBarMenu> {
-  _MenuNode? _menu;
   late _MenuBarState _menuBar;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
-
-  bool get _isAnOpenMenu {
-    return _menu != null && _menuBar.isAnOpenMenu(_menu!);
-  }
+  late _MenuBarMenuState? _parent;
+  bool _showingSubmenu = false;
+  bool get _isTopLevelMenu => _parent == null;
+  bool get _enabled => _menuBar.enabled && widget.menus.isNotEmpty;
 
   @override
   void initState() {
@@ -1675,11 +1128,10 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
 
   @override
   void didChangeDependencies() {
-    _menu = _MenuNodeWrapper.of(context);
-    _menuBar = _MenuBarState.of(context);
     super.didChangeDependencies();
+    _parent = _MenuItemWrapper.maybeOf(context);
+    _menuBar = _MenuBarState.of(context);
   }
-
   @override
   void didUpdateWidget(MenuBarMenu oldWidget) {
     if (widget.focusNode != null) {
@@ -1695,38 +1147,49 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     super.didUpdateWidget(oldWidget);
   }
 
-  bool get _enabled => _menuBar.enabled && widget.menus.isNotEmpty;
-
-  @override
-  Widget build(BuildContext context) {
-    return MenuBarButton._forMenu(
-      label: widget.label,
-      labelWidget: widget.labelWidget,
-      onSelected: _enabled ? _maybeToggleShowMenu : null,
-      onHover: _enabled ? _handleMenuHover : null,
-      focusNode: _focusNode,
-      leadingIcon: widget.leadingIcon,
-      trailingIcon: widget.trailingIcon,
-      semanticsLabel: widget.semanticLabel,
-      backgroundColor: widget.buttonBackgroundColor,
-      foregroundColor: widget.buttonForegroundColor,
-      overlayColor: widget.buttonOverlayColor,
-      textStyle: widget.buttonTextStyle,
-      padding: widget.buttonPadding,
-      shape: widget.buttonShape,
-      menuPadding: widget.padding,
-      menuBackgroundColor: widget.backgroundColor,
-      menuShape: widget.shape,
-    );
+  void close() {
+    setState(() {
+      _showingSubmenu = false;
+      _menuBar.closeMenu(this);
+    });
   }
 
-  // Shows the submenu if there is one, and it wasn't visible. Hides the menu if
-  // it was already visible.
-  void _maybeToggleShowMenu() {
-    if (_isAnOpenMenu) {
-      _menuBar.close(_menu!);
+  void open() {
+    setState(() {
+      _showingSubmenu = true;
+      _menuBar.openMenu(this, _buildPositionedMenu);
+    });
+  }
+
+  List<_MenuBarMenuState> get _ancestors {
+    final List<_MenuBarMenuState> result = <_MenuBarMenuState>[];
+    _MenuBarMenuState? node = this;
+    while (node != null) {
+      node = node._parent;
+      if (node != null) {
+        result.add(node);
+      }
+    }
+    return result;
+  }
+
+  List<_MenuBarMenuState> ancestorDifference(_MenuBarMenuState? other) {
+    final List<_MenuBarMenuState> myAncestors = <_MenuBarMenuState>[..._ancestors, this];
+    final List<_MenuBarMenuState> otherAncestors = other == null ? const <_MenuBarMenuState>[] : <_MenuBarMenuState>[...other._ancestors, other];
+    int skip = 0;
+    for (; skip < myAncestors.length && skip < otherAncestors.length; skip += 1) {
+      if (myAncestors[skip] != otherAncestors[skip]) {
+        break;
+      }
+    }
+    return myAncestors.sublist(skip);
+  }
+
+  void _toggleShowMenu() {
+    if (_showingSubmenu) {
+      close();
     } else {
-      _menuBar.openMenu = _menu;
+      open();
     }
   }
 
@@ -1735,13 +1198,166 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     // Don't open the top level menu bar buttons on hover unless something else
     // is already open. This means that the user has to first open the menu bar
     // before hovering allows them to traverse it.
-    if (_menu!.isTopLevel && _menuBar.openMenu == null) {
+    if (_parent == null && _menuBar.openMenu == null) {
       return;
     }
+  }
 
-    if (hovering && !_isAnOpenMenu) {
-      _menuBar.openMenu = _menu;
+  @override
+  Widget build(BuildContext context) {
+    final MenuThemeData menuTheme = MenuTheme.of(context);
+    final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(context);
+    final Size densityAdjustedSize = const Size(64, 48) + Theme.of(context).visualDensity.baseSizeAdjustment;
+    final MaterialStateProperty<EdgeInsets?> resolvedPadding;
+    if (_isTopLevelMenu) {
+      resolvedPadding =
+          MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuTheme.barPadding ?? defaultTheme.barPadding);
+    } else {
+      resolvedPadding =
+          MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuTheme.itemPadding ?? defaultTheme.itemPadding);
     }
+    return Semantics(
+      enabled: _enabled,
+      // Will default to the label in the Text widget or labelWidget below if
+      // not specified.
+      label: widget.semanticsLabel,
+      child: TextButton(
+        style: (TextButtonTheme.of(context).style ?? const ButtonStyle()).copyWith(
+          minimumSize: MaterialStateProperty.all<Size?>(densityAdjustedSize),
+          backgroundColor: widget.buttonBackgroundColor ?? menuTheme.itemBackgroundColor ?? defaultTheme.itemBackgroundColor,
+          foregroundColor: widget.buttonForegroundColor ?? menuTheme.itemForegroundColor ?? defaultTheme.itemForegroundColor,
+          overlayColor: widget.buttonOverlayColor ?? menuTheme.itemOverlayColor ?? defaultTheme.itemOverlayColor,
+          padding: resolvedPadding,
+          shape: widget.buttonShape ?? menuTheme.itemShape ?? defaultTheme.itemShape,
+          textStyle: widget.buttonTextStyle ?? menuTheme.itemTextStyle ?? defaultTheme.itemTextStyle,
+        ),
+        focusNode: _focusNode,
+        onHover: _enabled ? _handleMenuHover : null,
+        onPressed: _enabled ? _toggleShowMenu : null,
+        child: _MenuBarItemLabel(
+          leadingIcon: widget.leadingIcon,
+          label: widget.labelWidget ?? Text(widget.label),
+          shortcut: widget.shortcut,
+          trailingIcon: widget.trailingIcon,
+          hasSubmenu: true,
+        ),
+      ),
+    );
+  }
+
+  // Expands groups and adds dividers when necessary.
+  List<Widget> _expandGroups(MenuItem parent) {
+    final List<Widget> expanded = <Widget>[];
+    bool lastWasGroup = false;
+    for (final MenuItem item in parent.menus) {
+      if (lastWasGroup) {
+        expanded.add(const _MenuItemDivider());
+      }
+      if (item.members.isNotEmpty) {
+        if (!lastWasGroup && expanded.isNotEmpty) {
+          expanded.add(const _MenuItemDivider());
+        }
+        expanded.addAll(item.members);
+        lastWasGroup = true;
+      } else {
+        expanded.add(item);
+        lastWasGroup = false;
+      }
+    }
+    return expanded;
+  }
+
+  // Wraps the given child with the appropriate Positioned widget for the
+  // submenu.
+  Widget _wrapWithPosition({
+    required BuildContext menuButtonContext,
+    required Widget child,
+  }) {
+    final TextDirection textDirection = Directionality.of(menuButtonContext);
+    final RenderBox button = menuButtonContext.findRenderObject()! as RenderBox;
+    final RenderBox menuBarBox = _menuBar.context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Overlay.of(menuButtonContext)!.context.findRenderObject()! as RenderBox;
+
+    final EdgeInsets menuPadding =
+        widget.padding ?? MenuTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding;
+    Offset menuOrigin;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        final Offset menuBarOrigin = menuBarBox.localToGlobal(menuBarBox.paintBounds.topRight, ancestor: overlay);
+        if (_parent == null) {
+          menuOrigin = button.localToGlobal(button.paintBounds.bottomRight, ancestor: menuBarBox);
+          menuOrigin = Offset(menuBarOrigin.dx - menuOrigin.dx, menuBarOrigin.dy + menuOrigin.dy);
+        } else {
+          menuOrigin = button.localToGlobal(button.paintBounds.topLeft, ancestor: overlay);
+          menuOrigin =
+              Offset(menuBarOrigin.dx - menuOrigin.dx, menuOrigin.dy) + Offset(-menuPadding.left, -menuPadding.top);
+        }
+        break;
+      case TextDirection.ltr:
+        if (_parent == null) {
+          menuOrigin = button.localToGlobal(button.paintBounds.bottomLeft, ancestor: overlay);
+        } else {
+          menuOrigin = button.localToGlobal(button.paintBounds.topRight, ancestor: overlay) +
+              Offset(menuPadding.left, -menuPadding.top);
+        }
+        break;
+    }
+    return Positioned.directional(
+      textDirection: textDirection,
+      top: menuOrigin.dy,
+      start: menuOrigin.dx,
+      child: child,
+    );
+  }
+
+  // A builder for a submenu that should be positioned relative to the menu
+  // button whose context is given.
+  Widget _buildPositionedMenu(BuildContext context) {
+    final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(_menuBar.context);
+    final MenuThemeData menuTheme = MenuTheme.of(_menuBar.context);
+    final TextDirection textDirection = Directionality.of(_menuBar.context);
+    final Set<MaterialState> disabled = <MaterialState>{
+      if (!_enabled) MaterialState.disabled,
+    };
+    // Because this is all in the overlay, we have to duplicate a lot of state
+    // that exists in the context of the menu button.
+    return _wrapWithPosition(
+      // Use the menu button's context, not the passed-in context.
+      menuButtonContext: this.context,
+      child: Directionality(
+        textDirection: textDirection,
+        child: InheritedTheme.captureAll(
+          _menuBar.context,
+          Builder(
+            builder: (BuildContext context) {
+              return _MenuBarMarker(
+                state: _menuBar,
+                child: _MenuItemWrapper(
+                  parent: this,
+                  child: Material(
+                    color: (widget.backgroundColor ??
+                        menuTheme.menuBackgroundColor ??
+                        defaultTheme.menuBackgroundColor)
+                        .resolve(disabled),
+                    shape: (widget.shape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled),
+                    elevation: (widget.elevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation)
+                        .resolve(disabled)!,
+                    child: Padding(
+                      padding: widget.padding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
+                      child: _MenuBarMenuList(
+                        direction: Axis.vertical,
+                        textDirection: Directionality.of(context),
+                        children: _expandGroups(widget.menus),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -1850,13 +1466,11 @@ class _MenuStack extends StatelessWidget {
               state: menuBar,
               child: Stack(
                 children: <Widget>[
-                  ...menuBar.openMenus.where((_MenuNode node) {
-                    return node.menuBuilder != null;
-                  }).map<Widget>(
-                    (_MenuNode node) {
+                  ...menuBar._openMenus.entries.map<Widget>(
+                    (MapEntry<_MenuBarMenuState, WidgetBuilder> entry) {
                       return Builder(
-                        key: ValueKey<_MenuNode>(node),
-                        builder: node.menuBuilder!,
+                        key: ValueKey<_MenuBarMenuState>(entry.key),
+                        builder: entry.value,
                       );
                     },
                   ),
@@ -2147,6 +1761,51 @@ class _MenuNodeWrapper extends InheritedWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<_MenuNode>('menu', menu, defaultValue: null));
+  }
+}
+
+/// An inherited widget used to provide its subtree with a [_MenuNode], so that
+/// the children of a [MenuBar] can find their associated [_MenuNode]s without
+/// having to be stateful widgets.
+///
+/// This is how a [MenuBarButton] knows what it's node is in the menu tree: it
+/// looks up the nearest [_MenuNodeWrapper] and asks for the [_MenuNode].
+///
+/// Nodes have a longer lifetime than the widgets they are connected to, since
+/// the widgets only exist while their menus are visible, but nodes exist with
+/// the same lifetime as the [MenuBar].
+class _MenuItemWrapper extends InheritedWidget {
+  const _MenuItemWrapper({
+    required this.parent,
+    required super.child,
+  });
+
+  /// The parent that owns this _MenuItemWrapper.
+  ///
+  /// May be null if this is a top-level menu.
+  final _MenuBarMenuState? parent;
+
+  static _MenuBarMenuState? maybeOf(BuildContext context) {
+    final _MenuItemWrapper? wrapper = context.dependOnInheritedWidgetOfExactType<_MenuItemWrapper>();
+    if (wrapper == null) {
+      throw FlutterError('A menu was created without a $MenuBarController.\n'
+          'A menu must have a $MenuBarController ancestor, and one was not found '
+          'in the widget tree. The widget that was created outside of a '
+          '$MenuBarController was: $context');
+    }
+
+    return wrapper.parent;
+  }
+
+  @override
+  bool updateShouldNotify(_MenuItemWrapper oldWidget) {
+    return oldWidget.parent != parent;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<_MenuBarMenuState>('parent', parent, defaultValue: null));
   }
 }
 
