@@ -851,8 +851,8 @@ class BitmapCanvas extends EngineCanvas {
       SurfacePaintData paint) {
     // For srcIn blendMode, we use an svg filter to apply to image element.
     final SvgFilter svgFilter = svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
-    rootElement.append(svgFilter.element as DomElement);
-    _children.add(svgFilter.element as DomElement);
+    rootElement.append(svgFilter.element);
+    _children.add(svgFilter.element);
     final DomHTMLElement imgElement = _reuseOrCreateImage(image);
     imgElement.style.filter = 'url(#${svgFilter.id})';
     if (colorFilterBlendMode == ui.BlendMode.saturation) {
@@ -866,8 +866,8 @@ class BitmapCanvas extends EngineCanvas {
       HtmlImage image, List<double> matrix, SurfacePaintData paint) {
     // For srcIn blendMode, we use an svg filter to apply to image element.
     final SvgFilter svgFilter = svgFilterFromColorMatrix(matrix);
-    rootElement.append(svgFilter.element as DomElement);
-    _children.add(svgFilter.element as DomElement);
+    rootElement.append(svgFilter.element);
+    _children.add(svgFilter.element);
     final DomHTMLElement imgElement = _reuseOrCreateImage(image);
     imgElement.style.filter = 'url(#${svgFilter.id})';
     return imgElement;

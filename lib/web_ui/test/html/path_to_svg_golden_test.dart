@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-import 'dart:svg' as svg;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -61,7 +58,7 @@ Future<void> testMain() async {
 
     canvas.drawPath(path, paint!);
 
-    final html.Element svgElement = pathToSvgElement(path, paint, enableFill);
+    final DomElement svgElement = pathToSvgElement(path, paint, enableFill);
 
     canvas.endRecording();
     canvas.apply(bitmapCanvas, canvasBounds);
@@ -75,7 +72,7 @@ Future<void> testMain() async {
       sceneElement.style.transform = 'scale(0.3)';
     }
     sceneElement.append(bitmapCanvas.rootElement);
-    sceneElement.append(svgElement as DomElement);
+    sceneElement.append(svgElement);
 
     await matchGoldenFile('$scubaFileName.png',
         region: region, maxDiffRatePercent: maxDiffRatePercent, write: write);
@@ -85,7 +82,7 @@ Future<void> testMain() async {
   }
 
   tearDown(() {
-    html.document.body!.children.clear();
+    domDocument.body!.clearChildren();
   });
 
   test('render line strokes', () async {
@@ -193,15 +190,15 @@ Future<void> testMain() async {
   });
 }
 
-html.Element pathToSvgElement(Path path, Paint paint, bool enableFill) {
+DomElement pathToSvgElement(Path path, Paint paint, bool enableFill) {
   final Rect bounds = path.getBounds();
-  final svg.SvgSvgElement root = svg.SvgSvgElement();
+  final SVGSVGElement root = createSVGSVGElement();
   root.style.transform = 'translate(200px, 0px)';
   root.setAttribute('viewBox', '0 0 ${bounds.right} ${bounds.bottom}');
-  root.width!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, bounds.right);
-  root.height!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, bounds.bottom);
+  root.width!.baseVal!.newValueSpecifiedUnits(svgLengthTypeNumber, bounds.right);
+  root.height!.baseVal!.newValueSpecifiedUnits(svgLengthTypeNumber, bounds.bottom);
 
-  final svg.PathElement pathElement = svg.PathElement();
+  final SVGPathElement pathElement = createSVGPathElement();
   root.append(pathElement);
   if (paint.style == PaintingStyle.stroke ||
       paint.strokeWidth != 0.0) {

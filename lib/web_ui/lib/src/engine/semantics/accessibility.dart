@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import '../../engine.dart'  show registerHotRestartListener;
+import '../dom.dart';
 import '../services.dart';
 import '../util.dart';
 
@@ -52,9 +52,9 @@ class AccessibilityAnnouncements {
   /// This element has aria-live attribute.
   ///
   /// It also has id 'accessibility-element' for testing purposes.
-  html.HtmlElement? _element;
+  DomHTMLElement? _element;
 
-  html.HtmlElement get _domElement => _element ??= _createElement();
+  DomHTMLElement get _domElement => _element ??= _createElement();
 
   /// Decodes the message coming from the 'flutter/accessibility' channel.
   void handleMessage(StandardMessageCodec codec, ByteData? data) {
@@ -73,11 +73,11 @@ class AccessibilityAnnouncements {
   void _initLiveRegion(String message) {
     _domElement.setAttribute('aria-live', 'polite');
     _domElement.text = message;
-    html.document.body!.append(_domElement);
+    domDocument.body!.append(_domElement);
   }
 
-  html.LabelElement _createElement() {
-    final html.LabelElement liveRegion = html.LabelElement();
+  DomHTMLLabelElement _createElement() {
+    final DomHTMLLabelElement liveRegion = createDomHTMLLabelElement();
     liveRegion.setAttribute('id', 'accessibility-element');
     liveRegion.style
       ..position = 'fixed'
