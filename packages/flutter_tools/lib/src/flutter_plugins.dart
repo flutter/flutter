@@ -1011,7 +1011,8 @@ void handleSymlinkException(FileSystemException e, {
     // ERROR_ACCESS_DENIED
     if (e.osError?.errorCode == 5) {
       throwToolExit(
-        'ERROR_ACCESS_DENIED file system exception while trying to create a symlink from $source to $destination',
+        'ERROR_ACCESS_DENIED file system exception thrown while trying to '
+        'create a symlink from $source to $destination',
       );
     }
     // ERROR_PRIVILEGE_NOT_HELD, user cannot symlink

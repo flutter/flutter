@@ -87,6 +87,8 @@ void main() {
     // using it instead of fs must re-run any necessary setup (e.g.,
     // setUpProject).
     FileSystem fsWindows;
+    const String pubCachePath = '/path/to/.pub-cache/hosted/pub.dartlang.org/foo-1.2.3';
+    const String ephemeralPackagePath = '/path/to/app/linux/flutter/ephemeral/foo-1.2.3';
 
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(FileSystem fileSystem) {
@@ -1615,8 +1617,36 @@ flutter:
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
-      expect(() => handleSymlinkException(e, platform: platform, os: os),
-        throwsToolExit(message: 'start ms-settings:developers'));
+      expect(
+        () => handleSymlinkException(
+          e,
+          platform: platform,
+          os: os,
+          source: pubCachePath,
+          destination: ephemeralPackagePath,
+        ),
+        throwsToolExit(message: 'start ms-settings:developers'),
+      );
+    });
+
+    testWithoutContext('Symlink ERROR_ACCESS_DENIED failures show developers paths that were used', () async {
+      final Platform platform = FakePlatform(operatingSystem: 'windows');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
+
+      const FileSystemException e = FileSystemException('', '', OSError('', 5));
+
+      expect(
+        () => handleSymlinkException(
+          e,
+          platform: platform,
+          os: os,
+          source: pubCachePath,
+          destination: ephemeralPackagePath,
+        ),
+        throwsToolExit(
+          message: 'ERROR_ACCESS_DENIED file system exception thrown while trying to create a symlink from $pubCachePath to $ephemeralPackagePath',
+        ),
+      );
     });
 
     testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
@@ -1625,8 +1655,16 @@ flutter:
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
-      expect(() => handleSymlinkException(e, platform: platform, os: os),
-        throwsToolExit(message: 'administrator'));
+      expect(
+        () => handleSymlinkException(
+          e,
+          platform: platform,
+          os: os,
+          source: pubCachePath,
+          destination: ephemeralPackagePath,
+        ),
+        throwsToolExit(message: 'administrator'),
+      );
     });
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
@@ -1635,7 +1673,16 @@ flutter:
 
       const FileSystemException e = FileSystemException('', '', OSError('', 999));
 
-      expect(() => handleSymlinkException(e, platform: platform, os: os), returnsNormally);
+      expect(
+        () => handleSymlinkException(
+          e,
+          platform: platform,
+          os: os,
+          source: pubCachePath,
+          destination: ephemeralPackagePath,
+        ),
+        returnsNormally,
+      );
     });
   });
 }
