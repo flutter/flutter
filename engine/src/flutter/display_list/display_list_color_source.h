@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_attributes.h"
 #include "flutter/display_list/display_list_color.h"
+#include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_tile_mode.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/logging.h"
@@ -105,7 +106,7 @@ class DlColorSource
   virtual bool is_opaque() const = 0;
 
   virtual std::shared_ptr<DlColorSource> with_sampling(
-      const SkSamplingOptions& options) const {
+      DlImageSampling options) const {
     return shared();
   }
 
@@ -204,7 +205,7 @@ class DlImageColorSource final : public SkRefCnt,
   DlImageColorSource(sk_sp<const SkImage> image,
                      DlTileMode horizontal_tile_mode,
                      DlTileMode vertical_tile_mode,
-                     SkSamplingOptions sampling = DisplayList::LinearSampling,
+                     DlImageSampling sampling = DlImageSampling::kLinear,
                      const SkMatrix* matrix = nullptr)
       : DlMatrixColorSourceBase(matrix),
         sk_image_(image),
@@ -219,7 +220,7 @@ class DlImageColorSource final : public SkRefCnt,
   }
 
   std::shared_ptr<DlColorSource> with_sampling(
-      const SkSamplingOptions& sampling) const override {
+      DlImageSampling sampling) const override {
     return std::make_shared<DlImageColorSource>(
         sk_image_, horizontal_tile_mode_, vertical_tile_mode_, sampling,
         matrix_ptr());
@@ -233,11 +234,11 @@ class DlImageColorSource final : public SkRefCnt,
   sk_sp<const SkImage> image() const { return sk_image_; }
   DlTileMode horizontal_tile_mode() const { return horizontal_tile_mode_; }
   DlTileMode vertical_tile_mode() const { return vertical_tile_mode_; }
-  SkSamplingOptions sampling() const { return sampling_; }
+  DlImageSampling sampling() const { return sampling_; }
 
   virtual sk_sp<SkShader> skia_object() const override {
     return sk_image_->makeShader(ToSk(horizontal_tile_mode_),
-                                 ToSk(vertical_tile_mode_), sampling_,
+                                 ToSk(vertical_tile_mode_), ToSk(sampling_),
                                  matrix_ptr());
   }
 
@@ -255,7 +256,7 @@ class DlImageColorSource final : public SkRefCnt,
   sk_sp<const SkImage> sk_image_;
   DlTileMode horizontal_tile_mode_;
   DlTileMode vertical_tile_mode_;
-  SkSamplingOptions sampling_;
+  DlImageSampling sampling_;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlImageColorSource);
 };

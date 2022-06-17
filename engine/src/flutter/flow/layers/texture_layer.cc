@@ -12,7 +12,7 @@ TextureLayer::TextureLayer(const SkPoint& offset,
                            const SkSize& size,
                            int64_t texture_id,
                            bool freeze,
-                           const SkSamplingOptions& sampling)
+                           DlImageSampling sampling)
     : offset_(offset),
       size_(size),
       texture_id_(texture_id),
@@ -61,7 +61,7 @@ void TextureLayer::Paint(PaintContext& context) const {
   }
   AutoCachePaint cache_paint(context);
   texture->Paint(*context.leaf_nodes_canvas, paint_bounds(), freeze_,
-                 context.gr_context, sampling_, cache_paint.paint());
+                 context.gr_context, ToSk(sampling_), cache_paint.paint());
 }
 
 }  // namespace flutter
