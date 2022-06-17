@@ -1070,8 +1070,14 @@ String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startD
 
 /// Controls the date range of a date range picker.
 class DateRangeController extends ValueNotifier<DateTimeRangeValue> {
-  /// Creates a [DateRangeController] with an initial [value].
-  DateRangeController(super.value);
+    /// Creates a [DateRangeController] with an initial [value].
+  DateRangeController({
+    required DateTimeRangeValue value, 
+    required this.allowedRange,
+  }) : super(value);
+
+  /// The range that the [DateTimeRangeValue] must be in to be valid.
+  final DateTimeRange allowedRange;
 
   /// The start of the date range.
   DateTime? get start => value.start;
@@ -1113,8 +1119,31 @@ class DateRangeController extends ValueNotifier<DateTimeRangeValue> {
   /// Whether the start and end date falls on the same day
   bool get isSameDay => isCompleted && start!.isAtSameMomentAs(end!);
 
-  /// A date range is valid when start is not after end.
-  bool get isValid => isCompleted && !start!.isAfter(end!);
+  /// Whether the date time range is valid, a valid range falls in the allowed range.
+  bool get isValid => isCompleted && verifyIsInAllowedRange(start!) && verifyIsInAllowedRange(end!);
+
+  /// Wether a date falls on the allowed range when completed
+  bool verifyIsInAllowedRange(DateTime dateTime) {
+    final DateTime date = DateUtils.dateOnly(dateTime);
+    return !date.isBefore(allowedRange.start) && !date.isAfter(allowedRange.end);
+  }
+
+  /// Wether a date falls in the selected range
+  bool verifyIsInSelectedRange(DateTime dateTime) {
+    final DateTime date = DateUtils.dateOnly(dateTime);
+    return isCompleted && !date.isBefore(value.start!) && !date.isAfter(value.end!);
+  }
+
+  /// Wether a possible date is a valid start for the range
+  bool verifyIsValidStart(DateTime? dateTime) => dateTime != null 
+    && verifyIsInAllowedRange(dateTime);
+
+  /// Wether a possible date is a valid end for the range
+  bool verifyIsValidEnd(DateTime? dateTime) => dateTime != null 
+    && verifyIsInAllowedRange(dateTime)
+    && start != null
+    && start!.isAfter(dateTime);
+
 }
 
 /// A Material-style date range picker dialog.
@@ -1298,7 +1327,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
       start: _restorableStart.value,
       end: _restorableEnd.value,
     );
-    _controller = DateRangeController(initialDateRange);
+    _controller = DateRangeController(
+      value: initialDateRange, 
+      allowedRange: DateTimeRange(start: widget.firstDate, end: widget.lastDate),
+    );
     _controller.addListener(_onDateRangeSelectionChanged);
   }
 
@@ -1339,12 +1371,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
         case DatePickerEntryMode.input:
           // Validate the range dates
-          if (_controller.isCompleted &&
-              (_controller.start!.isBefore(widget.firstDate) || _controller.end!.isAfter(widget.lastDate))) {
-            // With no valid start date, having an end date makes no sense for the UI.
-            _controller.value = const DateTimeRangeValue.empty();
+          if (_controller.start != null && !_controller.verifyIsInAllowedRange(_controller.start!)) {
+            _controller.start = null;
           }
-          if (_controller.end != null && (_controller.end!.isBefore(widget.firstDate) || _controller.end!.isAfter(widget.lastDate))) {
+          if (_controller.end != null && !_controller.verifyIsInAllowedRange(_controller.end!)) {
             _controller.end = null;
           }
           _entryMode.value = DatePickerEntryMode.calendar;
@@ -1383,8 +1413,6 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         contents = _CalendarRangePickerDialog(
           key: _calendarPickerKey,
           controller: _controller,
-          firstDate: widget.firstDate,
-          lastDate: widget.lastDate,
           currentDate: widget.currentDate,
           onConfirm: _controller.isCompleted ? _handleOk : null,
           onCancel: _handleCancel,
@@ -1489,8 +1517,6 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   const _CalendarRangePickerDialog({
     super.key,
     required this.controller,
-    required this.firstDate,
-    required this.lastDate,
     required this.currentDate,
     required this.onConfirm,
     required this.onCancel,
@@ -1500,8 +1526,6 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   });
 
   final DateRangeController controller;
-  final DateTime firstDate;
-  final DateTime lastDate;
   final DateTime? currentDate;
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
@@ -1604,8 +1628,6 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         ),
         body: _CalendarDateRangePicker(
           controller: controller,
-          firstDate: firstDate,
-          lastDate: lastDate,
           currentDate: currentDate,
         ),
       ),
@@ -1629,23 +1651,11 @@ class _CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
   _CalendarDateRangePicker({
     required this.controller,
-    required DateTime firstDate,
-    required DateTime lastDate,
     DateTime? currentDate,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
+  }) : currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
 
   /// Controller for selected date range.
   final DateRangeController controller;
-
-  /// The earliest allowable [DateTime] that the user can select.
-  final DateTime firstDate;
-
-  /// The latest allowable [DateTime] that the user can select.
-  final DateTime lastDate;
 
   /// The [DateTime] representing today. It will be highlighted in the day grid.
   final DateTime currentDate;
@@ -1671,9 +1681,8 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
     // Calculate the index for the initially displayed month. This is needed to
     // divide the list of months into two `SliverList`s.
     final DateTime initialDate = widget.controller.start ?? widget.currentDate;
-    if (!initialDate.isBefore(widget.firstDate) &&
-        !initialDate.isAfter(widget.lastDate)) {
-      _initialMonthIndex = DateUtils.monthDelta(widget.firstDate, initialDate);
+    if (_controller.verifyIsInAllowedRange(initialDate)) {
+      _initialMonthIndex = DateUtils.monthDelta(_controller.allowedRange.start, initialDate);
     }
 
     _showWeekBottomDivider = _initialMonthIndex != 0;
@@ -1698,7 +1707,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
     }
   }
 
-  int get _numberOfMonths => DateUtils.monthDelta(widget.firstDate, widget.lastDate) + 1;
+  int get _numberOfMonths => DateUtils.monthDelta(_controller.allowedRange.start, _controller.allowedRange.end) + 1;
 
   void _vibrate() {
     switch (Theme.of(context).platform) {
@@ -1718,12 +1727,10 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
     final int monthIndex = beforeInitialMonth
       ? _initialMonthIndex - index - 1
       : _initialMonthIndex + index;
-    final DateTime month = DateUtils.addMonthsToMonthDate(widget.firstDate, monthIndex);
+    final DateTime month = DateUtils.addMonthsToMonthDate(_controller.allowedRange.start, monthIndex);
     return _MonthItem(
       controller: _controller,
       currentDate: widget.currentDate,
-      firstDate: widget.firstDate,
-      lastDate: widget.lastDate,
       displayedMonth: month,
     );
   }
@@ -1738,8 +1745,8 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
           child: _CalendarKeyboardNavigator(
-            firstDate: widget.firstDate,
-            lastDate: widget.lastDate,
+            firstDate: _controller.allowedRange.start,
+            lastDate: _controller.allowedRange.end,
             initialFocusedDay: _controller.start ?? widget.currentDate,
             // In order to prevent performance issues when displaying the
             // correct initial month, 2 `SliverList`s are used to split the
@@ -2112,17 +2119,12 @@ class _MonthSliverGridLayout extends SliverGridLayout {
 /// the week.
 class _MonthItem extends StatefulWidget {
   /// Creates a month item.
-  _MonthItem({
+  const _MonthItem({
     required this.controller,
     required this.currentDate,
-    required this.firstDate,
-    required this.lastDate,
     required this.displayedMonth,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       assert(!firstDate.isAfter(lastDate)),
-       assert(currentDate != null),
+  }) : assert(currentDate != null),
        assert(displayedMonth != null),
        assert(dragStartBehavior != null);
 
@@ -2131,12 +2133,6 @@ class _MonthItem extends StatefulWidget {
 
   /// The current date at the time the picker is displayed.
   final DateTime currentDate;
-
-  /// The earliest date the user is permitted to pick.
-  final DateTime firstDate;
-
-  /// The latest date the user is permitted to pick.
-  final DateTime lastDate;
 
   /// The month whose days are displayed by this picker.
   final DateTime displayedMonth;
@@ -2237,17 +2233,14 @@ class _MonthItemState extends State<_MonthItem> {
     final Color highlightColor = _highlightColor(context);
     final int day = dayToBuild.day;
 
-    final bool isDisabled = dayToBuild.isAfter(widget.lastDate) || dayToBuild.isBefore(widget.firstDate);
+    final bool isDisabled = !_controller.verifyIsInAllowedRange(dayToBuild);
 
     BoxDecoration? decoration;
     TextStyle? itemStyle = textTheme.bodyText2;
 
-    final bool isRangeSelected = _controller.isCompleted;
     final bool isSelectedDayStart = _controller.start != null && dayToBuild.isAtSameMomentAs(_controller.start!);
     final bool isSelectedDayEnd = _controller.end != null && dayToBuild.isAtSameMomentAs(_controller.end!);
-    final bool isInRange = isRangeSelected &&
-      dayToBuild.isAfter(_controller.start!) &&
-      dayToBuild.isBefore(_controller.end!);
+    final bool isInRange = _controller.verifyIsInSelectedRange(dayToBuild);
 
     _HighlightPainter? highlightPainter;
 
@@ -2731,7 +2724,6 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     super.didChangeDependencies();
     _startController = TextEditingController();
     _endController = TextEditingController();
-    // _controller.addListener(_syncTextControllers);
 
     _syncTextControllers();
     if (widget.autofocus) {
@@ -2743,14 +2735,12 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   void dispose() {
     _startController.dispose();
     _endController.dispose();
-    // _controller.removeListener(_syncTextControllers);
     super.dispose();
   }
 
   /// Synchronize text controllers with the values from the [DateRangeController]
   void _syncTextControllers() {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final String startInputText = _controller.start != null
         ? localizations.formatCompactDate(_controller.start!)
@@ -2769,10 +2759,12 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   /// return false and display an appropriate error message under one of the
   /// text fields.
   bool validate() {
-    String? startError = _validateDate(_parseDate(_startController.text));
-    final String? endError = _validateDate(_parseDate(_endController.text));
+    final DateTime? startDate = _parseDate(_startController.text);
+    final DateTime? endDate = _parseDate(_endController.text);
+    String? startError = _validateInRange(startDate);
+    final String? endError = _validateInRange(endDate);
     if (startError == null && endError == null) {
-      if (!_controller.isValid) {
+      if (startDate!.isAfter(endDate!)) {
         startError = widget.errorInvalidRangeText ?? MaterialLocalizations.of(context).invalidDateRangeLabel;
       }
     }
@@ -2788,10 +2780,10 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     return localizations.parseCompactDate(text);
   }
 
-  String? _validateDate(DateTime? date) {
+  String? _validateInRange(DateTime? date) {
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
-    } else if (date.isBefore(widget.firstDate) || date.isAfter(widget.lastDate)) {
+    } else if (!_controller.verifyIsInAllowedRange(date)) {
       return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
@@ -2807,24 +2799,22 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   }
 
   void _synchronizeRangeController() {
-    DateTime? newStart = _parseDate(_startController.text);
-    DateTime? newEnd = _parseDate(_endController.text);
-    final bool isStartInRange = newStart == null
-      || (!newStart.isBefore(widget.firstDate)
-      &&  !newStart.isAfter(widget.lastDate));
-    final bool isEndAfterStart = newEnd == null
-      || (newStart != null
-      && !newEnd.isBefore(newStart));
-    final bool isEndInRange = newEnd == null
-      || (!newEnd.isBefore(widget.firstDate)
-      && !newEnd.isAfter(widget.lastDate));
-    if (!isStartInRange) {
-      newStart = null;
+    final DateTime? newStart = _parseDate(_startController.text);
+    final DateTime? newEnd = _parseDate(_endController.text);
+    final bool isValidStart = _controller.verifyIsValidStart(newStart);
+    if (!isValidStart) {
+      _controller.start = null;
+    } else {
+      _controller.start = newStart;
     }
-    if (!isStartInRange || !isEndAfterStart || !isEndInRange) {
-      newEnd = null;
+
+    final bool isValidEnd = _controller.verifyIsValidEnd(newEnd);
+
+    if (!isValidEnd) {
+      _controller.end = null;
+    } else {
+      _controller.end = newEnd;
     }
-    _controller.value = DateTimeRangeValue(start: newStart, end: newEnd);
   }
 
   void _onTextChanged() {
