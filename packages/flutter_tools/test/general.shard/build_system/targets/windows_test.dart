@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -120,7 +118,7 @@ void main() {
   });
 
   // AssetBundleFactory still uses context injection
-  FileSystem? fileSystem;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
@@ -128,10 +126,10 @@ void main() {
 
   testUsingContext('DebugBundleWindowsAssets creates correct bundle structure', () async {
     final Environment environment = Environment.test(
-      fileSystem!.currentDirectory,
+      fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem!,
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       defines: <String, String>{
         kBuildMode: 'debug',
@@ -144,7 +142,7 @@ void main() {
 
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // sksl bundle
-    fileSystem!.file('bundle.sksl').writeAsStringSync(json.encode(
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
       <String, Object>{
         'engineRevision': '2',
         'platform': 'ios',
@@ -158,10 +156,10 @@ void main() {
 
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
-    expect(fileSystem!.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
-    expect(fileSystem!.file(r'C:\flutter_assets\AssetManifest.json'), exists);
-    expect(fileSystem!.file(r'C:\flutter_assets\io.flutter.shaders.json'), exists);
-    expect(fileSystem!.file(r'C:\flutter_assets\io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -169,10 +167,10 @@ void main() {
 
   testUsingContext('ProfileBundleWindowsAssets creates correct bundle structure', () async {
     final Environment environment = Environment.test(
-      fileSystem!.currentDirectory,
+      fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem!,
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       defines: <String, String>{
         kBuildMode: 'profile',
@@ -186,9 +184,9 @@ void main() {
 
     // Depfile is created and so is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
-    expect(fileSystem!.file(r'C:\windows\app.so'), exists);
-    expect(fileSystem!.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-    expect(fileSystem!.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -196,10 +194,10 @@ void main() {
 
   testUsingContext('ReleaseBundleWindowsAssets creates correct bundle structure', () async {
     final Environment environment = Environment.test(
-      fileSystem!.currentDirectory,
+      fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem!,
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       defines: <String, String>{
         kBuildMode: 'release',
@@ -213,9 +211,9 @@ void main() {
 
     // Depfile is created and so is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
-    expect(fileSystem!.file(r'C:\windows\app.so'), exists);
-    expect(fileSystem!.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-    expect(fileSystem!.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),

@@ -390,7 +390,7 @@ class Cache {
       }
       final dynamic data = jsonDecode(versionFile.readAsStringSync());
       if (data is! Map<String, Object?>) {
-        throw Exception("Expected object of type 'Map<String, Object>' but got one of type '${data.runtimeType}'");
+        throw Exception("Expected object of type 'Map<String, Object?>' but got one of type '${data.runtimeType}'");
       }
       final Object? version = data['version'];
       if (version == null) {

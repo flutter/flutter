@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -32,7 +30,7 @@ const List<String> kDart2jsLinuxArgs = <String>[
 void main() {
   late Testbed testbed;
   late Environment environment;
-  FakeProcessManager? processManager;
+  late FakeProcessManager processManager;
   final Platform linux = FakePlatform(
     environment: <String, String>{},
   );
@@ -332,7 +330,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with expected args with csp', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kCspMode] = 'true';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
@@ -344,7 +342,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
@@ -367,7 +365,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with expected args with enabled experiment', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
@@ -380,7 +378,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
@@ -401,7 +399,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
@@ -413,7 +411,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
@@ -433,7 +431,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -445,7 +443,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -465,7 +463,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with expected args in release mode with native null assertions', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kNativeNullAssertions] = 'true';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--native-null-assertions',
@@ -478,7 +476,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--native-null-assertions',
@@ -499,7 +497,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kDart2jsOptimization] = 'O3';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -511,7 +509,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -530,7 +528,7 @@ void main() {
 
   test('Dart2JSTarget produces expected depfile', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -560,7 +558,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -574,7 +572,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -596,7 +594,7 @@ void main() {
   test('Dart2JSTarget can enable source maps', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kSourceMapsEnabled] = 'true';
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -607,7 +605,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -627,7 +625,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
@@ -641,7 +639,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
-    processManager!.addCommand(FakeCommand(
+    processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',

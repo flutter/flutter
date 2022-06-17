@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,8 +22,8 @@ final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAg
 final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
 
 void main() {
-  FakeCache? cache;
-  FakeProcessManager? processManager;
+  late FakeCache cache;
+  late FakeProcessManager processManager;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -57,7 +55,7 @@ void main() {
 
       testUsingContext('prints nothing when Flutter installation looks fresh', () async {
         const String flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
-        processManager!.addCommands(<FakeCommand>[
+        processManager.addCommands(<FakeCommand>[
           const FakeCommand(
             command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
             stdout: '1234abcd',
@@ -123,7 +121,7 @@ void main() {
         expect(flutterVersion.getBranchName(redactUnknownBranches: true), channel);
 
         expect(testLogger.statusText, isEmpty);
-        expect(processManager!.hasRemainingExpectations, isFalse);
+        expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => processManager,
@@ -137,11 +135,11 @@ void main() {
           lastTimeVersionWasChecked: _stampOutOfDate,
           lastKnownRemoteVersion: getChannelOutOfDateVersion(),
         );
-        cache!.versionStamp = json.encode(stamp);
+        cache.versionStamp = json.encode(stamp);
 
         await VersionFreshnessValidator(
           version: flutterVersion,
-          cache: cache!,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -158,11 +156,11 @@ void main() {
           lastTimeVersionWasChecked: _stampUpToDate,
           lastKnownRemoteVersion: getChannelUpToDateVersion(),
         );
-        cache!.versionStamp = json.encode(stamp);
+        cache.versionStamp = json.encode(stamp);
 
         await VersionFreshnessValidator(
           version: flutterVersion,
-          cache: cache!,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -170,7 +168,7 @@ void main() {
         ).run();
 
         expect(logger.statusText, contains('A new version of Flutter is available!'));
-        expect(cache!.setVersionStamp, true);
+        expect(cache.setVersionStamp, true);
       });
 
       testWithoutContext('does not print warning if printed recently', () async {
@@ -181,11 +179,11 @@ void main() {
           lastKnownRemoteVersion: getChannelUpToDateVersion(),
           lastTimeWarningWasPrinted: _testClock.now(),
         );
-        cache!.versionStamp = json.encode(stamp);
+        cache.versionStamp = json.encode(stamp);
 
         await VersionFreshnessValidator(
           version: flutterVersion,
-          cache: cache!,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -198,11 +196,11 @@ void main() {
       testWithoutContext('pings server when version stamp is missing', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
-        cache!.versionStamp = '{}';
+        cache.versionStamp = '{}';
 
         await VersionFreshnessValidator(
           version: flutterVersion,
-          cache: cache!,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -210,7 +208,7 @@ void main() {
         ).run();
 
         expect(logger.statusText, contains('A new version of Flutter is available!'));
-        expect(cache!.setVersionStamp, true);
+        expect(cache.setVersionStamp, true);
       });
 
       testWithoutContext('pings server when version stamp is out-of-date', () async {
@@ -220,11 +218,11 @@ void main() {
           lastTimeVersionWasChecked: _stampOutOfDate,
           lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
         );
-        cache!.versionStamp = json.encode(stamp);
+        cache.versionStamp = json.encode(stamp);
 
         await VersionFreshnessValidator(
           version: flutterVersion,
-          cache: cache!,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -237,11 +235,11 @@ void main() {
       testWithoutContext('does not print warning when unable to connect to server if not out of date', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
-        cache!.versionStamp = '{}';
+        cache.versionStamp = '{}';
 
         await VersionFreshnessValidator(
           version: flutterVersion,
-          cache: cache!,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelUpToDateVersion(),
@@ -258,11 +256,11 @@ void main() {
           lastTimeVersionWasChecked: _stampOutOfDate,
           lastKnownRemoteVersion: _testClock.ago(const Duration(days: 2)),
         );
-        cache!.versionStamp = json.encode(stamp);
+        cache.versionStamp = json.encode(stamp);
 
         await VersionFreshnessValidator(
           version: flutterVersion,
-          cache: cache!,
+          cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
@@ -281,21 +279,21 @@ void main() {
         }
 
         testWithoutContext('loads blank when stamp file missing', () async {
-          cache!.versionStamp = null;
+          cache.versionStamp = null;
 
-          expectDefault(await VersionCheckStamp.load(cache!, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is malformed JSON', () async {
-          cache!.versionStamp = '<';
+          cache.versionStamp = '<';
 
-          expectDefault(await VersionCheckStamp.load(cache!, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is well-formed but invalid JSON', () async {
-          cache!.versionStamp = '[]';
+          cache.versionStamp = '[]';
 
-          expectDefault(await VersionCheckStamp.load(cache!, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads valid JSON', () async {
@@ -306,9 +304,9 @@ void main() {
           "lastTimeWarningWasPrinted": "${_testClock.now()}"
         }
         ''';
-          cache!.versionStamp = value;
+          cache.versionStamp = value;
 
-          final VersionCheckStamp stamp = await VersionCheckStamp.load(cache!, BufferLogger.test());
+          final VersionCheckStamp stamp = await VersionCheckStamp.load(cache, BufferLogger.test());
 
           expect(stamp.lastKnownRemoteVersion, _testClock.ago(const Duration(days: 1)));
           expect(stamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
@@ -402,7 +400,7 @@ void main() {
     });
 
   testUsingContext('version handles unknown branch', () async {
-    processManager!.addCommands(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
         stdout: '1234abcd',
@@ -430,7 +428,7 @@ void main() {
     expect(flutterVersion.getBranchName(), 'feature-branch');
     expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
     expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
-    expect(processManager!.hasRemainingExpectations, isFalse);
+    expect(processManager.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FlutterVersion: () => FlutterVersion(clock: _testClock),
     ProcessManager: () => processManager,

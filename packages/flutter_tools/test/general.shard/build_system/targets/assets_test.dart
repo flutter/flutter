@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -23,28 +21,28 @@ import '../../../src/context.dart';
 
 void main() {
   late Environment environment;
-  FileSystem? fileSystem;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     environment = Environment.test(
-      fileSystem!.currentDirectory,
+      fileSystem.currentDirectory,
       processManager: FakeProcessManager.any(),
       artifacts: Artifacts.test(),
-      fileSystem: fileSystem!,
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
     );
-    fileSystem!.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
-    fileSystem!.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
+    fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
+    fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
       .createSync(recursive: true);
-    fileSystem!.file('assets/foo/bar.png')
+    fileSystem.file('assets/foo/bar.png')
       .createSync(recursive: true);
-    fileSystem!.file('assets/wildcard/#bar.png')
+    fileSystem.file('assets/wildcard/#bar.png')
       .createSync(recursive: true);
-    fileSystem!.file('.packages')
+    fileSystem.file('.packages')
       .createSync();
-    fileSystem!.file('pubspec.yaml')
+    fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
 name: example
@@ -57,9 +55,9 @@ flutter:
   });
 
   testUsingContext('includes LICENSE file inputs in dependencies', () async {
-    fileSystem!.file('.packages')
+    fileSystem.file('.packages')
       .writeAsStringSync('foo:file:///bar/lib');
-    fileSystem!.file('bar/LICENSE')
+    fileSystem.file('bar/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync('THIS IS A LICENSE');
 
@@ -71,7 +69,7 @@ flutter:
 
     final DepfileService depfileService = DepfileService(
       logger: BufferLogger.test(),
-      fileSystem: fileSystem!,
+      fileSystem: fileSystem,
     );
     final Depfile dependencies = depfileService.parse(depfile);
 
@@ -87,20 +85,20 @@ flutter:
   testUsingContext('Copies files to correct asset directory', () async {
     await const CopyAssets().build(environment);
 
-    expect(fileSystem!.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'), exists);
-    expect(fileSystem!.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'), exists);
-    expect(fileSystem!.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
     // See https://github.com/flutter/flutter/issues/35293
-    expect(fileSystem!.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'), exists);
     // See https://github.com/flutter/flutter/issues/46163
-    expect(fileSystem!.file('${environment.buildDir.path}/flutter_assets/assets/wildcard/%23bar.png'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/wildcard/%23bar.png'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('Throws exception if pubspec contains missing files', () async {
-    fileSystem!.file('pubspec.yaml')
+    fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
 name: example

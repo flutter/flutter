@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -22,7 +20,7 @@ import '../../src/context.dart';
 
 // FlutterProject still depends on context.
 void main() {
-  FileSystem? fileSystem;
+  late FileSystem fileSystem;
 
   // This setup is required to inject the context.
   setUp(() {
@@ -30,17 +28,17 @@ void main() {
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
-    fileSystem!.file('pubspec.yaml')
+    fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: example
 flutter:
   module: {}
   ''');
-    fileSystem!.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.packages').writeAsStringSync('\n');
     final FlutterProject flutterProject =
-      FlutterProject.fromDirectory(fileSystem!.currentDirectory);
-    final IOSDevice device = setUpIOSDevice(fileSystem!);
+      FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final IOSDevice device = setUpIOSDevice(fileSystem);
 
     expect(device.isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{

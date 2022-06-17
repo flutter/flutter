@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -34,9 +32,9 @@ final Platform macosPlatform = FakePlatform(
 );
 
 void main() {
-  FakePlatform? osx;
-  FileSystemUtils? fsUtils;
-  MemoryFileSystem? fileSystem;
+  late FakePlatform osx;
+  late FileSystemUtils fsUtils;
+  late MemoryFileSystem fileSystem;
 
   setUp(() {
     osx = FakePlatform(
@@ -44,12 +42,12 @@ void main() {
       operatingSystem: 'macos',
     );
     fileSystem = MemoryFileSystem.test();
-    fsUtils = FileSystemUtils(fileSystem: fileSystem!, platform: osx!);
+    fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
     late FakeSimControl simControl;
-    Xcode? xcode;
+    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -107,7 +105,7 @@ void main() {
     });
 
     testUsingContext('defaults to rooted from HOME', () {
-      osx!.environment['HOME'] = '/foo/bar';
+      osx.environment['HOME'] = '/foo/bar';
       final IOSSimulator simulator = IOSSimulator(
         '123',
         name: 'iPhone 11',
@@ -123,8 +121,8 @@ void main() {
     }, testOn: 'posix');
 
     testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
-      osx!.environment['HOME'] = '/foo/bar';
-      osx!.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
+      osx.environment['HOME'] = '/foo/bar';
+      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
       final IOSSimulator simulator = IOSSimulator(
         '456',
         name: 'iPhone 11',
@@ -368,7 +366,7 @@ void main() {
   });
 
   group('device log tool', () {
-    FakeProcessManager? fakeProcessManager;
+    late FakeProcessManager fakeProcessManager;
     late FakeSimControl simControl;
 
     setUp(() {
@@ -383,7 +381,7 @@ void main() {
         simulatorCategory: 'iOS 9.3',
         simControl: simControl,
       );
-      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'tail',
         '-n',
         '0',
@@ -391,14 +389,14 @@ void main() {
         '/Library/Logs/CoreSimulator/x/system.log',
       ]));
       await launchDeviceSystemLogTool(device);
-      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => fileSystem,
       Platform: () => macosPlatform,
       FileSystemUtils: () => FileSystemUtils(
-        fileSystem: fileSystem!,
+        fileSystem: fileSystem,
         platform: macosPlatform,
       ),
     });
@@ -416,7 +414,7 @@ void main() {
           'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
           'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
           'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'simctl',
         'spawn',
@@ -430,7 +428,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
-      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     },
       overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
@@ -449,7 +447,7 @@ void main() {
           'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
           'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
           'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'simctl',
         'spawn',
@@ -463,7 +461,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, null);
-      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     },
       overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
@@ -486,8 +484,8 @@ void main() {
 
     group('syslog', () {
       setUp(() {
-        final File syslog = fileSystem!.file('system.log')..createSync();
-        osx!.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = syslog.path;
+        final File syslog = fileSystem.file('system.log')..createSync();
+        osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = syslog.path;
       });
 
       testUsingContext('simulator can parse Xcode 8/iOS 10-style logs', () async {
@@ -616,7 +614,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     group('unified logging', () {
-      BufferLogger? logger;
+      late BufferLogger logger;
 
       setUp(() {
         logger = BufferLogger.test();
@@ -712,7 +710,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, isEmpty);
-        expect(logger!.errorText, contains('Logger returned non-JSON response'));
+        expect(logger.errorText, contains('Logger returned non-JSON response'));
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
@@ -895,10 +893,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('startApp', () {
-    FakePlistParser? testPlistParser;
+    late FakePlistParser testPlistParser;
     late FakeSimControl simControl;
-    Xcode? xcode;
-    BufferLogger? logger;
+    late Xcode xcode;
+    late BufferLogger logger;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -914,7 +912,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      testPlistParser!.setProperty('CFBundleIdentifier', 'correct');
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(
@@ -958,7 +956,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(result.started, isFalse);
       expect(simControl.requests, isEmpty);
-      expect(logger!.errorText, contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier'));
+      expect(logger.errorText, contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier'));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
@@ -974,7 +972,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      testPlistParser!.setProperty('CFBundleIdentifier', 'correct');
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(
@@ -1003,7 +1001,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      testPlistParser!.setProperty('CFBundleIdentifier', 'correct');
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(
@@ -1028,7 +1026,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
   group('IOSDevice.isSupportedForProject', () {
     late FakeSimControl simControl;
-    Xcode? xcode;
+    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
