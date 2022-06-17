@@ -2437,7 +2437,7 @@ class _MonthItemState extends State<_MonthItem> {
 class DayItem extends StatelessWidget {
 
   /// A day item displayed in the calendar.
-  const DayItem({
+  DayItem({
     super.key, 
     required this.date, 
     required this.onTap, 
@@ -2447,7 +2447,8 @@ class DayItem extends StatelessWidget {
     required this.isSelectionEnd,
     this.selectionColor,
     this.textStyle,
-  });
+    DateTime? today,
+  }): today = today ?? DateTime.now();
 
   /// Callback for when the day is tapped.
   final VoidCallback? onTap;
@@ -2465,6 +2466,8 @@ class DayItem extends StatelessWidget {
   final Color? selectionColor;
   /// The text style of the day item when it is not the edge of a range.
   final TextStyle? textStyle;
+  /// The current date
+  final DateTime today;
 
   bool get _isEnabled => onTap != null;
 
@@ -2476,8 +2479,12 @@ class DayItem extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
     final TextTheme textTheme = theme.textTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final TextDirection textDirection = Directionality.of(context);
+    final highlightColor = selectionColor?.withOpacity(0.12) ??
+       colorScheme.primary.withOpacity(0.12);
     BoxDecoration? decoration;
     TextStyle? textStyle = this.textStyle;
+    _HighlightPainter? highlightPainter;
 
     if (isSelectionStart || isSelectionEnd) {
       // The selected start and end dates gets a circle background
@@ -2507,7 +2514,7 @@ class DayItem extends StatelessWidget {
       );
     } else if (!_isEnabled) {
       textStyle ??= textTheme.bodyText2?.apply(color: colorScheme.onSurface.withOpacity(0.38));
-    } else if (DateUtils.isSameDay(widget.currentDate, dayToBuild)) {
+    } else if (DateUtils.isSameDay(today, date)) {
       // The current day gets a different text color and a circle stroke
       // border.
       textStyle ??= textTheme.bodyText2?.apply(color: colorScheme.primary);
@@ -2537,7 +2544,7 @@ class DayItem extends StatelessWidget {
           label: semanticLabel,
           selected: isSelectionStart || isSelectionEnd,
           child: ExcludeSemantics(
-            child: Text(localizations.formatDecimal(date.day), style: itemStyle),
+            child: Text(localizations.formatDecimal(date.day), style: textStyle),
           ),
         ),
       ),
