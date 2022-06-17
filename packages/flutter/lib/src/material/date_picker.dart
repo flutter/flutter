@@ -2431,11 +2431,66 @@ class _MonthItemState extends State<_MonthItem> {
 }
 
 class DayItem extends StatelessWidget {
-  const DayItem({super.key});
+  final VoidCallback? onTap;
+  final FocusNode focusNode;
+  final ValueChanged<bool> onFocusChange;
+  final DateTime date;
+
+  bool get isEnabled => onTap != null;
+
+  const DayItem({super.key, required this.isEnabled,});
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+
+    // We want the day of month to be spoken first irrespective of the
+    // locale-specific preferences or TextDirection. This is because
+    // an accessibility user is more likely to be interested in the
+    // day of month before the rest of the date, as they are looking
+    // for the day of month. To do that we prepend day of month to the
+    // formatted full date.
+    String semanticLabel = '${localizations.formatDecimal(date.day)}, ${localizations.formatFullDate(date)}';
+    if (isSelectedDayStart) {
+      semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
+    } else if (isSelectedDayEnd) {
+      semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
+    }
+
+    Widget dayWidget = Container(
+      decoration: decoration,
+      child: Center(
+        child: Semantics(
+          label: semanticLabel,
+          selected: isSelectedDayStart || isSelectedDayEnd,
+          child: ExcludeSemantics(
+            child: Text(localizations.formatDecimal(day), style: itemStyle),
+          ),
+        ),
+      ),
+    );
+
+    if (highlightPainter != null) {
+      dayWidget = CustomPaint(
+        painter: highlightPainter,
+        child: dayWidget,
+      );
+    }
+
+    if (isEnabled) {
+      dayWidget = InkResponse(
+        focusNode: focusNode,
+        onTap: onTap,
+        radius: _monthItemRowHeight / 2 + 4,
+        splashColor: colorScheme.primary.withOpacity(0.38),
+        onFocusChange: onFocusChange,
+        child: dayWidget,
+      );
+    }
+
+    return dayWidget;
   }
 }
 
