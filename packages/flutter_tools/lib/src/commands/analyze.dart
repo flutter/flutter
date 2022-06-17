@@ -31,7 +31,7 @@ class AnalyzeCommand extends FlutterCommand {
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
-       _allProjectValidators = allProjectValidators ?? [] ,
+       _allProjectValidators = allProjectValidators ?? <ProjectValidator>[] ,
        _platform = platform {
     argParser.addFlag('flutter-repo',
         negatable: false,
