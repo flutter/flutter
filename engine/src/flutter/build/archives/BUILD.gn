@@ -89,7 +89,7 @@ if (host_os == "linux" || host_os == "win") {
 # zips_archive/flutter_patched_sdk_product/ folder.
 zip_bundle("flutter_patched_sdk") {
   file_suffix = ""
-  path_prefix = "flutter_patched_sdk"
+  path_prefix = "flutter_patched_sdk/"
   if (flutter_runtime_mode == "release") {
     file_suffix = "_product"
     path_prefix = "flutter_patched_sdk_product/"
