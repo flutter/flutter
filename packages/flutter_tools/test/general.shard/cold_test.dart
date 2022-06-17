@@ -65,8 +65,9 @@ void main() {
   });
 
   group('cold run', () {
-    MemoryFileSystem? memoryFileSystem;
-    FakePlatform? fakePlatform;
+    late MemoryFileSystem memoryFileSystem;
+    late FakePlatform fakePlatform;
+
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
       fakePlatform = FakePlatform(environment: <String, String>{});
@@ -102,7 +103,7 @@ void main() {
       ).run();
 
       expect(result, 0);
-      expect(memoryFileSystem!.directory(getBuildDirectory()).childFile('start_up_info.json').existsSync(), true);
+      expect(memoryFileSystem.directory(getBuildDirectory()).childFile('start_up_info.json').existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -110,7 +111,7 @@ void main() {
     });
 
     testUsingContext('with traceStartup, env variable', () async {
-      fakePlatform!.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
+      fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
       final FakeDevice device = FakeDevice();
       final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
@@ -125,7 +126,7 @@ void main() {
       ).run();
 
       expect(result, 0);
-      expect(memoryFileSystem!.directory('test_output_dir').childFile('start_up_info.json').existsSync(), true);
+      expect(memoryFileSystem.directory('test_output_dir').childFile('start_up_info.json').existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

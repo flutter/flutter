@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -17,7 +15,8 @@ import '../src/context.dart';
 
 void main() {
   late BufferLogger logger;
-  FileSystem? fs;
+  late FileSystem fs;
+
   setUp(() {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
@@ -156,10 +155,10 @@ void main() {
 
       testUsingContext('shows GitHub issue URL', () async {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
-          fileSystem: fs!,
+          fileSystem: fs,
           logger: logger,
           flutterProjectFactory: FlutterProjectFactory(
-            fileSystem: fs!,
+            fileSystem: fs,
             logger: logger,
           ),
         );
@@ -180,14 +179,14 @@ void main() {
 
       testUsingContext('app metadata', () async {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
-          fileSystem: fs!,
+          fileSystem: fs,
           logger: logger,
           flutterProjectFactory: FlutterProjectFactory(
-            fileSystem: fs!,
+            fileSystem: fs,
             logger: logger,
           ),
         );
-        final Directory projectDirectory = fs!.currentDirectory;
+        final Directory projectDirectory = fs.currentDirectory;
 
         projectDirectory
             .childFile('pubspec.yaml')

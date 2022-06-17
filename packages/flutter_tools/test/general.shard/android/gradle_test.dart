@@ -455,7 +455,7 @@ flutter:
   });
 
   group('isAppUsingAndroidX', () {
-    FileSystem? fs;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();

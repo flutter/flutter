@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -90,7 +88,7 @@ Platform macPlatform() {
 }
 
 void main() {
-  FileSystem? fileSystem;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -116,7 +114,7 @@ void main() {
     // so we force the platform to fake Linux here.
     Platform: () => linuxPlatform,
     FileSystemUtils: () => FileSystemUtils(
-      fileSystem: fileSystem!,
+      fileSystem: fileSystem,
       platform: linuxPlatform,
     ),
   });
@@ -131,7 +129,7 @@ void main() {
       plistUtils = FakePlistUtils();
       platform = macPlatform();
       fsUtils = FileSystemUtils(
-        fileSystem: fileSystem!,
+        fileSystem: fileSystem,
         platform: platform,
       );
       processManager = FakeProcessManager.empty();
@@ -342,46 +340,46 @@ void main() {
 
     testUsingContext('Can discover installation from Spotlight query', () {
       // One in expected location.
-      final String studioInApplication = fileSystem!.path.join(
+      final String studioInApplication = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
       );
-      final String studioInApplicationPlistFolder = fileSystem!.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         studioInApplication,
         'Contents',
       );
-      fileSystem!.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-      final String plistFilePath = fileSystem!.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
 
       // Two in random location only Spotlight knows about.
-      final String randomLocation1 = fileSystem!.path.join(
+      final String randomLocation1 = fileSystem.path.join(
         '/',
         'random',
         'Android Studio Preview.app',
       );
-      final String randomLocation1PlistFolder = fileSystem!.path.join(
+      final String randomLocation1PlistFolder = fileSystem.path.join(
         randomLocation1,
         'Contents',
       );
-      fileSystem!.directory(randomLocation1PlistFolder).createSync(recursive: true);
-      final String randomLocation1PlistPath = fileSystem!.path.join(randomLocation1PlistFolder, 'Info.plist');
+      fileSystem.directory(randomLocation1PlistFolder).createSync(recursive: true);
+      final String randomLocation1PlistPath = fileSystem.path.join(randomLocation1PlistFolder, 'Info.plist');
       plistUtils.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
 
-      final String randomLocation2 = fileSystem!.path.join(
+      final String randomLocation2 = fileSystem.path.join(
         '/',
         'random',
         'Android Studio with Blaze.app',
       );
-      final String randomLocation2PlistFolder = fileSystem!.path.join(
+      final String randomLocation2PlistFolder = fileSystem.path.join(
         randomLocation2,
         'Contents',
       );
-      fileSystem!.directory(randomLocation2PlistFolder).createSync(recursive: true);
-      final String randomLocation2PlistPath = fileSystem!.path.join(randomLocation2PlistFolder, 'Info.plist');
+      fileSystem.directory(randomLocation2PlistFolder).createSync(recursive: true);
+      final String randomLocation2PlistPath = fileSystem.path.join(randomLocation2PlistFolder, 'Info.plist');
       plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
-      final String javaBin = fileSystem!.path.join('jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
+      final String javaBin = fileSystem.path.join('jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
 
       // Spotlight finds the one known and two random installations.
       processManager.addCommands(<FakeCommand>[
@@ -394,19 +392,19 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
-            fileSystem!.path.join(randomLocation1, 'Contents', javaBin),
+            fileSystem.path.join(randomLocation1, 'Contents', javaBin),
             '-version',
           ],
         ),
         FakeCommand(
           command: <String>[
-            fileSystem!.path.join(randomLocation2, 'Contents', javaBin),
+            fileSystem.path.join(randomLocation2, 'Contents', javaBin),
             '-version',
           ],
         ),
         FakeCommand(
           command: <String>[
-            fileSystem!.path.join(studioInApplicationPlistFolder, javaBin),
+            fileSystem.path.join(studioInApplicationPlistFolder, javaBin),
             '-version',
           ],
         ),
@@ -490,18 +488,17 @@ void main() {
     });
   });
 
-  FileSystem? windowsFileSystem;
+  late FileSystem windowsFileSystem;
 
   setUp(() {
     windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
   });
 
   testUsingContext('Can discover Android Studio 4.1 location on Windows', () {
-    windowsFileSystem!.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem!
-      .directory(r'C:\Program Files\AndroidStudio')
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
@@ -515,11 +512,10 @@ void main() {
   });
 
   testUsingContext('Can discover Android Studio 4.2 location on Windows', () {
-    windowsFileSystem!.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem!
-      .directory(r'C:\Program Files\AndroidStudio')
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
@@ -533,11 +529,10 @@ void main() {
   });
 
   testUsingContext('Can discover Android Studio 2020.3 location on Windows', () {
-    windowsFileSystem!.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem!
-      .directory(r'C:\Program Files\AndroidStudio')
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
@@ -551,11 +546,10 @@ void main() {
   });
 
   testUsingContext('Does not discover Android Studio 4.1 location on Windows if LOCALAPPDATA is null', () {
-    windowsFileSystem!.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem!
-      .directory(r'C:\Program Files\AndroidStudio')
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
     expect(AndroidStudio.allInstalled(), isEmpty);
@@ -569,11 +563,10 @@ void main() {
   });
 
   testUsingContext('Does not discover Android Studio 4.2 location on Windows if LOCALAPPDATA is null', () {
-    windowsFileSystem!.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem!
-      .directory(r'C:\Program Files\AndroidStudio')
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
     expect(AndroidStudio.allInstalled(), isEmpty);
@@ -587,11 +580,10 @@ void main() {
   });
 
   testUsingContext('Does not discover Android Studio 2020.3 location on Windows if LOCALAPPDATA is null', () {
-    windowsFileSystem!.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem!
-      .directory(r'C:\Program Files\AndroidStudio')
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
     expect(AndroidStudio.allInstalled(), isEmpty);
@@ -605,11 +597,11 @@ void main() {
   });
 
   group('Installation detection on Linux', () {
-    FileSystemUtils? fsUtils;
+    late FileSystemUtils fsUtils;
 
     setUp(() {
       fsUtils = FileSystemUtils(
-        fileSystem: fileSystem!,
+        fileSystem: fileSystem,
         platform: linuxPlatform,
       );
     });

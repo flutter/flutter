@@ -22,13 +22,13 @@ void main() {
     test('Can provide default interfaces', () async {
       final Testbed testbed = Testbed();
 
-      FileSystem? localFileSystem;
+      late FileSystem localFileSystem;
       await testbed.run(() {
         localFileSystem = globals.fs;
       });
 
       expect(localFileSystem, isA<ErrorHandlingFileSystem>());
-      expect((localFileSystem! as ErrorHandlingFileSystem).fileSystem,
+      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem,
              isA<MemoryFileSystem>());
     });
 

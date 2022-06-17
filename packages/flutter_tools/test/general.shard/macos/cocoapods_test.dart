@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -22,14 +20,14 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  FileSystem? fileSystem;
-  FakeProcessManager? fakeProcessManager;
+  late FileSystem fileSystem;
+  late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;
   late TestUsage usage;
 
   void pretendPodVersionFails() {
-    fakeProcessManager!.addCommand(
+    fakeProcessManager.addCommand(
       const FakeCommand(
         command: <String>['pod', '--version'],
         exitCode: 1,
@@ -38,7 +36,7 @@ void main() {
   }
 
   void pretendPodVersionIs(String versionText) {
-    fakeProcessManager!.addCommand(
+    fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>['pod', '--version'],
         stdout: versionText,
@@ -47,7 +45,7 @@ void main() {
   }
 
   void podsIsInHomeDir() {
-    fileSystem!.directory(fileSystem!.path.join(
+    fileSystem.directory(fileSystem.path.join(
       '.cocoapods',
       'repos',
       'master',
@@ -56,7 +54,7 @@ void main() {
 
   FlutterProject setupProjectUnderTest() {
     // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
-    final FlutterProject projectUnderTest = FlutterProject.fromDirectory(fileSystem!.directory('project'));
+    final FlutterProject projectUnderTest = FlutterProject.fromDirectory(fileSystem.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
     return projectUnderTest;
@@ -69,24 +67,24 @@ void main() {
     logger = BufferLogger.test();
     usage = TestUsage();
     cocoaPodsUnderTest = CocoaPods(
-      fileSystem: fileSystem!,
-      processManager: fakeProcessManager!,
+      fileSystem: fileSystem,
+      processManager: fakeProcessManager,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       usage: usage,
     );
-    fileSystem!.file(fileSystem!.path.join(
+    fileSystem.file(fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Objective-C iOS podfile template');
-    fileSystem!.file(fileSystem!.path.join(
+    fileSystem.file(fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-swift',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Swift iOS podfile template');
-    fileSystem!.file(fileSystem!.path.join(
+    fileSystem.file(fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-macos',
     ))
         ..createSync(recursive: true)
@@ -94,7 +92,7 @@ void main() {
   });
 
   void pretendPodIsNotInstalled() {
-    fakeProcessManager!.addCommand(
+    fakeProcessManager.addCommand(
       const FakeCommand(
         command: <String>['which', 'pod'],
         exitCode: 1,
@@ -103,7 +101,7 @@ void main() {
   }
 
   void pretendPodIsBroken() {
-    fakeProcessManager!.addCommands(<FakeCommand>[
+    fakeProcessManager.addCommands(<FakeCommand>[
       // it is present
       const FakeCommand(
         command: <String>['which', 'pod'],
@@ -117,7 +115,7 @@ void main() {
   }
 
   void pretendPodIsInstalled() {
-    fakeProcessManager!.addCommands(<FakeCommand>[
+    fakeProcessManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['which', 'pod'],
       ),
@@ -187,15 +185,15 @@ void main() {
         'SWIFT_VERSION': '5.0',
       });
       final CocoaPods cocoaPodsUnderTest = CocoaPods(
-        fileSystem: fileSystem!,
-        processManager: fakeProcessManager!,
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         usage: usage,
       );
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.directory('project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Swift iOS podfile template');
@@ -213,7 +211,7 @@ void main() {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.directory('project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Existing Podfile');
@@ -222,15 +220,15 @@ void main() {
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       final CocoaPods cocoaPodsUnderTest = CocoaPods(
-        fileSystem: fileSystem!,
-        processManager: fakeProcessManager!,
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
         usage: usage,
       );
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.directory('project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.existsSync(), false);
@@ -246,7 +244,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.directory('project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -272,7 +270,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(legacyReleaseInclude);
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.directory('project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -298,7 +296,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(flavorReleaseInclude);
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.directory('project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -315,7 +313,7 @@ void main() {
   group('Update xcconfig', () {
     testUsingContext('includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
-      fileSystem!.file(fileSystem!.path.join('project', 'foo', '.packages'))
+      fileSystem.file(fileSystem.path.join('project', 'foo', '.packages'))
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Custom Podfile');
@@ -328,7 +326,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.directory('project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await injectPlugins(project, iosPlatform: true);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -376,7 +374,7 @@ void main() {
 
     testUsingContext('exits if Podfile creates the Flutter engine symlink', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
-      fileSystem!.file(fileSystem!.path.join('project', 'ios', 'Podfile'))
+      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
@@ -393,7 +391,7 @@ void main() {
 
     testUsingContext('exits if iOS Podfile parses .flutter-plugins', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
-      fileSystem!.file(fileSystem!.path.join('project', 'ios', 'Podfile'))
+      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync("plugin_pods = parse_KV_file('../.flutter-plugins')");
 
@@ -408,7 +406,7 @@ void main() {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       pretendPodIsInstalled();
       pretendPodVersionIs('100.0.0');
-      fakeProcessManager!.addCommands(const <FakeCommand>[
+      fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
         ),
@@ -447,11 +445,11 @@ void main() {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       pretendPodIsInstalled();
       pretendPodVersionIs('100.0.0');
-      fileSystem!.file(fileSystem!.path.join('project', 'ios', 'Podfile'))
+      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
-      fakeProcessManager!.addCommand(
+      fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -498,11 +496,11 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         final FlutterProject projectUnderTest = setupProjectUnderTest();
         pretendPodIsInstalled();
         pretendPodVersionIs('100.0.0');
-        fileSystem!.file(fileSystem!.path.join('project', 'ios', 'Podfile'))
+        fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
           ..createSync()
           ..writeAsStringSync('Existing Podfile');
 
-        fakeProcessManager!.addCommands(<FakeCommand>[
+        fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: const <String>['pod', 'install', '--verbose'],
             workingDirectory: 'project/ios',
@@ -545,11 +543,11 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       pretendPodIsInstalled();
       pretendPodVersionIs('100.0.0');
-      fileSystem!.file(fileSystem!.path.join('project', 'ios', 'Podfile'))
+      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
-      fakeProcessManager!.addCommands(<FakeCommand>[
+      fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -596,7 +594,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing lock file.');
 
-      fakeProcessManager!.addCommands(const <FakeCommand>[
+      fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -622,7 +620,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podfileLock
         ..createSync()
         ..writeAsStringSync('Existing lock file.');
-      fakeProcessManager!.addCommands(const <FakeCommand>[
+      fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -651,7 +649,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.macos.podfileLock
         ..createSync()
         ..writeAsStringSync('Existing lock file.');
-      fakeProcessManager!.addCommands(const <FakeCommand>[
+      fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/macos',
@@ -683,7 +681,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podManifestLock
         ..createSync(recursive: true)
         ..writeAsStringSync('Different lock file.');
-      fakeProcessManager!.addCommands(const <FakeCommand>[
+      fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -715,7 +713,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podManifestLock
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing lock file.');
-      fakeProcessManager!.addCommands(const <FakeCommand>[
+      fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -749,7 +747,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       await Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.ios.podfile
         .writeAsStringSync('Updated Podfile');
-      fakeProcessManager!.addCommands(const <FakeCommand>[
+      fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -800,7 +798,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podManifestLock
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing lock file.');
-      fakeProcessManager!.addCommand(
+      fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',

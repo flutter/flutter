@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -33,22 +31,22 @@ final BuildInfo debugBuild = BuildInfo(
 );
 
 void main() {
-  FakeResidentCompiler? residentCompiler;
-  FileSystem? fileSystem;
+  late FakeResidentCompiler residentCompiler;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem!.file('pubspec.yaml').createSync();
-    fileSystem!.file('test/foo.dart').createSync(recursive: true);
-    fileSystem!.file('.packages').createSync();
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('test/foo.dart').createSync(recursive: true);
+    fileSystem.file('.packages').createSync();
     residentCompiler = FakeResidentCompiler(fileSystem);
   });
 
   testUsingContext('TestCompiler reports a dill file when compile is successful', () async {
-    residentCompiler!.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
 
@@ -61,10 +59,10 @@ void main() {
   });
 
   testUsingContext('TestCompiler does not try to cache the dill file when precompiled dill is passed', () async {
-    residentCompiler!.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
       precompiledDillPath: 'precompiled.dill',
     );
@@ -78,15 +76,15 @@ void main() {
   });
 
   testUsingContext('TestCompiler reports null when a compile fails', () async {
-    residentCompiler!.compilerOutput = const CompilerOutput('abc.dill', 1, <Uri>[]);
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 1, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
 
     expect(await testCompiler.compile(Uri.parse('test/foo.dart')), null);
-    expect(residentCompiler!.didShutdown, true);
+    expect(residentCompiler.didShutdown, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Platform: () => linuxPlatform,
@@ -97,7 +95,7 @@ void main() {
   testUsingContext('TestCompiler disposing test compiler shuts down backing compiler', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
     testCompiler.compiler = residentCompiler;
@@ -107,7 +105,7 @@ void main() {
     await testCompiler.dispose();
 
     expect(testCompiler.compilerController.isClosed, true);
-    expect(residentCompiler!.didShutdown, true);
+    expect(residentCompiler.didShutdown, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Platform: () => linuxPlatform,
@@ -116,15 +114,15 @@ void main() {
   });
 
   testUsingContext('TestCompiler updates dart_plugin_registrant.dart', () async {
-    final Directory fakeDartPlugin = fileSystem!.directory('a_plugin');
-      fileSystem!.file('pubspec.yaml').writeAsStringSync('''
+    final Directory fakeDartPlugin = fileSystem.directory('a_plugin');
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: foo
 dependencies:
   flutter:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-      fileSystem!.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
+      fileSystem.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
       fakeDartPlugin.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -140,17 +138,16 @@ environment:
   flutter: ">=2.5.0"
 ''');
 
-    residentCompiler!.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
 
     await testCompiler.compile(Uri.parse('test/foo.dart'));
 
-    final File generatedMain = fileSystem!
-      .directory('.dart_tool')
+    final File generatedMain = fileSystem.directory('.dart_tool')
       .childDirectory('flutter_build')
       .childFile('dart_plugin_registrant.dart');
 

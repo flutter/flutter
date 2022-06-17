@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
@@ -22,13 +20,13 @@ import '../src/context.dart';
 
 void main() {
   group('Dart plugin registrant', () {
-    FileSystem? fs;
+    late FileSystem fs;
     late FakeFlutterProject flutterProject;
     late FakeFlutterManifest flutterManifest;
 
     setUp(() async {
       fs = MemoryFileSystem.test();
-      final Directory directory = fs!.currentDirectory.childDirectory('app');
+      final Directory directory = fs.currentDirectory.childDirectory('app');
       flutterManifest = FakeFlutterManifest();
       flutterProject = FakeFlutterProject()
         ..manifest = flutterManifest
@@ -59,7 +57,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -75,7 +73,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -91,7 +89,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -110,7 +108,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -151,7 +149,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -196,7 +194,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -227,7 +225,7 @@ void main() {
             }),
             VersionConstraint.parse('>=2.10.0'),
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -257,7 +255,7 @@ void main() {
             }),
             VersionConstraint.parse('>=2.11.0'),
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -300,7 +298,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -316,7 +314,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -346,7 +344,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -362,7 +360,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -395,7 +393,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -411,7 +409,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -427,7 +425,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -460,7 +458,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -476,7 +474,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -492,7 +490,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
@@ -526,7 +524,7 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs!,
+              fileSystem: fs,
               appDependencies: directDependencies,
             ),
             Plugin.fromYaml(
@@ -542,7 +540,7 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs!,
+              fileSystem: fs,
               appDependencies: directDependencies,
             ),
           ]);
@@ -579,7 +577,7 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs!,
+              fileSystem: fs,
               appDependencies: directDependencies,
             ),
             Plugin.fromYaml(
@@ -595,7 +593,7 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs!,
+              fileSystem: fs,
               appDependencies: directDependencies,
             ),
           ]);
@@ -620,7 +618,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs!,
+          fs,
           <String, String>{
             'url_launcher_android': '''
   flutter:
@@ -794,7 +792,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs!,
+          fs,
           <String, String>{
             'url_launcher_macos': '''
   flutter:
@@ -838,7 +836,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs!,
+          fs,
           <String, String>{
             'url_launcher_macos': '''
   flutter:
@@ -892,7 +890,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs!,
+            fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ],
@@ -935,7 +933,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs!,
+          fs,
           <String, String>{
             'url_launcher_macos': '''
   flutter:
@@ -969,7 +967,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs!,
+          fs,
           <String, String>{});
 
         await generateMainDartWithPluginRegistrant(

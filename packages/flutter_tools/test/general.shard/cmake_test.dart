@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,16 +15,16 @@ const String _kTestFlutterRoot = '/flutter';
 const String _kTestWindowsFlutterRoot = r'C:\flutter';
 
 void main() {
-  FileSystem? fileSystem;
-
-  ProcessManager? processManager;
+  late FileSystem fileSystem;
+  late ProcessManager processManager;
 
   setUp(() {
+    processManager = FakeProcessManager.any();
     fileSystem = MemoryFileSystem.test();
   });
 
   testUsingContext('parses executable name from cmake file', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
     cmakeProject.cmakeFile
@@ -42,7 +40,7 @@ void main() {
   });
 
   testUsingContext('defaults executable name to null if cmake config does not exist', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
     final String? name = getCmakeExecutableName(cmakeProject);
@@ -54,7 +52,7 @@ void main() {
   });
 
   testUsingContext('generates config', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     final Map<String, String> environment = <String, String>{};
 
@@ -89,7 +87,7 @@ void main() {
   testUsingContext('config escapes backslashes', () async {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
     final Map<String, String> environment = <String, String>{

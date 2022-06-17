@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -38,7 +36,7 @@ void main() {
     });
 
     group('Xcode', () {
-      FakeXcodeProjectInterpreter? xcodeProjectInterpreter;
+      late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
 
       setUp(() {
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -134,70 +132,70 @@ void main() {
         });
 
         testWithoutContext('version checks fail when version is less than minimum', () {
-          xcodeProjectInterpreter!.isInstalled = true;
-          xcodeProjectInterpreter!.version = Version(9, null, null);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(9, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('version checks fail when xcodebuild tools are not installed', () {
-          xcodeProjectInterpreter!.isInstalled = false;
+          xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('version checks pass when version meets minimum', () {
-          xcodeProjectInterpreter!.isInstalled = true;
-          xcodeProjectInterpreter!.version = Version(13, null, null);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(13, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when major version exceeds minimum', () {
-          xcodeProjectInterpreter!.isInstalled = true;
-          xcodeProjectInterpreter!.version = Version(14, 0, 0);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(14, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when minor version exceeds minimum', () {
-          xcodeProjectInterpreter!.isInstalled = true;
-          xcodeProjectInterpreter!.version = Version(13, 3, 0);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(13, 3, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when patch version exceeds minimum', () {
-          xcodeProjectInterpreter!.isInstalled = true;
-          xcodeProjectInterpreter!.version = Version(13, 0, 2);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(13, 0, 2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when not installed', () {
-          xcodeProjectInterpreter!.isInstalled = false;
+          xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
-          xcodeProjectInterpreter!.isInstalled = true;
-          xcodeProjectInterpreter!.version = Version(10, 2, 0);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(10, 2, 0);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
-          xcodeProjectInterpreter!.isInstalled = true;
-          xcodeProjectInterpreter!.version = Version(13, null, null);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(13, null, null);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -311,7 +309,7 @@ void main() {
 
     group('xcdevice', () {
       late XCDevice xcdevice;
-      Xcode xcode;
+      late Xcode xcode;
 
       setUp(() {
         xcode = Xcode.test(processManager: FakeProcessManager.any());

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
@@ -16,19 +14,18 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   group('FuchsiaPM', () {
-    File pm;
-    FakeProcessManager? fakeProcessManager;
-    FakeFuchsiaArtifacts? fakeFuchsiaArtifacts;
+    late File pm;
+    late FakeProcessManager fakeProcessManager;
+    late FakeFuchsiaArtifacts fakeFuchsiaArtifacts;
 
     setUp(() {
       pm = MemoryFileSystem.test().file('pm');
-
       fakeFuchsiaArtifacts = FakeFuchsiaArtifacts(pm);
       fakeProcessManager = FakeProcessManager.empty();
     });
 
     testUsingContext('serve - IPv4 address', () async {
-      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'pm',
         'serve',
         '-repo',
@@ -47,7 +44,7 @@ void main() {
     });
 
     testUsingContext('serve - IPv6 address', () async {
-      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'pm',
         'serve',
         '-repo',
