@@ -10,7 +10,7 @@
                         "out/android_profile/zip_archives/android-arm-profile/artifacts.zip",
                         "out/android_profile/zip_archives/android-arm-profile/linux-x64.zip",
                         "out/android_profile/zip_archives/android-arm-profile/symbols.zip",
-                        "out/android_profile/zip_archives/flutter_download_io"
+                        "out/android_profile/zip_archives/download.flutter.io"
                     ]
                 }
             ],
@@ -50,7 +50,7 @@
                         "out/android_release/zip_archives/android-arm-release/artifacts.zip",
                         "out/android_release/zip_archives/android-arm-release/linux-x64.zip",
                         "out/android_release/zip_archives/android-arm-release/symbols.zip",
-                        "out/android_release/zip_archives/flutter_download_io"
+                        "out/android_release/zip_archives/download.flutter.io"
                     ]
                 }
             ],
@@ -90,7 +90,7 @@
                         "out/android_release_arm64/zip_archives/android-arm64-release/artifacts.zip",
                         "out/android_release_arm64/zip_archives/android-arm64-release/linux-x64.zip",
                         "out/android_release_arm64/zip_archives/android-arm64-release/symbols.zip",
-                        "out/android_release_arm64/zip_archives/flutter_download_io"
+                        "out/android_release_arm64/zip_archives/download.flutter.io"
                     ]
                 }
             ],
@@ -164,7 +164,7 @@
                         "out/android_profile_x64/zip_archives/android-x64-profile/artifacts.zip",
                         "out/android_profile_x64/zip_archives/android-x64-profile/linux-x64.zip",
                         "out/android_profile_x64/zip_archives/android-x64-profile/symbols.zip",
-                        "out/android_profile_x64/zip_archives/flutter_download_io"
+                        "out/android_profile_x64/zip_archives/download.flutter.io"
                     ]
                 }
             ],
@@ -203,7 +203,7 @@
                         "out/android_release_x64/zip_archives/android-x64-release/artifacts.zip",
                         "out/android_release_x64/zip_archives/android-x64-release/linux-x64.zip",
                         "out/android_release_x64/zip_archives/android-x64-release/symbols.zip",
-                        "out/android_release_x64/zip_archives/flutter_download_io"
+                        "out/android_release_x64/zip_archives/download.flutter.io"
                     ]
                 }
             ],
