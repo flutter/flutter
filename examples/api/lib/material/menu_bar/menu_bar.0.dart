@@ -109,7 +109,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
             MenuBarMenu(
               autofocus: true,
               label: 'Menu App',
-              menus: <MenuItem>[
+              children: <MenuItem>[
                 MenuBarButton(
                   label: MenuSelection.about.label,
                   onSelected: () => _activate(MenuSelection.about),
@@ -128,7 +128,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
                 ),
                 MenuBarMenu(
                   label: 'Background Color',
-                  menus: <MenuItem>[
+                  children: <MenuItem>[
                     MenuItemGroup(members: <MenuItem>[
                       MenuBarButton(
                         onSelected: () => _activate(MenuSelection.colorRed),

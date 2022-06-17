@@ -97,7 +97,7 @@ class _HomeState extends State<Home> {
                       onClose: () {
                         _closeItem(TestMenu.mainMenu1);
                       },
-                      menus: <MenuItem>[
+                      children: <MenuItem>[
                         MenuBarButton(
                           label: TestMenu.subMenu1.label,
                           shortcut: const SingleActivator(
@@ -134,7 +134,7 @@ class _HomeState extends State<Home> {
                           onClose: () {
                             _closeItem(TestMenu.mainMenu2);
                           },
-                          menus: <MenuItem>[
+                          children: <MenuItem>[
                             MenuBarButton(
                               label: TestMenu.subMenu3.label,
                               shortcut: const SingleActivator(
@@ -157,7 +157,7 @@ class _HomeState extends State<Home> {
                       onClose: () {
                         _closeItem(TestMenu.mainMenu3);
                       },
-                      menus: <MenuItem>[
+                      children: <MenuItem>[
                         MenuItemGroup(members: <MenuItem>[
                           MenuBarButton(
                             label: TestMenu.subMenu4.label,
@@ -173,7 +173,7 @@ class _HomeState extends State<Home> {
                           onClose: () {
                             _closeItem(TestMenu.subMenu5);
                           },
-                          menus: <MenuItem>[
+                          children: <MenuItem>[
                             MenuBarButton(
                               label: TestMenu.subSubMenu1.label,
                               shortcut: _addItem
@@ -315,7 +315,7 @@ class _Controls extends StatelessWidget {
         children: <Widget>[
           MenuBarMenu(
             label: 'Menu Bar Button',
-            menus: <MenuItem>[
+            children: <MenuItem>[
               MenuBarButton(
                 label: TestMenu.subMenu2.label,
                 leadingIcon: const Icon(Icons.send),

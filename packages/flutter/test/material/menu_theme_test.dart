@@ -212,7 +212,7 @@ List<MenuItem> createTestMenus({
       label: TestMenu.mainMenu0.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
-      menus: <MenuItem>[
+      children: <MenuItem>[
         MenuBarButton(
           label: TestMenu.subMenu00.label,
           onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu00) : null,
@@ -228,7 +228,7 @@ List<MenuItem> createTestMenus({
       backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color?>(menuBackground) : null,
       elevation: menuElevation != null ? MaterialStatePropertyAll<double?>(menuElevation) : null,
       shape: menuShape != null ? MaterialStatePropertyAll<ShapeBorder?>(menuShape) : null,
-      menus: <MenuItem>[
+      children: <MenuItem>[
         MenuItemGroup(
           members: <MenuItem>[
             MenuBarButton(
@@ -247,7 +247,7 @@ List<MenuItem> createTestMenus({
           label: TestMenu.subMenu11.label,
           onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
           onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
-          menus: <MenuItem>[
+          children: <MenuItem>[
             MenuItemGroup(
               members: <MenuItem>[
                 MenuBarButton(
@@ -285,7 +285,7 @@ List<MenuItem> createTestMenus({
       label: TestMenu.mainMenu2.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
-      menus: <MenuItem>[
+      children: <MenuItem>[
         MenuBarButton(
           // Always disabled.
           label: TestMenu.subMenu20.label,
