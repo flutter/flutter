@@ -14,7 +14,7 @@ import 'migrate_compute.dart';
 /// The compute function does not clean up the temp directories, as the directories may be reused,
 /// so this must be done manually afterwards.
 class MigrateResult {
-  /// Explicitly initialize the 
+  /// Explicitly initialize the MigrateResult
   MigrateResult({
     required this.mergeResults,
     required this.addedFiles,
@@ -58,12 +58,8 @@ class MigrateResult {
   /// The root directory of the base app.
   Directory? generatedBaseTemplateDirectory;
 
-  MigrateBaseFlutterProject? baseProject;
-
   /// The root directory of the target app.
   Directory? generatedTargetTemplateDirectory;
-
-  MigrateTargetFlutterProject? targetProject;
 
   /// The root directories of the Flutter SDK for each revision.
   Map<String, Directory> sdkDirs;

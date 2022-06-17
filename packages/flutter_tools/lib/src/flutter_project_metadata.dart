@@ -414,6 +414,7 @@ class MigratePlatformConfig {
 
   bool equals(MigratePlatformConfig other) {
     return platform == other.platform &&
-          createRevision == other.createRevision && baseRevision == other.baseRevision;
+           createRevision == other.createRevision &&
+           baseRevision == other.baseRevision;
   }
 }
