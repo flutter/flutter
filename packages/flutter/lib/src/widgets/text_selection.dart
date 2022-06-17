@@ -1493,21 +1493,11 @@ class TextSelectionGestureDetectorBuilder {
           );
           return;
         }
-        switch (details.kind) {
-          case PointerDeviceKind.mouse:
-          case PointerDeviceKind.trackpad:
-          case PointerDeviceKind.stylus:
-          case PointerDeviceKind.invertedStylus:
-          // Precise devices should place the cursor at a precise position.
-            renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-            break;
-          // On macOS a touch tap places the cursor at the edge of the word.
-          case PointerDeviceKind.touch:
-          case PointerDeviceKind.unknown:
-          case null:
-            renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-            break;
-        }
+        // On macOS, a tap/click places the selection in a precise position.
+        // This differs from iOS/iPadOS, where if the gesture is done by a touch
+        // then the selection moves to the closest word edge, instead of a
+        // precise position.
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
         break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:

@@ -1755,7 +1755,7 @@ void main() {
 
       // But don't trigger the toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets(
     'slow double tap does not trigger double tap',
@@ -1763,6 +1763,7 @@ void main() {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -1780,11 +1781,9 @@ void main() {
       await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump();
 
-      // Plain collapsed selection.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
-      );
+      // Place collapsed selection.
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 3);
+      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 3);
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -1893,6 +1892,7 @@ void main() {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -1911,10 +1911,9 @@ void main() {
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 8),
-      );
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
+
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
 
@@ -1979,6 +1978,7 @@ void main() {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -1994,23 +1994,22 @@ void main() {
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 8),
-      );
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
+
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
       await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
       await tester.pump();
 
-      // Plain collapsed selection at the edge of first word. In iOS 12, the
+      // Place collapsed selection at the edge of first word. In iOS 12, the
       // first tap after a double tap ends up putting the cursor at where
       // you tapped instead of the edge like every other single tap. This is
       // likely a bug in iOS 12 and not present in other versions.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
+        TextSelection.collapsed(offset: isTargetPlatformMobile ? 7 : 6, affinity: TextAffinity.upstream),
       );
 
       // No toolbar.
@@ -2429,6 +2428,7 @@ void main() {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -2451,7 +2451,7 @@ void main() {
       // the toolbar.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
+        TextSelection.collapsed(offset: isTargetPlatformMobile ? 7 : 3, affinity: TextAffinity.upstream),
       );
 
       // The toolbar from the long press is now dismissed by the second tap.
@@ -2615,6 +2615,7 @@ void main() {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -2630,10 +2631,8 @@ void main() {
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor to the beginning of the second word.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 8),
-      );
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -2656,6 +2655,7 @@ void main() {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -2674,10 +2674,8 @@ void main() {
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 8),
-      );
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
 
@@ -2752,7 +2750,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('force press selects word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -2798,6 +2796,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
+    final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -2824,11 +2823,10 @@ void main() {
       ),
     );
     await gesture.up();
-    // Fall back to a single tap which selects the edge of the word.
-    expect(
-      controller.selection,
-      const TextSelection.collapsed(offset: 8),
-    );
+    // Fall back to a single tap which selects the edge of the word on iOS, and
+    // a precise position on macOS.
+    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+    expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
 
     await tester.pump();
     // Falling back to a single tap doesn't trigger a toolbar.
@@ -2839,6 +2837,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'abc def ghi',
     );
+    final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2860,7 +2859,7 @@ void main() {
     await tester.tapAt(ePos, pointer: 7);
     await tester.pump(const Duration(milliseconds: 50));
     expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 4 : 5);
     await tester.tapAt(ePos, pointer: 7);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
