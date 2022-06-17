@@ -1214,26 +1214,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
 
       group('setPubRootDirectories', ()  {
+        late final String pubRootTest; 
+        setUpAll(() {
+          pubRootTest = generateTestPubRootDirectory2(service);
+        });
+
         setUp((){
           service.disposeAllGroups();
           service.setPubRootDirectories(<String>[]);
         });
-
-        String testPubRootDirectory(WidgetTester tester, Element element){
-          final String originalSelection = service.getSelectedWidget(null, 'my-group');
-          service.setSelection(element, 'my-group');
-
-          final Map<String, Object?> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
-          final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
-
-          final String fileA = creationLocation['file']! as String;
-          final List<String> segments = Uri.parse(fileA).pathSegments;
-          // Strip a couple subdirectories away to generate a plausible pub root
-          // directory.
-          final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-          service.setSelection(originalSelection, 'my-group');
-          return pubRootTest;
-        }
 
         testWidgets(
           'does not have createdByLocalProject when there are no pubRootDirectories',
@@ -1257,7 +1246,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (WidgetTester tester) async {
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
-            final String pubRootTest = testPubRootDirectory(tester, elementA);
 
             service.setPubRootDirectories(<String>[pubRootTest]);
             
@@ -1271,7 +1259,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (WidgetTester tester) async {
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
-            final String pubRootTest = testPubRootDirectory(tester, elementA);
             service.setSelection(elementA, 'my-group');
 
             service.setPubRootDirectories(<String>['/invalid/$pubRootTest']);
@@ -1285,7 +1272,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (WidgetTester tester) async {
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
-            final String pubRootTest = testPubRootDirectory(tester, elementA);
             service.setSelection(elementA, 'my-group');
 
             service.setPubRootDirectories(<String>['file://$pubRootTest']);
@@ -1298,7 +1284,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (WidgetTester tester) async {
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
-            final String pubRootTest = testPubRootDirectory(tester, elementA);
             service.setSelection(elementA, 'my-group');
 
             service.setPubRootDirectories(<String>['$pubRootTest/different']);
@@ -1311,7 +1296,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (WidgetTester tester) async {
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
-            final String pubRootTest = testPubRootDirectory(tester, elementA);
             service.setSelection(elementA, 'my-group');
 
             service.setPubRootDirectories(<String>[
@@ -1327,7 +1311,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           (WidgetTester tester) async {
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
-            final String pubRootTest = testPubRootDirectory(tester, elementA);
             final Element richText = find.descendant(
               of: find.text('a'),
               matching: find.byType(RichText),
@@ -3466,7 +3449,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
   }
 
-  static String generateTestPubRootDirectory(TestWidgetInspectorService service) {
+  static String generateTestPubRootDirectory2(TestWidgetInspectorService service){
     final Map<String, Object?> jsonObject = const SizedBox().toDiagnosticsNode().toJsonMap(InspectorSerializationDelegate(service: service));
     final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
     expect(creationLocation, isNotNull);
@@ -3484,8 +3467,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   }
 
   static void setupDefaultPubRootDirectory(TestWidgetInspectorService service) {
-    service
-        .setPubRootDirectories(<String>[generateTestPubRootDirectory(service)]);
+    final String pubRootTest = generateTestPubRootDirectory2(service);
+
+    service.setPubRootDirectories(<String>[pubRootTest]);
   }
 }
 
