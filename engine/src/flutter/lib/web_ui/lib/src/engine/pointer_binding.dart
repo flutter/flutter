@@ -403,8 +403,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         ..fontSize = 'initial'
         ..display = 'none';
     domDocument.body!.append(probe);
-    String fontSize =
-        domWindow.getComputedStyle(probe).getPropertyValue('font-size');
+    String fontSize = domWindow.getComputedStyle(probe).fontSize;
     double? res;
     if (fontSize.contains('px')) {
        fontSize = fontSize.replaceAll('px', '');
