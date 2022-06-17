@@ -2759,6 +2759,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   /// return false and display an appropriate error message under one of the
   /// text fields.
   bool validate() {
+    print('validate');
     final DateTime? startDate = _parseDate(_startController.text);
     final DateTime? endDate = _parseDate(_endController.text);
     String? startError = _validateInRange(startDate);
