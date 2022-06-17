@@ -720,13 +720,26 @@ void main() {
       expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
-      if (debugDefaultTargetPlatformOverride == null) {
-        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
-      } else {
-        numberOfVariationsRun += 1;
-      }
-    }, variant: TargetPlatformVariant.all());
+    group('all', () {
+      testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
+        if (debugDefaultTargetPlatformOverride == null) {
+          expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+        } else {
+          numberOfVariationsRun += 1;
+        }
+      }, variant: TargetPlatformVariant.all());
+
+      const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{ TargetPlatform.android, TargetPlatform.linux };
+      testWidgets('TargetPlatformVariant.all with excluding runs an all variants except those provided in excluding', (WidgetTester tester) async {
+        if (debugDefaultTargetPlatformOverride == null) {
+          expect(numberOfVariationsRun, equals(TargetPlatform.values.length - excludePlatforms.length));
+        } else {
+          numberOfVariationsRun += 1;
+        }
+      }, variant: TargetPlatformVariant.all(excluding: excludePlatforms));
+    });
+
+
 
     testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
       final TargetPlatformVariant all = TargetPlatformVariant.all();
