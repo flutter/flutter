@@ -59,6 +59,10 @@ if (flutter_runtime_mode == "debug") {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
 }
 
+if (is_linux || is_mac || is_win) {
+  support_fractional_translation = true
+}
+
 if (support_fractional_translation) {
   feature_defines_list += [ "SUPPORT_FRACTIONAL_TRANSLATION=1" ]
 }
