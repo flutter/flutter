@@ -1220,7 +1220,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         });
 
         String testPubRootDirectory(WidgetTester tester, Element element){
-          final originalSelection = service.getSelectedWidget(null, 'my-group');
+          final String originalSelection = service.getSelectedWidget(null, 'my-group');
           service.setSelection(element, 'my-group');
 
           final Map<String, Object?> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
@@ -1235,96 +1235,129 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           return pubRootTest;
         }
 
-        testWidgets('does not have createdByLocalProject when there are no pubRootDirectories',(WidgetTester tester) async {
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
-          service.setSelection(elementA, 'my-group');
+        testWidgets(
+          'does not have createdByLocalProject when there are no pubRootDirectories',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            service.setSelection(elementA, 'my-group');
 
-          final Map<String, Object?> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
-          final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
+            final Map<String, Object?> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
+            final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
 
-          expect(creationLocation, isNotNull);
-          final String fileA = creationLocation['file']! as String;
-          expect(fileA, endsWith('widget_inspector_test.dart'));
-          expect(jsonObject, isNot(contains('createdByLocalProject')));
-        });
+            expect(creationLocation, isNotNull);
+            final String fileA = creationLocation['file']! as String;
+            expect(fileA, endsWith('widget_inspector_test.dart'));
+            expect(jsonObject, isNot(contains('createdByLocalProject')));
+          },
+        );
 
-        testWidgets('has createdByLocalProject when the element is part of the pubRootDirectory', (WidgetTester tester) async {
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
-          final String pubRootTest = testPubRootDirectory(tester, elementA);
+        testWidgets(
+          'has createdByLocalProject when the element is part of the pubRootDirectory',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            final String pubRootTest = testPubRootDirectory(tester, elementA);
 
-          service.setPubRootDirectories(<String>[pubRootTest]);
-          
-          service.setSelection(elementA, 'my-group');
-          expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
-        });
+            service.setPubRootDirectories(<String>[pubRootTest]);
+            
+            service.setSelection(elementA, 'my-group');
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
+          },
+        );
 
-        testWidgets('does not have createdByLocalProject when widget package directory is a suffix of a pubRootDirectory', (WidgetTester tester) async {
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
-          final String pubRootTest = testPubRootDirectory(tester, elementA);
-          service.setSelection(elementA, 'my-group');
+        testWidgets(
+          'does not have createdByLocalProject when widget package directory is a suffix of a pubRootDirectory',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            final String pubRootTest = testPubRootDirectory(tester, elementA);
+            service.setSelection(elementA, 'my-group');
 
-          service.setPubRootDirectories(<String>['/invalid/$pubRootTest']);
+            service.setPubRootDirectories(<String>['/invalid/$pubRootTest']);
 
-          expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
-        });
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
+          },
+        );
 
-        testWidgets('has createdByLocalProject when the pubRootDirectory is prefixed with file://', (WidgetTester tester) async {
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
-          final String pubRootTest = testPubRootDirectory(tester, elementA);
-          service.setSelection(elementA, 'my-group');
+        testWidgets(
+          'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            final String pubRootTest = testPubRootDirectory(tester, elementA);
+            service.setSelection(elementA, 'my-group');
 
-          service.setPubRootDirectories(<String>['file://$pubRootTest']);
-          expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
-        });
+            service.setPubRootDirectories(<String>['file://$pubRootTest']);
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
+          },
+        );
 
-        testWidgets('does not have createdByLocalProject when thePubRootDirecty has a different suffix', (WidgetTester tester) async {
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
-          final String pubRootTest = testPubRootDirectory(tester, elementA);
-          service.setSelection(elementA, 'my-group');
+        testWidgets(
+          'does not have createdByLocalProject when thePubRootDirecty has a different suffix',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            final String pubRootTest = testPubRootDirectory(tester, elementA);
+            service.setSelection(elementA, 'my-group');
 
-          service.setPubRootDirectories(<String>['$pubRootTest/different']);
-          expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
-        });
+            service.setPubRootDirectories(<String>['$pubRootTest/different']);
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
+          },
+        );
 
-        testWidgets('has createdByLocalProject even if another pubRootDirectory does not match', (WidgetTester tester) async {
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
-          final String pubRootTest = testPubRootDirectory(tester, elementA);
-          service.setSelection(elementA, 'my-group');
+        testWidgets(
+          'has createdByLocalProject even if another pubRootDirectory does not match',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            final String pubRootTest = testPubRootDirectory(tester, elementA);
+            service.setSelection(elementA, 'my-group');
 
-          service.setPubRootDirectories(<String>[
-            '/invalid/$pubRootTest',
-            pubRootTest,
-          ]);
-          expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
-        });
+            service.setPubRootDirectories(<String>[
+              '/invalid/$pubRootTest',
+              pubRootTest,
+            ]);
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
+          },
+        );
 
-        testWidgets('widget is part of core framework and is the child of a widget in the package pubRootDirectories', (WidgetTester tester) async {
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
-          final String pubRootTest = testPubRootDirectory(tester, elementA);
-          final Element richText = find.descendant(
-            of: find.text('a'),
-            matching: find.byType(RichText),
-          ).evaluate().first;
+        testWidgets(
+          'widget is part of core framework and is the child of a widget in the package pubRootDirectories',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            final String pubRootTest = testPubRootDirectory(tester, elementA);
+            final Element richText = find.descendant(
+              of: find.text('a'),
+              matching: find.byType(RichText),
+            ).evaluate().first;
+            service.setSelection(richText, 'my-group');
+            service.setPubRootDirectories(<String>[pubRootTest]);
+            
+            final Map<String, Object?> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
+            expect(jsonObject, isNot(contains('createdByLocalProject')));
+            final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
+            expect(creationLocation, isNotNull);
+            // This RichText widget is created by the build method of the Text widget
+            // thus the creation location is in text.dart not basic.dart
+            final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']! as String).pathSegments;
+            expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
-          service.setSelection(richText, 'my-group');
-          service.setPubRootDirectories(<String>[pubRootTest]);
-
-          final Map<String, Object?> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
-          expect(jsonObject, isNot(contains('createdByLocalProject')));
-          final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
-          expect(creationLocation, isNotNull);
-          // This RichText widget is created by the build method of the Text widget
-          // thus the creation location is in text.dart not basic.dart
-          final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']! as String).pathSegments;
-          expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
-        });
+            // Strip off /src/widgets/text.dart.
+            final String pubRootFramework = '/${pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/')}';
+            service.setPubRootDirectories(<String>[pubRootFramework]);
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
+            service.setSelection(elementA, 'my-group');
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
+            
+            service.setPubRootDirectories(<String>[pubRootFramework, pubRootTest]);
+            service.setSelection(elementA, 'my-group');
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
+            service.setSelection(richText, 'my-group');
+            expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
+          },
+        );
       });
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
 
