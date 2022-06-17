@@ -19,6 +19,13 @@ import 'theme.dart';
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarWidth = 222.0;
 
+/// Desktop Material styled text selection handle controls.
+///
+/// Specifically does not manage the toolbar, which is left to
+/// [EditableText.buildContextMenu].
+class _DesktopTextSelectionHandleControls extends _DesktopTextSelectionControls with TextSelectionHandleControls {
+}
+
 class _DesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
@@ -85,7 +92,17 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
   }
 }
 
-/// Text selection controls that loosely follows Material design conventions.
+/// Desktop text selection handle controls that loosely follow Material design
+/// conventions.
+@Deprecated(
+  'Use `desktopTextSelectionControls` instead. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
+final TextSelectionControls desktopTextSelectionHandleControls =
+    _DesktopTextSelectionHandleControls();
+
+/// Desktop text selection controls that loosely follow Material design
+/// conventions.
 final TextSelectionControls desktopTextSelectionControls =
     _DesktopTextSelectionControls();
 

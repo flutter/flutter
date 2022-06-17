@@ -20,6 +20,17 @@ const double _kHandleSize = 22.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
+/// Android Material styled text selection handle controls.
+///
+/// Specifically does not manage the toolbar, which is left to
+/// [EditableText.buildContextMenu].
+@Deprecated(
+  'Use `MaterialTextSelectionControls`. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
+class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls with TextSelectionHandleControls {
+}
+
 /// Android Material styled text selection controls.
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
@@ -292,6 +303,13 @@ class _TextSelectionHandlePainter extends CustomPainter {
     return color != oldPainter.color;
   }
 }
+
+/// Text selection handle controls that follow the Material Design specification.
+@Deprecated(
+  'Use `materialTextSelectionControls` instead. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
+final TextSelectionControls materialTextSelectionHandleControls = MaterialTextSelectionHandleControls();
 
 /// Text selection controls that follow the Material Design specification.
 final TextSelectionControls materialTextSelectionControls = MaterialTextSelectionControls();

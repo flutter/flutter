@@ -32,6 +32,13 @@ const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.wit
   darkColor: Color(0xff302928),
 );
 
+/// MacOS Cupertino styled text selection handle controls.
+///
+/// Specifically does not manage the toolbar, which is left to
+/// [EditableText.buildContextMenu].
+class _CupertinoDesktopTextSelectionHandleControls extends _CupertinoDesktopTextSelectionControls with TextSelectionHandleControls {
+}
+
 class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
@@ -88,7 +95,15 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   }
 }
 
-/// Text selection controls that follows Mac design conventions.
+/// Text selection handle controls that follow MacOS design conventions.
+@Deprecated(
+  'Use `cupertinoDesktopTextSelectionControls` instead. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
+final TextSelectionControls cupertinoDesktopTextSelectionHandleControls =
+    _CupertinoDesktopTextSelectionHandleControls();
+
+/// Text selection controls that follows MacOS design conventions.
 final TextSelectionControls cupertinoDesktopTextSelectionControls =
     _CupertinoDesktopTextSelectionControls();
 

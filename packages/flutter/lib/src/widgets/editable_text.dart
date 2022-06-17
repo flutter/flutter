@@ -1957,8 +1957,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       }
     }
-    if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null
-        && TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus!.value)) {
+    final bool canPaste = widget.selectionControls is TextSelectionHandleControls
+        ? TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus!.value)
+        : widget.selectionControls?.canPaste(this) ?? false;
+    if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
       clipboardStatus!.update();
     }
   }

@@ -386,11 +386,10 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
     _updateSelectionOverlay();
-    // TODO(justinmc): For this PR, public API needs to still work, but I should
-    // deprecate it.
-    /*
-    _selectionOverlay.showToolbar();
-    */
+    if (selectionControls is! TextSelectionHandleControls) {
+      _selectionOverlay.showToolbar();
+      return;
+    }
 
     ContextMenuController.hide();
 
@@ -508,7 +507,11 @@ class TextSelectionOverlay {
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
-  bool get toolbarIsVisible => ContextMenuController.isShown;
+  bool get toolbarIsVisible {
+    return selectionControls is TextSelectionHandleControls
+        ? ContextMenuController.isShown
+        : _selectionOverlay._toolbar != null;
+  }
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   //void hide() => _selectionOverlay.hide();
@@ -518,13 +521,10 @@ class TextSelectionOverlay {
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
-  //void hideToolbar() => _selectionOverlay.hideToolbar();
   void hideToolbar() {
-    /*
-    assert(_contextualMenuController != null);
-    _contextualMenuController!.dispose();
-    _contextualMenuController = null;
-    */
+    if (selectionControls is! TextSelectionHandleControls) {
+      return _selectionOverlay.hideToolbar();
+    }
     ContextMenuController.hide();
   }
 
@@ -686,6 +686,10 @@ class SelectionOverlay {
     this.onEndHandleDragStart,
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
     this.toolbarVisible,
     required List<TextSelectionPoint> selectionEndPoints,
     required this.selectionControls,
@@ -693,9 +697,17 @@ class SelectionOverlay {
     required this.clipboardStatus,
     required this.startHandleLayerLink,
     required this.endHandleLayerLink,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
     required this.toolbarLayerLink,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
     Offset? toolbarLocation,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
@@ -813,6 +825,10 @@ class SelectionOverlay {
   /// itself on and off the screen.
   ///
   /// If this is null the toolbar will always be visible.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.
@@ -830,6 +846,10 @@ class SelectionOverlay {
 
   /// The object supplied to the [CompositedTransformTarget] that wraps the text
   /// field.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   final LayerLink toolbarLayerLink;
 
   /// The objects supplied to the [CompositedTransformTarget] that wraps the
@@ -892,7 +912,6 @@ class SelectionOverlay {
   /// asynchronously (see [Clipboard.getData]).
   final ClipboardStatusNotifier? clipboardStatus;
 
-  // TODO(justinmc): Not using this, right?
   /// The location of where the toolbar should be drawn in relative to the
   /// location of [toolbarLayerLink].
   ///
@@ -901,6 +920,10 @@ class SelectionOverlay {
   ///
   /// This is useful for displaying toolbars at the mouse right-click locations
   /// in desktop devices.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   Offset? get toolbarLocation => _toolbarLocation;
   Offset? _toolbarLocation;
   set toolbarLocation(Offset? value) {
@@ -918,7 +941,6 @@ class SelectionOverlay {
   /// second is hidden when the selection is collapsed.
   List<OverlayEntry>? _handles;
 
-  // TODO(justinmc): Get rid of this.
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
@@ -950,6 +972,9 @@ class SelectionOverlay {
     }
   }
 
+  // TODO(justinmc): Do I really want to deprecate this?  Isn't SelectionOverlay
+  // the non-editable version of TextSelectionOverlay? How am I showing the menu
+  // for global selection?
   /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
@@ -1080,6 +1105,7 @@ class SelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context) {
+    // TODO(justinmc): Remove?
     if (selectionControls == null) {
       return Container();
     }
@@ -2388,4 +2414,51 @@ enum ClipboardStatus {
 
   /// The content on the clipboard is not pasteable, such as when it is empty.
   notPasteable,
+}
+
+/// [TextSelectionControls] that specifically do not manage the toolbar in order
+/// to leave that to [EditableText.buildContextMenu].
+@Deprecated(
+  'Use `TextSelectionControls`. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
+mixin TextSelectionHandleControls on TextSelectionControls {
+  @override
+  Size getHandleSize(double textLineHeight) => Size.zero;
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) => const SizedBox.shrink();
+
+  @override
+  bool canCut(TextSelectionDelegate delegate) => false;
+
+  @override
+  bool canCopy(TextSelectionDelegate delegate) => false;
+
+  @override
+  bool canPaste(TextSelectionDelegate delegate) => false;
+
+  @override
+  bool canSelectAll(TextSelectionDelegate delegate) => false;
+
+  @override
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {}
+
+  @override
+  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {}
+
+  @override
+  Future<void> handlePaste(TextSelectionDelegate delegate) async {}
+
+  @override
+  void handleSelectAll(TextSelectionDelegate delegate) {}
 }

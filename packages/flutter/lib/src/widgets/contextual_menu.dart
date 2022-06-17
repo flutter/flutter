@@ -281,6 +281,8 @@ typedef ToolbarButtonWidgetBuilder = Widget Function(
 /// Calls [builder] with the [ContextualMenuButtonData]s representing the
 /// button in this platform's default text selection menu.
 ///
+/// The platform is determined by [defaultTargetPlatform].
+///
 /// See also:
 ///
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets

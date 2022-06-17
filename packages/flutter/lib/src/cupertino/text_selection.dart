@@ -55,6 +55,17 @@ class _TextSelectionHandlePainter extends CustomPainter {
   bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
+/// iOS Cupertino styled text selection handle controls.
+///
+/// Specifically does not manage the toolbar, which is left to
+/// [EditableText.buildContextMenu].
+@Deprecated(
+  'Use `CupertinoTextSelectionControls`. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
+class CupertinoTextSelectionHandleControls extends CupertinoTextSelectionControls with TextSelectionHandleControls {
+}
+
 /// iOS Cupertino styled text selection controls.
 class CupertinoTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Cupertino handle.
@@ -68,7 +79,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override
@@ -171,8 +182,17 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   }
 }
 
-/// Text selection controls that follows iOS design conventions.
-final TextSelectionControls cupertinoTextSelectionControls = CupertinoTextSelectionControls();
+/// Text selection handle controls that follow iOS design conventions.
+@Deprecated(
+  'Use `cupertinoTextSelectionControls` instead. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
+final TextSelectionControls cupertinoTextSelectionHandleControls =
+    CupertinoTextSelectionHandleControls();
+
+/// Text selection controls that follow iOS design conventions.
+final TextSelectionControls cupertinoTextSelectionControls =
+    CupertinoTextSelectionControls();
 
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
