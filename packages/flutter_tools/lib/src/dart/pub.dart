@@ -35,7 +35,7 @@ const int _kPubExitCodeUnavailable = 69;
 
 typedef MessageFilter = String? Function(String message);
 
-/// targetPath is the directory in which the content of the extraPath will be moved in
+/// globalCachePath is the directory in which the content of the localCachePath will be moved in
 void joinCaches({
   required FileSystem fileSystem,
   required String globalCachePath,
@@ -47,17 +47,15 @@ void joinCaches({
   for (final FileSystemEntity entity in localDirectory.listSync()) {
     final String newPath = fileSystem.path.join(globalDirectory.path, entity.basename);
     if (entity is File) {
-      final File file = fileSystem.file(entity.path);
-      file.copySync(newPath);
+      entity.copySync(newPath);
     } else if (entity is Directory) {
-      final Directory currentDirectory = fileSystem.directory(entity.path);
-      if (!currentDirectory.existsSync()) {
+      if (!globalDirectory.childDirectory(entity.basename).existsSync()) {
         final Directory newDirectory = globalDirectory.childDirectory(entity.basename);
         newDirectory.createSync();
         joinCaches(
           fileSystem: fileSystem,
           globalCachePath: newDirectory.path,
-          localCachePath: currentDirectory.path,
+          localCachePath: entity.path,
         );
       }
     }

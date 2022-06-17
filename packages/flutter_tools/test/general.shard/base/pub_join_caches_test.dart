@@ -22,6 +22,8 @@ void main() {
     extra.childFile('second.file').writeAsBytesSync(<int>[0]);
     extra.childDirectory('dir').createSync();
     extra.childDirectory('dir').childFile('third.file').writeAsBytesSync(<int>[0]);
+    extra.childDirectory('dir_2').createSync();
+    extra.childDirectory('dir_2').childFile('fourth.file').writeAsBytesSync(<int>[0]);
     joinCaches(
       fileSystem: fileSystem,
       globalCachePath: target.path,
@@ -30,6 +32,7 @@ void main() {
 
     expect(target.childFile('second.file').existsSync(), true);
     expect(target.childDirectory('dir').childFile('third.file').existsSync(), false);
+    expect(target.childDirectory('dir_2').childFile('fourth.file').existsSync(), true);
     expect(extra.childDirectory('dir').childFile('third.file').existsSync(), true);
   });
 
