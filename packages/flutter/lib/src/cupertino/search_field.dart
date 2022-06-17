@@ -268,18 +268,20 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// Whether to allow the platform to automatically format quotes.
   ///
-  /// This flag only affects iOS. It sets
-  /// [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc)
-  /// in the engine. When true, it passes
+  /// This flag only affects iOS, where it is equivalent to [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc).
+  ///
+  /// When set to [SmartQuotesType.enabled], it passes
   /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
-  /// and when false, it passes
+  /// and when set to [SmartQuotesType.disabled], it passes
   /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
+  ///
+  /// If set to null, [SmartQuotesType.enabled] will be used.
   ///
   /// As an example of what this does, a standard vertical double quote
   /// character will be automatically replaced by a left or right double quote
   /// depending on its position in a word.
   ///
-  /// Defaults to true.
+  /// Defaults to null.
   ///
   /// See also:
   ///
@@ -289,18 +291,20 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// Whether to allow the platform to automatically format dashes.
   ///
-  /// This flag only affects iOS versions 11 and above. It sets
-  /// [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc)
-  /// in the engine. When true, it passes
+  /// This flag only affects iOS versions 11 and above, where it is equivalent to [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc).
+  ///
+  /// When set to [SmartDashesType.enabled], it passes
   /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
-  /// and when false, it passes
+  /// and when set to [SmartDashesType.disabled], it passes
   /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
+  ///
+  /// If set to null, [SmartDashesType.enabled] will be used.
   ///
   /// As an example of what this does, two consecutive hyphen characters will be
   /// automatically replaced with one en dash, and three consecutive hyphens
   /// will become one em dash.
   ///
-  /// Defaults to true.
+  /// Defaults to null.
   ///
   /// See also:
   ///
