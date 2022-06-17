@@ -41,7 +41,7 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
   BuildContext context,
   List<ContextualMenuButtonData> buttonDatas,
   Offset primaryAnchor,
-  Offset? secondaryAnchor,
+  [Offset secondaryAnchor]
 );
 
 /// A widget that introduces an area for user selections.
@@ -627,12 +627,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // TODO(justinmc): Is there ever a reason to use a secondary anchor?
     ContextMenuController.show(
       context: context,
-      primaryAnchor: location,
-      buildContextMenu: (
-        BuildContext context,
-        Offset primaryAnchor,
-        Offset? secondaryAnchor,
-      ) {
+      buildContextMenu: (BuildContext context) {
         final String? selectedText =
             _selectable?.getSelectedContent()?.plainText;
         return widget.buildContextMenu!(
@@ -654,8 +649,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
               type: DefaultContextualMenuButtonType.selectAll,
             ),
           ],
-          primaryAnchor,
-          secondaryAnchor,
+          location,
         );
       },
     );

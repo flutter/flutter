@@ -18,6 +18,7 @@ import 'ticker_provider.dart';
 
 // TODO(justinmc): Rename this file. context_menu.dart? There is already cupertino/context_menu.dart.
 
+// TODO(justinmc): Remove ContextualMenuController et. al.
 /// A function that builds a widget to use as a contextual menu.
 ///
 /// See also:
@@ -36,9 +37,11 @@ typedef ContextualMenuBuilder = Widget Function(
 typedef ContextMenuBuilder = Widget Function(
   BuildContext,
   Offset,
-  Offset?,
+  [Offset?]
 );
 
+// TODO(justinmc): Instead of 2 anchors, take a Rect? Or that's not enough
+// info because selection is not always a Rect?
 /// A function that builds a widget to use as the text selection toolbar for
 /// editable text.
 ///
@@ -50,7 +53,7 @@ typedef EditableTextToolbarBuilder = Widget Function(
   BuildContext,
   EditableTextState,
   Offset,
-  Offset?,
+  [Offset?]
 );
 
 // TODO(justinmc): Is the ephemeral approach with just dipose right? Consumers
@@ -69,13 +72,8 @@ class ContextMenuController {
   // TODO(justinmc): Update method for efficiency of moving the menu?
   /// Shows the given context menu at the location.
   static void show({
-    // TODO(justinmc): Accept these or just BuildContext?
-    required ContextMenuBuilder buildContextMenu,
+    required WidgetBuilder buildContextMenu,
     required BuildContext context,
-    // TODO(justinmc): Instead of 2 anchors, take a Rect? Or that's not enough
-    // info because selection is not always a Rect?
-    required Offset primaryAnchor,
-    Offset? secondaryAnchor,
     Widget? debugRequiredFor,
   }) {
     hide();
@@ -91,7 +89,7 @@ class ContextMenuController {
 
     _menuOverlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        return capturedThemes.wrap(buildContextMenu(context, primaryAnchor, secondaryAnchor));
+        return capturedThemes.wrap(buildContextMenu(context));
       },
     );
     overlayState!.insert(_menuOverlayEntry!);
@@ -656,8 +654,9 @@ class _ContextMenuState extends State<ContextMenu> {
   void _show(Offset position) {
     ContextMenuController.show(
       context: context,
-      primaryAnchor: position,
-      buildContextMenu: widget.buildContextMenu,
+      buildContextMenu: (BuildContext context) {
+        return widget.buildContextMenu(context, position);
+      },
     );
   }
 

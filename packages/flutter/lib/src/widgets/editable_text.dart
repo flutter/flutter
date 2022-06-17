@@ -2515,7 +2515,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       buildContextMenu: (
         BuildContext context,
         Offset primaryAnchor,
-        Offset? secondaryAnchor,
+        [Offset? secondaryAnchor]
       ) {
         if (widget.buildContextMenu == null) {
           return const SizedBox.shrink();

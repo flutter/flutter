@@ -407,8 +407,9 @@ class TextSelectionOverlay {
         case TargetPlatform.windows:
           ContextMenuController.show(
             context: context,
-            primaryAnchor: renderObject.lastSecondaryTapDownPosition!,
-            buildContextMenu: buildContextMenu,
+            buildContextMenu: (BuildContext context) {
+              return buildContextMenu(context, renderObject.lastSecondaryTapDownPosition!);
+            },
           );
           return;
       }
@@ -418,45 +419,45 @@ class TextSelectionOverlay {
     // of the selection.
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
 
-    final Rect editingRegion = Rect.fromPoints(
-      renderBox.localToGlobal(Offset.zero),
-      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-    );
-    final List<TextSelectionPoint> selectionEndPoints = renderObject.getEndpointsForSelection(_selection);
-    final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
-        _getEndGlyphHeight() / 2;
-
-    // If the selected text spans more than 1 line, horizontally center the toolbar.
-    // Derived from both iOS and Android.
-    final double midX = isMultiline
-      ? editingRegion.width / 2
-      : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
-
-    final double lineHeightAtStart = _getStartGlyphHeight();
-    final Offset midpoint = Offset(
-      midX,
-      // The y-coordinate won't be made use of most likely.
-      selectionEndPoints.first.point.dy - lineHeightAtStart,
-    );
-
-    final TextSelectionPoint startTextSelectionPoint = selectionEndPoints[0];
-    final TextSelectionPoint endTextSelectionPoint = selectionEndPoints.length > 1
-      ? selectionEndPoints[1]
-      : selectionEndPoints[0];
-    final Offset anchorAbove = Offset(
-      editingRegion.left + midpoint.dx,
-      editingRegion.top + startTextSelectionPoint.point.dy - lineHeightAtStart,
-    );
-    final Offset anchorBelow = Offset(
-      editingRegion.left + midpoint.dx,
-      editingRegion.top + endTextSelectionPoint.point.dy,
-    );
-
     ContextMenuController.show(
       context: context,
-      primaryAnchor: anchorAbove,
-      secondaryAnchor: anchorBelow,
-      buildContextMenu: buildContextMenu,
+      buildContextMenu: (BuildContext context) {
+        final Rect editingRegion = Rect.fromPoints(
+          renderBox.localToGlobal(Offset.zero),
+          renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+        );
+        final List<TextSelectionPoint> selectionEndPoints = renderObject.getEndpointsForSelection(_selection);
+        final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
+            _getEndGlyphHeight() / 2;
+
+        // If the selected text spans more than 1 line, horizontally center the toolbar.
+        // Derived from both iOS and Android.
+        final double midX = isMultiline
+          ? editingRegion.width / 2
+          : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+
+        final double lineHeightAtStart = _getStartGlyphHeight();
+        final Offset midpoint = Offset(
+          midX,
+          // The y-coordinate won't be made use of most likely.
+          selectionEndPoints.first.point.dy - lineHeightAtStart,
+        );
+
+        final TextSelectionPoint startTextSelectionPoint = selectionEndPoints[0];
+        final TextSelectionPoint endTextSelectionPoint = selectionEndPoints.length > 1
+          ? selectionEndPoints[1]
+          : selectionEndPoints[0];
+        final Offset anchorAbove = Offset(
+          editingRegion.left + midpoint.dx,
+          editingRegion.top + startTextSelectionPoint.point.dy - lineHeightAtStart,
+        );
+        final Offset anchorBelow = Offset(
+          editingRegion.left + midpoint.dx,
+          editingRegion.top + endTextSelectionPoint.point.dy,
+        );
+
+        return buildContextMenu(context, anchorAbove, anchorBelow);
+      },
     );
   }
 
@@ -891,6 +892,7 @@ class SelectionOverlay {
   /// asynchronously (see [Clipboard.getData]).
   final ClipboardStatusNotifier? clipboardStatus;
 
+  // TODO(justinmc): Not using this, right?
   /// The location of where the toolbar should be drawn in relative to the
   /// location of [toolbarLayerLink].
   ///
@@ -919,39 +921,6 @@ class SelectionOverlay {
   // TODO(justinmc): Get rid of this.
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
-
-  // TODO(justinmc): Delete?
-  /*
-  /// Whether selection handles are visible.
-  ///
-  /// Set to false if you want to hide the handles. Use this property to show or
-  /// hide the handle without rebuilding them.
-  ///
-  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the update is delayed
-  /// until the post-frame callbacks phase. Otherwise the update is done
-  /// synchronously. This means that it is safe to call during builds, but also
-  /// that if you do call this during a build, the UI will not update until the
-  /// next frame (i.e. many milliseconds later).
-  ///
-  /// Defaults to false.
-  bool get handlesVisible => _handlesVisible;
-  bool _handlesVisible = false;
-  set handlesVisible(bool visible) {
-    assert(visible != null);
-    if (_handlesVisible == visible)
-      return;
-    _handlesVisible = visible;
-    // If we are in build state, it will be too late to update visibility.
-    // We will need to schedule the build in next frame.
-    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
-    } else {
-      _markNeedsBuild();
-    }
-  }
-  */
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
