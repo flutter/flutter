@@ -16,7 +16,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  FileSystem? fileSystem;
+  late FileSystem fileSystem;
   late BufferLogger logger;
   late Directory projectDir;
   late Platform platform;
@@ -25,8 +25,8 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    projectDir = fileSystem!.directory('/project');
-    flutterRootDir = fileSystem!.directory('/flutter_root');
+    projectDir = fileSystem.directory('/project');
+    flutterRootDir = fileSystem.directory('/flutter_root');
     platform = FakePlatform();
   });
 

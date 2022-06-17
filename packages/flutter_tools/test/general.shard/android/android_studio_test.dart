@@ -122,17 +122,17 @@ void main() {
   });
 
   group('pluginsPath on Mac', () {
-    FileSystemUtils? fsUtils;
-    Platform? platform;
-    FakePlistUtils? plistUtils;
-    FakeProcessManager? processManager;
+    late FileSystemUtils fsUtils;
+    late Platform platform;
+    late FakePlistUtils plistUtils;
+    late FakeProcessManager processManager;
 
     setUp(() {
       plistUtils = FakePlistUtils();
       platform = macPlatform();
       fsUtils = FileSystemUtils(
         fileSystem: fileSystem!,
-        platform: platform!,
+        platform: platform,
       );
       processManager = FakeProcessManager.empty();
     });
@@ -147,8 +147,8 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[plistFilePath] = macStudioInfoPlist4_1;
-      processManager!.addCommand(FakeCommand(
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
+      processManager.addCommand(FakeCommand(
           command: <String>[
             globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'),
             '-version',
@@ -189,8 +189,8 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
-      processManager!.addCommand(FakeCommand(
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
+      processManager.addCommand(FakeCommand(
           command: <String>[
             globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
             '-version',
@@ -231,8 +231,8 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[plistFilePath] = macStudioInfoPlist;
-      processManager!.addCommand(FakeCommand(
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist;
+      processManager.addCommand(FakeCommand(
           command: <String>[
             globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'),
             '-version',
@@ -272,8 +272,8 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[plistFilePath] = macStudioInfoPlistEAP;
-      processManager!.addCommand(FakeCommand(
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEAP;
+      processManager.addCommand(FakeCommand(
           command: <String>[
             globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
             '-version',
@@ -316,7 +316,7 @@ void main() {
       const Map<String, Object> jetbrainsInfoPlist = <String, Object>{
         'JetBrainsToolboxApp': 'ignored',
       };
-      plistUtils!.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
+      plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
 
       final String homeDirectoryPlistFolder = globals.fs.path.join(
         globals.fsUtils.homeDirPath!,
@@ -327,7 +327,7 @@ void main() {
       globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
 
       final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist2020_3;
+      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist2020_3;
 
       expect(AndroidStudio.allInstalled().length, 1);
     }, overrides: <Type, Generator>{
@@ -353,7 +353,7 @@ void main() {
       );
       fileSystem!.directory(studioInApplicationPlistFolder).createSync(recursive: true);
       final String plistFilePath = fileSystem!.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[plistFilePath] = macStudioInfoPlist4_1;
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
 
       // Two in random location only Spotlight knows about.
       final String randomLocation1 = fileSystem!.path.join(
@@ -367,7 +367,7 @@ void main() {
       );
       fileSystem!.directory(randomLocation1PlistFolder).createSync(recursive: true);
       final String randomLocation1PlistPath = fileSystem!.path.join(randomLocation1PlistFolder, 'Info.plist');
-      plistUtils!.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
+      plistUtils.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
 
       final String randomLocation2 = fileSystem!.path.join(
         '/',
@@ -380,11 +380,11 @@ void main() {
       );
       fileSystem!.directory(randomLocation2PlistFolder).createSync(recursive: true);
       final String randomLocation2PlistPath = fileSystem!.path.join(randomLocation2PlistFolder, 'Info.plist');
-      plistUtils!.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
+      plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
       final String javaBin = fileSystem!.path.join('jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
 
       // Spotlight finds the one known and two random installations.
-      processManager!.addCommands(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: const <String>[
             'mdfind',
@@ -435,7 +435,7 @@ void main() {
       globals.fs.directory(applicationPlistFolder).createSync(recursive: true);
 
       final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[applicationsPlistFilePath] = macStudioInfoPlist;
+      plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist;
 
       final String homeDirectoryPlistFolder = globals.fs.path.join(
         globals.fsUtils.homeDirPath!,
@@ -446,7 +446,7 @@ void main() {
       globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
 
       final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
+      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
 
       expect(AndroidStudio.allInstalled().length, 2);
       expect(AndroidStudio.latestValid()!.version, Version(4, 1, 0));
@@ -468,7 +468,7 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      plistUtils!.fileContents[plistFilePath] = macStudioInfoPlist;
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder).parent.path,
       )!;

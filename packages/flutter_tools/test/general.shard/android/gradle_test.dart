@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
@@ -194,8 +192,8 @@ void main() {
   });
 
   group('Gradle local.properties', () {
-    Artifacts? localEngineArtifacts;
-    FileSystem? fs;
+    late Artifacts localEngineArtifacts;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
