@@ -7706,7 +7706,11 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -7847,7 +7851,11 @@ void main() {
         const TextSelection.collapsed(offset: 9),
       );
       // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -7922,7 +7930,11 @@ void main() {
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
     );
     // The toolbar now shows up.
-    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+    final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+    expect(
+      find.byType(CupertinoButton),
+      isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+    );
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 66), // Last character's position.
@@ -8347,7 +8359,11 @@ void main() {
       );
 
       // Long press toolbar.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -10375,7 +10391,8 @@ void main() {
     expect(find.text(selectAll), findsNothing);
     expect(find.text('Copy'), findsNothing);
   },
-    variant: TargetPlatformVariant.desktop(),
+    // All desktop platforms except MacOS, which has no select all button.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
