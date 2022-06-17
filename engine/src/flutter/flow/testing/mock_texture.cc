@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/testing/mock_texture.h"
+#include "flutter/flow/testing/skia_gpu_object_layer_test.h"
 
 namespace flutter {
 namespace testing {

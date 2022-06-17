@@ -939,7 +939,7 @@ sk_sp<SkImage> ImageFromBitmapWithNewID(const SkBitmap& bitmap) {
 void BM_DrawImage(benchmark::State& state,
                   BackendType backend_type,
                   unsigned attributes,
-                  const SkSamplingOptions& options,
+                  DlImageSampling options,
                   bool upload_bitmap) {
   auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
@@ -1017,7 +1017,7 @@ std::string ConstraintToString(SkCanvas::SrcRectConstraint constraint) {
 void BM_DrawImageRect(benchmark::State& state,
                       BackendType backend_type,
                       unsigned attributes,
-                      const SkSamplingOptions& options,
+                      DlImageSampling options,
                       SkCanvas::SrcRectConstraint constraint,
                       bool upload_bitmap) {
   auto canvas_provider = CreateCanvasProvider(backend_type);
@@ -1083,11 +1083,11 @@ void BM_DrawImageRect(benchmark::State& state,
   canvas_provider->Snapshot(filename);
 }
 
-std::string FilterModeToString(const SkFilterMode mode) {
+std::string FilterModeToString(const DlFilterMode mode) {
   switch (mode) {
-    case SkFilterMode::kNearest:
+    case DlFilterMode::kNearest:
       return "Nearest";
-    case SkFilterMode::kLinear:
+    case DlFilterMode::kLinear:
       return "Linear";
     default:
       return "Unknown";
@@ -1102,7 +1102,7 @@ std::string FilterModeToString(const SkFilterMode mode) {
 void BM_DrawImageNine(benchmark::State& state,
                       BackendType backend_type,
                       unsigned attributes,
-                      const SkFilterMode filter,
+                      const DlFilterMode filter,
                       bool upload_bitmap) {
   auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;

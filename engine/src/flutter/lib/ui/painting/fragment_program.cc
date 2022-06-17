@@ -72,11 +72,14 @@ fml::RefPtr<FragmentShader> FragmentProgram::shader(
   uniforms.Release();
   std::vector<sk_sp<SkShader>> sk_samplers(sampler_shaders.size());
   for (size_t i = 0; i < sampler_shaders.size(); i++) {
-    SkSamplingOptions sampling;
+    DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
     ImageShader* image_shader = sampler_shaders[i];
-    // The default value for SkSamplingOptions is used because ImageShader
-    // uses a cached value set by the user in the Dart constructor.
-    // Users are instructed to make use of this in the Dart docs.
+    // ImageShaders can hold a preferred value for sampling options and
+    // developers are encouraged to use that value or the value will be supplied
+    // by "the environment where it is used". The environment here does not
+    // contain a value to be used if the developer did not specify a preference
+    // when they constructed the ImageShader, so we will use kNearest which is
+    // the default filterQuality in a Paint object.
     sk_samplers[i] = image_shader->shader(sampling)->skia_object();
     uniform_floats[uniform_count + 2 * i] = image_shader->width();
     uniform_floats[uniform_count + 2 * i + 1] = image_shader->height();

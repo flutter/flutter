@@ -6,6 +6,7 @@
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_comparable.h"
 #include "flutter/display_list/display_list_image_filter.h"
+#include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/types.h"
 #include "gtest/gtest.h"
 
@@ -84,7 +85,7 @@ TEST(DisplayListImageFilter, FromSkiaErodeImageFilter) {
 
 TEST(DisplayListImageFilter, FromSkiaMatrixImageFilter) {
   sk_sp<SkImageFilter> sk_image_filter = SkImageFilters::MatrixTransform(
-      SkMatrix::RotateDeg(45), DisplayList::LinearSampling, nullptr);
+      SkMatrix::RotateDeg(45), ToSk(DlImageSampling::kLinear), nullptr);
   std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
 
   ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
@@ -102,7 +103,7 @@ TEST(DisplayListImageFilter, FromSkiaComposeImageFilter) {
   sk_sp<SkImageFilter> sk_blur_filter =
       SkImageFilters::Blur(5.0, 5.0, SkTileMode::kRepeat, nullptr);
   sk_sp<SkImageFilter> sk_matrix_filter = SkImageFilters::MatrixTransform(
-      SkMatrix::RotateDeg(45), DisplayList::LinearSampling, nullptr);
+      SkMatrix::RotateDeg(45), ToSk(DlImageSampling::kLinear), nullptr);
   sk_sp<SkImageFilter> sk_image_filter =
       SkImageFilters::Compose(sk_blur_filter, sk_matrix_filter);
   std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
@@ -271,14 +272,14 @@ TEST(DisplayListImageFilter, MatrixConstructor) {
   DlMatrixImageFilter filter(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                                0.5, 3.0, 15,  //
                                                0.0, 0.0, 1),
-                             DisplayList::LinearSampling);
+                             DlImageSampling::kLinear);
 }
 
 TEST(DisplayListImageFilter, MatrixShared) {
   DlMatrixImageFilter filter(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                                0.5, 3.0, 15,  //
                                                0.0, 0.0, 1),
-                             DisplayList::LinearSampling);
+                             DlImageSampling::kLinear);
 
   ASSERT_NE(filter.shared().get(), &filter);
   ASSERT_EQ(*filter.shared(), filter);
@@ -288,7 +289,7 @@ TEST(DisplayListImageFilter, MatrixAsMatrix) {
   DlMatrixImageFilter filter(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                                0.5, 3.0, 15,  //
                                                0.0, 0.0, 1),
-                             DisplayList::LinearSampling);
+                             DlImageSampling::kLinear);
 
   ASSERT_NE(filter.asMatrix(), nullptr);
   ASSERT_EQ(filter.asMatrix(), &filter);
@@ -298,18 +299,18 @@ TEST(DisplayListImageFilter, MatrixContents) {
   SkMatrix matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                       0.5, 3.0, 15,  //
                                       0.0, 0.0, 1);
-  DlMatrixImageFilter filter(matrix, DisplayList::LinearSampling);
+  DlMatrixImageFilter filter(matrix, DlImageSampling::kLinear);
 
   ASSERT_EQ(filter.matrix(), matrix);
-  ASSERT_EQ(filter.sampling(), DisplayList::LinearSampling);
+  ASSERT_EQ(filter.sampling(), DlImageSampling::kLinear);
 }
 
 TEST(DisplayListImageFilter, MatrixEquals) {
   SkMatrix matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                       0.5, 3.0, 15,  //
                                       0.0, 0.0, 1);
-  DlMatrixImageFilter filter1(matrix, DisplayList::LinearSampling);
-  DlMatrixImageFilter filter2(matrix, DisplayList::LinearSampling);
+  DlMatrixImageFilter filter1(matrix, DlImageSampling::kLinear);
+  DlMatrixImageFilter filter2(matrix, DlImageSampling::kLinear);
 
   TestEquals(filter1, filter2);
 }
@@ -321,9 +322,9 @@ TEST(DisplayListImageFilter, MatrixNotEquals) {
   SkMatrix matrix2 = SkMatrix::MakeAll(5.0, 0.0, 10,  //
                                        0.5, 3.0, 15,  //
                                        0.0, 0.0, 1);
-  DlMatrixImageFilter filter1(matrix1, DisplayList::LinearSampling);
-  DlMatrixImageFilter filter2(matrix2, DisplayList::LinearSampling);
-  DlMatrixImageFilter filter3(matrix1, DisplayList::NearestSampling);
+  DlMatrixImageFilter filter1(matrix1, DlImageSampling::kLinear);
+  DlMatrixImageFilter filter2(matrix2, DlImageSampling::kLinear);
+  DlMatrixImageFilter filter3(matrix1, DlImageSampling::kNearestNeighbor);
 
   TestNotEquals(filter1, filter2, "Matrix differs");
   TestNotEquals(filter1, filter3, "Sampling differs");
@@ -333,7 +334,7 @@ TEST(DisplayListImageFilter, ComposeConstructor) {
   DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                               0.5, 3.0, 15,  //
                                               0.0, 0.0, 1),
-                            DisplayList::LinearSampling);
+                            DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 }
@@ -342,7 +343,7 @@ TEST(DisplayListImageFilter, ComposeShared) {
   DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                               0.5, 3.0, 15,  //
                                               0.0, 0.0, 1),
-                            DisplayList::LinearSampling);
+                            DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 
@@ -354,7 +355,7 @@ TEST(DisplayListImageFilter, ComposeAsCompose) {
   DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                               0.5, 3.0, 15,  //
                                               0.0, 0.0, 1),
-                            DisplayList::LinearSampling);
+                            DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 
@@ -366,7 +367,7 @@ TEST(DisplayListImageFilter, ComposeContents) {
   DlMatrixImageFilter outer(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                               0.5, 3.0, 15,  //
                                               0.0, 0.0, 1),
-                            DisplayList::LinearSampling);
+                            DlImageSampling::kLinear);
   DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 
@@ -378,14 +379,14 @@ TEST(DisplayListImageFilter, ComposeEquals) {
   DlMatrixImageFilter outer1(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                                0.5, 3.0, 15,  //
                                                0.0, 0.0, 1),
-                             DisplayList::LinearSampling);
+                             DlImageSampling::kLinear);
   DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter1(outer1, inner1);
 
   DlMatrixImageFilter outer2(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                                0.5, 3.0, 15,  //
                                                0.0, 0.0, 1),
-                             DisplayList::LinearSampling);
+                             DlImageSampling::kLinear);
   DlBlurImageFilter inner2(5.0, 6.0, DlTileMode::kMirror);
   DlComposeImageFilter filter2(outer1, inner1);
 
@@ -396,13 +397,13 @@ TEST(DisplayListImageFilter, ComposeNotEquals) {
   DlMatrixImageFilter outer1(SkMatrix::MakeAll(2.0, 0.0, 10,  //
                                                0.5, 3.0, 15,  //
                                                0.0, 0.0, 1),
-                             DisplayList::LinearSampling);
+                             DlImageSampling::kLinear);
   DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
 
   DlMatrixImageFilter outer2(SkMatrix::MakeAll(5.0, 0.0, 10,  //
                                                0.5, 3.0, 15,  //
                                                0.0, 0.0, 1),
-                             DisplayList::LinearSampling);
+                             DlImageSampling::kLinear);
   DlBlurImageFilter inner2(7.0, 6.0, DlTileMode::kMirror);
 
   DlComposeImageFilter filter1(outer1, inner1);

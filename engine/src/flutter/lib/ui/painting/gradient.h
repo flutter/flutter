@@ -61,7 +61,7 @@ class CanvasGradient : public Shader {
                            SkTileMode tile_mode,
                            const tonic::Float64List& matrix4);
 
-  std::shared_ptr<DlColorSource> shader(SkSamplingOptions& sampling) override {
+  std::shared_ptr<DlColorSource> shader(DlImageSampling sampling) override {
     return dl_shader_->with_sampling(sampling);
   }
 

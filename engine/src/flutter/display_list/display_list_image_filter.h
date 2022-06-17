@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list_attributes.h"
 #include "flutter/display_list/display_list_color_filter.h"
 #include "flutter/display_list/display_list_comparable.h"
+#include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_tile_mode.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/logging.h"
@@ -309,7 +310,7 @@ class DlErodeImageFilter final : public DlImageFilter {
 
 class DlMatrixImageFilter final : public DlImageFilter {
  public:
-  DlMatrixImageFilter(const SkMatrix& matrix, const SkSamplingOptions& sampling)
+  DlMatrixImageFilter(const SkMatrix& matrix, DlImageSampling sampling)
       : matrix_(matrix), sampling_(sampling) {}
   explicit DlMatrixImageFilter(const DlMatrixImageFilter* filter)
       : DlMatrixImageFilter(filter->matrix_, filter->sampling_) {}
@@ -324,7 +325,7 @@ class DlMatrixImageFilter final : public DlImageFilter {
   size_t size() const override { return sizeof(*this); }
 
   const SkMatrix& matrix() const { return matrix_; }
-  const SkSamplingOptions& sampling() const { return sampling_; }
+  DlImageSampling sampling() const { return sampling_; }
 
   const DlMatrixImageFilter* asMatrix() const override { return this; }
 
@@ -353,7 +354,7 @@ class DlMatrixImageFilter final : public DlImageFilter {
   }
 
   sk_sp<SkImageFilter> skia_object() const override {
-    return SkImageFilters::MatrixTransform(matrix_, sampling_, nullptr);
+    return SkImageFilters::MatrixTransform(matrix_, ToSk(sampling_), nullptr);
   }
 
  protected:
@@ -365,7 +366,7 @@ class DlMatrixImageFilter final : public DlImageFilter {
 
  private:
   SkMatrix matrix_;
-  SkSamplingOptions sampling_;
+  DlImageSampling sampling_;
 };
 
 class DlComposeImageFilter final : public DlImageFilter {

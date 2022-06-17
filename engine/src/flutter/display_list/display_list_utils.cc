@@ -476,7 +476,7 @@ void DisplayListBoundsCalculator::drawVertices(const DlVertices* vertices,
 }
 void DisplayListBoundsCalculator::drawImage(const sk_sp<DlImage> image,
                                             const SkPoint point,
-                                            const SkSamplingOptions& sampling,
+                                            DlImageSampling sampling,
                                             bool render_with_attributes) {
   SkRect bounds = SkRect::MakeXYWH(point.fX, point.fY,  //
                                    image->width(), image->height());
@@ -489,7 +489,7 @@ void DisplayListBoundsCalculator::drawImageRect(
     const sk_sp<DlImage> image,
     const SkRect& src,
     const SkRect& dst,
-    const SkSamplingOptions& sampling,
+    DlImageSampling sampling,
     bool render_with_attributes,
     SkCanvas::SrcRectConstraint constraint) {
   DisplayListAttributeFlags flags = render_with_attributes
@@ -500,7 +500,7 @@ void DisplayListBoundsCalculator::drawImageRect(
 void DisplayListBoundsCalculator::drawImageNine(const sk_sp<DlImage> image,
                                                 const SkIRect& center,
                                                 const SkRect& dst,
-                                                SkFilterMode filter,
+                                                DlFilterMode filter,
                                                 bool render_with_attributes) {
   DisplayListAttributeFlags flags = render_with_attributes
                                         ? kDrawImageNineWithPaintFlags
@@ -511,7 +511,7 @@ void DisplayListBoundsCalculator::drawImageLattice(
     const sk_sp<DlImage> image,
     const SkCanvas::Lattice& lattice,
     const SkRect& dst,
-    SkFilterMode filter,
+    DlFilterMode filter,
     bool render_with_attributes) {
   DisplayListAttributeFlags flags = render_with_attributes
                                         ? kDrawImageLatticeWithPaintFlags
@@ -524,7 +524,7 @@ void DisplayListBoundsCalculator::drawAtlas(const sk_sp<DlImage> atlas,
                                             const DlColor colors[],
                                             int count,
                                             DlBlendMode mode,
-                                            const SkSamplingOptions& sampling,
+                                            DlImageSampling sampling,
                                             const SkRect* cullRect,
                                             bool render_with_attributes) {
   SkPoint quad[4];

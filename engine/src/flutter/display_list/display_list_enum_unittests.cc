@@ -4,10 +4,12 @@
 
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_paint.h"
+#include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_tile_mode.h"
 #include "flutter/display_list/display_list_vertices.h"
 #include "flutter/display_list/types.h"
 #include "gtest/gtest.h"
+#include "include/core/SkSamplingOptions.h"
 
 namespace flutter {
 namespace testing {
@@ -80,6 +82,42 @@ TEST(DisplayListEnum, ToSkVertexMode) {
             SkVertices::VertexMode::kTriangleStrip_VertexMode);
   ASSERT_EQ(ToSk(DlVertexMode::kTriangleFan),
             SkVertices::VertexMode::kTriangleFan_VertexMode);
+}
+
+TEST(DisplayListEnum, ToDlFilterMode) {
+  ASSERT_EQ(ToDl(SkFilterMode::kLinear), DlFilterMode::kLinear);
+  ASSERT_EQ(ToDl(SkFilterMode::kNearest), DlFilterMode::kNearest);
+  ASSERT_EQ(ToDl(SkFilterMode::kLast), DlFilterMode::kLast);
+}
+
+TEST(DisplayListEnum, ToSkFilterMode) {
+  ASSERT_EQ(ToSk(DlFilterMode::kLinear), SkFilterMode::kLinear);
+  ASSERT_EQ(ToSk(DlFilterMode::kNearest), SkFilterMode::kNearest);
+  ASSERT_EQ(ToSk(DlFilterMode::kLast), SkFilterMode::kLast);
+}
+
+TEST(DisplayListEnum, ToDlImageSampling) {
+  ASSERT_EQ(ToDl(SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone)),
+            DlImageSampling::kLinear);
+  ASSERT_EQ(
+      ToDl(SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear)),
+      DlImageSampling::kMipmapLinear);
+  ASSERT_EQ(
+      ToDl(SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone)),
+      DlImageSampling::kNearestNeighbor);
+  ASSERT_EQ(ToDl(SkSamplingOptions(SkCubicResampler{1 / 3.0f, 1 / 3.0f})),
+            DlImageSampling::kCubic);
+}
+
+TEST(DisplayListEnum, ToSkSamplingOptions) {
+  ASSERT_EQ(ToSk(DlImageSampling::kLinear),
+            SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone));
+  ASSERT_EQ(ToSk(DlImageSampling::kMipmapLinear),
+            SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear));
+  ASSERT_EQ(ToSk(DlImageSampling::kNearestNeighbor),
+            SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone));
+  ASSERT_EQ(ToSk(DlImageSampling::kCubic),
+            SkSamplingOptions(SkCubicResampler{1 / 3.0f, 1 / 3.0f}));
 }
 
 #define CHECK_TO_DLENUM(V) ASSERT_EQ(ToDl(SkBlendMode::V), DlBlendMode::V);
