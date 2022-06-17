@@ -544,7 +544,7 @@ class _DefaultPub implements Pub {
   /// 1) Provide the _kPubCacheEnvironmentKey.
   /// 2) There is a local cache (in the Flutter SDK) but not a global one (in the user's home directory).
   /// 3) If both local and global are available then merge the local into global and return the global.
-  String? _getLocalPubCacheIfAvailable() {
+  String? _getPubCacheIfAvailable() {
     if (_platform.environment.containsKey(_kPubCacheEnvironmentKey)) {
       return _platform.environment[_kPubCacheEnvironmentKey];
     }
@@ -580,6 +580,11 @@ class _DefaultPub implements Pub {
         localCachePath: localDirectoryPub.path,
       );
       _fileSystem.directory(localCachePath).deleteSync(recursive: true);
+      return globalDirectory.path;
+    } else if (globalDirectory != null && globalDirectory.existsSync()) {
+      return globalDirectory.path;
+    } else if (_fileSystem.directory(localCachePath).existsSync()) {
+      return localCachePath;
     }
     // Use pub's default location by returning null.
     return null;
@@ -613,7 +618,7 @@ class _DefaultPub implements Pub {
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
     };
-    final String? pubCache = _getLocalPubCacheIfAvailable();
+    final String? pubCache = _getPubCacheIfAvailable();
     if (pubCache != null) {
       environment[_kPubCacheEnvironmentKey] = pubCache;
     }
