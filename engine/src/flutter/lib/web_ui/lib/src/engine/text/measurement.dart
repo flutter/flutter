@@ -16,11 +16,11 @@ import '../embedder.dart';
 //                anything as of this writing.
 const double baselineRatioHack = 1.1662499904632568;
 
-/// Hosts ruler DOM elements in a hidden container under a `root` [html.Node].
+/// Hosts ruler DOM elements in a hidden container under a `root` [DomNode].
 ///
-/// The `root` [html.Node] is optional. Defaults to [flutterViewEmbedder.glassPaneShadow].
+/// The `root` [DomNode] is optional. Defaults to [flutterViewEmbedder.glassPaneShadow].
 class RulerHost {
-  RulerHost({html.Node? root}) {
+  RulerHost({DomNode? root}) {
     _rulerHost.style
       ..position = 'fixed'
       ..visibility = 'hidden'
@@ -30,7 +30,11 @@ class RulerHost {
       ..width = '0'
       ..height = '0';
 
-    (root ?? flutterViewEmbedder.glassPaneShadow!.node).append(_rulerHost);
+    if (root == null) {
+      flutterViewEmbedder.glassPaneShadow!.node.append(_rulerHost as html.Node);
+    } else {
+      root.appendChild(_rulerHost);
+    }
     registerHotRestartListener(dispose);
   }
 
@@ -40,7 +44,7 @@ class RulerHost {
   /// rulers would be attached to the `<body>` element polluting the element
   /// tree and making it hard to navigate. It does not serve any functional
   /// purpose.
-  final html.Element _rulerHost = html.Element.tag('flt-ruler-host');
+  final DomElement _rulerHost = createDomElement('flt-ruler-host');
 
   /// Releases the resources used by this [RulerHost].
   ///
@@ -50,7 +54,7 @@ class RulerHost {
   }
 
   /// Adds an element used for measuring text as a child of [_rulerHost].
-  void addElement(html.HtmlElement element) {
+  void addElement(DomHTMLElement element) {
     _rulerHost.append(element);
   }
 }

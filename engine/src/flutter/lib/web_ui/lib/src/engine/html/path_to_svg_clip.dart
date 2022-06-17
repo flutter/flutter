@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:svg' as svg;
-
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../dom.dart';
+import '../svg.dart';
 import 'path/path.dart';
 import 'path/path_to_svg.dart';
 
@@ -17,7 +17,7 @@ int _clipIdCounter = 0;
 ///
 /// Position needs to be absolute since these svgs are sandwiched between
 /// canvas elements and can cause layout shifts otherwise.
-final svg.SvgSvgElement kSvgResourceHeader = svg.SvgSvgElement()
+final SVGSVGElement kSvgResourceHeader = createSVGSVGElement()
   ..setAttribute('width', 0)
   ..setAttribute('height', 0)
   ..style.position = 'absolute';
@@ -26,22 +26,22 @@ final svg.SvgSvgElement kSvgResourceHeader = svg.SvgSvgElement()
 ///
 /// Calling this method updates [_clipIdCounter]. The HTML id of the generated
 /// clip is set to "svgClip${_clipIdCounter}", e.g. "svgClip123".
-svg.SvgSvgElement pathToSvgClipPath(ui.Path path,
+SVGSVGElement pathToSvgClipPath(ui.Path path,
     {double offsetX = 0,
     double offsetY = 0,
     double scaleX = 1.0,
     double scaleY = 1.0}) {
   _clipIdCounter += 1;
-  final svg.SvgSvgElement root = kSvgResourceHeader.clone(false) as svg.SvgSvgElement;
-  final svg.DefsElement defs = svg.DefsElement();
+  final SVGSVGElement root = kSvgResourceHeader.cloneNode(false) as SVGSVGElement;
+  final SVGDefsElement defs = createSVGDefsElement();
   root.append(defs);
 
   final String clipId = 'svgClip$_clipIdCounter';
-  final svg.ClipPathElement clipPath = svg.ClipPathElement();
+  final SVGClipPathElement clipPath = createSVGClipPathElement();
   defs.append(clipPath);
   clipPath.id = clipId;
 
-  final svg.PathElement svgPath = svg.PathElement();
+  final SVGPathElement svgPath = createSVGPathElement();
   clipPath.append(svgPath);
   svgPath.setAttribute('fill', '#FFFFFF');
 

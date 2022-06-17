@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
@@ -212,7 +210,7 @@ class TextHeightRuler {
 
     // [rulerHost] is not migrated yet so add a cast to [html.HtmlElement].
     // This cast will be removed after the migration is complete.
-    rulerHost.addElement(host as html.HtmlElement);
+    rulerHost.addElement(host);
     return host;
   }
 

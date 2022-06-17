@@ -1475,8 +1475,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     if (hasAutofillGroup) {
       placeForm();
     }
-    inputConfig.textCapitalization.setAutocapitalizeAttribute(activeDomElement
-        as html.HtmlElement);
+    inputConfig.textCapitalization.setAutocapitalizeAttribute(activeDomElement);
   }
 
   @override
@@ -1637,7 +1636,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       defaultTextEditingRoot.append(activeDomElement as html.Node);
     }
     inputConfig.textCapitalization.setAutocapitalizeAttribute(
-        activeDomElement as html.HtmlElement);
+        activeDomElement);
   }
 
   @override
