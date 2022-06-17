@@ -425,7 +425,7 @@ class HtmlViewEmbedder {
     if (_svgPathDefs != null) {
       return;
     }
-    _svgPathDefs = kSvgResourceHeader.clone(false) as SVGElement;
+    _svgPathDefs = kSvgResourceHeader.cloneNode(false) as SVGElement;
     _svgPathDefs!.append(createSVGDefsElement()..id = 'sk_path_defs');
     skiaSceneHost!.append(_svgPathDefs!);
   }

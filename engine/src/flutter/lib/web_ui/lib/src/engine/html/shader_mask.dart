@@ -162,7 +162,7 @@ class PersistedShaderMask extends PersistedContainerSurface
 
       final SvgFilter svgFilter = svgMaskFilterFromImageAndBlendMode(
           imageUrl, blendModeTemp, maskRect.width, maskRect.height);
-      _shaderElement = svgFilter.element;
+      _shaderElement = svgFilter.element as html.Element;
       if (isWebKit) {
         _childContainer!.style.filter = 'url(#${svgFilter.id})';
       } else {

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import '../browser_detection.dart';
+import '../dom.dart';
 
 /// Controls the capitalization of the text.
 ///
@@ -58,7 +57,7 @@ class TextCapitalizationConfig {
   ///
   /// See: https://developers.google.com/web/updates/2015/04/autocapitalize
   /// https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/autocapitalize
-  void setAutocapitalizeAttribute(html.HtmlElement domElement) {
+  void setAutocapitalizeAttribute(DomHTMLElement domElement) {
     String autocapitalize = '';
     switch (textCapitalization) {
       case TextCapitalization.words:
@@ -82,11 +81,12 @@ class TextCapitalizationConfig {
         autocapitalize = 'off';
         break;
     }
-    if (domElement is html.InputElement) {
-      final html.InputElement element = domElement;
+    if (domInstanceOfString(domElement, 'HTMLInputElement')) {
+      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.setAttribute('autocapitalize', autocapitalize);
-    } else if (domElement is html.TextAreaElement) {
-      final html.TextAreaElement element = domElement;
+    } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
+      final DomHTMLTextAreaElement element = domElement as
+          DomHTMLTextAreaElement;
       element.setAttribute('autocapitalize', autocapitalize);
     }
   }
