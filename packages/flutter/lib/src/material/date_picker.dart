@@ -2430,6 +2430,15 @@ class _MonthItemState extends State<_MonthItem> {
   }
 }
 
+class DayItem extends StatelessWidget {
+  const DayItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
 /// Determines which style to use to paint the highlight.
 enum _HighlightPainterStyle {
   /// Paints nothing.
