@@ -2174,6 +2174,9 @@ class _MonthItemState extends State<_MonthItem> {
     if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
+    for (final FocusNode node in _dayFocusNodes) {
+      node.addListener(() => _dayFocusChanged(node.hasFocus));
+    }
   }
 
   @override
@@ -2430,21 +2433,89 @@ class _MonthItemState extends State<_MonthItem> {
   }
 }
 
+/// A day item displayed in the calendar.
 class DayItem extends StatelessWidget {
+
+  /// A day item displayed in the calendar.
+  const DayItem({
+    super.key, 
+    required this.date, 
+    required this.onTap, 
+    required this.focusNode,
+    required this.isInSelectionRage,
+    required this.isSelectionStart,
+    required this.isSelectionEnd,
+    this.selectionColor,
+    this.textStyle,
+  });
+
+  /// Callback for when the day is tapped.
   final VoidCallback? onTap;
+  /// Controls focus on DayItem.
   final FocusNode focusNode;
-  final ValueChanged<bool> onFocusChange;
+  /// The date of the day to be rendered.
   final DateTime date;
+  /// Whether this day item is currently in the selected range.
+  final bool isInSelectionRage;
+  /// Whether this day item is the start of the selected range.
+  final bool isSelectionStart;
+  /// Whether this day item is the end of the selected range.
+  final bool isSelectionEnd;
+  /// The color for the highlight above a selected range.
+  final Color? selectionColor;
+  /// The text style of the day item when it is not the edge of a range.
+  final TextStyle? textStyle;
 
-  bool get isEnabled => onTap != null;
+  bool get _isEnabled => onTap != null;
 
-  const DayItem({super.key, required this.isEnabled,});
+
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final TextTheme textTheme = theme.textTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    BoxDecoration? decoration;
+    TextStyle? textStyle = this.textStyle;
+
+    if (isSelectionStart || isSelectionEnd) {
+      // The selected start and end dates gets a circle background
+      // highlight, and a contrasting text color.
+      textStyle = textTheme.bodyText2?.apply(color: colorScheme.onPrimary);
+      decoration = BoxDecoration(
+        color: colorScheme.primary,
+        shape: BoxShape.circle,
+      );
+
+      if (isSelectionStart != isSelectionEnd) {
+        final _HighlightPainterStyle style = isSelectionStart
+          ? _HighlightPainterStyle.highlightTrailing
+          : _HighlightPainterStyle.highlightLeading;
+        highlightPainter = _HighlightPainter(
+          color: highlightColor,
+          style: style,
+          textDirection: textDirection,
+        );
+      }
+    } else if (isInSelectionRage) {
+      // The days within the range get a light background highlight.
+      highlightPainter = _HighlightPainter(
+        color: highlightColor,
+        style: _HighlightPainterStyle.highlightAll,
+        textDirection: textDirection,
+      );
+    } else if (!_isEnabled) {
+      textStyle ??= textTheme.bodyText2?.apply(color: colorScheme.onSurface.withOpacity(0.38));
+    } else if (DateUtils.isSameDay(widget.currentDate, dayToBuild)) {
+      // The current day gets a different text color and a circle stroke
+      // border.
+      textStyle ??= textTheme.bodyText2?.apply(color: colorScheme.primary);
+      decoration = BoxDecoration(
+        border: Border.all(color: colorScheme.primary),
+        shape: BoxShape.circle,
+      );
+    }
 
     // We want the day of month to be spoken first irrespective of the
     // locale-specific preferences or TextDirection. This is because
@@ -2453,9 +2524,9 @@ class DayItem extends StatelessWidget {
     // for the day of month. To do that we prepend day of month to the
     // formatted full date.
     String semanticLabel = '${localizations.formatDecimal(date.day)}, ${localizations.formatFullDate(date)}';
-    if (isSelectedDayStart) {
+    if (isSelectionStart) {
       semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
-    } else if (isSelectedDayEnd) {
+    } else if (isSelectionEnd) {
       semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
     }
 
@@ -2464,9 +2535,9 @@ class DayItem extends StatelessWidget {
       child: Center(
         child: Semantics(
           label: semanticLabel,
-          selected: isSelectedDayStart || isSelectedDayEnd,
+          selected: isSelectionStart || isSelectionEnd,
           child: ExcludeSemantics(
-            child: Text(localizations.formatDecimal(day), style: itemStyle),
+            child: Text(localizations.formatDecimal(date.day), style: itemStyle),
           ),
         ),
       ),
@@ -2479,13 +2550,12 @@ class DayItem extends StatelessWidget {
       );
     }
 
-    if (isEnabled) {
+    if (_isEnabled) {
       dayWidget = InkResponse(
         focusNode: focusNode,
         onTap: onTap,
         radius: _monthItemRowHeight / 2 + 4,
         splashColor: colorScheme.primary.withOpacity(0.38),
-        onFocusChange: onFocusChange,
         child: dayWidget,
       );
     }

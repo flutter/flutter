@@ -28,6 +28,7 @@ void main() {
   String? fieldEndLabelText;
   String? helpText;
   String? saveText;
+  Widget Function(BuildContext context, DateTime date, DateRangeController controller)? dayBuilder;
 
   setUp(() {
     firstDate = DateTime(2015);
@@ -94,6 +95,7 @@ void main() {
       fieldEndLabelText: fieldEndLabelText,
       helpText: helpText,
       saveText: saveText,
+      dayBuilder: dayBuilder,
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: textDirection,
@@ -1074,6 +1076,29 @@ void main() {
       // By default it should place the dialog on the left screen
       expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), Offset.zero);
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(390.0, 600.0));
+    });
+  });
+
+  group('DayItemBuilder', () {
+    setUp(() {
+      firstDate = DateTime(2022, 1, 2);
+      lastDate = DateTime(2022, DateTime.december, 31);
+      dayBuilder = (BuildContext context, DateTime date, DateRangeController controller) {
+        final bool isInAllowedRange = controller.verifyIsInAllowedRange(date);
+        return DayItem(
+          onTap: isInAllowedRange ? () => controller.push(date) : null,
+          isInSelectionRange: controller.verifyIsInSelectedRange(date),
+          isSelectionStart: controller.start == date,
+          isSelectionEnd: controller.end == date,
+          selectionColor: Colors.yellow,
+          textStyle: isInAllowedRange ? Colors.black : Colors.red,
+        );
+      };
+    });
+    testWidgets('Should be able to be set', (WidgetTester tester) async {
+      preparePicker(tester, (Future<DateTimeRange?> range) {
+
+      });
     });
   });
 }
