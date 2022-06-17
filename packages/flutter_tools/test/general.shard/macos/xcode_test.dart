@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -24,21 +24,21 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  BufferLogger logger;
+  late BufferLogger logger;
 
   setUp(() {
     logger = BufferLogger.test();
   });
 
   group('FakeProcessManager', () {
-    FakeProcessManager fakeProcessManager;
+    late FakeProcessManager fakeProcessManager;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
     });
 
     group('Xcode', () {
-      FakeXcodeProjectInterpreter xcodeProjectInterpreter;
+      FakeXcodeProjectInterpreter? xcodeProjectInterpreter;
 
       setUp(() {
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -94,7 +94,7 @@ void main() {
       });
 
       group('macOS', () {
-        Xcode xcode;
+        late Xcode xcode;
 
         setUp(() {
           xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -134,70 +134,70 @@ void main() {
         });
 
         testWithoutContext('version checks fail when version is less than minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(9, null, null);
+          xcodeProjectInterpreter!.isInstalled = true;
+          xcodeProjectInterpreter!.version = Version(9, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('version checks fail when xcodebuild tools are not installed', () {
-          xcodeProjectInterpreter.isInstalled = false;
+          xcodeProjectInterpreter!.isInstalled = false;
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('version checks pass when version meets minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, null, null);
+          xcodeProjectInterpreter!.isInstalled = true;
+          xcodeProjectInterpreter!.version = Version(13, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when major version exceeds minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(14, 0, 0);
+          xcodeProjectInterpreter!.isInstalled = true;
+          xcodeProjectInterpreter!.version = Version(14, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when minor version exceeds minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 3, 0);
+          xcodeProjectInterpreter!.isInstalled = true;
+          xcodeProjectInterpreter!.version = Version(13, 3, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when patch version exceeds minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 0, 2);
+          xcodeProjectInterpreter!.isInstalled = true;
+          xcodeProjectInterpreter!.version = Version(13, 0, 2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when not installed', () {
-          xcodeProjectInterpreter.isInstalled = false;
+          xcodeProjectInterpreter!.isInstalled = false;
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(10, 2, 0);
+          xcodeProjectInterpreter!.isInstalled = true;
+          xcodeProjectInterpreter!.version = Version(10, 2, 0);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, null, null);
+          xcodeProjectInterpreter!.isInstalled = true;
+          xcodeProjectInterpreter!.version = Version(13, null, null);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -276,8 +276,8 @@ void main() {
     });
 
     group('xcdevice not installed', () {
-      XCDevice xcdevice;
-      Xcode xcode;
+      late XCDevice xcdevice;
+      late Xcode xcode;
 
       setUp(() {
         xcode = Xcode.test(
@@ -310,7 +310,7 @@ void main() {
     });
 
     group('xcdevice', () {
-      XCDevice xcdevice;
+      late XCDevice xcdevice;
       Xcode xcode;
 
       setUp(() {
@@ -351,7 +351,7 @@ void main() {
           // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
           // Attach: 00008027-00192736010F802E
           // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-          xcdevice.observedDeviceEvents().listen((Map<XCDeviceEvent, String> event) {
+          xcdevice.observedDeviceEvents()!.listen((Map<XCDeviceEvent, String> event) {
             expect(event.length, 1);
             if (event.containsKey(XCDeviceEvent.attach)) {
               if (event[XCDeviceEvent.attach] == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {

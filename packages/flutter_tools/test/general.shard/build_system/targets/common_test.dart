@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -26,12 +26,12 @@ const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
 
 final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 void main() {
-  FakeProcessManager processManager;
-  Environment androidEnvironment;
-  Environment iosEnvironment;
-  Artifacts artifacts;
-  FileSystem fileSystem;
-  Logger logger;
+  FakeProcessManager? processManager;
+  late Environment androidEnvironment;
+  late Environment iosEnvironment;
+  late Artifacts artifacts;
+  FileSystem? fileSystem;
+  late Logger logger;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -39,28 +39,28 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     androidEnvironment = Environment.test(
-      fileSystem.currentDirectory,
+      fileSystem!.currentDirectory,
       defines: <String, String>{
         kBuildMode: getNameForBuildMode(BuildMode.profile),
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
-      processManager: processManager,
-      fileSystem: fileSystem,
+      processManager: processManager!,
+      fileSystem: fileSystem!,
       logger: logger,
     );
     androidEnvironment.buildDir.createSync(recursive: true);
     iosEnvironment = Environment.test(
-      fileSystem.currentDirectory,
+      fileSystem!.currentDirectory,
       defines: <String, String>{
         kBuildMode: getNameForBuildMode(BuildMode.profile),
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
-      processManager: processManager,
-      fileSystem: fileSystem,
+      processManager: processManager!,
+      fileSystem: fileSystem!,
       logger: logger,
     );
     iosEnvironment.buildDir.createSync(recursive: true);
@@ -74,7 +74,7 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem!.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
@@ -83,7 +83,7 @@ void main() {
       platform: TargetPlatform.android_arm,
       mode: BuildMode.profile,
     );
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
@@ -112,7 +112,7 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot does use track widget creation on profile builds', () async {
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem!.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
@@ -121,7 +121,7 @@ void main() {
       platform: TargetPlatform.android_arm,
       mode: BuildMode.profile,
     );
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
@@ -151,7 +151,7 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () async {
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem!.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
@@ -160,7 +160,7 @@ void main() {
       platform: TargetPlatform.android_arm,
       mode: BuildMode.profile,
     );
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
@@ -191,7 +191,7 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem!.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
@@ -200,7 +200,7 @@ void main() {
       platform: TargetPlatform.android_arm,
       mode: BuildMode.profile,
     );
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
@@ -233,7 +233,7 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem!.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
@@ -242,7 +242,7 @@ void main() {
       platform: TargetPlatform.android_arm,
       mode: BuildMode.debug,
     );
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
@@ -272,7 +272,7 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot forces platform linking on debug for darwin target platforms', () async {
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem!.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
@@ -281,7 +281,7 @@ void main() {
       platform: TargetPlatform.darwin,
       mode: BuildMode.debug,
     );
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
@@ -312,18 +312,18 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot does use track widget creation on debug builds', () async {
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem!.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final Environment testEnvironment = Environment.test(
-      fileSystem.currentDirectory,
+      fileSystem!.currentDirectory,
       defines: <String, String>{
         kBuildMode: getNameForBuildMode(BuildMode.debug),
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       logger: logger,
     );
     final String build = testEnvironment.buildDir.path;
@@ -332,7 +332,7 @@ void main() {
       platform: TargetPlatform.android_arm,
       mode: BuildMode.debug,
     );
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
@@ -362,7 +362,7 @@ void main() {
 
   testUsingContext('AotElfProfile Produces correct output directory', () async {
     final String build = androidEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(
           Artifact.genSnapshot,
@@ -388,7 +388,7 @@ void main() {
   testUsingContext('AotElfRelease configures gen_snapshot with code size directory', () async {
     androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
     final String build = androidEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(
           Artifact.genSnapshot,
@@ -463,7 +463,7 @@ void main() {
     iosEnvironment.defines[kBitcodeFlag] = 'true';
     iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     final String build = iosEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         // This path is not known by the cache due to the iOS gen_snapshot split.
         'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
@@ -537,7 +537,7 @@ void main() {
     iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
     final String build = iosEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         // This path is not known by the cache due to the iOS gen_snapshot split.
         'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
@@ -612,7 +612,7 @@ void main() {
     androidEnvironment.defines[kBuildMode] = getNameForBuildMode(BuildMode.profile);
     final String build = androidEnvironment.buildDir.path;
 
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(
           Artifact.genSnapshot,

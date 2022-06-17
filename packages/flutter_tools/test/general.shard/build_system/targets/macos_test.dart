@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -19,16 +19,16 @@ import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  Environment environment;
-  FileSystem fileSystem;
-  Artifacts artifacts;
-  FakeProcessManager processManager;
-  File binary;
-  BufferLogger logger;
-  FakeCommand copyFrameworkCommand;
-  FakeCommand lipoInfoNonFatCommand;
-  FakeCommand lipoInfoFatCommand;
-  FakeCommand lipoVerifyX86_64Command;
+  late Environment environment;
+  late FileSystem fileSystem;
+  late Artifacts artifacts;
+  late FakeProcessManager processManager;
+  late File binary;
+  late BufferLogger logger;
+  late FakeCommand copyFrameworkCommand;
+  late FakeCommand lipoInfoNonFatCommand;
+  late FakeCommand lipoInfoFatCommand;
+  late FakeCommand lipoVerifyX86_64Command;
 
   setUp(() {
     processManager = FakeProcessManager.empty();

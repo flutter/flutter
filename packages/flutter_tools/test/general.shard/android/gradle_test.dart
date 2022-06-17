@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -33,7 +33,7 @@ void main() {
   Cache.flutterRoot = getFlutterRoot();
 
   group('build artifacts', () {
-    FileSystem fileSystem;
+    late FileSystem fileSystem;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -194,8 +194,8 @@ void main() {
   });
 
   group('Gradle local.properties', () {
-    Artifacts localEngineArtifacts;
-    FileSystem fs;
+    Artifacts? localEngineArtifacts;
+    FileSystem? fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -211,7 +211,7 @@ void main() {
       });
     }
 
-    String propertyFor(String key, File file) {
+    String? propertyFor(String key, File file) {
       final Iterable<String> result = file.readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
           .map((String line) => line.split('=')[1]);
@@ -219,10 +219,10 @@ void main() {
     }
 
     Future<void> checkBuildVersion({
-      String manifest,
-      BuildInfo buildInfo,
-      String expectedBuildName,
-      String expectedBuildNumber,
+      required String manifest,
+      BuildInfo? buildInfo,
+      String? expectedBuildName,
+      String? expectedBuildNumber,
     }) async {
       final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -457,7 +457,7 @@ flutter:
   });
 
   group('isAppUsingAndroidX', () {
-    FileSystem fs;
+    FileSystem? fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -503,8 +503,8 @@ flutter:
   });
 
   group('printHowToConsumeAar', () {
-    BufferLogger logger;
-    FileSystem fileSystem;
+    late BufferLogger logger;
+    late FileSystem fileSystem;
 
     setUp(() {
       logger = BufferLogger.test();
@@ -694,8 +694,8 @@ flutter:
     // If this test fails, you probably edited templates/app/android.tmpl.
     // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
     // from the previous versions by a line that just says ";EOF".
-    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
-    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
+    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
+    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
     expect(
       legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),

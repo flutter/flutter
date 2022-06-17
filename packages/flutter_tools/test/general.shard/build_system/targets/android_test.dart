@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -21,10 +21,10 @@ import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  FakeProcessManager processManager;
-  FileSystem fileSystem;
-  Artifacts artifacts;
-  Logger logger;
+  FakeProcessManager? processManager;
+  late FileSystem fileSystem;
+  late Artifacts artifacts;
+  late Logger logger;
 
   setUp(() {
     logger = BufferLogger.test();
@@ -44,7 +44,7 @@ void main() {
       defines: <String, String>{
         kBuildMode: 'debug',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
@@ -78,7 +78,7 @@ void main() {
       inputs: <String, String>{
         kBundleSkSLPath: 'bundle.sksl',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
@@ -121,7 +121,7 @@ void main() {
         kBuildMode: 'profile',
       },
       artifacts: artifacts,
-      processManager: processManager,
+      processManager: processManager!,
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -144,7 +144,7 @@ void main() {
         kBuildMode: 'release',
       },
       artifacts: artifacts,
-      processManager: processManager,
+      processManager: processManager!,
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -168,11 +168,11 @@ void main() {
         kBuildMode: 'release',
       },
       artifacts: artifacts,
-      processManager: processManager,
+      processManager: processManager!,
       fileSystem: fileSystem,
       logger: logger,
     );
-    processManager.addCommand(FakeCommand(command: <String>[
+    processManager!.addCommand(FakeCommand(command: <String>[
       artifacts.getArtifactPath(
         Artifact.genSnapshot,
         platform: TargetPlatform.android_arm64,
@@ -205,11 +205,11 @@ void main() {
         kCodeSizeDirectory: 'code_size_1',
       },
       artifacts: artifacts,
-      processManager: processManager,
+      processManager: processManager!,
       fileSystem: fileSystem,
       logger: logger,
     );
-    processManager.addCommand(FakeCommand(command: <String>[
+    processManager!.addCommand(FakeCommand(command: <String>[
       artifacts.getArtifactPath(
         Artifact.genSnapshot,
         platform: TargetPlatform.android_arm64,
@@ -244,12 +244,12 @@ void main() {
         kExtraGenSnapshotOptions: 'foo,bar,baz=2',
         kTargetPlatform: 'android-arm',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
     );
-    processManager.addCommand(
+    processManager!.addCommand(
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(
           Artifact.genSnapshot,
@@ -284,12 +284,12 @@ void main() {
         kExtraGenSnapshotOptions: 'foo,--no-strip,bar',
         kTargetPlatform: 'android-arm',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
     );
-    processManager.addCommand(
+    processManager!.addCommand(
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(
           Artifact.genSnapshot,
@@ -319,7 +319,7 @@ void main() {
       defines: <String, String>{
         kBuildMode: 'release',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
@@ -347,7 +347,7 @@ void main() {
       defines: <String, String>{
         kBuildMode: 'release',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
@@ -434,7 +434,7 @@ void main() {
       defines: <String, String>{
         kBuildMode: 'release',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
