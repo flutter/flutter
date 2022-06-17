@@ -2875,28 +2875,50 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         child: Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-            return CustomMultiChildLayout(
-              delegate: _ScaffoldLayout(
-                extendBody: extendBody,
-                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                minInsets: minInsets,
-                minViewPadding: minViewPadding,
-                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                textDirection: textDirection,
-                isSnackBarFloating: isSnackBarFloating,
-                extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
-                snackBarWidth: snackBarWidth,
+            return Actions(
+              actions: <Type, Action<Intent>>{
+                DismissIntent: _DismissDrawerAction(context),
+              },
+              child: CustomMultiChildLayout(
+                delegate: _ScaffoldLayout(
+                  extendBody: extendBody,
+                  extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                  minInsets: minInsets,
+                  minViewPadding: minViewPadding,
+                  currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                  floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                  floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                  geometryNotifier: _geometryNotifier,
+                  previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                  textDirection: textDirection,
+                  isSnackBarFloating: isSnackBarFloating,
+                  extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+                  snackBarWidth: snackBarWidth,
+                ),
+                children: children,
               ),
-              children: children,
             );
           }),
         ),
       ),
     );
+  }
+}
+
+class _DismissDrawerAction extends DismissAction {
+  _DismissDrawerAction(this.context);
+
+  final BuildContext context;
+
+  @override
+  bool isEnabled(DismissIntent intent) {
+    return Scaffold.of(context).isDrawerOpen || Scaffold.of(context).isEndDrawerOpen;
+  }
+
+  @override
+  void invoke(DismissIntent intent) {
+    Scaffold.of(context).closeDrawer();
+    Scaffold.of(context).closeEndDrawer();
   }
 }
 
