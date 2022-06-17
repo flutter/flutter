@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -28,14 +26,14 @@ void main() {
   }
 
   group('AssetBundle asset variants', () {
-    FileSystem? testFileSystem;
+    late FileSystem testFileSystem;
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: globals.platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
-      testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
     });
 
     testUsingContext('main asset and variants', () async {

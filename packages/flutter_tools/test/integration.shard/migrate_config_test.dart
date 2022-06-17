@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
@@ -17,23 +15,23 @@ import 'test_utils.dart';
 
 
 void main() {
-  Directory? tempDir;
+  late Directory tempDir;
   late FlutterRunTestDriver flutter;
   late Logger logger;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
-    flutter = FlutterRunTestDriver(tempDir!);
+    flutter = FlutterRunTestDriver(tempDir);
     logger = BufferLogger.test();
   });
 
   tearDown(() async {
     await flutter.stop();
-    tryToDelete(tempDir!);
+    tryToDelete(tempDir);
   });
 
   testWithoutContext('parse simple config file', () async {
-    final File metadataFile = tempDir!.childFile('.metadata');
+    final File metadataFile = tempDir.childFile('.metadata');
     metadataFile.createSync(recursive: true);
     metadataFile.writeAsStringSync('''
 # This file tracks properties of this Flutter project.
@@ -157,9 +155,9 @@ migration:
   testUsingContext('populate migrate config', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
-    await project.setUpIn(tempDir!);
+    await project.setUpIn(tempDir);
 
-    final File metadataFile = tempDir!.childFile('.metadata');
+    final File metadataFile = tempDir.childFile('.metadata');
 
     const String currentRevision = 'test_base_revision';
     const String createRevision = 'test_create_revision';
@@ -188,7 +186,7 @@ migration:
     expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios]!.baseRevision, equals(currentRevision));
     expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios]!.createRevision, equals(createRevision));
 
-    final File metadataFileOutput = tempDir!.childFile('.metadata_output');
+    final File metadataFileOutput = tempDir.childFile('.metadata_output');
     metadata.writeFile(outputFile: metadataFileOutput);
     expect(metadataFileOutput.readAsStringSync(), equals('''
 # This file tracks properties of this Flutter project.

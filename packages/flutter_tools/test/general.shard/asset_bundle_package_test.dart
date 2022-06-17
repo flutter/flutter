@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -103,7 +101,7 @@ $assetsSection
     }
   }
 
-  FileSystem? testFileSystem;
+  late FileSystem testFileSystem;
 
   setUp(() async {
     testFileSystem = MemoryFileSystem(
@@ -111,7 +109,7 @@ $assetsSection
         ? FileSystemStyle.windows
         : FileSystemStyle.posix,
     );
-    testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+    testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
   });
 
   group('AssetBundle assets from packages', () {

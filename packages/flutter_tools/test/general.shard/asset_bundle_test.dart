@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -21,7 +19,7 @@ import '../src/context.dart';
 
 void main() {
   group('AssetBundle.build', () {
-    FileSystem? testFileSystem;
+    late FileSystem testFileSystem;
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
@@ -29,7 +27,7 @@ void main() {
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
-      testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('nonempty', () async {
@@ -390,29 +388,29 @@ flutter:
 
 
   group('Shaders: ', () {
-    MemoryFileSystem? fileSystem;
-    Artifacts? artifacts;
-    String? impellerc;
+    late MemoryFileSystem fileSystem;
+    late Artifacts artifacts;
+    late String impellerc;
     late Directory output;
-    String? shaderPath;
-    String? outputPath;
+    late String shaderPath;
+    late String outputPath;
 
     setUp(() {
       artifacts = Artifacts.test();
       fileSystem = MemoryFileSystem.test();
-      impellerc = artifacts!.getHostArtifact(HostArtifact.impellerc).path;
+      impellerc = artifacts.getHostArtifact(HostArtifact.impellerc).path;
 
-      fileSystem!.file(impellerc).createSync(recursive: true);
+      fileSystem.file(impellerc).createSync(recursive: true);
 
-      output = fileSystem!.directory('asset_output')..createSync(recursive: true);
-      shaderPath = fileSystem!.path.join('assets', 'shader.frag');
-      outputPath = fileSystem!.path.join(output.path, 'assets', 'shader.frag');
-      fileSystem!.file(shaderPath).createSync(recursive: true);
+      output = fileSystem.directory('asset_output')..createSync(recursive: true);
+      shaderPath = fileSystem.path.join('assets', 'shader.frag');
+      outputPath = fileSystem.path.join(output.path, 'assets', 'shader.frag');
+      fileSystem.file(shaderPath).createSync(recursive: true);
     });
 
     testUsingContext('Including a shader triggers the shader compiler', () async {
-      fileSystem!.file('.packages').createSync();
-      fileSystem!.file('pubspec.yaml')
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
   name: example
@@ -432,13 +430,13 @@ flutter:
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            impellerc!,
+            impellerc,
             '--flutter-spirv',
             '--spirv=$outputPath',
             '--input=/$shaderPath',
           ],
           onRun: () {
-            fileSystem!.file(outputPath).createSync(recursive: true);
+            fileSystem.file(outputPath).createSync(recursive: true);
           },
         ),
       ]),
