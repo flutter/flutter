@@ -138,7 +138,7 @@ void main() {
 
   group('Common text editing shortcuts: ',
     () {
-      final TargetPlatformVariant allExceptApple = TargetPlatformVariant(TargetPlatform.values.toSet()..removeAll(<TargetPlatform>[TargetPlatform.macOS, TargetPlatform.iOS]));
+      final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS});
 
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
