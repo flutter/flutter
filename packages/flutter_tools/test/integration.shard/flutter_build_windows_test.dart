@@ -77,7 +77,7 @@ void main() {
       expect(fileVersion, equals('1.0.0.0'));
       expect(productVersion, equals('1.0.0'));
     });
-  }, skip: io.Platform.isWindows);
+  }, skip: !io.Platform.isWindows);
 }
 
 String _getFileVersion(File file) {
