@@ -32,7 +32,7 @@ class FragmentShader : public Shader {
   static fml::RefPtr<FragmentShader> Create(Dart_Handle dart_handle,
                                             sk_sp<SkShader> shader);
 
-  std::shared_ptr<DlColorSource> shader(SkSamplingOptions&) override;
+  std::shared_ptr<DlColorSource> shader(DlImageSampling) override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

@@ -4,6 +4,7 @@
 
 #include <memory>
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_canvas_recorder.h"
 #include "flutter/display_list/display_list_utils.h"
@@ -63,10 +64,8 @@ constexpr SkPoint TestPoints[] = {
 };
 #define TestPointCount sizeof(TestPoints) / (sizeof(TestPoints[0]))
 
-static const SkSamplingOptions kNearestSampling =
-    SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
-static const SkSamplingOptions kLinearSampling =
-    SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
+static DlImageSampling kNearestSampling = DlImageSampling::kNearestNeighbor;
+static DlImageSampling kLinearSampling = DlImageSampling::kLinear;
 
 static sk_sp<DlImage> MakeTestImage(int w, int h, int checker_size) {
   sk_sp<SkSurface> surface = SkSurface::MakeRasterN32Premul(w, h);
@@ -391,7 +390,7 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "SetColorSource", {
-      {0, 112, 0, 0, [](DisplayListBuilder& b) {b.setColorSource(&kTestSource1);}},
+      {0, 96, 0, 0, [](DisplayListBuilder& b) {b.setColorSource(&kTestSource1);}},
       // stop_count * (sizeof(float) + sizeof(uint32_t)) = 80
       {0, 80 + 6 * 4, 0, 0, [](DisplayListBuilder& b) {b.setColorSource(kTestSource2.get());}},
       {0, 80 + 6 * 4, 0, 0, [](DisplayListBuilder& b) {b.setColorSource(kTestSource3.get());}},
@@ -411,9 +410,9 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestErodeImageFilter1);}},
       {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestErodeImageFilter2);}},
       {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestErodeImageFilter3);}},
-      {0, 80, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestMatrixImageFilter1);}},
-      {0, 80, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestMatrixImageFilter2);}},
-      {0, 80, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestMatrixImageFilter3);}},
+      {0, 64, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestMatrixImageFilter1);}},
+      {0, 64, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestMatrixImageFilter2);}},
+      {0, 64, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestMatrixImageFilter3);}},
       {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestComposeImageFilter1);}},
       {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestComposeImageFilter2);}},
       {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(&kTestComposeImageFilter3);}},
@@ -709,46 +708,46 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "DrawImage", {
-      {1, 48, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, kNearestSampling, false);}},
-      {1, 48, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, kNearestSampling, true);}},
-      {1, 48, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {20, 10}, kNearestSampling, false);}},
-      {1, 48, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 20}, kNearestSampling, false);}},
-      {1, 48, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, kLinearSampling, false);}},
-      {1, 48, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage2, {10, 10}, kNearestSampling, false);}},
+      {1, 24, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, kNearestSampling, false);}},
+      {1, 24, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, kNearestSampling, true);}},
+      {1, 24, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {20, 10}, kNearestSampling, false);}},
+      {1, 24, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 20}, kNearestSampling, false);}},
+      {1, 24, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, kLinearSampling, false);}},
+      {1, 24, -1, 48, [](DisplayListBuilder& b) {b.drawImage(TestImage2, {10, 10}, kNearestSampling, false);}},
     }
   },
   { "DrawImageRect", {
-      {1, 80, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+      {1, 56, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
                                                                 kNearestSampling, false);}},
-      {1, 80, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+      {1, 56, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
                                                                 kNearestSampling, true);}},
-      {1, 80, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+      {1, 56, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
                                                                 kNearestSampling, false,
                                                                 SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint);}},
-      {1, 80, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
+      {1, 56, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
                                                                 kNearestSampling, false);}},
-      {1, 80, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
+      {1, 56, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
                                                                 kNearestSampling, false);}},
-      {1, 80, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+      {1, 56, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
                                                                 kLinearSampling, false);}},
-      {1, 80, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
+      {1, 56, -1, 80, [](DisplayListBuilder& b) {b.drawImageRect(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
                                                                 kNearestSampling, false);}},
     }
   },
   { "DrawImageNine", {
       // SkVanvas::drawImageNine is immediately converted to drawImageLattice
       {1, 48, -1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                SkFilterMode::kNearest, false);}},
+                                                                DlFilterMode::kNearest, false);}},
       {1, 48, -1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                SkFilterMode::kNearest, true);}},
+                                                                DlFilterMode::kNearest, true);}},
       {1, 48, -1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
-                                                                SkFilterMode::kNearest, false);}},
+                                                                DlFilterMode::kNearest, false);}},
       {1, 48, -1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
-                                                                SkFilterMode::kNearest, false);}},
+                                                                DlFilterMode::kNearest, false);}},
       {1, 48, -1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                SkFilterMode::kLinear, false);}},
+                                                                DlFilterMode::kLinear, false);}},
       {1, 48, -1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
-                                                                SkFilterMode::kNearest, false);}},
+                                                                DlFilterMode::kNearest, false);}},
     }
   },
   { "DrawImageLattice", {
@@ -764,80 +763,80 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       // if fColors and fRectTypes are not null, add (fXCount + 1) * (fYCount + 1) * 5
       {1, 88, -1, 88, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage1,
                                                                    {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                                                                   {10, 10, 40, 40}, SkFilterMode::kNearest, false);}},
+                                                                   {10, 10, 40, 40}, DlFilterMode::kNearest, false);}},
       {1, 88, -1, 88, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage1,
                                                                    {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                                                                   {10, 10, 40, 45}, SkFilterMode::kNearest, false);}},
+                                                                   {10, 10, 40, 45}, DlFilterMode::kNearest, false);}},
       {1, 88, -1, 88, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage1,
                                                                    {kTestDivs2, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                                                                   {10, 10, 40, 40}, SkFilterMode::kNearest, false);}},
+                                                                   {10, 10, 40, 40}, DlFilterMode::kNearest, false);}},
       // One less yDiv does not change the allocation due to 8-byte alignment
       {1, 88, -1, 88, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage1,
                                                                    {kTestDivs1, kTestDivs1, nullptr, 3, 2, nullptr, nullptr},
-                                                                   {10, 10, 40, 40}, SkFilterMode::kNearest, false);}},
+                                                                   {10, 10, 40, 40}, DlFilterMode::kNearest, false);}},
       {1, 88, -1, 88, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage1,
                                                                    {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                                                                   {10, 10, 40, 40}, SkFilterMode::kLinear, false);}},
+                                                                   {10, 10, 40, 40}, DlFilterMode::kLinear, false);}},
       {1, 96, -1, 96, [](DisplayListBuilder& b) {b.setColor(SK_ColorMAGENTA);
                                                 b.drawImageLattice(TestImage1,
                                                                    {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                                                                   {10, 10, 40, 40}, SkFilterMode::kNearest, true);}},
+                                                                   {10, 10, 40, 40}, DlFilterMode::kNearest, true);}},
       {1, 88, -1, 88, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage2,
                                                                    {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                                                                   {10, 10, 40, 40}, SkFilterMode::kNearest, false);}},
+                                                                   {10, 10, 40, 40}, DlFilterMode::kNearest, false);}},
       // Supplying fBounds does not change size because the Op record always includes it
       {1, 88, -1, 88, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage1,
                                                                    {kTestDivs1, kTestDivs1, nullptr, 3, 3, &kTestLatticeSrcRect, nullptr},
-                                                                   {10, 10, 40, 40}, SkFilterMode::kNearest, false);}},
+                                                                   {10, 10, 40, 40}, DlFilterMode::kNearest, false);}},
       {1, 128, -1, 128, [](DisplayListBuilder& b) {b.drawImageLattice(TestImage1,
                                                                      {kTestDivs3, kTestDivs3, kTestRTypes, 2, 2, nullptr, kTestLatticeColors},
-                                                                     {10, 10, 40, 40}, SkFilterMode::kNearest, false);}},
+                                                                     {10, 10, 40, 40}, DlFilterMode::kNearest, false);}},
     }
   },
   { "DrawAtlas", {
-      {1, 48 + 32 + 32, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
+      {1, 48 + 32 + 8, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     kNearestSampling, nullptr, false);}},
-      {1, 48 + 32 + 32, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
+      {1, 48 + 32 + 8, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     kNearestSampling, nullptr, true);}},
-      {1, 48 + 32 + 32, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
+      {1, 48 + 32 + 8, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {0, 1, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     kNearestSampling, nullptr, false);}},
-      {1, 48 + 32 + 32, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
+      {1, 48 + 32 + 8, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 25, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     kNearestSampling, nullptr, false);}},
-      {1, 48 + 32 + 32, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
+      {1, 48 + 32 + 8, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     kLinearSampling, nullptr, false);}},
-      {1, 48 + 32 + 32, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
+      {1, 48 + 32 + 8, -1, 48 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kDstIn,
                     kNearestSampling, nullptr, false);}},
-      {1, 64 + 32 + 32, -1, 64 + 32 + 32, [](DisplayListBuilder& b) {
+      {1, 64 + 32 + 8, -1, 64 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static SkRect cullRect = { 0, 0, 200, 200 };
         b.drawAtlas(TestImage2, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     kNearestSampling, &cullRect, false);}},
-      {1, 48 + 32 + 32 + 8, -1, 48 + 32 + 32 + 8, [](DisplayListBuilder& b) {
+      {1, 48 + 32 + 8 + 8, -1, 48 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static DlColor colors[] = { DlColor::kBlue(), DlColor::kGreen() };
         b.drawAtlas(TestImage1, xforms, texs, colors, 2, DlBlendMode::kSrcIn,
                     kNearestSampling, nullptr, false);}},
-      {1, 64 + 32 + 32 + 8, -1, 64 + 32 + 32 + 8, [](DisplayListBuilder& b) {
+      {1, 64 + 32 + 8 + 8, -1, 64 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static DlColor colors[] = { DlColor::kBlue(), DlColor::kGreen() };
@@ -893,7 +892,7 @@ TEST(DisplayList, SingleOpSizes) {
       sk_sp<DisplayList> dl = invocation.Build();
       auto desc = group.op_name + "(variant " + std::to_string(i + 1) + ")";
       ASSERT_EQ(dl->op_count(false), invocation.op_count()) << desc;
-      EXPECT_EQ(dl->bytes(false), invocation.byte_count()) << desc;
+      ASSERT_EQ(dl->bytes(false), invocation.byte_count()) << desc;
     }
   }
 }
@@ -1502,18 +1501,18 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
                                    kNearestSampling, false);
              , true);
   RUN_TESTS(builder.drawImageNine(TestImage2, {20, 20, 30, 30}, {0, 0, 20, 20},
-                                  SkFilterMode::kLinear, true););
+                                  DlFilterMode::kLinear, true););
   RUN_TESTS2(builder.drawImageNine(TestImage2, {20, 20, 30, 30}, {0, 0, 20, 20},
-                                   SkFilterMode::kLinear, false);
+                                   DlFilterMode::kLinear, false);
              , true);
   RUN_TESTS(builder.drawImageLattice(
       TestImage1,
       {kTestDivs1, kTestDivs1, nullptr, 3, 3, &kTestLatticeSrcRect, nullptr},
-      {10, 10, 40, 40}, SkFilterMode::kNearest, true););
+      {10, 10, 40, 40}, DlFilterMode::kNearest, true););
   RUN_TESTS2(builder.drawImageLattice(
       TestImage1,
       {kTestDivs1, kTestDivs1, nullptr, 3, 3, &kTestLatticeSrcRect, nullptr},
-      {10, 10, 40, 40}, SkFilterMode::kNearest, false);
+      {10, 10, 40, 40}, DlFilterMode::kNearest, false);
              , true);
   static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
   static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};

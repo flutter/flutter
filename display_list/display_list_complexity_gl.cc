@@ -533,7 +533,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawVertices(
 void DisplayListGLComplexityCalculator::GLHelper::drawImage(
     const sk_sp<DlImage> image,
     const SkPoint point,
-    const SkSamplingOptions& sampling,
+    DlImageSampling sampling,
     bool render_with_attributes) {
   if (IsComplex()) {
     return;
@@ -616,7 +616,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawImageNine(
     const sk_sp<DlImage> image,
     const SkIRect& center,
     const SkRect& dst,
-    SkFilterMode filter,
+    DlFilterMode filter,
     bool render_with_attributes) {
   if (IsComplex()) {
     return;

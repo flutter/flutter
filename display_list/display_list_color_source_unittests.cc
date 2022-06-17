@@ -5,6 +5,7 @@
 #include "flutter/display_list/display_list_attributes_testing.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_color_source.h"
+#include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/types.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -76,7 +77,7 @@ static const sk_sp<SkShader> kTestAlphaUnknownShader =
 
 TEST(DisplayListColorSource, BuilderSetGet) {
   DlImageColorSource source(kTestImage1, DlTileMode::kClamp, DlTileMode::kClamp,
-                            DisplayList::LinearSampling, &kTestMatrix1);
+                            DlImageSampling::kLinear, &kTestMatrix1);
   DisplayListBuilder builder;
   ASSERT_EQ(builder.getColorSource(), nullptr);
   builder.setColorSource(&source);
@@ -117,10 +118,10 @@ TEST(DisplayListColorSource, FromSkiaColorShader) {
 
 TEST(DisplayListColorSource, FromSkiaImageShader) {
   sk_sp<SkShader> shader =
-      kTestImage1->makeShader(DisplayList::LinearSampling, &kTestMatrix1);
+      kTestImage1->makeShader(ToSk(DlImageSampling::kLinear), &kTestMatrix1);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
   DlImageColorSource dl_source(kTestImage1, DlTileMode::kClamp,
-                               DlTileMode::kClamp, DisplayList::LinearSampling,
+                               DlTileMode::kClamp, DlImageSampling::kLinear,
                                &kTestMatrix1);
   ASSERT_EQ(source->type(), DlColorSourceType::kImage);
   ASSERT_EQ(*source->asImage(), dl_source);
@@ -128,7 +129,7 @@ TEST(DisplayListColorSource, FromSkiaImageShader) {
   ASSERT_EQ(source->asImage()->matrix(), kTestMatrix1);
   ASSERT_EQ(source->asImage()->horizontal_tile_mode(), DlTileMode::kClamp);
   ASSERT_EQ(source->asImage()->vertical_tile_mode(), DlTileMode::kClamp);
-  ASSERT_EQ(source->asImage()->sampling(), DisplayList::LinearSampling);
+  ASSERT_EQ(source->asImage()->sampling(), DlImageSampling::kLinear);
 
   ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), nullptr);
@@ -278,19 +279,19 @@ TEST(DisplayListColorSource, ColorNotEquals) {
 
 TEST(DisplayListColorSource, ImageConstructor) {
   DlImageColorSource source(kTestImage1, DlTileMode::kClamp, DlTileMode::kClamp,
-                            DisplayList::LinearSampling, &kTestMatrix1);
+                            DlImageSampling::kLinear, &kTestMatrix1);
 }
 
 TEST(DisplayListColorSource, ImageShared) {
   DlImageColorSource source(kTestImage1, DlTileMode::kClamp, DlTileMode::kClamp,
-                            DisplayList::LinearSampling, &kTestMatrix1);
+                            DlImageSampling::kLinear, &kTestMatrix1);
   ASSERT_NE(source.shared().get(), &source);
   ASSERT_EQ(*source.shared(), source);
 }
 
 TEST(DisplayListColorSource, ImageAsImage) {
   DlImageColorSource source(kTestImage1, DlTileMode::kClamp, DlTileMode::kClamp,
-                            DisplayList::LinearSampling, &kTestMatrix1);
+                            DlImageSampling::kLinear, &kTestMatrix1);
   ASSERT_NE(source.asImage(), nullptr);
   ASSERT_EQ(source.asImage(), &source);
 
@@ -303,69 +304,69 @@ TEST(DisplayListColorSource, ImageAsImage) {
 
 TEST(DisplayListColorSource, ImageContents) {
   DlImageColorSource source(kTestImage1, DlTileMode::kRepeat,
-                            DlTileMode::kMirror, DisplayList::LinearSampling,
+                            DlTileMode::kMirror, DlImageSampling::kLinear,
                             &kTestMatrix1);
   ASSERT_EQ(source.image(), kTestImage1);
   ASSERT_EQ(source.horizontal_tile_mode(), DlTileMode::kRepeat);
   ASSERT_EQ(source.vertical_tile_mode(), DlTileMode::kMirror);
-  ASSERT_EQ(source.sampling(), DisplayList::LinearSampling);
+  ASSERT_EQ(source.sampling(), DlImageSampling::kLinear);
   ASSERT_EQ(source.matrix(), kTestMatrix1);
   ASSERT_EQ(source.is_opaque(), true);
 }
 
 TEST(DisplayListColorSource, AlphaImageContents) {
   DlImageColorSource source(kTestAlphaImage1, DlTileMode::kRepeat,
-                            DlTileMode::kMirror, DisplayList::LinearSampling,
+                            DlTileMode::kMirror, DlImageSampling::kLinear,
                             &kTestMatrix1);
   ASSERT_EQ(source.image(), kTestAlphaImage1);
   ASSERT_EQ(source.horizontal_tile_mode(), DlTileMode::kRepeat);
   ASSERT_EQ(source.vertical_tile_mode(), DlTileMode::kMirror);
-  ASSERT_EQ(source.sampling(), DisplayList::LinearSampling);
+  ASSERT_EQ(source.sampling(), DlImageSampling::kLinear);
   ASSERT_EQ(source.matrix(), kTestMatrix1);
   ASSERT_EQ(source.is_opaque(), false);
 }
 
 TEST(DisplayListColorSource, ImageEquals) {
   DlImageColorSource source1(kTestImage1, DlTileMode::kClamp,
-                             DlTileMode::kMirror, DisplayList::LinearSampling,
+                             DlTileMode::kMirror, DlImageSampling::kLinear,
                              &kTestMatrix1);
   DlImageColorSource source2(kTestImage1, DlTileMode::kClamp,
-                             DlTileMode::kMirror, DisplayList::LinearSampling,
+                             DlTileMode::kMirror, DlImageSampling::kLinear,
                              &kTestMatrix1);
   TestEquals(source1, source2);
 }
 
 TEST(DisplayListColorSource, ImageNotEquals) {
   DlImageColorSource source1(kTestImage1, DlTileMode::kClamp,
-                             DlTileMode::kMirror, DisplayList::LinearSampling,
+                             DlTileMode::kMirror, DlImageSampling::kLinear,
                              &kTestMatrix1);
   {
     DlImageColorSource source2(kTestAlphaImage1, DlTileMode::kClamp,
-                               DlTileMode::kMirror, DisplayList::LinearSampling,
+                               DlTileMode::kMirror, DlImageSampling::kLinear,
                                &kTestMatrix1);
     TestNotEquals(source1, source2, "Image differs");
   }
   {
     DlImageColorSource source2(kTestImage1, DlTileMode::kRepeat,
-                               DlTileMode::kMirror, DisplayList::LinearSampling,
+                               DlTileMode::kMirror, DlImageSampling::kLinear,
                                &kTestMatrix1);
     TestNotEquals(source1, source2, "hTileMode differs");
   }
   {
     DlImageColorSource source2(kTestImage1, DlTileMode::kClamp,
-                               DlTileMode::kRepeat, DisplayList::LinearSampling,
+                               DlTileMode::kRepeat, DlImageSampling::kLinear,
                                &kTestMatrix1);
     TestNotEquals(source1, source2, "vTileMode differs");
   }
   {
     DlImageColorSource source2(kTestImage1, DlTileMode::kClamp,
-                               DlTileMode::kMirror, DisplayList::CubicSampling,
+                               DlTileMode::kMirror, DlImageSampling::kCubic,
                                &kTestMatrix1);
     TestNotEquals(source1, source2, "Sampling differs");
   }
   {
     DlImageColorSource source2(kTestImage1, DlTileMode::kClamp,
-                               DlTileMode::kMirror, DisplayList::LinearSampling,
+                               DlTileMode::kMirror, DlImageSampling::kLinear,
                                &kTestMatrix2);
     TestNotEquals(source1, source2, "Matrix differs");
   }

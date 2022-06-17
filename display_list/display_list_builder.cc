@@ -852,7 +852,7 @@ void DisplayListBuilder::drawVertices(const DlVertices* vertices,
 
 void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
                                    const SkPoint point,
-                                   const SkSamplingOptions& sampling,
+                                   DlImageSampling sampling,
                                    bool render_with_attributes) {
   render_with_attributes
       ? Push<DrawImageWithAttrOp>(0, 1, std::move(image), point, sampling)
@@ -861,7 +861,7 @@ void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
 }
 void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
                                    const SkPoint point,
-                                   const SkSamplingOptions& sampling,
+                                   DlImageSampling sampling,
                                    const DlPaint* paint) {
   if (paint != nullptr) {
     setAttributesFromDlPaint(*paint,
@@ -874,7 +874,7 @@ void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
 void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
                                        const SkRect& src,
                                        const SkRect& dst,
-                                       const SkSamplingOptions& sampling,
+                                       DlImageSampling sampling,
                                        bool render_with_attributes,
                                        SkCanvas::SrcRectConstraint constraint) {
   Push<DrawImageRectOp>(0, 1, std::move(image), src, dst, sampling,
@@ -884,7 +884,7 @@ void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
 void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
                                        const SkRect& src,
                                        const SkRect& dst,
-                                       const SkSamplingOptions& sampling,
+                                       DlImageSampling sampling,
                                        const DlPaint* paint,
                                        SkCanvas::SrcRectConstraint constraint) {
   if (paint != nullptr) {
@@ -898,7 +898,7 @@ void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
 void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
                                        const SkIRect& center,
                                        const SkRect& dst,
-                                       SkFilterMode filter,
+                                       DlFilterMode filter,
                                        bool render_with_attributes) {
   render_with_attributes
       ? Push<DrawImageNineWithAttrOp>(0, 1, std::move(image), center, dst,
@@ -909,7 +909,7 @@ void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
 void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
                                        const SkIRect& center,
                                        const SkRect& dst,
-                                       SkFilterMode filter,
+                                       DlFilterMode filter,
                                        const DlPaint* paint) {
   if (paint != nullptr) {
     setAttributesFromDlPaint(*paint,
@@ -922,7 +922,7 @@ void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
 void DisplayListBuilder::drawImageLattice(const sk_sp<DlImage> image,
                                           const SkCanvas::Lattice& lattice,
                                           const SkRect& dst,
-                                          SkFilterMode filter,
+                                          DlFilterMode filter,
                                           bool render_with_attributes) {
   int xDivCount = lattice.fXCount;
   int yDivCount = lattice.fYCount;
@@ -947,7 +947,7 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
                                    const DlColor colors[],
                                    int count,
                                    DlBlendMode mode,
-                                   const SkSamplingOptions& sampling,
+                                   DlImageSampling sampling,
                                    const SkRect* cull_rect,
                                    bool render_with_attributes) {
   int bytes = count * (sizeof(SkRSXform) + sizeof(SkRect));
@@ -985,7 +985,7 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
                                    const DlColor colors[],
                                    int count,
                                    DlBlendMode mode,
-                                   const SkSamplingOptions& sampling,
+                                   DlImageSampling sampling,
                                    const SkRect* cull_rect,
                                    const DlPaint* paint) {
   if (paint != nullptr) {

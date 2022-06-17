@@ -6,6 +6,7 @@
 #include "flutter/lib/ui/painting/image_filter.h"
 
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "lib/ui/painting/display_list_image_gpu.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -54,15 +55,14 @@ void ImageShader::initWithImage(CanvasImage* image,
   sk_image_ = UIDartState::CreateGPUObject(std::move(raw_sk_image));
   SkMatrix local_matrix = ToSkMatrix(matrix4);
   sampling_is_locked_ = filter_quality_index >= 0;
-  SkSamplingOptions sampling =
+  DlImageSampling sampling =
       sampling_is_locked_ ? ImageFilter::SamplingFromIndex(filter_quality_index)
-                          : DisplayList::LinearSampling;
+                          : DlImageSampling::kLinear;
   cached_shader_ = UIDartState::CreateGPUObject(sk_make_sp<DlImageColorSource>(
       sk_image_.skia_object(), ToDl(tmx), ToDl(tmy), sampling, &local_matrix));
 }
 
-std::shared_ptr<DlColorSource> ImageShader::shader(
-    SkSamplingOptions& sampling) {
+std::shared_ptr<DlColorSource> ImageShader::shader(DlImageSampling sampling) {
   if (sampling_is_locked_) {
     sampling = cached_shader_.skia_object()->sampling();
   }

@@ -7,6 +7,7 @@
 
 #include <optional>
 
+#include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/logging.h"
 
@@ -216,11 +217,6 @@ class SaveLayerOptions {
 // through an instance of DisplayListBuilder::build().
 class DisplayList : public SkRefCnt {
  public:
-  static const SkSamplingOptions NearestSampling;
-  static const SkSamplingOptions LinearSampling;
-  static const SkSamplingOptions MipmapSampling;
-  static const SkSamplingOptions CubicSampling;
-
   DisplayList();
 
   ~DisplayList();
