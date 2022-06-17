@@ -61,7 +61,7 @@ class AnalyzeCommand extends FlutterCommand {
               'only intended to be used for debugging the tooling.',
         hide: !verboseHelp);
     argParser.addOption('suggestions',
-        help: 'Show suggestions about the current flutter project'
+        help: 'Show suggestions about the current flutter project.'
     );
 
     // Hidden option to enable a benchmarking mode.
