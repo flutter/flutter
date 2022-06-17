@@ -494,7 +494,7 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final Uri processObservatoryUri = await testDevice.observatoryUri;
+          final Uri? processObservatoryUri = await testDevice.observatoryUri;
           if (processObservatoryUri != null) {
             globals.printTrace('test $ourTestCount: Observatory uri is available at $processObservatoryUri');
           } else {

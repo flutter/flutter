@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -37,8 +37,8 @@ void main() {
   });
 
   group('analytics', () {
-    Directory tempDir;
-    Config testConfig;
+    late Directory tempDir;
+    Config? testConfig;
 
     setUp(() {
       Cache.flutterRoot = '../..';
@@ -108,7 +108,7 @@ void main() {
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
-      testConfig.setValue(flutterWebFeature.configSetting, true);
+      testConfig!.setValue(flutterWebFeature.configSetting!, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
@@ -126,9 +126,9 @@ void main() {
     });
 
     testUsingContext('Usage records multiple features in experiment setting', () async {
-      testConfig.setValue(flutterWebFeature.configSetting, true);
-      testConfig.setValue(flutterLinuxDesktopFeature.configSetting, true);
-      testConfig.setValue(flutterMacOSDesktopFeature.configSetting, true);
+      testConfig!.setValue(flutterWebFeature.configSetting!, true);
+      testConfig!.setValue(flutterLinuxDesktopFeature.configSetting!, true);
+      testConfig!.setValue(flutterMacOSDesktopFeature.configSetting!, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
@@ -150,11 +150,11 @@ void main() {
   });
 
   group('analytics with fakes', () {
-    MemoryFileSystem memoryFileSystem;
-    FakeStdio fakeStdio;
-    TestUsage testUsage;
-    FakeClock fakeClock;
-    FakeDoctor doctor;
+    MemoryFileSystem? memoryFileSystem;
+    FakeStdio? fakeStdio;
+    TestUsage? testUsage;
+    FakeClock? fakeClock;
+    FakeDoctor? doctor;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -165,13 +165,13 @@ void main() {
     });
 
     testUsingContext('flutter commands send timing events', () async {
-      fakeClock.times = <int>[1000, 2000];
-      doctor.diagnoseSucceeds = true;
+      fakeClock!.times = <int>[1000, 2000];
+      doctor!.diagnoseSucceeds = true;
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
-      expect(testUsage.timings, contains(
+      expect(testUsage!.timings, contains(
         const TestTimingEvent(
             'flutter', 'doctor', Duration(milliseconds: 1000), label: 'success',
         ),
@@ -183,14 +183,14 @@ void main() {
     });
 
     testUsingContext('doctor fail sends warning', () async {
-      fakeClock.times = <int>[1000, 2000];
-      doctor.diagnoseSucceeds = false;
+      fakeClock!.times = <int>[1000, 2000];
+      doctor!.diagnoseSucceeds = false;
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
 
-      expect(testUsage.timings, contains(
+      expect(testUsage!.timings, contains(
         const TestTimingEvent(
           'flutter', 'doctor', Duration(milliseconds: 1000), label: 'warning',
         ),
@@ -211,7 +211,7 @@ void main() {
 
     testUsingContext('compound command usage path', () async {
       final BuildCommand buildCommand = BuildCommand();
-      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'] as FlutterCommand;
+      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk']! as FlutterCommand;
 
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
@@ -220,7 +220,7 @@ void main() {
 
     testUsingContext('command sends localtime', () async {
       const int kMillis = 1000;
-      fakeClock.times = <int>[kMillis];
+      fakeClock!.times = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
       final Usage usage = Usage(
@@ -250,7 +250,7 @@ void main() {
 
     testUsingContext('event sends localtime', () async {
       const int kMillis = 1000;
-      fakeClock.times = <int>[kMillis];
+      fakeClock!.times = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
       final Usage usage = Usage(
@@ -280,7 +280,7 @@ void main() {
   });
 
   group('analytics bots', () {
-    Directory tempDir;
+    late Directory tempDir;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
@@ -341,8 +341,8 @@ Analytics throwingAnalyticsIOFactory(
   String trackingId,
   String applicationName,
   String applicationVersion, {
-  String analyticsUrl,
-  Directory documentDirectory,
+  String? analyticsUrl,
+  Directory? documentDirectory,
 }) {
   throw const FileSystemException('Could not create file');
 }
@@ -368,9 +368,9 @@ class FakeDoctor extends Fake implements Doctor {
     bool androidLicenses = false,
     bool verbose = true,
     bool showColor = true,
-    AndroidLicenseValidator androidLicenseValidator,
+    AndroidLicenseValidator? androidLicenseValidator,
     bool showPii = true,
-    List<ValidatorTask> startedValidatorTasks,
+    List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
   }) async {
     return diagnoseSucceeds;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -34,9 +34,9 @@ final Platform macosPlatform = FakePlatform(
 );
 
 void main() {
-  FakePlatform osx;
-  FileSystemUtils fsUtils;
-  MemoryFileSystem fileSystem;
+  FakePlatform? osx;
+  FileSystemUtils? fsUtils;
+  MemoryFileSystem? fileSystem;
 
   setUp(() {
     osx = FakePlatform(
@@ -44,12 +44,12 @@ void main() {
       operatingSystem: 'macos',
     );
     fileSystem = MemoryFileSystem.test();
-    fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
+    fsUtils = FileSystemUtils(fileSystem: fileSystem!, platform: osx!);
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
-    FakeSimControl simControl;
-    Xcode xcode;
+    late FakeSimControl simControl;
+    Xcode? xcode;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -100,14 +100,14 @@ void main() {
   });
 
   group('logFilePath', () {
-    FakeSimControl simControl;
+    late FakeSimControl simControl;
 
     setUp(() {
       simControl = FakeSimControl();
     });
 
     testUsingContext('defaults to rooted from HOME', () {
-      osx.environment['HOME'] = '/foo/bar';
+      osx!.environment['HOME'] = '/foo/bar';
       final IOSSimulator simulator = IOSSimulator(
         '123',
         name: 'iPhone 11',
@@ -123,8 +123,8 @@ void main() {
     }, testOn: 'posix');
 
     testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
-      osx.environment['HOME'] = '/foo/bar';
-      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
+      osx!.environment['HOME'] = '/foo/bar';
+      osx!.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
       final IOSSimulator simulator = IOSSimulator(
         '456',
         name: 'iPhone 11',
@@ -163,7 +163,7 @@ void main() {
   });
 
   group('sdkMajorVersion', () {
-    FakeSimControl simControl;
+    late FakeSimControl simControl;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -205,7 +205,7 @@ void main() {
   });
 
   group('IOSSimulator.isSupported', () {
-    FakeSimControl simControl;
+    late FakeSimControl simControl;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -368,8 +368,8 @@ void main() {
   });
 
   group('device log tool', () {
-    FakeProcessManager fakeProcessManager;
-    FakeSimControl simControl;
+    FakeProcessManager? fakeProcessManager;
+    late FakeSimControl simControl;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -383,7 +383,7 @@ void main() {
         simulatorCategory: 'iOS 9.3',
         simControl: simControl,
       );
-      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
         'tail',
         '-n',
         '0',
@@ -391,14 +391,14 @@ void main() {
         '/Library/Logs/CoreSimulator/x/system.log',
       ]));
       await launchDeviceSystemLogTool(device);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => fileSystem,
       Platform: () => macosPlatform,
       FileSystemUtils: () => FileSystemUtils(
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         platform: macosPlatform,
       ),
     });
@@ -416,7 +416,7 @@ void main() {
           'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
           'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
           'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'simctl',
         'spawn',
@@ -430,7 +430,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     },
       overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
@@ -449,7 +449,7 @@ void main() {
           'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
           'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
           'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
+      fakeProcessManager!.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'simctl',
         'spawn',
@@ -463,7 +463,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, null);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     },
       overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
@@ -472,10 +472,10 @@ void main() {
   });
 
   group('log reader', () {
-    FakeProcessManager fakeProcessManager;
-    FakeIosProject mockIosProject;
-    FakeSimControl simControl;
-    Xcode xcode;
+    late FakeProcessManager fakeProcessManager;
+    late FakeIosProject mockIosProject;
+    late FakeSimControl simControl;
+    late Xcode xcode;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -486,8 +486,8 @@ void main() {
 
     group('syslog', () {
       setUp(() {
-        final File syslog = fileSystem.file('system.log')..createSync();
-        osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = syslog.path;
+        final File syslog = fileSystem!.file('system.log')..createSync();
+        osx!.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = syslog.path;
       });
 
       testUsingContext('simulator can parse Xcode 8/iOS 10-style logs', () async {
@@ -616,7 +616,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     group('unified logging', () {
-      BufferLogger logger;
+      BufferLogger? logger;
 
       setUp(() {
         logger = BufferLogger.test();
@@ -712,7 +712,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, isEmpty);
-        expect(logger.errorText, contains('Logger returned non-JSON response'));
+        expect(logger!.errorText, contains('Logger returned non-JSON response'));
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
@@ -754,9 +754,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 }
     ''';
 
-    FakeProcessManager fakeProcessManager;
+    late FakeProcessManager fakeProcessManager;
     Xcode xcode;
-    SimControl simControl;
+    late SimControl simControl;
     const String deviceId = 'smart-phone';
     const String appId = 'flutterApp';
 
@@ -895,10 +895,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('startApp', () {
-    FakePlistParser testPlistParser;
-    FakeSimControl simControl;
-    Xcode xcode;
-    BufferLogger logger;
+    FakePlistParser? testPlistParser;
+    late FakeSimControl simControl;
+    Xcode? xcode;
+    BufferLogger? logger;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -914,7 +914,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+      testPlistParser!.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(
@@ -958,7 +958,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(result.started, isFalse);
       expect(simControl.requests, isEmpty);
-      expect(logger.errorText, contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier'));
+      expect(logger!.errorText, contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier'));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
@@ -974,7 +974,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+      testPlistParser!.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(
@@ -1003,7 +1003,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+      testPlistParser!.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(
@@ -1027,8 +1027,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('IOSDevice.isSupportedForProject', () {
-    FakeSimControl simControl;
-    Xcode xcode;
+    late FakeSimControl simControl;
+    Xcode? xcode;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -1113,17 +1113,17 @@ flutter:
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => 'com.example.test';
+  Future<String> productBundleIdentifier(BuildInfo? buildInfo) async => 'com.example.test';
 
   @override
-  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
+  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'My Super Awesome App.app';
 }
 
 class FakeSimControl extends Fake implements SimControl {
   final List<LaunchRequest> requests = <LaunchRequest>[];
 
   @override
-  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) async {
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String>? launchArgs ]) async {
     requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
@@ -1139,5 +1139,5 @@ class LaunchRequest {
 
   final String deviceId;
   final String appIdentifier;
-  final List<String> launchArgs;
+  final List<String>? launchArgs;
 }

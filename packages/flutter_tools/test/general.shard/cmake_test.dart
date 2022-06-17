@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -17,23 +17,23 @@ const String _kTestFlutterRoot = '/flutter';
 const String _kTestWindowsFlutterRoot = r'C:\flutter';
 
 void main() {
-  FileSystem fileSystem;
+  FileSystem? fileSystem;
 
-  ProcessManager processManager;
+  ProcessManager? processManager;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
   });
 
   testUsingContext('parses executable name from cmake file', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
     cmakeProject.cmakeFile
       ..createSync(recursive: true)
       ..writeAsStringSync('set(BINARY_NAME "hello")');
 
-    final String name = getCmakeExecutableName(cmakeProject);
+    final String? name = getCmakeExecutableName(cmakeProject);
 
     expect(name, 'hello');
   }, overrides: <Type, Generator>{
@@ -42,10 +42,10 @@ void main() {
   });
 
   testUsingContext('defaults executable name to null if cmake config does not exist', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
-    final String name = getCmakeExecutableName(cmakeProject);
+    final String? name = getCmakeExecutableName(cmakeProject);
 
     expect(name, isNull);
   }, overrides: <Type, Generator>{
@@ -54,7 +54,7 @@ void main() {
   });
 
   testUsingContext('generates config', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     final Map<String, String> environment = <String, String>{};
 
@@ -89,7 +89,7 @@ void main() {
   testUsingContext('config escapes backslashes', () async {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
     final Map<String, String> environment = <String, String>{

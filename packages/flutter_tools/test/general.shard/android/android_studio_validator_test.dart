@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
@@ -24,8 +24,8 @@ final Platform linuxPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  FakeProcessManager fakeProcessManager;
+  FileSystem? fileSystem;
+  FakeProcessManager? fakeProcessManager;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -44,7 +44,7 @@ void main() {
   });
 
   testUsingContext('AndroidStudioValidator gives doctor error on java crash', () async {
-    fakeProcessManager.addCommand(const FakeCommand(
+    fakeProcessManager!.addCommand(const FakeCommand(
       command: <String>[
         '/opt/android-studio-with-cheese-5.0/jre/bin/java',
         '-version',
@@ -67,13 +67,13 @@ void main() {
         return message.isError && message.message.contains('ProcessException');
       }).isNotEmpty, true);
     }
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => linuxPlatform,
     FileSystemUtils: () => FileSystemUtils(
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       platform: linuxPlatform,
     ),
   });

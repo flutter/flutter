@@ -117,7 +117,7 @@ class CoverageCollector extends TestWatcher {
     );
 
     final Future<void> collectionComplete = testDevice.observatoryUri
-      .then((Uri observatoryUri) {
+      .then((Uri? observatoryUri) {
         _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
         return collect(observatoryUri, libraryNames)
           .then<void>((Map<String, dynamic> result) {
