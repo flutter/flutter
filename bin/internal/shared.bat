@@ -163,9 +163,9 @@ GOTO :after_subroutine
     POPD
 
     IF "%FLUTTER_TOOL_ARGS%" == "" (
-      "%dart%" --verbosity=error --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" --no-enable-mirrors "%script_path%"
+      "%dart%" --verbosity=error --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%"
     ) else (
-      "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+      "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" "%script_path%"
     )
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool. 1>&2
