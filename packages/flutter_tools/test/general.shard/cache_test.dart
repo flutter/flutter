@@ -456,6 +456,7 @@ void main() {
   testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Cache cache = FakeSecondaryCache()
+      ..artifactDirectory = fileSystem.currentDirectory
       ..version = '123456';
 
     final FakeVersionedPackageResolver packageResolver = FakeVersionedPackageResolver();

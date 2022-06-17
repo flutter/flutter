@@ -79,7 +79,7 @@ class TestCompiler {
   late File outputDill;
 
   Future<String?> compile(Uri mainDart) {
-    final Completer<String> completer = Completer<String>();
+    final Completer<String?> completer = Completer<String?>();
     if (compilerController.isClosed) {
       return Future<String?>.value();
     }
@@ -175,7 +175,7 @@ class TestCompiler {
       // compiler to avoid reusing compiler that might have gotten into
       // a weird state.
       if (outputPath == null || compilerOutput!.errorCount > 0) {
-        request.result.complete(null);
+        request.result.complete();
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
