@@ -71,7 +71,7 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.mm'));
+    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.g.mm'));
     expect(output, contains('kValueMask'));
     expect(output, contains('keyCodeToPhysicalKey'));
     expect(output, contains('keyCodeToLogicalKey'));
@@ -89,7 +89,7 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.mm'));
+    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.g.mm'));
     expect(output, contains('kValueMask'));
     expect(output, contains('keyCodeToPhysicalKey'));
     expect(output, contains('keyCodeToLogicalKey'));
@@ -109,7 +109,7 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('flutter_key_map.cc'));
+    expect(codeGenerator.outputPath(platform), endsWith('flutter_key_map.g.cc'));
     expect(output, contains('KeyboardKeyEmbedderHandler::windowsToPhysicalMap_'));
     expect(output, contains('KeyboardKeyEmbedderHandler::windowsToLogicalMap_'));
     expect(output, contains('KeyboardKeyEmbedderHandler::scanCodeToLogicalMap_'));
@@ -126,7 +126,7 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('key_mapping.cc'));
+    expect(codeGenerator.outputPath(platform), endsWith('key_mapping.g.cc'));
     expect(output, contains('initialize_modifier_bit_to_checked_keys'));
     expect(output, contains('initialize_lock_bit_to_checked_keys'));
     checkCommonOutput(output);
@@ -140,7 +140,7 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('key_map.dart'));
+    expect(codeGenerator.outputPath(platform), endsWith('key_map.g.dart'));
     expect(output, contains('kWebToLogicalKey'));
     expect(output, contains('kWebToPhysicalKey'));
     expect(output, contains('kWebLogicalLocationMap'));
