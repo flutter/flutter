@@ -215,7 +215,7 @@ void testMain() {
 
       // It doesn't remove the DOM element.
       final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
-      expect(appHostNode.contains(textField.editableElement), isTrue);
+      expect(appHostNode.contains(textField.editableElement as html.Node), isTrue);
       // Editing element is not enabled.
       expect(strategy.isEnabled, isFalse);
       expect(html.document.activeElement, html.document.body);
