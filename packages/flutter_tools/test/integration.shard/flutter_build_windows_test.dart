@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -10,75 +12,72 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  // Only run this test on Windows
-  if (!platform.isWindows) {
-    return;
-  }
-
   late Directory tempDir;
   late Directory projectRoot;
   late String flutterBin;
   late Directory releaseDir;
   late File exeFile;
 
-  setUpAll(() {
-    tempDir = createResolvedTempDirectorySync('build_windows_test.');
-    flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-    processManager.runSync(<String>[flutterBin, 'config',
-      '--enable-windows-desktop',
-    ]);
+  group('flutter build windows command', () {
+    setUpAll(() {
+      tempDir = createResolvedTempDirectorySync('build_windows_test.');
+      flutterBin = fileSystem.path.join(
+        getFlutterRoot(),
+        'bin',
+        'flutter',
+      );
+      processManager.runSync(<String>[flutterBin, 'config',
+        '--enable-windows-desktop',
+      ]);
 
-    processManager.runSync(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'create',
-      'hello',
-    ], workingDirectory: tempDir.path);
+      processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'create',
+        'hello',
+      ], workingDirectory: tempDir.path);
 
-    projectRoot = tempDir.childDirectory('hello');
+      projectRoot = tempDir.childDirectory('hello');
 
-    releaseDir = fileSystem.directory(fileSystem.path.join(
-      projectRoot.path,
-      'build',
-      'windows',
-      'runner',
-      'Release'
-    ));
+      releaseDir = fileSystem.directory(fileSystem.path.join(
+        projectRoot.path,
+        'build',
+        'windows',
+        'runner',
+        'Release',
+      ));
 
-    exeFile = fileSystem.file(fileSystem.path.join(
-      releaseDir.path,
-      'hello.exe'
-    ));
-  });
+      exeFile = fileSystem.file(fileSystem.path.join(
+        releaseDir.path,
+        'hello.exe',
+      ));
+    });
 
-  tearDownAll(() {
-    tryToDelete(tempDir);
-  });
+    tearDownAll(() {
+      tryToDelete(tempDir);
+    });
 
-  testWithoutContext('flutter build windows creates exe', () {
-    final ProcessResult result = processManager.runSync(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      'windows',
-      '--no-pub',
-    ], workingDirectory: projectRoot.path);
+    testWithoutContext('flutter build windows creates exe', () {
+      final ProcessResult result = processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        'windows',
+        '--no-pub',
+      ], workingDirectory: projectRoot.path);
 
-    expect(result.exitCode, 0);
-    expect(releaseDir, exists);
-    expect(exeFile, exists);
+      expect(result.exitCode, 0);
+      expect(releaseDir, exists);
+      expect(exeFile, exists);
 
-    // Default exe has version 1.0.0
-    final String fileVersion = _getFileVersion(exeFile);
-    final String productVersion = _getProductVersion(exeFile);
+      // Default exe has version 1.0.0
+      final String fileVersion = _getFileVersion(exeFile);
+      final String productVersion = _getProductVersion(exeFile);
 
-    expect(fileVersion, equals('1.0.0.0'));
-    expect(productVersion, equals('1.0.0'));
-  });
+      expect(fileVersion, equals('1.0.0.0'));
+      expect(productVersion, equals('1.0.0'));
+    });
+  }, skip: io.Platform.isWindows);
 }
 
 String _getFileVersion(File file) {
