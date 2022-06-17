@@ -1087,6 +1087,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
+    () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
