@@ -1580,8 +1580,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1687,8 +1689,10 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1773,8 +1777,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1851,8 +1857,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset);
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset);
+        }
       }
       return true;
     }());
