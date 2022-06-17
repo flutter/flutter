@@ -1202,21 +1202,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[3].runtimeType, StringProperty);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());  // [intended] Test requires --track-widget-creation flag.
     group('WidgetInspectorService', () {
-      final widget = Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: const <Widget>[
-              Text('a'),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        );
 
       group('setPubRootDirectories', ()  {
         late final String pubRootTest; 
         setUpAll(() {
-          pubRootTest = generateTestPubRootDirectory2(service);
+          pubRootTest = generateTestPubRootDirectory(service);
         });
 
         setUp((){
@@ -1227,6 +1217,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject when there are no pubRootDirectories',
           (WidgetTester tester) async {
+            final Widget widget = Directionality(
+                textDirection: TextDirection.ltr,
+                child: Stack(
+                  children: const <Widget>[
+                    Text('a'),
+                    Text('b', textDirection: TextDirection.ltr),
+                    Text('c', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              );
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
@@ -1244,6 +1244,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject when the element is part of the pubRootDirectory',
           (WidgetTester tester) async {
+            final Widget widget = Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            );
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
 
@@ -1257,12 +1267,21 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject when widget package directory is a suffix of a pubRootDirectory',
           (WidgetTester tester) async {
+            final Widget widget = Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            );
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
             service.setPubRootDirectories(<String>['/invalid/$pubRootTest']);
-
             expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
           },
         );
@@ -1270,6 +1289,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
+            final Widget widget = Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            );
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
@@ -1282,6 +1311,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject when thePubRootDirecty has a different suffix',
           (WidgetTester tester) async {
+            final Widget widget = Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            );
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
@@ -1294,6 +1333,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject even if another pubRootDirectory does not match',
           (WidgetTester tester) async {
+            final Widget widget = Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            );
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
@@ -1309,6 +1358,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'widget is part of core framework and is the child of a widget in the package pubRootDirectories',
           (WidgetTester tester) async {
+            final Widget widget = Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            );
             await tester.pumpWidget(widget);
             final Element elementA = find.text('a').evaluate().first;
             final Element richText = find.descendant(
@@ -1342,8 +1401,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       });
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
-
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
@@ -3135,7 +3193,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
   }
 
-  static String generateTestPubRootDirectory2(TestWidgetInspectorService service){
+  static String generateTestPubRootDirectory(TestWidgetInspectorService service){
     final Map<String, Object?> jsonObject = const SizedBox().toDiagnosticsNode().toJsonMap(InspectorSerializationDelegate(service: service));
     final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
     expect(creationLocation, isNotNull);
@@ -3153,9 +3211,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   }
 
   static void setupDefaultPubRootDirectory(TestWidgetInspectorService service) {
-    final String pubRootTest = generateTestPubRootDirectory2(service);
-
-    service.setPubRootDirectories(<String>[pubRootTest]);
+    service.setPubRootDirectories(<String>[generateTestPubRootDirectory(service)]);
   }
 }
 
