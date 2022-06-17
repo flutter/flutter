@@ -1,4 +1,4 @@
-Signature: e11a3c20a85a7e87d2f6388e043a50f6
+Signature: 12260d4a91582b5d008643326f4b979e
 
 UNUSED LICENSES:
 
@@ -1106,7 +1106,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/font.js
 FILE: ../../../third_party/skia/modules/canvaskit/fonts/NotoMono-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/gm.js
 FILE: ../../../third_party/skia/modules/canvaskit/go/gold_test_env/BUILD.bazel
-FILE: ../../../third_party/skia/modules/canvaskit/gpu.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/_namedcolors.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/canvas2dcontext.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/color.js
@@ -1141,6 +1140,8 @@ FILE: ../../../third_party/skia/modules/canvaskit/skp.js
 FILE: ../../../third_party/skia/modules/canvaskit/util.js
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/gms.html
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/viewer.html
+FILE: ../../../third_party/skia/modules/canvaskit/webgl.js
+FILE: ../../../third_party/skia/modules/canvaskit/webgpu.js
 FILE: ../../../third_party/skia/modules/particles/BUILD.bazel
 FILE: ../../../third_party/skia/modules/particles/include/BUILD.bazel
 FILE: ../../../third_party/skia/modules/particles/src/BUILD.bazel
