@@ -14,8 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
-
 import 'object.dart';
 
 export 'package:flutter/services.dart' show
