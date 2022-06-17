@@ -1134,16 +1134,6 @@ class DateRangeController extends ValueNotifier<DateTimeRangeValue> {
     return isCompleted && !date.isBefore(value.start!) && !date.isAfter(value.end!);
   }
 
-  /// Wether a possible date is a valid start for the range
-  bool verifyIsValidStart(DateTime? dateTime) => dateTime != null 
-    && verifyIsInAllowedRange(dateTime);
-
-  /// Wether a possible date is a valid end for the range
-  bool verifyIsValidEnd(DateTime? dateTime) => dateTime != null 
-    && verifyIsInAllowedRange(dateTime)
-    && start != null
-    && start!.isAfter(dateTime);
-
 }
 
 /// A Material-style date range picker dialog.
@@ -2752,6 +2742,22 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     _endController.text = endInputText;
   }
 
+  /// Synchronize the [DateRangeController] with the values in textFields
+  void _synchronizeRangeController() {
+    final DateTime? newStart = _parseDate(_startController.text);
+    final DateTime? newEnd = _parseDate(_endController.text);
+    final bool isValidStart = newStart != null && _controller.verifyIsInAllowedRange(newStart);
+    final bool isValidEnd = newEnd != null 
+      && isValidStart
+      && _controller.verifyIsInAllowedRange(newEnd)
+      && !newStart.isAfter(newEnd);
+
+    _controller.value = DateTimeRangeValue(
+      start: isValidStart ? newStart : null, 
+      end: isValidEnd ? newEnd : null,
+    );
+  }
+
   /// Validates that the text in the start and end fields represent a valid
   /// date range.
   ///
@@ -2759,7 +2765,6 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   /// return false and display an appropriate error message under one of the
   /// text fields.
   bool validate() {
-    print('validate');
     final DateTime? startDate = _parseDate(_startController.text);
     final DateTime? endDate = _parseDate(_endController.text);
     String? startError = _validateInRange(startDate);
@@ -2799,24 +2804,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     controller.value = selected;
   }
 
-  void _synchronizeRangeController() {
-    final DateTime? newStart = _parseDate(_startController.text);
-    final DateTime? newEnd = _parseDate(_endController.text);
-    final bool isValidStart = _controller.verifyIsValidStart(newStart);
-    if (!isValidStart) {
-      _controller.start = null;
-    } else {
-      _controller.start = newStart;
-    }
 
-    final bool isValidEnd = _controller.verifyIsValidEnd(newEnd);
-
-    if (!isValidEnd) {
-      _controller.end = null;
-    } else {
-      _controller.end = newEnd;
-    }
-  }
 
   void _onTextChanged() {
     _synchronizeRangeController();
