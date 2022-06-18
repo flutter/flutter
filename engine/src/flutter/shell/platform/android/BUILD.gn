@@ -683,7 +683,7 @@ action("abi_jars") {
   ]
   outputs = []
   args = []
-  base_name = "$root_out_dir/zip_archives/download.flutter.io/io/flutter" +
+  base_name = "$root_out_dir/zip_archives/download.flutter.io/io/flutter/" +
               "${artifact_id}/1.0.0-$engine_version/" +
               "${artifact_id}-1.0.0-${engine_version}"
   foreach(source, sources) {
