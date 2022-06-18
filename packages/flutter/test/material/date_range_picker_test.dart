@@ -1118,7 +1118,7 @@ void main() {
         expect(await range, DateTimeRange(
           start: DateTime(2016, DateTime.january, 15),
           end: DateTime(2016, DateTime.january, 25),
-        ));      
+        ));    
       });
     });
   });
