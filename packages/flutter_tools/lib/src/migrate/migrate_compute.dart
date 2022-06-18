@@ -295,14 +295,14 @@ Future<MigrateResult?> computeMigration({
   logger.printStatus('Diffing base and target reference app.', indent: 2, color: TerminalColor.grey);
   status.resume();
 
-  await baseProject.diffProjects(context, targetProject);
+  migrateResult.diffMap.addAll(await baseProject.diff(context, targetProject));
 
   // Check for any new files that were added in the target reference app that did not
   // exist in the base reference app.
   status.pause();
   logger.printStatus('Finding newly added files', indent: 2, color: TerminalColor.grey);
   status.resume();
-  await baseProject.newlyAddedFiles(context, targetProject);
+  migrateResult.addedFiles.addAll(await baseProject.newlyAddedFiles(context, targetProject));
 
   // Merge any base->target changed files with the version in the developer's project.
   // Files that the developer left unchanged are fully updated to match the target reference.
@@ -310,8 +310,10 @@ Future<MigrateResult?> computeMigration({
   status.pause();
   logger.printStatus('Merging changes with existing project.', indent: 2, color: TerminalColor.grey);
   status.resume();
-  await computeMerge(
+  await MigrateFlutterProject.merge(
     context,
+    baseProject,
+    targetProject,
     unmanagedFiles,
     unmanagedDirectories,
     preferTwoWayMerge,
@@ -381,10 +383,11 @@ abstract class MigrateFlutterProject {
   final List<SupportedPlatform>? platformWhitelist;
 
   /// Run git diff over each matching pair of files in the base reference app and target reference app.
-  Future<void> diffProjects(
+  Future<Map<String, DiffResult>> diff(
     MigrateContext context,
     MigrateFlutterProject other,
   ) async {
+    final Map<String, DiffResult> diffMap = <String, DiffResult>{};
     final List<FileSystemEntity> thisFiles = directory.listSync(recursive: true);
     int modifiedFilesCount = 0;
     for (final FileSystemEntity entity in thisFiles) {
@@ -397,12 +400,12 @@ abstract class MigrateFlutterProject {
         continue;
       }
       if (await context.migrateUtils.isGitIgnored(thisFile.absolute.path, directory.absolute.path)) {
-        context.migrateResult.diffMap[localPath] = DiffResult(diffType: DiffType.ignored);
+        diffMap[localPath] = DiffResult(diffType: DiffType.ignored);
       }
       final File otherFile = other.directory.childFile(localPath);
       if (otherFile.existsSync()) {
         final DiffResult diff = await context.migrateUtils.diffFiles(thisFile, otherFile);
-        context.migrateResult.diffMap[localPath] = diff;
+        diffMap[localPath] = diff;
         if (context.verbose && diff.diff != '') {
           context.status.pause();
           context.logger.printStatus('Found ${diff.exitCode} changes in $localPath', indent: 4, color: TerminalColor.grey);
@@ -412,7 +415,7 @@ abstract class MigrateFlutterProject {
       } else {
         // Current file has no new template counterpart, which is equivalent to a deletion.
         // This could also indicate a renaming if there is an addition with equivalent contents.
-        context.migrateResult.diffMap[localPath] = DiffResult(diffType: DiffType.deletion);
+        diffMap[localPath] = DiffResult(diffType: DiffType.deletion);
       }
     }
     if (context.verbose) {
@@ -420,10 +423,12 @@ abstract class MigrateFlutterProject {
       context.logger.printStatus('$modifiedFilesCount files were modified between base and target apps.');
       context.status.resume();
     }
+    return diffMap;
   }
 
   /// Find all files that exist in the target reference app but not in the base reference app.
-  Future<void> newlyAddedFiles(MigrateContext context, MigrateFlutterProject other) async {
+  Future<List<FilePendingMigration>> newlyAddedFiles(MigrateContext context, MigrateFlutterProject other) async {
+    final List<FilePendingMigration> addedFiles = <FilePendingMigration>[];
     final List<FileSystemEntity> otherFiles = other.directory.listSync(recursive: true);
     for (final FileSystemEntity entity in otherFiles) {
       if (entity is! File) {
@@ -442,12 +447,183 @@ abstract class MigrateFlutterProject {
         // Don't store as added file if file already exists in the project.
         continue;
       }
-      context.migrateResult.addedFiles.add(FilePendingMigration(localPath, otherFile));
+      addedFiles.add(FilePendingMigration(localPath, otherFile));
     }
     if (context.verbose) {
       context.status.pause();
       context.logger.printStatus('${context.migrateResult.addedFiles.length} files were newly added in the target app.');
       context.status.resume();
+    }
+    return addedFiles;
+  }
+
+  /// Loops through each existing file and intelligently merges it with the base->target changes.
+  static Future<void> merge(
+    MigrateContext context,
+    MigrateFlutterProject baseProject,
+    MigrateFlutterProject targetProject,
+    List<String> unmanagedFiles,
+    List<String> unmanagedDirectories,
+    bool preferTwoWayMerge,
+  ) async {
+    final List<CustomMerge> customMerges = <CustomMerge>[
+      MetadataCustomMerge(logger: context.logger),
+    ];
+    // For each existing file in the project, we attempt to 3 way merge if it is changed by the user.
+    final List<FileSystemEntity> currentFiles = context.flutterProject.directory.listSync(recursive: true);
+    final String projectRootPath = context.flutterProject.directory.absolute.path;
+    final Set<String> missingAlwaysMigrateFiles = Set<String>.of(_alwaysMigrateFiles);
+    for (final FileSystemEntity entity in currentFiles) {
+      if (entity is! File) {
+        continue;
+      }
+      // check if the file is unmanaged/ignored by the migration tool.
+      bool ignored = false;
+      ignored = unmanagedFiles.contains(entity.absolute.path);
+      for (final String path in unmanagedDirectories) {
+        if (entity.absolute.path.startsWith(path)) {
+          ignored = true;
+          break;
+        }
+      }
+      if (ignored) {
+        continue; // Skip if marked as unmanaged
+      }
+
+      final File currentFile = entity.absolute;
+      // Diff the current file against the old generated template
+      final String localPath = getLocalPath(currentFile.path, projectRootPath, context.fileSystem);
+      missingAlwaysMigrateFiles.remove(localPath);
+      if (context.migrateResult.diffMap.containsKey(localPath) && context.migrateResult.diffMap[localPath]!.diffType == DiffType.ignored ||
+          await context.migrateUtils.isGitIgnored(currentFile.path, context.flutterProject.directory.absolute.path) ||
+          _skipped(localPath, blacklistPrefixes: context.blacklistPrefixes) ||
+          _skippedMerge(localPath)) {
+        continue;
+      }
+      final File baseTemplateFile = baseProject.directory.childFile(localPath);
+      final File targetTemplateFile = targetProject.directory.childFile(localPath);
+      final DiffResult userDiff = await context.migrateUtils.diffFiles(currentFile, baseTemplateFile);
+      final DiffResult targetDiff = await context.migrateUtils.diffFiles(currentFile, targetTemplateFile);
+      if (targetDiff.exitCode == 0) {
+        // current file is already the same as the target file.
+        continue;
+      }
+
+      final bool alwaysMigrate = _alwaysMigrateFiles.contains(localPath);
+
+      // Current file unchanged by user, thus we consider it owned by the tool.
+      if (userDiff.exitCode == 0 || alwaysMigrate) {
+        if (context.migrateResult.diffMap.containsKey(localPath) || alwaysMigrate) {
+          // File changed between base and target
+          if (context.migrateResult.diffMap[localPath]!.diffType == DiffType.deletion) {
+            // File is deleted in new template
+            context.migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
+            continue;
+          }
+          if (context.migrateResult.diffMap[localPath]!.exitCode != 0 || alwaysMigrate) {
+            // Accept the target version wholesale
+            MergeResult result;
+            try {
+              result = StringMergeResult.explicit(
+                mergedString: targetTemplateFile.readAsStringSync(),
+                hasConflict: false,
+                exitCode: 0,
+                localPath: localPath,
+              );
+            } on FileSystemException {
+              result = BinaryMergeResult.explicit(
+                mergedBytes: targetTemplateFile.readAsBytesSync(),
+                hasConflict: false,
+                exitCode: 0,
+                localPath: localPath,
+              );
+            }
+            context.migrateResult.mergeResults.add(result);
+            continue;
+          }
+        }
+        continue;
+      }
+
+      // File changed by user
+      if (context.migrateResult.diffMap.containsKey(localPath)) {
+        MergeResult? result;
+        // Default to two way merge as it does not require the base file to exist.
+        MergeType mergeType = context.migrateResult.mergeTypeMap[localPath] ?? MergeType.twoWay;
+        for (final CustomMerge customMerge in customMerges) {
+          if (customMerge.localPath == localPath) {
+            result = customMerge.merge(currentFile, baseTemplateFile, targetTemplateFile);
+            mergeType = MergeType.custom;
+            break;
+          }
+        }
+        if (result == null) {
+          late String basePath;
+          late String currentPath;
+          late String targetPath;
+
+          // Use two way merge if diff between base and target are the same.
+          // This prevents the three way merge re-deleting the base->target changes.
+          if (preferTwoWayMerge) {
+            mergeType = MergeType.twoWay;
+          }
+          switch (mergeType) {
+            case MergeType.twoWay: {
+              basePath = currentFile.path;
+              currentPath = currentFile.path;
+              targetPath = context.fileSystem.path.join(context.migrateResult.generatedTargetTemplateDirectory!.path, localPath);
+              break;
+            }
+            case MergeType.threeWay: {
+              basePath = context.fileSystem.path.join(context.migrateResult.generatedBaseTemplateDirectory!.path, localPath);
+              currentPath = currentFile.path;
+              targetPath = context.fileSystem.path.join(context.migrateResult.generatedTargetTemplateDirectory!.path, localPath);
+              break;
+            }
+            case MergeType.custom: {
+              break; // handled above
+            }
+          }
+          if (mergeType != MergeType.custom) {
+            result = await context.migrateUtils.gitMergeFile(
+              base: basePath,
+              current: currentPath,
+              target: targetPath,
+              localPath: localPath,
+            );
+          }
+        }
+        if (result != null) {
+          // Don't include if result is identical to the current file.
+          if (result is StringMergeResult) {
+            if (result.mergedString == currentFile.readAsStringSync()) {
+              context.status.pause();
+              context.logger.printStatus('$localPath was merged with a $mergeType.');
+              context.status.resume();
+              continue;
+            }
+          } else {
+            if ((result as BinaryMergeResult).mergedBytes == currentFile.readAsBytesSync()) {
+              continue;
+            }
+          }
+          context.migrateResult.mergeResults.add(result);
+        }
+        if (context.verbose) {
+          context.status.pause();
+          context.logger.printStatus('$localPath was merged with a $mergeType.');
+          context.status.resume();
+        }
+        continue;
+      }
+    }
+
+    // Add files that are in the target, marked as always migrate, and missing in the current project.
+    for (final String localPath in missingAlwaysMigrateFiles) {
+      final File targetTemplateFile = context.migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
+      if (targetTemplateFile.existsSync() && !_skipped(localPath, blacklistPrefixes: context.blacklistPrefixes)) {
+        context.migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
+      }
     }
   }
 }
@@ -667,174 +843,6 @@ class MigrateRevisions {
       context.status.pause();
       context.logger.printStatus('Using Flutter v1.0.0 ($fallbackRevision) as the base revision since a valid base revision could not be found in the .metadata file. This may result in more merge conflicts than normally expected.', indent: 4, color: TerminalColor.grey);
       context.status.resume();
-    }
-  }
-}
-
-/// Loops through each existing file and intelligently merges it with the base->target changes.
-Future<void> computeMerge(
-  MigrateContext context,
-  List<String> unmanagedFiles,
-  List<String> unmanagedDirectories,
-  bool preferTwoWayMerge,
-) async {
-  final List<CustomMerge> customMerges = <CustomMerge>[
-    MetadataCustomMerge(logger: context.logger),
-  ];
-  // For each existing file in the project, we attempt to 3 way merge if it is changed by the user.
-  final List<FileSystemEntity> currentFiles = context.flutterProject.directory.listSync(recursive: true);
-  final String projectRootPath = context.flutterProject.directory.absolute.path;
-  final Set<String> missingAlwaysMigrateFiles = Set<String>.of(_alwaysMigrateFiles);
-  for (final FileSystemEntity entity in currentFiles) {
-    if (entity is! File) {
-      continue;
-    }
-    // check if the file is unmanaged/ignored by the migration tool.
-    bool ignored = false;
-    ignored = unmanagedFiles.contains(entity.absolute.path);
-    for (final String path in unmanagedDirectories) {
-      if (entity.absolute.path.startsWith(path)) {
-        ignored = true;
-        break;
-      }
-    }
-    if (ignored) {
-      continue; // Skip if marked as unmanaged
-    }
-
-    final File currentFile = entity.absolute;
-    // Diff the current file against the old generated template
-    final String localPath = getLocalPath(currentFile.path, projectRootPath, context.fileSystem);
-    missingAlwaysMigrateFiles.remove(localPath);
-    if (context.migrateResult.diffMap.containsKey(localPath) && context.migrateResult.diffMap[localPath]!.diffType == DiffType.ignored ||
-        await context.migrateUtils.isGitIgnored(currentFile.path, context.flutterProject.directory.absolute.path) ||
-        _skipped(localPath, blacklistPrefixes: context.blacklistPrefixes) ||
-        _skippedMerge(localPath)) {
-      continue;
-    }
-    final File baseTemplateFile = context.migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
-    final File targetTemplateFile = context.migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
-    final DiffResult userDiff = await context.migrateUtils.diffFiles(currentFile, baseTemplateFile);
-    final DiffResult targetDiff = await context.migrateUtils.diffFiles(currentFile, targetTemplateFile);
-    if (targetDiff.exitCode == 0) {
-      // current file is already the same as the target file.
-      continue;
-    }
-
-    final bool alwaysMigrate = _alwaysMigrateFiles.contains(localPath);
-
-    // Current file unchanged by user, thus we consider it owned by the tool.
-    if (userDiff.exitCode == 0 || alwaysMigrate) {
-      if (context.migrateResult.diffMap.containsKey(localPath) || alwaysMigrate) {
-        // File changed between base and target
-        if (context.migrateResult.diffMap[localPath]!.diffType == DiffType.deletion) {
-          // File is deleted in new template
-          context.migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
-          continue;
-        }
-        if (context.migrateResult.diffMap[localPath]!.exitCode != 0 || alwaysMigrate) {
-          // Accept the target version wholesale
-          MergeResult result;
-          try {
-            result = StringMergeResult.explicit(
-              mergedString: targetTemplateFile.readAsStringSync(),
-              hasConflict: false,
-              exitCode: 0,
-              localPath: localPath,
-            );
-          } on FileSystemException {
-            result = BinaryMergeResult.explicit(
-              mergedBytes: targetTemplateFile.readAsBytesSync(),
-              hasConflict: false,
-              exitCode: 0,
-              localPath: localPath,
-            );
-          }
-          context.migrateResult.mergeResults.add(result);
-          continue;
-        }
-      }
-      continue;
-    }
-
-    // File changed by user
-    if (context.migrateResult.diffMap.containsKey(localPath)) {
-      MergeResult? result;
-      // Default to two way merge as it does not require the base file to exist.
-      MergeType mergeType = context.migrateResult.mergeTypeMap[localPath] ?? MergeType.twoWay;
-      for (final CustomMerge customMerge in customMerges) {
-        if (customMerge.localPath == localPath) {
-          result = customMerge.merge(currentFile, baseTemplateFile, targetTemplateFile);
-          mergeType = MergeType.custom;
-          break;
-        }
-      }
-      if (result == null) {
-        late String basePath;
-        late String currentPath;
-        late String targetPath;
-
-        // Use two way merge if diff between base and target are the same.
-        // This prevents the three way merge re-deleting the base->target changes.
-        if (preferTwoWayMerge) {
-          mergeType = MergeType.twoWay;
-        }
-        switch (mergeType) {
-          case MergeType.twoWay: {
-            basePath = currentFile.path;
-            currentPath = currentFile.path;
-            targetPath = context.fileSystem.path.join(context.migrateResult.generatedTargetTemplateDirectory!.path, localPath);
-            break;
-          }
-          case MergeType.threeWay: {
-            basePath = context.fileSystem.path.join(context.migrateResult.generatedBaseTemplateDirectory!.path, localPath);
-            currentPath = currentFile.path;
-            targetPath = context.fileSystem.path.join(context.migrateResult.generatedTargetTemplateDirectory!.path, localPath);
-            break;
-          }
-          case MergeType.custom: {
-            break; // handled above
-          }
-        }
-        if (mergeType != MergeType.custom) {
-          result = await context.migrateUtils.gitMergeFile(
-            base: basePath,
-            current: currentPath,
-            target: targetPath,
-            localPath: localPath,
-          );
-        }
-      }
-      if (result != null) {
-        // Don't include if result is identical to the current file.
-        if (result is StringMergeResult) {
-          if (result.mergedString == currentFile.readAsStringSync()) {
-            context.status.pause();
-            context.logger.printStatus('$localPath was merged with a $mergeType.');
-            context.status.resume();
-            continue;
-          }
-        } else {
-          if ((result as BinaryMergeResult).mergedBytes == currentFile.readAsBytesSync()) {
-            continue;
-          }
-        }
-        context.migrateResult.mergeResults.add(result);
-      }
-      if (context.verbose) {
-        context.status.pause();
-        context.logger.printStatus('$localPath was merged with a $mergeType.');
-        context.status.resume();
-      }
-      continue;
-    }
-  }
-
-  // Add files that are in the target, marked as always migrate, and missing in the current project.
-  for (final String localPath in missingAlwaysMigrateFiles) {
-    final File targetTemplateFile = context.migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
-    if (targetTemplateFile.existsSync() && !_skipped(localPath, blacklistPrefixes: context.blacklistPrefixes)) {
-      context.migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
     }
   }
 }
