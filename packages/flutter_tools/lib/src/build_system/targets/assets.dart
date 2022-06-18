@@ -210,10 +210,10 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
   }
 
   // Step 2: validate top level bundle structure.
-  Map<String, Object>? bundle;
+  Map<String, Object?>? bundle;
   try {
     final Object? rawBundle = json.decode(skSLBundleFile.readAsStringSync());
-    if (rawBundle is Map<String, Object>) {
+    if (rawBundle is Map<String, Object?>) {
       bundle = rawBundle;
     } else {
       logger.printError('"$bundle" was not a JSON object: $rawBundle');

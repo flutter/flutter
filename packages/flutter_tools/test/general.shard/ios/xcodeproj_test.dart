@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -56,11 +54,11 @@ void main() {
     stdout: 'hw.optional.arm64: 1',
   );
 
-  FakeProcessManager fakeProcessManager;
-  XcodeProjectInterpreter xcodeProjectInterpreter;
-  FakePlatform platform;
-  FileSystem fileSystem;
-  BufferLogger logger;
+  late FakeProcessManager fakeProcessManager;
+  late XcodeProjectInterpreter xcodeProjectInterpreter;
+  late FakePlatform platform;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
@@ -660,7 +658,7 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
   });
  group('environmentVariablesAsXcodeBuildSettings', () {
-    FakePlatform platform;
+    late FakePlatform platform;
 
     setUp(() {
       platform = FakePlatform();
@@ -679,9 +677,9 @@ Information about project "Runner":
   });
 
   group('updateGeneratedXcodeProperties', () {
-    Artifacts localIosArtifacts;
-    FakePlatform macOS;
-    FileSystem fs;
+    late Artifacts localIosArtifacts;
+    late FakePlatform macOS;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -691,8 +689,8 @@ Information about project "Runner":
     });
 
     group('arm simulator', () {
-      FakeProcessManager fakeProcessManager;
-      XcodeProjectInterpreter xcodeProjectInterpreter;
+      late FakeProcessManager fakeProcessManager;
+      late XcodeProjectInterpreter xcodeProjectInterpreter;
 
       setUp(() {
         fakeProcessManager = FakeProcessManager.empty();
@@ -1047,7 +1045,7 @@ Build settings for action build and target plugin2:
       });
     });
 
-    String propertyFor(String key, File file) {
+    String? propertyFor(String key, File file) {
       final List<String> properties = file
           .readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
@@ -1057,10 +1055,10 @@ Build settings for action build and target plugin2:
     }
 
     Future<void> checkBuildVersion({
-      String manifestString,
-      BuildInfo buildInfo,
-      String expectedBuildName,
-      String expectedBuildNumber,
+      required String manifestString,
+      required BuildInfo buildInfo,
+      String? expectedBuildName,
+      String? expectedBuildNumber,
     }) async {
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
