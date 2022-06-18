@@ -788,6 +788,35 @@ void main() {
       "recoverySuggestion" : "Xcode will continue when iPhone is finished.",
       "domain" : "com.apple.platform.iphoneos"
     }
+  },
+  {
+    "modelCode" : "iPad8,5",
+    "simulator" : false,
+    "modelName" : "iPad Pro (12.9-inch) (3rd generation)",
+    "error" : {
+      "code" : -13,
+      "failureReason" : "",
+      "underlyingErrors" : [
+        {
+          "code" : 4,
+          "failureReason" : "",
+          "description" : "iPad is locked.",
+          "recoverySuggestion" : "To use iPad with Xcode, unlock it.",
+          "domain" : "DVTDeviceIneligibilityErrorDomain"
+        }
+      ],
+      "description" : "iPad is not connected",
+      "recoverySuggestion" : "Xcode will continue when iPad is connected.",
+      "domain" : "com.apple.platform.iphoneos"
+    },
+    "operatingSystemVersion" : "15.6 (19G5027e)",
+    "identifier" : "00008027-0019253601068123",
+    "platform" : "com.apple.platform.iphoneos",
+    "architecture" : "arm64e",
+    "interface" : "usb",
+    "available" : false,
+    "name" : "iPad",
+    "modelUTI" : "com.apple.ipad-pro-12point9-1"
   }
 ]
 ''';
@@ -799,10 +828,12 @@ void main() {
 
           final List<String> errors = await xcdevice.getDiagnostics();
           expect(errors, hasLength(4));
+
           expect(errors[0], 'Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)');
           expect(errors[1], 'Error: iPhone is not paired with your computer.');
           expect(errors[2], 'Error: Xcode pairing error. (code -13)');
           expect(errors[3], 'Error: iPhone is busy: Preparing debugger support for iPhone. Xcode will continue when iPhone is finished. (code -10)');
+          expect(errors, isNot(contains('Xcode will continue')));
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
