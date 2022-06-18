@@ -271,8 +271,8 @@ class DateTimeRangeValue {
     DateTime? start,
     DateTime? end,
   })  : assert(
-            (start == null && end == null) 
-            || (start != null && end == null) 
+            (start == null && end == null)
+            || (start != null && end == null)
             || (start != null && end != null && !start.isAfter(end)),
           '$start - $end is not a valid range',
         ),

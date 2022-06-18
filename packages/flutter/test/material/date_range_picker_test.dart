@@ -1091,8 +1091,8 @@ void main() {
           onTap: isInAllowedRange ? () => controller.push(date) : null,
           controller: controller,
           selectionColor: Colors.yellow,
-          textStyle: isInAllowedRange 
-            ? const TextStyle(color: Colors.black) 
+          textStyle: isInAllowedRange
+            ? const TextStyle(color: Colors.black)
             : const TextStyle(color: Colors.red),
         );
       };

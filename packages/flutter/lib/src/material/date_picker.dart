@@ -1074,7 +1074,7 @@ String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startD
 class DateRangeController extends ValueNotifier<DateTimeRangeValue> {
     /// Creates a [DateRangeController] with an initial [value].
   DateRangeController({
-    required DateTimeRangeValue value, 
+    required DateTimeRangeValue value,
     required this.allowedRange,
   }) : super(value);
 
@@ -1325,7 +1325,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
       end: _restorableEnd.value,
     );
     _controller = DateRangeController(
-      value: initialDateRange, 
+      value: initialDateRange,
       allowedRange: DateTimeRange(start: widget.firstDate, end: widget.lastDate),
     );
     _controller.addListener(_onDateRangeSelectionChanged);
@@ -2269,15 +2269,15 @@ class _MonthItemState extends State<_MonthItem> {
         final DateTime dayDate = DateTime(year, month, day);
         final bool isInRange = _controller.verifyIsInAllowedRange(dayDate);
         final Widget dayItem = widget.dayItemBuilder?.call(
-          context, 
-          dayDate, 
-          _controller, 
+          context,
+          dayDate,
+          _controller,
           _dayFocusNodes[day - 1],
         ) ?? DayItem(
-          date: dayDate, 
-          focusNode: _dayFocusNodes[day - 1], 
+          date: dayDate,
+          focusNode: _dayFocusNodes[day - 1],
           controller: _controller,
-          onTap: isInRange ? () => _controller.push(dayDate) : null, 
+          onTap: isInRange ? () => _controller.push(dayDate) : null,
           currentDate: widget.currentDate,
         );
         dayItems.add(dayItem);
@@ -2358,23 +2358,23 @@ class _MonthItemState extends State<_MonthItem> {
 
 /// Builder that can be used to create [DayItem] in [showDateRangePicker].
 typedef DayItemBuilder = DayItem Function(
-  BuildContext context, 
+  BuildContext context,
   DateTime date,
   DateRangeController controller,
   FocusNode focusNode,
 );
 
-/// A day item displayed in a calendar. 
-/// 
+/// A day item displayed in a calendar.
+///
 /// The [DayItem] of [showDateRangePicker] can be customized by furnishing
 /// a [DayItemBuilder] to [showDateRangePicker].
 class DayItem extends StatelessWidget {
 
   /// A day item displayed in the calendar.
   DayItem({
-    super.key, 
-    required this.date, 
-    required this.onTap, 
+    super.key,
+    required this.date,
+    required this.onTap,
     required this.focusNode,
     required this.controller,
     this.selectionColor,
@@ -2823,13 +2823,13 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     final DateTime? newStart = _parseDate(_startController.text);
     final DateTime? newEnd = _parseDate(_endController.text);
     final bool isValidStart = newStart != null && _controller.verifyIsInAllowedRange(newStart);
-    final bool isValidEnd = newEnd != null 
+    final bool isValidEnd = newEnd != null
       && isValidStart
       && _controller.verifyIsInAllowedRange(newEnd)
       && !newStart.isAfter(newEnd);
 
     _controller.value = DateTimeRangeValue(
-      start: isValidStart ? newStart : null, 
+      start: isValidStart ? newStart : null,
       end: isValidEnd ? newEnd : null,
     );
   }
