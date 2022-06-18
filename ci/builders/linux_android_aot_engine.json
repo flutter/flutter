@@ -126,7 +126,8 @@
                     "type": "gcs",
                     "base_path": "out/android_profile_arm64/zip_archives/",
                     "include_paths": [
-                        "out/android_profile_arm64/zip_archives/android-arm64-profile/linux-x64.zip"
+                        "out/android_profile_arm64/zip_archives/android-arm64-profile/linux-x64.zip",
+                        "out/android_release_arm64/zip_archives/download.flutter.io"
                     ]
                 }
             ],
@@ -149,7 +150,8 @@
                 "config": "android_profile_arm64",
                 "targets": [
                     "default",
-                    "clang_x64/gen_snapshot"
+                    "clang_x64/gen_snapshot",
+                    "flutter/shell/platform/android:abi_jars"
                 ]
             },
             "tests": []
