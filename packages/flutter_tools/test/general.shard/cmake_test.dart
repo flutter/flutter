@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,11 +15,11 @@ const String _kTestFlutterRoot = '/flutter';
 const String _kTestWindowsFlutterRoot = r'C:\flutter';
 
 void main() {
-  FileSystem fileSystem;
-
-  ProcessManager processManager;
+  late FileSystem fileSystem;
+  late ProcessManager processManager;
 
   setUp(() {
+    processManager = FakeProcessManager.any();
     fileSystem = MemoryFileSystem.test();
   });
 
@@ -33,7 +31,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('set(BINARY_NAME "hello")');
 
-    final String name = getCmakeExecutableName(cmakeProject);
+    final String? name = getCmakeExecutableName(cmakeProject);
 
     expect(name, 'hello');
   }, overrides: <Type, Generator>{
@@ -45,7 +43,7 @@ void main() {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
-    final String name = getCmakeExecutableName(cmakeProject);
+    final String? name = getCmakeExecutableName(cmakeProject);
 
     expect(name, isNull);
   }, overrides: <Type, Generator>{
