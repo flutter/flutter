@@ -1085,10 +1085,11 @@ void main() {
       lastDate = DateTime(2016, DateTime.december, 31);
       dayItemBuilder = (BuildContext context, DateTime date, DateRangeController controller, FocusNode node) {
         final bool isInAllowedRange = controller.verifyIsInAllowedRange(date);
+        final bool isEnabled = isInAllowedRange && date.day != 16;
         return DayItem(
           date: date,
           focusNode: node,
-          onTap: isInAllowedRange ? () => controller.push(date) : null,
+          onTap: isEnabled ? () => controller.push(date) : null,
           controller: controller,
           selectionColor: Colors.yellow,
           textStyle: isInAllowedRange
@@ -1106,6 +1107,18 @@ void main() {
           start: DateTime(2016, DateTime.january, 12),
           end: DateTime(2016, DateTime.january, 14),
         ));
+      });
+    });
+
+    testWidgets('Should be able to prevent selection', (WidgetTester tester) async {
+      preparePicker(tester, (Future<DateTimeRange?> range) async {
+        await tester.tap(find.text('16').first);
+        await tester.tap(find.text('16').first);
+        await tester.tap(find.text('SAVE'));
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 15),
+          end: DateTime(2016, DateTime.january, 25),
+        ));      
       });
     });
   });
