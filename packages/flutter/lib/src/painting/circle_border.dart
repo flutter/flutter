@@ -145,8 +145,9 @@ class CircleBorder extends OutlinedBorder {
   }
 
   Rect _adjustRect(Rect rect) {
-    if (eccentricity == 0.0 || rect.width == rect.height)
+    if (eccentricity == 0.0 || rect.width == rect.height) {
       return Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0);
+    }
     if (rect.width < rect.height) {
       final double delta = (1.0 - eccentricity) * (rect.height - rect.width) / 2.0;
       return Rect.fromLTRB(

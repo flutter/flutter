@@ -1575,8 +1575,9 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   bool assertOval(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
-    if (shapeClipper.shape.runtimeType != OvalBorder)
+    if (shapeClipper.shape.runtimeType != OvalBorder) {
       return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    }
     return true;
   }
 
