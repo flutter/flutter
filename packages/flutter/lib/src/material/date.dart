@@ -30,7 +30,7 @@ class DateUtils {
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.
   static bool isSameDay(DateTime? dateA, DateTime? dateB) {
-    return 
+    return
       dateA?.year == dateB?.year &&
       dateA?.month == dateB?.month &&
       dateA?.day == dateB?.day;
@@ -39,7 +39,7 @@ class DateUtils {
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
   static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
-    return 
+    return
       dateA?.year == dateB?.year &&
       dateA?.month == dateB?.month;
   }
@@ -234,7 +234,9 @@ class DateTimeRange {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DateTimeRange && other.start == start && other.end == end;
+    return other is DateTimeRange
+      && other.start == start
+      && other.end == end;
   }
 
   @override
