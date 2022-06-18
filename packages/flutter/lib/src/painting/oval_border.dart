@@ -14,7 +14,7 @@ import 'circle_border.dart';
 /// Typically used with [ShapeDecoration] to draw an oval.
 /// Instead of centering the [Border] to a square, like [CircleBorder],
 /// it fills the available space, such that it touches the edges of the box.
-/// There is no difference between `CircleBorder(circularity = 1.0)` and `OvalBorder()`.
+/// There is no difference between `CircleBorder(eccentricity = 1.0)` and `OvalBorder()`.
 /// [OvalBorder] works as an alias for users to discover this feature.
 ///
 /// See also:
@@ -23,14 +23,14 @@ import 'circle_border.dart';
 ///  * [Border], which, when used with [BoxDecoration], can also describe an oval.
 class OvalBorder extends CircleBorder {
   /// Create an oval border.
-  const OvalBorder({ super.side, super.circularity = 0.0});
+  const OvalBorder({ super.side, super.eccentricity = 1.0});
 
   @override
-  ShapeBorder scale(double t) => OvalBorder(side: side.scale(t), circularity: circularity);
+  ShapeBorder scale(double t) => OvalBorder(side: side.scale(t), eccentricity: eccentricity);
 
   @override
-  OvalBorder copyWith({ BorderSide? side, double? circularity }) {
-    return OvalBorder(side: side ?? this.side, circularity: circularity ?? this.circularity);
+  OvalBorder copyWith({ BorderSide? side, double? eccentricity }) {
+    return OvalBorder(side: side ?? this.side, eccentricity: eccentricity ?? this.eccentricity);
   }
 
   @override
@@ -38,7 +38,7 @@ class OvalBorder extends CircleBorder {
     if (a is CircleBorder) {
       return OvalBorder(
         side: BorderSide.lerp(a.side, side, t),
-        circularity: ui.lerpDouble(a.circularity, circularity, t)!,
+        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t)!,
       );
     }
     return super.lerpFrom(a, t);
@@ -46,8 +46,8 @@ class OvalBorder extends CircleBorder {
 
   @override
   String toString() {
-    if (circularity != 1.0) {
-      return '${objectRuntimeType(this, 'OvalBorder')}($side, circularity: $circularity)';
+    if (eccentricity != 0.0) {
+      return '${objectRuntimeType(this, 'OvalBorder')}($side, eccentricity: $eccentricity)';
     }
     return '${objectRuntimeType(this, 'OvalBorder')}($side)';
   }

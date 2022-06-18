@@ -71,7 +71,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: borderRadius,
         circleness: 1.0 - t,
-        circularity: a.circularity,
+        eccentricity: a.eccentricity,
       );
     }
     return super.lerpFrom(a, t);
@@ -91,7 +91,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: borderRadius,
         circleness: t,
-        circularity: b.circularity,
+        eccentricity: b.eccentricity,
       );
     }
     return super.lerpTo(b, t);
@@ -189,14 +189,14 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     super.side,
     this.borderRadius = BorderRadius.zero,
     required this.circleness,
-    required this.circularity,
+    required this.eccentricity,
   }) : assert(side != null),
        assert(borderRadius != null),
        assert(circleness != null);
 
   final BorderRadiusGeometry borderRadius;
   final double circleness;
-  final double circularity;
+  final double eccentricity;
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -216,7 +216,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
       side: side.scale(t),
       borderRadius: borderRadius * t,
       circleness: t,
-      circularity: circularity,
+      eccentricity: eccentricity,
     );
   }
 
@@ -228,7 +228,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
         circleness: circleness * t,
-        circularity: circularity,
+        eccentricity: eccentricity,
       );
     }
     if (a is CircleBorder) {
@@ -236,7 +236,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: borderRadius,
         circleness: circleness + (1.0 - circleness) * (1.0 - t),
-        circularity: a.circularity,
+        eccentricity: a.eccentricity,
       );
     }
     if (a is _RoundedRectangleToCircleBorder) {
@@ -244,7 +244,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
         circleness: ui.lerpDouble(a.circleness, circleness, t)!,
-        circularity: circularity,
+        eccentricity: eccentricity,
       );
     }
     return super.lerpFrom(a, t);
@@ -257,7 +257,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
         circleness: circleness * (1.0 - t),
-        circularity: circularity,
+        eccentricity: eccentricity,
       );
     }
     if (b is CircleBorder) {
@@ -265,7 +265,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: borderRadius,
         circleness: circleness + (1.0 - circleness) * t,
-        circularity: b.circularity,
+        eccentricity: b.eccentricity,
       );
     }
     if (b is _RoundedRectangleToCircleBorder) {
@@ -273,7 +273,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
         circleness: ui.lerpDouble(circleness, b.circleness, t)!,
-        circularity: circularity,
+        eccentricity: eccentricity,
       );
     }
     return super.lerpTo(b, t);
@@ -284,13 +284,8 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
       return rect;
     }
     if (rect.width < rect.height) {
-      final double partialDelta = (rect.height - rect.width) / 2.0;
-      final double delta;
-      if (circularity < 1.0) {
-        delta = circleness * partialDelta * circularity;
-      } else {
-        delta = circleness * partialDelta;
-      }
+      final double partialDelta = (rect.height - rect.width) / 2;
+      final double delta = circleness * partialDelta * (1.0 - eccentricity);
       return Rect.fromLTRB(
         rect.left,
         rect.top + delta,
@@ -298,13 +293,8 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         rect.bottom - delta,
       );
     } else {
-      final double partialDelta = (rect.width - rect.height) / 2.0;
-      final double delta;
-      if (circularity < 1.0) {
-        delta = circleness * partialDelta * circularity;
-      } else {
-        delta = circleness * partialDelta;
-      }
+      final double partialDelta = (rect.width - rect.height) / 2;
+      final double delta = circleness * partialDelta * (1.0 - eccentricity);
       return Rect.fromLTRB(
         rect.left + delta,
         rect.top,
@@ -319,22 +309,22 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     if (circleness == 0.0) {
       return resolvedRadius;
     }
-    if (circularity != 1.0) {
+    if (eccentricity != 0.0) {
       if (rect.width < rect.height) {
         return BorderRadius.lerp(
           resolvedRadius,
-          BorderRadius.all(Radius.elliptical(rect.width / 2, (1 - circularity / 2) * rect.height / 2)),
+          BorderRadius.all(Radius.elliptical(rect.width / 2, (0.5 + eccentricity / 2) * rect.height / 2)),
           circleness,
         )!;
       } else {
         return BorderRadius.lerp(
           resolvedRadius,
-          BorderRadius.all(Radius.elliptical((1 - circularity / 2) * rect.width / 2, rect.height / 2)),
+          BorderRadius.all(Radius.elliptical((0.5 + eccentricity / 2) * rect.width / 2, rect.height / 2)),
           circleness,
         )!;
       }
     }
-    return BorderRadius.lerp(resolvedRadius, BorderRadius.circular(rect.shortestSide / 2.0), circleness);
+    return BorderRadius.lerp(resolvedRadius, BorderRadius.circular(rect.shortestSide / 2), circleness);
   }
 
   @override
@@ -363,12 +353,12 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  _RoundedRectangleToCircleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius, double? circleness, double? circularity }) {
+  _RoundedRectangleToCircleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius, double? circleness, double? eccentricity }) {
     return _RoundedRectangleToCircleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
       circleness: circleness ?? this.circleness,
-      circularity: circularity ?? this.circularity,
+      eccentricity: eccentricity ?? this.eccentricity,
     );
   }
 
@@ -416,8 +406,8 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
 
   @override
   String toString() {
-    if (circularity < 1.0) {
-      return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder that is ${(circularity * 100).toStringAsFixed(1)}% circular)';
+    if (eccentricity != 0.0) {
+      return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder that is ${(eccentricity * 100).toStringAsFixed(1)}% circular)';
     }
     return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder)';
   }

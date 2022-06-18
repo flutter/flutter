@@ -55,7 +55,7 @@ class StadiumBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: 1.0 - t,
-        circularity: a.circularity,
+        eccentricity: a.eccentricity,
       );
     }
     if (a is RoundedRectangleBorder) {
@@ -78,7 +78,7 @@ class StadiumBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: t,
-        circularity: b.circularity,
+        eccentricity: b.eccentricity,
       );
     }
     if (b is RoundedRectangleBorder) {
@@ -129,7 +129,7 @@ class StadiumBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Radius radius = Radius.circular(rect.shortestSide / 2.0);
+        final Radius radius = Radius.circular(rect.shortestSide / 2);
         final RRect borderRect = RRect.fromRectAndRadius(rect, radius);
         final RRect adjustedRect;
         switch (side.strokeAlign) {
@@ -140,7 +140,7 @@ class StadiumBorder extends OutlinedBorder {
             adjustedRect = borderRect;
             break;
           case StrokeAlign.outside:
-            adjustedRect = borderRect.inflate(side.width /2);
+            adjustedRect = borderRect.inflate(side.width / 2);
             break;
         }
         canvas.drawRRect(
@@ -173,12 +173,12 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   const _StadiumToCircleBorder({
     super.side,
     this.circleness = 0.0,
-    required this.circularity,
+    required this.eccentricity,
   }) : assert(side != null),
        assert(circleness != null);
 
   final double circleness;
-  final double circularity;
+  final double eccentricity;
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -197,7 +197,7 @@ class _StadiumToCircleBorder extends OutlinedBorder {
     return _StadiumToCircleBorder(
       side: side.scale(t),
       circleness: t,
-      circularity: circularity,
+      eccentricity: eccentricity,
     );
   }
 
@@ -208,21 +208,21 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: circleness * t,
-        circularity: circularity,
+        eccentricity: eccentricity,
       );
     }
     if (a is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: circleness + (1.0 - circleness) * (1.0 - t),
-        circularity: a.circularity,
+        eccentricity: a.eccentricity,
       );
     }
     if (a is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: ui.lerpDouble(a.circleness, circleness, t)!,
-        circularity: ui.lerpDouble(a.circularity, circularity, t)!,
+        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t)!,
       );
     }
     return super.lerpFrom(a, t);
@@ -235,21 +235,21 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: circleness * (1.0 - t),
-        circularity: circularity,
+        eccentricity: eccentricity,
       );
     }
     if (b is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: circleness + (1.0 - circleness) * t,
-        circularity: b.circularity,
+        eccentricity: b.eccentricity,
       );
     }
     if (b is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: ui.lerpDouble(circleness, b.circleness, t)!,
-        circularity: ui.lerpDouble(circularity, b.circularity, t)!,
+        eccentricity: ui.lerpDouble(eccentricity, b.eccentricity, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -260,13 +260,8 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return rect;
     }
     if (rect.width < rect.height) {
-      final double partialDelta = (rect.height - rect.width) / 2.0;
-      final double delta;
-      if (circularity < 1.0) {
-        delta = circleness * partialDelta * circularity;
-      } else {
-        delta = circleness * partialDelta;
-      }
+      final double partialDelta = (rect.height - rect.width) / 2;
+      final double delta = circleness * partialDelta * (1.0 - eccentricity);
       return Rect.fromLTRB(
         rect.left,
         rect.top + delta,
@@ -274,13 +269,8 @@ class _StadiumToCircleBorder extends OutlinedBorder {
         rect.bottom - delta,
       );
     } else {
-      final double partialDelta = (rect.width - rect.height) / 2.0;
-      final double delta;
-      if (circularity < 1.0) {
-        delta = circleness * partialDelta * circularity;
-      } else {
-        delta = circleness * partialDelta;
-      }
+      final double partialDelta = (rect.width - rect.height) / 2;
+      final double delta = circleness * partialDelta * (1.0 - eccentricity);
       return Rect.fromLTRB(
         rect.left + delta,
         rect.top,
@@ -291,18 +281,18 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   BorderRadius _adjustBorderRadius(Rect rect) {
-    final BorderRadius circleRadius = BorderRadius.circular(rect.shortestSide / 2.0);
-    if (circularity != 1.0) {
+    final BorderRadius circleRadius = BorderRadius.circular(rect.shortestSide / 2);
+    if (eccentricity != 0.0) {
       if (rect.width < rect.height) {
         return BorderRadius.lerp(
           circleRadius,
-          BorderRadius.all(Radius.elliptical(rect.width / 2, (1 - circularity / 2) * rect.height / 2)),
+          BorderRadius.all(Radius.elliptical(rect.width / 2, (0.5 + eccentricity / 2) * rect.height / 2)),
           circleness,
         )!;
       } else {
         return BorderRadius.lerp(
             circleRadius,
-            BorderRadius.all(Radius.elliptical((1 - circularity / 2) * rect.width / 2, rect.height / 2)),
+            BorderRadius.all(Radius.elliptical((0.5 + eccentricity / 2) * rect.width / 2, rect.height / 2)),
             circleness,
         )!;
       }
@@ -323,11 +313,11 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  _StadiumToCircleBorder copyWith({ BorderSide? side, double? circleness, double? circularity }) {
+  _StadiumToCircleBorder copyWith({ BorderSide? side, double? circleness, double? eccentricity }) {
     return _StadiumToCircleBorder(
       side: side ?? this.side,
       circleness: circleness ?? this.circleness,
-      circularity: circularity ?? this.circularity,
+      eccentricity: eccentricity ?? this.eccentricity,
     );
   }
 
