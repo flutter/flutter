@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -24,21 +22,21 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  BufferLogger logger;
+  late BufferLogger logger;
 
   setUp(() {
     logger = BufferLogger.test();
   });
 
   group('FakeProcessManager', () {
-    FakeProcessManager fakeProcessManager;
+    late FakeProcessManager fakeProcessManager;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
     });
 
     group('Xcode', () {
-      FakeXcodeProjectInterpreter xcodeProjectInterpreter;
+      late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
 
       setUp(() {
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -94,7 +92,7 @@ void main() {
       });
 
       group('macOS', () {
-        Xcode xcode;
+        late Xcode xcode;
 
         setUp(() {
           xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -276,8 +274,8 @@ void main() {
     });
 
     group('xcdevice not installed', () {
-      XCDevice xcdevice;
-      Xcode xcode;
+      late XCDevice xcdevice;
+      late Xcode xcode;
 
       setUp(() {
         xcode = Xcode.test(
@@ -310,8 +308,8 @@ void main() {
     });
 
     group('xcdevice', () {
-      XCDevice xcdevice;
-      Xcode xcode;
+      late XCDevice xcdevice;
+      late Xcode xcode;
 
       setUp(() {
         xcode = Xcode.test(processManager: FakeProcessManager.any());
@@ -351,7 +349,7 @@ void main() {
           // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
           // Attach: 00008027-00192736010F802E
           // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-          xcdevice.observedDeviceEvents().listen((Map<XCDeviceEvent, String> event) {
+          xcdevice.observedDeviceEvents()!.listen((Map<XCDeviceEvent, String> event) {
             expect(event.length, 1);
             if (event.containsKey(XCDeviceEvent.attach)) {
               if (event[XCDeviceEvent.attach] == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {

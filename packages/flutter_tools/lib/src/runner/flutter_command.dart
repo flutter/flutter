@@ -1534,7 +1534,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!argParser.options.containsKey(name)) {
       return null;
     }
-    return argResults![name] as String;
+    return argResults![name] as String?;
   }
 
   /// Gets the parsed command-line option named [name] as an `int`.

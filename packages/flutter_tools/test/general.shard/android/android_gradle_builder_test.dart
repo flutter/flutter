@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -27,10 +25,10 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   group('gradle build', () {
-    BufferLogger logger;
-    TestUsage testUsage;
-    FileSystem fileSystem;
-    FakeProcessManager processManager;
+    late BufferLogger logger;
+    late TestUsage testUsage;
+    late FileSystem fileSystem;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -99,10 +97,10 @@ void main() {
                 return line.contains('Some gradle message');
               },
               handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
+                String? line,
+                FlutterProject? project,
+                bool? usesAndroidX,
+                bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -263,10 +261,10 @@ void main() {
                 return false;
               },
               handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
+                String? line,
+                FlutterProject? project,
+                bool? usesAndroidX,
+                bool? multidexEnabled
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -351,10 +349,10 @@ void main() {
                 return line.contains('Some gradle message');
               },
               handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
+                String? line,
+                FlutterProject? project,
+                bool? usesAndroidX,
+                bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -517,10 +515,10 @@ void main() {
               return line.contains('Some gradle message');
             },
             handler: ({
-              String line,
-              FlutterProject project,
-              bool usesAndroidX,
-                bool multidexEnabled
+              String? line,
+              FlutterProject? project,
+              bool? usesAndroidX,
+                bool? multidexEnabled
             }) async {
               return GradleBuildStatus.retry;
             },
@@ -595,7 +593,7 @@ void main() {
         .childDirectory('flutter-apk')
         .childFile('app-release.apk')
         ..createSync(recursive: true)
-        ..writeAsBytesSync(ZipEncoder().encode(archive));
+        ..writeAsBytesSync(ZipEncoder().encode(archive)!);
 
       fileSystem.file('foo/snapshot.arm64-v8a.json')
         ..createSync(recursive: true)
