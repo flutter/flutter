@@ -173,10 +173,10 @@ class FakeDevice extends Fake implements Device {
   bool isSupported() => true;
 
   @override
-  late bool supportsHotReload;
+  bool supportsHotReload = false;
 
   @override
-  late bool supportsHotRestart;
+  bool supportsHotRestart = false;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Android 10';
