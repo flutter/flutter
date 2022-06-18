@@ -952,6 +952,7 @@ Future<DateTimeRange?> showDateRangePicker({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   TextDirection? textDirection,
+  DayItemBuilder? dayItemBuilder,
   TransitionBuilder? builder,
   Offset? anchorPoint,
 }) async {
@@ -1011,6 +1012,7 @@ Future<DateTimeRange?> showDateRangePicker({
     fieldEndHintText: fieldEndHintText,
     fieldStartLabelText: fieldStartLabelText,
     fieldEndLabelText: fieldEndLabelText,
+    dayItemBuilder: dayItemBuilder,
   );
 
   if (textDirection != null) {
@@ -1166,6 +1168,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.fieldStartLabelText,
     this.fieldEndLabelText,
     this.restorationId,
+    this.dayItemBuilder,
   });
 
   /// The date range that the date range picker starts with when it opens.
@@ -1284,6 +1287,10 @@ class DateRangePickerDialog extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+
+  /// Builder to cotumize how each day item is displayed and behave.
+  final DayItemBuilder? dayItemBuilder;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1417,6 +1424,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
             : null,
           confirmText: widget.saveText ?? localizations.saveButtonLabel,
           helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
+          dayItemBuilder: widget.dayItemBuilder,
         );
         size = mediaQuery.size;
         insetPadding = EdgeInsets.zero;
@@ -1512,6 +1520,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     required this.onCancel,
     required this.confirmText,
     required this.helpText,
+    required this.dayItemBuilder,
     this.entryModeButton,
   });
 
@@ -1522,6 +1531,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   final String confirmText;
   final String helpText;
   final Widget? entryModeButton;
+  final DayItemBuilder? dayItemBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -1618,6 +1628,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         ),
         body: _CalendarDateRangePicker(
           controller: controller,
+          dayItemBuilder: dayItemBuilder,
           currentDate: currentDate,
         ),
       ),
@@ -1642,6 +1653,7 @@ class _CalendarDateRangePicker extends StatefulWidget {
   _CalendarDateRangePicker({
     required this.controller,
     DateTime? currentDate,
+    this.dayItemBuilder,
   }) : currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
 
   /// Controller for selected date range.
@@ -1649,6 +1661,9 @@ class _CalendarDateRangePicker extends StatefulWidget {
 
   /// The [DateTime] representing today. It will be highlighted in the day grid.
   final DateTime currentDate;
+
+
+  final DayItemBuilder? dayItemBuilder;
 
   @override
   _CalendarDateRangePickerState createState() => _CalendarDateRangePickerState();
@@ -1721,6 +1736,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
     return _MonthItem(
       controller: _controller,
       currentDate: widget.currentDate,
+      dayItemBuilder: widget.dayItemBuilder,
       displayedMonth: month,
     );
   }
@@ -2113,6 +2129,7 @@ class _MonthItem extends StatefulWidget {
     required this.controller,
     required this.currentDate,
     required this.displayedMonth,
+    required this.dayItemBuilder,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(currentDate != null),
        assert(displayedMonth != null),
@@ -2121,11 +2138,15 @@ class _MonthItem extends StatefulWidget {
   /// The controller for the currently selected date
   final DateRangeController controller;
 
+
   /// The current date at the time the picker is displayed.
   final DateTime currentDate;
 
   /// The month whose days are displayed by this picker.
   final DateTime displayedMonth;
+
+  /// The builder used to display each day item.
+  final DayItemBuilder? dayItemBuilder;
 
   /// Determines the way that drag start behavior is handled.
   ///
@@ -2217,111 +2238,6 @@ class _MonthItemState extends State<_MonthItem> {
     }
   }
 
-  Widget _buildDayItem(BuildContext context, DateTime dayToBuild, int firstDayOffset, int daysInMonth) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final TextTheme textTheme = theme.textTheme;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextDirection textDirection = Directionality.of(context);
-    final Color highlightColor = _highlightColor(context);
-    final int day = dayToBuild.day;
-
-    final bool isDisabled = !_controller.verifyIsInAllowedRange(dayToBuild);
-
-    BoxDecoration? decoration;
-    TextStyle? itemStyle = textTheme.bodyText2;
-
-    final bool isSelectedDayStart = _controller.start != null && dayToBuild.isAtSameMomentAs(_controller.start!);
-    final bool isSelectedDayEnd = _controller.end != null && dayToBuild.isAtSameMomentAs(_controller.end!);
-    final bool isInRange = _controller.verifyIsInSelectedRange(dayToBuild);
-
-    _HighlightPainter? highlightPainter;
-
-    if (isSelectedDayStart || isSelectedDayEnd) {
-      // The selected start and end dates gets a circle background
-      // highlight, and a contrasting text color.
-      itemStyle = textTheme.bodyText2?.apply(color: colorScheme.onPrimary);
-      decoration = BoxDecoration(
-        color: colorScheme.primary,
-        shape: BoxShape.circle,
-      );
-
-      if (!_controller.isSameDay) {
-        final _HighlightPainterStyle style = isSelectedDayStart
-          ? _HighlightPainterStyle.highlightTrailing
-          : _HighlightPainterStyle.highlightLeading;
-        highlightPainter = _HighlightPainter(
-          color: highlightColor,
-          style: style,
-          textDirection: textDirection,
-        );
-      }
-    } else if (isInRange) {
-      // The days within the range get a light background highlight.
-      highlightPainter = _HighlightPainter(
-        color: highlightColor,
-        style: _HighlightPainterStyle.highlightAll,
-        textDirection: textDirection,
-      );
-    } else if (isDisabled) {
-      itemStyle = textTheme.bodyText2?.apply(color: colorScheme.onSurface.withOpacity(0.38));
-    } else if (DateUtils.isSameDay(widget.currentDate, dayToBuild)) {
-      // The current day gets a different text color and a circle stroke
-      // border.
-      itemStyle = textTheme.bodyText2?.apply(color: colorScheme.primary);
-      decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary),
-        shape: BoxShape.circle,
-      );
-    }
-
-    // We want the day of month to be spoken first irrespective of the
-    // locale-specific preferences or TextDirection. This is because
-    // an accessibility user is more likely to be interested in the
-    // day of month before the rest of the date, as they are looking
-    // for the day of month. To do that we prepend day of month to the
-    // formatted full date.
-    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}';
-    if (isSelectedDayStart) {
-      semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
-    } else if (isSelectedDayEnd) {
-      semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
-    }
-
-    Widget dayWidget = Container(
-      decoration: decoration,
-      child: Center(
-        child: Semantics(
-          label: semanticLabel,
-          selected: isSelectedDayStart || isSelectedDayEnd,
-          child: ExcludeSemantics(
-            child: Text(localizations.formatDecimal(day), style: itemStyle),
-          ),
-        ),
-      ),
-    );
-
-    if (highlightPainter != null) {
-      dayWidget = CustomPaint(
-        painter: highlightPainter,
-        child: dayWidget,
-      );
-    }
-
-    if (!isDisabled) {
-      dayWidget = InkResponse(
-        focusNode: _dayFocusNodes[day - 1],
-        onTap: () => _controller.push(dayToBuild),
-        radius: _monthItemRowHeight / 2 + 4,
-        splashColor: colorScheme.primary.withOpacity(0.38),
-        onFocusChange: _dayFocusChanged,
-        child: dayWidget,
-      );
-    }
-
-    return dayWidget;
-  }
-
   Widget _buildEdgeContainer(BuildContext context, bool isHighlighted) {
     return Container(color: isHighlighted ? _highlightColor(context) : null);
   }
@@ -2350,12 +2266,19 @@ class _MonthItemState extends State<_MonthItem> {
       if (day < 1) {
         dayItems.add(Container());
       } else {
-        final DateTime dayToBuild = DateTime(year, month, day);
-        final Widget dayItem = _buildDayItem(
-          context,
-          dayToBuild,
-          dayOffset,
-          daysInMonth,
+        final DateTime dayDate = DateTime(year, month, day);
+        final bool isInRange = _controller.verifyIsInAllowedRange(dayDate);
+        final Widget dayItem = widget.dayItemBuilder?.call(
+          context, 
+          dayDate, 
+          _controller, 
+          _dayFocusNodes[day - 1],
+        ) ?? DayItem(
+          date: dayDate, 
+          focusNode: _dayFocusNodes[day - 1], 
+          controller: _controller,
+          onTap: isInRange ? () => _controller.push(dayDate) : null, 
+          currentDate: widget.currentDate,
         );
         dayItems.add(dayItem);
       }
@@ -2433,7 +2356,18 @@ class _MonthItemState extends State<_MonthItem> {
   }
 }
 
-/// A day item displayed in the calendar.
+/// Builder that can be used to create [DayItem] in [showDateRangePicker].
+typedef DayItemBuilder = DayItem Function(
+  BuildContext context, 
+  DateTime date,
+  DateRangeController controller,
+  FocusNode focusNode,
+);
+
+/// A day item displayed in a calendar. 
+/// 
+/// The [DayItem] of [showDateRangePicker] can be customized by furnishing
+/// a [DayItemBuilder] to [showDateRangePicker].
 class DayItem extends StatelessWidget {
 
   /// A day item displayed in the calendar.
@@ -2442,32 +2376,32 @@ class DayItem extends StatelessWidget {
     required this.date, 
     required this.onTap, 
     required this.focusNode,
-    required this.isInSelectionRage,
-    required this.isSelectionStart,
-    required this.isSelectionEnd,
+    required this.controller,
     this.selectionColor,
     this.textStyle,
-    DateTime? today,
-  }): today = today ?? DateTime.now();
+    DateTime? currentDate,
+  }): currentDate = currentDate ?? DateTime.now();
 
+  /// The date of the day to be rendered.
+  final DateTime date;
+  /// The controller that controls the selection
+  final DateRangeController controller;
   /// Callback for when the day is tapped.
   final VoidCallback? onTap;
   /// Controls focus on DayItem.
   final FocusNode focusNode;
-  /// The date of the day to be rendered.
-  final DateTime date;
-  /// Whether this day item is currently in the selected range.
-  final bool isInSelectionRage;
-  /// Whether this day item is the start of the selected range.
-  final bool isSelectionStart;
-  /// Whether this day item is the end of the selected range.
-  final bool isSelectionEnd;
   /// The color for the highlight above a selected range.
   final Color? selectionColor;
   /// The text style of the day item when it is not the edge of a range.
   final TextStyle? textStyle;
-  /// The current date
-  final DateTime today;
+  /// The date of today.
+  final DateTime currentDate;
+  /// Whether this day item is currently in the selected range.
+  bool get _isInSelectionRange => controller.verifyIsInSelectedRange(date);
+  /// Whether this day item is the start of the selected range.
+  bool get _isSelectionStart => DateUtils.isSameDay(controller.start, date);
+  /// Whether this day item is the end of the selected range.
+  bool get _isSelectionEnd => DateUtils.isSameDay(controller.end, date);
 
   bool get _isEnabled => onTap != null;
 
@@ -2480,13 +2414,13 @@ class DayItem extends StatelessWidget {
     final TextTheme textTheme = theme.textTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextDirection textDirection = Directionality.of(context);
-    final highlightColor = selectionColor?.withOpacity(0.12) ??
+    final Color highlightColor = selectionColor?.withOpacity(0.12) ??
        colorScheme.primary.withOpacity(0.12);
     BoxDecoration? decoration;
     TextStyle? textStyle = this.textStyle;
     _HighlightPainter? highlightPainter;
 
-    if (isSelectionStart || isSelectionEnd) {
+    if (_isSelectionStart || _isSelectionEnd) {
       // The selected start and end dates gets a circle background
       // highlight, and a contrasting text color.
       textStyle = textTheme.bodyText2?.apply(color: colorScheme.onPrimary);
@@ -2494,9 +2428,10 @@ class DayItem extends StatelessWidget {
         color: colorScheme.primary,
         shape: BoxShape.circle,
       );
-
-      if (isSelectionStart != isSelectionEnd) {
-        final _HighlightPainterStyle style = isSelectionStart
+      final bool selectionIsOneDay = _isSelectionStart == _isSelectionEnd;
+      // start of range has a trailing highlight when there are multiple days selected.
+      if (!selectionIsOneDay && _isInSelectionRange) {
+        final _HighlightPainterStyle style = _isSelectionStart
           ? _HighlightPainterStyle.highlightTrailing
           : _HighlightPainterStyle.highlightLeading;
         highlightPainter = _HighlightPainter(
@@ -2505,7 +2440,7 @@ class DayItem extends StatelessWidget {
           textDirection: textDirection,
         );
       }
-    } else if (isInSelectionRage) {
+    } else if (_isInSelectionRange) {
       // The days within the range get a light background highlight.
       highlightPainter = _HighlightPainter(
         color: highlightColor,
@@ -2514,7 +2449,7 @@ class DayItem extends StatelessWidget {
       );
     } else if (!_isEnabled) {
       textStyle ??= textTheme.bodyText2?.apply(color: colorScheme.onSurface.withOpacity(0.38));
-    } else if (DateUtils.isSameDay(today, date)) {
+    } else if (DateUtils.isSameDay(currentDate, date)) {
       // The current day gets a different text color and a circle stroke
       // border.
       textStyle ??= textTheme.bodyText2?.apply(color: colorScheme.primary);
@@ -2531,9 +2466,9 @@ class DayItem extends StatelessWidget {
     // for the day of month. To do that we prepend day of month to the
     // formatted full date.
     String semanticLabel = '${localizations.formatDecimal(date.day)}, ${localizations.formatFullDate(date)}';
-    if (isSelectionStart) {
+    if (_isSelectionStart) {
       semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
-    } else if (isSelectionEnd) {
+    } else if (_isSelectionEnd) {
       semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
     }
 
@@ -2542,7 +2477,7 @@ class DayItem extends StatelessWidget {
       child: Center(
         child: Semantics(
           label: semanticLabel,
-          selected: isSelectionStart || isSelectionEnd,
+          selected: _isSelectionStart || _isSelectionEnd,
           child: ExcludeSemantics(
             child: Text(localizations.formatDecimal(date.day), style: textStyle),
           ),

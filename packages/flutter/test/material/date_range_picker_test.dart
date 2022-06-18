@@ -28,7 +28,7 @@ void main() {
   String? fieldEndLabelText;
   String? helpText;
   String? saveText;
-  Widget Function(BuildContext context, DateTime date, DateRangeController controller)? dayBuilder;
+  DayItemBuilder? dayItemBuilder;
 
   setUp(() {
     firstDate = DateTime(2015);
@@ -95,7 +95,7 @@ void main() {
       fieldEndLabelText: fieldEndLabelText,
       helpText: helpText,
       saveText: saveText,
-      dayBuilder: dayBuilder,
+      dayItemBuilder: dayItemBuilder,
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: textDirection,
@@ -1081,23 +1081,31 @@ void main() {
 
   group('DayItemBuilder', () {
     setUp(() {
-      firstDate = DateTime(2022, 1, 2);
-      lastDate = DateTime(2022, DateTime.december, 31);
-      dayBuilder = (BuildContext context, DateTime date, DateRangeController controller) {
+      firstDate = DateTime(2016, 1, 2);
+      lastDate = DateTime(2016, DateTime.december, 31);
+      dayItemBuilder = (BuildContext context, DateTime date, DateRangeController controller, FocusNode node) {
         final bool isInAllowedRange = controller.verifyIsInAllowedRange(date);
         return DayItem(
+          date: date,
+          focusNode: node,
           onTap: isInAllowedRange ? () => controller.push(date) : null,
-          isInSelectionRange: controller.verifyIsInSelectedRange(date),
-          isSelectionStart: controller.start == date,
-          isSelectionEnd: controller.end == date,
+          controller: controller,
           selectionColor: Colors.yellow,
-          textStyle: isInAllowedRange ? Colors.black : Colors.red,
+          textStyle: isInAllowedRange 
+            ? const TextStyle(color: Colors.black) 
+            : const TextStyle(color: Colors.red),
         );
       };
     });
-    testWidgets('Should be able to be set', (WidgetTester tester) async {
-      preparePicker(tester, (Future<DateTimeRange?> range) {
-
+    testWidgets('Should be able to be select range', (WidgetTester tester) async {
+      preparePicker(tester, (Future<DateTimeRange?> range) async {
+        await tester.tap(find.text('12').first);
+        await tester.tap(find.text('14').first);
+        await tester.tap(find.text('SAVE'));
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 12),
+          end: DateTime(2016, DateTime.january, 14),
+        ));
       });
     });
   });
