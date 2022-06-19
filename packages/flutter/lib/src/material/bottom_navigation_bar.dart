@@ -121,10 +121,9 @@ enum BottomNavigationBarLandscapeLayout {
 ///
 /// {@tool dartpad}
 /// This example shows [BottomNavigationBar] used in a [Scaffold] Widget with
-/// different interaction patterns. Tapping on the first [BottomNavigationBarItem]
+/// different interaction patterns. Tapping twice on the first [BottomNavigationBarItem]
 /// uses the [ScrollController] to animate the [ListView] to the top. The second
-/// and third [BottomNavigationBarItem] change the fontWeight to bold and normal
-/// respectively.
+/// [BottomNavigationBarItem] shows a Modal Dialog.
 ///
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.2.dart **
 /// {@end-tool}

@@ -24,22 +24,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.widgetWithText(Center, 'Item 49'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.arrow_circle_up));
+    await tester.tap(find.byIcon(Icons.home));
+    await tester.tap(find.byIcon(Icons.home));
     await tester.pumpAndSettle();
+
     final Scrollable bodyScrollView = tester.widget(find.byType(Scrollable));
     expect(bodyScrollView.controller?.offset, 0.0);
 
-    final Finder textFinder = find.text('Item 0');
-    expect(
-        tester.widget<Text>(textFinder).style?.fontWeight, FontWeight.normal);
-
-    await tester.tap(find.byIcon(Icons.format_bold));
+    await tester.tap(find.byIcon(Icons.open_in_new_rounded));
     await tester.pumpAndSettle();
-    expect(tester.widget<Text>(textFinder).style?.fontWeight, FontWeight.bold);
-
-    await tester.tap(find.byIcon(Icons.format_clear));
-    await tester.pumpAndSettle();
-    expect(
-        tester.widget<Text>(textFinder).style?.fontWeight, FontWeight.normal);
+    expect(find.byType(AlertDialog), findsOneWidget);
   });
 }

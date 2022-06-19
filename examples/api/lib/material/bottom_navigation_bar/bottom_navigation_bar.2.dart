@@ -30,8 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  int _selectedIndex = 1;
-  FontWeight _fontWeight = FontWeight.normal;
+  int _selectedIndex = 0;
   final ScrollController _homeController = ScrollController();
 
   Widget _listViewBody() {
@@ -41,9 +40,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           return Center(
             child: Text(
               'Item $index',
-              style: TextStyle(
-                fontWeight: _fontWeight,
-              ),
             ),
           );
         },
@@ -61,46 +57,58 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ),
       body: _listViewBody(),
       bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.arrow_circle_up),
-              label: 'Back top',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.format_bold),
-              label: 'Bold Fonts',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.format_clear),
-              label: 'Normalize Fonts',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.amber[800],
-          onTap: (int index) {
-            switch (index) {
-              case 0:
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.open_in_new_rounded),
+            label: 'Open Dialog',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: (int index) {
+          switch (index) {
+            case 0:
+              // only scroll to top when current index is selected.
+              if (_selectedIndex == index) {
                 _homeController.animateTo(
                   0.0,
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeOut,
                 );
-                break;
-              case 1:
-                setState(() {
-                  _fontWeight = FontWeight.bold;
-                });
-                break;
-              case 2:
-                setState(() {
-                  _fontWeight = FontWeight.normal;
-                });
-                break;
-            }
-            setState(() {
+              }
+              break;
+            case 1:
+              showModal(context);
+              break;
+          }
+          setState(
+            () {
               _selectedIndex = index;
-            });
-          }),
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void showModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: const Text('Example Dialog'),
+        actions: <TextButton>[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Close'),
+          )
+        ],
+      ),
     );
   }
 }
