@@ -169,10 +169,10 @@ class Dialog extends StatelessWidget {
 
 /// A Material Design alert dialog.
 ///
-/// An alert dialog informs the user about situations that require
-/// acknowledgement. An alert dialog has an optional title and an optional list
-/// of actions. The title is displayed above the content and the actions are
-/// displayed below the content.
+/// An alert dialog (also known as a basic dialog) informs the user about
+/// situations that require acknowledgement. An alert dialog has an optional
+/// title and an optional list of actions. The title is displayed above the
+/// content and the actions are displayed below the content.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
@@ -251,6 +251,7 @@ class Dialog extends StatelessWidget {
 ///  * [CupertinoAlertDialog], an iOS-styled alert dialog.
 ///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.io/design/components/dialogs.html#alert-dialog>
+///  * <https://m3.material.io/components/dialogs>
 class AlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
   ///
@@ -554,11 +555,10 @@ class AlertDialog extends StatelessWidget {
 
     if (actions != null) {
       final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
-      final EdgeInsetsGeometry effetiveActionsPadding = (actionsPadding ?? EdgeInsets.zero).add(
-        theme.useMaterial3 ? const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0) : EdgeInsets.all(spacing),
-      );
       actionsWidget = Padding(
-        padding: effetiveActionsPadding,
+        padding: actionsPadding ?? dialogTheme.actionsPadding ?? (
+          theme.useMaterial3 ? defaults.actionsPadding! : defaults.actionsPadding!.add(EdgeInsets.all(spacing))
+        ),
         child: OverflowBar(
           alignment: actionsAlignment ?? MainAxisAlignment.end,
           spacing: spacing,
@@ -1060,6 +1060,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/dialogs.html>
+///  * <https://m3.material.io/components/dialogs>
 Future<T?> showDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -1203,6 +1204,9 @@ class _DefaultsM2 extends DialogTheme {
 
   @override
   TextStyle? get contentTextStyle => _textTheme.subtitle1;
+
+  @override
+  EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
@@ -1211,7 +1215,7 @@ class _DefaultsM2 extends DialogTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_101
 class _TokenDefaultsM3 extends DialogTheme {
   _TokenDefaultsM3(this.context)
     : super(
@@ -1233,6 +1237,9 @@ class _TokenDefaultsM3 extends DialogTheme {
 
   @override
   TextStyle? get contentTextStyle => _textTheme.bodyMedium;
+
+  @override
+  EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
 }
 
 // END GENERATED TOKEN PROPERTIES

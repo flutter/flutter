@@ -1586,13 +1586,8 @@ class ScrollAction extends Action<ScrollIntent> {
         return true;
       }
       // Check for fallback scrollable with context from PrimaryScrollController
-      if (PrimaryScrollController.of(focus.context!) != null) {
-        final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
-        return primaryScrollController != null
-          && primaryScrollController.hasClients
-          && primaryScrollController.position.context.notificationContext != null
-          && Scrollable.of(primaryScrollController.position.context.notificationContext!) != null;
-      }
+      final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
+      return primaryScrollController != null && primaryScrollController.hasClients;
     }
     return false;
   }
@@ -1681,7 +1676,34 @@ class ScrollAction extends Action<ScrollIntent> {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
       final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
-      state = Scrollable.of(primaryScrollController!.position.context.notificationContext!);
+      assert (() {
+        if (primaryScrollController!.positions.length != 1) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'A ScrollAction was invoked with the PrimaryScrollController, but '
+              'more than one ScrollPosition is attached.',
+            ),
+            ErrorDescription(
+              'Only one ScrollPosition can be manipulated by a ScrollAction at '
+              'a time.',
+            ),
+            ErrorHint(
+              'The PrimaryScrollController can be inherited automatically by '
+              'descendant ScrollViews based on the TargetPlatform and scroll '
+              'direction. By default, the PrimaryScrollController is '
+              'automatically inherited on mobile platforms for vertical '
+              'ScrollViews. ScrollView.primary can also override this behavior.',
+            ),
+          ]);
+        }
+        return true;
+      }());
+
+      if (primaryScrollController!.position.context.notificationContext == null
+          && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
+        return;
+      }
+      state = Scrollable.of(primaryScrollController.position.context.notificationContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');

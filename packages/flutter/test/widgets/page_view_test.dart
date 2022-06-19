@@ -133,6 +133,45 @@ void main() {
     expect(find.text('Illinois'), findsOneWidget);
   });
 
+  testWidgets('_PagePosition.applyViewportDimension should not throw', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/101007
+    final PageController controller = PageController(
+      initialPage: 1,
+    );
+
+    // Set the starting viewportDimension to 0.0
+    await tester.binding.setSurfaceSize(Size.zero);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromWindow(tester.binding.window);
+
+    Widget build(Size size) {
+      return MediaQuery(
+        data: mediaQueryData.copyWith(size: size),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.expand(
+              child: PageView(
+                controller: controller,
+                onPageChanged: (int page) { },
+                children: kStates.map<Widget>((String state) => Text(state)).toList(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(Size.zero));
+    const Size surfaceSize = Size(500,400);
+    await tester.binding.setSurfaceSize(surfaceSize);
+    await tester.pumpWidget(build(surfaceSize));
+
+    expect(tester.takeException(), isNull);
+
+    // Reset TestWidgetsFlutterBinding surfaceSize
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets('PageController cannot return page while unattached',
       (WidgetTester tester) async {
     final PageController controller = PageController();

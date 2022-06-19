@@ -123,6 +123,7 @@ enum BottomNavigationBarLandscapeLayout {
 ///  * [BottomNavigationBarItem]
 ///  * [Scaffold]
 ///  * <https://material.io/design/components/bottom-navigation.html>
+///  * [NavigationBar], this widget's replacement in Material Design 3.
 class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar which is typically used as a
   /// [Scaffold]'s [Scaffold.bottomNavigationBar] argument.
