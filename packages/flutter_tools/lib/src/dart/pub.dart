@@ -12,13 +12,13 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 
@@ -88,6 +88,7 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Stdio stdio,
   }) = _DefaultPub;
 
   /// Runs `pub get` or `pub upgrade` for [project].
@@ -152,6 +153,7 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Stdio stdio,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -161,7 +163,8 @@ class _DefaultPub implements Pub {
          logger: logger,
          processManager: processManager,
        ),
-       _processManager = processManager;
+       _processManager = processManager,
+       _stdio = stdio;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -170,6 +173,7 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final Usage _usage;
   final ProcessManager _processManager;
+  final Stdio _stdio;
 
   @override
   Future<void> get({
@@ -243,7 +247,6 @@ class _DefaultPub implements Pub {
       _fileSystem.path.relative(directory),
       ...<String>[
         command,
-        '--no-precompile',
       ],
       if (offline)
         '--offline',
@@ -303,7 +306,7 @@ class _DefaultPub implements Pub {
     }
 
     final Status? status = printProgress
-      ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.relative(directory)}...',)
+      ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',)
       : null;
     try {
       do {
@@ -367,10 +370,10 @@ class _DefaultPub implements Pub {
       for (final _OutputLine line in output) {
         switch (line.stream) {
           case _OutputStream.stdout:
-            globals.stdio.stdoutWrite('${line.line}\n');
+            _stdio.stdoutWrite('${line.line}\n');
             break;
           case _OutputStream.stderr:
-            globals.stdio.stderrWrite('${line.line}\n');
+            _stdio.stderrWrite('${line.line}\n');
             break;
         }
       }

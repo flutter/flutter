@@ -41,7 +41,7 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fs.directory(directory).childFile('.packages').createSync();
+    project.directory.childFile('.packages').createSync();
     if (offline == true) {
       calledGetOffline += 1;
     } else {

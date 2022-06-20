@@ -69,6 +69,7 @@ void main() {
           usage: globals.flutterUsage,
           botDetector: globals.botDetector,
           platform: globals.platform,
+          stdio: globals.stdio,
         ),
   });
 
@@ -116,6 +117,7 @@ void main() {
           usage: globals.flutterUsage,
           botDetector: globals.botDetector,
           platform: globals.platform,
+          stdio: globals.stdio,
         ),
   });
 }
