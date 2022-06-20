@@ -831,13 +831,7 @@ class DataTable extends StatelessWidget {
       label = Expanded(child: builder != null ? builder(context, label) : label);
       label = Row(
         textDirection: numeric ? TextDirection.rtl : null,
-        children: <Widget>[
-          if (builder != null)
-            builder(context, label)
-          else
-           label,
-          icon,
-        ],
+        children: <Widget>[ if (builder != null) builder(context, label) else label, icon ],
       );
     }
 
@@ -857,11 +851,12 @@ class DataTable extends StatelessWidget {
         style: effectiveDataTextStyle.copyWith(
           color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
         ),
-        child: DropdownButtonHideUnderline(
-          child: builder != null ? builder(context, label) : label,
-        ),
+        child: DropdownButtonHideUnderline(child: builder != null ? builder(context, label) : label),
       ),
     );
+    if (builder != null) {
+      return label;
+    }
     if (onTap != null ||
         onDoubleTap != null ||
         onLongPress != null ||
