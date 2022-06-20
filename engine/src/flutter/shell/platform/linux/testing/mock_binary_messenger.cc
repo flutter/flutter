@@ -18,6 +18,27 @@ struct _FlMockBinaryMessenger {
   MockBinaryMessenger* mock;
 };
 
+static FlBinaryMessenger* fl_mock_binary_messenger_new(
+    MockBinaryMessenger* mock) {
+  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(
+      g_object_new(fl_mock_binary_messenger_get_type(), nullptr));
+  self->mock = mock;
+  return FL_BINARY_MESSENGER(self);
+}
+
+MockBinaryMessenger::MockBinaryMessenger()
+    : instance_(fl_mock_binary_messenger_new(this)) {}
+
+MockBinaryMessenger::~MockBinaryMessenger() {
+  if (FL_IS_BINARY_MESSENGER(instance_)) {
+    g_clear_object(&instance_);
+  }
+}
+
+MockBinaryMessenger::operator FlBinaryMessenger*() {
+  return instance_;
+}
+
 bool MockBinaryMessenger::HasMessageHandler(const gchar* channel) const {
   return message_handlers.at(channel) != nullptr;
 }
@@ -30,15 +51,14 @@ void MockBinaryMessenger::SetMessageHandler(
   user_datas[channel] = user_data;
 }
 
-void MockBinaryMessenger::ReceiveMessage(FlBinaryMessenger* messenger,
-                                         const gchar* channel,
+void MockBinaryMessenger::ReceiveMessage(const gchar* channel,
                                          GBytes* message) {
   FlBinaryMessengerMessageHandler handler = message_handlers[channel];
   if (response_handles[channel] == nullptr) {
     response_handles[channel] = FL_BINARY_MESSENGER_RESPONSE_HANDLE(
         fl_mock_binary_messenger_response_handle_new());
   }
-  handler(messenger, channel, message, response_handles[channel],
+  handler(instance_, channel, message, response_handles[channel],
           user_datas[channel]);
 }
 
@@ -113,10 +133,3 @@ static void fl_mock_binary_messenger_iface_init(
 }
 
 static void fl_mock_binary_messenger_init(FlMockBinaryMessenger* self) {}
-
-FlBinaryMessenger* fl_binary_messenger_new_mock(MockBinaryMessenger* mock) {
-  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(
-      g_object_new(fl_mock_binary_messenger_get_type(), NULL));
-  self->mock = mock;
-  return FL_BINARY_MESSENGER(self);
-}
