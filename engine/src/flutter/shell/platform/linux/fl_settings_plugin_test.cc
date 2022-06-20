@@ -25,19 +25,18 @@ MATCHER_P2(HasSetting, key, value, "") {
   return false;
 }
 
-#define EXPECT_SETTING(mock, messenger, key, value)                            \
-  EXPECT_CALL(mock, fl_binary_messenger_send_on_channel(                       \
-                        messenger, ::testing::StrEq("flutter/settings"),       \
-                        HasSetting(key, value), ::testing::A<GCancellable*>(), \
-                        ::testing::A<GAsyncReadyCallback>(),                   \
-                        ::testing::A<gpointer>()))
+#define EXPECT_SETTING(messenger, key, value)                                 \
+  EXPECT_CALL(                                                                \
+      messenger,                                                              \
+      fl_binary_messenger_send_on_channel(                                    \
+          ::testing::Eq<FlBinaryMessenger*>(messenger),                       \
+          ::testing::StrEq("flutter/settings"), HasSetting(key, value),       \
+          ::testing::A<GCancellable*>(), ::testing::A<GAsyncReadyCallback>(), \
+          ::testing::A<gpointer>()))
 
 TEST(FlSettingsPluginTest, AlwaysUse24HourFormat) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
-
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> mock_messenger;
-  g_autoptr(FlBinaryMessenger) messenger =
-      fl_binary_messenger_new_mock(&mock_messenger);
+  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
   g_autoptr(FlSettingsPlugin) plugin = fl_settings_plugin_new(messenger);
 
@@ -49,21 +48,18 @@ TEST(FlSettingsPluginTest, AlwaysUse24HourFormat) {
       .WillOnce(::testing::Return(FL_CLOCK_FORMAT_12H))
       .WillOnce(::testing::Return(FL_CLOCK_FORMAT_24H));
 
-  EXPECT_SETTING(mock_messenger, messenger, "alwaysUse24HourFormat", use_12h);
+  EXPECT_SETTING(messenger, "alwaysUse24HourFormat", use_12h);
 
   fl_settings_plugin_start(plugin, settings);
 
-  EXPECT_SETTING(mock_messenger, messenger, "alwaysUse24HourFormat", use_24h);
+  EXPECT_SETTING(messenger, "alwaysUse24HourFormat", use_24h);
 
   fl_settings_emit_changed(settings);
 }
 
 TEST(FlSettingsPluginTest, PlatformBrightness) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
-
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> mock_messenger;
-  g_autoptr(FlBinaryMessenger) messenger =
-      fl_binary_messenger_new_mock(&mock_messenger);
+  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
   g_autoptr(FlSettingsPlugin) plugin = fl_settings_plugin_new(messenger);
 
@@ -75,21 +71,18 @@ TEST(FlSettingsPluginTest, PlatformBrightness) {
       .WillOnce(::testing::Return(FL_COLOR_SCHEME_LIGHT))
       .WillOnce(::testing::Return(FL_COLOR_SCHEME_DARK));
 
-  EXPECT_SETTING(mock_messenger, messenger, "platformBrightness", light);
+  EXPECT_SETTING(messenger, "platformBrightness", light);
 
   fl_settings_plugin_start(plugin, settings);
 
-  EXPECT_SETTING(mock_messenger, messenger, "platformBrightness", dark);
+  EXPECT_SETTING(messenger, "platformBrightness", dark);
 
   fl_settings_emit_changed(settings);
 }
 
 TEST(FlSettingsPluginTest, TextScaleFactor) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
-
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> mock_messenger;
-  g_autoptr(FlBinaryMessenger) messenger =
-      fl_binary_messenger_new_mock(&mock_messenger);
+  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
   g_autoptr(FlSettingsPlugin) plugin = fl_settings_plugin_new(messenger);
 
@@ -101,11 +94,11 @@ TEST(FlSettingsPluginTest, TextScaleFactor) {
       .WillOnce(::testing::Return(1.0))
       .WillOnce(::testing::Return(2.0));
 
-  EXPECT_SETTING(mock_messenger, messenger, "textScaleFactor", one);
+  EXPECT_SETTING(messenger, "textScaleFactor", one);
 
   fl_settings_plugin_start(plugin, settings);
 
-  EXPECT_SETTING(mock_messenger, messenger, "textScaleFactor", two);
+  EXPECT_SETTING(messenger, "textScaleFactor", two);
 
   fl_settings_emit_changed(settings);
 }

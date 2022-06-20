@@ -49,15 +49,14 @@ static FlValue* build_list(std::vector<FlValue*> args) {
 }
 
 TEST(FlTextInputPluginTest, SetClient) {
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> mock;
-  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new_mock(&mock);
+  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
   auto filter =
       +[](GtkIMContext* im_context, gpointer gdk_event) { return false; };
 
   fl_text_input_plugin_new(messenger, nullptr,
                            FlTextInputPluginImFilter(filter));
 
-  EXPECT_TRUE(mock.HasMessageHandler("flutter/textinput"));
+  EXPECT_TRUE(messenger.HasMessageHandler("flutter/textinput"));
 
   g_autoptr(FlValue) args = build_list({
       fl_value_new_int(1),  // client id
@@ -75,11 +74,11 @@ TEST(FlTextInputPluginTest, SetClient) {
       FL_METHOD_CODEC(codec), "TextInput.setClient", args, nullptr);
 
   g_autoptr(FlValue) null = fl_value_new_null();
-  EXPECT_CALL(mock, fl_binary_messenger_send_response(
-                        ::testing::Eq(messenger),
-                        ::testing::A<FlBinaryMessengerResponseHandle*>(),
-                        SuccessResponse(null), ::testing::A<GError**>()))
+  EXPECT_CALL(messenger, fl_binary_messenger_send_response(
+                             ::testing::Eq<FlBinaryMessenger*>(messenger),
+                             ::testing::A<FlBinaryMessengerResponseHandle*>(),
+                             SuccessResponse(null), ::testing::A<GError**>()))
       .WillOnce(::testing::Return(true));
 
-  mock.ReceiveMessage(messenger, "flutter/textinput", message);
+  messenger.ReceiveMessage("flutter/textinput", message);
 }
