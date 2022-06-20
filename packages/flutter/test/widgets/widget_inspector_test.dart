@@ -1205,6 +1205,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       group('setPubRootDirectories', ()  {
         late final String pubRootTest; 
+
         setUpAll(() {
           pubRootTest = generateTestPubRootDirectory(service);
         });
@@ -1885,8 +1886,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     group('ext.flutter.inspector.setPubRootDirectories group', () {
       late final String pubRootTest; 
+
       setUpAll(() async {
-        await service.testExtension('setPubRootDirectories', <String, String>{});
         pubRootTest = generateTestPubRootDirectory(service);
       }); 
 
@@ -1937,6 +1938,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), isNot(contains('createdByLocalProject')));
         },
       );
+
       testWidgets(
         'has createdByLocalProject if the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
@@ -1960,6 +1962,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
         },
       );
+
       testWidgets(
         'does not have createdByLocalProject if the pubRootDirectory has a different suffix',
         (WidgetTester tester) async {
@@ -1983,6 +1986,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), isNot(contains('createdByLocalProject')));
         },
       );
+
       testWidgets(
         'has createdByLocalProject if at least one of the pubRootDirectories matches',
         (WidgetTester tester) async {
@@ -2010,6 +2014,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject')); 
         },
       );
+
       testWidgets(
         'widget is part of core framework and is the child of a widget in the package pubRootDirectories',
         (WidgetTester tester) async {
@@ -2063,6 +2068,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     group('ext.flutter.inspector.setPubRootDirectories extra args regression test', () {
       // Ensure that passing the isolate id as an argument won't break
       // setPubRootDirectories command.
+
       late final String pubRootTest; 
 
       setUpAll(() {
@@ -2091,6 +2097,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
         },
       );
+
       testWidgets(
         'does not have createdByLocalProject if the prefix of the pubRootDirectory is different',
         (WidgetTester tester) async {
@@ -2113,6 +2120,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), isNot(contains('createdByLocalProject')));
         },
       );
+
       testWidgets(
         'has createdByLocalProject if the pubRootDirectory is prefixed with file://',
         (WidgetTester tester) async {
@@ -2135,6 +2143,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
         },
       );
+
       testWidgets(
         'does not have createdByLocalProject if the pubRootDirectory has a different suffix',
         (WidgetTester tester) async {
@@ -2157,6 +2166,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), isNot(contains('createdByLocalProject')));
         },
       );
+
       testWidgets(
         'has createdByLocalProject if at least one of the pubRootDirectories matchesE',
         (WidgetTester tester) async {
