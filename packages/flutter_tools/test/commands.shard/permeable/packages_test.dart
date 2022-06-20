@@ -32,6 +32,12 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  FakeStdio mockStdio;
+
+  setUp(() {
+    mockStdio = FakeStdio()..stdout.terminalColumns = 80;
+  });
+
   Cache.disableLocking();
   group('packages get/upgrade', () {
     Directory tempDir;
@@ -197,16 +203,25 @@ void main() {
       }
     }
 
-    testUsingContext('get fetches packages', () async {
+    testUsingContext('get fetches packages and has output from pub', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
 
+      expect(mockStdio.stdout.writes.map(utf8.decode),
+        allOf(
+          contains('Resolving dependencies...\n'),
+          contains('+ flutter 0.0.0 from sdk flutter\n'),
+          contains(matches(RegExp('Changed \\d+ dependencies!\n'))),
+        ),
+      );
+
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -227,6 +242,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -247,6 +263,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -269,6 +286,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -289,6 +307,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -309,6 +328,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -338,6 +358,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -358,6 +379,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -378,7 +400,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
-      Stdio: () => FakeStdio()..stdout.terminalColumns = 80,
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -399,6 +421,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectModulePluginInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -427,6 +450,7 @@ void main() {
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -440,11 +464,10 @@ void main() {
 
   group('packages test/pub', () {
     FakeProcessManager processManager;
-    FakeStdio mockStdio;
+
 
     setUp(() {
       processManager = FakeProcessManager.empty();
-      mockStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('test without bot', () async {

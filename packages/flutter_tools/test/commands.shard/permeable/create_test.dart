@@ -65,6 +65,7 @@ void main() {
   LoggingProcessManager loggingProcessManager;
   FakeProcessManager fakeProcessManager;
   BufferLogger logger;
+  FakeStdio mockStdio;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -81,6 +82,7 @@ void main() {
       channel: frameworkChannel,
     );
     fakeProcessManager = FakeProcessManager.empty();
+    mockStdio = FakeStdio();
   });
 
   tearDown(() {
@@ -132,6 +134,7 @@ void main() {
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -179,6 +182,7 @@ void main() {
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -205,6 +209,7 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -234,6 +239,7 @@ void main() {
     ]);
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -259,6 +265,7 @@ void main() {
         ]),
       throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -284,6 +291,7 @@ void main() {
     expect(exec.exitCode, 2);
     expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -317,6 +325,7 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -349,6 +358,7 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -376,6 +386,7 @@ void main() {
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',]
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -414,6 +425,7 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -443,6 +455,7 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -481,6 +494,7 @@ void main() {
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -511,6 +525,7 @@ void main() {
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -541,6 +556,7 @@ void main() {
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -568,6 +584,7 @@ void main() {
     final PathDependency pathDependency = pubspec.dependencies[pluginName] as PathDependency;
     expect(pathDependency.path, '../');
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -689,6 +706,7 @@ void main() {
       '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
     ]);
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -756,6 +774,7 @@ void main() {
 
     expect(logger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Logger: () => logger,
   });
 
@@ -781,6 +800,7 @@ void main() {
 
     expect(projectDir.childDirectory('android'), isNot(exists));
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
   });
 
@@ -1387,6 +1407,7 @@ void main() {
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -1415,6 +1436,7 @@ void main() {
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -1672,6 +1694,7 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -1696,6 +1719,7 @@ void main() {
       'com.bar.foo.flutterProject',
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -1846,6 +1870,7 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -1877,6 +1902,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -2814,6 +2840,7 @@ void main() {
       expectedFailures: expectedFailures,
     );
   }, overrides: <Type, Generator>{
+    Stdio: () => mockStdio,
     Pub: () => Pub(
       fileSystem: globals.fs,
       logger: globals.logger,

@@ -19,6 +19,7 @@ import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'globals.dart' as globals;
+import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
@@ -118,7 +119,7 @@ class PubDependencies extends ArtifactSet {
   ) async {
     await _pub().get(
       context: PubContext.pubGet,
-      directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      project: FlutterProject.fromDirectory(fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))),
       offline: offline
     );
   }

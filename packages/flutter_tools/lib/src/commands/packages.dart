@@ -138,11 +138,10 @@ class PackagesGetCommand extends FlutterCommand {
     try {
       await pub.get(
         context: PubContext.pubGet,
-        directory: directory,
+        project: flutterProject,
         upgrade: upgrade,
         shouldSkipThirdPartyGenerator: false,
         offline: boolArgDeprecated('offline'),
-        generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
@@ -177,7 +176,6 @@ class PackagesGetCommand extends FlutterCommand {
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
       final FlutterProject exampleProject = rootProject.example;
-      await _runPubGet(exampleProject.directory.path, exampleProject);
       await exampleProject.regeneratePlatformSpecificTooling();
     }
 
@@ -210,7 +208,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.batch(<String>['run', 'test', ...argResults!.rest], context: PubContext.runTest, retry: false);
+    await pub.batch(<String>['run', 'test', ...argResults!.rest], context: PubContext.runTest);
     return FlutterCommandResult.success();
   }
 }

@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/update_packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
@@ -227,11 +228,12 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     @required PubContext context,
-    String directory,
+    @required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
@@ -268,8 +270,6 @@ sdks:
         String directory,
         MessageFilter filter,
         String failureMessage = 'pub failed',
-        @required bool retry,
-        bool showTraceForErrors,
       }) async {
     pubBatchDirectories.add(directory);
 
