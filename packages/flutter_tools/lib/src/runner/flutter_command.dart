@@ -12,6 +12,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -68,7 +69,7 @@ class FlutterCommandResult {
   /// Optional data that can be appended to the timing event.
   /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
   /// Do not add PII.
-  final List<String>? timingLabelParts;
+  final List<String?>? timingLabelParts;
 
   /// Optional epoch time when the command's non-interactive wait time is
   /// complete during the command's execution. Use to measure user perceivable
@@ -1264,7 +1265,7 @@ abstract class FlutterCommand extends Command<void> {
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
-    final List<String> labels = <String>[
+    final List<String?> labels = <String?>[
       if (commandResult.exitStatus != null)
         getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
@@ -1272,7 +1273,7 @@ abstract class FlutterCommand extends Command<void> {
     ];
 
     final String label = labels
-        .where((String label) => !_isBlank(label))
+        .where((String? label) => label != null && !_isBlank(label))
         .join('-');
     globals.flutterUsage.sendTiming(
       'flutter',
@@ -1475,16 +1476,12 @@ abstract class FlutterCommand extends Command<void> {
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.
-      bool changedDirectory = false;
-      while (!globals.fs.isFileSync('pubspec.yaml')) {
-        final Directory nextCurrent = globals.fs.currentDirectory.parent;
-        if (nextCurrent == null || nextCurrent.path == globals.fs.currentDirectory.path) {
-          throw ToolExit(userMessages.flutterNoPubspec);
-        }
-        globals.fs.currentDirectory = nextCurrent;
-        changedDirectory = true;
+      final String? path = findProjectRoot(globals.fs, globals.fs.currentDirectory.path);
+      if (path == null) {
+        throwToolExit(userMessages.flutterNoPubspec);
       }
-      if (changedDirectory) {
+      if (path != globals.fs.currentDirectory.path) {
+        globals.fs.currentDirectory = path;
         globals.printStatus('Changing current working directory to: ${globals.fs.currentDirectory.path}');
       }
     }
@@ -1537,7 +1534,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!argParser.options.containsKey(name)) {
       return null;
     }
-    return argResults![name] as String;
+    return argResults![name] as String?;
   }
 
   /// Gets the parsed command-line option named [name] as an `int`.

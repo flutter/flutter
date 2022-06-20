@@ -180,8 +180,9 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   @override
   Ticker createTicker(TickerCallback onTick) {
     assert(() {
-      if (_ticker == null)
+      if (_ticker == null) {
         return true;
+      }
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('$runtimeType is a SingleTickerProviderStateMixin but multiple tickers were created.'),
         ErrorDescription('A SingleTickerProviderStateMixin can only be used as a TickerProvider once.'),
@@ -201,8 +202,9 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   @override
   void dispose() {
     assert(() {
-      if (_ticker == null || !_ticker!.isActive)
+      if (_ticker == null || !_ticker!.isActive) {
         return true;
+      }
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('$this was disposed with an active Ticker.'),
         ErrorDescription(
@@ -254,14 +256,15 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     super.debugFillProperties(properties);
     String? tickerDescription;
     if (_ticker != null) {
-      if (_ticker!.isActive && _ticker!.muted)
+      if (_ticker!.isActive && _ticker!.muted) {
         tickerDescription = 'active but muted';
-      else if (_ticker!.isActive)
+      } else if (_ticker!.isActive) {
         tickerDescription = 'active';
-      else if (_ticker!.muted)
+      } else if (_ticker!.muted) {
         tickerDescription = 'inactive and muted';
-      else
+      } else {
         tickerDescription = 'inactive';
+      }
     }
     properties.add(DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
   }

@@ -13,8 +13,9 @@ int runeToLowerCase(int rune) {
   // Assume only Basic Multilingual Plane runes have lower and upper cases.
   // For other characters, return them as is.
   const int utf16BmpUpperBound = 0xD7FF;
-  if (rune > utf16BmpUpperBound)
+  if (rune > utf16BmpUpperBound) {
     return rune;
+  }
   return String.fromCharCode(rune).toLowerCase().codeUnitAt(0);
 }
 
@@ -251,10 +252,12 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataMacOs
         && other.characters == characters
         && other.charactersIgnoringModifiers == charactersIgnoringModifiers

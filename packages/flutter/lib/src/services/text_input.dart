@@ -20,7 +20,6 @@ import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
-import 'system_chrome.dart';
 import 'text_editing.dart';
 import 'text_editing_delta.dart';
 
@@ -752,7 +751,8 @@ class RawFloatingCursorPoint {
 class TextEditingValue {
   /// Creates information for editing a run of text.
   ///
-  /// The selection and composing range must be within the text.
+  /// The selection and composing range must be within the text. This is not
+  /// checked during construction, and must be guaranteed by the caller.
   ///
   /// The [text], [selection], and [composing] arguments must not be null but
   /// each have default values.
@@ -764,23 +764,32 @@ class TextEditingValue {
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
   }) : assert(text != null),
+       // The constructor does not verify that `selection` and `composing` are
+       // valid ranges within `text`, and is unable to do so due to limitation
+       // of const constructors. Some checks are performed by assertion in
+       // other occasions. See `_textRangeIsValid`.
        assert(selection != null),
        assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+    final String text = encoded['text'] as String;
+    final TextSelection selection = TextSelection(
+      baseOffset: encoded['selectionBase'] as int? ?? -1,
+      extentOffset: encoded['selectionExtent'] as int? ?? -1,
+      affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+      isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+    );
+    final TextRange composing = TextRange(
+      start: encoded['composingBase'] as int? ?? -1,
+      end: encoded['composingExtent'] as int? ?? -1,
+    );
+    assert(_textRangeIsValid(selection, text));
+    assert(_textRangeIsValid(composing, text));
     return TextEditingValue(
-      text: encoded['text'] as String,
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
-      composing: TextRange(
-        start: encoded['composingBase'] as int? ?? -1,
-        end: encoded['composingExtent'] as int? ?? -1,
-      ),
+      text: text,
+      selection: selection,
+      composing: composing,
     );
   }
 
@@ -885,21 +894,27 @@ class TextEditingValue {
       return originalIndex + replacedLength - removedLength;
     }
 
+    final TextSelection adjustedSelection = TextSelection(
+      baseOffset: adjustIndex(selection.baseOffset),
+      extentOffset: adjustIndex(selection.extentOffset),
+    );
+    final TextRange adjustedComposing = TextRange(
+      start: adjustIndex(composing.start),
+      end: adjustIndex(composing.end),
+    );
+    assert(_textRangeIsValid(adjustedSelection, newText));
+    assert(_textRangeIsValid(adjustedComposing, newText));
     return TextEditingValue(
       text: newText,
-      selection: TextSelection(
-        baseOffset: adjustIndex(selection.baseOffset),
-        extentOffset: adjustIndex(selection.extentOffset),
-      ),
-      composing: TextRange(
-        start: adjustIndex(composing.start),
-        end: adjustIndex(composing.end),
-      ),
+      selection: adjustedSelection,
+      composing: adjustedComposing,
     );
   }
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
+    assert(_textRangeIsValid(selection, text));
+    assert(_textRangeIsValid(composing, text));
     return <String, dynamic>{
       'text': text,
       'selectionBase': selection.baseOffset,
@@ -916,8 +931,9 @@ class TextEditingValue {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is TextEditingValue
         && other.text == text
         && other.selection == selection
@@ -930,6 +946,24 @@ class TextEditingValue {
     selection.hashCode,
     composing.hashCode,
   );
+
+  // Verify that the given range is within the text.
+  //
+  // The verification can't be perform during the constructor of
+  // [TextEditingValue], which are `const` and are allowed to retrieve
+  // properties of [TextRange]s. [TextEditingValue] should perform this
+  // wherever it is building other values (such as toJson) or is built in a
+  // non-const way (such as fromJson).
+  static bool _textRangeIsValid(TextRange range, String text) {
+    if (range.start == -1 && range.end == -1) {
+      return true;
+    }
+    assert(range.start >= 0 && range.start <= text.length,
+        'Range start ${range.start} is out of text of length ${text.length}');
+    assert(range.end >= 0 && range.end <= text.length,
+        'Range end ${range.end} is out of text of length ${text.length}');
+    return true;
+  }
 }
 
 /// Indicates what triggered the change in selected text (including changes to
@@ -1165,10 +1199,12 @@ class SelectionRect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is SelectionRect
         && other.position == position
         && other.bounds   == bounds;
@@ -1330,8 +1366,9 @@ class TextInputConnection {
   /// platform.
   void setComposingRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedRect)
+    if (rect == _cachedRect) {
       return;
+    }
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
@@ -1348,8 +1385,9 @@ class TextInputConnection {
   /// the accent selection menu.
   void setCaretRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedCaretRect)
+    if (rect == _cachedCaretRect) {
       return;
+    }
     _cachedCaretRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setCaretRect(
@@ -1436,7 +1474,7 @@ TextInputAction _toTextInputAction(String action) {
       return TextInputAction.next;
     case 'TextInputAction.previous':
       return TextInputAction.previous;
-    case 'TextInputAction.continue_action':
+    case 'TextInputAction.continueAction':
       return TextInputAction.continueAction;
     case 'TextInputAction.join':
       return TextInputAction.join;
@@ -1530,7 +1568,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
-    _channel.setMethodCallHandler(_handleTextInputInvocation);
+    _channel.setMethodCallHandler(_loudlyHandleTextInputInvocation);
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
@@ -1542,7 +1580,7 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel = newChannel..setMethodCallHandler(_instance._handleTextInputInvocation);
+      _instance._channel = newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
     }());
   }
@@ -1599,9 +1637,9 @@ class TextInput {
     return connection;
   }
 
-  /// This method actually notifies the embedding of the client. It is utilized
-  /// by [attach] and by [_handleTextInputInvocation] for the
-  /// `TextInputClient.requestExistingInputState` method.
+  // This method actually notifies the embedding of the client. It is utilized
+  // by [attach] and by [_handleTextInputInvocation] for the
+  // `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
     assert(connection._client != null);
@@ -1609,7 +1647,10 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _channel.invokeMethod<void>(
       'TextInput.setClient',
-      <dynamic>[ connection._id, configuration.toJson() ],
+      <Object>[
+        connection._id,
+        configuration.toJson(),
+      ],
     );
     _currentConnection = connection;
     _currentConfiguration = configuration;
@@ -1652,6 +1693,23 @@ class TextInput {
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
+  Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
+    try {
+      return await _handleTextInputInvocation(call);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during method call ${call.method}'),
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
+      ));
+      rethrow;
+    }
+  }
+
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
     if (method == 'TextInputClient.focusElement') {
@@ -1662,8 +1720,9 @@ class TextInput {
       final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
       return _scribbleClients.keys.where((String elementIdentifier) {
         final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false))
+        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
           return false;
+        }
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
         return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
       }).map((String elementIdentifier) {
@@ -1677,8 +1736,9 @@ class TextInput {
       _scribbleInProgress = false;
       return;
     }
-    if (_currentConnection == null)
+    if (_currentConnection == null) {
       return;
+    }
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
@@ -1723,12 +1783,14 @@ class TextInput {
         // In debug builds we allow "-1" as a magical client ID that ignores
         // this verification step so that tests can always get through, even
         // when they are not mocking the engine side of text input.
-        if (client == -1)
+        if (client == -1) {
           debugAllowAnyway = true;
+        }
         return true;
       }());
-      if (!debugAllowAnyway)
+      if (!debugAllowAnyway) {
         return;
+      }
     }
 
     switch (method) {
@@ -1787,8 +1849,9 @@ class TextInput {
   bool _hidePending = false;
 
   void _scheduleHide() {
-    if (_hidePending)
+    if (_hidePending) {
       return;
+    }
     _hidePending = true;
 
     // Schedule a deferred task that hides the text input. If someone else
@@ -1796,8 +1859,9 @@ class TextInput {
     // nothing.
     scheduleMicrotask(() {
       _hidePending = false;
-      if (_currentConnection == null)
+      if (_currentConnection == null) {
         _channel.invokeMethod<void>('TextInput.hide');
+      }
     });
   }
 

@@ -71,8 +71,9 @@ abstract class OverlayRoute<T> extends Route<T> {
   bool didPop(T? result) {
     final bool returnValue = super.didPop(result);
     assert(returnValue);
-    if (finishedWhenPopped)
+    if (finishedWhenPopped) {
       navigator!.finalizeRoute(this);
+    }
     return returnValue;
   }
 
@@ -194,13 +195,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void _handleStatusChanged(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.completed:
-        if (overlayEntries.isNotEmpty)
+        if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = opaque;
+        }
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        if (overlayEntries.isNotEmpty)
+        if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = false;
+        }
         break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
@@ -249,8 +252,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void didReplace(Route<dynamic>? oldRoute) {
     assert(_controller != null, '$runtimeType.didReplace called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    if (oldRoute is TransitionRoute)
+    if (oldRoute is TransitionRoute) {
       _controller!.value = oldRoute._controller!.value;
+    }
     super.didReplace(oldRoute);
   }
 
@@ -633,8 +637,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
       internalStateChanged = _entriesImpliesAppBarDismissal == 0;
       _entriesImpliesAppBarDismissal += 1;
     }
-    if (wasEmpty || internalStateChanged)
+    if (wasEmpty || internalStateChanged) {
       changedInternalState();
+    }
   }
 
   /// Remove a local history entry from this route.
@@ -669,8 +674,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
 
   @override
   Future<RoutePopDisposition> willPop() async {
-    if (willHandlePopInternally)
+    if (willHandlePopInternally) {
       return RoutePopDisposition.pop;
+    }
     return super.willPop();
   }
 
@@ -686,8 +692,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
         _entriesImpliesAppBarDismissal -= 1;
         internalStateChanged = _entriesImpliesAppBarDismissal == 0;
       }
-      if (_localHistory!.isEmpty || internalStateChanged)
+      if (_localHistory!.isEmpty || internalStateChanged) {
         changedInternalState();
+      }
       return false;
     }
     return super.didPop(result);
@@ -1387,8 +1394,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
-    if (_offstage == value)
+    if (_offstage == value) {
       return;
+    }
     setState(() {
       _offstage = value;
     });
@@ -1433,8 +1441,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
-      if (await callback() != true)
+      if (await callback() != true) {
         return RoutePopDisposition.doNotPop;
+      }
     }
     return super.willPop();
   }
@@ -1575,8 +1584,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void changedExternalState() {
     super.changedExternalState();
     _modalBarrier.markNeedsBuild();
-    if (_scopeKey.currentState != null)
+    if (_scopeKey.currentState != null) {
       _scopeKey.currentState!._forceRebuildPage();
+    }
   }
 
   /// Whether this route can be popped.
@@ -1975,6 +1985,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (_transitionBuilder == null) {
+      // Some default transition.
       return FadeTransition(
         opacity: CurvedAnimation(
           parent: animation,
@@ -1982,7 +1993,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
         ),
         child: child,
       );
-    } // Some default transition
+    }
     return _transitionBuilder!(context, animation, secondaryAnimation, child);
   }
 }
@@ -2138,8 +2149,9 @@ class FocusTrap extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    if (renderObject is _RenderFocusTrap)
+    if (renderObject is _RenderFocusTrap) {
       renderObject.focusScopeNode = focusScopeNode;
+    }
   }
 }
 
@@ -2170,8 +2182,9 @@ class FocusTrapArea extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    if (renderObject is _RenderFocusTrapArea)
+    if (renderObject is _RenderFocusTrapArea) {
       renderObject.focusNode = focusNode;
+    }
   }
 }
 
@@ -2191,8 +2204,9 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
   FocusNode? _previousFocus;
   FocusScopeNode get focusScopeNode => _focusScopeNode;
   set focusScopeNode(FocusScopeNode value) {
-    if (focusScopeNode == value)
+    if (focusScopeNode == value) {
       return;
+    }
     _focusScopeNode = value;
   }
 
@@ -2249,12 +2263,14 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     }
     final BoxHitTestResult? result = cachedResults[entry];
     final FocusNode? focusNode = _focusScopeNode.focusedChild;
-    if (focusNode == null || result == null)
+    if (focusNode == null || result == null) {
       return;
+    }
 
     final RenderObject? renderObject = focusNode.context?.findRenderObject();
-    if (renderObject == null)
+    if (renderObject == null) {
       return;
+    }
 
     bool hitCurrentFocus = false;
     for (final HitTestEntry entry in result.path) {

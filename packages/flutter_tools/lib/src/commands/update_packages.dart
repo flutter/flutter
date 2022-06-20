@@ -28,16 +28,13 @@ import '../runner/flutter_command.dart';
 /// in ways that prevent them from every upgrading Flutter again!
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
-  'archive': '3.1.11', // Breaking changes in 3.2.0, see https://github.com/flutter/flutter/issues/98536
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.1.0', // Must always exactly match flutter_tools template.
-  // "shelf" is pinned to avoid the performance regression from a reverted
-  // feature from https://github.com/dart-lang/shelf/issues/189 . This can be
-  // removed when a new major version of shelf is published.
-  'shelf': '1.1.4',
   'video_player': '2.2.11',
-  // https://github.com/flutter/flutter/issues/103357 color regressions
-  'material_color_utilities': '0.1.4',
+  // Could potentially break color scheme tests on upgrade,
+  // so pin and manually update as needed.
+  'material_color_utilities': '0.1.5',
+  'test_api': '0.4.9',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

@@ -53,10 +53,10 @@ class _OverflowRegionData {
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
-///     AlignmentGeometry alignment = Alignment.center,
-///     TextDirection? textDirection,
-///     RenderBox? child,
-///   }) : super.mixin(alignment, textDirection, child);
+///     super.alignment = Alignment.center,
+///     required super.textDirection,
+///     super.child,
+///   });
 ///
 ///   late Rect _containerRect;
 ///   late Rect _childRect;

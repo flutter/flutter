@@ -188,12 +188,15 @@ void main() {
             height: 100,
             child: InkWell(
               overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered))
+                if (states.contains(MaterialState.hovered)) {
                   return const Color(0xff00ff00);
-                if (states.contains(MaterialState.focused))
+                }
+                if (states.contains(MaterialState.focused)) {
                   return const Color(0xff0000ff);
-                if (states.contains(MaterialState.pressed))
+                }
+                if (states.contains(MaterialState.pressed)) {
                   return const Color(0xf00fffff);
+                }
                 return const Color(0xffbadbad); // Shouldn't happen.
               }),
               onTap: () { },
@@ -265,12 +268,15 @@ void main() {
               child: InkWell(
                 focusNode: focusNode,
                 overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered))
+                  if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
-                  if (states.contains(MaterialState.focused))
+                  }
+                  if (states.contains(MaterialState.focused)) {
                     return const Color(0xff0000ff);
-                  if (states.contains(MaterialState.pressed))
+                  }
+                  if (states.contains(MaterialState.pressed)) {
                     return const Color(0xf00fffff);
+                  }
                   return const Color(0xffbadbad); // Shouldn't happen.
                 }),
                 highlightColor: const Color(0xf00fffff),
@@ -381,12 +387,15 @@ void main() {
               height: 100,
               child: InkWell(
                   overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered))
+                    if (states.contains(MaterialState.hovered)) {
                       return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.focused))
+                    }
+                    if (states.contains(MaterialState.focused)) {
                       return const Color(0xff0000ff);
-                    if (states.contains(MaterialState.pressed))
+                    }
+                    if (states.contains(MaterialState.pressed)) {
                       return splashColor;
+                    }
                     return const Color(0xffbadbad); // Shouldn't happen.
                   }),
                   onTap: () { },
@@ -1503,5 +1512,48 @@ void main() {
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+  });
+
+  testWidgets('InkWell dispose statesController', (WidgetTester tester) async {
+    int tapCount = 0;
+    Widget buildFrame(MaterialStatesController? statesController) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: InkWell(
+              statesController: statesController,
+              onTap: () { tapCount += 1; },
+              child: const Text('inkwell'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final MaterialStatesController controller = MaterialStatesController();
+    int pressedCount = 0;
+    controller.addListener(() {
+      if (controller.value.contains(MaterialState.pressed)) {
+        pressedCount += 1;
+      }
+    });
+
+    await tester.pumpWidget(buildFrame(controller));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 1);
+    expect(pressedCount, 1);
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 2);
+    expect(pressedCount, 1);
+
+    await tester.pumpWidget(buildFrame(controller));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 3);
+    expect(pressedCount, 2);
   });
 }

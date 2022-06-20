@@ -89,11 +89,13 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     ui.PlatformMessageResponseCallback? callback,
   ) {
     Future<ByteData?>? result;
-    if (_inboundHandlers.containsKey(channel))
+    if (_inboundHandlers.containsKey(channel)) {
       result = _inboundHandlers[channel]!(data);
+    }
     result ??= Future<ByteData?>.value();
-    if (callback != null)
+    if (callback != null) {
       result = result.then((ByteData? result) { callback(result); return result; });
+    }
     return result;
   }
 
@@ -139,6 +141,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     if (resultFuture != null) {
       _pendingMessages.add(resultFuture);
       resultFuture
+        // TODO(srawlins): Fix this static issue,
+        // https://github.com/flutter/flutter/issues/105750.
+        // ignore: body_might_complete_normally_catch_error
         .catchError((Object error) { /* errors are the responsibility of the caller */ })
         .whenComplete(() => _pendingMessages.remove(resultFuture));
     }

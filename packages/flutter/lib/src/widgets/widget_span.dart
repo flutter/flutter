@@ -140,12 +140,15 @@ class WidgetSpan extends PlaceholderSpan {
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return RenderComparison.identical;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return RenderComparison.layout;
-    if ((style == null) != (other.style == null))
+    }
+    if ((style == null) != (other.style == null)) {
       return RenderComparison.layout;
+    }
     final WidgetSpan typedOther = other as WidgetSpan;
     if (child != typedOther.child || alignment != typedOther.alignment) {
       return RenderComparison.layout;
@@ -153,22 +156,27 @@ class WidgetSpan extends PlaceholderSpan {
     RenderComparison result = RenderComparison.identical;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(other.style!);
-      if (candidate.index > result.index)
+      if (candidate.index > result.index) {
         result = candidate;
-      if (result == RenderComparison.layout)
+      }
+      if (result == RenderComparison.layout) {
         return result;
+      }
     }
     return result;
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
-    if (super != other)
+    }
+    if (super != other) {
       return false;
+    }
     return other is WidgetSpan
         && other.child == child
         && other.alignment == alignment

@@ -107,8 +107,9 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
     super.initState();
     if (!widget._disabled) {
       widget.delegate!._selectionContainerContext = context;
-      if (widget.registrar != null)
+      if (widget.registrar != null) {
         registrar = widget.registrar;
+      }
     }
   }
 
@@ -180,8 +181,9 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
 
   @override
   SelectionGeometry get value {
-    if (widget._disabled)
+    if (widget._disabled) {
       return _disabledGeometry;
+    }
     return widget.delegate!.value;
   }
 

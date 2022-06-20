@@ -97,6 +97,10 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// developers to change that if they add an ancestor [Actions] widget that maps
 /// [SelectAllTextIntent] to a different [Action].
 ///
+/// See the article on [Using Actions and
+/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// for a detailed explanation.
+///
 /// See also:
 ///
 ///  * [Shortcuts], which is a widget that contains a key map, in which it looks
@@ -1338,7 +1342,7 @@ class VoidCallbackAction extends Action<VoidCallbackIntent> {
 ///    handlers in the focus chain.
 class DoNothingIntent extends Intent {
   /// Creates a const [DoNothingIntent].
-  factory DoNothingIntent() => const DoNothingIntent._();
+  const factory DoNothingIntent() = DoNothingIntent._;
 
   // Make DoNothingIntent constructor private so it can't be subclassed.
   const DoNothingIntent._();
@@ -1363,7 +1367,7 @@ class DoNothingIntent extends Intent {
 ///  * [DoNothingIntent], a similar intent that will handle the key event.
 class DoNothingAndStopPropagationIntent extends Intent {
   /// Creates a const [DoNothingAndStopPropagationIntent].
-  factory DoNothingAndStopPropagationIntent() => const DoNothingAndStopPropagationIntent._();
+  const factory DoNothingAndStopPropagationIntent() = DoNothingAndStopPropagationIntent._;
 
   // Make DoNothingAndStopPropagationIntent constructor private so it can't be subclassed.
   const DoNothingAndStopPropagationIntent._();
@@ -1447,7 +1451,10 @@ class ButtonActivateIntent extends Intent {
 abstract class ActivateAction extends Action<ActivateIntent> { }
 
 /// An [Intent] that selects the currently focused control.
-class SelectIntent extends Intent { }
+class SelectIntent extends Intent {
+  /// Creates an intent that selects the currently focused control.
+  const SelectIntent();
+}
 
 /// An action that selects the currently focused control.
 ///
@@ -1499,8 +1506,9 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   @override
   bool isEnabled(PrioritizedIntents intent) {
     final FocusNode? focus = primaryFocus;
-    if  (focus == null || focus.context == null)
+    if  (focus == null || focus.context == null) {
       return false;
+    }
     for (final Intent candidateIntent in intent.orderedIntents) {
       final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
         focus.context!,

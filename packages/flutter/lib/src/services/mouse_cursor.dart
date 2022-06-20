@@ -66,8 +66,9 @@ class MouseCursorManager {
     final MouseCursor nextCursor = _DeferringMouseCursor.firstNonDeferred(cursorCandidates)
       ?? fallbackMouseCursor;
     assert(nextCursor is! _DeferringMouseCursor);
-    if (lastSession?.cursor == nextCursor)
+    if (lastSession?.cursor == nextCursor) {
       return;
+    }
 
     final MouseCursorSession nextSession = nextCursor.createSession(device);
     _lastSession[device] = nextSession;
@@ -211,8 +212,9 @@ abstract class MouseCursor with Diagnosticable {
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     final String debugDescription = this.debugDescription;
-    if (minLevel.index >= DiagnosticLevel.info.index && debugDescription != null)
+    if (minLevel.index >= DiagnosticLevel.info.index && debugDescription != null) {
       return debugDescription;
+    }
     return super.toString(minLevel: minLevel);
   }
 
@@ -258,8 +260,9 @@ class _DeferringMouseCursor extends MouseCursor {
   static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
     for (final MouseCursor cursor in cursors) {
       assert(cursor != null);
-      if (cursor != MouseCursor.defer)
+      if (cursor != MouseCursor.defer) {
         return cursor;
+      }
     }
     return null;
   }
@@ -368,8 +371,9 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SystemMouseCursor
         && other.kind == kind;
   }

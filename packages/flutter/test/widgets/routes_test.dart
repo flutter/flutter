@@ -65,8 +65,9 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   bool didPop(String? result) {
     log('didPop $result');
     bool returnValue;
-    if (returnValue = super.didPop(result))
+    if (returnValue = super.didPop(result)) {
       navigator!.finalizeRoute(this);
+    }
     return returnValue;
   }
 
@@ -951,10 +952,11 @@ void main() {
             return PageRouteBuilder<void>(
               settings: settings,
               pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                if (settings.name == '/')
+                if (settings.name == '/') {
                   secondaryAnimationOfRouteOne = secondaryAnimation;
-                else
+                } else {
                   primaryAnimationOfRouteTwo = animation;
+                }
                 return const Text('Page');
               },
             );
@@ -1947,7 +1949,7 @@ void main() {
 
   testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         restorationScopeId: 'app',
         home: _RestorableDialogTestWidget(),
       ),
@@ -2296,51 +2298,9 @@ class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
   }
 }
 
-class TransitionDetector extends DefaultTransitionDelegate<void> {
-  bool hasTransition = false;
-  @override
-  Iterable<RouteTransitionRecord> resolve({
-    required List<RouteTransitionRecord> newPageRouteHistory,
-    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
-  }) {
-    hasTransition = true;
-    return super.resolve(
-      newPageRouteHistory: newPageRouteHistory,
-      locationToExitingPageRoute: locationToExitingPageRoute,
-      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
-    );
-  }
-}
-
-Widget buildNavigator({
-  required List<Page<dynamic>> pages,
-  required PopPageCallback onPopPage,
-  GlobalKey<NavigatorState>? key,
-  TransitionDelegate<dynamic>? transitionDelegate,
-}) {
-  return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-    child: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Navigator(
-          key: key,
-          pages: pages,
-          onPopPage: onPopPage,
-          transitionDelegate: transitionDelegate ?? const DefaultTransitionDelegate<dynamic>(),
-        ),
-      ),
-    ),
-  );
-}
-
 class _RestorableDialogTestWidget extends StatelessWidget {
+  const _RestorableDialogTestWidget();
+
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (

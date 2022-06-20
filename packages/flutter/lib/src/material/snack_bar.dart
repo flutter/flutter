@@ -115,8 +115,9 @@ class _SnackBarActionState extends State<SnackBarAction> {
   bool _haveTriggeredAction = false;
 
   void _handlePressed() {
-    if (_haveTriggeredAction)
+    if (_haveTriggeredAction) {
       return;
+    }
     setState(() {
       _haveTriggeredAction = true;
     });
@@ -128,8 +129,9 @@ class _SnackBarActionState extends State<SnackBarAction> {
   Widget build(BuildContext context) {
     Color? resolveForegroundColor(Set<MaterialState> states) {
       final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+      }
       return widget.textColor ?? snackBarTheme.actionTextColor;
     }
 

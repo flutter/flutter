@@ -347,8 +347,9 @@ void main() {
 
     // ListView's height is 600, so items i0-i5 and s0-s4 fit.
     await tester.pumpWidget(buildFrame(itemCount: 25));
-    for (final String s in <String>['i0', 's0', 'i1', 's1', 'i2', 's2', 'i3', 's3', 'i4', 's4', 'i5'])
+    for (final String s in <String>['i0', 's0', 'i1', 's1', 'i2', 's2', 'i3', 's3', 'i4', 's4', 'i5']) {
       expect(find.text(s), findsOneWidget);
+    }
     expect(find.text('s5'), findsNothing);
     expect(find.text('i6'), findsNothing);
   });

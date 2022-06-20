@@ -347,10 +347,12 @@ class Scrollable extends StatefulWidget {
       scrollable = Scrollable.of(context);
     }
 
-    if (futures.isEmpty || duration == Duration.zero)
+    if (futures.isEmpty || duration == Duration.zero) {
       return Future<void>.value();
-    if (futures.length == 1)
+    }
+    if (futures.length == 1) {
       return futures.single;
+    }
     return Future.wait<void>(futures).then<void>((List<void> _) => null);
   }
 }
@@ -449,8 +451,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void initState() {
-    if (widget.controller == null)
+    if (widget.controller == null) {
       _fallbackScrollController = ScrollController();
+    }
     super.initState();
   }
 
@@ -465,8 +468,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
     ScrollPhysics? oldPhysics = oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
     do {
-      if (newPhysics?.runtimeType != oldPhysics?.runtimeType)
+      if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
         return true;
+      }
       newPhysics = newPhysics?.parent;
       oldPhysics = oldPhysics?.parent;
     } while (newPhysics != null || oldPhysics != null);
@@ -500,8 +504,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       _effectiveScrollController.attach(position);
     }
 
-    if (_shouldUpdatePosition(oldWidget))
+    if (_shouldUpdatePosition(oldWidget)) {
       _updatePosition();
+    }
   }
 
   @override
@@ -526,8 +531,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   @protected
   void setSemanticsActions(Set<SemanticsAction> actions) {
-    if (_gestureDetectorKey.currentState != null)
+    if (_gestureDetectorKey.currentState != null) {
       _gestureDetectorKey.currentState!.replaceSemanticsActions(actions);
+    }
   }
 
   // GESTURE RECOGNITION AND POINTER IGNORING
@@ -545,8 +551,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   @protected
   void setCanDrag(bool value) {
-    if (value == _lastCanDrag && (!value || widget.axis == _lastAxisDirection))
+    if (value == _lastCanDrag && (!value || widget.axis == _lastAxisDirection)) {
       return;
+    }
     if (!value) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
       // Cancel the active hold/drag (if any) because the gesture recognizers
@@ -601,8 +608,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
     _lastCanDrag = value;
     _lastAxisDirection = widget.axis;
-    if (_gestureDetectorKey.currentState != null)
+    if (_gestureDetectorKey.currentState != null) {
       _gestureDetectorKey.currentState!.replaceGestureRecognizers(_gestureRecognizers);
+    }
   }
 
   @override
@@ -611,8 +619,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   @protected
   void setIgnorePointer(bool value) {
-    if (_shouldIgnorePointer == value)
+    if (_shouldIgnorePointer == value) {
       return;
+    }
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
       final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
@@ -728,8 +737,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (notification.depth == 0) {
       final RenderObject? scrollSemanticsRenderObject = _scrollSemanticsKey.currentContext?.findRenderObject();
-      if (scrollSemanticsRenderObject != null)
+      if (scrollSemanticsRenderObject != null) {
         scrollSemanticsRenderObject.markNeedsSemanticsUpdate();
+      }
     }
     return false;
   }
@@ -947,8 +957,9 @@ class EdgeDraggingAutoScroller {
       // The change will be picked up in the next scroll.
       return;
     }
-    if (!_scrolling)
+    if (!_scrolling) {
       _scroll();
+    }
   }
 
   /// Stop any ongoing auto scrolling.
@@ -1003,10 +1014,12 @@ class EdgeDraggingAutoScroller {
       duration: duration,
       curve: Curves.linear,
     );
-    if (onScrollViewScrolled != null)
+    if (onScrollViewScrolled != null) {
       onScrollViewScrolled!();
-    if (_scrolling)
+    }
+    if (_scrolling) {
       await _scroll();
+    }
   }
 }
 
@@ -1041,8 +1054,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   ScrollPosition get position => _position;
   ScrollPosition _position;
   set position(ScrollPosition other) {
-    if (other == _position)
+    if (other == _position) {
       return;
+    }
     _position.removeListener(_scheduleLayoutChange);
     _position = other;
     _position.addListener(_scheduleLayoutChange);
@@ -1051,12 +1065,14 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   // The layout will only be updated a frame later than position changes.
   // Schedule PostFrameCallback to capture the accurate layout.
   void _scheduleLayoutChange() {
-    if (_scheduledLayoutChange)
+    if (_scheduledLayoutChange) {
       return;
+    }
     _scheduledLayoutChange = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      if (!_scheduledLayoutChange)
+      if (!_scheduledLayoutChange) {
         return;
+      }
       _scheduledLayoutChange = false;
       layoutDidChange();
     });
@@ -1377,8 +1393,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
   ScrollPosition _position;
   set position(ScrollPosition value) {
     assert(value != null);
-    if (value == _position)
+    if (value == _position) {
       return;
+    }
     _position.removeListener(markNeedsSemanticsUpdate);
     _position = value;
     _position.addListener(markNeedsSemanticsUpdate);
@@ -1389,8 +1406,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
   bool get allowImplicitScrolling => _allowImplicitScrolling;
   bool _allowImplicitScrolling;
   set allowImplicitScrolling(bool value) {
-    if (value == _allowImplicitScrolling)
+    if (value == _allowImplicitScrolling) {
       return;
+    }
     _allowImplicitScrolling = value;
     markNeedsSemanticsUpdate();
   }
@@ -1398,8 +1416,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
   int? get semanticChildCount => _semanticChildCount;
   int? _semanticChildCount;
   set semanticChildCount(int? value) {
-    if (value == semanticChildCount)
+    if (value == semanticChildCount) {
       return;
+    }
     _semanticChildCount = value;
     markNeedsSemanticsUpdate();
   }
@@ -1440,8 +1459,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
       } else {
-        if (!child.hasFlag(SemanticsFlag.isHidden))
+        if (!child.hasFlag(SemanticsFlag.isHidden)) {
           firstVisibleIndex ??= child.indexInParent;
+        }
         included.add(child);
       }
     }
@@ -1562,16 +1582,12 @@ class ScrollAction extends Action<ScrollIntent> {
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
       // Check for primary scrollable within the current context
-      if (Scrollable.of(focus.context!) != null)
+      if (Scrollable.of(focus.context!) != null) {
         return true;
-      // Check for fallback scrollable with context from PrimaryScrollController
-      if (PrimaryScrollController.of(focus.context!) != null) {
-        final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
-        return primaryScrollController != null
-          && primaryScrollController.hasClients
-          && primaryScrollController.position.context.notificationContext != null
-          && Scrollable.of(primaryScrollController.position.context.notificationContext!) != null;
       }
+      // Check for fallback scrollable with context from PrimaryScrollController
+      final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
+      return primaryScrollController != null && primaryScrollController.hasClients;
     }
     return false;
   }
@@ -1660,7 +1676,34 @@ class ScrollAction extends Action<ScrollIntent> {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
       final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
-      state = Scrollable.of(primaryScrollController!.position.context.notificationContext!);
+      assert (() {
+        if (primaryScrollController!.positions.length != 1) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'A ScrollAction was invoked with the PrimaryScrollController, but '
+              'more than one ScrollPosition is attached.',
+            ),
+            ErrorDescription(
+              'Only one ScrollPosition can be manipulated by a ScrollAction at '
+              'a time.',
+            ),
+            ErrorHint(
+              'The PrimaryScrollController can be inherited automatically by '
+              'descendant ScrollViews based on the TargetPlatform and scroll '
+              'direction. By default, the PrimaryScrollController is '
+              'automatically inherited on mobile platforms for vertical '
+              'ScrollViews. ScrollView.primary can also override this behavior.',
+            ),
+          ]);
+        }
+        return true;
+      }());
+
+      if (primaryScrollController!.position.context.notificationContext == null
+          && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
+        return;
+      }
+      state = Scrollable.of(primaryScrollController.position.context.notificationContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');

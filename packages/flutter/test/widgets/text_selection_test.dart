@@ -1391,12 +1391,14 @@ class FakeRenderEditable extends RenderEditable {
   @override
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     selectWordsInRangeCalled = true;
+    hasFocus = true;
   }
 
   bool selectWordEdgeCalled = false;
   @override
   void selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
+    hasFocus = true;
   }
 
   bool selectPositionAtCalled = false;
@@ -1407,6 +1409,7 @@ class FakeRenderEditable extends RenderEditable {
     selectPositionAtCalled = true;
     selectPositionAtFrom = from;
     selectPositionAtTo = to;
+    hasFocus = true;
   }
 
   bool selectPositionCalled = false;
@@ -1420,41 +1423,11 @@ class FakeRenderEditable extends RenderEditable {
   @override
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
+    hasFocus = true;
   }
 
   @override
   bool hasFocus = false;
-}
-
-class CustomTextSelectionControls extends TextSelectionControls {
-  @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Size getHandleSize(double textLineHeight) {
-    throw UnimplementedError();
-  }
 }
 
 class TextSelectionControlsSpy extends TextSelectionControls {

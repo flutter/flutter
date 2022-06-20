@@ -53,6 +53,7 @@ import 'theme.dart';
 ///  * [ListTile], to display icons and text in a card.
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
+///  * <https://m3.material.io/components/cards>
 class Card extends StatelessWidget {
   /// Creates a Material Design card.
   ///
@@ -211,7 +212,7 @@ class _DefaultsM2 extends CardTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_101
 class _TokenDefaultsM3 extends CardTheme {
   const _TokenDefaultsM3(this.context)
     : super(

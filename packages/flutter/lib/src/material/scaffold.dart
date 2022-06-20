@@ -329,11 +329,13 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// any queued snack bars, they begin their entrance animation immediately.
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(reason != null);
-    if (_snackBars.isEmpty)
+    if (_snackBars.isEmpty) {
       return;
+    }
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    if (!completer.isCompleted)
+    if (!completer.isCompleted) {
       completer.complete(reason);
+    }
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     // This will trigger the animation's status callback.
@@ -345,8 +347,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// The closed completer is called after the animation is complete.
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(reason != null);
-    if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed)
+    if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed) {
       return;
+    }
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
     if (_accessibleNavigation!) {
       _snackBarController!.value = 0.0;
@@ -354,8 +357,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     } else {
       _snackBarController!.reverse().then<void>((void value) {
         assert(mounted);
-        if (!completer.isCompleted)
+        if (!completer.isCompleted) {
           completer.complete(reason);
+        }
       });
     }
     _snackBarTimer?.cancel();
@@ -365,8 +369,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// Removes all the snackBars currently in queue by clearing the queue
   /// and running normal exit animation on the current snackBar.
   void clearSnackBars() {
-    if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed)
+    if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed) {
       return;
+    }
     final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> currentSnackbar = _snackBars.first;
     _snackBars.clear();
     _snackBars.add(currentSnackbar);
@@ -456,11 +461,13 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// any queued material banners, they begin their entrance animation immediately.
   void removeCurrentMaterialBanner({ MaterialBannerClosedReason reason = MaterialBannerClosedReason.remove }) {
     assert(reason != null);
-    if (_materialBanners.isEmpty)
+    if (_materialBanners.isEmpty) {
       return;
+    }
     final Completer<MaterialBannerClosedReason> completer = _materialBanners.first._completer;
-    if (!completer.isCompleted)
+    if (!completer.isCompleted) {
       completer.complete(reason);
+    }
 
     // This will trigger the animation's status callback.
     _materialBannerController!.value = 0.0;
@@ -471,8 +478,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// The closed completer is called after the animation is complete.
   void hideCurrentMaterialBanner({ MaterialBannerClosedReason reason = MaterialBannerClosedReason.hide }) {
     assert(reason != null);
-    if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed)
+    if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed) {
       return;
+    }
     final Completer<MaterialBannerClosedReason> completer = _materialBanners.first._completer;
     if (_accessibleNavigation!) {
       _materialBannerController!.value = 0.0;
@@ -480,8 +488,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     } else {
       _materialBannerController!.reverse().then<void>((void value) {
         assert(mounted);
-        if (!completer.isCompleted)
+        if (!completer.isCompleted) {
           completer.complete(reason);
+        }
       });
     }
   }
@@ -489,8 +498,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// Removes all the [MaterialBanner]s currently in queue by clearing the queue
   /// and running normal exit animation on the current [MaterialBanner].
   void clearMaterialBanners() {
-    if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed)
+    if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed) {
       return;
+    }
     final ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason> currentMaterialBanner = _materialBanners.first;
     _materialBanners.clear();
     _materialBanners.add(currentMaterialBanner);
@@ -515,8 +525,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
             );
             // Look up MediaQuery again in case the setting changed.
             final MediaQueryData mediaQuery = MediaQuery.of(context);
-            if (mediaQuery.accessibleNavigation && snackBar.action != null)
+            if (mediaQuery.accessibleNavigation && snackBar.action != null) {
               return;
+            }
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
         }
@@ -728,8 +739,9 @@ class ScaffoldGeometry {
   final Rect? floatingActionButtonArea;
 
   ScaffoldGeometry _scaleFloatingActionButton(double scaleFactor) {
-    if (scaleFactor == 1.0)
+    if (scaleFactor == 1.0) {
       return this;
+    }
 
     if (scaleFactor == 0.0) {
       return ScaffoldGeometry(
@@ -770,12 +782,13 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
   ScaffoldGeometry get value {
     assert(() {
       final RenderObject? renderObject = context.findRenderObject();
-      if (renderObject == null || !renderObject.owner!.debugDoingPaint)
+      if (renderObject == null || !renderObject.owner!.debugDoingPaint) {
         throw FlutterError(
             'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
             'The ScaffoldGeometry is only available during the paint phase, because '
             'its value is computed during the animation and layout phases prior to painting.',
         );
+      }
       return true;
     }());
     return geometry._scaleFloatingActionButton(floatingActionButtonScale!);
@@ -828,8 +841,9 @@ class _BodyBoxConstraints extends BoxConstraints {
   // min and max values have not, we still want performLayout to happen.
   @override
   bool operator ==(Object other) {
-    if (super != other)
+    if (super != other) {
       return false;
+    }
     return other is _BodyBoxConstraints
         && other.materialBannerHeight == materialBannerHeight
         && other.bottomWidgetsHeight == bottomWidgetsHeight
@@ -861,9 +875,6 @@ class _BodyBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!extendBody && !extendBodyBehindAppBar)
-      return body;
-
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
@@ -1129,12 +1140,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.minInsets != minInsets
-        || oldDelegate.textDirection != textDirection
-        || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
-        || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
-        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
-        || oldDelegate.extendBody != extendBody
-        || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
+      || oldDelegate.minViewPadding != minViewPadding
+      || oldDelegate.textDirection != textDirection
+      || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
+      || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
+      || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
+      || oldDelegate.extendBody != extendBody
+      || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
   }
 }
 
@@ -1213,8 +1225,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     super.didUpdateWidget(oldWidget);
     final bool oldChildIsNull = oldWidget.child == null;
     final bool newChildIsNull = widget.child == null;
-    if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key)
+    if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key) {
       return;
+    }
     if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
       // Get the right scale and rotation animations to use for this widget.
       _updateAnimations();
@@ -1225,8 +1238,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
         // The current child hasn't started its entrance animation yet. We can
         // just skip directly to the new child's entrance.
         _previousChild = null;
-        if (widget.child != null)
+        if (widget.child != null) {
           widget.currentController.forward();
+        }
       } else {
         // Otherwise, we need to copy the state from the current controller to
         // the previous controller and run an exit animation for the previous
@@ -1284,8 +1298,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     setState(() {
       if (status == AnimationStatus.dismissed) {
         assert(widget.currentController.status == AnimationStatus.dismissed);
-        if (widget.child != null)
+        if (widget.child != null) {
           widget.currentController.forward();
+        }
       }
     });
   }
@@ -1599,7 +1614,7 @@ class Scaffold extends StatefulWidget {
   /// [Navigator.pop].
   ///
   /// {@tool dartpad}
-  /// To disable the drawer edge swipe, set the
+  /// To disable the drawer edge swipe on mobile, set the
   /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
   /// it.
@@ -1721,15 +1736,19 @@ class Scaffold extends StatefulWidget {
   final double? drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag
-  /// gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool drawerEnableOpenDragGesture;
 
   /// Determines if the [Scaffold.endDrawer] can be opened with a
-  /// drag gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool endDrawerEnableOpenDragGesture;
 
   /// Restoration ID to save and restore the state of the [Scaffold].
@@ -1787,8 +1806,9 @@ class Scaffold extends StatefulWidget {
   static ScaffoldState of(BuildContext context) {
     assert(context != null);
     final ScaffoldState? result = context.findAncestorStateOfType<ScaffoldState>();
-    if (result != null)
+    if (result != null) {
       return result;
+    }
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
         'Scaffold.of() called with a context that does not contain a Scaffold.',
@@ -1857,7 +1877,7 @@ class Scaffold extends StatefulWidget {
   /// listenable.
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
     final _ScaffoldScope? scaffoldScope = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
-    if (scaffoldScope == null)
+    if (scaffoldScope == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'Scaffold.geometryOf() called with a context that does not contain a Scaffold.',
@@ -1880,6 +1900,7 @@ class Scaffold extends StatefulWidget {
         ),
         context.describeElement('The context used was'),
       ]);
+    }
     return scaffoldScope.geometryNotifier;
   }
 
@@ -1998,8 +2019,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
-    if (_endDrawerKey.currentState != null && _endDrawerOpened.value)
+    if (_endDrawerKey.currentState != null && _endDrawerOpened.value) {
       _endDrawerKey.currentState!.close();
+    }
     _drawerKey.currentState?.open();
   }
 
@@ -2017,8 +2039,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
-    if (_drawerKey.currentState != null && _drawerOpened.value)
+    if (_drawerKey.currentState != null && _drawerOpened.value) {
       _drawerKey.currentState!.close();
+    }
     _endDrawerKey.currentState?.open();
   }
 
@@ -2248,8 +2271,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       constraints: constraints,
     );
 
-    if (!isPersistent)
+    if (!isPersistent) {
       ModalRoute.of(context)!.addLocalHistoryEntry(entry!);
+    }
 
     return PersistentBottomSheetController<T>._(
       bottomSheet,
@@ -2522,8 +2546,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       removeRight: removeRightPadding,
       removeBottom: removeBottomPadding,
     );
-    if (removeBottomInset)
+    if (removeBottomInset) {
       data = data.removeViewInsets(removeBottom: true);
+    }
 
     if (maintainBottomViewPadding && data.viewInsets.bottom != 0.0) {
       data = data.copyWith(
@@ -2833,7 +2858,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     // The minimum viewPadding for interactive elements positioned by the
     // Scaffold to keep within safe interactive areas.
     final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
-      bottom: _resizeToAvoidBottomInset &&  mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
+      bottom: _resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
     );
 
     // extendBody locked when keyboard is open
@@ -3053,17 +3078,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     return false;
   }
 
-  Widget _wrapBottomSheet(Widget bottomSheet) {
-    return Semantics(
-      container: true,
-      onDismiss: close,
-      child:  NotificationListener<DraggableScrollableNotification>(
-        onNotification: extentChanged,
-        child: bottomSheet,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -3075,19 +3089,24 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           child: child,
         );
       },
-      child: _wrapBottomSheet(
-        BottomSheet(
-          animationController: widget.animationController,
-          enableDrag: widget.enableDrag,
-          onDragStart: _handleDragStart,
-          onDragEnd: _handleDragEnd,
-          onClosing: widget.onClosing!,
-          builder: widget.builder,
-          backgroundColor: widget.backgroundColor,
-          elevation: widget.elevation,
-          shape: widget.shape,
-          clipBehavior: widget.clipBehavior,
-          constraints: widget.constraints,
+      child: Semantics(
+        container: true,
+        onDismiss: close,
+        child:  NotificationListener<DraggableScrollableNotification>(
+          onNotification: extentChanged,
+          child: BottomSheet(
+            animationController: widget.animationController,
+            enableDrag: widget.enableDrag,
+            onDragStart: _handleDragStart,
+            onDragEnd: _handleDragEnd,
+            onClosing: widget.onClosing!,
+            builder: widget.builder,
+            backgroundColor: widget.backgroundColor,
+            elevation: widget.elevation,
+            shape: widget.shape,
+            clipBehavior: widget.clipBehavior,
+            constraints: widget.constraints,
+          ),
         ),
       ),
     );

@@ -10,8 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
@@ -119,8 +117,9 @@ class RenderParagraph extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! TextParentData)
+    if (child.parentData is! TextParentData) {
       child.parentData = TextParentData();
+    }
   }
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
@@ -164,8 +163,9 @@ class RenderParagraph extends RenderBox
   /// are any.
   @visibleForTesting
   List<TextSelection> get selections {
-    if (_lastSelectableFragments == null)
+    if (_lastSelectableFragments == null) {
       return const <TextSelection>[];
+    }
     final List<TextSelection> results = <TextSelection>[];
     for (final _SelectableFragment fragment in _lastSelectableFragments!) {
       if (fragment._textSelectionStart != null &&
@@ -191,8 +191,9 @@ class RenderParagraph extends RenderBox
   SelectionRegistrar? get registrar => _registrar;
   SelectionRegistrar? _registrar;
   set registrar(SelectionRegistrar? value) {
-    if (value == _registrar)
+    if (value == _registrar) {
       return;
+    }
     _removeSelectionRegistrarSubscription();
     _disposeSelectableFragments();
     _registrar = value;
@@ -221,8 +222,9 @@ class RenderParagraph extends RenderBox
     while (start < plainText.length) {
       int end = plainText.indexOf(_placeholderCharacter, start);
       if (start != end) {
-        if (end == -1)
+        if (end == -1) {
           end = plainText.length;
+        }
         result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end)));
         start = end;
       }
@@ -232,8 +234,9 @@ class RenderParagraph extends RenderBox
   }
 
   void _disposeSelectableFragments() {
-    if (_lastSelectableFragments == null)
+    if (_lastSelectableFragments == null) {
       return;
+    }
     for (final _SelectableFragment fragment in _lastSelectableFragments!) {
       fragment.dispose();
     }
@@ -270,8 +273,9 @@ class RenderParagraph extends RenderBox
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
     assert(value != null);
-    if (_textPainter.textAlign == value)
+    if (_textPainter.textAlign == value) {
       return;
+    }
     _textPainter.textAlign = value;
     markNeedsPaint();
   }
@@ -292,8 +296,9 @@ class RenderParagraph extends RenderBox
   TextDirection get textDirection => _textPainter.textDirection!;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textPainter.textDirection == value)
+    if (_textPainter.textDirection == value) {
       return;
+    }
     _textPainter.textDirection = value;
     markNeedsLayout();
   }
@@ -309,8 +314,9 @@ class RenderParagraph extends RenderBox
   bool _softWrap;
   set softWrap(bool value) {
     assert(value != null);
-    if (_softWrap == value)
+    if (_softWrap == value) {
       return;
+    }
     _softWrap = value;
     markNeedsLayout();
   }
@@ -320,8 +326,9 @@ class RenderParagraph extends RenderBox
   TextOverflow _overflow;
   set overflow(TextOverflow value) {
     assert(value != null);
-    if (_overflow == value)
+    if (_overflow == value) {
       return;
+    }
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
     markNeedsLayout();
@@ -334,8 +341,9 @@ class RenderParagraph extends RenderBox
   double get textScaleFactor => _textPainter.textScaleFactor;
   set textScaleFactor(double value) {
     assert(value != null);
-    if (_textPainter.textScaleFactor == value)
+    if (_textPainter.textScaleFactor == value) {
       return;
+    }
     _textPainter.textScaleFactor = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -349,8 +357,9 @@ class RenderParagraph extends RenderBox
   /// zero.
   set maxLines(int? value) {
     assert(value == null || value > 0);
-    if (_textPainter.maxLines == value)
+    if (_textPainter.maxLines == value) {
       return;
+    }
     _textPainter.maxLines = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -366,8 +375,9 @@ class RenderParagraph extends RenderBox
   Locale? get locale => _textPainter.locale;
   /// The value may be null.
   set locale(Locale? value) {
-    if (_textPainter.locale == value)
+    if (_textPainter.locale == value) {
       return;
+    }
     _textPainter.locale = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -377,8 +387,9 @@ class RenderParagraph extends RenderBox
   StrutStyle? get strutStyle => _textPainter.strutStyle;
   /// The value may be null.
   set strutStyle(StrutStyle? value) {
-    if (_textPainter.strutStyle == value)
+    if (_textPainter.strutStyle == value) {
       return;
+    }
     _textPainter.strutStyle = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -388,8 +399,9 @@ class RenderParagraph extends RenderBox
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
-    if (_textPainter.textWidthBasis == value)
+    if (_textPainter.textWidthBasis == value) {
       return;
+    }
     _textPainter.textWidthBasis = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -398,8 +410,9 @@ class RenderParagraph extends RenderBox
   /// {@macro dart.ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior? value) {
-    if (_textPainter.textHeightBehavior == value)
+    if (_textPainter.textHeightBehavior == value) {
       return;
+    }
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -409,8 +422,9 @@ class RenderParagraph extends RenderBox
   Color? get selectionColor => _selectionColor;
   Color? _selectionColor;
   set selectionColor(Color? value) {
-    if (_selectionColor == value)
+    if (_selectionColor == value) {
       return;
+    }
     _selectionColor = value;
     if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
       markNeedsPaint();
@@ -1247,8 +1261,9 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   late SelectionGeometry _selectionGeometry;
   void _updateSelectionGeometry() {
     final SelectionGeometry newValue = _getSelectionGeometry();
-    if (_selectionGeometry == newValue)
+    if (_selectionGeometry == newValue) {
       return;
+    }
     _selectionGeometry = newValue;
     notifyListeners();
   }
@@ -1377,10 +1392,11 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   }
 
   void _setSelectionPosition(TextPosition? position, {required bool isEnd}) {
-    if (isEnd)
+    if (isEnd) {
       _textSelectionEnd = position;
-    else
+    } else {
       _textSelectionStart = position;
+    }
   }
 
   SelectionResult _handleClearSelection() {
@@ -1423,8 +1439,9 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   ///
   /// The parameter `start` must be smaller than `end`.
   bool _positionIsWithinCurrentSelection(TextPosition position) {
-    if (_textSelectionStart == null || _textSelectionEnd == null)
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
       return false;
+    }
     // Normalize current selection.
     late TextPosition currentStart;
     late TextPosition currentEnd;
@@ -1509,8 +1526,9 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    if (_textSelectionStart == null || _textSelectionEnd == null)
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
+    }
     if (paragraph.selectionColor != null) {
       final TextSelection selection = TextSelection(
         baseOffset: _textSelectionStart!.offset,

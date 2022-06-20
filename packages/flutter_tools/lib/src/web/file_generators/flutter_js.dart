@@ -27,14 +27,23 @@ _flutter.loader = null;
 (function() {
   "use strict";
   class FlutterLoader {
-    // TODO: Move the below methods to "#private" once supported by all the browsers
-    // we support. In the meantime, we use the "revealing module" pattern.
+    /**
+     * Creates a FlutterLoader, and initializes its instance methods.
+     */
+    constructor() {
+      // TODO: Move the below methods to "#private" once supported by all the browsers
+      // we support. In the meantime, we use the "revealing module" pattern.
 
-    // Watchdog to prevent injecting the main entrypoint multiple times.
-    _scriptLoaded = null;
+      // Watchdog to prevent injecting the main entrypoint multiple times.
+      this._scriptLoaded = null;
 
-    // Resolver for the pending promise returned by loadEntrypoint.
-    _didCreateEngineInitializerResolve = null;
+      // Resolver for the pending promise returned by loadEntrypoint.
+      this._didCreateEngineInitializerResolve = null;
+
+      // Called by Flutter web.
+      // Bound to `this` now, so "this" is preserved across JS <-> Flutter jumps.
+      this.didCreateEngineInitializer = this._didCreateEngineInitializer.bind(this);
+    }
 
     /**
      * Initializes the main.dart.js with/without serviceWorker.
@@ -51,27 +60,32 @@ _flutter.loader = null;
     }
 
     /**
-     * Resolves the promise created by loadEntrypoint. Called by Flutter.
-     * Needs to be weirdly bound like it is, so "this" is preserved across
-     * the JS <-> Flutter jumps.
+     * Resolves the promise created by loadEntrypoint.
+     * Called by Flutter through the public `didCreateEngineInitializer` method,
+     * which is bound to the correct instance of the FlutterLoader on the page.
      * @param {*} engineInitializer
      */
-    didCreateEngineInitializer = (function(engineInitializer) {
+    _didCreateEngineInitializer(engineInitializer) {
       if (typeof this._didCreateEngineInitializerResolve != "function") {
         console.warn("Do not call didCreateEngineInitializer by hand. Start with loadEntrypoint instead.");
       }
       this._didCreateEngineInitializerResolve(engineInitializer);
-      // Remove this method after it's done, so Flutter Web can hot restart.
+      // Remove the public method after it's done, so Flutter Web can hot restart.
       delete this.didCreateEngineInitializer;
-    }).bind(this);
+    }
 
     _loadEntrypoint(entrypointUrl) {
       if (!this._scriptLoaded) {
+        console.debug("Injecting <script> tag.");
         this._scriptLoaded = new Promise((resolve, reject) => {
           let scriptTag = document.createElement("script");
           scriptTag.src = entrypointUrl;
           scriptTag.type = "application/javascript";
-          this._didCreateEngineInitializerResolve = resolve; // Cache the resolve, so it can be called from Flutter.
+          // Cache the resolve, so it can be called from Flutter.
+          // Note: Flutter hot restart doesn't re-create this promise, so this
+          // can only be called once. Instead, we need to model this as a stream
+          // of `engineCreated` events coming from Flutter that are handled by JS.
+          this._didCreateEngineInitializerResolve = resolve;
           scriptTag.addEventListener("error", reject);
           document.body.append(scriptTag);
         });
@@ -83,7 +97,7 @@ _flutter.loader = null;
     _waitForServiceWorkerActivation(serviceWorker, entrypointUrl) {
       if (!serviceWorker || serviceWorker.state == "activated") {
         if (!serviceWorker) {
-          console.warn("Cannot activate a null service worker. Falling back to plain <script> tag.");
+          console.warn("Cannot activate a null service worker.");
         } else {
           console.debug("Service worker already active.");
         }
@@ -101,7 +115,7 @@ _flutter.loader = null;
 
     _loadWithServiceWorker(entrypointUrl, serviceWorkerOptions) {
       if (!("serviceWorker" in navigator) || serviceWorkerOptions == null) {
-        console.warn("Service worker not supported (or configured). Falling back to plain <script> tag.", serviceWorkerOptions);
+        console.warn("Service worker not supported (or configured).", serviceWorkerOptions);
         return this._loadEntrypoint(entrypointUrl);
       }
 
@@ -132,6 +146,11 @@ _flutter.loader = null;
               console.debug("Loading app from service worker.");
               return this._loadEntrypoint(entrypointUrl);
             }
+          })
+          .catch((error) => {
+            // Some exception happened while registering/activating the service worker.
+            console.warn("Failed to register or activate service worker:", error);
+            return this._loadEntrypoint(entrypointUrl);
           });
 
       // Timeout race promise
@@ -140,7 +159,7 @@ _flutter.loader = null;
         timeout = new Promise((resolve, _) => {
           setTimeout(() => {
             if (!this._scriptLoaded) {
-              console.warn("Failed to load app from service worker. Falling back to plain <script> tag.");
+              console.warn("Loading from service worker timed out after", timeoutMillis, "milliseconds.");
               resolve(this._loadEntrypoint(entrypointUrl));
             }
           }, timeoutMillis);

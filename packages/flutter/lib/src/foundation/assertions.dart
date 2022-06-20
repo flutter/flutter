@@ -10,6 +10,10 @@ import 'diagnostics.dart';
 import 'print.dart';
 import 'stack_frame.dart';
 
+export 'basic_types.dart' show IterableFilter;
+export 'diagnostics.dart' show DiagnosticLevel, DiagnosticsNode, DiagnosticPropertiesBuilder, DiagnosticsTreeStyle;
+export 'stack_frame.dart' show StackFrame;
+
 // Examples can assume:
 // late String runtimeType;
 // late bool draconisAlive;
@@ -391,8 +395,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// subsequently be reported using [FlutterError.onError].
   ///
   /// The [exception] must not be null; other arguments can be left to
-  /// their default values. (`throw null` results in a
-  /// [NullThrownError] exception.)
+  /// their default values.
   const FlutterErrorDetails({
     required this.exception,
     this.stack,
@@ -622,8 +625,9 @@ class FlutterErrorDetails with Diagnosticable {
       longMessage = '  $exception';
     }
     longMessage = longMessage.trimRight();
-    if (longMessage.isEmpty)
+    if (longMessage.isEmpty) {
       longMessage = '  <no message available>';
+    }
     return longMessage;
   }
 
@@ -666,7 +670,7 @@ class FlutterErrorDetails with Diagnosticable {
     super.debugFillProperties(properties);
     final DiagnosticsNode verb = ErrorDescription('thrown${ context != null ? ErrorDescription(" $context") : ""}');
     final Diagnosticable? diagnosticable = _exceptionToDiagnosticable();
-    if (exception is NullThrownError) {
+    if (exception is NullThrownError) { // ignore: deprecated_member_use
       properties.add(ErrorDescription('The null value was $verb.'));
     } else if (exception is num) {
       properties.add(ErrorDescription('The number $exception was $verb.'));
@@ -690,8 +694,9 @@ class FlutterErrorDetails with Diagnosticable {
         // strip out that header when we see it.
         final String prefix = '${exception.runtimeType}: ';
         String message = exceptionAsString();
-        if (message.startsWith(prefix))
+        if (message.startsWith(prefix)) {
           message = message.substring(prefix.length);
+        }
         properties.add(ErrorSummary(message));
       }
     }
@@ -1002,8 +1007,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       return true;
     }());
     final bool reportError = isInDebugMode || details.silent != true; // could be null
-    if (!reportError && !forceReport)
+    if (!reportError && !forceReport) {
       return;
+    }
     if (_errorCount == 0 || forceReport) {
       // Diagnostics is only available in debug mode. In profile and release modes fallback to plain print.
       if (isInDebugMode) {
@@ -1115,8 +1121,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     if (skipped == 1) {
       result.add('(elided one frame from ${where.single})');
     } else if (skipped > 1) {
-      if (where.length > 1)
+      if (where.length > 1) {
         where[where.length - 1] = 'and ${where.last}';
+      }
       if (where.length > 2) {
         result.add('(elided $skipped frames from ${where.join(", ")})');
       } else {
@@ -1190,8 +1197,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 ///
 /// The `label` argument, if present, will be printed before the stack.
 void debugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
-  if (label != null)
+  if (label != null) {
     debugPrint(label);
+  }
   if (stackTrace == null) {
     stackTrace = StackTrace.current;
   } else {
@@ -1208,8 +1216,9 @@ void debugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
              line.contains('dart:sdk_internal');
     });
   }
-  if (maxFrames != null)
+  if (maxFrames != null) {
     lines = lines.take(maxFrames);
+  }
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
 }
 
@@ -1252,8 +1261,9 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
     StackTrace? stack,
     IterableFilter<String>? stackFilter,
   ) {
-    if (stack == null)
+    if (stack == null) {
       return <DiagnosticsNode>[];
+    }
     final IterableFilter<String> filter = stackFilter ?? FlutterError.defaultStackFilter;
     final Iterable<String> frames = filter('${FlutterError.demangleStackTrace(stack)}'.trimRight().split('\n'));
     return frames.map<DiagnosticsNode>(_createStackFrame).toList();

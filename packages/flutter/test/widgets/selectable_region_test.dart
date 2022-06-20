@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
+import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -34,7 +35,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  group('SelectionArea', () {
+  group('SelectableRegion', () {
     testWidgets('mouse selection sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
@@ -71,6 +72,34 @@ void main() {
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
+    testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
+      final UniqueKey spy = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            children: <Widget>[
+              const Text('How are you?'),
+              SelectableRegion(
+                focusNode: FocusNode(),
+                selectionControls: materialTextSelectionControls,
+                child: SelectAllWidget(key: spy, child: const SizedBox(width: 100, height: 100)),
+              ),
+              const Text('Fine, thank you.'),
+            ],
+          ),
+        ),
+      );
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(spy)));
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pump();
+
+      final RenderSelectAll renderSpy = tester.renderObject<RenderSelectAll>(find.byKey(spy));
+      expect(renderSpy.startHandle, isNotNull);
+      expect(renderSpy.endHandle, isNotNull);
+    });
+
     testWidgets('touch does not accept drag', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
@@ -92,6 +121,81 @@ void main() {
         renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
         isTrue
       );
+    });
+
+    testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text('Line one'),
+                    const Text('Line two'),
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Text('Button'),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Line one',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Line two',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'Button',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+          ignoreId: true,
+        ),
+      );
+
+      semantics.dispose();
     });
 
     testWidgets('mouse selection always cancels previous selection', (WidgetTester tester) async {
@@ -739,44 +843,73 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can drag end selection handle', (WidgetTester tester) async {
+    testWidgets('can drag end handle when not covering entire screen', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/104620.
       await tester.pumpWidget(
         MaterialApp(
-          home: SelectableRegion(
-            focusNode: FocusNode(),
-            selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
-                Text('How are you?'),
-                Text('Good, and you?'),
-                Text('Fine, thank you.'),
-              ],
-            ),
+          home: Column(
+            children: <Widget>[
+              const Text('How are you?'),
+              SelectableRegion(
+                focusNode: FocusNode(),
+                selectionControls: materialTextSelectionControls,
+                child: const Text('Good, and you?'),
+              ),
+              const Text('Fine, thank you.'),
+            ],
           ),
         ),
       );
-      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
-      final List<TextBox> boxes = paragraph1.getBoxesForSelection(paragraph1.selections[0]);
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 6, extentOffset: 9));
+      final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
       expect(boxes.length, 1);
 
-      final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph1);
+      final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph2);
       await gesture.down(handlePos);
-      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
-      await gesture.moveTo(textOffsetToPosition(paragraph2, 5) + Offset(0, paragraph2.size.height / 2));
-      expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
 
-      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
-      await gesture.moveTo(textOffsetToPosition(paragraph3, 6) + Offset(0, paragraph3.size.height / 2));
-      expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
-      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 11) + Offset(0, paragraph2.size.height / 2));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 6, extentOffset: 11));
+      await gesture.up();
+    });
+
+    testWidgets('can drag start handle when not covering entire screen', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/104620.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            children: <Widget>[
+              const Text('How are you?'),
+              SelectableRegion(
+                focusNode: FocusNode(),
+                selectionControls: materialTextSelectionControls,
+                child: const Text('Good, and you?'),
+              ),
+              const Text('Fine, thank you.'),
+            ],
+          ),
+        ),
+      );
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 6, extentOffset: 9));
+      final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
+      expect(boxes.length, 1);
+
+      final Offset handlePos = globalize(boxes[0].toRect().bottomLeft, paragraph2);
+      await gesture.down(handlePos);
+
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 11) + Offset(0, paragraph2.size.height / 2));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 11, extentOffset: 9));
       await gesture.up();
     });
 
@@ -967,11 +1100,51 @@ void main() {
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
   });
+
+  testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    await tester.pumpAndSettle();
+    // Text selection toolbar has appeared.
+    expect(find.text('Copy'), findsOneWidget);
+
+    // Hide the toolbar by changing orientation.
+    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Copy'), findsNothing);
+
+    // Handles should be hidden as well on Android
+    expect(
+      find.descendant(
+        of: find.byType(CompositedTransformFollower),
+        matching: find.byType(Padding),
+      ),
+      defaultTargetPlatform == TargetPlatform.android ? findsNothing : findsNWidgets(2),
+    );
+  },
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
   const SelectionSpy({
-  super.key,
+    super.key,
   });
 
   @override
@@ -1030,8 +1203,9 @@ class RenderSelectionSpy extends RenderProxyBox
     ),
   );
   set value(SelectionGeometry other) {
-    if (other == _value)
+    if (other == _value) {
       return;
+    }
     _value = other;
     for (final VoidCallback callback in listeners) {
       callback();
@@ -1042,94 +1216,94 @@ class RenderSelectionSpy extends RenderProxyBox
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
 }
 
-
-class TextTextSelectionControls extends TextSelectionControls {
-  static final UniqueKey leftHandle = UniqueKey();
-  static final UniqueKey rightHandle = UniqueKey();
-  static final UniqueKey toolbar = UniqueKey();
-
-  @override
-  Size getHandleSize(double textLineHeight) => Size(textLineHeight, textLineHeight);
+class SelectAllWidget extends SingleChildRenderObjectWidget {
+  const SelectAllWidget({
+    super.key,
+    super.child,
+  });
 
   @override
-  Widget buildToolbar(
-      BuildContext context,
-      Rect globalEditableRegion,
-      double textLineHeight,
-      Offset selectionMidpoint,
-      List<TextSelectionPoint> endpoints,
-      TextSelectionDelegate delegate,
-      ClipboardStatusNotifier? clipboardStatus,
-      Offset? lastSecondaryTapDownPosition,
-      ) {
-    return TestToolbar(
-      key: toolbar,
-      globalEditableRegion: globalEditableRegion,
-      textLineHeight: textLineHeight,
-      selectionMidpoint: selectionMidpoint,
-      endpoints: endpoints,
-      delegate: delegate,
-      clipboardStatus: clipboardStatus,
-      lastSecondaryTapDownPosition: lastSecondaryTapDownPosition,
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderSelectAll(
+      SelectionContainer.maybeOf(context),
     );
   }
 
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight, [VoidCallback? onTap]) {
-    return TestHandle(
-      key: type == TextSelectionHandleType.left ? leftHandle : rightHandle,
-      type: type,
-      textHeight: textHeight,
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+}
+
+class RenderSelectAll extends RenderProxyBox
+    with Selectable, SelectionRegistrant {
+  RenderSelectAll(
+    SelectionRegistrar? registrar,
+  ) {
+    this.registrar = registrar;
+  }
+
+  final Set<VoidCallback> listeners = <VoidCallback>{};
+  LayerLink? startHandle;
+  LayerLink? endHandle;
+
+  @override
+  void addListener(VoidCallback listener) => listeners.add(listener);
+
+  @override
+  void removeListener(VoidCallback listener) => listeners.remove(listener);
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    value = SelectionGeometry(
+      hasContent: true,
+      status: SelectionStatus.uncollapsed,
+      startSelectionPoint: SelectionPoint(
+        localPosition: Offset(0, size.height),
+        lineHeight: 0.0,
+        handleType: TextSelectionHandleType.left,
+      ),
+      endSelectionPoint: SelectionPoint(
+        localPosition: Offset(size.width, size.height),
+        lineHeight: 0.0,
+        handleType: TextSelectionHandleType.left,
+      ),
     );
+    return SelectionResult.end;
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    return Offset.zero;
+  SelectedContent? getSelectedContent() {
+    return const SelectedContent(plainText: 'content');
   }
 
   @override
-  bool canSelectAll(TextSelectionDelegate delegate) => true;
-}
-
-class TestHandle extends StatelessWidget {
-  const TestHandle({
-  super.key,
-  required this.type,
-  required this.textHeight,
-  });
-
-  final TextSelectionHandleType type;
-  final double textHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(width: textHeight, height: textHeight);
+  SelectionGeometry get value => _value;
+  SelectionGeometry _value = SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: const SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: const SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+  set value(SelectionGeometry other) {
+    if (other == _value) {
+      return;
+    }
+    _value = other;
+    for (final VoidCallback callback in listeners) {
+      callback();
+    }
   }
-}
-
-class TestToolbar extends StatelessWidget {
-  const TestToolbar({
-  super.key,
-  required this.globalEditableRegion,
-  required this.textLineHeight,
-  required this.selectionMidpoint,
-  required this.endpoints,
-  required this.delegate,
-  required this.clipboardStatus,
-  required this.lastSecondaryTapDownPosition,
-  });
-
-  final Rect globalEditableRegion;
-  final double textLineHeight;
-  final Offset selectionMidpoint;
-  final List<TextSelectionPoint> endpoints;
-  final TextSelectionDelegate delegate;
-  final ClipboardStatusNotifier? clipboardStatus;
-  final Offset? lastSecondaryTapDownPosition;
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(width: textLineHeight, height: textLineHeight);
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
+    this.startHandle = startHandle;
+    this.endHandle = endHandle;
   }
 }

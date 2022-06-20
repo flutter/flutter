@@ -1065,8 +1065,9 @@ void main() {
             return states.contains(MaterialState.hovered);
           }),
           thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered))
+            if (states.contains(MaterialState.hovered)) {
               return 40.0;
+            }
             // Default thickness
             return 8.0;
           }),
@@ -1130,8 +1131,9 @@ void main() {
         theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
           isAlwaysShown: true,
           trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered))
+            if (states.contains(MaterialState.hovered)) {
               return true;
+            }
             return false;
           }),
         )),

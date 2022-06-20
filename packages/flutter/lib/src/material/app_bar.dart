@@ -152,6 +152,7 @@ class _PreferredAppBarSize extends Size {
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
+///  * <https://m3.material.io/components/top-app-bar>
 ///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design app bar.
@@ -803,11 +804,13 @@ class _AppBarState extends State<AppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_scrollNotificationObserver != null)
+    if (_scrollNotificationObserver != null) {
       _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+    }
     _scrollNotificationObserver = ScrollNotificationObserver.of(context);
-    if (_scrollNotificationObserver != null)
+    if (_scrollNotificationObserver != null) {
       _scrollNotificationObserver!.addListener(_handleScrollNotification);
+    }
   }
 
   @override
@@ -949,10 +952,12 @@ class _AppBarState extends State<AppBar> {
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
-      if (titleTextStyle?.color != null)
+      if (titleTextStyle?.color != null) {
         titleTextStyle = titleTextStyle!.copyWith(color: titleTextStyle.color!.withOpacity(opacity));
-      if (toolbarTextStyle?.color != null)
+      }
+      if (toolbarTextStyle?.color != null) {
         toolbarTextStyle = toolbarTextStyle!.copyWith(color: toolbarTextStyle.color!.withOpacity(opacity));
+      }
       overallIconTheme = overallIconTheme.copyWith(
         opacity: opacity * (overallIconTheme.opacity ?? 1.0),
       );
@@ -1280,7 +1285,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight), 0.0);
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
-    final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
+    final bool isScrolledUnder = overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
@@ -1304,7 +1309,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
             )
           : flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
+        elevation: isScrolledUnder ? elevation : 0.0,
         scrolledUnderElevation: scrolledUnderElevation,
         shadowColor: shadowColor,
         surfaceTintColor: surfaceTintColor,
@@ -2050,10 +2055,12 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   void didUpdateWidget(SliverAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
+    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating) {
       _updateSnapConfiguration();
-    if (widget.stretch != oldWidget.stretch)
+    }
+    if (widget.stretch != oldWidget.stretch) {
       _updateStretchConfiguration();
+    }
   }
 
   @override
@@ -2312,7 +2319,7 @@ class _DefaultsM2 extends AppBarTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_101
 class _TokenDefaultsM3 extends AppBarTheme {
   _TokenDefaultsM3(this.context)
     : super(

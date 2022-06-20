@@ -523,7 +523,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       vsync: this,
     );
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
-    positionController.value = _unlerp(widget.value);
+    positionController.value = _convert(widget.value);
     _actionMap = <Type, Action<Intent>>{
       _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(
         onInvoke: _actionHandler,
@@ -621,6 +621,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(value >= 0.0);
     assert(value <= 1.0);
     return value * (widget.max - widget.min) + widget.min;
+  }
+
+  double _discretize(double value) {
+    assert(widget.divisions != null);
+    assert(value >= 0.0 && value <= 1.0);
+
+    final int divisions = widget.divisions!;
+    return (value * divisions).round() / divisions;
+  }
+
+  double _convert(double value) {
+    double ret = _unlerp(value);
+    if (widget.divisions != null) {
+      ret = _discretize(ret);
+    }
+    return ret;
   }
 
   // Returns a number between 0.0 and 1.0, given a value between min and max.
@@ -771,7 +787,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           link: _layerLink,
           child: _SliderRenderObjectWidget(
             key: _renderObjectKey,
-            value: _unlerp(widget.value),
+            value: _convert(widget.value),
             divisions: widget.divisions,
             label: widget.label,
             sliderTheme: sliderTheme,
@@ -1051,8 +1067,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TargetPlatform _platform;
   TargetPlatform get platform => _platform;
   set platform(TargetPlatform value) {
-    if (_platform == value)
+    if (_platform == value) {
       return;
+    }
     _platform = value;
     markNeedsSemanticsUpdate();
   }
@@ -1060,8 +1077,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   SemanticFormatterCallback? _semanticFormatterCallback;
   SemanticFormatterCallback? get semanticFormatterCallback => _semanticFormatterCallback;
   set semanticFormatterCallback(SemanticFormatterCallback? value) {
-    if (_semanticFormatterCallback == value)
+    if (_semanticFormatterCallback == value) {
       return;
+    }
     _semanticFormatterCallback = value;
     markNeedsSemanticsUpdate();
   }
@@ -1154,8 +1172,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hasFocus;
   set hasFocus(bool value) {
     assert(value != null);
-    if (value == _hasFocus)
+    if (value == _hasFocus) {
       return;
+    }
     _hasFocus = value;
     _updateForFocusOrHover(_hasFocus);
     markNeedsSemanticsUpdate();
@@ -1166,8 +1185,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hovering;
   set hovering(bool value) {
     assert(value != null);
-    if (value == _hovering)
+    if (value == _hovering) {
       return;
+    }
     _hovering = value;
     _updateForFocusOrHover(_hovering);
   }

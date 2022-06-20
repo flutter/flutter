@@ -89,6 +89,7 @@ enum _FloatingActionButtonType {
 ///  * [Scaffold], in which floating action buttons typically live.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons-floating-action-button.html>
+///  * <https://m3.material.io/components/floating-action-button>
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
@@ -235,6 +236,9 @@ class FloatingActionButton extends StatelessWidget {
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
+  ///
+  /// See also:
+  ///  * <https://m3.material.io/components/extended-fab>
   const FloatingActionButton.extended({
     super.key,
     this.tooltip,
@@ -782,7 +786,7 @@ class _M2Defaults extends FloatingActionButtonThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_101
 class _TokenDefaultsM3 extends FloatingActionButtonThemeData {
   _TokenDefaultsM3(this.context, this.type, this.hasChild)
     : super(

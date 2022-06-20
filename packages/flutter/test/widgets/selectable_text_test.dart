@@ -103,15 +103,6 @@ Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 200));
 }
 
-double getOpacity(WidgetTester tester, Finder finder) {
-  return tester.widget<FadeTransition>(
-      find.ancestor(
-        of: finder,
-        matching: find.byType(FadeTransition),
-      ),
-  ).opacity.value;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -1641,10 +1632,11 @@ void main() {
 
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.setData')
+      if (methodCall.method == 'Clipboard.setData') {
         clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData')
+      } else if (methodCall.method == 'Clipboard.getData') {
         return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
     const String testValue = 'a big house\njumped over a mouse';

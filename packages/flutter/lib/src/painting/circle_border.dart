@@ -46,15 +46,17 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is CircleBorder)
+    if (a is CircleBorder) {
       return CircleBorder(side: BorderSide.lerp(a.side, side, t));
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b is CircleBorder)
+    if (b is CircleBorder) {
       return CircleBorder(side: BorderSide.lerp(side, b.side, t));
+    }
     return super.lerpTo(b, t);
   }
 
@@ -118,8 +120,9 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is CircleBorder
         && other.side == side;
   }

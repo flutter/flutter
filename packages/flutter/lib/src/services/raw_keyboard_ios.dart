@@ -264,10 +264,12 @@ class RawKeyEventDataIos extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataIos
         && other.characters == characters
         && other.charactersIgnoringModifiers == charactersIgnoringModifiers

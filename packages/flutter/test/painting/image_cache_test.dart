@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -136,15 +135,15 @@ void main() {
   });
 
   test('Returns null if an error is caught resolving an image', () {
-    Future<ui.Codec> basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+    Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+      return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
     }
     final ErrorImageProvider errorImage = ErrorImageProvider();
-    expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, basicDecoder)), throwsA(isA<Error>()));
+    expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.loadBuffer(errorImage, basicDecoder)), throwsA(isA<Error>()));
     bool caughtError = false;
     final ImageStreamCompleter? result = imageCache.putIfAbsent(
       errorImage,
-      () => errorImage.load(errorImage, basicDecoder),
+      () => errorImage.loadBuffer(errorImage, basicDecoder),
       onError: (dynamic error, StackTrace? stackTrace) {
        caughtError = true;
       },

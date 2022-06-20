@@ -252,29 +252,6 @@ void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
   expect(box0.size, equals(box1.size));
 }
 
-void verifyPaintedShadow(Finder customPaint, int elevation) {
-  const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
-
-  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation]![index]);
-  final List<RRect> rrects = List<RRect>.generate(3, (int index) {
-    return RRect.fromRectAndRadius(
-      originalRectangle.shift(
-        boxShadows[index].offset,
-      ).inflate(boxShadows[index].spreadRadius),
-      const Radius.circular(2.0),
-    );
-  });
-
-  expect(
-    customPaint,
-    paints
-      ..save()
-      ..rrect(rrect: rrects[0], color: boxShadows[0].color, hasMaskFilter: true)
-      ..rrect(rrect: rrects[1], color: boxShadows[1].color, hasMaskFilter: true)
-      ..rrect(rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
-  );
-}
-
 Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormField = false }) async {
   const String text = 'foo';
   await tester.pumpWidget(
@@ -323,12 +300,6 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
       ..rrect()
       ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false),
   );
-}
-
-bool sameGeometry(RenderBox box1, RenderBox box2) {
-  expect(box1.localToGlobal(Offset.zero), equals(box2.localToGlobal(Offset.zero)));
-  expect(box1.size.height, equals(box2.size.height));
-  return true;
 }
 
 void main() {
@@ -3837,5 +3808,36 @@ void main() {
     );
     expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
     expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
+  });
+
+  testWidgets('BorderRadius property clips dropdown menu', (WidgetTester tester) async {
+    const double radius = 20.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(radius),
+              value: 'One',
+              items: <String>['One', 'Two', 'Three', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+
+    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+    expect(renderClip.borderRadius, BorderRadius.circular(radius));
   });
 }

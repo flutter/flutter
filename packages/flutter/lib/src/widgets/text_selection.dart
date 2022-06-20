@@ -318,8 +318,9 @@ class TextSelectionOverlay {
   bool _handlesVisible = false;
   set handlesVisible(bool visible) {
     assert(visible != null);
-    if (_handlesVisible == visible)
+    if (_handlesVisible == visible) {
       return;
+    }
     _handlesVisible = visible;
     _updateTextSelectionOverlayVisibilities();
   }
@@ -349,8 +350,9 @@ class TextSelectionOverlay {
   /// that if you do call this during a build, the UI will not update until the
   /// next frame (i.e. many milliseconds later).
   void update(TextEditingValue newValue) {
-    if (_value == newValue)
+    if (_value == newValue) {
       return;
+    }
     _value = newValue;
     _updateSelectionOverlay();
   }
@@ -457,13 +459,32 @@ class TextSelectionOverlay {
       return;
     }
 
-    final TextSelection newSelection = TextSelection(
-      baseOffset: _selection.baseOffset,
-      extentOffset: position.offset,
-    );
-
-    if (newSelection.baseOffset >= newSelection.extentOffset)
-      return; // don't allow order swapping.
+    final TextSelection newSelection;
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        newSelection = TextSelection(
+          extentOffset: position.offset,
+          baseOffset: _selection.start,
+        );
+        if (position.offset <= _selection.start) {
+          return; // Don't allow order swapping.
+        }
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        newSelection = TextSelection(
+          baseOffset: _selection.baseOffset,
+          extentOffset: position.offset,
+        );
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
+          return; // Don't allow order swapping.
+        }
+        break;
+    }
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
   }
@@ -486,13 +507,32 @@ class TextSelectionOverlay {
       return;
     }
 
-    final TextSelection newSelection = TextSelection(
-      baseOffset: position.offset,
-      extentOffset: _selection.extentOffset,
-    );
-
-    if (newSelection.baseOffset >= newSelection.extentOffset)
-      return; // don't allow order swapping.
+    final TextSelection newSelection;
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        newSelection = TextSelection(
+          extentOffset: position.offset,
+          baseOffset: _selection.end,
+        );
+        if (newSelection.extentOffset >= _selection.end) {
+          return; // Don't allow order swapping.
+        }
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        newSelection = TextSelection(
+          baseOffset: position.offset,
+          extentOffset: _selection.extentOffset,
+        );
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
+          return; // Don't allow order swapping.
+        }
+        break;
+    }
 
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
@@ -511,8 +551,9 @@ class TextSelectionOverlay {
       TextSelectionHandleType ltrType,
       TextSelectionHandleType rtlType,
       ) {
-    if (_selection.isCollapsed)
+    if (_selection.isCollapsed) {
       return TextSelectionHandleType.collapsed;
+    }
 
     assert(textDirection != null);
     switch (textDirection) {
@@ -585,8 +626,9 @@ class SelectionOverlay {
   TextSelectionHandleType get startHandleType => _startHandleType;
   TextSelectionHandleType _startHandleType;
   set startHandleType(TextSelectionHandleType value) {
-    if (_startHandleType == value)
+    if (_startHandleType == value) {
       return;
+    }
     _startHandleType = value;
     _markNeedsBuild();
   }
@@ -599,8 +641,9 @@ class SelectionOverlay {
   double get lineHeightAtStart => _lineHeightAtStart;
   double _lineHeightAtStart;
   set lineHeightAtStart(double value) {
-    if (_lineHeightAtStart == value)
+    if (_lineHeightAtStart == value) {
       return;
+    }
     _lineHeightAtStart = value;
     _markNeedsBuild();
   }
@@ -629,8 +672,9 @@ class SelectionOverlay {
   TextSelectionHandleType get endHandleType => _endHandleType;
   TextSelectionHandleType _endHandleType;
   set endHandleType(TextSelectionHandleType value) {
-    if (_endHandleType == value)
+    if (_endHandleType == value) {
       return;
+    }
     _endHandleType = value;
     _markNeedsBuild();
   }
@@ -643,8 +687,9 @@ class SelectionOverlay {
   double get lineHeightAtEnd => _lineHeightAtEnd;
   double _lineHeightAtEnd;
   set lineHeightAtEnd(double value) {
-    if (_lineHeightAtEnd == value)
+    if (_lineHeightAtEnd == value) {
       return;
+    }
     _lineHeightAtEnd = value;
     _markNeedsBuild();
   }
@@ -784,8 +829,9 @@ class SelectionOverlay {
   /// Builds the handles by inserting them into the [context]'s overlay.
   /// {@endtemplate}
   void showHandles() {
-    if (_handles != null)
+    if (_handles != null) {
       return;
+    }
 
     _handles = <OverlayEntry>[
       OverlayEntry(builder: _buildStartHandle),
@@ -820,13 +866,15 @@ class SelectionOverlay {
 
   bool _buildScheduled = false;
   void _markNeedsBuild() {
-    if (_handles == null && _toolbar == null)
+    if (_handles == null && _toolbar == null) {
       return;
+    }
     // If we are in build state, it will be too late to update visibility.
     // We will need to schedule the build in next frame.
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      if (_buildScheduled)
+      if (_buildScheduled) {
         return;
+      }
       _buildScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _buildScheduled = false;
@@ -865,8 +913,9 @@ class SelectionOverlay {
   /// To hide the whole overlay, see [hide].
   /// {@endtemplate}
   void hideToolbar() {
-    if (_toolbar == null)
+    if (_toolbar == null) {
       return;
+    }
     _toolbar?.remove();
     _toolbar = null;
   }
@@ -881,9 +930,9 @@ class SelectionOverlay {
   Widget _buildStartHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null)
+    if (selectionControls == null) {
       handle = Container();
-    else {
+    } else {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
@@ -905,9 +954,10 @@ class SelectionOverlay {
   Widget _buildEndHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed)
-      handle = Container(); // hide the second handle when collapsed.
-    else {
+    if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
+      // Hide the second handle when collapsed.
+      handle = Container();
+    } else {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
@@ -927,8 +977,9 @@ class SelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    if (selectionControls == null)
+    if (selectionControls == null) {
       return Container();
+    }
 
     final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
 
@@ -1101,7 +1152,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
 }
 
 class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
@@ -1482,8 +1532,9 @@ class TextSelectionGestureDetectorBuilder {
       from: details.globalPosition,
       cause: SelectionChangedCause.forcePress,
     );
-    if (shouldShowSelectionToolbar)
+    if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
@@ -1590,8 +1641,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
-    if (shouldShowSelectionToolbar)
+    if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
@@ -1605,7 +1657,7 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (!_lastSecondaryTapWasOnSelection) {
+        if (!_lastSecondaryTapWasOnSelection || !renderEditable.hasFocus) {
           renderEditable.selectWord(cause: SelectionChangedCause.tap);
         }
         if (shouldShowSelectionToolbar) {
@@ -1651,8 +1703,9 @@ class TextSelectionGestureDetectorBuilder {
   void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
-      if (shouldShowSelectionToolbar)
+      if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
+      }
     }
   }
 
@@ -1666,8 +1719,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onDragSelectionStart(DragStartDetails details) {
-    if (!delegate.selectionEnabled)
+    if (!delegate.selectionEnabled) {
       return;
+    }
     final PointerDeviceKind? kind = details.kind;
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
@@ -1709,8 +1763,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback./lib/src/material/text_field.dart
   @protected
   void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
-    if (!delegate.selectionEnabled)
+    if (!delegate.selectionEnabled) {
       return;
+    }
 
     if (!_isShiftTapping) {
       // Adjust the drag start offset for possible viewport offset changes.

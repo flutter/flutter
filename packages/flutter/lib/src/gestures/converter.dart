@@ -7,6 +7,10 @@ import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
 import 'events.dart';
 
+export 'dart:ui' show PointerData;
+
+export 'events.dart' show PointerEvent;
+
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
 //
 // TODO(tongmu): This patch is supposed to be done by embedders. Patching it

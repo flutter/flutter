@@ -1560,8 +1560,9 @@ void main() {
     final Finder backgroundMaterial = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byWidgetPredicate((Widget w) {
-        if (w is Material)
+        if (w is Material) {
           return w.type == MaterialType.canvas;
+        }
         return false;
       }),
     );

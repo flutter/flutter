@@ -2170,8 +2170,9 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -3175,8 +3176,9 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!(widget as Offstage).offstage)
+    if (!(widget as Offstage).offstage) {
       super.debugVisitOnstageChildren(visitor);
+    }
   }
 }
 
@@ -3844,6 +3846,13 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_O0PPD1Xfbk}
 ///
+/// {@tool dartpad}
+/// This example shows a [IndexedStack] widget being used to lay out one card
+/// at a time from a series of cards, each keeping their respective states.
+///
+/// ** See code in examples/api/lib/widgets/basic/indexed_stack.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Stack], for more details about stacks.
@@ -4133,8 +4142,9 @@ class Positioned extends ParentDataWidget<StackParentData> {
 
     if (needsLayout) {
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -4993,8 +5003,9 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
     if (needsLayout) {
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -6437,12 +6448,15 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final List<String> listeners = <String>[];
-    if (onEnter != null)
+    if (onEnter != null) {
       listeners.add('enter');
-    if (onExit != null)
+    }
+    if (onExit != null) {
       listeners.add('exit');
-    if (onHover != null)
+    }
+    if (onHover != null) {
       listeners.add('hover');
+    }
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
@@ -6957,8 +6971,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   }
 
   TextDirection? _getTextDirection(BuildContext context) {
-    if (properties.textDirection != null)
+    if (properties.textDirection != null) {
       return properties.textDirection;
+    }
 
     final bool containsText = properties.attributedLabel != null ||
                               properties.label != null ||
@@ -6966,8 +6981,9 @@ class Semantics extends SingleChildRenderObjectWidget {
                               properties.hint != null ||
                               properties.tooltip != null;
 
-    if (!containsText)
+    if (!containsText) {
       return null;
+    }
 
     return Directionality.maybeOf(context);
   }
@@ -7195,8 +7211,9 @@ class KeyedSubtree extends StatelessWidget {
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
   /// the sum of its list index and `baseIndex`.
   static List<Widget> ensureUniqueKeysForList(List<Widget> items, { int baseIndex = 0 }) {
-    if (items == null || items.isEmpty)
+    if (items == null || items.isEmpty) {
       return items;
+    }
 
     final List<Widget> itemsWithUniqueKeys = <Widget>[];
     int itemIndex = baseIndex;

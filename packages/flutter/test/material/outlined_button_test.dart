@@ -829,10 +829,12 @@ void main() {
                 minimumSize: const Size(64, 36),
               ).copyWith(
                 side: MaterialStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled))
+                  if (states.contains(MaterialState.disabled)) {
                     return disabledBorderSide;
-                  if (states.contains(MaterialState.pressed))
+                  }
+                  if (states.contains(MaterialState.pressed)) {
                     return pressedBorderSide;
+                  }
                   return enabledBorderSide;
                 }),
               ),
@@ -1714,6 +1716,123 @@ void main() {
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('OutlinedButton statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: OutlinedButton(
+            statesController: controller,
+            onPressed: () { },
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(OutlinedButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+
+    // If the button is rebuilt disabled, then the pressed state is
+    // removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: OutlinedButton(
+            statesController: controller,
+            onPressed: null,
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(count, 10); // removes pressed and adds disabled - two changes
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 11);
+
+    await gesture.removePointer();
+  });
+
+  testWidgets('Disabled OutlinedButton statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: OutlinedButton(
+            statesController: controller,
+            onPressed: null,
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 1);
   });
 }
 
