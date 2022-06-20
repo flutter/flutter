@@ -354,7 +354,10 @@ class XCDevice {
     return error is Map<String, Object?> ? error : null;
   }
 
-  static int? _errorCode(Map<String, Object?> errorProperties) {
+  static int? _errorCode(Map<String, Object?>? errorProperties) {
+    if (errorProperties == null) {
+      return null;
+    }
     final Object? code = errorProperties['code'];
     return code is int ? code : null;
   }
@@ -521,6 +524,14 @@ class XCDevice {
       final Map<String, Object?>? errorProperties = _errorProperties(deviceProperties);
       final String? errorMessage = _parseErrorMessage(errorProperties);
       if (errorMessage != null) {
+        final int? code = _errorCode(errorProperties);
+        // Error -13: iPhone is not connected. Xcode will continue when iPhone is connected.
+        // This error is confusing since the device is not connected and maybe has not been connected
+        // for a long time. Avoid showing it.
+        if (code == -13 && errorMessage.contains('not connected')) {
+          continue;
+        }
+
         diagnostics.add(errorMessage);
       }
     }

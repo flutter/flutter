@@ -961,13 +961,19 @@ class ThemeData with Diagnosticable {
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.light() => ThemeData(brightness: Brightness.light);
+  factory ThemeData.light({bool? useMaterial3}) => ThemeData(
+    brightness: Brightness.light,
+    useMaterial3: useMaterial3,
+  );
 
   /// A default dark theme with a teal secondary [ColorScheme] color.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.dark() => ThemeData(brightness: Brightness.dark);
+  factory ThemeData.dark({bool? useMaterial3}) => ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: useMaterial3,
+  );
 
   /// The default color theme. Same as [ThemeData.light].
   ///
@@ -978,7 +984,7 @@ class ThemeData with Diagnosticable {
   ///
   /// Most applications would use [Theme.of], which provides correct localized
   /// text geometry.
-  factory ThemeData.fallback() => ThemeData.light();
+  factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
 
   /// The overall theme brightness.
   ///

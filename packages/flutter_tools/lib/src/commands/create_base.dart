@@ -649,11 +649,11 @@ abstract class CreateBase extends FlutterCommand {
       'templates',
       'template_manifest.json',
     );
-    final Map<String, Object> manifest = json.decode(
+    final Map<String, Object?> manifest = json.decode(
       globals.fs.file(manifestPath).readAsStringSync(),
-    ) as Map<String, Object>;
+    ) as Map<String, Object?>;
     return Set<Uri>.from(
-      (manifest['files']! as List<Object>).cast<String>().map<Uri>(
+      (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
           (String path) =>
               Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
     );

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -107,8 +105,8 @@ void main() {
       flutterDevices: <FlutterDevice>[],
     );
 
-    expect(handler.activeDevToolsServer.host, 'localhost');
-    expect(handler.activeDevToolsServer.port, 8181);
+    expect(handler.activeDevToolsServer!.host, 'localhost');
+    expect(handler.activeDevToolsServer!.port, 8181);
   });
 
   testWithoutContext('serveAndAnnounceDevTools with attached device does not fail on null vm service', () async {
@@ -425,13 +423,13 @@ void main() {
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
-  DevToolsServerAddress activeDevToolsServer;
+  DevToolsServerAddress? activeDevToolsServer;
 
   @override
-  Uri devToolsUrl;
+  Uri? devToolsUrl;
 
   @override
-  Future<DevToolsServerAddress> serve() async => null;
+  Future<DevToolsServerAddress?> serve() async => null;
 
   @override
   Future<void> get ready => readyCompleter.future;
@@ -452,7 +450,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   final Device device = FakeDevice();
 
   @override
-  FlutterVmService vmService;
+  FlutterVmService? vmService;
 
   @override
   TargetPlatform targetPlatform = TargetPlatform.android_arm;

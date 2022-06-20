@@ -875,10 +875,6 @@ class _BodyBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!extendBody && !extendBodyBehindAppBar) {
-      return body;
-    }
-
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
