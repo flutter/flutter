@@ -17,6 +17,11 @@ namespace testing {
 // Mock for FlBinaryMessenger.
 class MockBinaryMessenger {
  public:
+  MockBinaryMessenger();
+  ~MockBinaryMessenger();
+
+  operator FlBinaryMessenger*();
+
   MOCK_METHOD5(fl_binary_messenger_set_message_handler_on_channel,
                void(FlBinaryMessenger* messenger,
                     const gchar* channel,
@@ -49,11 +54,10 @@ class MockBinaryMessenger {
                          FlBinaryMessengerMessageHandler handler,
                          gpointer user_data);
 
-  void ReceiveMessage(FlBinaryMessenger* messenger,
-                      const gchar* channel,
-                      GBytes* message);
+  void ReceiveMessage(const gchar* channel, GBytes* message);
 
  private:
+  FlBinaryMessenger* instance_ = nullptr;
   std::unordered_map<std::string, FlBinaryMessengerMessageHandler>
       message_handlers;
   std::unordered_map<std::string, FlBinaryMessengerResponseHandle*>
@@ -63,8 +67,5 @@ class MockBinaryMessenger {
 
 }  // namespace testing
 }  // namespace flutter
-
-FlBinaryMessenger* fl_binary_messenger_new_mock(
-    flutter::testing::MockBinaryMessenger* mock);
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_BINARY_MESSENGER_H_
