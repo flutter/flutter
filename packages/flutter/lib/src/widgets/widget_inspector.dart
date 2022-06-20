@@ -748,7 +748,7 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
-  List<String>? _pubRootDirectories;
+  List<String>? _pubRootDirectories; // TODO:  Change this to a set. No need to muck about
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
 
@@ -1247,7 +1247,7 @@ mixin WidgetInspectorService {
   void resetAllState() {
     disposeAllGroups();
     selection.clear();
-    setPubRootDirectories(<String>[]);
+    resetPubRootDirectories();
   }
 
   /// Free all references to objects in a group.
@@ -1370,11 +1370,15 @@ mixin WidgetInspectorService {
   ///
   /// The local project directories are used to distinguish widgets created by
   /// the local project over widgets created from inside the framework.
+  @Deprecated('TODO: How do I deprecate stuff?')
   @protected
   void setPubRootDirectories(List<String> pubRootDirectories) {
-    _pubRootDirectories = pubRootDirectories
-      .map<String>((String directory) => Uri.parse(directory).path)
-      .toList();
+    addPubRootDirectories(pubRootDirectories);
+  }
+
+  @protected
+  void resetPubRootDirectories([List<String> pubRootDirectories = const <String>[]]) {
+    _pubRootDirectories = pubRootDirectories;
     _isLocalCreationCache.clear();
   }
 
@@ -1406,11 +1410,10 @@ mixin WidgetInspectorService {
     if (_pubRootDirectories == null) {
       return;
     }
+    final Set<String> pubRootDirectorySet = _pubRootDirectories!.toSet();
+    pubRootDirectorySet.remove(pubRootDirectories);
+    _pubRootDirectories = pubRootDirectorySet.toList();
 
-    _pubRootDirectories!.toSet().remove(pubRootDirectories);
-
-    // TODO: This feels like something that could benefit from a Mutex?
-    
     _isLocalCreationCache.clear();
   }
 
