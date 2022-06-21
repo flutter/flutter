@@ -173,7 +173,9 @@ class OutlinedButton extends ButtonStyleButton {
       : _OutlinedButtonDefaultColor(foreground, disabledForeground);
     final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
       ? null
-      : _OutlinedButtonDefaultColor(backgroundColor, disabledBackgroundColor);
+      : disabledBackgroundColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(backgroundColor)
+        : _OutlinedButtonDefaultColor(backgroundColor, disabledBackgroundColor);
     final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
       : _OutlinedButtonDefaultOverlay(foreground);

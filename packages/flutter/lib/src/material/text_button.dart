@@ -177,14 +177,16 @@ class TextButton extends ButtonStyleButton {
     final Color? foreground = foregroundColor ?? primary;
     final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
     final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
-        ? null
-        : _TextButtonDefaultColor(foreground, disabledForeground);
+      ? null
+      : _TextButtonDefaultColor(foreground, disabledForeground);
     final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
-        ? null
+      ? null
+      : disabledBackgroundColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(backgroundColor)
         : _TextButtonDefaultColor(backgroundColor, disabledBackgroundColor);
     final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
-        ? null
-        : _TextButtonDefaultOverlay(foreground);
+      ? null
+      : _TextButtonDefaultOverlay(foreground);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);

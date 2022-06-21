@@ -176,8 +176,8 @@ class ElevatedButton extends ButtonStyleButton {
     final Color? background = backgroundColor ?? primary;
     final Color? disabledBackground = disabledBackgroundColor ?? onSurface?.withOpacity(0.12);
     final MaterialStateProperty<Color?>? backgroundColorProp = (background == null && disabledBackground == null)
-        ? null
-        : _ElevatedButtonDefaultColor(background, disabledBackground);
+      ? null
+      : _ElevatedButtonDefaultColor(background, disabledBackground);
     final Color? foreground = foregroundColor ?? onPrimary;
     final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
     final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
