@@ -412,6 +412,15 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   void _handleAppStarted() {
     appStartedCompleter.complete();
     _connectDebuggerIfReady();
+
+    // Send a custom event so the editor knows the app has started.
+    //
+    // This may be useful when there's no VM Service (for example Profile mode)
+    // but the editor still wants to know that startup has finished.
+    sendEvent(
+      RawEventBody(<String, Object?>{}),
+      eventType: 'flutter.appStarted',
+    );
   }
 
   /// Handles the daemon.connected event, recording the pid of the flutter_tools process.
