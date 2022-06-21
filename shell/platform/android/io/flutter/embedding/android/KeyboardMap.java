@@ -614,6 +614,5 @@ public class KeyboardMap {
 
   public static final long kValueMask = 0x000ffffffffL;
   public static final long kUnicodePlane = 0x00000000000L;
-  public static final long kLogicalPlane = 0x00300000000L;
   public static final long kAndroidPlane = 0x01100000000L;
 }
