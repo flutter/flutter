@@ -72,7 +72,7 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
     // key from the key code so that keys can be told apart.
     if (scancode == 0) {
       // The key code can't also be 0, since those events have been filtered.
-      return keyOfPlane(event.getKeyCode(), KeyboardMap.kLogicalPlane);
+      return keyOfPlane(event.getKeyCode(), KeyboardMap.kAndroidPlane);
     }
     final Long byMapping = KeyboardMap.scanCodeToPhysical.get(scancode);
     if (byMapping != null) {
