@@ -23,7 +23,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:platform/platform.dart';
 
 import 'widget_inspector_test_utils.dart';
 
@@ -1447,8 +1446,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         });
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
 
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
@@ -2372,8 +2371,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.);
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.);
+    );
 
     Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
       final Map<Object, Object?> event = events.removeLast();
