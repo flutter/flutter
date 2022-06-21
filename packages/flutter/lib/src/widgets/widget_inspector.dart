@@ -748,7 +748,7 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
-  List<String>? _pubRootDirectories; // TODO:  Change this to a set. No need to muck about
+  Set<String>? _pubRootDirectories;
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
 
@@ -1378,7 +1378,7 @@ mixin WidgetInspectorService {
 
   @protected
   void resetPubRootDirectories([List<String> pubRootDirectories = const <String>[]]) {
-    _pubRootDirectories = pubRootDirectories;
+    _pubRootDirectories = pubRootDirectories.toSet();
     _isLocalCreationCache.clear();
   }
 
@@ -1389,13 +1389,9 @@ mixin WidgetInspectorService {
   /// the local project over widgets created from inside the framework.
   @protected
   void addPubRootDirectories(List<String> pubRootDirectories) {
-    _pubRootDirectories ??= <String>[];
-    final Set<String> pubSet = _pubRootDirectories!.toSet();
-    pubSet.addAll(pubRootDirectories
+    _pubRootDirectories ??= <String>{};
+    _pubRootDirectories!.addAll(pubRootDirectories
         .map<String>((String directory) => Uri.parse(directory).path));
-    _pubRootDirectories = pubSet.toList();
-    
-    // TODO: This feels like something that could benefit from a Mutex?
 
     _isLocalCreationCache.clear();
   }
@@ -1410,13 +1406,10 @@ mixin WidgetInspectorService {
     if (_pubRootDirectories == null) {
       return;
     }
-    final Set<String> pubRootDirectorySet = _pubRootDirectories!.toSet();
     for (int i = 0; i < pubRootDirectories.length; i++) {
       final String element = pubRootDirectories[i];
-      pubRootDirectorySet.remove(element);
+      _pubRootDirectories!.remove(element);
     }
-    pubRootDirectorySet.remove(pubRootDirectories);
-    _pubRootDirectories = pubRootDirectorySet.toList();
 
     _isLocalCreationCache.clear();
   }
