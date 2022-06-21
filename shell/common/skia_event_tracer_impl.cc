@@ -81,7 +81,7 @@ class FlutterEventTracer : public SkEventTracer {
 
   FlutterEventTracer(bool enabled,
                      const std::optional<std::vector<std::string>>& allowlist)
-      : enabled_(enabled ? kYes : kNo), shaders_category_flag_(nullptr) {
+      : enabled_(enabled ? kYes : kNo) {
     if (allowlist.has_value()) {
       allowlist_.emplace();
       for (const std::string& category : *allowlist) {
@@ -311,7 +311,7 @@ class FlutterEventTracer : public SkEventTracer {
   std::mutex flag_map_mutex_;
   std::map<const char*, uint8_t> category_flag_map_;
   std::map<const uint8_t*, const char*> reverse_flag_map_;
-  const uint8_t* shaders_category_flag_;
+  const uint8_t* shaders_category_flag_ = nullptr;
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEventTracer);
 };
 

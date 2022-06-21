@@ -397,7 +397,6 @@ FILE: ../../../flutter/fml/unique_fd.cc
 FILE: ../../../flutter/fml/unique_fd.h
 FILE: ../../../flutter/fml/unique_object.h
 FILE: ../../../flutter/fml/wakeable.h
-FILE: ../../../flutter/impeller/.clang-tidy
 FILE: ../../../flutter/impeller/aiks/aiks_context.cc
 FILE: ../../../flutter/impeller/aiks/aiks_context.h
 FILE: ../../../flutter/impeller/aiks/aiks_playground.cc

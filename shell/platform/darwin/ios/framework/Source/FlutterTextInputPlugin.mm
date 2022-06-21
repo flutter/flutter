@@ -345,30 +345,30 @@ static NSString* AutofillIdFromDictionary(NSDictionary* dictionary) {
 // The text input plugin then tries to determine which kind of autofill the text
 // field needs. If the AutofillGroup the text field belongs to contains an
 // autofillable text field that's password related, this text 's autofill type
-// will be FlutterAutofillTypePassword. If autofill is disabled for a text field,
-// then its type will be FlutterAutofillTypeNone. Otherwise the text field will
-// have an autofill type of FlutterAutofillTypeRegular.
+// will be kFlutterAutofillTypePassword. If autofill is disabled for a text field,
+// then its type will be kFlutterAutofillTypeNone. Otherwise the text field will
+// have an autofill type of kFlutterAutofillTypeRegular.
 //
-// The text input plugin creates a new UIView for every FlutterAutofillTypeNone
+// The text input plugin creates a new UIView for every kFlutterAutofillTypeNone
 // text field. The UIView instance is never reused for other flutter text fields
 // since the software keyboard often uses the identity of a UIView to distinguish
 // different views and provides the same predictive text suggestions or restore
 // the composing region if a UIView is reused for a different flutter text field.
 //
 // The text input plugin creates a new "autofill context" if the text field has
-// the type of FlutterAutofillTypePassword, to represent the AutofillGroup of
+// the type of kFlutterAutofillTypePassword, to represent the AutofillGroup of
 // the text field, and creates one FlutterTextInputView for every text field in
 // the AutofillGroup.
 //
 // The text input plugin will try to reuse a UIView if a flutter text field's
-// type is FlutterAutofillTypeRegular, and has the same autofill id.
+// type is kFlutterAutofillTypeRegular, and has the same autofill id.
 typedef NS_ENUM(NSInteger, FlutterAutofillType) {
   // The field does not have autofillable content. Additionally if
   // the field is currently in the autofill context, it will be
   // removed from the context without triggering autofill save.
-  FlutterAutofillTypeNone,
-  FlutterAutofillTypeRegular,
-  FlutterAutofillTypePassword,
+  kFlutterAutofillTypeNone,
+  kFlutterAutofillTypeRegular,
+  kFlutterAutofillTypePassword,
 };
 
 static BOOL IsFieldPasswordRelated(NSDictionary* configuration) {
@@ -405,22 +405,22 @@ static BOOL IsFieldPasswordRelated(NSDictionary* configuration) {
 static FlutterAutofillType AutofillTypeOf(NSDictionary* configuration) {
   for (NSDictionary* field in configuration[kAssociatedAutofillFields]) {
     if (IsFieldPasswordRelated(field)) {
-      return FlutterAutofillTypePassword;
+      return kFlutterAutofillTypePassword;
     }
   }
 
   if (IsFieldPasswordRelated(configuration)) {
-    return FlutterAutofillTypePassword;
+    return kFlutterAutofillTypePassword;
   }
 
   if (@available(iOS 10.0, *)) {
     NSDictionary* autofill = configuration[kAutofillProperties];
     UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
-    return !autofill || [contentType isEqualToString:@""] ? FlutterAutofillTypeNone
-                                                          : FlutterAutofillTypeRegular;
+    return !autofill || [contentType isEqualToString:@""] ? kFlutterAutofillTypeNone
+                                                          : kFlutterAutofillTypeRegular;
   }
 
-  return FlutterAutofillTypeNone;
+  return kFlutterAutofillTypeNone;
 }
 
 static BOOL IsApproximatelyEqual(float x, float y, float delta) {
@@ -2218,17 +2218,17 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
   // Update the current active view.
   switch (AutofillTypeOf(configuration)) {
-    case FlutterAutofillTypeNone:
+    case kFlutterAutofillTypeNone:
       self.activeView = [self createInputViewWith:configuration];
       break;
-    case FlutterAutofillTypeRegular:
+    case kFlutterAutofillTypeRegular:
       // If the group does not involve password autofill, only install the
       // input view that's being focused.
       self.activeView = [self updateAndShowAutofillViews:nil
                                             focusedField:configuration
                                        isPasswordRelated:NO];
       break;
-    case FlutterAutofillTypePassword:
+    case kFlutterAutofillTypePassword:
       self.activeView = [self updateAndShowAutofillViews:configuration[kAssociatedAutofillFields]
                                             focusedField:configuration
                                        isPasswordRelated:YES];
@@ -2266,7 +2266,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
   for (NSDictionary* field in configuration[kAssociatedAutofillFields]) {
     NSString* autofillId = AutofillIdFromDictionary(field);
-    if (autofillId && AutofillTypeOf(field) == FlutterAutofillTypeNone) {
+    if (autofillId && AutofillTypeOf(field) == kFlutterAutofillTypeNone) {
       [_autofillContext removeObjectForKey:autofillId];
     }
   }
@@ -2291,7 +2291,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     NSString* autofillId = AutofillIdFromDictionary(field);
     NSAssert(autofillId, @"autofillId must not be null for field: %@", field);
 
-    BOOL hasHints = AutofillTypeOf(field) != FlutterAutofillTypeNone;
+    BOOL hasHints = AutofillTypeOf(field) != kFlutterAutofillTypeNone;
     BOOL isFocused = [focusedId isEqualToString:autofillId];
 
     if (isFocused) {

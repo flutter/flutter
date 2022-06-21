@@ -15,7 +15,7 @@ struct _FlViewAccessible {
   GHashTable* semantics_nodes_by_id;
 };
 
-enum { PROP_0, PROP_ENGINE, PROP_LAST };
+enum { kProp0, kPropEngine, kPropLast };
 
 G_DEFINE_TYPE(FlViewAccessible,
               fl_view_accessible,
@@ -85,7 +85,7 @@ static void fl_view_accessible_set_property(GObject* object,
                                             GParamSpec* pspec) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(object);
   switch (prop_id) {
-    case PROP_ENGINE:
+    case kPropEngine:
       init_engine(self, FL_ENGINE(g_value_get_object(value)));
       break;
     default:
@@ -115,7 +115,7 @@ static void fl_view_accessible_class_init(FlViewAccessibleClass* klass) {
   G_OBJECT_CLASS(klass)->set_property = fl_view_accessible_set_property;
 
   g_object_class_install_property(
-      G_OBJECT_CLASS(klass), PROP_ENGINE,
+      G_OBJECT_CLASS(klass), kPropEngine,
       g_param_spec_object(
           "engine", "engine", "Flutter engine", fl_engine_get_type(),
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |

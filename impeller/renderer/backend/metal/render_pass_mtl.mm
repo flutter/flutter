@@ -186,7 +186,8 @@ bool RenderPassMTL::EncodeCommands(
 ///             absent.
 ///
 struct PassBindingsCache {
-  PassBindingsCache(id<MTLRenderCommandEncoder> encoder) : encoder_(encoder) {}
+  explicit PassBindingsCache(id<MTLRenderCommandEncoder> encoder)
+      : encoder_(encoder) {}
 
   PassBindingsCache(const PassBindingsCache&) = delete;
 

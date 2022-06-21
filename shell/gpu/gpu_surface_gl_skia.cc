@@ -73,7 +73,7 @@ GPUSurfaceGLSkia::GPUSurfaceGLSkia(sk_sp<GrDirectContext> gr_context,
                                    bool render_to_surface)
     : delegate_(delegate),
       context_(gr_context),
-      context_owner_(false),
+
       render_to_surface_(render_to_surface),
       weak_factory_(this) {
   auto context_switch = delegate_->GLContextMakeCurrent();

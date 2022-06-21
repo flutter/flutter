@@ -38,7 +38,8 @@ TEST_P(EntityTest, CanCreateEntity) {
 
 class TestPassDelegate final : public EntityPassDelegate {
  public:
-  TestPassDelegate(std::optional<Rect> coverage) : coverage_(coverage) {}
+  explicit TestPassDelegate(std::optional<Rect> coverage)
+      : coverage_(coverage) {}
 
   // |EntityPassDelegate|
   ~TestPassDelegate() override = default;

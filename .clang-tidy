@@ -2,6 +2,7 @@
 Checks: "google-*,\
 clang-analyzer-*,\
 clang-diagnostic-*,\
+modernize-use-default-member-init,\
 readability-identifier-naming,\
 -google-objc-global-variable-declaration,\
 -google-objc-avoid-throwing-exception,\
@@ -22,5 +23,15 @@ google-objc-*,\
 google-explicit-constructor"
 
 CheckOptions:
-  - key: readability-identifier-naming.GlobalConstantPrefix
-    value: k
+  - key:    modernize-use-default-member-init.UseAssignment
+    value:  true
+  - key:    readability-identifier-naming.EnumConstantCase
+    value:  'CamelCase'
+  - key:    readability-identifier-naming.EnumConstantPrefix
+    value:  'k'
+  - key:    readability-identifier-naming.GlobalConstantPrefix
+    value:  'k'
+  - key:    readability-identifier-naming.PrivateMemberCase
+    value:  'lower_case'
+  - key:    readability-identifier-naming.PrivateMemberSuffix
+    value:  '_'

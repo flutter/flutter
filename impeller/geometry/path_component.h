@@ -130,7 +130,7 @@ struct CubicPathComponent {
 
 struct ContourComponent {
   Point destination;
-  bool is_closed;
+  bool is_closed = false;
 
   ContourComponent() {}
 
