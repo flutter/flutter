@@ -2360,37 +2360,35 @@ void main() {
   testWidgets('NestedScrollView works well when rebuilding during scheduleWarmUpFrame', (WidgetTester tester) async {
     bool? isScrolled;
     final Widget myApp = MaterialApp(
-      home: Scaffold(
-        body: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Focus(
-              onFocusChange: (_) => setState( (){} ),
-              child: NestedScrollView(
-                headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
-                  isScrolled = boxIsScrolled;
-                  return <Widget>[
-                    const SliverAppBar(
-                      expandedHeight: 200,
-                      title: Text('Test'),
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Focus(
+            onFocusChange: (_) => setState( (){} ),
+            child: NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
+                isScrolled = boxIsScrolled;
+                return <Widget>[
+                  const SliverAppBar(
+                    expandedHeight: 200,
+                    title: Text('Test'),
+                  ),
+                ];
+              },
+              body: CustomScrollView(
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                        return const Text('');
+                      },
+                      childCount: 10,
                     ),
-                  ];
-                },
-                body: CustomScrollView(
-                  slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          return const Text('');
-                        },
-                        childCount: 10,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
 

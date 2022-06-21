@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -20,11 +18,11 @@ void main() {
         ),
         FakeVmServiceRequest(
           method: 'getVM',
-          jsonResponse: (VM.parse(<String, Object>{})
+          jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
           ).toJson(),
         ),
@@ -40,10 +38,10 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object?> result = await collect(
       null,
       <String>{'foo'},
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
     );
@@ -61,11 +59,11 @@ void main() {
         ),
         FakeVmServiceRequest(
           method: 'getVM',
-          jsonResponse: (VM.parse(<String, Object>{})
+          jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
           ).toJson(),
         ),
@@ -112,10 +110,10 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object?> result = await collect(
       null,
       <String>{'foo'},
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
     );
@@ -148,11 +146,11 @@ void main() {
         ),
         FakeVmServiceRequest(
           method: 'getVM',
-          jsonResponse: (VM.parse(<String, Object>{})
+          jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
           ).toJson(),
         ),
@@ -229,10 +227,10 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object?> result = await collect(
       null,
       null,
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
     );
@@ -276,11 +274,11 @@ void main() {
         ),
         FakeVmServiceRequest(
           method: 'getVM',
-          jsonResponse: (VM.parse(<String, Object>{})
+          jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
           ).toJson(),
         ),
@@ -317,10 +315,10 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object?> result = await collect(
       null,
       <String>{'foo'},
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
     );
@@ -353,11 +351,11 @@ void main() {
         ),
         FakeVmServiceRequest(
           method: 'getVM',
-          jsonResponse: (VM.parse(<String, Object>{})
+          jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
           ).toJson(),
         ),
@@ -393,10 +391,10 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object?> result = await collect(
       null,
       null,
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
     );

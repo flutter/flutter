@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'dart:ui' show Offset, PointerDeviceKind;
-
 import 'package:flutter/foundation.dart';
 
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'velocity_tracker.dart' show Velocity;
 
 /// Details object for callbacks that use [GestureDragDownCallback].
 ///

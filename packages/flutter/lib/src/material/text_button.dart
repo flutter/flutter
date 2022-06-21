@@ -69,6 +69,7 @@ import 'theme_data.dart';
 ///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons.html>
+///  * <https://m3.material.io/components/buttons>
 class TextButton extends ButtonStyleButton {
   /// Create a TextButton.
   ///
@@ -469,7 +470,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_101
 class _TokenDefaultsM3 extends ButtonStyle {
   _TokenDefaultsM3(this.context)
    : super(

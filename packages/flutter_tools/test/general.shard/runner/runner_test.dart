@@ -191,13 +191,13 @@ void main() {
       expect(logContents, contains('flutter crash'));
       expect(logContents, contains('Exception: an exception % --'));
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
-      expect(logContents, contains('[✓] Flutter'));
+      expect(logContents, contains('[!] Flutter'));
 
       final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error.toString(), 'Exception: an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-      expect(await sentDetails.doctorText.text, contains('[✓] Flutter'));
+      expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         environment: <String, String>{

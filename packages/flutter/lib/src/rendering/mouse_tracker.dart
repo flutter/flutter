@@ -14,8 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
-
 import 'object.dart';
 
 export 'package:flutter/services.dart' show
@@ -408,10 +406,11 @@ class MouseTracker extends ChangeNotifier {
     // hit-test order.
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
-      if (!nextAnnotations.containsKey(annotation))
+      if (!nextAnnotations.containsKey(annotation)) {
         if (annotation.validForMouseTracker && annotation.onExit != null) {
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
         }
+      }
     });
 
     // Send enter events to annotations that are not in last but in next, in

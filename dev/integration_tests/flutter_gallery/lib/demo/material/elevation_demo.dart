@@ -64,7 +64,12 @@ class _ElevationDemoState extends State<ElevationDemo> {
           ),
         ],
       ),
-      body: Scrollbar(child: ListView(children: buildCards())),
+      body: Scrollbar(
+        child: ListView(
+          primary: true,
+          children: buildCards(),
+        ),
+      ),
     );
   }
 }

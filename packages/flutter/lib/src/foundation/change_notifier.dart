@@ -8,6 +8,8 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'diagnostics.dart';
 
+export 'dart:ui' show VoidCallback;
+
 /// An object that maintains a list of listeners.
 ///
 /// The listeners are typically used to notify clients that the object has been
