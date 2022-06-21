@@ -6,7 +6,7 @@
 #include "flutter/lib/ui/painting/image_filter.h"
 
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "lib/ui/painting/display_list_image_gpu.h"
+#include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
