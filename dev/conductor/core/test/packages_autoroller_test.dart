@@ -127,6 +127,7 @@ void main() {
       ]),
       const FakeCommand(command: <String>[
         '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+        '--verbose',
         'update-packages',
         '--force-upgrade',
       ]),
