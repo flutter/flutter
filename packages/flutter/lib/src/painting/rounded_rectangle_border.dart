@@ -144,16 +144,10 @@ class RoundedRectangleBorder extends OutlinedBorder {
             ..color = side.color;
           if (side.strokeAlign != StrokeAlign.inside && borderRadius == BorderRadius.zero) {
             final Rect adjustedRect;
-            switch (side.strokeAlign) {
-              case StrokeAlign.inside:
-                adjustedRect = rect.deflate(width / 2);
-                break;
-              case StrokeAlign.center:
-                adjustedRect = rect;
-                break;
-              case StrokeAlign.outside:
-                adjustedRect = rect.inflate(width / 2);
-                break;
+            if (side.strokeAlign == StrokeAlign.center) {
+              adjustedRect = rect;
+            } else { // side.strokeAlign == StrokeAlign.outside
+              adjustedRect = rect.inflate(width / 2);
             }
             canvas.drawRect(adjustedRect, side.toPaint());
           } else {
