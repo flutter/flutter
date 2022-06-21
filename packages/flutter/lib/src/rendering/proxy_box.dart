@@ -887,6 +887,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    assert(_alpha != 255);
     final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
     updatedLayer.alpha = _alpha;
     return updatedLayer;
@@ -1060,7 +1061,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0;
+      _currentlyIsRepaintBoundary = _alpha! > 0 && _alpha! < 255;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary) {
         markNeedsCompositingBitsUpdate();
       }
