@@ -5,21 +5,22 @@
 import 'dart:html' as html;
 
 import 'browser_detection.dart';
+import 'dom.dart';
 import 'embedder.dart';
 import 'text_editing/text_editing.dart';
 
 /// The interface required to host a flutter app in the DOM, and its tests.
 ///
-/// Consider this as the intersection in functionality between [html.ShadowRoot]
-/// (preferred Flutter rendering method) and [html.Document] (fallback).
+/// Consider this as the intersection in functionality between [DomShadowRoot]
+/// (preferred Flutter rendering method) and [DomDocument] (fallback).
 ///
-/// Not to be confused with [html.DocumentOrShadowRoot].
+/// Not to be confused with [DomDocumentOrShadowRoot].
 abstract class HostNode {
-  /// Retrieves the [html.Element] that currently has focus.
+  /// Retrieves the [DomElement] that currently has focus.
   ///
   /// See:
   /// * [Document.activeElement](https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement)
-  html.Element? get activeElement;
+  DomElement? get activeElement;
 
   /// Adds a node to the end of the child [nodes] list of this node.
   ///
@@ -31,18 +32,18 @@ abstract class HostNode {
   ///
   /// See:
   /// * [Node.appendChild](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
-  html.Node append(html.Node node);
+  DomNode append(DomNode node);
+
+  /// Appends all of an [Iterable<DomNode>] to this [HostNode].
+  void appendAll(Iterable<DomNode> nodes);
 
   /// Returns true if this node contains the specified node.
   /// See:
   /// * [Node.contains](https://developer.mozilla.org/en-US/docs/Web/API/Node.contains)
-  bool contains(html.Node? other);
+  bool contains(DomNode? other);
 
-  /// Returns the currently wrapped [html.Node].
-  html.Node get node;
-
-  /// A modifiable list of this node's children.
-  List<html.Node> get nodes;
+  /// Returns the currently wrapped [DomNode].
+  DomNode get node;
 
   /// Finds the first descendant element of this document that matches the
   /// specified group of selectors.
@@ -59,7 +60,7 @@ abstract class HostNode {
   ///
   /// See:
   /// * [Document.querySelector](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector)
-  html.Element? querySelector(String selectors);
+  DomElement? querySelector(String selectors);
 
   /// Finds all descendant elements of this document that match the specified
   /// group of selectors.
@@ -75,10 +76,10 @@ abstract class HostNode {
   ///
   /// See:
   /// * [Document.querySelectorAll](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll)
-  List<html.Element> querySelectorAll(String selectors);
+  Iterable<DomElement> querySelectorAll(String selectors);
 }
 
-/// A [HostNode] implementation, backed by a [html.ShadowRoot].
+/// A [HostNode] implementation, backed by a [DomShadowRoot].
 ///
 /// This is the preferred flutter implementation, but it might not be supported
 /// by all browsers yet.
@@ -87,12 +88,12 @@ abstract class HostNode {
 /// supported in the current environment. In this case, a fallback [ElementHostNode]
 /// should be created instead.
 class ShadowDomHostNode implements HostNode {
-  late html.ShadowRoot _shadow;
+  late DomShadowRoot _shadow;
 
-  /// Build a HostNode by attaching a [html.ShadowRoot] to the `root` element.
+  /// Build a HostNode by attaching a [DomShadowRoot] to the `root` element.
   ///
   /// This also calls [applyGlobalCssRulesToSheet], defined in dom_renderer.
-  ShadowDomHostNode(html.Element root) :
+  ShadowDomHostNode(DomElement root) :
     assert(
     root.isConnected ?? true,
     'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.',
@@ -104,9 +105,9 @@ class ShadowDomHostNode implements HostNode {
       'delegatesFocus': false,
     });
 
-    final html.StyleElement shadowRootStyleElement = html.StyleElement();
+    final DomHTMLStyleElement shadowRootStyleElement = createDomHTMLStyleElement();
     // The shadowRootStyleElement must be appended to the DOM, or its `sheet` will be null later.
-    _shadow.append(shadowRootStyleElement);
+    _shadow.appendChild(shadowRootStyleElement);
 
     // TODO(dit): Apply only rules for the shadow root
     applyGlobalCssRulesToSheet(
@@ -117,74 +118,74 @@ class ShadowDomHostNode implements HostNode {
   }
 
   @override
-  html.Element? get activeElement => _shadow.activeElement;
+  DomElement? get activeElement => _shadow.activeElement;
 
   @override
-  html.Element? querySelector(String selectors) {
+  DomElement? querySelector(String selectors) {
     return _shadow.querySelector(selectors);
   }
 
   @override
-  List<html.Element> querySelectorAll(String selectors) {
+  Iterable<DomElement> querySelectorAll(String selectors) {
     return _shadow.querySelectorAll(selectors);
   }
 
   @override
-  html.Node append(html.Node node) {
-    return _shadow.append(node);
+  DomNode append(DomNode node) {
+    return _shadow.appendChild(node);
   }
 
   @override
-  bool contains(html.Node? other) {
+  bool contains(DomNode? other) {
     return _shadow.contains(other);
   }
 
   @override
-  html.Node get node => _shadow;
+  DomNode get node => _shadow;
 
   @override
-  List<html.Node> get nodes => _shadow.nodes;
+  void appendAll(Iterable<DomNode> nodes) => nodes.forEach(append);
 }
 
-/// A [HostNode] implementation, backed by a [html.Element].
+/// A [HostNode] implementation, backed by a [DomElement].
 ///
 /// This is a fallback implementation, in case [ShadowDomHostNode] fails when
 /// being constructed.
 class ElementHostNode implements HostNode {
-  late html.Element _element;
+  late DomElement _element;
 
-  /// Build a HostNode by attaching a child [html.Element] to the `root` element.
-  ElementHostNode(html.Element root) {
-    _element = html.document.createElement('flt-element-host-node');
-    root.append(_element);
+  /// Build a HostNode by attaching a child [DomElement] to the `root` element.
+  ElementHostNode(DomElement root) {
+    _element = domDocument.createElement('flt-element-host-node');
+    root.appendChild(_element);
   }
 
   @override
-  html.Element? get activeElement => _element.ownerDocument?.activeElement;
+  DomElement? get activeElement => _element.ownerDocument?.activeElement;
 
   @override
-  html.Element? querySelector(String selectors) {
+  DomElement? querySelector(String selectors) {
     return _element.querySelector(selectors);
   }
 
   @override
-  List<html.Element> querySelectorAll(String selectors) {
+  Iterable<DomElement> querySelectorAll(String selectors) {
     return _element.querySelectorAll(selectors);
   }
 
   @override
-  html.Node append(html.Node node) {
-    return _element.append(node);
+  DomNode append(DomNode node) {
+    return _element.appendChild(node);
   }
 
   @override
-  bool contains(html.Node? other) {
+  bool contains(DomNode? other) {
     return _element.contains(other);
   }
 
   @override
-  html.Node get node => _element;
+  DomNode get node => _element;
 
   @override
-  List<html.Node> get nodes => _element.nodes;
+  void appendAll(Iterable<DomNode> nodes) => nodes.forEach(append);
 }

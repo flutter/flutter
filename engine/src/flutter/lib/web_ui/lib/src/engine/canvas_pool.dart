@@ -219,7 +219,7 @@ class CanvasPool extends _SaveStackTracking {
     return tryCreateCanvasElement(
       (width * _density).ceil(),
       (height * _density).ceil(),
-    ) as DomCanvasElement?;
+    );
   }
 
   @override

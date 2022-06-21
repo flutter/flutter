@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/embedder.dart';
 import 'package:ui/src/engine/host_node.dart';
 import 'package:ui/src/engine/semantics.dart';
@@ -362,7 +363,7 @@ class SemanticsTester {
 void expectSemanticsTree(String semanticsHtml) {
   const List<String> ignoredAttributes = <String>['pointer-events'];
   expect(
-    canonicalizeHtml(appHostNode.querySelector('flt-semantics')!.outerHtml!, ignoredAttributes: ignoredAttributes),
+    canonicalizeHtml(appHostNode.querySelector('flt-semantics')!.outerHTML!, ignoredAttributes: ignoredAttributes),
     canonicalizeHtml(semanticsHtml),
   );
 }
@@ -370,12 +371,12 @@ void expectSemanticsTree(String semanticsHtml) {
 /// Finds the first HTML element in the semantics tree used for scrolling.
 html.Element? findScrollable() {
   return appHostNode.querySelectorAll('flt-semantics').firstWhereOrNull(
-    (html.Element element) {
-      return element.style.overflow == 'hidden' ||
+    (DomElement? element) {
+      return element!.style.overflow == 'hidden' ||
         element.style.overflowY == 'scroll' ||
         element.style.overflowX == 'scroll';
     },
-  );
+  ) as html.Element?;
 }
 
 /// Logs semantics actions dispatched to [ui.window].
