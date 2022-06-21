@@ -17,7 +17,7 @@
 namespace impeller {
 
 struct ArchiveDatabase::Handle {
-  Handle(const std::string& filename) {
+  explicit Handle(const std::string& filename) {
     if (::sqlite3_initialize() != SQLITE_OK) {
       VALIDATION_LOG << "Could not initialize sqlite.";
       return;

@@ -15,44 +15,44 @@ namespace fml {
 class PlatformSemaphore {
  public:
   explicit PlatformSemaphore(uint32_t count)
-      : _sem(dispatch_semaphore_create(count)), _initial(count) {}
+      : sem_(dispatch_semaphore_create(count)), initial_(count) {}
 
   ~PlatformSemaphore() {
-    for (uint32_t i = 0; i < _initial; ++i) {
+    for (uint32_t i = 0; i < initial_; ++i) {
       Signal();
     }
-    if (_sem != nullptr) {
-      dispatch_release(reinterpret_cast<dispatch_object_t>(_sem));
-      _sem = nullptr;
+    if (sem_ != nullptr) {
+      dispatch_release(reinterpret_cast<dispatch_object_t>(sem_));
+      sem_ = nullptr;
     }
   }
 
-  bool IsValid() const { return _sem != nullptr; }
+  bool IsValid() const { return sem_ != nullptr; }
 
   bool Wait() {
-    if (_sem == nullptr) {
+    if (sem_ == nullptr) {
       return false;
     }
-    return dispatch_semaphore_wait(_sem, DISPATCH_TIME_FOREVER) == 0;
+    return dispatch_semaphore_wait(sem_, DISPATCH_TIME_FOREVER) == 0;
   }
 
   bool TryWait() {
-    if (_sem == nullptr) {
+    if (sem_ == nullptr) {
       return false;
     }
 
-    return dispatch_semaphore_wait(_sem, DISPATCH_TIME_NOW) == 0;
+    return dispatch_semaphore_wait(sem_, DISPATCH_TIME_NOW) == 0;
   }
 
   void Signal() {
-    if (_sem != nullptr) {
-      dispatch_semaphore_signal(_sem);
+    if (sem_ != nullptr) {
+      dispatch_semaphore_signal(sem_);
     }
   }
 
  private:
-  dispatch_semaphore_t _sem;
-  const uint32_t _initial;
+  dispatch_semaphore_t sem_;
+  const uint32_t initial_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
