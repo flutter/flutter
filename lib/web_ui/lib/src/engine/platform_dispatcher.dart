@@ -1184,7 +1184,6 @@ const double _defaultRootFontSize = 16.0;
 /// Finds the text scale factor of the browser by looking at the computed style
 /// of the browser's <html> element.
 double findBrowserTextScaleFactor() {
-  final num fontSize = parseFontSize(domDocument.documentElement! as
-      html.Element) ?? _defaultRootFontSize;
+  final num fontSize = parseFontSize(domDocument.documentElement!) ?? _defaultRootFontSize;
   return fontSize / _defaultRootFontSize;
 }

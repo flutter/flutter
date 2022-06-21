@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -13,15 +11,15 @@ void main() {
 }
 
 void testMain() {
-  final html.Element rootNode = html.document.createElement('div');
-  html.document.body!.append(rootNode);
+  final DomElement rootNode = domDocument.createElement('div');
+  domDocument.body!.append(rootNode);
 
   group('ShadowDomHostNode', () {
     final HostNode hostNode = ShadowDomHostNode(rootNode);
 
     test('Initializes and attaches a shadow root', () {
-      expect(hostNode.node, isA<html.ShadowRoot>());
-      expect((hostNode.node as html.ShadowRoot).host, rootNode);
+      expect(domInstanceOfString(hostNode.node, 'ShadowRoot'), isTrue);
+      expect((hostNode.node as DomShadowRoot).host, rootNode);
       expect(hostNode.node, rootNode.shadowRoot);
 
       // The shadow root should be initialized with correct parameters.
@@ -35,8 +33,8 @@ void testMain() {
     });
 
     test('Attaches a stylesheet to the shadow root', () {
-      final html.Element firstChild =
-          (hostNode.node as html.ShadowRoot).children.first;
+      final DomElement firstChild =
+          (hostNode.node as DomShadowRoot).childNodes.toList()[0] as DomElement;
 
       expect(firstChild.tagName, equalsIgnoringCase('style'));
     });
@@ -48,9 +46,9 @@ void testMain() {
     final HostNode hostNode = ElementHostNode(rootNode);
 
     test('Initializes and attaches a child element', () {
-      expect(hostNode.node, isA<html.Element>());
-      expect((hostNode.node as html.Element).shadowRoot, isNull);
-      expect(hostNode.node.parent, rootNode);
+      expect(domInstanceOfString(hostNode.node, 'Element'), isTrue);
+      expect((hostNode.node as DomElement).shadowRoot, isNull);
+      expect(hostNode.node.parentNode, rootNode);
     });
 
     _runDomTests(hostNode);
@@ -60,29 +58,29 @@ void testMain() {
 // The common test suite that all types of HostNode implementations need to pass.
 void _runDomTests(HostNode hostNode) {
   group('DOM operations', () {
-    final html.Element target = html.document.createElement('div')..id = 'yep';
+    final DomElement target = domDocument.createElement('div')..id = 'yep';
 
     setUp(() {
-      hostNode.nodes.addAll(<html.Node>[
-        html.document.createElement('div'),
+      hostNode.appendAll(<DomNode>[
+        domDocument.createElement('div'),
         target,
-        html.document.createElement('flt-span'),
-        html.document.createElement('div'),
+        domDocument.createElement('flt-span'),
+        domDocument.createElement('div'),
       ]);
     });
 
     tearDown(() {
-      hostNode.nodes.clear();
+      hostNode.node.clearChildren();
     });
 
     test('querySelector', () {
-      final html.Element? found = hostNode.querySelector('#yep');
+      final DomElement? found = hostNode.querySelector('#yep');
 
       expect(identical(found, target), isTrue);
     });
 
     test('.contains and .append', () {
-      final html.Element another = html.document.createElement('div')
+      final DomElement another = domDocument.createElement('div')
         ..id = 'another';
 
       expect(hostNode.contains(target), isTrue);
@@ -94,7 +92,7 @@ void _runDomTests(HostNode hostNode) {
     });
 
     test('querySelectorAll', () {
-      final List<html.Node> found = hostNode.querySelectorAll('div');
+      final List<DomNode> found = hostNode.querySelectorAll('div').toList();
 
       expect(found.length, 3);
       expect(found[1], target);

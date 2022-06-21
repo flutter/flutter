@@ -95,7 +95,9 @@ void testMain() {
     embedder.addResource(regularTextField);
 
     regularTextField.focus();
-    html.CssStyleDeclaration? style = embedder.glassPaneShadow?.querySelector('input')?.getComputedStyle('::placeholder');
+    html.CssStyleDeclaration? style = domWindow.getComputedStyle(
+        embedder.glassPaneShadow!.querySelector('input')!,
+        '::placeholder') as html.CssStyleDeclaration?;
     expect(style, isNotNull);
     expect(style?.opacity, isNot('0'));
 
@@ -105,7 +107,9 @@ void testMain() {
     embedder.addResource(textField);
 
     textField.focus();
-    style = embedder.glassPaneShadow?.querySelector('input.flt-text-editing')?.getComputedStyle('::placeholder');
+    style = domWindow.getComputedStyle(
+        embedder.glassPaneShadow!.querySelector('input.flt-text-editing')!,
+        '::placeholder') as html.CssStyleDeclaration?;
     expect(style, isNotNull);
     expect(style?.opacity, '0');
   }, skip: browserEngine != BrowserEngine.firefox);

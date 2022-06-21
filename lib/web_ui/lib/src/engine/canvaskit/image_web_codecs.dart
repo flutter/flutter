@@ -458,7 +458,7 @@ Future<Uint8List> encodeVideoFrameAsPng(VideoFrame videoFrame) async {
   final DomCanvasElement canvas = createDomCanvasElement(width: width, height:
       height);
   final DomCanvasRenderingContext2D ctx = canvas.context2D;
-  ctx.drawImage(videoFrame as DomCanvasImageSource, 0, 0);
+  ctx.drawImage(videoFrame, 0, 0);
   final String pngBase64 = canvas.toDataURL().substring('data:image/png;base64,'.length);
   return base64.decode(pngBase64);
 }

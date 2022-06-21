@@ -313,9 +313,9 @@ class FlutterViewEmbedder {
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder() as html.Element;
 
-    glassPaneElementHostNode.nodes.addAll(<html.Node>[
-      _accessibilityPlaceholder,
-      _sceneHostElement!,
+    glassPaneElementHostNode.appendAll(<DomNode>[
+      _accessibilityPlaceholder as DomNode,
+      _sceneHostElement! as DomNode,
 
       // The semantic host goes last because hit-test order-wise it must be
       // first. If semantics goes under the scene host, platform views will
@@ -327,7 +327,7 @@ class FlutterViewEmbedder {
       // elements transparent. This way, if a platform view appears among other
       // interactive Flutter widgets, as long as those widgets do not intersect
       // with the platform view, the platform view will be reachable.
-      semanticsHostElement,
+      semanticsHostElement as DomNode,
     ]);
 
     // When debugging semantics, make the scene semi-transparent so that the
@@ -384,10 +384,10 @@ class FlutterViewEmbedder {
   // Creates a [HostNode] into a `root` [html.Element].
   HostNode _createHostNode(html.Element root) {
     if (getJsProperty<Object?>(root, 'attachShadow') != null) {
-      return ShadowDomHostNode(root);
+      return ShadowDomHostNode(root as DomElement);
     } else {
       // attachShadow not available, fall back to ElementHostNode.
-      return ElementHostNode(root);
+      return ElementHostNode(root as DomElement);
     }
   }
 
@@ -526,7 +526,7 @@ class FlutterViewEmbedder {
         bodyNode.insertBefore(_resourcesHost!, bodyNode.firstChild);
       } else {
         _glassPaneShadow!.node.insertBefore(
-            _resourcesHost!, _glassPaneShadow!.node.firstChild);
+            _resourcesHost! as DomNode, _glassPaneShadow!.node.firstChild);
       }
     }
     _resourcesHost!.append(element);
