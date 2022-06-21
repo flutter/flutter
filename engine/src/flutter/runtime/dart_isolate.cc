@@ -42,7 +42,7 @@ constexpr std::string_view kFileUriPrefix = "file://";
 
 class DartErrorString {
  public:
-  DartErrorString() : str_(nullptr) {}
+  DartErrorString() {}
   ~DartErrorString() {
     if (str_) {
       ::free(str_);
@@ -54,7 +54,7 @@ class DartErrorString {
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(DartErrorString);
-  char* str_;
+  char* str_ = nullptr;
 };
 
 }  // anonymous namespace

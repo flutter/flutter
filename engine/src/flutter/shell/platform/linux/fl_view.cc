@@ -70,7 +70,7 @@ typedef struct _FlViewChild {
   GdkRectangle geometry;
 } FlViewChild;
 
-enum { PROP_FLUTTER_PROJECT = 1, PROP_LAST };
+enum { kPropFlutterProject = 1, kPropLast };
 
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
@@ -531,7 +531,7 @@ static void fl_view_set_property(GObject* object,
   FlView* self = FL_VIEW(object);
 
   switch (prop_id) {
-    case PROP_FLUTTER_PROJECT:
+    case kPropFlutterProject:
       g_set_object(&self->project,
                    static_cast<FlDartProject*>(g_value_get_object(value)));
       break;
@@ -548,7 +548,7 @@ static void fl_view_get_property(GObject* object,
   FlView* self = FL_VIEW(object);
 
   switch (prop_id) {
-    case PROP_FLUTTER_PROJECT:
+    case kPropFlutterProject:
       g_value_set_object(value, self->project);
       break;
     default:
@@ -876,7 +876,7 @@ static void fl_view_class_init(FlViewClass* klass) {
   container_class->get_child_property = fl_view_get_child_property;
 
   g_object_class_install_property(
-      G_OBJECT_CLASS(klass), PROP_FLUTTER_PROJECT,
+      G_OBJECT_CLASS(klass), kPropFlutterProject,
       g_param_spec_object(
           "flutter-project", "flutter-project", "Flutter project in use",
           fl_dart_project_get_type(),

@@ -50,11 +50,11 @@ static constexpr char kNoneInputType[] = "TextInputType.none";
 static constexpr int64_t kClientIdUnset = -1;
 
 typedef enum {
-  FL_TEXT_INPUT_TYPE_TEXT,
+  kFlTextInputTypeText,
   // Send newline when multi-line and enter is pressed.
-  FL_TEXT_INPUT_TYPE_MULTILINE,
+  kFlTextInputTypeMultiline,
   // The input method is not shown at all.
-  FL_TEXT_INPUT_TYPE_NONE,
+  kFlTextInputTypeNone,
 } FlTextInputType;
 
 struct FlTextInputPluginPrivate {
@@ -373,7 +373,7 @@ static FlMethodResponse* set_client(FlTextInputPlugin* self, FlValue* args) {
   priv->enable_delta_model = enable_delta_model;
 
   // Reset the input type, then set only if appropriate.
-  priv->input_type = FL_TEXT_INPUT_TYPE_TEXT;
+  priv->input_type = kFlTextInputTypeText;
   FlValue* input_type_value =
       fl_value_lookup_string(config_value, kTextInputTypeKey);
   if (fl_value_get_type(input_type_value) == FL_VALUE_TYPE_MAP) {
@@ -382,9 +382,9 @@ static FlMethodResponse* set_client(FlTextInputPlugin* self, FlValue* args) {
     if (fl_value_get_type(input_type_name) == FL_VALUE_TYPE_STRING) {
       const gchar* input_type = fl_value_get_string(input_type_name);
       if (g_strcmp0(input_type, kMultilineInputType) == 0) {
-        priv->input_type = FL_TEXT_INPUT_TYPE_MULTILINE;
+        priv->input_type = kFlTextInputTypeMultiline;
       } else if (g_strcmp0(input_type, kNoneInputType) == 0) {
-        priv->input_type = FL_TEXT_INPUT_TYPE_NONE;
+        priv->input_type = kFlTextInputTypeNone;
       }
     }
   }
@@ -405,7 +405,7 @@ static FlMethodResponse* hide(FlTextInputPlugin* self) {
 static FlMethodResponse* show(FlTextInputPlugin* self) {
   FlTextInputPluginPrivate* priv = static_cast<FlTextInputPluginPrivate*>(
       fl_text_input_plugin_get_instance_private(self));
-  if (priv->input_type == FL_TEXT_INPUT_TYPE_NONE) {
+  if (priv->input_type == kFlTextInputTypeNone) {
     return hide(self);
   }
 
@@ -630,7 +630,7 @@ static gboolean fl_text_input_plugin_filter_keypress_default(
       case GDK_KEY_Return:
       case GDK_KEY_KP_Enter:
       case GDK_KEY_ISO_Enter:
-        if (priv->input_type == FL_TEXT_INPUT_TYPE_MULTILINE) {
+        if (priv->input_type == kFlTextInputTypeMultiline) {
           priv->text_model->AddCodePoint('\n');
           text = "\n";
           changed = TRUE;
@@ -686,7 +686,7 @@ static void fl_text_input_plugin_init(FlTextInputPlugin* self) {
       fl_text_input_plugin_get_instance_private(self));
 
   priv->client_id = kClientIdUnset;
-  priv->input_type = FL_TEXT_INPUT_TYPE_TEXT;
+  priv->input_type = kFlTextInputTypeText;
   priv->text_model = new flutter::TextInputModel();
 }
 

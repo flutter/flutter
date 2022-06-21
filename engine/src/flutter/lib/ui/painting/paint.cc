@@ -64,7 +64,7 @@ constexpr float kInvertColors[20] = {
 // clang-format on
 
 // Must be kept in sync with the MaskFilter private constants in painting.dart.
-enum MaskFilterType { Null, Blur };
+enum MaskFilterType { kNull, kBlur };
 
 Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data)
     : paint_objects_(paint_objects), paint_data_(paint_data) {}
@@ -169,9 +169,9 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
   }
 
   switch (uint_data[kMaskFilterIndex]) {
-    case Null:
+    case kNull:
       break;
-    case Blur:
+    case kBlur:
       SkBlurStyle blur_style =
           static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
       double sigma = float_data[kMaskFilterSigmaIndex];
@@ -300,10 +300,10 @@ bool Paint::sync_to(DisplayListBuilder* builder,
 
   if (flags.applies_mask_filter()) {
     switch (uint_data[kMaskFilterIndex]) {
-      case Null:
+      case kNull:
         builder->setMaskFilter(nullptr);
         break;
-      case Blur:
+      case kBlur:
         SkBlurStyle blur_style =
             static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
         double sigma = float_data[kMaskFilterSigmaIndex];

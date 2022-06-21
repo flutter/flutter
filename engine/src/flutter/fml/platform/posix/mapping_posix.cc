@@ -51,8 +51,7 @@ Mapping::Mapping() = default;
 Mapping::~Mapping() = default;
 
 FileMapping::FileMapping(const fml::UniqueFD& handle,
-                         std::initializer_list<Protection> protection)
-    : size_(0), mapping_(nullptr) {
+                         std::initializer_list<Protection> protection) {
   if (!handle.is_valid()) {
     return;
   }

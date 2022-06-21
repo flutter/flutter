@@ -57,8 +57,8 @@ static NSString* const kTransformKey = @"transform";
  * or at the beginning of the next (downstream).
  */
 typedef NS_ENUM(NSUInteger, FlutterTextAffinity) {
-  FlutterTextAffinityUpstream,
-  FlutterTextAffinityDownstream
+  kFlutterTextAffinityUpstream,
+  kFlutterTextAffinityDownstream
 };
 
 /*
@@ -267,7 +267,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
       _enableDeltaModel = [config[kEnableDeltaModel] boolValue];
       NSDictionary* inputTypeInfo = config[kTextInputType];
       _inputType = inputTypeInfo[kTextInputTypeName];
-      self.textAffinity = FlutterTextAffinityUpstream;
+      self.textAffinity = kFlutterTextAffinityUpstream;
 
       _activeModel = std::make_unique<flutter::TextInputModel>();
     }
@@ -361,8 +361,8 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
   NSString* selectionAffinity = state[kSelectionAffinityKey];
   if (selectionAffinity != nil) {
     _textAffinity = [selectionAffinity isEqualToString:kTextAffinityUpstream]
-                        ? FlutterTextAffinityUpstream
-                        : FlutterTextAffinityDownstream;
+                        ? kFlutterTextAffinityUpstream
+                        : kFlutterTextAffinityDownstream;
   }
 
   NSString* text = state[kTextKey];
@@ -464,8 +464,8 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 }
 
 - (NSString*)textAffinityString {
-  return (self.textAffinity == FlutterTextAffinityUpstream) ? kTextAffinityUpstream
-                                                            : kTextAffinityDownstream;
+  return (self.textAffinity == kFlutterTextAffinityUpstream) ? kTextAffinityUpstream
+                                                             : kTextAffinityDownstream;
 }
 
 - (BOOL)isComposing {

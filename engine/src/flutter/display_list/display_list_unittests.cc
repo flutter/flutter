@@ -1360,15 +1360,15 @@ TEST(DisplayList, DisplayListBlenderRefHandling) {
   class BlenderRefTester : public virtual AttributeRefTester {
    public:
     void setRefToPaint(SkPaint& paint) const override {
-      paint.setBlender(blender);
+      paint.setBlender(blender_);
     }
     void setRefToDisplayList(DisplayListBuilder& builder) const override {
-      builder.setBlender(blender);
+      builder.setBlender(blender_);
     }
-    bool ref_is_unique() const override { return blender->unique(); }
+    bool ref_is_unique() const override { return blender_->unique(); }
 
    private:
-    sk_sp<SkBlender> blender =
+    sk_sp<SkBlender> blender_ =
         SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, true);
   };
 

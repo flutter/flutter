@@ -155,9 +155,9 @@ class ScriptCompletionTaskObserver {
       return;
     }
 
-    if (!has_terminated) {
+    if (!has_terminated_) {
       // Only try to terminate the loop once.
-      has_terminated = true;
+      has_terminated_ = true;
       fml::TaskRunner::RunNowOrPostTask(main_task_runner_, []() {
         fml::MessageLoop::GetCurrent().Terminate();
       });
@@ -169,7 +169,7 @@ class ScriptCompletionTaskObserver {
   fml::RefPtr<fml::TaskRunner> main_task_runner_;
   bool run_forever_ = false;
   std::optional<DartErrorCode> last_error_;
-  bool has_terminated = false;
+  bool has_terminated_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ScriptCompletionTaskObserver);
 };

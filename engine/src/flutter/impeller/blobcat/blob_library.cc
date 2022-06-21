@@ -42,7 +42,7 @@ BlobLibrary::BlobLibrary(std::shared_ptr<fml::Mapping> mapping)
   {
     const size_t read_size = sizeof(Blob) * header.blob_count;
     ::memcpy(blobs.data(), mapping_->GetMapping() + offset, read_size);
-    offset += read_size;
+    offset += read_size;  // NOLINT(clang-analyzer-deadcode.DeadStores)
   }
 
   // Read the blobs.

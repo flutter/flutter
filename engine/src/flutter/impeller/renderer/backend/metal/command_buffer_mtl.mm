@@ -8,6 +8,9 @@
 
 namespace impeller {
 namespace {
+
+// NOLINTBEGIN(readability-identifier-naming)
+
 // TODO(dnfield): remove this declaration when we no longer need to build on
 // machines with lower SDK versions than 11.0.
 #if !defined(MAC_OS_VERSION_11_0) || \
@@ -20,6 +23,8 @@ typedef NS_ENUM(NSInteger, MTLCommandEncoderErrorState) {
   MTLCommandEncoderErrorStateFaulted = 4,
 } API_AVAILABLE(macos(11.0), ios(14.0));
 #endif
+
+// NOLINTEND(readability-identifier-naming)
 
 API_AVAILABLE(ios(14.0), macos(11.0))
 NSString* MTLCommandEncoderErrorStateToString(
@@ -39,6 +44,8 @@ NSString* MTLCommandEncoderErrorStateToString(
   return @"unknown";
 }
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 // TODO(dnfield): This can be removed when all bots have been sufficiently
 // upgraded for MAC_OS_VERSION_12_0.
 #if !defined(MAC_OS_VERSION_12_0) || \
@@ -46,6 +53,8 @@ NSString* MTLCommandEncoderErrorStateToString(
 constexpr int MTLCommandBufferErrorAccessRevoked = 4;
 constexpr int MTLCommandBufferErrorStackOverflow = 12;
 #endif
+
+// NOLINTEND(readability-identifier-naming)
 
 static NSString* MTLCommandBufferErrorToString(MTLCommandBufferError code) {
   switch (code) {

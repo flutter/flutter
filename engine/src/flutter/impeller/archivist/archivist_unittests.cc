@@ -18,7 +18,7 @@ static int64_t LastSample = 0;
 
 class Sample : public Archivable {
  public:
-  Sample(uint64_t count = 42) : some_data_(count) {}
+  explicit Sample(uint64_t count = 42) : some_data_(count) {}
 
   Sample(Sample&&) = default;
 

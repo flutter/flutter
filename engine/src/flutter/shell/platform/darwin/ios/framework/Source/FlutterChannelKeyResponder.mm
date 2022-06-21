@@ -20,28 +20,35 @@ namespace {
 // framework code expects certain values, and has additional values (like the
 // sided modifier values below), we translate the iOS values to the framework
 // values, and add a mask for all the possible values.
-typedef NS_OPTIONS(NSInteger, KeyboardModifier) {
-  KeyboardModifierAlphaShift = 0x10000,
-  KeyboardModifierShift = 0x20000,
-  KeyboardModifierLeftShift = 0x02,
-  KeyboardModifierRightShift = 0x04,
-  KeyboardModifierControl = 0x40000,
-  KeyboardModifierLeftControl = 0x01,
-  KeyboardModifierRightControl = 0x2000,
-  KeyboardModifierOption = 0x80000,
-  KeyboardModifierLeftOption = 0x20,
-  KeyboardModifierRightOption = 0x40,
-  KeyboardModifierCommand = 0x100000,
-  KeyboardModifierLeftCommand = 0x08,
-  KeyboardModifierRightCommand = 0x10,
-  KeyboardModifierNumericPad = 0x200000,
-  KeyboardModifierMask = KeyboardModifierAlphaShift | KeyboardModifierShift |
-                         KeyboardModifierLeftShift | KeyboardModifierRightShift |
-                         KeyboardModifierControl | KeyboardModifierLeftControl |
-                         KeyboardModifierRightControl | KeyboardModifierOption |
-                         KeyboardModifierLeftOption | KeyboardModifierRightOption |
-                         KeyboardModifierCommand | KeyboardModifierLeftCommand |
-                         KeyboardModifierRightCommand | KeyboardModifierNumericPad,
+typedef NS_OPTIONS(NSInteger, kKeyboardModifier) {
+  kKeyboardModifierAlphaShift = 0x10000,
+  kKeyboardModifierShift = 0x20000,
+  kKeyboardModifierLeftShift = 0x02,
+  kKeyboardModifierRightShift = 0x04,
+  kKeyboardModifierControl = 0x40000,
+  kKeyboardModifierLeftControl = 0x01,
+  kKeyboardModifierRightControl = 0x2000,
+  kKeyboardModifierOption = 0x80000,
+  kKeyboardModifierLeftOption = 0x20,
+  kKeyboardModifierRightOption = 0x40,
+  kKeyboardModifierCommand = 0x100000,
+  kKeyboardModifierLeftCommand = 0x08,
+  kKeyboardModifierRightCommand = 0x10,
+  kKeyboardModifierNumericPad = 0x200000,
+  kKeyboardModifierMask = kKeyboardModifierAlphaShift |    //
+                          kKeyboardModifierShift |         //
+                          kKeyboardModifierLeftShift |     //
+                          kKeyboardModifierRightShift |    //
+                          kKeyboardModifierControl |       //
+                          kKeyboardModifierLeftControl |   //
+                          kKeyboardModifierRightControl |  //
+                          kKeyboardModifierOption |        //
+                          kKeyboardModifierLeftOption |    //
+                          kKeyboardModifierRightOption |   //
+                          kKeyboardModifierCommand |       //
+                          kKeyboardModifierLeftCommand |   //
+                          kKeyboardModifierRightCommand |  //
+                          kKeyboardModifierNumericPad,
 };
 
 /**
@@ -83,7 +90,7 @@ static NSString* getEventCharacters(NSString* characters, UIKeyboardHIDUsage key
 - (NSInteger)adjustModifiers:(nonnull FlutterUIPressProxy*)press API_AVAILABLE(ios(13.4));
 - (void)updatePressedModifiers:(nonnull FlutterUIPressProxy*)press API_AVAILABLE(ios(13.4));
 
-@property(nonatomic) KeyboardModifier pressedModifiers;
+@property(nonatomic) kKeyboardModifier pressedModifiers;
 @end
 
 @implementation FlutterChannelKeyResponder
@@ -174,7 +181,7 @@ static NSString* getEventCharacters(NSString* characters, UIKeyboardHIDUsage key
       break;
   }
 
-  void (^update)(KeyboardModifier, bool) = ^(KeyboardModifier mod, bool isOn) {
+  void (^update)(kKeyboardModifier, bool) = ^(kKeyboardModifier mod, bool isOn) {
     if (isOn) {
       _pressedModifiers |= mod;
     } else {
@@ -183,48 +190,48 @@ static NSString* getEventCharacters(NSString* characters, UIKeyboardHIDUsage key
   };
   switch (press.key.keyCode) {
     case UIKeyboardHIDUsageKeyboardCapsLock:
-      update(KeyboardModifierAlphaShift, isKeyDown);
+      update(kKeyboardModifierAlphaShift, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeypadNumLock:
-      update(KeyboardModifierNumericPad, isKeyDown);
+      update(kKeyboardModifierNumericPad, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardLeftShift:
-      update(KeyboardModifierLeftShift, isKeyDown);
+      update(kKeyboardModifierLeftShift, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardRightShift:
-      update(KeyboardModifierRightShift, isKeyDown);
+      update(kKeyboardModifierRightShift, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardLeftControl:
-      update(KeyboardModifierLeftControl, isKeyDown);
+      update(kKeyboardModifierLeftControl, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardRightControl:
-      update(KeyboardModifierRightControl, isKeyDown);
+      update(kKeyboardModifierRightControl, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardLeftAlt:
-      update(KeyboardModifierLeftOption, isKeyDown);
+      update(kKeyboardModifierLeftOption, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardRightAlt:
-      update(KeyboardModifierRightOption, isKeyDown);
+      update(kKeyboardModifierRightOption, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardLeftGUI:
-      update(KeyboardModifierLeftCommand, isKeyDown);
+      update(kKeyboardModifierLeftCommand, isKeyDown);
       break;
     case UIKeyboardHIDUsageKeyboardRightGUI:
-      update(KeyboardModifierRightCommand, isKeyDown);
+      update(kKeyboardModifierRightCommand, isKeyDown);
       break;
     default:
       // If we didn't update any of the modifiers above, we're done.
       return;
   }
   // Update the non-sided modifier flags to match the content of the sided ones.
-  update(KeyboardModifierShift,
-         _pressedModifiers & (KeyboardModifierRightShift | KeyboardModifierLeftShift));
-  update(KeyboardModifierControl,
-         _pressedModifiers & (KeyboardModifierRightControl | KeyboardModifierLeftControl));
-  update(KeyboardModifierOption,
-         _pressedModifiers & (KeyboardModifierRightOption | KeyboardModifierLeftOption));
-  update(KeyboardModifierCommand,
-         _pressedModifiers & (KeyboardModifierRightCommand | KeyboardModifierLeftCommand));
+  update(kKeyboardModifierShift,
+         _pressedModifiers & (kKeyboardModifierRightShift | kKeyboardModifierLeftShift));
+  update(kKeyboardModifierControl,
+         _pressedModifiers & (kKeyboardModifierRightControl | kKeyboardModifierLeftControl));
+  update(kKeyboardModifierOption,
+         _pressedModifiers & (kKeyboardModifierRightOption | kKeyboardModifierLeftOption));
+  update(kKeyboardModifierCommand,
+         _pressedModifiers & (kKeyboardModifierRightCommand | kKeyboardModifierLeftCommand));
 }
 
 // Because iOS differs from macOS in that the modifier flags still contain the
@@ -239,7 +246,7 @@ static NSString* getEventCharacters(NSString* characters, UIKeyboardHIDUsage key
 
   [self updatePressedModifiers:press];
   // Replace the supplied modifier flags with our computed ones.
-  return _pressedModifiers | (press.key.modifierFlags & ~KeyboardModifierMask);
+  return _pressedModifiers | (press.key.modifierFlags & ~kKeyboardModifierMask);
 }
 
 @end

@@ -90,7 +90,7 @@ struct TexImage2DData {
   GLenum type = GL_NONE;
   std::shared_ptr<const fml::Mapping> data;
 
-  TexImage2DData(PixelFormat pixel_format) {
+  explicit TexImage2DData(PixelFormat pixel_format) {
     switch (pixel_format) {
       case PixelFormat::kA8UNormInt:
         internal_format = GL_ALPHA;

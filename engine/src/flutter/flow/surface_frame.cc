@@ -17,8 +17,7 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
                            const SubmitCallback& submit_callback,
                            std::unique_ptr<GLContextResult> context_result,
                            bool display_list_fallback)
-    : submitted_(false),
-      surface_(surface),
+    : surface_(surface),
       framebuffer_info_(std::move(framebuffer_info)),
       submit_callback_(submit_callback),
       context_result_(std::move(context_result)) {

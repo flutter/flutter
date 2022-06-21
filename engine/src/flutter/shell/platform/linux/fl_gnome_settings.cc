@@ -22,7 +22,7 @@ struct _FlGnomeSettings {
   GSettings* interface_settings;
 };
 
-enum { PROP_0, PROP_INTERFACE_SETTINGS, PROP_LAST };
+enum { kProp0, kPropInterfaceSettings, kPropLast };
 
 static void fl_gnome_settings_iface_init(FlSettingsInterface* iface);
 
@@ -98,7 +98,7 @@ static void fl_gnome_settings_set_property(GObject* object,
                                            GParamSpec* pspec) {
   FlGnomeSettings* self = FL_GNOME_SETTINGS(object);
   switch (prop_id) {
-    case PROP_INTERFACE_SETTINGS:
+    case kPropInterfaceSettings:
       fl_gnome_settings_set_interface_settings(
           self, G_SETTINGS(g_value_get_object(value)));
       break;
@@ -122,7 +122,7 @@ static void fl_gnome_settings_class_init(FlGnomeSettingsClass* klass) {
   object_class->set_property = fl_gnome_settings_set_property;
 
   g_object_class_install_property(
-      object_class, PROP_INTERFACE_SETTINGS,
+      object_class, kPropInterfaceSettings,
       g_param_spec_object(
           kInterfaceSettings, kInterfaceSettings, kDesktopInterfaceSchema,
           g_settings_get_type(),
