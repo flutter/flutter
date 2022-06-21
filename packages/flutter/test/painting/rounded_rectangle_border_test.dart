@@ -150,4 +150,17 @@ void main() {
     const CircleBorder outsideCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
     expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
   });
+
+  test('RoundedRectangleBorder when borderRadius is 0 and strokeAlign is not inside', () {
+    const RoundedRectangleBorder c10 = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center));
+    const Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
+    expect(
+      (Canvas canvas) => c10.paint(canvas, rect),
+      paints
+        ..rrect(
+          rrect: BorderRadius.zero.toRRect(rect),
+          strokeWidth: 10.0,
+        ),
+    );
+  });
 }
