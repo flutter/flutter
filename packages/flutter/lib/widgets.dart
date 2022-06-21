@@ -112,12 +112,9 @@ export 'src/widgets/scroll_simulation.dart';
 export 'src/widgets/scroll_view.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollbar.dart';
-<<<<<<< HEAD
 export 'src/widgets/selectable_region.dart';
 export 'src/widgets/selection_container.dart';
-=======
 export 'src/widgets/selection_gestures.dart';
->>>>>>> 901fae1d90 (updates)
 export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/shared_app_data.dart';
 export 'src/widgets/shortcuts.dart';
