@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import '../browser_detection.dart';
 import '../dom.dart';
 import '../embedder.dart';
@@ -163,8 +161,7 @@ class PlatformViewManager {
     final DomElement slot = domDocument.createElement('slot')
       ..style.display = 'none'
       ..setAttribute('name', tombstoneName);
-    // Remove cast to [html.Node] after migration.
-    flutterViewEmbedder.glassPaneShadow!.append(slot as html.Node);
+    flutterViewEmbedder.glassPaneShadow!.append(slot);
     // Link the element to the new slot
     element.setAttribute('slot', tombstoneName);
     // Delete both the element, and the new slot

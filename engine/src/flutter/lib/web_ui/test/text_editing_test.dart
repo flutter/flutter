@@ -105,7 +105,8 @@ Future<void> testMain() async {
         defaultTextEditingRoot.querySelectorAll('input'),
         hasLength(1),
       );
-      final Element input = defaultTextEditingRoot.querySelector('input')!;
+      final Element input = defaultTextEditingRoot.querySelector('input')! as
+          Element;
       // Now the editing element should have focus.
 
       expect(document.activeElement, flutterViewEmbedder.glassPaneElement);
@@ -115,8 +116,7 @@ Future<void> testMain() async {
       expect(input.getAttribute('type'), null);
 
       // Input is appended to the right point of the DOM.
-      expect(defaultTextEditingRoot.contains(editingStrategy!.domElement as
-              Node?), isTrue);
+      expect(defaultTextEditingRoot.contains(editingStrategy!.domElement), isTrue);
 
       editingStrategy!.disable();
       expect(
@@ -138,7 +138,8 @@ Future<void> testMain() async {
         onAction: trackInputAction,
       );
       expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
-      final Element input = defaultTextEditingRoot.querySelector('input')!;
+      final Element input = defaultTextEditingRoot.querySelector('input')! as
+          Element;
       expect(editingStrategy!.domElement, input);
       expect(input.getAttribute('readonly'), 'readonly');
 
@@ -155,7 +156,8 @@ Future<void> testMain() async {
         onAction: trackInputAction,
       );
       expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
-      final Element input = defaultTextEditingRoot.querySelector('input')!;
+      final Element input = defaultTextEditingRoot.querySelector('input')! as
+          Element;
       expect(editingStrategy!.domElement, input);
       expect(input.getAttribute('type'), 'password');
 
@@ -172,7 +174,8 @@ Future<void> testMain() async {
         onAction: trackInputAction,
       );
       expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
-      final Element input = defaultTextEditingRoot.querySelector('input')!;
+      final Element input = defaultTextEditingRoot.querySelector('input')! as
+          Element;
       expect(editingStrategy!.domElement, input);
       expect(input.getAttribute('autocorrect'), 'off');
 
@@ -189,7 +192,8 @@ Future<void> testMain() async {
         onAction: trackInputAction,
       );
       expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
-      final Element input = defaultTextEditingRoot.querySelector('input')!;
+      final Element input = defaultTextEditingRoot.querySelector('input')! as
+          Element;
       expect(editingStrategy!.domElement, input);
       expect(input.getAttribute('autocorrect'), 'on');
 
@@ -206,7 +210,8 @@ Future<void> testMain() async {
         onAction: trackInputAction,
       );
       expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
-      final Element input = defaultTextEditingRoot.querySelector('input')!;
+      final Element input = defaultTextEditingRoot.querySelector('input')! as
+          Element;
       expect(editingStrategy!.domElement, input);
       expect(input.getAttribute('autocomplete'), 'off');
 
@@ -1970,7 +1975,7 @@ Future<void> testMain() async {
       // 3 child nodes.
       expect(form.childNodes, hasLength(3));
 
-      final DomHTMLInputElement firstElement = form.childNodes.item(0)! as
+      final DomHTMLInputElement firstElement = form.childNodes.toList()[0] as
           DomHTMLInputElement;
       // Autofill value is applied to the element.
       expect(firstElement.name,
@@ -2063,7 +2068,7 @@ Future<void> testMain() async {
       final DomHTMLFormElement form = autofillForm.formElement;
       // Submit button is added to the form.
       expect(form.childNodes, isNotEmpty);
-      final InputElement inputElement = form.childNodes.item(0)! as InputElement;
+      final InputElement inputElement = form.childNodes.toList()[0] as InputElement;
       expect(inputElement.type, 'submit');
 
       // The submit button should have class `submitBtn`.

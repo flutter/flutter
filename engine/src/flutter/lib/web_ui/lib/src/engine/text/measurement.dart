@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import '../../engine.dart' show registerHotRestartListener;
 import '../dom.dart';
 import '../embedder.dart';
@@ -31,7 +29,7 @@ class RulerHost {
       ..height = '0';
 
     if (root == null) {
-      flutterViewEmbedder.glassPaneShadow!.node.append(_rulerHost as html.Node);
+      flutterViewEmbedder.glassPaneShadow!.node.appendChild(_rulerHost);
     } else {
       root.appendChild(_rulerHost);
     }

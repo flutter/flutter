@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -300,7 +299,7 @@ class _WebGlRenderer implements GlRenderer {
 
     context!.save();
     context.resetTransform();
-    gl.drawImage(context as html.CanvasRenderingContext2D, offsetX, offsetY);
+    gl.drawImage(context, offsetX, offsetY);
     context.restore();
   }
 

@@ -32,7 +32,8 @@ Future<void> testMain() async {
       testScene.style.transform = 'scale(0.3)';
     }
     testScene.append(canvas.rootElement as html.Node);
-    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(testScene);
+    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(testScene
+        as DomElement);
   }
 
   setUpStableTestFonts();
@@ -260,7 +261,7 @@ Future<void> testMain() async {
     }
 
     sceneElement.querySelector('flt-clip')!.append(canvas.rootElement);
-    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement as html.Node);
+    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement);
 
     await matchGoldenFile(
       'bitmap_canvas_draws_text_on_top_of_canvas.png',

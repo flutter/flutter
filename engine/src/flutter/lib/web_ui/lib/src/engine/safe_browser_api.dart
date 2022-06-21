@@ -12,7 +12,6 @@
 library browser_api;
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js' as js;
 import 'dart:js_util' as js_util;
 import 'dart:math' as math;
@@ -22,6 +21,7 @@ import 'package:js/js.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
+import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'vector_math.dart';
 
@@ -87,7 +87,7 @@ typedef OnBenchmark = void Function(String name, double value);
 ///
 /// [eventOptions] supply additional configuration parameters.
 ///
-/// This is different from [html.Element.addEventListener] in that the listener
+/// This is different from [DomElement.addEventListener] in that the listener
 /// is added as a plain JavaScript function, as opposed to a Dart function.
 ///
 /// To remove the listener, call [removeJsEventListener].
@@ -139,11 +139,11 @@ num? parseFloat(String source) {
 }
 
 final bool supportsFontLoadingApi =
-    js_util.hasProperty(html.window, 'FontFace');
+    js_util.hasProperty(domWindow, 'FontFace');
 
 final bool supportsFontsClearApi =
-    js_util.hasProperty(html.document, 'fonts') &&
-        js_util.hasProperty(html.document.fonts!, 'clear');
+    js_util.hasProperty(domDocument, 'fonts') &&
+        js_util.hasProperty(domDocument.fonts!, 'clear');
 
 /// Used to decide if the browser tab still has the focus.
 ///
@@ -154,10 +154,10 @@ final bool supportsFontsClearApi =
 /// See for more details:
 /// https://developer.mozilla.org/en-US/docs/Web/API/Document/hasFocus
 bool get windowHasFocus =>
-    js_util.callMethod<bool>(html.document, 'hasFocus', <dynamic>[]);
+    js_util.callMethod<bool>(domDocument, 'hasFocus', <dynamic>[]);
 
 /// Parses the font size of [element] and returns the value without a unit.
-num? parseFontSize(html.Element element) {
+num? parseFontSize(DomElement element) {
   num? fontSize;
 
   if (hasJsProperty(element, 'computedStyleMap')) {
@@ -175,7 +175,8 @@ num? parseFontSize(html.Element element) {
 
   if (fontSize == null) {
     // Fallback to `getComputedStyle`.
-    final String fontSizeString = element.getComputedStyle().fontSize;
+    final String fontSizeString =
+        domWindow.getComputedStyle(element).getPropertyValue('font-size');
     fontSize = parseFloat(fontSizeString);
   }
 
@@ -184,7 +185,7 @@ num? parseFontSize(html.Element element) {
 
 /// Provides haptic feedback.
 void vibrate(int durationMs) {
-  final html.Navigator navigator = html.window.navigator;
+  final DomNavigator navigator = domWindow.navigator;
   if (hasJsProperty(navigator, 'vibrate')) {
     js_util.callMethod<void>(navigator, 'vibrate', <num>[durationMs]);
   }
@@ -192,12 +193,12 @@ void vibrate(int durationMs) {
 
 /// Creates a `<canvas>` but anticipates that the result may be null.
 ///
-/// The [html.CanvasElement] factory assumes that element allocation will
+/// The [DomCanvasElement] factory assumes that element allocation will
 /// succeed and will return a non-null element. This is not always true. For
 /// example, when Safari on iOS runs out of memory it returns null.
-html.CanvasElement? tryCreateCanvasElement(int width, int height) {
-  final html.CanvasElement? canvas = js_util.callMethod<html.CanvasElement?>(
-    html.document,
+DomCanvasElement? tryCreateCanvasElement(int width, int height) {
+  final DomCanvasElement? canvas = js_util.callMethod<DomCanvasElement?>(
+    domDocument,
     'createElement',
     <dynamic>['CANVAS'],
   );
@@ -331,7 +332,7 @@ class DecodeOptions {
 ///  * https://www.w3.org/TR/webcodecs/#videoframe-interface
 @JS()
 @anonymous
-class VideoFrame implements html.CanvasImageSource {
+class VideoFrame implements DomCanvasImageSource {
   external int allocationSize();
   external JsPromise copyTo(Uint8List destination);
   external String? get format;
@@ -447,14 +448,14 @@ class GlContext {
         offScreenCanvas.canvasElement!, webGLVersion == WebGLVersion.webgl1);
   }
 
-  GlContext._fromOffscreenCanvas(html.OffscreenCanvas canvas)
+  GlContext._fromOffscreenCanvas(DomOffscreenCanvas canvas)
       : glContext = canvas.getContext('webgl2', <String, dynamic>{'premultipliedAlpha': false})!,
         isOffscreen = true {
     _programCache = <String, GlProgram?>{};
     _canvas = canvas;
   }
 
-  GlContext._fromCanvasElement(html.CanvasElement canvas, bool useWebGl1)
+  GlContext._fromCanvasElement(DomCanvasElement canvas, bool useWebGl1)
       : glContext = canvas.getContext(useWebGl1 ? 'webgl' : 'webgl2',
       <String, dynamic>{'premultipliedAlpha': false})!,
         isOffscreen = false {
@@ -468,7 +469,7 @@ class GlContext {
   }
 
   /// Draws Gl context contents to canvas context.
-  void drawImage(html.CanvasRenderingContext2D context,
+  void drawImage(DomCanvasRenderingContext2D context,
       double left, double top) {
     // Actual size of canvas may be larger than viewport size. Use
     // source/destination to draw part of the image data.
@@ -808,7 +809,7 @@ class GlContext {
   /// Reads gl contents as image data.
   ///
   /// Warning: data is read bottom up (flipped).
-  html.ImageData readImageData() {
+  DomImageData readImageData() {
     const int kBytesPerPixel = 4;
     final int bufferWidth = _widthInPixels!;
     final int bufferHeight = _heightInPixels!;
@@ -818,14 +819,14 @@ class GlContext {
       Uint8List(bufferWidth * bufferHeight * kBytesPerPixel);
       js_util.callMethod<void>(glContext, 'readPixels',
           <dynamic>[0, 0, bufferWidth, bufferHeight, kRGBA, kUnsignedByte, pixels]);
-      return html.ImageData(
+      return createDomImageData(
           Uint8ClampedList.fromList(pixels), bufferWidth, bufferHeight);
     } else {
       final Uint8ClampedList pixels =
       Uint8ClampedList(bufferWidth * bufferHeight * kBytesPerPixel);
       js_util.callMethod<void>(glContext, 'readPixels',
           <dynamic>[0, 0, bufferWidth, bufferHeight, kRGBA, kUnsignedByte, pixels]);
-      return html.ImageData(pixels, bufferWidth, bufferHeight);
+      return createDomImageData(pixels, bufferWidth, bufferHeight);
     }
   }
 
@@ -845,8 +846,8 @@ class GlContext {
           <dynamic>[]);
       return imageBitmap;
     } else {
-      final html.CanvasElement canvas = html.CanvasElement(width: _widthInPixels, height: _heightInPixels);
-      final html.CanvasRenderingContext2D ctx = canvas.context2D;
+      final DomCanvasElement canvas = createDomCanvasElement(width: _widthInPixels, height: _heightInPixels);
+      final DomCanvasRenderingContext2D ctx = canvas.context2D;
       drawImage(ctx, 0, 0);
       return canvas;
     }
@@ -854,10 +855,10 @@ class GlContext {
 
   /// Returns image data in data url format.
   String toImageUrl() {
-    final html.CanvasElement canvas = html.CanvasElement(width: _widthInPixels, height: _heightInPixels);
-    final html.CanvasRenderingContext2D ctx = canvas.context2D;
+    final DomCanvasElement canvas = createDomCanvasElement(width: _widthInPixels, height: _heightInPixels);
+    final DomCanvasRenderingContext2D ctx = canvas.context2D;
     drawImage(ctx, 0, 0);
-    final String dataUrl = canvas.toDataUrl();
+    final String dataUrl = canvas.toDataURL();
     canvas.width = 0;
     canvas.height = 0;
     return dataUrl;
@@ -950,19 +951,19 @@ dynamic tileModeToGlWrapping(GlContext gl, ui.TileMode tileMode) {
   }
 }
 
-/// Polyfill for html.OffscreenCanvas that is not supported on some browsers.
+/// Polyfill for DomOffscreenCanvas that is not supported on some browsers.
 class OffScreenCanvas {
-  html.OffscreenCanvas? offScreenCanvas;
-  html.CanvasElement? canvasElement;
+  DomOffscreenCanvas? offScreenCanvas;
+  DomCanvasElement? canvasElement;
   int width;
   int height;
   static bool? _supported;
 
   OffScreenCanvas(this.width, this.height) {
     if (OffScreenCanvas.supported) {
-      offScreenCanvas = html.OffscreenCanvas(width, height);
+      offScreenCanvas = createDomOffscreenCanvas(width, height);
     } else {
-      canvasElement = html.CanvasElement(
+      canvasElement = createDomCanvasElement(
         width: width,
         height: height,
       );
@@ -971,7 +972,7 @@ class OffScreenCanvas {
     }
   }
 
-  void _updateCanvasCssSize(html.CanvasElement element) {
+  void _updateCanvasCssSize(DomCanvasElement element) {
     final double cssWidth = width / EnginePlatformDispatcher.browserDevicePixelRatio;
     final double cssHeight = height / EnginePlatformDispatcher.browserDevicePixelRatio;
     element.style
@@ -1034,18 +1035,18 @@ class OffScreenCanvas {
   Future<String> toDataUrl() {
     final Completer<String> completer = Completer<String>();
     if (offScreenCanvas != null) {
-      offScreenCanvas!.convertToBlob().then((html.Blob value) {
-        final html.FileReader fileReader = html.FileReader();
-        fileReader.onLoad.listen((html.ProgressEvent event) {
+      offScreenCanvas!.convertToBlob().then((DomBlob value) {
+        final DomFileReader fileReader = createDomFileReader();
+        fileReader.addEventListener('load', allowInterop((DomEvent event) {
           completer.complete(
             js_util.getProperty<String>(js_util.getProperty<Object>(event, 'target'), 'result'),
           );
-        });
-        fileReader.readAsDataUrl(value);
+        }));
+        fileReader.readAsDataURL(value);
       });
       return completer.future;
     } else {
-      return Future<String>.value(canvasElement!.toDataUrl());
+      return Future<String>.value(canvasElement!.toDataURL());
     }
   }
 
@@ -1057,5 +1058,5 @@ class OffScreenCanvas {
 
   /// Feature detects OffscreenCanvas.
   static bool get supported => _supported ??=
-      js_util.hasProperty(html.window, 'OffscreenCanvas');
+      js_util.hasProperty(domWindow, 'OffscreenCanvas');
 }

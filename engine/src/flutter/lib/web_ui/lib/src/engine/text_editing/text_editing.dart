@@ -274,7 +274,7 @@ class EngineAutofillForm {
 
   void placeForm(DomHTMLElement mainTextEditingElement) {
     formElement.append(mainTextEditingElement);
-    defaultTextEditingRoot.append(formElement as html.Node);
+    defaultTextEditingRoot.append(formElement);
   }
 
   void storeForm() {
@@ -1154,7 +1154,7 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
       // DOM later, when the first location information arrived.
       // Otherwise, on Blink based Desktop browsers, the autofill menu appears
       // on top left of the screen.
-      defaultTextEditingRoot.append(activeDomElement as html.Node);
+      defaultTextEditingRoot.append(activeDomElement);
       _appendedToForm = false;
     }
 
@@ -1633,7 +1633,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     if (hasAutofillGroup) {
       placeForm();
     } else {
-      defaultTextEditingRoot.append(activeDomElement as html.Node);
+      defaultTextEditingRoot.append(activeDomElement);
     }
     inputConfig.textCapitalization.setAutocapitalizeAttribute(
         activeDomElement);
