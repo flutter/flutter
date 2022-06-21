@@ -6,5 +6,5 @@
 spirv_tools_standalone = false
 
 # Paths to SPIRV-Tools dependencies in Flutter.
-spirv_tools_googletest_dir = "//third_party/googletest"
-spirv_tools_spirv_headers_dir = "//third_party/spirv_headers"
+spirv_tools_googletest_dir = "//third_party/googletest/googletest/src"
+spirv_tools_spirv_headers_dir = "//third_party/vulkan-deps/spirv-headers/src"

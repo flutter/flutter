@@ -12,6 +12,8 @@ declare_args() {
   # standard system libraries. Set this flag to download prebuilt binaries from
   # GCS.
   use_prebuilt_instrumented_libraries = false
+
+  is_ubsan_vptr = false
 }
 
 use_fuzzing_engine = false

@@ -23,3 +23,13 @@ config("extra_warnings") {
 
   defines = [ "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS" ]
 }
+
+group("llvm-symbolizer_data") {
+  if (is_win) {
+    data = [ "//buildtools/windows-x64/bin/llvm-symbolizer.exe" ]
+  } else if (is_mac) {
+    data = [ "//buildtools/mac-x64/clang/bin/llvm-symbolizer" ]
+  } else if (is_linux) {
+    data = [ "//buildtools/linux-x64/clang/bin/llvm-symbolizer" ]
+  }
+}

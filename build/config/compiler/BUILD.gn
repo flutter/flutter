@@ -725,6 +725,16 @@ config("no_chromium_code") {
     cflags += [ "-Wno-deprecated-non-prototype" ]
   }
 
+  if (is_clang) {
+    cflags += [
+      "-Wno-newline-eof",
+      "-Wno-typedef-redefinition",
+    ]
+    cflags_cc += [
+      "-Wno-newline-eof",
+    ]
+  }
+
   cflags += default_warning_flags
   cflags_cc += default_warning_flags_cc
 }
