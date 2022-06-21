@@ -92,20 +92,16 @@ G_DEFINE_TYPE_WITH_CODE(
             G_IMPLEMENT_INTERFACE(fl_scrolling_view_delegate_get_type(),
                                   fl_view_scrolling_delegate_iface_init))
 
-static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
-                                            gpointer gdk_event) {
-  GdkEventKey* event = reinterpret_cast<GdkEventKey*>(gdk_event);
-  GdkEventType type = event->type;
-  g_return_val_if_fail(type == GDK_KEY_PRESS || type == GDK_KEY_RELEASE, false);
-  return gtk_im_context_filter_keypress(im_context, event);
-}
-
 // Initialize keyboard manager.
 static void init_keyboard(FlView* self) {
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
-  self->text_input_plugin = fl_text_input_plugin_new(
-      messenger, gtk_widget_get_window(GTK_WIDGET(self)),
-      text_input_im_filter_by_gtk);
+
+  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(self));
+  g_return_if_fail(GDK_IS_WINDOW(window));
+  g_autoptr(GtkIMContext) im_context = gtk_im_multicontext_new();
+  gtk_im_context_set_client_window(im_context, window);
+
+  self->text_input_plugin = fl_text_input_plugin_new(messenger, im_context);
   self->keyboard_manager =
       fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
 }
@@ -242,6 +238,7 @@ static void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
   g_clear_object(&self->keyboard_manager);
+  g_clear_object(&self->text_input_plugin);
   g_clear_object(&self->scrolling_manager);
   init_keyboard(self);
   init_scrolling(self);
@@ -488,7 +485,6 @@ static void fl_view_constructed(GObject* object) {
   // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
   self->accessibility_plugin = fl_accessibility_plugin_new(self);
-  init_keyboard(self);
   init_scrolling(self);
   self->mouse_cursor_plugin = fl_mouse_cursor_plugin_new(messenger, self);
   self->platform_plugin = fl_platform_plugin_new(messenger);
@@ -621,6 +617,8 @@ static void fl_view_realize(GtkWidget* widget) {
                                      &attributes, attributes_mask);
   gtk_widget_set_window(widget, window);
   gtk_widget_register_window(widget, window);
+
+  init_keyboard(self);
 
   if (!fl_renderer_start(self->renderer, self, &error)) {
     g_warning("Failed to start Flutter renderer: %s", error->message);
