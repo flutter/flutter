@@ -36,82 +36,82 @@ typedef InputCounterWidgetBuilder = Widget? Function(
   required bool isFocused,
 });
 
-class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
-  _TextFieldSelectionGestureDetectorBuilder({
-    required _TextFieldState state,
-  }) : _state = state,
-       super(delegate: state);
-
-  final _TextFieldState _state;
-
-  @override
-  void onForcePressStart(ForcePressDetails details) {
-    super.onForcePressStart(details);
-    if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
-      editableText.showToolbar();
-    }
-  }
-
-  @override
-  void onForcePressEnd(ForcePressDetails details) {
-    // Not required.
-  }
-
-  @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
-    }
-  }
-
-  @override
-  void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
-    super.onSingleTapUp(details);
-    _state._requestKeyboard();
-    _state.widget.onTap?.call();
-  }
-
-  @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          Feedback.forLongPress(_state.context);
-          break;
-      }
-    }
-  }
-}
+// class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
+//   _TextFieldSelectionGestureDetectorBuilder({
+//     required _TextFieldState state,
+//   }) : _state = state,
+//        super(delegate: state);
+//
+//   final _TextFieldState _state;
+//
+//   @override
+//   void onForcePressStart(ForcePressDetails details) {
+//     super.onForcePressStart(details);
+//     if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
+//       editableText.showToolbar();
+//     }
+//   }
+//
+//   @override
+//   void onForcePressEnd(ForcePressDetails details) {
+//     // Not required.
+//   }
+//
+//   @override
+//   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
+//     if (delegate.selectionEnabled) {
+//       switch (Theme.of(_state.context).platform) {
+//         case TargetPlatform.iOS:
+//         case TargetPlatform.macOS:
+//           renderEditable.selectPositionAt(
+//             from: details.globalPosition,
+//             cause: SelectionChangedCause.longPress,
+//           );
+//           break;
+//         case TargetPlatform.android:
+//         case TargetPlatform.fuchsia:
+//         case TargetPlatform.linux:
+//         case TargetPlatform.windows:
+//           renderEditable.selectWordsInRange(
+//             from: details.globalPosition - details.offsetFromOrigin,
+//             to: details.globalPosition,
+//             cause: SelectionChangedCause.longPress,
+//           );
+//           break;
+//       }
+//     }
+//   }
+//
+//   @override
+//   void onSingleTapUp(TapUpDetails details) {
+//     editableText.hideToolbar();
+//     super.onSingleTapUp(details);
+//     _state._requestKeyboard();
+//     _state.widget.onTap?.call();
+//   }
+//
+//   @override
+//   void onSingleLongTapStart(LongPressStartDetails details) {
+//     if (delegate.selectionEnabled) {
+//       switch (Theme.of(_state.context).platform) {
+//         case TargetPlatform.iOS:
+//         case TargetPlatform.macOS:
+//           renderEditable.selectPositionAt(
+//             from: details.globalPosition,
+//             cause: SelectionChangedCause.longPress,
+//           );
+//           break;
+//         case TargetPlatform.android:
+//         case TargetPlatform.fuchsia:
+//         case TargetPlatform.linux:
+//         case TargetPlatform.windows:
+//           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+//           Feedback.forLongPress(_state.context);
+//           break;
+//       }
+//     }
+//   }
+// }
 
 /// A Material Design text field.
 ///
@@ -811,7 +811,8 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
+// class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
+class _TextFieldState extends State<TextField> with RestorationMixin implements AutofillClient {
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
@@ -829,17 +830,17 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool _showSelectionHandles = false;
 
-  late _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+  // late _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
-  late bool forcePressEnabled;
-
-  @override
+  // late bool forcePressEnabled;
+  //
+  // @override
   final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-
-  @override
-  bool get selectionEnabled => widget.selectionEnabled;
+  //
+  // @override
+  // bool get selectionEnabled => widget.selectionEnabled;
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
@@ -923,7 +924,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
+    // _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1014,9 +1015,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
-      return false;
-    }
+
+    // if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+    //   return false;
 
     if (cause == SelectionChangedCause.keyboard) {
       return false;
@@ -1152,7 +1153,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     switch (theme.platform) {
       case TargetPlatform.iOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
-        forcePressEnabled = true;
+        // forcePressEnabled = true;
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
@@ -1165,7 +1166,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
-        forcePressEnabled = false;
+        // forcePressEnabled = false;
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
@@ -1183,7 +1184,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        forcePressEnabled = false;
+        // forcePressEnabled = false;
         textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
@@ -1192,7 +1193,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         break;
 
       case TargetPlatform.linux:
-        forcePressEnabled = false;
+        // forcePressEnabled = false;
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
@@ -1201,7 +1202,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         break;
 
       case TargetPlatform.windows:
-        forcePressEnabled = false;
+        // forcePressEnabled = false;
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
@@ -1344,10 +1345,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 child: child,
               );
             },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: child,
-            ),
+            child: child,
+            // child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            //   behavior: HitTestBehavior.translucent,
+            //   child: child,
+            // ),
           ),
         ),
       ),
