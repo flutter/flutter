@@ -1192,6 +1192,9 @@
       "name": "Escape",
       "chromium": "Escape"
     },
+    "otherWebCodes": [
+      "Esc"
+    ],
     "scanCodes": {
       "android": [
         1
