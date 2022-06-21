@@ -799,7 +799,7 @@ public class KeyboardManagerTest {
   }
 
   @Test
-  public void eventsWithForgedCodes() {
+  public void eventsWithMintedCodes() {
     final KeyboardTester tester = new KeyboardTester();
     final ArrayList<CallRecord> calls = new ArrayList<>();
 
@@ -814,7 +814,7 @@ public class KeyboardManagerTest {
     verifyEmbedderEvents(
         calls,
         new KeyData[] {
-          buildKeyData(Type.kDown, 0x300000042L, LOGICAL_ENTER, "\n", false),
+          buildKeyData(Type.kDown, 0x1100000042L, LOGICAL_ENTER, "\n", false),
         });
     calls.clear();
 
