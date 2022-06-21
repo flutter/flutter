@@ -10,19 +10,6 @@
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 
-/**
- * FlTextInputPluginImFilter:
- * @event: the pointer to the GdkEventKey.
- *
- * The signature for a callback with which a #FlTextInputPlugin allow an input
- * method to internally handle key press and release events.
- *
- * The #gdk_event is an opaque pointer. It will be GdkEvent* in actual
- * applications, or a dummy pointer in unit tests.
- **/
-typedef gboolean (*FlTextInputPluginImFilter)(GtkIMContext* im_context,
-                                              gpointer gdk_event);
-
 G_BEGIN_DECLS
 
 G_DECLARE_DERIVABLE_TYPE(FlTextInputPlugin,
@@ -50,20 +37,15 @@ struct _FlTextInputPluginClass {
 /**
  * fl_text_input_plugin_new:
  * @messenger: an #FlBinaryMessenger.
- * @window: the #GdkWindow with which the text input plugin is associated.
- * @im_filter: a function used to allow an input method to internally handle
- * key press and release events. Typically a wrap of
- * #gtk_im_context_filter_keypress. Must not be nullptr.
+ * @im_context: (allow-none): a #GtkIMContext.
  *
  * Creates a new plugin that implements SystemChannels.textInput from the
  * Flutter services library.
  *
  * Returns: a new #FlTextInputPlugin.
  */
-FlTextInputPlugin* fl_text_input_plugin_new(
-    FlBinaryMessenger* messenger,
-    GdkWindow* window,
-    FlTextInputPluginImFilter im_filter);
+FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger,
+                                            GtkIMContext* im_context);
 
 /**
  * fl_text_input_plugin_filter_keypress

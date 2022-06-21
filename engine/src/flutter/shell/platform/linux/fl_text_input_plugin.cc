@@ -80,13 +80,7 @@ struct FlTextInputPluginPrivate {
   // Input method.
   GtkIMContext* im_context;
 
-  // IM filter.
-  FlTextInputPluginImFilter im_filter;
-
   flutter::TextInputModel* text_model;
-
-  // The owning native window.
-  GdkWindow* window;
 
   // A 4x4 matrix that maps from `EditableText` local coordinates to the
   // coordinate system of `PipelineOwner.rootNode`.
@@ -216,8 +210,8 @@ static void update_editing_state_with_delta(FlTextInputPlugin* self,
 
   g_autoptr(FlValue) deltas = fl_value_new_list();
   fl_value_append(deltas, deltaValue);
-  FlValue* value = fl_value_new_map();
-  fl_value_set_string_take(value, "deltas", deltas);
+  g_autoptr(FlValue) value = fl_value_new_map();
+  fl_value_set_string(value, "deltas", deltas);
 
   fl_value_append(args, value);
 
@@ -258,9 +252,6 @@ static void im_preedit_start_cb(FlTextInputPlugin* self) {
   FlTextInputPluginPrivate* priv = static_cast<FlTextInputPluginPrivate*>(
       fl_text_input_plugin_get_instance_private(self));
   priv->text_model->BeginComposing();
-
-  // Set the native window used for system input method windows.
-  gtk_im_context_set_client_window(priv->im_context, priv->window);
 }
 
 // Signal handler for GtkIMContext::preedit-changed
@@ -417,9 +408,6 @@ static FlMethodResponse* show(FlTextInputPlugin* self) {
   if (priv->input_type == FL_TEXT_INPUT_TYPE_NONE) {
     return hide(self);
   }
-
-  // Set the native window used for system input method windows.
-  gtk_im_context_set_client_window(priv->im_context, priv->window);
 
   gtk_im_context_focus_in(priv->im_context);
 
@@ -599,7 +587,6 @@ static void fl_text_input_plugin_dispose(GObject* object) {
     delete priv->text_model;
     priv->text_model = nullptr;
   }
-  priv->window = nullptr;
 
   G_OBJECT_CLASS(fl_text_input_plugin_parent_class)->dispose(object);
 }
@@ -617,7 +604,8 @@ static gboolean fl_text_input_plugin_filter_keypress_default(
     return FALSE;
   }
 
-  if (priv->im_filter(priv->im_context, event->origin)) {
+  GdkEventKey* key_event = reinterpret_cast<GdkEventKey*>(event->origin);
+  if (gtk_im_context_filter_keypress(priv->im_context, key_event)) {
     return TRUE;
   }
 
@@ -698,12 +686,20 @@ static void fl_text_input_plugin_init(FlTextInputPlugin* self) {
       fl_text_input_plugin_get_instance_private(self));
 
   priv->client_id = kClientIdUnset;
-  priv->im_context = gtk_im_multicontext_new();
+  priv->input_type = FL_TEXT_INPUT_TYPE_TEXT;
+  priv->text_model = new flutter::TextInputModel();
+}
+
+static void init_im_context(FlTextInputPlugin* self, GtkIMContext* im_context) {
+  FlTextInputPluginPrivate* priv = static_cast<FlTextInputPluginPrivate*>(
+      fl_text_input_plugin_get_instance_private(self));
+  priv->im_context = GTK_IM_CONTEXT(g_object_ref(im_context));
+
   // On Wayland, this call sets up the input method so it can be enabled
   // immediately when required. Without it, on-screen keyboard's don't come up
   // the first time a text field is focused.
   gtk_im_context_focus_out(priv->im_context);
-  priv->input_type = FL_TEXT_INPUT_TYPE_TEXT;
+
   g_signal_connect_object(priv->im_context, "preedit-start",
                           G_CALLBACK(im_preedit_start_cb), self,
                           G_CONNECT_SWAPPED);
@@ -721,15 +717,12 @@ static void fl_text_input_plugin_init(FlTextInputPlugin* self) {
   g_signal_connect_object(priv->im_context, "delete-surrounding",
                           G_CALLBACK(im_delete_surrounding_cb), self,
                           G_CONNECT_SWAPPED);
-  priv->text_model = new flutter::TextInputModel();
 }
 
-FlTextInputPlugin* fl_text_input_plugin_new(
-    FlBinaryMessenger* messenger,
-    GdkWindow* window,
-    FlTextInputPluginImFilter im_filter) {
+FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger,
+                                            GtkIMContext* im_context) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
-  g_return_val_if_fail(im_filter != nullptr, nullptr);
+  g_return_val_if_fail(GTK_IS_IM_CONTEXT(im_context), nullptr);
 
   FlTextInputPlugin* self = FL_TEXT_INPUT_PLUGIN(
       g_object_new(fl_text_input_plugin_get_type(), nullptr));
@@ -741,8 +734,8 @@ FlTextInputPlugin* fl_text_input_plugin_new(
       fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(priv->channel, method_call_cb, self,
                                             nullptr);
-  priv->window = window;
-  priv->im_filter = im_filter;
+
+  init_im_context(self, im_context);
 
   return self;
 }
