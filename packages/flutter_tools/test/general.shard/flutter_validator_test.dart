@@ -214,7 +214,11 @@ void main() {
     expect(await flutterValidator.validate(), _matchDoctorValidation(
       validationType: ValidationType.partial,
       statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
-      messages: contains(const ValidationMessage.hint('Flutter version 1.0.0 on channel unknown at sdk/flutter')),
+      messages: contains( const ValidationMessage.hint(
+        'Flutter version 1.0.0 on channel unknown at sdk/flutter\n'
+        'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
+        "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install."
+      )),
     ));
   });
 
@@ -237,7 +241,11 @@ void main() {
     expect(await flutterValidator.validate(), _matchDoctorValidation(
       validationType: ValidationType.partial,
       statusInfo: 'Channel beta, 0.0.0-unknown, on Linux, locale en_US.UTF-8',
-      messages: contains(const ValidationMessage.hint('Flutter version 0.0.0-unknown on channel beta at sdk/flutter')),
+      messages: contains(const ValidationMessage.hint(
+        'Flutter version 0.0.0-unknown on channel beta at sdk/flutter\n'
+        'Cannot resolve current version, possibly due to local changes.\n'
+        'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
+      )),
     ));
   });
 
@@ -285,7 +293,12 @@ void main() {
       expect(await flutterValidator.validate(), _matchDoctorValidation(
         validationType: ValidationType.partial,
         statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
-        messages: contains(const ValidationMessage.hint('Upstream repository https://githubmirror.com/flutter.git is not a standard remote')),
+        messages: contains(
+          const ValidationMessage.hint(
+            'Upstream repository https://githubmirror.com/flutter.git is not a standard remote. '
+            'Set "FLUTTER_GIT_URL" to https://githubmirror.com/flutter.git.'
+          )
+        ),
       ));
     });
 
@@ -309,7 +322,10 @@ void main() {
       expect(await flutterValidator.validate(), _matchDoctorValidation(
         validationType: ValidationType.partial,
         statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
-        messages: contains(const ValidationMessage.hint('Upstream repository unknown')),
+        messages: contains(const ValidationMessage.hint(
+          'Unknown upstream repository.\n'
+          'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
+        )),
       ));
     });
   });
