@@ -116,9 +116,9 @@ else
     install_deps
     mkdir -p $DART_TOOL_DIR
 
-    "$DART_SDK_DIR/bin/dart" --snapshot="$SNAPSHOT_PATH" --packages="$WEB_UI_DIR/.packages" "$SCRIPT_PATH"
+    "$DART_SDK_DIR/bin/dart" --snapshot="$SNAPSHOT_PATH" --packages="$WEB_UI_DIR/.dart_tool/package_config.json" "$SCRIPT_PATH"
     echo "$REVISION" > "$STAMP_PATH"
   fi
 
-  $DART_SDK_DIR/bin/dart --packages="$WEB_UI_DIR/.packages" "$SNAPSHOT_PATH" $@
+  $DART_SDK_DIR/bin/dart --packages="$WEB_UI_DIR/.dart_tool/package_config.json" "$SNAPSHOT_PATH" $@
 fi

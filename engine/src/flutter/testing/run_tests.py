@@ -680,7 +680,9 @@ def GatherDartTests(build_dir, filter, verbose_dart_snapshot):
       '%s/observatory/*_test.dart' % dart_tests_dir
   )
   dart_tests = glob.glob('%s/*_test.dart' % dart_tests_dir)
-  test_packages = os.path.join(dart_tests_dir, '.packages')
+  test_packages = os.path.join(
+      dart_tests_dir, '.dart_tool', 'package_config.json'
+  )
 
   if 'release' not in build_dir:
     for dart_test_file in dart_observatory_tests:
@@ -723,7 +725,8 @@ def GatherDartSmokeTest(build_dir, verbose_dart_snapshot):
       "fail_test.dart"
   )
   test_packages = os.path.join(
-      buildroot_dir, "flutter", "testing", "smoke_test_failure", ".packages"
+      buildroot_dir, "flutter", "testing", "smoke_test_failure", ".dart_tool",
+      "package_config.json"
   )
   yield GatherDartTest(
       build_dir,

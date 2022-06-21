@@ -67,7 +67,7 @@ template("dart_package_config") {
     output_conversion = "json"
   }
 
-  # Converts the intermediate to a real pacakge_config.json file.
+  # Converts the intermediate to a real package_config.json file.
   action(main_target) {
     forward_variables_from(invoker,
                            [
