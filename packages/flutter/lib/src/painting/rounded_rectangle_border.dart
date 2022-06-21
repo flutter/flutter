@@ -144,12 +144,18 @@ class RoundedRectangleBorder extends OutlinedBorder {
             ..color = side.color;
           if (side.strokeAlign != StrokeAlign.inside && borderRadius == BorderRadius.zero) {
             final Rect adjustedRect;
-            if (side.strokeAlign == StrokeAlign.center) {
-              adjustedRect = rect;
-            } else { // side.strokeAlign == StrokeAlign.outside
-              adjustedRect = rect.inflate(width / 2);
+            switch (side.strokeAlign) {
+              case StrokeAlign.inside:
+                adjustedRect = rect.deflate(width / 2);
+                break;
+              case StrokeAlign.center:
+                adjustedRect = rect;
+                break;
+              case StrokeAlign.outside:
+                adjustedRect = rect.inflate(width / 2);
+                break;
             }
-            canvas.drawRRect(BorderRadius.zero.toRRect(adjustedRect), side.toPaint());
+            canvas.drawRect(adjustedRect, side.toPaint());
           } else {
             final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
             final RRect inner;
@@ -345,19 +351,27 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         break;
       case BorderStyle.solid:
         final double width = side.width;
+        final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect, textDirection)!;
+        final Rect initialRect = _adjustRect(rect);
         if (width == 0.0) {
-          canvas.drawRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)), side.toPaint());
+          canvas.drawRRect(adjustedBorderRadius.toRRect(initialRect), side.toPaint());
         } else {
-          if (side.strokeAlign != StrokeAlign.inside && _adjustBorderRadius(rect, textDirection) == BorderRadius.zero) {
+          if (adjustedBorderRadius == BorderRadius.zero) {
             final Rect adjustedRect;
-            if (side.strokeAlign == StrokeAlign.center) {
-              adjustedRect = _adjustRect(rect);
-            } else {
-              adjustedRect = _adjustRect(rect).inflate(width / 2);
+            switch (side.strokeAlign) {
+              case StrokeAlign.inside:
+                adjustedRect = initialRect.deflate(width / 2);
+                break;
+              case StrokeAlign.center:
+                adjustedRect = initialRect;
+                break;
+              case StrokeAlign.outside:
+                adjustedRect = initialRect.inflate(width / 2);
+                break;
             }
-            canvas.drawRRect(BorderRadius.zero.toRRect(adjustedRect), side.toPaint());
+            canvas.drawRect(adjustedRect, side.toPaint());
           } else {
-            final RRect borderRect = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
+            final RRect borderRect = adjustedBorderRadius.toRRect(initialRect);
             final RRect adjustedRect;
             switch (side.strokeAlign) {
               case StrokeAlign.inside:

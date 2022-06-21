@@ -152,13 +152,23 @@ void main() {
   });
 
   test('RoundedRectangleBorder when borderRadius is 0 and strokeAlign is not inside', () {
-    const RoundedRectangleBorder c10 = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center));
+    const RoundedRectangleBorder centerBorder = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center));
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
     expect(
-      (Canvas canvas) => c10.paint(canvas, rect),
+      (Canvas canvas) => centerBorder.paint(canvas, rect),
       paints
-        ..rrect(
-          rrect: BorderRadius.zero.toRRect(rect),
+        ..rect(
+          rect: rect,
+          strokeWidth: 10.0,
+        ),
+    );
+
+    const RoundedRectangleBorder outsideBorder = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.outside));
+    expect(
+      (Canvas canvas) => outsideBorder.paint(canvas, rect),
+      paints
+        ..rect(
+          rect: rect.inflate(5),
           strokeWidth: 10.0,
         ),
     );

@@ -463,19 +463,26 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
         break;
       case BorderStyle.solid:
         final double width = side.width;
+        final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect);
         if (width == 0.0) {
-          canvas.drawRRect(_adjustBorderRadius(rect).toRRect(rect), side.toPaint());
+          canvas.drawRRect(adjustedBorderRadius.toRRect(rect), side.toPaint());
         } else {
-          if (side.strokeAlign != StrokeAlign.inside && _adjustBorderRadius(rect) == BorderRadius.zero) {
+          if (adjustedBorderRadius == BorderRadius.zero) {
             final Rect adjustedRect;
-            if (side.strokeAlign == StrokeAlign.center) {
-              adjustedRect = rect;
-            } else {
-              adjustedRect = rect.inflate(width / 2);
+            switch (side.strokeAlign) {
+              case StrokeAlign.inside:
+                adjustedRect = rect.deflate(width / 2);
+                break;
+              case StrokeAlign.center:
+                adjustedRect = rect;
+                break;
+              case StrokeAlign.outside:
+                adjustedRect = rect.inflate(width / 2);
+                break;
             }
-            canvas.drawRRect(BorderRadius.zero.toRRect(adjustedRect), side.toPaint());
+            canvas.drawRect(adjustedRect, side.toPaint());
           } else {
-            final RRect borderRect = _adjustBorderRadius(rect).toRRect(rect);
+            final RRect borderRect = adjustedBorderRadius.toRRect(rect);
             final RRect adjustedRect;
             switch (side.strokeAlign) {
               case StrokeAlign.inside:
