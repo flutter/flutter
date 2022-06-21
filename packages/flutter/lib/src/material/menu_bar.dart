@@ -449,7 +449,13 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   void closeMenu(_MenuBarMenuState menu) {
-    _openMenus.remove(menu);
+    final Set<_MenuBarMenuState> toClose = <_MenuBarMenuState>{ menu };
+    for (final _MenuBarMenuState openMenu in _openMenus.keys) {
+      if (openMenu._ancestors.contains(menu)) {
+        toClose.add(openMenu);
+      }
+    }
+    _openMenus.removeWhere((_MenuBarMenuState key, WidgetBuilder value) => toClose.contains(key));
     _markMenuDirtyAndDelayIfNecessary();
   }
 
