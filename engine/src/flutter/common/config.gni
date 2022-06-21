@@ -23,8 +23,8 @@ declare_args() {
   # Whether to use a prebuilt Dart SDK instead of building one.
   flutter_prebuilt_dart_sdk = false
 
-  # Whether layers can be drawn at half pixel boundaries.
-  support_fractional_translation = false
+  # Whether layers can be drawn at fractional pixel boundaries.
+  support_fractional_translation = true
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -57,10 +57,6 @@ if (flutter_runtime_mode == "debug") {
   ]
 } else {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
-}
-
-if (is_linux || is_mac || is_win) {
-  support_fractional_translation = true
 }
 
 if (support_fractional_translation) {
