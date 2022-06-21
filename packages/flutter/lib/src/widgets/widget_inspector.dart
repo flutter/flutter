@@ -1411,6 +1411,10 @@ mixin WidgetInspectorService {
       return;
     }
     final Set<String> pubRootDirectorySet = _pubRootDirectories!.toSet();
+    for (int i = 0; i < pubRootDirectories.length; i++) {
+      final String element = pubRootDirectories[i];
+      pubRootDirectorySet.remove(element);
+    }
     pubRootDirectorySet.remove(pubRootDirectories);
     _pubRootDirectories = pubRootDirectorySet.toList();
 
