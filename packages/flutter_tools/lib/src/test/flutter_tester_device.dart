@@ -47,8 +47,7 @@ class FlutterTesterTestDevice extends TestDevice {
   })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
         assert(!debuggingOptions.startPaused || enableObservatory),
         _gotProcessObservatoryUri = enableObservatory
-            // ignore: null_argument_to_non_null_type
-            ? Completer<Uri>() : (Completer<Uri>()..complete()),
+            ? Completer<Uri?>() : (Completer<Uri?>()..complete()),
         _operatingSystemUtils = OperatingSystemUtils(
           fileSystem: fileSystem,
           logger: logger,
@@ -73,7 +72,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
 
-  final Completer<Uri> _gotProcessObservatoryUri;
+  final Completer<Uri?> _gotProcessObservatoryUri;
   final Completer<int> _exitCode = Completer<int>();
 
   Process? _process;
@@ -209,7 +208,7 @@ class FlutterTesterTestDevice extends TestDevice {
   }
 
   @override
-  Future<Uri> get observatoryUri {
+  Future<Uri?> get observatoryUri {
     assert(_gotProcessObservatoryUri != null);
     return _gotProcessObservatoryUri.future;
   }

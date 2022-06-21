@@ -769,7 +769,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 }
 
 /// A delegate for computing the layout of a tooltip to be displayed above or
-/// bellow a target specified in the global coordinate system.
+/// below a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
   ///

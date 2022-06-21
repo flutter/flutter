@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -34,9 +32,9 @@ final Platform macosPlatform = FakePlatform(
 );
 
 void main() {
-  FakePlatform osx;
-  FileSystemUtils fsUtils;
-  MemoryFileSystem fileSystem;
+  late FakePlatform osx;
+  late FileSystemUtils fsUtils;
+  late MemoryFileSystem fileSystem;
 
   setUp(() {
     osx = FakePlatform(
@@ -48,8 +46,8 @@ void main() {
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
-    FakeSimControl simControl;
-    Xcode xcode;
+    late FakeSimControl simControl;
+    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -100,7 +98,7 @@ void main() {
   });
 
   group('logFilePath', () {
-    FakeSimControl simControl;
+    late FakeSimControl simControl;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -163,7 +161,7 @@ void main() {
   });
 
   group('sdkMajorVersion', () {
-    FakeSimControl simControl;
+    late FakeSimControl simControl;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -205,7 +203,7 @@ void main() {
   });
 
   group('IOSSimulator.isSupported', () {
-    FakeSimControl simControl;
+    late FakeSimControl simControl;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -368,8 +366,8 @@ void main() {
   });
 
   group('device log tool', () {
-    FakeProcessManager fakeProcessManager;
-    FakeSimControl simControl;
+    late FakeProcessManager fakeProcessManager;
+    late FakeSimControl simControl;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -472,10 +470,10 @@ void main() {
   });
 
   group('log reader', () {
-    FakeProcessManager fakeProcessManager;
-    FakeIosProject mockIosProject;
-    FakeSimControl simControl;
-    Xcode xcode;
+    late FakeProcessManager fakeProcessManager;
+    late FakeIosProject mockIosProject;
+    late FakeSimControl simControl;
+    late Xcode xcode;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -616,7 +614,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     group('unified logging', () {
-      BufferLogger logger;
+      late BufferLogger logger;
 
       setUp(() {
         logger = BufferLogger.test();
@@ -754,9 +752,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 }
     ''';
 
-    FakeProcessManager fakeProcessManager;
+    late FakeProcessManager fakeProcessManager;
     Xcode xcode;
-    SimControl simControl;
+    late SimControl simControl;
     const String deviceId = 'smart-phone';
     const String appId = 'flutterApp';
 
@@ -895,10 +893,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('startApp', () {
-    FakePlistParser testPlistParser;
-    FakeSimControl simControl;
-    Xcode xcode;
-    BufferLogger logger;
+    late FakePlistParser testPlistParser;
+    late FakeSimControl simControl;
+    late Xcode xcode;
+    late BufferLogger logger;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -1027,8 +1025,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('IOSDevice.isSupportedForProject', () {
-    FakeSimControl simControl;
-    Xcode xcode;
+    late FakeSimControl simControl;
+    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
@@ -1113,17 +1111,17 @@ flutter:
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => 'com.example.test';
+  Future<String> productBundleIdentifier(BuildInfo? buildInfo) async => 'com.example.test';
 
   @override
-  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
+  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'My Super Awesome App.app';
 }
 
 class FakeSimControl extends Fake implements SimControl {
   final List<LaunchRequest> requests = <LaunchRequest>[];
 
   @override
-  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) async {
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String>? launchArgs ]) async {
     requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
@@ -1139,5 +1137,5 @@ class LaunchRequest {
 
   final String deviceId;
   final String appIdentifier;
-  final List<String> launchArgs;
+  final List<String>? launchArgs;
 }
