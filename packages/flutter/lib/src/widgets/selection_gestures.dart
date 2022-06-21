@@ -9,7 +9,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';//for shiftaware
 import 'package:flutter/widgets.dart';
 
+/// A widget that creates [GestureRecognizer] bindings to specific intents and
+/// actions for its descendants.
 class SelectionGestures extends StatefulWidget {
+  /// Creates a const [SelectionGestures] widget that owns the map of [GestureRecognizers]
+  /// and creates its own manager.
   const SelectionGestures({
     super.key,
     this.manager,
@@ -18,14 +22,23 @@ class SelectionGestures extends StatefulWidget {
     this.behavior
   });
 
+  /// The [SelectionGesturesManager] that will manage the [GestureRecognizer]
+  /// mapping.
   final SelectionGesturesManager? manager;
 
+  /// The [GestureRecognizer] mapping that will be managed by the [SelectionGesturesManager].
   final Map<Type, ContextGestureRecognizerFactory> gestures;
 
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  /// How this gesture detector should behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.deferToChild].
   final HitTestBehavior? behavior;
 
+  /// Returns the [SelectionGesturesManager] that most tightly encloses the
+  /// given [BuildContext].
   static SelectionGesturesManager of(BuildContext context) {
     assert(context != null);
     final _SelectionGesturesMarker? inherited = context.dependOnInheritedWidgetOfExactType<_SelectionGesturesMarker>();
@@ -72,7 +85,9 @@ class _SelectionGesturesState extends State<SelectionGestures> {
   }
 }
 
+/// A manager of [GestureRecognizer]s.
 class SelectionGesturesManager extends ChangeNotifier {
+  /// Constructs a [SelectionGesturesManager].
   SelectionGesturesManager({
     Map<Type, ContextGestureRecognizerFactory> gestures = const <Type, ContextGestureRecognizerFactory>{},
   })  : assert(gestures != null),

@@ -2180,9 +2180,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 }
 
+
+/// A gesture detector that inherits its [GestureRecognizer]s from
+/// the [SelectionGestures] widget in the given context.
 class SelectionGesturesDetector extends StatefulWidget {
+  /// Creates a [SelectionGesturesDetector] widget that provides that listens to
+  /// [PointerEvent]s.
   const SelectionGesturesDetector({super.key, required this.child});
 
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
