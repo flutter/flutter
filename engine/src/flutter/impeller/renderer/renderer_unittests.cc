@@ -285,9 +285,8 @@ TEST_P(RendererTest, CanRenderToTexture) {
   auto pipeline_desc =
       BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_desc.has_value());
-  auto box_pipeline = context->GetPipelineLibrary()
-                          ->GetRenderPipeline(std::move(pipeline_desc))
-                          .get();
+  auto box_pipeline =
+      context->GetPipelineLibrary()->GetRenderPipeline(pipeline_desc).get();
   ASSERT_TRUE(box_pipeline);
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
