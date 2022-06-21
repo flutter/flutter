@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show PointerDeviceKind;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +104,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 onSelected: onSelected,
                 onOpen: onOpen,
                 onClose: onClose,
@@ -159,7 +157,7 @@ void main() {
             child: Column(
               children: <Widget>[
                 MenuBar(
-                  menus: createTestMenus(onSelected: onSelected),
+                  children: createTestMenus(onSelected: onSelected),
                 ),
                 const Expanded(child: Placeholder()),
               ],
@@ -199,7 +197,7 @@ void main() {
               child: Column(
                 children: <Widget>[
                   MenuBar(
-                    menus: createTestMenus(onSelected: onSelected),
+                    children: createTestMenus(onSelected: onSelected),
                   ),
                   const Expanded(child: Placeholder()),
                 ],
@@ -242,7 +240,7 @@ void main() {
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: MenuBar(
-                      menus: createTestMenus(onSelected: onSelected),
+                      children: createTestMenus(onSelected: onSelected),
                     ),
                   ),
                   const Expanded(child: Placeholder()),
@@ -290,7 +288,7 @@ void main() {
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: MenuBar(
-                        menus: createTestMenus(onSelected: onSelected),
+                        children: createTestMenus(onSelected: onSelected),
                       ),
                     ),
                     const Expanded(child: Placeholder()),
@@ -336,7 +334,7 @@ void main() {
                   minimumHeight: 50,
                   elevation: MaterialStateProperty.all<double?>(10),
                   backgroundColor: MaterialStateProperty.all(Colors.red),
-                  menus: createTestMenus(onSelected: onSelected),
+                  children: createTestMenus(onSelected: onSelected),
                 ),
                 const Expanded(child: Placeholder()),
               ],
@@ -355,7 +353,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(onSelected: onSelected, onOpen: onOpen, onClose: onClose),
+              children: createTestMenus(onSelected: onSelected, onOpen: onOpen, onClose: onClose),
             ),
           ),
         ),
@@ -405,7 +403,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(onSelected: onSelected, onOpen: onOpen, onClose: onClose),
+              children: createTestMenus(onSelected: onSelected, onOpen: onOpen, onClose: onClose),
             ),
           ),
         ),
@@ -438,7 +436,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              children: <MenuItem>[
                 MenuBarMenu(
                   shape: MaterialStateProperty.all<ShapeBorder?>(const RoundedRectangleBorder()),
                   label: TestMenu.mainMenu0.label,
@@ -486,7 +484,7 @@ void main() {
         backgroundColor: MaterialStateProperty.all(Colors.red),
         minimumHeight: 40,
         elevation: MaterialStateProperty.all<double?>(10.0),
-        menus: const <MenuItem>[item],
+        children: const <MenuItem>[item],
       );
 
       await tester.pumpWidget(
@@ -523,7 +521,7 @@ void main() {
               children: <Widget>[
                 MenuBar(
                   controller: controller,
-                  menus: createTestMenus(
+                  children: createTestMenus(
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
@@ -575,7 +573,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 onSelected: onSelected,
                 onOpen: onOpen,
                 onClose: onClose,
@@ -612,7 +610,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              children: <MenuItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
                   children: <MenuItem>[
@@ -644,7 +642,7 @@ void main() {
               children: <Widget>[
                 MenuBar(
                   controller: controller,
-                  menus: createTestMenus(
+                  children: createTestMenus(
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
@@ -745,7 +743,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 onSelected: onSelected,
                 onOpen: onOpen,
                 onClose: onClose,
@@ -858,7 +856,7 @@ void main() {
             child: Material(
               child: MenuBar(
                 controller: controller,
-                menus: createTestMenus(
+                children: createTestMenus(
                   onSelected: onSelected,
                   onOpen: onOpen,
                   onClose: onClose,
@@ -974,7 +972,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 onSelected: onSelected,
                 onOpen: onOpen,
                 onClose: onClose,
@@ -1039,7 +1037,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 includeExtraGroups: true,
                 onSelected: onSelected,
                 onOpen: onOpen,
@@ -1081,7 +1079,7 @@ void main() {
             child: MenuBar(
               key: menuKey,
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 includeExtraGroups: true,
                 onSelected: onSelected,
                 onOpen: onOpen,
@@ -1129,7 +1127,7 @@ void main() {
               children: <Widget>[
                 MenuBar(
                   controller: controller,
-                  menus: createTestMenus(
+                  children: createTestMenus(
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
@@ -1188,7 +1186,7 @@ void main() {
                 MenuBar(
                   controller: controller,
                   enabled: false,
-                  menus: createTestMenus(
+                  children: createTestMenus(
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
@@ -1243,7 +1241,7 @@ void main() {
               children: <Widget>[
                 MenuBar(
                   controller: controller,
-                  menus: createTestMenus(
+                  children: createTestMenus(
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
@@ -1297,7 +1295,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 onSelected: onSelected,
                 onOpen: onOpen,
                 onClose: onClose,
@@ -1341,7 +1339,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 shortcuts: <TestMenu, MenuSerializableShortcut>{
                   TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
                   TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
@@ -1407,7 +1405,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 shortcuts: <TestMenu, MenuSerializableShortcut>{
                   TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.arrowRight),
                   TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.arrowLeft),
@@ -1436,7 +1434,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: createTestMenus(
+              children: createTestMenus(
                 shortcuts: <TestMenu, MenuSerializableShortcut>{
                   TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.escape),
                   TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.fn),
@@ -1464,7 +1462,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              children: <MenuItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
                   children: <MenuItem>[
@@ -1492,7 +1490,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              children: <MenuItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
                   children: <MenuItem>[
@@ -1519,7 +1517,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              children: <MenuItem>[
                 MenuBarMenu(
                   shape: MaterialStateProperty.all<ShapeBorder?>(const RoundedRectangleBorder()),
                   label: TestMenu.mainMenu0.label,
@@ -1603,7 +1601,7 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              children: <MenuItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
                   children: <MenuItem>[

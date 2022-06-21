@@ -143,7 +143,7 @@ mixin MenuItem on Diagnosticable implements Widget {
   /// item, such as [PlatformMenuItemGroup].
   ///
   /// Defaults to an empty list.
-  List<MenuItem> get members => const <MenuItem>[];
+  List<Widget> get members => const <Widget>[];
 
   @override
   String toStringShort() => '${describeIdentity(this)}($label)';
@@ -207,7 +207,7 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
     this.minimumHeight,
     this.padding,
     this.elevation,
-    this.menus = const <MenuItem>[],
+    this.children = const <Widget>[],
   });
 
   /// The list of menu items that are the top level children of the
@@ -226,7 +226,7 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// `someMenuBarWidget.menus.add(...)` will result in incorrect
   /// behaviors. Whenever the menus list is modified, a new list object
   /// should be provided.
-  final List<MenuItem> menus;
+  final List<Widget> children;
 
   /// An optional controller that allows outside control of the menu bar.
   ///
@@ -273,7 +273,7 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuItem item) => item.toDiagnosticsNode())];
+    return <DiagnosticsNode>[...children.map<DiagnosticsNode>((Widget item) => item.toDiagnosticsNode())];
   }
 
   @override
@@ -421,7 +421,7 @@ class _MenuBarState extends State<MenuBar> {
                             _TokenDefaultsM3(context).barBackgroundColor)
                         .resolve(state)!,
                     padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                    children: widget.menus,
+                    children: widget.children,
                   ),
                 ),
               ),
@@ -433,7 +433,7 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   void openMenu(_MenuBarMenuState menu, WidgetBuilder builder) {
-    if (_openMenus.isEmpty) {
+    if (!menuIsOpen) {
       // We're opening the first menu, so cache the primary focus so that we can
       // try to return to it when the menu is dismissed.
       // If we captured a focus before the click, then use that, otherwise use
@@ -441,14 +441,15 @@ class _MenuBarState extends State<MenuBar> {
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
     }
     _focusBeforeClick = null;
+    // Close anymenu
+    final List<_MenuBarMenuState> ancestors = menu._ancestors;
+    _openMenus.removeWhere((_MenuBarMenuState key, WidgetBuilder builder) => !ancestors.contains(key));
     _openMenus[menu] = builder;
-    _manageOverlayEntry();
     _markMenuDirtyAndDelayIfNecessary();
   }
 
   void closeMenu(_MenuBarMenuState menu) {
     _openMenus.remove(menu);
-    _manageOverlayEntry();
     _markMenuDirtyAndDelayIfNecessary();
   }
 
@@ -456,13 +457,14 @@ class _MenuBarState extends State<MenuBar> {
     _focusBeforeClick = null;
     _openMenus.clear();
     _previousFocus?.requestFocus();
-    _manageOverlayEntry();
     _markMenuDirtyAndDelayIfNecessary();
   }
 
-  // Creates or removes the overlay entry that contains the stack of all menus.
-  void _manageOverlayEntry() {
-    if (openMenu != null) {
+  void _markMenuDirtyAndDelayIfNecessary() {
+    if (_disposed || !mounted) {
+      return;
+    }
+    if (menuIsOpen) {
       if (_overlayEntry == null) {
         _overlayEntry = OverlayEntry(builder: (BuildContext context) => _MenuStack(this));
         Overlay.of(context)?.insert(_overlayEntry!);
@@ -470,18 +472,15 @@ class _MenuBarState extends State<MenuBar> {
     } else {
       _overlayEntry?.remove();
       _overlayEntry = null;
-    }
-  }
-
-  void _markMenuDirtyAndDelayIfNecessary() {
-    if (_disposed || !mounted) {
+      // If there aren't any menus open, then there's no need to mark the
+      // overlay dirty, since we just removed the overlay entry.
+      widget.controller?._menuBarStateChanged();
       return;
     }
     void markMenuDirty() {
       _overlayEntry?.markNeedsBuild();
       widget.controller?._menuBarStateChanged();
     }
-
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       // If we're in the middle of a build, we need to mark dirty in a post
       // frame callback, since this function will often be called by a part of
@@ -541,7 +540,7 @@ class _MenuBarState extends State<MenuBar> {
   String? get debugCurrentItem {
     String? result;
     assert(() {
-      if (openMenu != null) {
+      if (menuIsOpen) {
         result = _openMenus.keys.map<String>((_MenuBarMenuState node) => node.toStringShort()).join(' > ');
       }
       return true;
@@ -906,7 +905,7 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 /// A menu item widget that displays a hierarchical cascading menu as part of a
 /// [MenuBar].
 ///
-/// This widget represents an entry in [MenuBar.menus] that has a submenu. Like
+/// This widget represents an entry in [MenuBar.children] that has a submenu. Like
 /// the leaf [MenuBarButton], it shows a label with an optional leading or
 /// trailing icon.
 ///
@@ -953,7 +952,7 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
     this.onOpen,
     this.onClose,
     this.onHover,
-    this.children = const <MenuItem>[],
+    this.children = const <Widget>[],
   });
 
   /// An optional icon to display before the label text.
@@ -1104,7 +1103,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
   late _MenuBarMenuState? _parent;
-  bool _showingSubmenu = false;
+  bool get _showingSubmenu => _menuBar.isAnOpenMenu(this);
   bool get _isTopLevelMenu => _parent == null;
   bool get _enabled => _menuBar.enabled && widget.children.isNotEmpty;
 
@@ -1151,14 +1150,12 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
 
   void close() {
     setState(() {
-      _showingSubmenu = false;
       _menuBar.closeMenu(this);
     });
   }
 
   void open() {
     setState(() {
-      _showingSubmenu = true;
       _menuBar.openMenu(this, _buildPositionedMenu);
     });
   }
@@ -1201,7 +1198,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     // Don't open the top level menu bar buttons on hover unless something else
     // is already open. This means that the user has to first open the menu bar
     // before hovering allows them to traverse it.
-    if (_parent == null && _menuBar.openMenu == null) {
+    if (_parent == null && !_menuBar.menuIsOpen) {
       return;
     }
   }
@@ -1357,16 +1354,36 @@ class MenuItemGroup extends StatelessWidget with MenuItem {
   ///
   /// It empty, then this group will not appear in the menu.
   @override
-  final List<MenuItem> members;
+  final List<Widget> members;
 
   @override
   Widget build(BuildContext context) {
+    final _MenuBarMenuState? parent = _MenuItemWrapper.maybeOf(context);
+    int index = -1;
+    bool skipPrevious = false;
+    bool skipNext = false;
+    if (parent != null) {
+      final int numChildren = parent.widget.children.length;
+      index = parent.widget.children.indexOf(this);
+      if (index != -1) {
+        if (index == 0) {
+          skipPrevious = true;
+        } else if (index > 0) {
+          skipPrevious = parent.widget.children[index - 1] is MenuItemGroup;
+        }
+        if (index == numChildren - 1) {
+          skipNext = true;
+        } else if (index > 0 && index < numChildren - 1) {
+          skipNext = parent.widget.children[index + 1] is MenuItemGroup;
+        }
+      }
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        const _MenuItemDivider(),
+        if (!skipPrevious) const _MenuItemDivider(),
         ...members,
-        const _MenuItemDivider(),
+        if (!skipNext) const _MenuItemDivider(),
       ],
     );
   }
@@ -1374,7 +1391,7 @@ class MenuItemGroup extends StatelessWidget with MenuItem {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<MenuItem>('members', members));
+    properties.add(IterableProperty<Widget>('members', members));
   }
 
   @override
@@ -2102,12 +2119,12 @@ class _MenuNextFocusAction extends NextFocusAction {
 
   @override
   void invoke(NextFocusIntent intent) {
-    // if (menuBar.openMenu == null) {
+    // if (!menuBar.menuIsOpen) {
     //   // Nothing is open, select first top level menu item.
     //   if (menuBar._root.children.isEmpty) {
     //     return;
     //   }
-    //   menuBar.openMenu = menuBar._root.children[0];
+    //   menuBar.openMenu(menuBar._root.children[0]);
     //   return;
     // }
     // final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
@@ -2123,10 +2140,10 @@ class _MenuNextFocusAction extends NextFocusAction {
     //   return;
     // }
     // if (index == enabledNodes.length - 1) {
-    //   menuBar.openMenu = enabledNodes.first;
+    //   menuBar.openMenu(enabledNodes.first);
     //   return;
     // }
-    // menuBar.openMenu = enabledNodes[index + 1];
+    // menuBar.openMenu(enabledNodes[index + 1]);
   }
 }
 
@@ -2137,12 +2154,12 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
 
   @override
   void invoke(PreviousFocusIntent intent) {
-    // if (menuBar.openMenu == null) {
+    // if (!menuBar.menuIsOpen) {
     //   // Nothing is open, select first top level menu item.
     //   if (menuBar._root.children.isEmpty) {
     //     return;
     //   }
-    //   menuBar.openMenu = menuBar._root.children.last;
+    //   menuBar.openMenu(menuBar._root.children.last);
     //   return;
     // }
     // final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
@@ -2150,7 +2167,7 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
     //       node != menuBar._root &&
     //       (node.item.children.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
     // }).toList();
-    // final List<MenuItem> enabledItems = enabledNodes.map<MenuItem>((_MenuNode node) => node.item).toList();
+    // final List<Widget> enabledItems = enabledNodes.map<Widget>((_MenuNode node) => node.item).toList();
     // if (enabledNodes.isEmpty) {
     //   return;
     // }
@@ -2159,10 +2176,10 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
     //   return;
     // }
     // if (index == 0) {
-    //   menuBar.openMenu = enabledNodes.last;
+    //   menuBar.openMenu(enabledNodes.last);
     //   return;
     // }
-    // menuBar.openMenu = enabledNodes[index - 1];
+    // menuBar.openMenu(enabledNodes[index - 1]);
     // return;
   }
 }
@@ -2174,7 +2191,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   final _MenuBarState menuBar;
 
   // bool _moveForward() {
-  //   if (menuBar.openMenu == null) {
+  //   if (!menuBar.menuIsOpen) {
   //     return false;
   //   }
   //   final _MenuNode? focusedItem = menuBar.focusedItem;
@@ -2184,23 +2201,23 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   //   if (focusedItem.hasSubmenu && focusedItem.parent != menuBar._root) {
   //     // If no submenu is open, then arrow opens the submenu.
   //     if (focusedItem.children.isNotEmpty) {
-  //       menuBar.openMenu = focusedItem.children.first;
+  //       menuBar.openMenu(focusedItem.children.first);
   //     }
   //   } else {
   //     // If there's no submenu, then an arrow moves to the next top
   //     // level sibling, wrapping around if need be.
   //     final _MenuNode? next = focusedItem.topLevel.nextSibling;
   //     if (next != null) {
-  //       menuBar.openMenu = next;
+  //       menuBar.openMenu(next);
   //     } else {
-  //       menuBar.openMenu = menuBar._root.children.isNotEmpty ? menuBar._root.children.first : null;
+  //       menuBar.openMenu(menuBar._root.children.isNotEmpty ? menuBar._root.children.first : null);
   //     }
   //   }
   //   return true;
   // }
   //
   // bool _moveBackward() {
-  //   if (menuBar.openMenu == null) {
+  //   if (!menuBar.menuIsOpen) {
   //     return false;
   //   }
   //   final _MenuNode? focusedItem = menuBar.focusedItem;
@@ -2220,15 +2237,15 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   //     }
   //   }
   //   if (previous != null) {
-  //     menuBar.openMenu = previous;
+  //     menuBar.openMenu(previous);
   //   } else {
-  //     menuBar.openMenu = menuBar._root.children.isNotEmpty ? menuBar._root.children.last : null;
+  //     menuBar.openMenu(menuBar._root.children.isNotEmpty ? menuBar._root.children.last : null);
   //   }
   //   return true;
   // }
   //
   // bool _moveUp() {
-  //   if (menuBar.openMenu == null) {
+  //   if (menuBar.openMenus) {
   //     return false;
   //   }
   //   final _MenuNode? focusedItem = menuBar.focusedItem;
@@ -2237,7 +2254,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   //   }
   //   if (focusedItem.parent == menuBar._root) {
   //     // Pressing on a top level menu closes all the menus.
-  //     menuBar.openMenu = null;
+  //     menuBar.openMenu(null);
   //     return true;
   //   }
   //   _MenuNode? previousFocusable = focusedItem.previousSibling;
@@ -2245,10 +2262,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   //     previousFocusable = previousFocusable.previousSibling;
   //   }
   //   if (previousFocusable != null) {
-  //     menuBar.openMenu = previousFocusable;
+  //     menuBar.openMenu(previousFocusable);
   //   } else if (focusedItem.parent?.parent == menuBar._root) {
   //     // Pressing on a next-to-top level menu, moves to the parent.
-  //     menuBar.openMenu = focusedItem.parent;
+  //     menuBar.openMenu(focusedItem.parent);
   //   }
   //   return true;
   // }
@@ -2259,13 +2276,13 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   //     return false;
   //   }
   //   if (focusedItem.parent == menuBar._root) {
-  //     if (menuBar.openMenu == null) {
-  //       menuBar.openMenu = focusedItem;
+  //     if (!menuBar.menuIsOpen) {
+  //       menuBar.openMenu(focusedItem);
   //       return true;
   //     }
   //     final List<_MenuNode> children = focusedItem.focusableChildren;
   //     if (children.isNotEmpty) {
-  //       menuBar.openMenu = children[0];
+  //       menuBar.openMenu(children[0]);
   //     }
   //     return true;
   //   }
@@ -2274,7 +2291,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   //     nextFocusable = nextFocusable.nextSibling;
   //   }
   //   if (nextFocusable != null) {
-  //     menuBar.openMenu = nextFocusable;
+  //     menuBar.openMenu(nextFocusable);
   //   }
   //   return true;
   // }

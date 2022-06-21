@@ -105,7 +105,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
     return Column(
       children: <Widget>[
         MenuBar(
-          menus: <MenuItem>[
+          children: <MenuItem>[
             MenuBarMenu(
               autofocus: true,
               label: 'Menu App',

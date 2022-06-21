@@ -73,7 +73,7 @@ void main() {
               child: Column(
                 children: <Widget>[
                   MenuBar(
-                    menus: createTestMenus(onSelected: onSelected),
+                    children: createTestMenus(onSelected: onSelected),
                   ),
                   const Expanded(child: Placeholder()),
                 ],
@@ -117,7 +117,11 @@ void main() {
               child: Column(
                 children: <Widget>[
                   MenuBar(
-                    menus: createTestMenus(
+                    backgroundColor: MaterialStateProperty.all<Color?>(Colors.blue),
+                    minimumHeight: 50.0,
+                    elevation: MaterialStateProperty.all<double?>(10.0),
+                    padding: const EdgeInsets.all(12.0),
+                    children: createTestMenus(
                       onSelected: onSelected,
                       menuBackground: Colors.cyan,
                       menuElevation: 18.0,
@@ -129,10 +133,6 @@ void main() {
                       itemPadding: const EdgeInsets.all(11.0),
                       itemShape: const BeveledRectangleBorder(),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color?>(Colors.blue),
-                    minimumHeight: 50.0,
-                    elevation: MaterialStateProperty.all<double?>(10.0),
-                    padding: const EdgeInsets.all(12.0),
                   ),
                   const Expanded(child: Placeholder()),
                 ],
