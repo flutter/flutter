@@ -176,10 +176,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 
     //TODO: Find a way to shorten this. Should the configuration even be nullable?
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null) {
-       TextSpan w = spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults!);
-      print(w.children);
-      print(w);
-      return w;
+      return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults!);
     } else {
       if (composingWithinCurrentTextRange) {
         return TextSpan(style: style, text: text);

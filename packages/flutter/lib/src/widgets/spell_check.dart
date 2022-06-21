@@ -146,6 +146,9 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       span_pointer += 1;
     }
 
+    print('${results.length}, ${correctedSpellCheckResults.length}');
+    print('${newText}');
+    print(resultsText);
     return correctedSpellCheckResults;
   }
 
@@ -206,9 +209,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
             TextStyle(decoration: TextDecoration.underline);
     TextStyle misspelledJointStyle =
         style?.merge(misspelledStyle) ?? misspelledStyle;
-
-    print("STYLE: ${style}");
-    print("MISPELLED STYLE: ${misspelledJointStyle}");
 
     int scss_pointer = 0;
 
