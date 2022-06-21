@@ -38,7 +38,7 @@ final String basePath =
 final String fixtures = path.join(basePath, 'test', 'fixtures');
 final String box = path.join(fixtures, 'lib', 'box.dart');
 final String consts = path.join(fixtures, 'lib', 'consts.dart');
-final String dotPackages = path.join(fixtures, '.packages');
+final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
 final String constsAndNon = path.join(fixtures, 'lib', 'consts_and_non.dart');
 final String boxDill = path.join(fixtures, 'box.dill');
 final String constsDill = path.join(fixtures, 'consts.dill');
@@ -189,7 +189,7 @@ Future<void> main(List<String> args) async {
       '--target=flutter',
       '--aot',
       '--tfa',
-      '--packages=$dotPackages',
+      '--packages=$packageConfig',
       '--output-dill=$boxDill',
       box,
     ]));
@@ -200,7 +200,7 @@ Future<void> main(List<String> args) async {
       '--target=flutter',
       '--aot',
       '--tfa',
-      '--packages=$dotPackages',
+      '--packages=$packageConfig',
       '--output-dill=$constsDill',
       consts,
     ]));
@@ -211,7 +211,7 @@ Future<void> main(List<String> args) async {
       '--target=flutter',
       '--aot',
       '--tfa',
-      '--packages=$dotPackages',
+      '--packages=$packageConfig',
       '--output-dill=$constsAndNonDill',
       constsAndNon,
     ]));
