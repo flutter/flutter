@@ -6,11 +6,13 @@ package dev.flutter.scenarios;
 
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Canvas;
+import android.graphics.ImageFormat;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.graphics.SurfaceTexture;
+import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.ImageWriter;
@@ -91,7 +93,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     super.waitUntilFlutterRendered();
 
     try {
-      firstFrameLatch.await();
+      firstFrameLatch.await(10, java.util.concurrent.TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
@@ -368,9 +370,23 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     @Override
     public void attach(Surface surface, CountDownLatch onFirstFrame) {
       this.onFirstFrame = onFirstFrame;
-      writer = ImageWriter.newInstance(surface, 3);
-      reader = ImageReader.newInstance(SURFACE_WIDTH, SURFACE_HEIGHT, writer.getFormat(), 2);
-
+      if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+        // On Android Q+, use PRIVATE image format.
+        // Also let the frame producer know the images will
+        // be sampled from by the GPU.
+        writer = ImageWriter.newInstance(surface, 3, ImageFormat.PRIVATE);
+        reader =
+            ImageReader.newInstance(
+                SURFACE_WIDTH,
+                SURFACE_HEIGHT,
+                ImageFormat.PRIVATE,
+                2,
+                HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+      } else {
+        // Before Android Q, this will change the format of the surface to match the images.
+        writer = ImageWriter.newInstance(surface, 3);
+        reader = ImageReader.newInstance(SURFACE_WIDTH, SURFACE_HEIGHT, writer.getFormat(), 2);
+      }
       inner.attach(reader.getSurface(), null);
 
       handlerThread = new HandlerThread("image reader/writer thread");
@@ -409,7 +425,8 @@ public class ExternalTextureFlutterActivity extends TestActivity {
         // If the output surface disconnects, this method will be interrupted with an
         // IllegalStateException.
         // Simply log and return.
-        Log.i(TAG, "Surface disconnected from ImageWriter");
+        Log.i(TAG, "Surface disconnected from ImageWriter", e);
+        image.close();
         return;
       }
 
