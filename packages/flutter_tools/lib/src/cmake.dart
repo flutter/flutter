@@ -6,7 +6,6 @@ import 'package:pub_semver/pub_semver.dart';
 
 import 'build_info.dart';
 import 'cmake_project.dart';
-import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 
 /// Extracts the `BINARY_NAME` from a project's CMake file.
@@ -30,11 +29,32 @@ String _escapeBackslashes(String s) {
   return s.replaceAll(r'\', r'\\');
 }
 
-Version _parseBuildName(String buildName) {
+String _determineVersionString(CmakeBasedProject project, BuildInfo buildInfo) {
+  // Prefer the build arguments for version information.
+  final String? buildName = buildInfo.buildName;
+  if (buildName != null) {
+    final String? buildNumber = buildInfo.buildNumber;
+
+    return buildNumber != null
+      ? '$buildName+$buildNumber'
+      : buildName;
+  }
+
+  // Otherwise try to use the project manifest's version information.
+  final String? manifestVersion = project.parent.manifest.appVersion;
+  if (manifestVersion != null) {
+    return manifestVersion;
+  }
+
+  return '1.0.0';
+}
+
+Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
+  final String version = _determineVersionString(project, buildInfo);
   try {
-    return Version.parse(buildName);
+    return Version.parse(version);
   } on FormatException {
-    globals.printWarning('Warning: could not parse build name $buildName, defaulting to 1.0.0.');
+    globals.printWarning('Warning: could not parse version $version, defaulting to 1.0.0.');
 
     return Version(1, 0, 0);
   }
@@ -52,20 +72,16 @@ void writeGeneratedCmakeConfig(
   // the rest are put into a list to pass to the re-entrant build step.
   final String escapedFlutterRoot = _escapeBackslashes(flutterRoot);
   final String escapedProjectDir = _escapeBackslashes(project.parent.directory.path);
-  final FlutterManifest manifest = project.parent.manifest;
-  final String buildName = buildInfo.buildName ?? manifest.buildName ?? '1.0.0';
-  final String buildNumber = buildInfo.buildNumber ?? manifest.buildNumber ?? '1';
-  final Version buildVersion = _parseBuildName(buildName);
+  final Version version = _determineVersion(project, buildInfo);
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 file(TO_CMAKE_PATH "$escapedFlutterRoot" FLUTTER_ROOT)
 file(TO_CMAKE_PATH "$escapedProjectDir" PROJECT_DIR)
 
-set(FLUTTER_BUILD_NAME "$buildVersion" PARENT_SCOPE)
-set(FLUTTER_BUILD_MAJOR ${buildVersion.major} PARENT_SCOPE)
-set(FLUTTER_BUILD_MINOR ${buildVersion.minor} PARENT_SCOPE)
-set(FLUTTER_BUILD_PATCH ${buildVersion.patch} PARENT_SCOPE)
-set(FLUTTER_BUILD_NUMBER $buildNumber PARENT_SCOPE)
+set(FLUTTER_VERSION "$version" PARENT_SCOPE)
+set(FLUTTER_VERSION_MAJOR ${version.major} PARENT_SCOPE)
+set(FLUTTER_VERSION_MINOR ${version.minor} PARENT_SCOPE)
+set(FLUTTER_VERSION_PATCH ${version.patch} PARENT_SCOPE)
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT

@@ -556,7 +556,7 @@ abstract class FlutterCommand extends Command<void> {
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
               'On Android it is used as "versionCode".\n'
               'On Xcode builds it is used as "CFBundleVersion".\n'
-              'On Windows it is used as the private part of the file version.',
+              'On Windows it is used as the build suffix for the product and file versions.',
     );
   }
 
@@ -566,7 +566,7 @@ abstract class FlutterCommand extends Command<void> {
               'For each new version of your app, you will provide a version number to differentiate it from previous versions.\n'
               'On Android it is used as "versionName".\n'
               'On Xcode builds it is used as "CFBundleShortVersionString".\n'
-              'On Windows it is used as the product and file versions.',
+              'On Windows it is used as the major, minor, and build parts of the product and file versions.',
         valueHelp: 'x.y.z');
   }
 

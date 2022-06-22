@@ -90,7 +90,7 @@ class BuildInfo {
   /// It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.
   /// On Android it is used as versionCode.
   /// On Xcode builds it is used as CFBundleVersion.
-  /// On Windows it is used as the private part of the product and file versions.
+  /// On Windows it is used as the build suffix for the product and file versions.
   final String? buildNumber;
 
   /// A "x.y.z" string used as the version number shown to users.

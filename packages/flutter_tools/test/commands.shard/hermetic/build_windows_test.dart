@@ -472,11 +472,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     expect(configLines, containsAll(<String>[
       r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
-      r'set(FLUTTER_BUILD_NAME "1.0.0" PARENT_SCOPE)',
-      r'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
-      r'set(FLUTTER_BUILD_MINOR 0 PARENT_SCOPE)',
-      r'set(FLUTTER_BUILD_PATCH 0 PARENT_SCOPE)',
-      r'set(FLUTTER_BUILD_NUMBER 1 PARENT_SCOPE)',
+      r'set(FLUTTER_VERSION "1.0.0" PARENT_SCOPE)',
+      r'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+      r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
+      r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
       r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
       r'  "DART_OBFUSCATION=true"',
       r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
@@ -548,7 +547,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync('version: 2.3.4+5');
+      ..writeAsStringSync('version: 1.2.3+4');
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -573,11 +572,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_BUILD_NAME "2.3.4" PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_MAJOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_MINOR 3 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_PATCH 4 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_NUMBER 5 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -617,11 +615,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_BUILD_NAME "1.2.3" PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_NUMBER 4 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -638,7 +635,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
-      ..writeAsStringSync('version: 2.3.4+5');
+      ..writeAsStringSync('version: 9.9.9+9');
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -665,11 +662,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_BUILD_NAME "1.2.3" PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_BUILD_NUMBER 4 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

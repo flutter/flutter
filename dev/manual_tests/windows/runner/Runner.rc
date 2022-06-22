@@ -60,31 +60,21 @@ IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
 // Version
 //
 
-// The extra level of indirection is necessary to make the preprocessor expand
-// the macro to the token's value instead of the token itself.
-// See: https://stackoverflow.com/a/5459929
-#define _TOSTRING(x) #x
-#define TOSTRING(x) _TOSTRING(x)
-
-#if defined(FLUTTER_BUILD_MAJOR) && defined(FLUTTER_BUILD_MINOR) && defined(FLUTTER_BUILD_PATCH) && defined(FLUTTER_BUILD_NUMBER)
-#define FILE_VERSION_AS_NUMBER FLUTTER_BUILD_MAJOR,FLUTTER_BUILD_MINOR,FLUTTER_BUILD_PATCH,FLUTTER_BUILD_NUMBER
-#define PRODUCT_VERSION_AS_NUMBER FLUTTER_BUILD_MAJOR,FLUTTER_BUILD_MINOR,FLUTTER_BUILD_PATCH
+#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH)
+#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH
 #else
-#define FILE_VERSION_AS_NUMBER 1,0,0,1
-#define PRODUCT_VERSION_AS_NUMBER 1,0,0
+#define VERSION_AS_NUMBER 1,0,0
 #endif
 
-#if defined(FLUTTER_BUILD_NAME) && defined(FLUTTER_BUILD_NUMBER)
-#define FILE_VERSION_AS_STRING FLUTTER_BUILD_NAME "." TOSTRING(FLUTTER_BUILD_NUMBER)
-#define PRODUCT_VERSION_AS_STRING FLUTTER_BUILD_NAME
+#if defined(FLUTTER_VERSION)
+#define VERSION_AS_STRING FLUTTER_VERSION
 #else
-#define FILE_VERSION_AS_STRING "1.0.0.1"
-#define PRODUCT_VERSION_AS_STRING "1.0.0"
+#define VERSION_AS_STRING "1.0.0"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION FILE_VERSION_AS_NUMBER
- PRODUCTVERSION PRODUCT_VERSION_AS_NUMBER
+ FILEVERSION VERSION_AS_NUMBER
+ PRODUCTVERSION VERSION_AS_NUMBER
  FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -101,12 +91,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "dev.flutter" "\0"
             VALUE "FileDescription", "manual_tests" "\0"
-            VALUE "FileVersion", FILE_VERSION_AS_STRING "\0"
+            VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "manual_tests" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2021 dev.flutter. All rights reserved." "\0"
             VALUE "OriginalFilename", "manual_tests.exe" "\0"
             VALUE "ProductName", "manual_tests" "\0"
-            VALUE "ProductVersion", PRODUCT_VERSION_AS_STRING "\0"
+            VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
     BLOCK "VarFileInfo"
