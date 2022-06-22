@@ -455,7 +455,7 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
     if (_selection.isCollapsed) {
-      _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: true);
+      _handleSelectionHandleChanged(TextSelection.fromPosition(position));
       return;
     }
 
@@ -486,7 +486,7 @@ class TextSelectionOverlay {
         break;
     }
 
-    _handleSelectionHandleChanged(newSelection, isEnd: true);
+    _handleSelectionHandleChanged(newSelection);
   }
 
   late Offset _dragStartPosition;
@@ -503,7 +503,7 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
-      _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: false);
+      _handleSelectionHandleChanged(TextSelection.fromPosition(position));
       return;
     }
 
@@ -534,16 +534,14 @@ class TextSelectionOverlay {
         break;
     }
 
-    _handleSelectionHandleChanged(newSelection, isEnd: false);
+    _handleSelectionHandleChanged(newSelection);
   }
 
-  void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
-    final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
+  void _handleSelectionHandleChanged(TextSelection newSelection) {
     selectionDelegate.userUpdateTextEditingValue(
       _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
-    selectionDelegate.bringIntoView(textPosition);
   }
 
   TextSelectionHandleType _chooseType(
