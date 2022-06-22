@@ -38,7 +38,7 @@ platform_properties:
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       os: Linux
-      device_os: "N"
+      device_type: "msm8952"
   linux_samsung_s10:
     properties:
       dependencies: >-
@@ -67,7 +67,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: x86
-      device_os: N
+      device_type: "msm8952"
   mac_arm64_android:
     properties:
       dependencies: >-
@@ -77,7 +77,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: arm64
-      device_os: N
+      device_type: "msm8952"
   mac_ios:
     properties:
       dependencies: >-
@@ -120,7 +120,7 @@ platform_properties:
             {"dependency": "open_jdk", "version": "11"}
           ]
       os: Windows-10
-      device_os: N
+      device_type: "msm8952"
 
 targets:
   - name: Linux analyze
@@ -2401,6 +2401,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_arm64_ios build_ios_framework_module_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/105609
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2703,6 +2704,21 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac_arm64_ios module_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
+      task_name: module_test_ios
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2737,6 +2753,26 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly"]
+      task_name: plugin_lint_mac
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - packages/integration_test/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64_ios plugin_lint_mac
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "arm64ruby", "version": "version:311_3"}
+        ]
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
       task_name: plugin_lint_mac
     scheduler: luci
     runIf:
@@ -3197,7 +3233,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios external_ui_integration_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/103057
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3493,6 +3528,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/102236
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3583,7 +3619,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/95582
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4176,6 +4211,7 @@ targets:
     scheduler: luci
 
   - name: Windows_android channels_integration_test_win
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/106030
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

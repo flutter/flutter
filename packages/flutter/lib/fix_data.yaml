@@ -17,6 +17,167 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'ElevatedButton.styleFrom(primary)' to 'ElevatedButton.styleFrom(backgroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'ElevatedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 1
+        name: 'backgroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% primary %}'
+          requiredIf: "primary != ''"
+      - kind: 'removeParameter'
+        name: 'primary'
+    variables:
+      primary:
+        kind: 'fragment'
+        value: 'arguments[primary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'ElevatedButton.styleFrom(onPrimary)' to 'ElevatedButton.styleFrom(foregroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'ElevatedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'foregroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onPrimary %}'
+          requiredIf: "onPrimary != ''"
+      - kind: 'removeParameter'
+        name: 'onPrimary'
+    variables:
+      onPrimary:
+        kind: 'fragment'
+        value: 'arguments[onPrimary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'ElevatedButton.styleFrom(onSurface)' to 'ElevatedButton.styleFrom(disabledForegroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'ElevatedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 2
+        name: 'disabledForegroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.38)'
+          requiredIf: "onSurface != ''"
+      - kind: 'addParameter'
+        index: 3
+        name: 'disabledBackgroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.12)'
+          requiredIf: "onSurface != ''"
+      - kind: 'removeParameter'
+        name: 'onSurface'
+    variables:
+     onSurface:
+       kind: 'fragment'
+       value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'OutlinedButton.styleFrom(primary)' to 'OutlinedButton.styleFrom(foregroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'OutlinedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'foregroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% primary %}'
+          requiredIf: "primary != ''"
+      - kind: 'removeParameter'
+        name: 'primary'
+    variables:
+      primary:
+        kind: 'fragment'
+        value: 'arguments[primary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'OutlinedButton.styleFrom(onSurface)' to 'OutlinedButton.styleFrom(disabledForeground)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'OutlinedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 2
+        name: 'disabledForegroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.38)'
+          requiredIf: "onSurface != ''"
+      - kind: 'removeParameter'
+        name: 'onSurface'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'TextButton.styleFrom(primary)' to 'TextButton.styleFrom(foregroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'TextButton'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'foregroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% primary %}'
+          requiredIf: "primary != ''"
+      - kind: 'removeParameter'
+        name: 'primary'
+    variables:
+      primary:
+        kind: 'fragment'
+        value: 'arguments[primary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'TextButton.styleFrom(onSurface)' to 'TextButton.styleFrom(disabledForeground)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'TextButton'
+    changes:
+      - kind: 'addParameter'
+        index: 2
+        name: 'disabledForegroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.38)'
+          requiredIf: "onSurface != ''"
+      - kind: 'removeParameter'
+        name: 'onSurface'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
   # Changes made in https://github.com/flutter/flutter/pull/100381
   - title: "Migrate 'TextSelectionOverlay.fadeDuration' to SelectionOverlay.fadeDuration"
     date: 2022-03-18

@@ -557,8 +557,8 @@ abstract class Device {
   /// For example, the desktop device classes can use a writer which
   /// copies the files across the local file system.
   DevFSWriter? createDevFSWriter(
-    covariant ApplicationPackage app,
-    String userIdentifier,
+    covariant ApplicationPackage? app,
+    String? userIdentifier,
   ) {
     return null;
   }
@@ -593,7 +593,7 @@ abstract class Device {
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    covariant ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -624,7 +624,7 @@ abstract class Device {
   ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
   Future<bool> stopApp(
-    covariant ApplicationPackage app, {
+    covariant ApplicationPackage? app, {
     String? userIdentifier,
   });
 
