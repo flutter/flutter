@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -9,6 +10,8 @@ import 'colors.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
+
+export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
@@ -116,6 +119,8 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.smartQuotesType,
+    this.smartDashesType,
     this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
@@ -261,6 +266,52 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
+  /// Whether to allow the platform to automatically format quotes.
+  ///
+  /// This flag only affects iOS, where it is equivalent to [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc).
+  ///
+  /// When set to [SmartQuotesType.enabled], it passes
+  /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
+  /// and when set to [SmartQuotesType.disabled], it passes
+  /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
+  ///
+  /// If set to null, [SmartQuotesType.enabled] will be used.
+  ///
+  /// As an example of what this does, a standard vertical double quote
+  /// character will be automatically replaced by a left or right double quote
+  /// depending on its position in a word.
+  ///
+  /// Defaults to null.
+  ///
+  /// See also:
+  ///
+  ///  * [smartDashesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  final SmartQuotesType? smartQuotesType;
+
+  /// Whether to allow the platform to automatically format dashes.
+  ///
+  /// This flag only affects iOS versions 11 and above, where it is equivalent to [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc).
+  ///
+  /// When set to [SmartDashesType.enabled], it passes
+  /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
+  /// and when set to [SmartDashesType.disabled], it passes
+  /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
+  ///
+  /// If set to null, [SmartDashesType.enabled] will be used.
+  ///
+  /// As an example of what this does, two consecutive hyphen characters will be
+  /// automatically replaced with one en dash, and three consecutive hyphens
+  /// will become one em dash.
+  ///
+  /// Defaults to null.
+  ///
+  /// See also:
+  ///
+  ///  * [smartQuotesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  final SmartDashesType? smartDashesType;
+
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
@@ -400,6 +451,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       autocorrect: widget.autocorrect,
+      smartQuotesType: widget.smartQuotesType,
+      smartDashesType: widget.smartDashesType,
       textInputAction: TextInputAction.search,
     );
   }
