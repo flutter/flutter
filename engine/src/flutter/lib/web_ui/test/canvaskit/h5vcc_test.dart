@@ -51,7 +51,7 @@ void testMain() {
     });
 
     test('Surface acquireFrame uses getH5vccSkSurface', () {
-      final Surface surface = SurfaceFactory.instance.getSurface();
+      final Surface surface = SurfaceFactory.instance.getOverlay()!;
       surface.acquireFrame(ui.Size.zero);
       expect(getH5vccSkSurfaceCalledCount, 1);
 
