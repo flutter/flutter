@@ -748,7 +748,7 @@ last line of pub output: "err3"
         exitCode: 69,
         environment: <String, String>{
           'FLUTTER_ROOT': '',
-          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'
+          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
         },
       ),
     ]);

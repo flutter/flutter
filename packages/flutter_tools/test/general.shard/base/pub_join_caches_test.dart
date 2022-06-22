@@ -36,7 +36,7 @@ void main() {
     expect(extra.childDirectory('dir').childFile('third.file').existsSync(), true);
   });
 
-  group('needs to join cache', (){
+  group('needsToJoinCache()', (){
     testWithoutContext('make join', () async {
       final MemoryFileSystem fileSystem = MemoryFileSystem();
       final Directory local = fileSystem.currentDirectory.childDirectory('local');
@@ -55,7 +55,7 @@ void main() {
       expect(pass, true);
     });
 
-    testWithoutContext("don't join", () async {
+    testWithoutContext('detects when global pub-cache does not have a pub.dartlang.org dir', () async {
       final MemoryFileSystem fileSystem = MemoryFileSystem();
       final Directory local = fileSystem.currentDirectory.childDirectory('local');
       final Directory global = fileSystem.currentDirectory.childDirectory('global');

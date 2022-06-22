@@ -596,7 +596,6 @@ class _DefaultPub implements Pub {
     // The default cache dir used to be in %APPDATA%, so to avoid breaking old installs,
     // we use the old dir in %APPDATA% if it exists. Else, we use the new default location
     // in %LOCALAPPDATA%.
-    //final String homePath = _platform.environment['APPDATA'] ?? '';
     for (final String envVariable in <String>['APPDATA', 'LOCALAPPDATA']) {
       if (_platform.environment[envVariable] != null) {
         final String homePath = _platform.environment[envVariable]!;
