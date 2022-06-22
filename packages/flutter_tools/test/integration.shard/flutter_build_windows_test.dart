@@ -94,8 +94,6 @@ void main() {
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
 
-      print(exeFile.path);
-
       expect(fileVersion, equals('1.2.3.0'));
       expect(productVersion, equals('1.2.3+4'));
     });
