@@ -1597,14 +1597,14 @@ class ScrollAction extends Action<ScrollIntent> {
     return false;
   }
 
-  // Returns the scroll increment for a single scroll request, for use when
-  // scrolling using a hardware keyboard.
-  //
-  // Must not be called when the position is null, or when any of the position
-  // metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
-  // null. The type and state arguments must not be null, and the widget must
-  // have already been laid out so that the position fields are valid.
-  static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
+  /// Returns the scroll increment for a single scroll request, for use when
+  /// scrolling using a hardware keyboard.
+  ///
+  /// Must not be called when the position is null, or when any of the position
+  /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
+  /// null. The type and state arguments must not be null, and the widget must
+  /// have already been laid out so that the position fields are valid.
+  static double calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(type != null);
     assert(state.position != null);
     assert(state.position.hasPixels);
@@ -1631,7 +1631,7 @@ class ScrollAction extends Action<ScrollIntent> {
   /// Find out how much of an increment to move by, taking the different
   /// directions into account.
   static double getIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = _calculateScrollIncrement(state, type: intent.type);
+    final double increment = calculateScrollIncrement(state, type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
         switch (state.axisDirection) {

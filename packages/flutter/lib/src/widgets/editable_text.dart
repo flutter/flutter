@@ -3309,7 +3309,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
     final double increment = ScrollAction.getIncrement(state!, intent);
-    final double destination = (position.pixels + increment).clamp(
+    final double destination = clampDouble(
+      position.pixels + increment,
       position.minScrollExtent,
       position.maxScrollExtent,
     );
@@ -3322,19 +3323,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Extend the selection down by page if the `forward` parameter is true, or
   /// up by page otherwise.
   void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
-    final ScrollPosition position = _scrollController.position;
+    if (widget.maxLines == 1) {
+      return;
+    }
+
     final TextSelection nextSelection;
     final Rect extentRect = renderEditable.getLocalRectForCaret(
       _value.selection.extent,
     );
+    final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
+    final double increment = ScrollAction.calculateScrollIncrement(
+      state!,
+      type: ScrollIncrementType.page,
+    );
+    final ScrollPosition position = _scrollController.position;
     if (intent.forward) {
       if (_value.selection.extentOffset >= _value.text.length) {
         return;
       }
       final Offset nextExtentOffset =
-          Offset(extentRect.left, extentRect.top + position.viewportDimension);
-      final double height = _scrollController.position.maxScrollExtent + renderEditable.size.height;
-      final TextPosition nextExtent = nextExtentOffset.dy + _scrollController.position.pixels >= height
+          Offset(extentRect.left, extentRect.top + increment);
+      final double height = position.maxScrollExtent + renderEditable.size.height;
+      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
           ? TextPosition(offset: _value.text.length)
           : renderEditable.getPositionForPoint(
               renderEditable.localToGlobal(nextExtentOffset),
@@ -3347,8 +3357,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return;
       }
       final Offset nextExtentOffset =
-          Offset(extentRect.left, extentRect.top - position.viewportDimension);
-      final TextPosition nextExtent = nextExtentOffset.dy + _scrollController.position.pixels <= 0
+          Offset(extentRect.left, extentRect.top - increment);
+      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
           ? const TextPosition(offset: 0)
           : renderEditable.getPositionForPoint(
               renderEditable.localToGlobal(nextExtentOffset),
