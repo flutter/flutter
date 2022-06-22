@@ -156,9 +156,13 @@ static sk_sp<DlImage> UploadTexture(std::shared_ptr<impeller::Context> context,
     return nullptr;
   }
 
-  if (!texture->SetContents(
-          reinterpret_cast<const uint8_t*>(bitmap->getAddr(0, 0)),
-          texture_descriptor.GetByteSizeOfBaseMipLevel())) {
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(bitmap->getAddr(0, 0)),  // data
+      texture_descriptor.GetByteSizeOfBaseMipLevel(),           // size
+      [bitmap](auto, auto) mutable { bitmap.reset(); }          // proc
+  );
+
+  if (!texture->SetContents(mapping)) {
     FML_DLOG(ERROR) << "Could not copy contents into Impeller texture.";
     return nullptr;
   }
