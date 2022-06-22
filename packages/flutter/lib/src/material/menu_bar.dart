@@ -441,7 +441,6 @@ class _MenuBarState extends State<MenuBar> {
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
     }
     _focusBeforeClick = null;
-    // Close anymenu
     final List<_MenuBarMenuState> ancestors = menu._ancestors;
     _openMenus.removeWhere((_MenuBarMenuState key, WidgetBuilder builder) => !ancestors.contains(key));
     _openMenus[menu] = builder;
@@ -810,6 +809,7 @@ class MenuBarButton extends StatefulWidget with MenuItem {
 
 class _MenuBarButtonState extends State<MenuBarButton> {
   late _MenuBarState _menuBar;
+  _MenuBarMenuState? _parent;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
 
@@ -896,6 +896,7 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   void _updateMenuRegistration() {
     _menuBar = _MenuBarState.of(context);
+    _parent = _MenuItemWrapper.maybeOf(context);
   }
 
   void _handleSelect() {
@@ -905,6 +906,9 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
+    // Will make sure that the parent is open, but all other menus (including
+    // submenus of sibling buttons) are closed.
+    _parent?.open();
   }
 }
 
@@ -1206,6 +1210,9 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     // before hovering allows them to traverse it.
     if (_parent == null && !_menuBar.menuIsOpen) {
       return;
+    }
+    if (hovering) {
+      open();
     }
   }
 
