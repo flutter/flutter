@@ -214,6 +214,7 @@ std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::windowsToLogicalMap_ =
         {0x00000029, 0x0010000050c},  // SELECT -> select
         {0x0000002a, 0x00100000a0c},  // PRINT -> print
         {0x0000002b, 0x00100000506},  // EXECUTE -> execute
+        {0x0000002c, 0x00100000608},  // SNAPSHOT -> printScreen
         {0x0000002d, 0x00100000407},  // INSERT -> insert
         {0x0000002e, 0x0010000007f},  // DELETE -> delete
         {0x0000002f, 0x00100000508},  // HELP -> help
