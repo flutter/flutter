@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'framework.dart';
+import 'scrollable.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
@@ -198,8 +200,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(false),
-    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(true),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
     const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionByPageIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionByPageIntent(forward: true),
 
@@ -311,8 +313,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
-    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(false),
-    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(true),
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
     const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionByPageIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionByPageIntent(forward: true),
 

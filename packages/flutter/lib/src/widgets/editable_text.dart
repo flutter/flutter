@@ -3293,11 +3293,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Scrolls down by page if the `forward` parameter is true, or up by page
-  /// otherwise.
-  void _scrollByPage(ScrollByPageIntent intent) {
+  /// Handles [ScrollIntent] by scrolling the [Scrollable] inside of
+  /// [EditableText].
+  void _scroll(ScrollIntent intent) {
+    if (intent.type != ScrollIncrementType.page) {
+      return;
+    }
+
     final ScrollPosition position = _scrollController.position;
-    if (intent.forward) {
+    if (widget.maxLines == 1) {
+      _scrollController.jumpTo(position.maxScrollExtent);
+      return;
+    }
+
+    if (intent.direction == AxisDirection.down) {
       if (position.pixels >= position.maxScrollExtent) {
         return;
       }
@@ -3443,7 +3452,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
-    ScrollByPageIntent: _makeOverridable(CallbackAction<ScrollByPageIntent>(onInvoke: _scrollByPage)),
+    ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
 
     // Copy Paste
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
