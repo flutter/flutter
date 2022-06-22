@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
+import '../dom.dart';
+import '../safe_browser_api.dart';
 import 'text_editing.dart';
 
 /// Provides default functionality for listening to HTML composition events.
@@ -29,9 +29,12 @@ mixin CompositionAwareMixin {
   /// The name of the browser composition event type that triggers on ending a composition.
   static const String _kCompositionEnd = 'compositionend';
 
-  late final html.EventListener _compositionStartListener = _handleCompositionStart;
-  late final html.EventListener _compositionUpdateListener = _handleCompositionUpdate;
-  late final html.EventListener _compositionEndListener = _handleCompositionEnd;
+  late final DomEventListener _compositionStartListener =
+      allowInterop(_handleCompositionStart);
+  late final DomEventListener _compositionUpdateListener =
+      allowInterop(_handleCompositionUpdate);
+  late final DomEventListener _compositionEndListener =
+      allowInterop(_handleCompositionEnd);
 
   /// The currently composing text in the `domElement`.
   ///
@@ -40,29 +43,29 @@ mixin CompositionAwareMixin {
   /// so it is safe to reference it to get the current composingText.
   String? composingText;
 
-  void addCompositionEventHandlers(html.HtmlElement domElement) {
+  void addCompositionEventHandlers(DomHTMLElement domElement) {
     domElement.addEventListener(_kCompositionStart, _compositionStartListener);
     domElement.addEventListener(_kCompositionUpdate, _compositionUpdateListener);
     domElement.addEventListener(_kCompositionEnd, _compositionEndListener);
   }
 
-  void removeCompositionEventHandlers(html.HtmlElement domElement) {
+  void removeCompositionEventHandlers(DomHTMLElement domElement) {
     domElement.removeEventListener(_kCompositionStart, _compositionStartListener);
     domElement.removeEventListener(_kCompositionUpdate, _compositionUpdateListener);
     domElement.removeEventListener(_kCompositionEnd, _compositionEndListener);
   }
 
-  void _handleCompositionStart(html.Event event) {
+  void _handleCompositionStart(DomEvent event) {
     composingText = null;
   }
 
-  void _handleCompositionUpdate(html.Event event) {
-    if (event is html.CompositionEvent) {
-      composingText = event.data;
+  void _handleCompositionUpdate(DomEvent event) {
+    if (domInstanceOfString(event, 'CompositionEvent')) {
+      composingText = (event as DomCompositionEvent).data;
     }
   }
 
-  void _handleCompositionEnd(html.Event event) {
+  void _handleCompositionEnd(DomEvent event) {
     composingText = null;
   }
 

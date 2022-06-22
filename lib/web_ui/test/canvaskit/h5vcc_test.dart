@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
@@ -59,7 +57,7 @@ void testMain() {
 
       // No <canvas> element should be created.
       expect(
-        flutterViewEmbedder.glassPaneElement!.querySelectorAll<html.Element>('canvas'),
+        flutterViewEmbedder.glassPaneElement!.querySelectorAll('canvas'),
         isEmpty,
       );
     });
