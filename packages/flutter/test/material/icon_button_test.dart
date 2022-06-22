@@ -1034,7 +1034,7 @@ void main() {
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
 
-    // Disabled TextButton
+    // Disabled IconButton
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
@@ -1108,12 +1108,14 @@ void main() {
   );
 
   testWidgets('IconButton uses stateful color for icon color in different states - M3', (WidgetTester tester) async {
+    bool isSelected = false;
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
+    const Color selectedColor = Color(0x00000005);
 
     Color getIconColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -1125,23 +1127,36 @@ void main() {
       if (states.contains(MaterialState.focused)) {
         return focusedColor;
       }
+      if (states.contains(MaterialState.selected)) {
+        return selectedColor;
+      }
       return defaultColor;
     }
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
-        home: Scaffold(
-          body: Center(
-            child: IconButton(
-              style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: Center(
+                child: IconButton(
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                        getIconColor),
+                  ),
+                  isSelected: isSelected,
+                  onPressed: () {
+                    setState(() {
+                      isSelected = !isSelected;
+                    });
+                  },
+                  focusNode: focusNode,
+                  icon: const Icon(Icons.ac_unit),
+                ),
               ),
-              onPressed: () {},
-              focusNode: focusNode,
-              icon: const Icon(Icons.ac_unit),
-            ),
-          ),
+            );
+          }
         ),
       ),
     );
@@ -1150,6 +1165,12 @@ void main() {
 
     // Default, not disabled.
     expect(iconColor(), equals(defaultColor));
+
+    // Selected
+    final Finder button = find.byType(IconButton);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(iconColor(), selectedColor);
 
     // Focused.
     focusNode.requestFocus();
@@ -1318,6 +1339,236 @@ void main() {
       ),
     );
     expect(paddingWidget3.padding, const EdgeInsets.all(22));
+  });
+
+  testWidgets('Default IconButton is not selectable - M3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: IconButton(icon: const Icon(Icons.ac_unit), onPressed: (){},)
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+
+    Material buttonMaterial() {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(IconButton),
+          matching: find.byType(Material),
+        )
+      );
+    }
+
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(buttonWidget().isSelected, null);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The non-toggle IconButton should not change appearance after clicking
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, null);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+  });
+
+  testWidgets('Icon button is selectable when isSelected is not null - M3', (WidgetTester tester) async {
+    bool isSelected = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              icon: const Icon(Icons.ac_unit),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+
+    Material buttonMaterial() {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(IconButton),
+          matching: find.byType(Material),
+        )
+      );
+    }
+
+    expect(buttonWidget().isSelected, false);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The toggle IconButton should change appearance after clicking
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, true);
+    expect(iconColor(), equals(const ColorScheme.light().primary));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The IconButton should be unselected if it's clicked again
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, false);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+  });
+
+  testWidgets('The IconButton is in selected status if isSelected is true by default - M3', (WidgetTester tester) async {
+    bool isSelected = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              icon: const Icon(Icons.ac_unit),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+
+    Material buttonMaterial() {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(IconButton),
+          matching: find.byType(Material),
+        )
+      );
+    }
+
+    expect(buttonWidget().isSelected, true);
+    expect(iconColor(), equals(const ColorScheme.light().primary));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The IconButton becomes unselected if it's clicked
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, false);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+  });
+
+  testWidgets("The selectedIcon is used if it's not null and the button is clicked" , (WidgetTester tester) async {
+    bool isSelected = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              selectedIcon: const Icon(Icons.account_box),
+              icon: const Icon(Icons.account_box_outlined),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+
+    expect(find.byIcon(Icons.account_box_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.account_box), findsNothing);
+
+    await tester.tap(button); // The icon becomes to selectedIcon
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.account_box), findsOneWidget);
+    expect(find.byIcon(Icons.account_box_outlined), findsNothing);
+
+    await tester.tap(button); // The icon becomes the original icon when it's clicked again
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.account_box_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.account_box), findsNothing);
+  });
+
+  testWidgets('The original icon is used for selected and unselected status when selectedIcon is null' , (WidgetTester tester) async {
+    bool isSelected = false;
+    await tester.pumpWidget(
+        MaterialApp(
+            theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+            home: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return IconButton(
+                    isSelected: isSelected,
+                    icon: const Icon(Icons.account_box),
+                    onPressed: (){
+                      setState(() {
+                        isSelected = !isSelected;
+                      });
+                    },
+                  );
+                }
+            )
+        )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+
+    expect(buttonWidget().isSelected, false);
+    expect(buttonWidget().selectedIcon, null);
+    expect(find.byIcon(Icons.account_box), findsOneWidget);
+
+    await tester.tap(button); // The icon becomes the original icon when it's clicked again
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, true);
+    expect(buttonWidget().selectedIcon, null);
+    expect(find.byIcon(Icons.account_box), findsOneWidget);
+  });
+
+  testWidgets('The selectedIcon is used for disabled button if isSelected is true - M3' , (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: const IconButton(
+          isSelected: true,
+          icon: Icon(Icons.account_box),
+          selectedIcon: Icon(Icons.ac_unit),
+          onPressed: null,
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+
+    expect(buttonWidget().isSelected, true);
+    expect(find.byIcon(Icons.account_box), findsNothing);
+    expect(find.byIcon(Icons.ac_unit), findsOneWidget);
   });
 }
 
