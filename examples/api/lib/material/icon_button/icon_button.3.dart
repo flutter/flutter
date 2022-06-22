@@ -255,5 +255,3 @@ class _OutlinedIconButtonsState extends State<OutlinedIconButtons> {
     );
   }
 }
-
-
