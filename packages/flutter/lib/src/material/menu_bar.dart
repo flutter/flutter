@@ -314,14 +314,19 @@ class _MenuBarState extends State<MenuBar> {
   // The set of menus that are currently open.
   final Map<_MenuBarMenuState, WidgetBuilder> _openMenus = <_MenuBarMenuState, WidgetBuilder>{};
 
+  // The tree of menu item nodes corresponding to menus that are currently
+  // *visible* (does not include any menu items that are not currently visible),
+  // and their associated MenuBarButtons.
+  final _MenuNode root = _RootMenuNode();
+
   bool get menuIsOpen => _openMenus.isNotEmpty;
   bool get enabled => widget.enabled;
 
   final FocusScopeNode menuBarScope = FocusScopeNode(debugLabel: 'MenuBar');
   final FocusScopeNode overlayScope = FocusScopeNode(debugLabel: 'MenuBar overlay');
 
-  // Returns the active menu bar state in the given context, and creates a
-  // dependency relationship that will rebuild the context when the menu bar
+  // Returns the active parent menu bar state in the given context, and creates
+  // a dependency relationship that will rebuild the context when the menu bar
   // changes.
   static _MenuBarState of(BuildContext context) {
     final _MenuBarState? found = context.dependOnInheritedWidgetOfExactType<_MenuBarMarker>()?.state;
@@ -388,6 +393,7 @@ class _MenuBarState extends State<MenuBar> {
       state: this,
       child: _MenuItemWrapper(
         parent: null,
+        index: 0,
         child: Actions(
           actions: <Type, Action<Intent>>{
             NextFocusIntent: _MenuNextFocusAction(menuBar: this),
@@ -413,8 +419,9 @@ class _MenuBarState extends State<MenuBar> {
                   child: _MenuBarTopLevelBar(
                     elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
                         .resolve(state)!,
-                    height:
-                        widget.minimumHeight ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
+                    height: widget.minimumHeight ??
+                        menuTheme.barMinimumHeight ??
+                        _TokenDefaultsM3(context).barMinimumHeight,
                     enabled: widget.enabled,
                     color: (widget.backgroundColor ??
                             menuTheme.barBackgroundColor ??
@@ -441,16 +448,16 @@ class _MenuBarState extends State<MenuBar> {
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
     }
     _focusBeforeClick = null;
-    final List<_MenuBarMenuState> ancestors = menu._ancestors;
+    final List<_MenuBarMenuState> ancestors = menu.ancestors;
     _openMenus.removeWhere((_MenuBarMenuState key, WidgetBuilder builder) => !ancestors.contains(key));
     _openMenus[menu] = builder;
     _markMenuDirtyAndDelayIfNecessary();
   }
 
   void closeMenu(_MenuBarMenuState menu) {
-    final Set<_MenuBarMenuState> toClose = <_MenuBarMenuState>{ menu };
+    final Set<_MenuBarMenuState> toClose = <_MenuBarMenuState>{menu};
     for (final _MenuBarMenuState openMenu in _openMenus.keys) {
-      if (openMenu._ancestors.contains(menu)) {
+      if (openMenu.ancestors.contains(menu)) {
         toClose.add(openMenu);
       }
     }
@@ -486,6 +493,7 @@ class _MenuBarState extends State<MenuBar> {
       _overlayEntry?.markNeedsBuild();
       widget.controller?._menuBarStateChanged();
     }
+
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       // If we're in the middle of a build, we need to mark dirty in a post
       // frame callback, since this function will often be called by a part of
@@ -807,15 +815,25 @@ class MenuBarButton extends StatefulWidget with MenuItem {
   }
 }
 
-class _MenuBarButtonState extends State<MenuBarButton> {
+class _MenuBarButtonState extends State<MenuBarButton> with _MenuNode {
   late _MenuBarState _menuBar;
   _MenuBarMenuState? _parent;
+  int _parentIndex = -1;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
 
   bool get _enabled {
     return (widget.onSelected != null || widget.onSelectedIntent != null) && _menuBar.enabled;
   }
+
+  @override
+  Map<int, _MenuNode> get children => const <int, _MenuNode>{};
+
+  @override
+  _MenuNode? get parent => _parent;
+
+  @override
+  int get parentIndex => _parentIndex;
 
   @override
   void initState() {
@@ -833,13 +851,19 @@ class _MenuBarButtonState extends State<MenuBarButton> {
   void dispose() {
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
+    parent?.removeChild(parentIndex, this);
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
-    _updateMenuRegistration();
     super.didChangeDependencies();
+    _menuBar = _MenuBarState.of(context);
+    parent?.removeChild(parentIndex, this);
+    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
+    _parent = wrapper?.parent;
+    _parentIndex = wrapper?.index ?? -1;
+    parent?.addChild(parentIndex, this);
   }
 
   @override
@@ -854,7 +878,6 @@ class _MenuBarButtonState extends State<MenuBarButton> {
         return true;
       }());
     }
-    _updateMenuRegistration();
     super.didUpdateWidget(oldWidget);
   }
 
@@ -892,11 +915,6 @@ class _MenuBarButtonState extends State<MenuBarButton> {
         ),
       ),
     );
-  }
-
-  void _updateMenuRegistration() {
-    _menuBar = _MenuBarState.of(context);
-    _parent = _MenuItemWrapper.maybeOf(context);
   }
 
   void _handleSelect() {
@@ -1108,14 +1126,36 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
   }
 }
 
-class _MenuBarMenuState extends State<MenuBarMenu> {
+class _MenuBarMenuState extends State<MenuBarMenu> with _MenuNode {
   late _MenuBarState _menuBar;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
-  late _MenuBarMenuState? _parent;
+  _MenuBarMenuState? _parent;
+  int _parentIndex = -1;
   bool get _showingSubmenu => _menuBar.isAnOpenMenu(this);
   bool get _isTopLevelMenu => _parent == null;
   bool get _enabled => _menuBar.enabled && widget.children.isNotEmpty;
+
+  @override
+  final Map<int, _MenuNode> children = <int, _MenuNode>{};
+
+  @override
+  _MenuNode? get parent => _parent;
+
+  @override
+  int get parentIndex => _parentIndex;
+
+  @override
+  void addChild(int index, _MenuNode child) {
+    assert(children[index] == null, 'Index $index already set. Tried to set to $child. Already set to ${children[index]}');
+    children[index] = child;
+  }
+
+  @override
+  void removeChild(int index, _MenuNode child) {
+    assert(children[index] == child, 'Child $child not found at index $index in $children');
+    children.remove(index);
+  }
 
   @override
   void initState() {
@@ -1133,14 +1173,19 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
   void dispose() {
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
+    parent?.removeChild(parentIndex, this);
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _parent = _MenuItemWrapper.maybeOf(context);
     _menuBar = _MenuBarState.of(context);
+    parent?.removeChild(parentIndex, this);
+    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
+    _parent = wrapper?.parent;
+    _parentIndex = wrapper?.index ?? -1;
+    parent?.addChild(parentIndex, this);
   }
 
   @override
@@ -1170,22 +1215,13 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     });
   }
 
-  List<_MenuBarMenuState> get _ancestors {
-    final List<_MenuBarMenuState> result = <_MenuBarMenuState>[];
-    _MenuBarMenuState? node = this;
-    while (node != null) {
-      node = node._parent;
-      if (node != null) {
-        result.add(node);
-      }
-    }
-    return result;
-  }
+  @override
+  List<_MenuBarMenuState> get ancestors => super.ancestors.cast<_MenuBarMenuState>();
 
   List<_MenuBarMenuState> ancestorDifference(_MenuBarMenuState? other) {
-    final List<_MenuBarMenuState> myAncestors = <_MenuBarMenuState>[..._ancestors, this];
+    final List<_MenuBarMenuState> myAncestors = <_MenuBarMenuState>[...ancestors, this];
     final List<_MenuBarMenuState> otherAncestors =
-        other == null ? const <_MenuBarMenuState>[] : <_MenuBarMenuState>[...other._ancestors, other];
+        other == null ? const <_MenuBarMenuState>[] : <_MenuBarMenuState>[...other.ancestors, other];
     int skip = 0;
     for (; skip < myAncestors.length && skip < otherAncestors.length; skip += 1) {
       if (myAncestors[skip] != otherAncestors[skip]) {
@@ -1314,6 +1350,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     };
     // Because this is all in the overlay, we have to duplicate a lot of state
     // that exists in the context of the menu button.
+    int index = 0;
     return _wrapWithPosition(
       // Use the menu button's context, not the passed-in context.
       menuButtonContext: this.context,
@@ -1325,21 +1362,30 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
             builder: (BuildContext context) {
               return _MenuBarMarker(
                 state: _menuBar,
-                child: _MenuItemWrapper(
-                  parent: this,
-                  child: Material(
-                    color: (widget.backgroundColor ?? menuTheme.menuBackgroundColor ?? defaultTheme.menuBackgroundColor)
-                        .resolve(disabled),
-                    shape: (widget.shape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled),
-                    elevation:
-                        (widget.elevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
-                    child: Padding(
-                      padding: widget.padding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
-                      child: _MenuBarMenuList(
-                        direction: Axis.vertical,
-                        textDirection: Directionality.of(context),
-                        children: widget.children,
-                      ),
+                child: Material(
+                  color: (widget.backgroundColor ?? menuTheme.menuBackgroundColor ?? defaultTheme.menuBackgroundColor)
+                      .resolve(disabled),
+                  shape: (widget.shape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled),
+                  elevation:
+                      (widget.elevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
+                  child: Padding(
+                    padding: widget.padding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
+                    child: _MenuBarMenuList(
+                      direction: Axis.vertical,
+                      textDirection: Directionality.of(context),
+                      children: widget.children.map<Widget>((Widget child) {
+                        final Widget result = _MenuItemWrapper(
+                          parent: this,
+                          index: index,
+                          child: child,
+                        );
+                        if (child is MenuItemGroup) {
+                          index += child.members.length;
+                        } else {
+                          index += 1;
+                        }
+                        return result;
+                      }).toList(),
                     ),
                   ),
                 ),
@@ -1357,11 +1403,14 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
 ///
 /// It inserts dividers as necessary before and after the group, only inserting
 /// them if there are other menu items before or after this group in the menu.
-class MenuItemGroup extends StatelessWidget with MenuItem {
+class MenuItemGroup extends StatefulWidget with MenuItem {
   /// Creates a const [MenuItemGroup].
   ///
   /// The [members] attribute is required.
   const MenuItemGroup({super.key, required this.members});
+
+  @override
+  String get label => '';
 
   /// The members of this [MenuItemGroup].
   ///
@@ -1370,32 +1419,78 @@ class MenuItemGroup extends StatelessWidget with MenuItem {
   final List<Widget> members;
 
   @override
+  State<MenuItemGroup> createState() => _MenuItemGroupState();
+}
+
+class _MenuItemGroupState extends State<MenuItemGroup> with _MenuNode {
+  _MenuNode? _parent;
+  int _parentIndex = -1;
+
+  @override
+  final Map<int, _MenuNode> children = <int, _MenuNode>{};
+
+  @override
+  int get memberCount => widget.members.length;
+
+  @override
+  _MenuNode? get parent => _parent;
+
+  @override
+  int get parentIndex => _parentIndex;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Don't add/remove groups to the parents: they are not part of the tree,
+    // only the members matter.
+    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
+    _parent = wrapper?.parent;
+    _parentIndex = wrapper?.index ?? -1;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final _MenuBarMenuState? parent = _MenuItemWrapper.maybeOf(context);
-    int index = -1;
+    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
+    final _MenuBarMenuState? parent = wrapper?.parent;
     bool skipPrevious = false;
     bool skipNext = false;
     if (parent != null) {
-      final int numChildren = parent.widget.children.length;
-      index = parent.widget.children.indexOf(this);
+      final int numChildren = parent.children.length;
+      final int index = parentIndex;
       if (index != -1) {
         if (index == 0) {
           skipPrevious = true;
         } else if (index > 0) {
-          skipPrevious = parent.widget.children[index - 1] is MenuItemGroup;
+          skipPrevious = parent.children[index - 1]!.memberCount > 0;
         }
         if (index == numChildren - 1) {
           skipNext = true;
         } else if (index > 0 && index < numChildren - 1) {
-          skipNext = parent.widget.children[index + 1] is MenuItemGroup;
+          skipNext = parent.children[index + 1]!.memberCount > 0;
         }
       }
     }
+    int childIndex = 0;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (!skipPrevious) const _MenuItemDivider(),
-        ...members,
+        ...widget.members.map<Widget>((Widget child) {
+          final Widget result = _MenuItemWrapper(
+            parent: parent,
+            // When the group is added, the parent adds enough space in the
+            // index to accommodate all of the members.
+            index: parentIndex + childIndex,
+            child: child,
+          );
+          childIndex += 1;
+          return result;
+        }),
         if (!skipNext) const _MenuItemDivider(),
       ],
     );
@@ -1404,11 +1499,8 @@ class MenuItemGroup extends StatelessWidget with MenuItem {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<Widget>('members', members));
+    properties.add(IterableProperty<Widget>('members', widget.members));
   }
-
-  @override
-  String get label => ''; // MenuItemGroups don't have labels.
 }
 
 class _MenuItemDivider extends StatelessWidget {
@@ -1482,6 +1574,70 @@ class _MenuStack extends StatelessWidget {
   }
 }
 
+mixin _MenuNode {
+  int get parentIndex;
+
+  /// This is the parent of this node in the hierarchy, so that we can traverse
+  /// ancestors.
+  _MenuNode? get parent;
+
+  /// These are the menu nodes that are the children of the menu item.
+  Map<int, _MenuNode> get children;
+
+  /// The number of additional members that this node represents. Will be zero
+  /// for everything except groups.
+  int get memberCount => 0;
+
+  /// Adds the given child to the end of the list of children.
+  void addChild(int index, _MenuNode child) {
+    throw UnimplementedError("The $runtimeType class doesn't support adding menu children.");
+  }
+
+  /// Removes the given child from the list of children.
+  void removeChild(int index, _MenuNode child) {
+    throw UnimplementedError("The $runtimeType class doesn't support removing menu children.");
+  }
+
+  /// Return the list of ancestors for this node.
+  List<_MenuNode> get ancestors {
+    final List<_MenuNode> result = <_MenuNode>[];
+    _MenuNode? node = this;
+    while (node != null) {
+      node = node.parent;
+      if (node != null) {
+        result.add(node);
+      }
+    }
+    return result;
+  }
+}
+
+class _RootMenuNode with _MenuNode {
+  /// Makes a node suitable for the root node of the tree which doesn't contain
+  /// a valid [item].
+  _RootMenuNode() : children = <int, _MenuNode>{};
+
+  @override
+  int get parentIndex => 0;
+
+  @override
+  _MenuNode? get parent => null;
+
+  @override
+  final Map<int, _MenuNode> children;
+
+  @override
+  void addChild(int index, _MenuNode child) {
+    children[index] = child;
+  }
+
+  @override
+  void removeChild(int index, _MenuNode child) {
+    assert(children[index] != null);
+    children.remove(index);
+  }
+}
+
 /// An inherited widget used to provide its subtree with a [_MenuNode], so that
 /// the children of a [MenuBar] can find their associated [_MenuNode]s without
 /// having to be stateful widgets.
@@ -1495,6 +1651,7 @@ class _MenuStack extends StatelessWidget {
 class _MenuItemWrapper extends InheritedWidget {
   const _MenuItemWrapper({
     required this.parent,
+    required this.index,
     required super.child,
   });
 
@@ -1503,7 +1660,10 @@ class _MenuItemWrapper extends InheritedWidget {
   /// May be null if this is a top-level menu.
   final _MenuBarMenuState? parent;
 
-  static _MenuBarMenuState? maybeOf(BuildContext context) {
+  /// The index of this menu item in the parent's list of menu items.
+  final int index;
+
+  static _MenuItemWrapper? maybeOf(BuildContext context) {
     final _MenuItemWrapper? wrapper = context.dependOnInheritedWidgetOfExactType<_MenuItemWrapper>();
     if (wrapper == null) {
       throw FlutterError('A menu item was created without a $MenuBar.\n'
@@ -1512,12 +1672,12 @@ class _MenuItemWrapper extends InheritedWidget {
           '$MenuBar was: $context');
     }
 
-    return wrapper.parent;
+    return wrapper;
   }
 
   @override
   bool updateShouldNotify(_MenuItemWrapper oldWidget) {
-    return oldWidget.parent != parent;
+    return oldWidget.parent != parent || oldWidget.index != index;
   }
 
   @override
@@ -1642,7 +1802,7 @@ class _MenuBarItemLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isTopLevelItem = _MenuItemWrapper.maybeOf(context) == null;
+    final bool isTopLevelItem = _MenuItemWrapper.maybeOf(context)?.parent == null;
     final VisualDensity density = Theme.of(context).visualDensity;
     final double horizontalPadding = math.max(
       _kLabelItemMinSpacing,
@@ -2132,31 +2292,27 @@ class _MenuNextFocusAction extends NextFocusAction {
 
   @override
   void invoke(NextFocusIntent intent) {
-    // if (!menuBar.menuIsOpen) {
-    //   // Nothing is open, select first top level menu item.
-    //   if (menuBar._root.children.isEmpty) {
+    //   if (!menuBar.menuIsOpen) {
+    //     menuBar.openMenu();
     //     return;
     //   }
-    //   menuBar.openMenu(menuBar._root.children[0]);
-    //   return;
-    // }
-    // final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
-    //   return menuBar.enabled &&
-    //       node != menuBar._root &&
-    //       (node.item.children.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
-    // }).toList();
-    // if (enabledNodes.isEmpty) {
-    //   return;
-    // }
-    // final int index = enabledNodes.indexOf(menuBar.openMenu!);
-    // if (index == -1) {
-    //   return;
-    // }
-    // if (index == enabledNodes.length - 1) {
-    //   menuBar.openMenu(enabledNodes.first);
-    //   return;
-    // }
-    // menuBar.openMenu(enabledNodes[index + 1]);
+    //   final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
+    //     return menuBar.enabled &&
+    //         node != menuBar._root &&
+    //         (node.item.children.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
+    //   }).toList();
+    //   if (enabledNodes.isEmpty) {
+    //     return;
+    //   }
+    //   final int index = enabledNodes.indexOf(menuBar.openMenu!);
+    //   if (index == -1) {
+    //     return;
+    //   }
+    //   if (index == enabledNodes.length - 1) {
+    //     menuBar.openMenu(enabledNodes.first);
+    //     return;
+    //   }
+    //   menuBar.openMenu(enabledNodes[index + 1]);
   }
 }
 
