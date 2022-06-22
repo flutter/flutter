@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
@@ -52,22 +51,18 @@ class FlutterViewEmbedder {
   // The tag name for the root view of the flutter app (glass-pane)
   static const String _glassPaneTagName = 'flt-glass-pane';
 
-  /// Fires when browser language preferences change.
-  static const html.EventStreamProvider<html.Event> languageChangeEvent =
-      html.EventStreamProvider<html.Event>('languagechange');
-
-  /// Listens to window resize events.
-  StreamSubscription<html.Event>? _resizeSubscription;
+  /// Listens to window resize events
+  DomSubscription? _resizeSubscription;
 
   /// Listens to window locale events.
-  StreamSubscription<html.Event>? _localeSubscription;
+  DomSubscription? _localeSubscription;
 
   /// Contains Flutter-specific CSS rules, such as default margins and
   /// paddings.
-  html.StyleElement? _styleElement;
+  DomHTMLStyleElement? _styleElement;
 
   /// Configures the screen, such as scaling.
-  html.MetaElement? _viewportMeta;
+  DomHTMLMetaElement? _viewportMeta;
 
   /// The element that contains the [sceneElement].
   ///
@@ -76,12 +71,12 @@ class FlutterViewEmbedder {
   ///
   /// This element is inserted after the [semanticsHostElement] so that
   /// platform views take precedence in DOM event handling.
-  html.Element? get sceneHostElement => _sceneHostElement;
-  html.Element? _sceneHostElement;
+  DomElement? get sceneHostElement => _sceneHostElement;
+  DomElement? _sceneHostElement;
 
   /// A child element of body outside the shadowroot that hosts
   /// global resources such svg filters and clip paths when using webkit.
-  html.Element? _resourcesHost;
+  DomElement? _resourcesHost;
 
   /// The element that contains the semantics tree.
   ///
@@ -96,18 +91,18 @@ class FlutterViewEmbedder {
   ///
   /// This element is inserted before the [semanticsHostElement] so that
   /// platform views take precedence in DOM event handling.
-  html.Element? get semanticsHostElement => _semanticsHostElement;
-  html.Element? _semanticsHostElement;
+  DomElement? get semanticsHostElement => _semanticsHostElement;
+  DomElement? _semanticsHostElement;
 
   /// The last scene element rendered by the [render] method.
-  html.Element? get sceneElement => _sceneElement;
-  html.Element? _sceneElement;
+  DomElement? get sceneElement => _sceneElement;
+  DomElement? _sceneElement;
 
   /// This is state persistent across hot restarts that indicates what
   /// to clear.  Delay removal of old visible state to make the
   /// transition appear smooth.
   static const String _staleHotRestartStore = '__flutter_state';
-  List<html.Element?>? _staleHotRestartState;
+  List<DomElement?>? _staleHotRestartState;
 
   /// Creates a container for DOM elements that need to be cleaned up between
   /// hot restarts.
@@ -115,11 +110,11 @@ class FlutterViewEmbedder {
   /// If a contains already exists, reuses the existing one.
   void _setupHotRestart() {
     // This persists across hot restarts to clear stale DOM.
-    _staleHotRestartState = getJsProperty<List<html.Element?>?>(html.window, _staleHotRestartStore);
+    _staleHotRestartState = getJsProperty<List<DomElement?>?>(domWindow, _staleHotRestartStore);
     if (_staleHotRestartState == null) {
-      _staleHotRestartState = <html.Element?>[];
+      _staleHotRestartState = <DomElement?>[];
       setJsProperty(
-          html.window, _staleHotRestartStore, _staleHotRestartState);
+          domWindow, _staleHotRestartStore, _staleHotRestartState);
     }
   }
 
@@ -130,7 +125,7 @@ class FlutterViewEmbedder {
     registerHotRestartListener(() {
       _resizeSubscription?.cancel();
       _localeSubscription?.cancel();
-      _staleHotRestartState!.addAll(<html.Element?>[
+      _staleHotRestartState!.addAll(<DomElement?>[
         _glassPaneElement,
         _styleElement,
         _viewportMeta,
@@ -140,7 +135,7 @@ class FlutterViewEmbedder {
 
   void _clearOnHotRestart() {
     if (_staleHotRestartState!.isNotEmpty) {
-      for (final html.Element? element in _staleHotRestartState!) {
+      for (final DomElement? element in _staleHotRestartState!) {
         element?.remove();
       }
       _staleHotRestartState!.clear();
@@ -151,7 +146,7 @@ class FlutterViewEmbedder {
   /// already in the right place, skip DOM mutation. This is both faster and
   /// more correct, because moving DOM nodes loses internal state, such as
   /// text selection.
-  void addSceneToSceneHost(html.Element? sceneElement) {
+  void addSceneToSceneHost(DomElement? sceneElement) {
     if (sceneElement != _sceneElement) {
       _sceneElement?.remove();
       _sceneElement = sceneElement;
@@ -169,14 +164,14 @@ class FlutterViewEmbedder {
   /// which captures semantics input events. The semantics DOM tree must be a
   /// child of the glass pane element so that events bubble up to the glass pane
   /// if they are not handled by semantics.
-  html.Element? get glassPaneElement => _glassPaneElement;
-  html.Element? _glassPaneElement;
+  DomElement? get glassPaneElement => _glassPaneElement;
+  DomElement? _glassPaneElement;
 
   /// The [HostNode] of the [glassPaneElement], which contains the whole Flutter app.
   HostNode? get glassPaneShadow => _glassPaneShadow;
   HostNode? _glassPaneShadow;
 
-  final html.Element rootElement = html.document.body!;
+  final DomElement rootElement = domDocument.body!;
 
   static const String defaultFontStyle = 'normal';
   static const String defaultFontWeight = 'normal';
@@ -189,11 +184,11 @@ class FlutterViewEmbedder {
     final bool isWebKit = browserEngine == BrowserEngine.webkit;
 
     _styleElement?.remove();
-    _styleElement = html.StyleElement();
+    _styleElement = createDomHTMLStyleElement();
     _resourcesHost?.remove();
     _resourcesHost = null;
-    html.document.head!.append(_styleElement!);
-    final html.CssStyleSheet sheet = _styleElement!.sheet! as html.CssStyleSheet;
+    domDocument.head!.append(_styleElement!);
+    final DomCSSStyleSheet sheet = _styleElement!.sheet! as DomCSSStyleSheet;
     applyGlobalCssRulesToSheet(
       sheet,
       browserEngine: browserEngine,
@@ -238,8 +233,8 @@ class FlutterViewEmbedder {
     // engine are complete.
     bodyElement.spellcheck = false;
 
-    for (final html.Element viewportMeta
-        in html.document.head!.querySelectorAll('meta[name="viewport"]')) {
+    for (final DomElement viewportMeta
+        in domDocument.head!.querySelectorAll('meta[name="viewport"]')) {
       if (assertionsEnabled) {
         // Filter out the meta tag that the engine placed on the page. This is
         // to avoid UI flicker during hot restart. Hot restart will clean up the
@@ -260,18 +255,18 @@ class FlutterViewEmbedder {
     // variables, so this will be null upon hot restart. Instead, this tag is
     // removed by _clearOnHotRestart.
     _viewportMeta?.remove();
-    _viewportMeta = html.MetaElement()
+    _viewportMeta = createDomHTMLMetaElement()
       ..setAttribute('flt-viewport', '')
       ..name = 'viewport'
       ..content = 'width=device-width, initial-scale=1.0, '
           'maximum-scale=1.0, user-scalable=no';
-    html.document.head!.append(_viewportMeta!);
+    domDocument.head!.append(_viewportMeta!);
 
     // IMPORTANT: the glass pane element must come after the scene element in the DOM node list so
     //            it can intercept input events.
     _glassPaneElement?.remove();
     final DomElement glassPaneElement = domDocument.createElement(_glassPaneTagName);
-    _glassPaneElement = glassPaneElement as html.Element;
+    _glassPaneElement = glassPaneElement;
     glassPaneElement.style
       ..position = 'absolute'
       ..top = '0'
@@ -285,12 +280,11 @@ class FlutterViewEmbedder {
 
     // Create a [HostNode] under the glass pane element, and attach everything
     // there, instead of directly underneath the glass panel.
-    final HostNode glassPaneElementHostNode = _createHostNode(glassPaneElement
-        as html.Element);
+    final HostNode glassPaneElementHostNode = _createHostNode(glassPaneElement);
     _glassPaneShadow = glassPaneElementHostNode;
 
     // Don't allow the scene to receive pointer events.
-    _sceneHostElement = html.document.createElement('flt-scene-host')
+    _sceneHostElement = domDocument.createElement('flt-scene-host')
       ..style.pointerEvents = 'none';
 
     /// CanvasKit uses a static scene element that never gets replaced, so it's
@@ -298,24 +292,24 @@ class FlutterViewEmbedder {
     /// system is reset due to hot restart or in a test.
     if (useCanvasKit) {
       skiaSceneHost = createDomElement('flt-scene');
-      addSceneToSceneHost(skiaSceneHost as html.Element?);
+      addSceneToSceneHost(skiaSceneHost);
     }
 
-    final html.Element semanticsHostElement =
-        html.document.createElement('flt-semantics-host');
+    final DomElement semanticsHostElement =
+        domDocument.createElement('flt-semantics-host');
     semanticsHostElement.style
       ..position = 'absolute'
       ..transformOrigin = '0 0 0';
     _semanticsHostElement = semanticsHostElement;
     updateSemanticsScreenProperties();
 
-    final html.Element _accessibilityPlaceholder = EngineSemanticsOwner
+    final DomElement _accessibilityPlaceholder = EngineSemanticsOwner
         .instance.semanticsHelper
-        .prepareAccessibilityPlaceholder() as html.Element;
+        .prepareAccessibilityPlaceholder();
 
     glassPaneElementHostNode.appendAll(<DomNode>[
-      _accessibilityPlaceholder as DomNode,
-      _sceneHostElement! as DomNode,
+      _accessibilityPlaceholder,
+      _sceneHostElement!,
 
       // The semantic host goes last because hit-test order-wise it must be
       // first. If semantics goes under the scene host, platform views will
@@ -327,7 +321,7 @@ class FlutterViewEmbedder {
       // elements transparent. This way, if a platform view appears among other
       // interactive Flutter widgets, as long as those widgets do not intersect
       // with the platform view, the platform view will be reachable.
-      semanticsHostElement as DomNode,
+      semanticsHostElement,
     ]);
 
     // When debugging semantics, make the scene semi-transparent so that the
@@ -339,7 +333,7 @@ class FlutterViewEmbedder {
     PointerBinding.initInstance(glassPaneElement);
     KeyboardBinding.initInstance(glassPaneElement);
 
-    if (html.window.visualViewport == null && isWebKit) {
+    if (domWindow.visualViewport == null && isWebKit) {
       // Older Safari versions sometimes give us bogus innerWidth/innerHeight
       // values when the page loads. When it changes the values to correct ones
       // it does not notify of the change via `onResize`. As a workaround, we
@@ -353,13 +347,13 @@ class FlutterViewEmbedder {
       // Firefox returns correct values for innerHeight, innerWidth.
       // Firefox also triggers html.window.onResize therefore this timer does
       // not need to be set up for Firefox.
-      final int initialInnerWidth = html.window.innerWidth!;
+      final int initialInnerWidth = domWindow.innerWidth!;
       // Counts how many times screen size was checked. It is checked up to 5
       // times.
       int checkCount = 0;
       Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
         checkCount += 1;
-        if (initialInnerWidth != html.window.innerWidth) {
+        if (initialInnerWidth != domWindow.innerWidth) {
           // Window size changed. Notify.
           t.cancel();
           _metricsDidChange(null);
@@ -370,24 +364,25 @@ class FlutterViewEmbedder {
       });
     }
 
-    if (html.window.visualViewport != null) {
-      _resizeSubscription =
-          html.window.visualViewport!.onResize.listen(_metricsDidChange);
+    if (domWindow.visualViewport != null) {
+      _resizeSubscription = DomSubscription(domWindow.visualViewport!, 'resize',
+          allowInterop(_metricsDidChange));
     } else {
-      _resizeSubscription = html.window.onResize.listen(_metricsDidChange);
+      _resizeSubscription = DomSubscription(domWindow, 'resize',
+          allowInterop(_metricsDidChange));
     }
-    _localeSubscription =
-        languageChangeEvent.forTarget(html.window).listen(_languageDidChange);
+    _localeSubscription = DomSubscription(domWindow, 'languagechange',
+          allowInterop(_languageDidChange));
     EnginePlatformDispatcher.instance.updateLocales();
   }
 
-  // Creates a [HostNode] into a `root` [html.Element].
-  HostNode _createHostNode(html.Element root) {
+  // Creates a [HostNode] into a `root` [DomElement].
+  HostNode _createHostNode(DomElement root) {
     if (getJsProperty<Object?>(root, 'attachShadow') != null) {
-      return ShadowDomHostNode(root as DomElement);
+      return ShadowDomHostNode(root);
     } else {
       // attachShadow not available, fall back to ElementHostNode.
-      return ElementHostNode(root as DomElement);
+      return ElementHostNode(root);
     }
   }
 
@@ -395,8 +390,8 @@ class FlutterViewEmbedder {
   /// logical pixels. To compensate, an inverse scale is injected at the root
   /// level.
   void updateSemanticsScreenProperties() {
-    _semanticsHostElement!.style.transform =
-        'scale(${1 / html.window.devicePixelRatio})';
+    _semanticsHostElement!.style.setProperty('transform',
+        'scale(${1 / domWindow.devicePixelRatio})');
   }
 
   /// Called immediately after browser window metrics change.
@@ -408,7 +403,7 @@ class FlutterViewEmbedder {
   ///
   /// Note: always check for rotations for a mobile device. Update the physical
   /// size if the change is caused by a rotation.
-  void _metricsDidChange(html.Event? event) {
+  void _metricsDidChange(DomEvent? event) {
     updateSemanticsScreenProperties();
     if (isMobile && !window.isRotation() && textEditing.isEditing) {
       window.computeOnScreenKeyboardInsets(true);
@@ -422,7 +417,7 @@ class FlutterViewEmbedder {
   }
 
   /// Called immediately after browser window language change.
-  void _languageDidChange(html.Event event) {
+  void _languageDidChange(DomEvent event) {
     EnginePlatformDispatcher.instance.updateLocales();
     if (ui.window.onLocaleChanged != null) {
       ui.window.onLocaleChanged!();
@@ -451,9 +446,9 @@ class FlutterViewEmbedder {
   ///
   /// See w3c screen api: https://www.w3.org/TR/screen-orientation/
   Future<bool> setPreferredOrientation(List<dynamic> orientations) {
-    final html.Screen screen = html.window.screen!;
+    final DomScreen screen = domWindow.screen!;
     if (!unsafeIsNull(screen)) {
-      final html.ScreenOrientation? screenOrientation = screen.orientation;
+      final DomScreenOrientation? screenOrientation = screen.orientation;
       if (!unsafeIsNull(screenOrientation)) {
         if (orientations.isEmpty) {
           screenOrientation!.unlock();
@@ -500,9 +495,9 @@ class FlutterViewEmbedder {
   }
 
   /// The element corresponding to the only child of the root surface.
-  html.Element? get _rootApplicationElement {
-    final html.Element lastElement = rootElement.children.last;
-    for (final html.Element child in lastElement.children) {
+  DomElement? get _rootApplicationElement {
+    final DomElement lastElement = rootElement.children.last;
+    for (final DomElement child in lastElement.children) {
       if (child.tagName == 'FLT-SCENE') {
         return child;
       }
@@ -516,37 +511,37 @@ class FlutterViewEmbedder {
   /// place it as first element of body(webkit), or as a child of
   /// glass pane element for other browsers to make sure url resolution
   /// works correctly when content is inside a shadow root.
-  void addResource(html.Element element) {
+  void addResource(DomElement element) {
     final bool isWebKit = browserEngine == BrowserEngine.webkit;
     if (_resourcesHost == null) {
-      _resourcesHost = html.DivElement()
+      _resourcesHost = createDomHTMLDivElement()
         ..style.visibility = 'hidden';
       if (isWebKit) {
-        final html.Node bodyNode = html.document.body!;
+        final DomNode bodyNode = domDocument.body!;
         bodyNode.insertBefore(_resourcesHost!, bodyNode.firstChild);
       } else {
         _glassPaneShadow!.node.insertBefore(
-            _resourcesHost! as DomNode, _glassPaneShadow!.node.firstChild);
+            _resourcesHost!, _glassPaneShadow!.node.firstChild);
       }
     }
     _resourcesHost!.append(element);
   }
 
   /// Removes a global resource element.
-  void removeResource(html.Element? element) {
+  void removeResource(DomElement? element) {
     if (element == null) {
       return;
     }
-    assert(element.parent == _resourcesHost);
+    assert(element.parentNode == _resourcesHost);
     element.remove();
   }
 
-  String get currentHtml => _rootApplicationElement?.outerHtml ?? '';
+  String get currentHtml => _rootApplicationElement?.outerHTML ?? '';
 }
 
 // Applies the required global CSS to an incoming [html.CssStyleSheet] `sheet`.
 void applyGlobalCssRulesToSheet(
-  html.CssStyleSheet sheet, {
+  DomCSSStyleSheet sheet, {
   required BrowserEngine browserEngine,
   required bool hasAutofillOverlay,
   String glassPaneTagName = FlutterViewEmbedder._glassPaneTagName,

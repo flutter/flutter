@@ -1888,7 +1888,9 @@ void _testPlatformView() {
     expect(child3Rect.right, 20);
     expect(child3Rect.bottom, 60);
 
-    final html.Element platformViewElement = flutterViewEmbedder.glassPaneElement!.querySelector('#view-0')!;
+    final html.Element platformViewElement =
+        flutterViewEmbedder.glassPaneElement!.querySelector('#view-0')! as
+        html.Element;
     final html.Rectangle<num> platformViewRect = platformViewElement.getBoundingClientRect();
     expect(platformViewRect.left, 0);
     expect(platformViewRect.top, 15);

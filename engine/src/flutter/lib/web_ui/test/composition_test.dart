@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
 
+import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/initialization.dart';
 import 'package:ui/src/engine/text_editing/composition_aware_mixin.dart';
 import 'package:ui/src/engine/text_editing/input_type.dart';
@@ -68,7 +69,8 @@ Future<void> testMain() async {
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
-        mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
+        mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement
+            as DomHTMLElement);
 
         _inputElement.dispatchEvent(html.Event(_MockWithCompositionAwareMixin._kCompositionEnd));
 
@@ -81,7 +83,8 @@ Future<void> testMain() async {
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
-        mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
+        mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement
+            as DomHTMLElement);
 
         _inputElement.dispatchEvent(html.Event(_MockWithCompositionAwareMixin._kCompositionStart));
 
@@ -95,7 +98,8 @@ Future<void> testMain() async {
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
-        mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
+        mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement
+            as DomHTMLElement);
 
         _inputElement.dispatchEvent(html.CompositionEvent(
             _MockWithCompositionAwareMixin._kCompositionUpdate,

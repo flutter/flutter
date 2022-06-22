@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -1787,7 +1786,7 @@ class EngineSemanticsOwner {
     if (_rootSemanticsElement == null) {
       final SemanticsObject root = _semanticsTree[0]!;
       _rootSemanticsElement = root.element;
-      flutterViewEmbedder.semanticsHostElement!.append(root.element as html.Node);
+      flutterViewEmbedder.semanticsHostElement!.append(root.element);
     }
 
     _finalizeTree();
