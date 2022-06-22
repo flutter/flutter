@@ -391,50 +391,45 @@ class _MenuBarState extends State<MenuBar> {
     final MenuThemeData menuTheme = MenuTheme.of(context);
     return _MenuBarMarker(
       state: this,
-      child: _MenuItemWrapper(
-        parent: null,
-        index: 0,
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            NextFocusIntent: _MenuNextFocusAction(menuBar: this),
-            PreviousFocusIntent: _MenuPreviousFocusAction(menuBar: this),
-            DirectionalFocusIntent: _MenuDirectionalFocusAction(
-              menuBar: this,
-            ),
-            DismissIntent: _MenuDismissAction(menuBar: this),
-          },
-          child: Builder(builder: (BuildContext context) {
-            return ExcludeFocus(
-              excluding: !widget.enabled || !menuIsOpen,
-              child: FocusScope(
-                node: menuBarScope,
-                child: Shortcuts(
-                  // Make sure that these override any shortcut bindings from
-                  // the menu items when a menu is open. If someone wants to
-                  // bind an arrow or tab to a menu item, it would otherwise
-                  // override the default traversal keys. We want their
-                  // shortcut to apply everywhere but in the menu itself,
-                  // since there we have to be able to traverse menus.
-                  shortcuts: _kMenuTraversalShortcuts,
-                  child: _MenuBarTopLevelBar(
-                    elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
-                        .resolve(state)!,
-                    height: widget.minimumHeight ??
-                        menuTheme.barMinimumHeight ??
-                        _TokenDefaultsM3(context).barMinimumHeight,
-                    enabled: widget.enabled,
-                    color: (widget.backgroundColor ??
-                            menuTheme.barBackgroundColor ??
-                            _TokenDefaultsM3(context).barBackgroundColor)
-                        .resolve(state)!,
-                    padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                    children: widget.children,
-                  ),
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          NextFocusIntent: _MenuNextFocusAction(menuBar: this),
+          PreviousFocusIntent: _MenuPreviousFocusAction(menuBar: this),
+          DirectionalFocusIntent: _MenuDirectionalFocusAction(
+            menuBar: this,
+          ),
+          DismissIntent: _MenuDismissAction(menuBar: this),
+        },
+        child: Builder(builder: (BuildContext context) {
+          return ExcludeFocus(
+            excluding: !widget.enabled || !menuIsOpen,
+            child: FocusScope(
+              node: menuBarScope,
+              child: Shortcuts(
+                // Make sure that these override any shortcut bindings from
+                // the menu items when a menu is open. If someone wants to
+                // bind an arrow or tab to a menu item, it would otherwise
+                // override the default traversal keys. We want their
+                // shortcut to apply everywhere but in the menu itself,
+                // since there we have to be able to traverse menus.
+                shortcuts: _kMenuTraversalShortcuts,
+                child: _MenuBarTopLevelBar(
+                  elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
+                      .resolve(state)!,
+                  height:
+                      widget.minimumHeight ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
+                  enabled: widget.enabled,
+                  color: (widget.backgroundColor ??
+                          menuTheme.barBackgroundColor ??
+                          _TokenDefaultsM3(context).barBackgroundColor)
+                      .resolve(state)!,
+                  padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
+                  children: widget.children,
                 ),
               ),
-            );
-          }),
-        ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -1147,7 +1142,8 @@ class _MenuBarMenuState extends State<MenuBarMenu> with _MenuNode {
 
   @override
   void addChild(int index, _MenuNode child) {
-    assert(children[index] == null, 'Index $index already set. Tried to set to $child. Already set to ${children[index]}');
+    assert(
+        children[index] == null, 'Index $index already set. Tried to set to $child. Already set to ${children[index]}');
     children[index] = child;
   }
 
@@ -1582,6 +1578,7 @@ mixin _MenuNode {
   _MenuNode? get parent;
 
   /// These are the menu nodes that are the children of the menu item.
+  /// This is a reverse mapping of [indices].
   Map<int, _MenuNode> get children;
 
   /// The number of additional members that this node represents. Will be zero
@@ -1609,6 +1606,34 @@ mixin _MenuNode {
       }
     }
     return result;
+  }
+
+  _MenuNode? nextSibling(int index) {
+    assert(children.containsKey(index));
+    if (index == children.length - 1) {
+      return null;
+    }
+    final List<int> indices = children.keys.toList()..sort();
+    final int listIndex = indices.indexOf(index);
+    assert(listIndex == index);
+    if (listIndex == indices.length - 1) {
+      return null;
+    }
+    return children[indices[listIndex - 1]];
+  }
+
+  _MenuNode? previousSibling(int index) {
+    assert(children.containsKey(index));
+    if (index == 0 || index == children.length - 1) {
+      return null;
+    }
+    final List<int> indices = children.keys.toList()..sort();
+    final int listIndex = indices.indexOf(index);
+    assert(listIndex == index);
+    if (listIndex == 0 || listIndex == indices.length - 1) {
+      return null;
+    }
+    return children[indices[listIndex + 1]];
   }
 }
 
@@ -1814,6 +1839,7 @@ class _MenuBarItemLabel extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            Text(_MenuItemWrapper.maybeOf(context)?.index.toString() ?? 'X'),
             if (leadingIcon != null) leadingIcon!,
             Padding(
               padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
@@ -1925,6 +1951,7 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
 
   @override
   Widget build(BuildContext context) {
+    int index = 0;
     return _RegisteredRenderBox(
       menuBar: _menuBar,
       child: ConstrainedBox(
@@ -1935,7 +1962,11 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
             direction: widget.direction,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              ...widget.children,
+              ...widget.children.map<Widget>((Widget child) {
+                final Widget result = _MenuItemWrapper(parent: null, index: index, child: child);
+                index += 1;
+                return result;
+              }).toList(),
               if (widget.direction == Axis.horizontal) const Spacer(),
             ],
           ),
@@ -2292,27 +2323,27 @@ class _MenuNextFocusAction extends NextFocusAction {
 
   @override
   void invoke(NextFocusIntent intent) {
-    //   if (!menuBar.menuIsOpen) {
-    //     menuBar.openMenu();
-    //     return;
-    //   }
-    //   final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
-    //     return menuBar.enabled &&
-    //         node != menuBar._root &&
-    //         (node.item.children.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
-    //   }).toList();
-    //   if (enabledNodes.isEmpty) {
-    //     return;
-    //   }
-    //   final int index = enabledNodes.indexOf(menuBar.openMenu!);
-    //   if (index == -1) {
-    //     return;
-    //   }
-    //   if (index == enabledNodes.length - 1) {
-    //     menuBar.openMenu(enabledNodes.first);
-    //     return;
-    //   }
-    //   menuBar.openMenu(enabledNodes[index + 1]);
+    // if (!menuBar.menuIsOpen) {
+    //   menuBar.openMenu(menuBar.);
+    //   return;
+    // }
+    // final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
+    //   return menuBar.enabled &&
+    //       node != menuBar._root &&
+    //       (node.item.children.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
+    // }).toList();
+    // if (enabledNodes.isEmpty) {
+    //   return;
+    // }
+    // final int index = enabledNodes.indexOf(menuBar.openMenu!);
+    // if (index == -1) {
+    //   return;
+    // }
+    // if (index == enabledNodes.length - 1) {
+    //   menuBar.openMenu(enabledNodes.first);
+    //   return;
+    // }
+    // menuBar.openMenu(enabledNodes[index + 1]);
   }
 }
 
