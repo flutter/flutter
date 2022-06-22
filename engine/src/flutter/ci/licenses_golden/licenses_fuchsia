@@ -1,4 +1,4 @@
-Signature: 6f48e4700d3694045ed7fdd1355a0039
+Signature: a632a6fc7167db57bf959eee90a0d728
 
 UNUSED LICENSES:
 
@@ -2547,7 +2547,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/trap.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/spawn.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/epitaph.c
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl/handle_closing.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/include/lib/fidl/epitaph.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/walker.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/binding.h
