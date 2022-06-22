@@ -48,11 +48,9 @@ class LayerTree {
   void paint(Frame frame, {bool ignoreRasterCache = false}) {
     final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
     internalNodesCanvas.addCanvas(frame.canvas);
-    final List<CkCanvas> overlayCanvases =
+    final Iterable<CkCanvas> overlayCanvases =
         frame.viewEmbedder!.getOverlayCanvases();
-    for (int i = 0; i < overlayCanvases.length; i++) {
-      internalNodesCanvas.addCanvas(overlayCanvases[i]);
-    }
+    overlayCanvases.forEach(internalNodesCanvas.addCanvas);
     // Clear the canvases before painting
     internalNodesCanvas.clear(const ui.Color(0x00000000));
     final PaintContext context = PaintContext(
