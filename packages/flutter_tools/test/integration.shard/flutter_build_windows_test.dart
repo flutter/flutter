@@ -78,7 +78,25 @@ void main() {
       expect(productVersion, equals('1.0.0+1'));
     });
 
-    testWithoutContext('flutter build windows sets version info', () {
+    testWithoutContext('flutter build windows sets build name', () {
+      processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        'windows',
+        '--no-pub',
+        '--build-name',
+        '1.2.3',
+      ], workingDirectory: projectRoot.path);
+
+      final String fileVersion = _getFileVersion(exeFile);
+      final String productVersion = _getProductVersion(exeFile);
+
+      expect(fileVersion, equals('1.2.3.0'));
+      expect(productVersion, equals('1.2.3'));
+    });
+
+    testWithoutContext('flutter build windows sets build name and build number', () {
       processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
