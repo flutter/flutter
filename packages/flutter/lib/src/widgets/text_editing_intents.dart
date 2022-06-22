@@ -237,9 +237,9 @@ class ScrollToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
 /// Scrolls up or down by page depending on the [forward] parameter.
 class ScrollByPageIntent extends DirectionalTextEditingIntent {
   /// Creates a [ScrollByPageIntent].
-  const ScrollByPageIntent({
-    required bool forward,
-  }) : super(forward);
+  const ScrollByPageIntent(
+    super.forward,
+  );
 }
 
 /// Scrolls up or down by page depending on the [forward] parameter.

@@ -198,8 +198,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(forward: false),
-    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(forward: true),
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(false),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(true),
     const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionByPageIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionByPageIntent(forward: true),
 
@@ -311,8 +311,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
-    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(forward: false),
-    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(forward: true),
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(false),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(true),
     const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionByPageIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionByPageIntent(forward: true),
 
