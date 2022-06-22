@@ -197,7 +197,7 @@ extension DomNodeExtension on DomNode {
   }
 
   external DomNode removeChild(DomNode child);
-  external bool? get isConnected;
+  external bool get isConnected;
   set text(String? value) =>
       js_util.setProperty<String?>(this, 'textContent', value);
   external DomNode cloneNode(bool? deep);
