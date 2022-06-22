@@ -256,10 +256,15 @@ class ChipThemeData with Diagnosticable {
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       secondarySelectedColor: secondarySelectedColor,
+      shadowColor: Colors.black,
+      selectedShadowColor: Colors.black,
+      showCheckmark: true,
       padding: padding,
       labelStyle: labelStyle,
       secondaryLabelStyle: secondaryLabelStyle,
       brightness: brightness,
+      elevation: 0.0,
+      pressElevation: 8.0,
     );
   }
 
@@ -420,6 +425,7 @@ class ChipThemeData with Diagnosticable {
     Color? secondarySelectedColor,
     Color? shadowColor,
     Color? selectedShadowColor,
+    bool? showCheckmark,
     Color? checkmarkColor,
     EdgeInsetsGeometry? labelPadding,
     EdgeInsetsGeometry? padding,
@@ -439,6 +445,7 @@ class ChipThemeData with Diagnosticable {
       secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
       shadowColor: shadowColor ?? this.shadowColor,
       selectedShadowColor: selectedShadowColor ?? this.selectedShadowColor,
+      showCheckmark: showCheckmark ?? this.showCheckmark,
       checkmarkColor: checkmarkColor ?? this.checkmarkColor,
       labelPadding: labelPadding ?? this.labelPadding,
       padding: padding ?? this.padding,
@@ -470,6 +477,7 @@ class ChipThemeData with Diagnosticable {
       secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
+      showCheckmark: t < 0.5 ? a?.showCheckmark ?? true : b?.showCheckmark ?? true,
       checkmarkColor: Color.lerp(a?.checkmarkColor, b?.checkmarkColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
@@ -514,6 +522,7 @@ class ChipThemeData with Diagnosticable {
     secondarySelectedColor,
     shadowColor,
     selectedShadowColor,
+    showCheckmark,
     checkmarkColor,
     labelPadding,
     padding,
@@ -542,6 +551,7 @@ class ChipThemeData with Diagnosticable {
         && other.secondarySelectedColor == secondarySelectedColor
         && other.shadowColor == shadowColor
         && other.selectedShadowColor == selectedShadowColor
+        && other.showCheckmark == showCheckmark
         && other.checkmarkColor == checkmarkColor
         && other.labelPadding == labelPadding
         && other.padding == padding
@@ -564,6 +574,7 @@ class ChipThemeData with Diagnosticable {
     properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showCheckmark', showCheckmark, defaultValue: null));
     properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
