@@ -3532,6 +3532,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       context: context,
       style: widget.style,
       withComposing: !widget.readOnly && _hasFocus,
+      spellCheckConfiguration: _spellCheckConfiguration,
     );
   }
 }
