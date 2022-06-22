@@ -25,7 +25,6 @@ export 'engine/canvaskit/canvaskit_api.dart';
 export 'engine/canvaskit/canvaskit_canvas.dart';
 export 'engine/canvaskit/color_filter.dart';
 export 'engine/canvaskit/embedded_views.dart';
-export 'engine/canvaskit/embedded_views_diff.dart';
 export 'engine/canvaskit/font_fallbacks.dart';
 export 'engine/canvaskit/fonts.dart';
 export 'engine/canvaskit/image.dart';
