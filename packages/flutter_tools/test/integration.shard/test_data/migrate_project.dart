@@ -11,6 +11,19 @@ import '../../src/common.dart';
 import '../test_utils.dart';
 import 'project.dart';
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/flutter_project_metadata.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/migrate/migrate_compute.dart';
+import 'package:flutter_tools/src/migrate/migrate_result.dart';
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
+import 'package:flutter_tools/src/project.dart';
+
+import '../test_utils.dart';
+
 class MigrateProject extends Project {
   MigrateProject(this.version, {this.vanilla = true, this.main});
 
@@ -24,6 +37,38 @@ class MigrateProject extends Project {
   final bool vanilla;
 
   late String _appPath;
+
+  static Future<void> installProject(String verison, Directory dir, {bool vanilla = true, String? main}) async {
+    final MigrateProject project = MigrateProject(verison, vanilla: vanilla, main: main);
+    await project.setUpIn(dir);
+
+    // Init a git repo to test uncommitted changes checks
+    await globals.processManager.run(<String>[
+      'git',
+      'init',
+    ], workingDirectory: dir.path);
+    await globals.processManager.run(<String>[
+      'git',
+      'checkout',
+      '-b',
+      'master',
+    ], workingDirectory: dir.path);
+    await commitChanges(dir);
+  }
+
+  static Future<void> commitChanges(Directory dir) async {
+    await globals.processManager.run(<String>[
+      'git',
+      'add',
+      '.',
+    ], workingDirectory: dir.path);
+    await globals.processManager.run(<String>[
+      'git',
+      'commit',
+      '-m',
+      '"Initial commit"',
+    ], workingDirectory: dir.path);
+  }
 
   @override
   Future<void> setUpIn(Directory dir, {
