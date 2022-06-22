@@ -40,10 +40,6 @@ void PictureLayer::Diff(DiffContext* context, const Layer* old_layer) {
 #endif
   }
   context->PushTransform(SkMatrix::Translate(offset_.x(), offset_.y()));
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context->SetTransform(
-      RasterCache::GetIntegralTransCTM(context->GetTransform()));
-#endif
   context->AddLayerBounds(picture()->cullRect());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
@@ -137,10 +133,6 @@ void PictureLayer::Paint(PaintContext& context) const {
 
   SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
   context.leaf_nodes_canvas->translate(offset_.x(), offset_.y());
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context.leaf_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
-      context.leaf_nodes_canvas->getTotalMatrix()));
-#endif
 
   if (context.raster_cache) {
     AutoCachePaint cache_paint(context);

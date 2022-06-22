@@ -468,8 +468,6 @@ def GatherDartTest(
     threading = 'single-threaded'
 
   tester_name = 'flutter_tester'
-  if alternative_tester:
-    tester_name = 'flutter_tester_fractional_translation'
   print(
       "Running test '%s' using '%s' (%s)" %
       (kernel_file_name, tester_name, threading)
@@ -699,11 +697,6 @@ def GatherDartTests(build_dir, filter, verbose_dart_snapshot):
         yield GatherDartTest(
             build_dir, test_packages, dart_test_file, verbose_dart_snapshot,
             False, True
-        )
-        # Smoke test with tester variant that has no raster cache and enabled fractional translation
-        yield GatherDartTest(
-            build_dir, test_packages, dart_test_file, verbose_dart_snapshot,
-            False, True, True
         )
 
   for dart_test_file in dart_tests:

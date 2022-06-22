@@ -25,11 +25,6 @@ void ShaderMaskLayer::Diff(DiffContext* context, const Layer* old_layer) {
     }
   }
 
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context->SetTransform(
-      RasterCache::GetIntegralTransCTM(context->GetTransform()));
-#endif
-
   DiffChildren(context, prev);
 
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
@@ -45,10 +40,6 @@ void ShaderMaskLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->subtree_can_inherit_opacity = true;
 
   SkMatrix child_matrix(matrix);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  child_matrix = RasterCache::GetIntegralTransCTM(child_matrix);
-#endif
-
   if (render_count_ >= kMinimumRendersBeforeCachingFilterLayer) {
     TryToPrepareRasterCache(context, this, child_matrix,
                             RasterCacheLayerStrategy::kLayer);
@@ -62,11 +53,6 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   AutoCachePaint cache_paint(context);
-
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
-      context.leaf_nodes_canvas->getTotalMatrix()));
-#endif
 
   if (context.raster_cache &&
       context.raster_cache->Draw(this, *context.leaf_nodes_canvas,

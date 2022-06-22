@@ -384,18 +384,12 @@ TEST_F(ClipRectLayerTest, OpacityInheritancePainting) {
   context->subtree_can_inherit_opacity = false;
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
-#endif
+
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
     expected_builder.save();
     {
       expected_builder.translate(offset.fX, offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      expected_builder.transformReset();
-      expected_builder.transform(opacity_integer_transform);
-#endif
       /* ClipRectLayer::Paint() */ {
         expected_builder.save();
         expected_builder.clipRect(clip_rect, SkClipOp::kIntersect, true);
@@ -454,26 +448,15 @@ TEST_F(ClipRectLayerTest, OpacityInheritanceSaveLayerPainting) {
   context->subtree_can_inherit_opacity = false;
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
-#endif
+
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
     expected_builder.save();
     {
       expected_builder.translate(offset.fX, offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      expected_builder.transformReset();
-      expected_builder.transform(opacity_integer_transform);
-#endif
       /* ClipRectLayer::Paint() */ {
         expected_builder.save();
         expected_builder.clipRect(clip_rect, SkClipOp::kIntersect, true);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-        /* ClipShapeLayer::Paint() Integer CTM */
-        expected_builder.transformReset();
-        expected_builder.transform(opacity_integer_transform);
-#endif
         expected_builder.setColor(opacity_alpha << 24);
         expected_builder.saveLayer(&children_bounds, true);
         /* child layer1 paint */ {

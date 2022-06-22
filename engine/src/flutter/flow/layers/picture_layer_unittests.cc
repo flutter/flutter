@@ -12,10 +12,6 @@
 #include "flutter/testing/mock_canvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-#include "flutter/flow/raster_cache.h"
-#endif
-
 namespace flutter {
 namespace testing {
 
@@ -88,11 +84,6 @@ TEST_F(PictureLayerTest, SimplePicture) {
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{
            1, MockCanvas::ConcatMatrixData{SkM44(layer_offset_matrix)}},
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-       MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{SkM44(
-                  RasterCache::GetIntegralTransCTM(layer_offset_matrix))}},
-#endif
        MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
@@ -184,11 +175,7 @@ TEST_F(PictureLayerDiffTest, FractionalTranslation) {
   tree1.root()->Add(CreatePictureLayer(picture, SkPoint::Make(0.5, 0.5)));
 
   auto damage = DiffLayerTree(tree1, MockLayerTree());
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(11, 11, 61, 61));
-#else
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 61, 61));
-#endif
 }
 
 TEST_F(PictureLayerDiffTest, PictureCompare) {

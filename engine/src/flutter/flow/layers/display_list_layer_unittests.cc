@@ -12,10 +12,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
 
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-#include "flutter/flow/raster_cache.h"
-#endif
-
 namespace flutter {
 namespace testing {
 
@@ -96,11 +92,6 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{
            1, MockCanvas::ConcatMatrixData{SkM44(layer_offset_matrix)}},
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-       MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{SkM44(
-                  RasterCache::GetIntegralTransCTM(layer_offset_matrix))}},
-#endif
        MockCanvas::DrawCall{
            1, MockCanvas::DrawRectData{picture_bounds, SkPaint()}},
        MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
@@ -137,31 +128,15 @@ TEST_F(DisplayListLayerTest, SimpleDisplayListOpacityInheritance) {
 
   auto save_layer_bounds =
       picture_bounds.makeOffset(layer_offset.fX, layer_offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  auto opacity_integral_matrix =
-      RasterCache::GetIntegralTransCTM(SkMatrix::Translate(opacity_offset));
-  SkMatrix layer_offset_matrix = opacity_integral_matrix;
-  layer_offset_matrix.postTranslate(layer_offset.fX, layer_offset.fY);
-  auto layer_offset_integral_matrix =
-      RasterCache::GetIntegralTransCTM(layer_offset_matrix);
-#endif
   DisplayListBuilder expected_builder;
   /* opacity_layer::Paint() */ {
     expected_builder.save();
     {
       expected_builder.translate(opacity_offset.fX, opacity_offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      expected_builder.transformReset();
-      expected_builder.transform(opacity_integral_matrix);
-#endif
       /* display_list_layer::Paint() */ {
         expected_builder.save();
         {
           expected_builder.translate(layer_offset.fX, layer_offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-          expected_builder.transformReset();
-          expected_builder.transform(layer_offset_integral_matrix);
-#endif
           expected_builder.setColor(opacity_alpha << 24);
           expected_builder.saveLayer(&save_layer_bounds, true);
           /* display_list contents */ {  //
@@ -216,23 +191,11 @@ TEST_F(DisplayListLayerTest, IncompatibleDisplayListOpacityInheritance) {
   auto save_layer_bounds =
       display_list_bounds.makeOffset(layer_offset.fX, layer_offset.fY);
   save_layer_bounds.roundOut(&save_layer_bounds);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  auto opacity_integral_matrix =
-      RasterCache::GetIntegralTransCTM(SkMatrix::Translate(opacity_offset));
-  SkMatrix layer_offset_matrix = opacity_integral_matrix;
-  layer_offset_matrix.postTranslate(layer_offset.fX, layer_offset.fY);
-  auto layer_offset_integral_matrix =
-      RasterCache::GetIntegralTransCTM(layer_offset_matrix);
-#endif
   DisplayListBuilder expected_builder;
   /* opacity_layer::Paint() */ {
     expected_builder.save();
     {
       expected_builder.translate(opacity_offset.fX, opacity_offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      expected_builder.transformReset();
-      expected_builder.transform(opacity_integral_matrix);
-#endif
       expected_builder.setColor(opacity_alpha << 24);
       expected_builder.saveLayer(&save_layer_bounds, true);
       {
@@ -240,10 +203,6 @@ TEST_F(DisplayListLayerTest, IncompatibleDisplayListOpacityInheritance) {
           expected_builder.save();
           {
             expected_builder.translate(layer_offset.fX, layer_offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-            expected_builder.transformReset();
-            expected_builder.transform(layer_offset_integral_matrix);
-#endif
             expected_builder.drawDisplayList(child_display_list);
           }
           expected_builder.restore();
@@ -318,18 +277,10 @@ TEST_F(DisplayListLayerTest, CachedIncompatibleDisplayListOpacityInheritance) {
   //     recorder.save();
   //     {
   //       recorder.translate(opacity_offset.fX, opacity_offset.fY);
-  // #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  //       recorder.resetMatrix();
-  //       recorder.concat(opacity_integral_matrix);
-  // #endif
   //       /* display_list_layer::Paint() */ {
   //         recorder.save();
   //         {
   //           recorder.translate(layer_offset.fX, layer_offset.fY);
-  // #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  //           recorder.resetMatrix();
-  //           recorder.concat(layer_offset_integral_matrix);
-  // #endif
   //           SkPaint p;
   //           p.setAlpha(opacity_alpha);
   //           context->raster_cache->Draw(*display_list, recorder, &p);
@@ -375,11 +326,7 @@ TEST_F(DisplayListLayerDiffTest, FractionalTranslation) {
       CreateDisplayListLayer(display_list, SkPoint::Make(0.5, 0.5)));
 
   auto damage = DiffLayerTree(tree1, MockLayerTree());
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(11, 11, 61, 61));
-#else
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 61, 61));
-#endif
 }
 
 TEST_F(DisplayListLayerDiffTest, DisplayListCompare) {
