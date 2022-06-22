@@ -13,7 +13,6 @@ if (build_engine_artifacts) {
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/lib/snapshot:generate_snapshot_bin",
       "//flutter/shell/testing:testing",
-      "//flutter/shell/testing:testing_fractional_translation",
     ]
     if (is_mac) {
       # TODO(godofredoc): Remove after paths are standardized flutter/flutter#105351.
@@ -60,10 +59,6 @@ if (build_engine_artifacts) {
       {
         source = "$root_out_dir/flutter_tester$exe"
         destination = "flutter_tester$exe"
-      },
-      {
-        source = "$root_out_dir/flutter_tester_fractional_translation$exe"
-        destination = "flutter_tester_fractional_translation$exe"
       },
       {
         source = "$root_out_dir/impellerc$exe"

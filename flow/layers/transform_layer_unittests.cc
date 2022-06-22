@@ -311,18 +311,11 @@ TEST_F(TransformLayerTest, OpacityInheritancePainting) {
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
-#endif
   DisplayListBuilder expected_builder;
   /* opacity_layer paint */ {
     expected_builder.save();
     {
       expected_builder.translate(offset.fX, offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      expected_builder.transformReset();
-      expected_builder.transform(opacity_integer_transform);
-#endif
       /* transform_layer paint */ {
         expected_builder.save();
         expected_builder.transform(transform);

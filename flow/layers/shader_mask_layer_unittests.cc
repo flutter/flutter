@@ -71,22 +71,20 @@ TEST_F(ShaderMaskLayerTest, EmptyFilter) {
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
-      std::vector({
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-          MockCanvas::DrawCall{0, MockCanvas::SetMatrixData{SkM44()}},
-#endif
-          MockCanvas::DrawCall{
-              0,
-              MockCanvas::SaveLayerData{child_bounds, SkPaint(), nullptr, 1}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawPathData{child_path, child_paint}},
-          MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                                      layer_bounds.fLeft, layer_bounds.fTop)}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawRectData{SkRect::MakeWH(layer_bounds.width(),
-                                                         layer_bounds.height()),
-                                          filter_paint}},
-          MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+      std::vector({MockCanvas::DrawCall{
+                       0, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
+                                                    nullptr, 1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path, child_paint}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
+                              layer_bounds.fLeft, layer_bounds.fTop)}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
+                                                       layer_bounds.width(),
+                                                       layer_bounds.height()),
+                                                   filter_paint}},
+                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 TEST_F(ShaderMaskLayerTest, SimpleFilter) {
@@ -114,22 +112,20 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
-      std::vector({
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-          MockCanvas::DrawCall{0, MockCanvas::SetMatrixData{SkM44()}},
-#endif
-          MockCanvas::DrawCall{
-              0,
-              MockCanvas::SaveLayerData{child_bounds, SkPaint(), nullptr, 1}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawPathData{child_path, child_paint}},
-          MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                                      layer_bounds.fLeft, layer_bounds.fTop)}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawRectData{SkRect::MakeWH(layer_bounds.width(),
-                                                         layer_bounds.height()),
-                                          filter_paint}},
-          MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+      std::vector({MockCanvas::DrawCall{
+                       0, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
+                                                    nullptr, 1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path, child_paint}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
+                              layer_bounds.fLeft, layer_bounds.fTop)}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
+                                                       layer_bounds.width(),
+                                                       layer_bounds.height()),
+                                                   filter_paint}},
+                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 TEST_F(ShaderMaskLayerTest, MultipleChildren) {
@@ -169,24 +165,22 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
-      std::vector({
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-          MockCanvas::DrawCall{0, MockCanvas::SetMatrixData{SkM44()}},
-#endif
-          MockCanvas::DrawCall{
-              0, MockCanvas::SaveLayerData{children_bounds, SkPaint(), nullptr,
-                                           1}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawPathData{child_path2, child_paint2}},
-          MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                                      layer_bounds.fLeft, layer_bounds.fTop)}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawRectData{SkRect::MakeWH(layer_bounds.width(),
-                                                         layer_bounds.height()),
-                                          filter_paint}},
-          MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+      std::vector({MockCanvas::DrawCall{
+                       0, MockCanvas::SaveLayerData{children_bounds, SkPaint(),
+                                                    nullptr, 1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path1, child_paint1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path2, child_paint2}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
+                              layer_bounds.fLeft, layer_bounds.fTop)}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
+                                                       layer_bounds.width(),
+                                                       layer_bounds.height()),
+                                                   filter_paint}},
+                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 TEST_F(ShaderMaskLayerTest, Nested) {
@@ -236,37 +230,35 @@ TEST_F(ShaderMaskLayerTest, Nested) {
   layer1->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
-      std::vector({
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-          MockCanvas::DrawCall{0, MockCanvas::SetMatrixData{SkM44()}},
-#endif
-          MockCanvas::DrawCall{
-              0, MockCanvas::SaveLayerData{children_bounds, SkPaint(), nullptr,
-                                           1}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-          MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44()}},
-#endif
-          MockCanvas::DrawCall{
-              1, MockCanvas::SaveLayerData{child_path2.getBounds(), SkPaint(),
-                                           nullptr, 2}},
-          MockCanvas::DrawCall{
-              2, MockCanvas::DrawPathData{child_path2, child_paint2}},
-          MockCanvas::DrawCall{2, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                                      layer_bounds.fLeft, layer_bounds.fTop)}},
-          MockCanvas::DrawCall{
-              2, MockCanvas::DrawRectData{SkRect::MakeWH(layer_bounds.width(),
-                                                         layer_bounds.height()),
-                                          filter_paint2}},
-          MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-          MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                                      layer_bounds.fLeft, layer_bounds.fTop)}},
-          MockCanvas::DrawCall{
-              1, MockCanvas::DrawRectData{SkRect::MakeWH(layer_bounds.width(),
-                                                         layer_bounds.height()),
-                                          filter_paint1}},
-          MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+      std::vector(
+          {MockCanvas::DrawCall{
+               0, MockCanvas::SaveLayerData{children_bounds, SkPaint(), nullptr,
+                                            1}},
+           MockCanvas::DrawCall{
+               1, MockCanvas::DrawPathData{child_path1, child_paint1}},
+           MockCanvas::DrawCall{
+               1, MockCanvas::SaveLayerData{child_path2.getBounds(), SkPaint(),
+                                            nullptr, 2}},
+           MockCanvas::DrawCall{
+               2, MockCanvas::DrawPathData{child_path2, child_paint2}},
+           MockCanvas::DrawCall{2,
+                                MockCanvas::ConcatMatrixData{SkM44::Translate(
+                                    layer_bounds.fLeft, layer_bounds.fTop)}},
+           MockCanvas::DrawCall{
+               2,
+               MockCanvas::DrawRectData{
+                   SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+                   filter_paint2}},
+           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+           MockCanvas::DrawCall{1,
+                                MockCanvas::ConcatMatrixData{SkM44::Translate(
+                                    layer_bounds.fLeft, layer_bounds.fTop)}},
+           MockCanvas::DrawCall{
+               1,
+               MockCanvas::DrawRectData{
+                   SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+                   filter_paint1}},
+           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 TEST_F(ShaderMaskLayerTest, Readback) {
@@ -351,21 +343,11 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
-#endif
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
     expected_builder.save();
     {
       expected_builder.translate(offset.fX, offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      expected_builder.transformReset();
-      expected_builder.transform(opacity_integer_transform);
-      /* Integer CTM in ShaderMaskLayer::Paint() */
-      expected_builder.transformReset();
-      expected_builder.transform(opacity_integer_transform);
-#endif
       /* ShaderMaskLayer::Paint() */ {
         expected_builder.setColor(opacity_alpha << 24);
         expected_builder.saveLayer(&child_path.getBounds(), true);
