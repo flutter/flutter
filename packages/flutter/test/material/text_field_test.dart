@@ -609,7 +609,7 @@ void main() {
     await checkCursorToggle();
   });
 
- // Regression test for https://github.com/flutter/flutter/issues/78918.
+  // Regression test for https://github.com/flutter/flutter/issues/78918.
   testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'how are you');
     final UniqueKey icon = UniqueKey();

@@ -971,7 +971,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('password briefly does not show last character on Android if turned off', (WidgetTester tester) async {
+  testWidgets('password briefly does not show last character when disabled by system', (WidgetTester tester) async {
     final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
     EditableText.debugDeterministicCursor = false;
     addTearDown(() {
