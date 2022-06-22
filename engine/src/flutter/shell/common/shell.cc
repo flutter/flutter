@@ -918,11 +918,7 @@ void Shell::OnPlatformViewSetViewportMetrics(const ViewportMetrics& metrics) {
 
   if (metrics.device_pixel_ratio <= 0 || metrics.physical_width <= 0 ||
       metrics.physical_height <= 0) {
-    FML_DLOG(ERROR)
-        << "Embedding reported invalid ViewportMetrics, ignoring update."
-        << "\nphysical_width: " << metrics.physical_width
-        << "\nphysical_height: " << metrics.physical_height
-        << "\ndevice_pixel_ratio: " << metrics.device_pixel_ratio;
+    // Ignore invalid view-port metrics.
     return;
   }
 
