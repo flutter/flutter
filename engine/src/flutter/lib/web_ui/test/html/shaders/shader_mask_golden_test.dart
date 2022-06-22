@@ -39,7 +39,7 @@ Future<void> testMain() async {
   setUp(() async {
     SurfaceSceneBuilder.debugForgetFrameScene();
     for (final html.Node scene in
-        flutterViewEmbedder.sceneHostElement!.querySelectorAll('flt-scene')) {
+        flutterViewEmbedder.sceneHostElement!.querySelectorAll('flt-scene').cast<html.Node>()) {
       scene.remove();
     }
     initWebGl();
@@ -163,8 +163,7 @@ void _renderCirclesScene(BlendMode blendMode) {
   builder.addPicture(Offset.zero, circles2);
   builder.pop();
 
-  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!
-      as html.Element);
+  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!);
 }
 
 Picture _drawTestPictureWithText(
@@ -220,6 +219,5 @@ void _renderTextScene(BlendMode blendMode) {
   builder.addPicture(Offset.zero, textPicture2);
   builder.pop();
 
-  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!
-      as html.Element);
+  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!);
 }
