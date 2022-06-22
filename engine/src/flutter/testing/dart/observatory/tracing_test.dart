@@ -65,6 +65,6 @@ void main() {
       }
     }
     expect(saveLayerRecordCount, 3);
-    expect(saveLayerCount, 3);
+    expect(saveLayerCount, 6);
   });
 }

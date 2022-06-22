@@ -35,7 +35,7 @@ class LayerTree {
   void Paint(CompositorContext::ScopedFrame& frame,
              bool ignore_raster_cache = false) const;
 
-  sk_sp<SkPicture> Flatten(const SkRect& bounds);
+  sk_sp<DisplayList> Flatten(const SkRect& bounds);
 
   Layer* root_layer() const { return root_layer_.get(); }
 

@@ -113,15 +113,10 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   }
 }
 
-sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
+sk_sp<DisplayList> LayerTree::Flatten(const SkRect& bounds) {
   TRACE_EVENT0("flutter", "LayerTree::Flatten");
 
-  SkPictureRecorder recorder;
-  auto* canvas = recorder.beginRecording(bounds);
-
-  if (!canvas) {
-    return nullptr;
-  }
+  DisplayListCanvasRecorder builder(bounds);
 
   MutatorsStack unused_stack;
   const FixedRefreshRateStopwatch unused_stopwatch;
@@ -147,14 +142,14 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       // clang-format on
   };
 
-  SkISize canvas_size = canvas->getBaseLayerSize();
+  SkISize canvas_size = builder.getBaseLayerSize();
   SkNWayCanvas internal_nodes_canvas(canvas_size.width(), canvas_size.height());
-  internal_nodes_canvas.addCanvas(canvas);
+  internal_nodes_canvas.addCanvas(&builder);
 
   Layer::PaintContext paint_context = {
       // clang-format off
       .internal_nodes_canvas         = &internal_nodes_canvas,
-      .leaf_nodes_canvas             = canvas,
+      .leaf_nodes_canvas             = &builder,
       .gr_context                    = nullptr,
       .view_embedder                 = nullptr,
       .raster_time                   = unused_stopwatch,
@@ -178,7 +173,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
     }
   }
 
-  return recorder.finishRecordingAsPicture();
+  return builder.Build();
 }
 
 }  // namespace flutter
