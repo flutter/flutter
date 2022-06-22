@@ -220,6 +220,29 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A JSON [MethodChannel] for handling spell check for text input.
+  ///
+  /// This channel exposes the spell check framework for supported platforms.
+  /// Android is the only supported platform currently.
+  ///
+  /// Spell check requests are intiiated by `SpellCheck.initiateSpellCheck`.
+  /// These requests may either be completed or canceled. If the request is
+  /// completed, the shell side will respond with the results of the request.
+  /// Otherwise, the shell side will respond with null.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked by
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `SpellCheck.initiateSpellCheck`: Sends request for specified text to be
+  ///     spell checked and returns the result, either a [List<SuggestionSpan>]
+  ///     representing [SuggestionSpan]s or null if the request was cancelled. 
+  ///     The arguments are the [String] to be spell checked and the [Locale] 
+  ///     for the text to be spell checked with.
+  static const MethodChannel spellCheck = OptionalMethodChannel(
+      'flutter/spellcheck',
+      JSONMethodCodec(),
+  );
+
   /// A JSON [BasicMessageChannel] for keyboard events.
   ///
   /// Each incoming message received on this channel (registered using

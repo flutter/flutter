@@ -329,6 +329,9 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.spellCheckEnabled = false,
+    this.spellCheckService,
+    this.spellCheckSuggestionsHandler,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -766,6 +769,15 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.editableText.spellCheckEnabled}
+  final bool spellCheckEnabled;
+
+  /// {@macro flutter.widgets.editableText.spellCheckService}
+  final SpellCheckService? spellCheckService;
+
+  /// {@macro flutter.widgets.editableText.spellCheckSuggestionsHandler}
+  final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -808,6 +820,9 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('spellCheckEnabled', spellCheckEnabled, defaultValue: false));
+    properties.add(DiagnosticsProperty<SpellCheckService>('spellCheckService', spellCheckService, defaultValue: null));
+    properties.add(DiagnosticsProperty<SpellCheckSuggestionsHandler>('spellCheckSuggestionsHandler', spellCheckSuggestionsHandler, defaultValue: null));
   }
 }
 
@@ -1278,6 +1293,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          spellCheckEnabled : widget.spellCheckEnabled,
+          spellCheckService : widget.spellCheckService,
+          spellCheckSuggestionsHandler : widget.spellCheckSuggestionsHandler,
         ),
       ),
     );

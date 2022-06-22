@@ -5,6 +5,8 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'platform_channel.dart';
+import 'system_channels.dart';
 
 /// A data structure representing a range of misspelled text and the suggested
 /// replacements for this range.
@@ -88,4 +90,119 @@ abstract class SpellCheckService {
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
     Locale locale, String text
   );
+}
+
+/// The service used by default to fetch spell check results for text input.
+///
+/// Any widget may use this service to spell check text by calling
+/// `fetchSpellCheckSuggestions(locale, text)` with an instance of this class.
+/// This is currently only supported by Android.
+///
+/// See also:
+///
+///  * [SpellCheckService], the service that this implements and may be
+///    overriden for use by [EditableText].
+///  * [EditableText], which may use this service to fetch results.
+class DefaultSpellCheckService implements SpellCheckService {
+  /// Creates service to spell check text input by default via communcication
+  /// over the spell check [MethodChannel].
+  DefaultSpellCheckService() {
+    spellCheckChannel = SystemChannels.spellCheck;
+  }
+
+  /// The last recieved [SuggestionSpan]s from the shell side.
+  List<SuggestionSpan>? lastSavedSpans;
+
+  /// The text corresponding to the [lastSavedSpans].
+  String? lastSavedText;
+
+  /// The channel used to communicate with the shell side to complete spell
+  /// check requests.
+  late MethodChannel spellCheckChannel;
+
+  /// Merges two lists of spell check [SuggestionSpan]s.
+  ///
+  /// Used in cases where the text has not changed, but the spell check results
+  /// received from the shell side have. This case is caused by IMEs (GBoard
+  /// confirmed) that ignore the composing region when spell checking text.
+  List<SuggestionSpan> mergeResults(
+      List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
+    final List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
+
+    SuggestionSpan oldSpan;
+    SuggestionSpan newSpan;
+    int oldSpanPointer = 0;
+    int newSpanPointer = 0;
+
+    while (oldSpanPointer < oldResults.length &&
+        newSpanPointer < newResults.length) {
+      oldSpan = oldResults[oldSpanPointer];
+      newSpan = newResults[newSpanPointer];
+
+      if (oldSpan.range.start == newSpan.range.start) {
+        mergedResults.add(oldSpan);
+        oldSpanPointer += 1;
+        newSpanPointer += 1;
+      } else {
+        if (oldSpan.range.start < newSpan.range.start) {
+          mergedResults.add(oldSpan);
+          oldSpanPointer += 1;
+        } else {
+          mergedResults.add(newSpan);
+          newSpanPointer += 1;
+        }
+      }
+    }
+
+    mergedResults.addAll(oldResults.sublist(oldSpanPointer));
+    mergedResults.addAll(newResults.sublist(newSpanPointer));
+
+    return mergedResults;
+  }
+
+  @override
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
+      Locale locale, String text) async {
+    assert(locale != null);
+    assert(text != null);
+
+    final List<dynamic> rawResults;
+
+    try {
+      rawResults = await spellCheckChannel.invokeMethod(
+        'SpellCheck.initiateSpellCheck',
+        <String>[locale.toLanguageTag(), text],
+      );
+    } catch (e) {
+      // Spell check request canceled due to pending request.
+      return null;
+    }
+
+    final List<String> results = rawResults.cast<String>();
+    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
+
+    for (final String result in results) {
+      final List<String> resultParsed = result.split('.');
+      suggestionSpans.add(SuggestionSpan(
+          TextRange(
+              start: int.parse(resultParsed[0]),
+              end: int.parse(resultParsed[1]) + 1),
+          resultParsed[2].split('\n')));
+    }
+
+    // Check to merge current and previous spell check results if the text has
+    // not changed, but the spell check results have between calls.
+    final bool canMergeSpans = lastSavedText != null && lastSavedText == text;
+    final bool shouldMergeSpans =
+        lastSavedSpans != null && !listEquals(lastSavedSpans, suggestionSpans);
+
+    if (canMergeSpans && shouldMergeSpans) {
+      suggestionSpans = mergeResults(lastSavedSpans!, suggestionSpans);
+    }
+
+    lastSavedSpans = suggestionSpans;
+    lastSavedText = text;
+
+    return suggestionSpans;
+  }
 }

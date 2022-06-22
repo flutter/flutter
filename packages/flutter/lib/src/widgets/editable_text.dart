@@ -32,6 +32,7 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'shortcuts.dart';
+import 'spell_check.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -164,12 +165,22 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, SpellCheckConfiguration? spellCheckConfiguration}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
+
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
-    if (!value.isComposingRangeValid || !withComposing) {
+    final bool composingRegionOutOfRange = !value.isComposingRangeValid || !withComposing;
+    final bool spellCheckEnabled = spellCheckConfiguration != null && 
+                             spellCheckConfiguration.spellCheckSuggestionsHandler != null && 
+                             spellCheckConfiguration.spellCheckResults != null;
+
+    if (spellCheckEnabled) {
+      return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingRegionOutOfRange, style, spellCheckConfiguration.spellCheckResults!);
+    }
+
+    if (composingRegionOutOfRange) {
       return TextSpan(style: style, text: text);
     }
     final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
@@ -552,6 +563,9 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.spellCheckEnabled = false,
+    this.spellCheckService,
+    this.spellCheckSuggestionsHandler,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1414,6 +1428,15 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// Whether or not spell check is enabled.
+  final bool spellCheckEnabled;
+
+  /// Service used to fetch spell check results if spell check is enabled.
+  final SpellCheckService? spellCheckService;
+
+  /// Handler used to display spell check results if spell check is enabled.
+  final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
+
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -1620,6 +1643,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AutofillScope? get currentAutofillScope => _currentAutofillScope;
 
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
+
+  late SpellCheckConfiguration? _spellCheckConfiguration;
+
+  bool? _spellCheckEnabled;
+
+  /// {@macro flutter.widgets.editableText.spellCheckEnabled}
+  bool? get spellCheckEnabled => _spellCheckEnabled;
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.
@@ -1838,6 +1868,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           FocusScope.of(context).autofocus(widget.focusNode);
         }
       });
+    }
+
+    _spellCheckEnabled = widget.spellCheckEnabled == true && widget.spellCheckService == null
+                          ? WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined
+                          : widget.spellCheckEnabled;
+    if (_spellCheckEnabled!) {
+      final SpellCheckService spellCheckService = widget.spellCheckService ?? DefaultSpellCheckService();
+      final SpellCheckSuggestionsHandler spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);
+
+      _spellCheckConfiguration = SpellCheckConfiguration(
+          spellCheckService: spellCheckService,
+          spellCheckSuggestionsHandler: spellCheckSuggestionsHandler);
+    } else {
+      _spellCheckConfiguration = SpellCheckConfiguration.disabled;
     }
 
     // Restart or stop the blinking cursor when TickerMode changes.
@@ -2544,6 +2588,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
     }
+
+    if (_spellCheckEnabled! && _value.text.isNotEmpty && cause! == SelectionChangedCause.tap) {
+      final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+      final Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
+      final String resultsText = _value.text;
+
+      spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
+        if (spans == null) {
+          return;
+        }
+       final  SpellCheckResults results = SpellCheckResults(resultsText, spans);
+       _spellCheckConfiguration!.spellCheckResults = results;
+        renderEditable.text = buildTextSpan();
+      });
+    }
   }
 
   Rect? _currentCaretRect;
@@ -2655,6 +2714,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           value,
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
+
+        if (_spellCheckEnabled! && value.text.isNotEmpty && _value.text != value.text) {
+          final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+          final Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+          final String resultsText = value.text;
+
+          spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
+            if (spans == null) {
+              return;
+            }
+            final SpellCheckResults results = SpellCheckResults(resultsText, spans);
+            _spellCheckConfiguration!.spellCheckResults = results;
+            renderEditable.text = buildTextSpan();
+          });
+        }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
