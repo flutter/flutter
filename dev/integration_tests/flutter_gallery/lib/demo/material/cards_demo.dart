@@ -247,7 +247,7 @@ class TravelDestinationContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TextStyle titleStyle = theme.textTheme.headline5!.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subtitle1!;
-    final ButtonStyle textButtonStyle = TextButton.styleFrom(primary: Colors.amber.shade500);
+    final ButtonStyle textButtonStyle = TextButton.styleFrom(foregroundColor: Colors.amber.shade500);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
