@@ -774,6 +774,59 @@ last line of pub output: "err3"
     });
   });
 
+  testWithoutContext('pub cache local is merge to global', () async {
+    String? error;
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory local = fileSystem.currentDirectory.childDirectory('.pub-cache');
+    final Directory global = fileSystem.currentDirectory.childDirectory('/global');
+    global.createSync();
+    for (final Directory dir in <Directory>[global.childDirectory('.pub-cache'), local]) {
+      dir.createSync();
+      dir.childDirectory('hosted').createSync();
+      dir.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
+    }
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 69,
+        environment: <String, String>{
+          'FLUTTER_ROOT': '',
+          'PUB_CACHE': '/global/.pub-cache',
+          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+        },
+      ),
+    ]);
+
+    final Platform platform = FakePlatform(
+      environment: <String, String>{'HOME': '/global'}
+    );
+    final Pub pub = Pub(
+      platform: platform,
+      usage: TestUsage(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    FakeAsync().run((FakeAsync time) {
+      pub.get(context: PubContext.flutterTests).then((void value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = thrownError.toString();
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(error, isNull);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  });
+
   testWithoutContext('pub cache in environment is used', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
