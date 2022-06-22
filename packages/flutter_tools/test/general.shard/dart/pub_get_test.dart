@@ -785,6 +785,18 @@ last line of pub output: "err3"
       dir.childDirectory('hosted').createSync();
       dir.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
     }
+
+    final Directory globalHosted = global.childDirectory('.pub-cache').childDirectory('hosted').childDirectory('pub.dartlang.org');
+    globalHosted.childFile('first.file').createSync();
+    globalHosted.childDirectory('dir').createSync();
+
+    final Directory localHosted = local.childDirectory('hosted').childDirectory('pub.dartlang.org');
+    localHosted.childFile('second.file').writeAsBytesSync(<int>[0]);
+    localHosted.childDirectory('dir').createSync();
+    localHosted.childDirectory('dir').childFile('third.file').writeAsBytesSync(<int>[0]);
+    localHosted.childDirectory('dir_2').createSync();
+    localHosted.childDirectory('dir_2').childFile('fourth.file').writeAsBytesSync(<int>[0]);
+
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
@@ -824,6 +836,12 @@ last line of pub output: "err3"
       time.elapse(const Duration(milliseconds: 500));
       expect(error, isNull);
       expect(processManager, hasNoRemainingExpectations);
+      expect(local.existsSync(), false);
+      expect(globalHosted.childFile('second.file').existsSync(), true);
+      expect(
+          globalHosted.childDirectory('dir').childFile('third.file').existsSync(), false
+      ); // do not copy dependencies that are already downloaded
+      expect(globalHosted.childDirectory('dir_2').childFile('fourth.file').existsSync(), true);
     });
   });
 
