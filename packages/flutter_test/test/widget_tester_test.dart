@@ -730,16 +730,19 @@ void main() {
       }, variant: TargetPlatformVariant.all());
 
       const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{ TargetPlatform.android, TargetPlatform.linux };
-      testWidgets('TargetPlatformVariant.all with excluding runs an all variants except those provided in excluding', (WidgetTester tester) async {
+      testWidgets('TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding', (WidgetTester tester) async {
         if (debugDefaultTargetPlatformOverride == null) {
           expect(numberOfVariationsRun, equals(TargetPlatform.values.length - excludePlatforms.length));
+          expect(
+            excludePlatforms,
+            isNot(contains(debugDefaultTargetPlatformOverride)),
+            reason: 'this test should not run on any platform in excludePlatforms'
+          );
         } else {
           numberOfVariationsRun += 1;
         }
       }, variant: TargetPlatformVariant.all(excluding: excludePlatforms));
     });
-
-
 
     testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
       final TargetPlatformVariant all = TargetPlatformVariant.all();

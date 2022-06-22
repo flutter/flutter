@@ -257,7 +257,7 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   /// the [TargetPlatform] enum. If [excluding] is provided, will test all platforms
   /// except those in [excluding].
   TargetPlatformVariant.all({
-    Set<TargetPlatform> excluding = const <TargetPlatform>{}
+    Set<TargetPlatform> excluding = const <TargetPlatform>{},
   }) : values = TargetPlatform.values.toSet()..removeAll(excluding);
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
