@@ -22,10 +22,6 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
     }
   }
   context->PushTransform(SkMatrix::Translate(offset_.fX, offset_.fY));
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context->SetTransform(
-      RasterCache::GetIntegralTransCTM(context->GetTransform()));
-#endif
   DiffChildren(context, prev);
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
@@ -68,9 +64,6 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
 
   if (!children_can_accept_opacity()) {
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-    child_matrix = RasterCache::GetIntegralTransCTM(child_matrix);
-#endif
     TryToPrepareRasterCache(context, this, child_matrix,
                             RasterCacheLayerStrategy::kLayerChildren);
   }
@@ -85,11 +78,6 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
-
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
-      context.leaf_nodes_canvas->getTotalMatrix()));
-#endif
 
   SkScalar inherited_opacity = context.inherited_opacity;
   SkScalar subtree_opacity = opacity() * inherited_opacity;
