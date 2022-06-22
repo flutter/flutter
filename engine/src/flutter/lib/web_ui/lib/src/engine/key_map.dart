@@ -81,6 +81,7 @@ const Map<String, int> kWebToLogicalKey = <String, int>{
   'EndCall': 0x00100001004,
   'Enter': 0x0010000000d,
   'EraseEof': 0x00100000405,
+  'Esc': 0x0010000001b,
   'Escape': 0x0010000001b,
   'ExSel': 0x00100000406,
   'Execute': 0x00100000506,
@@ -329,14 +330,9 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'Backquote': 0x00070035, // backquote
   'Backslash': 0x00070031, // backslash
   'Backspace': 0x0007002a, // backspace
-  'BassBoost': 0x000c00e5, // bassBoost
   'BracketLeft': 0x0007002f, // bracketLeft
   'BracketRight': 0x00070030, // bracketRight
-  'BrightnessAuto': 0x000c0075, // brightnessAuto
   'BrightnessDown': 0x000c0070, // brightnessDown
-  'BrightnessMaximum': 0x000c0074, // brightnessMaximum
-  'BrightnessMinimum': 0x000c0073, // brightnessMinimum
-  'BrightnessToggle': 0x000c0072, // brightnessToggle
   'BrightnessUp': 0x000c006f, // brightnessUp
   'BrowserBack': 0x000c0224, // browserBack
   'BrowserFavorites': 0x000c022a, // browserFavorites
@@ -346,10 +342,6 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'BrowserSearch': 0x000c0221, // browserSearch
   'BrowserStop': 0x000c0226, // browserStop
   'CapsLock': 0x00070039, // capsLock
-  'ChannelDown': 0x000c009d, // channelDown
-  'ChannelUp': 0x000c009c, // channelUp
-  'Close': 0x000c0203, // close
-  'ClosedCaptionToggle': 0x000c0061, // closedCaptionToggle
   'Comma': 0x00070036, // comma
   'ContextMenu': 0x00070065, // contextMenu
   'ControlLeft': 0x000700e0, // controlLeft
@@ -373,8 +365,8 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'End': 0x0007004d, // end
   'Enter': 0x00070028, // enter
   'Equal': 0x0007002e, // equal
+  'Esc': 0x00070029, // escape
   'Escape': 0x00070029, // escape
-  'Exit': 0x000c0094, // exit
   'F1': 0x0007003a, // f1
   'F10': 0x00070043, // f10
   'F11': 0x00070044, // f11
@@ -436,14 +428,11 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'Help': 0x00070075, // help
   'Home': 0x0007004a, // home
   'Hyper': 0x00000010, // hyper
-  'Info': 0x000c0060, // info
   'Insert': 0x00070049, // insert
   'IntlBackslash': 0x00070064, // intlBackslash
   'IntlRo': 0x00070087, // intlRo
   'IntlYen': 0x00070089, // intlYen
   'KanaMode': 0x00070088, // kanaMode
-  'KbdIllumDown': 0x000c007a, // kbdIllumDown
-  'KbdIllumUp': 0x000c0079, // kbdIllumUp
   'KeyA': 0x00070004, // keyA
   'KeyB': 0x00070005, // keyB
   'KeyC': 0x00070006, // keyC
@@ -479,25 +468,13 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'LaunchApp1': 0x000c0194, // launchApp1
   'LaunchApp2': 0x000c0192, // launchApp2
   'LaunchAssistant': 0x000c01cb, // launchAssistant
-  'LaunchAudioBrowser': 0x000c01b7, // launchAudioBrowser
-  'LaunchCalendar': 0x000c018e, // launchCalendar
-  'LaunchContacts': 0x000c018d, // launchContacts
   'LaunchControlPanel': 0x000c019f, // launchControlPanel
-  'LaunchDocuments': 0x000c01a7, // launchDocuments
-  'LaunchInternetBrowser': 0x000c0196, // launchInternetBrowser
-  'LaunchKeyboardLayout': 0x000c01ae, // launchKeyboardLayout
   'LaunchMail': 0x000c018a, // launchMail
-  'LaunchPhone': 0x000c008c, // launchPhone
   'LaunchScreenSaver': 0x000c01b1, // launchScreenSaver
-  'LaunchSpreadsheet': 0x000c0186, // launchSpreadsheet
-  'LaunchWordProcessor': 0x000c0184, // launchWordProcessor
-  'LockScreen': 0x000c019e, // lockScreen
-  'LogOff': 0x000c019c, // logOff
   'MailForward': 0x000c028b, // mailForward
   'MailReply': 0x000c0289, // mailReply
   'MailSend': 0x000c028c, // mailSend
   'MediaFastForward': 0x000c00b3, // mediaFastForward
-  'MediaLast': 0x000c0083, // mediaLast
   'MediaPause': 0x000c00b1, // mediaPause
   'MediaPlay': 0x000c00b0, // mediaPlay
   'MediaPlayPause': 0x000c00cd, // mediaPlayPause
@@ -509,8 +486,8 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'MediaTrackPrevious': 0x000c00b6, // mediaTrackPrevious
   'MetaLeft': 0x000700e3, // metaLeft
   'MetaRight': 0x000700e7, // metaRight
+  'MicrophoneMuteToggle': 0x00000018, // microphoneMuteToggle
   'Minus': 0x0007002d, // minus
-  'New': 0x000c0201, // newKey
   'NonConvert': 0x0007008b, // nonConvert
   'NumLock': 0x00070053, // numLock
   'Numpad0': 0x00070062, // numpad0
@@ -540,7 +517,6 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'NumpadMultiply': 0x00070055, // numpadMultiply
   'NumpadParenLeft': 0x000700b6, // numpadParenLeft
   'NumpadParenRight': 0x000700b7, // numpadParenRight
-  'NumpadSignChange': 0x000700d7, // numpadSignChange
   'NumpadSubtract': 0x00070056, // numpadSubtract
   'Open': 0x00070074, // open
   'PageDown': 0x0007004e, // pageDown
@@ -549,15 +525,11 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'Pause': 0x00070048, // pause
   'Period': 0x00070037, // period
   'Power': 0x00070066, // power
-  'Print': 0x000c0208, // print
   'PrintScreen': 0x00070046, // printScreen
   'PrivacyScreenToggle': 0x00000017, // privacyScreenToggle
-  'ProgramGuide': 0x000c008d, // programGuide
   'Props': 0x000700a3, // props
   'Quote': 0x00070034, // quote
-  'Redo': 0x000c0279, // redo
   'Resume': 0x00000015, // resume
-  'Save': 0x000c0207, // save
   'ScrollLock': 0x00070047, // scrollLock
   'Select': 0x00070077, // select
   'SelectTask': 0x000c01a2, // selectTask
@@ -568,20 +540,12 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
   'Slash': 0x00070038, // slash
   'Sleep': 0x00010082, // sleep
   'Space': 0x0007002c, // space
-  'SpeechInputToggle': 0x000c00cf, // speechInputToggle
-  'SpellCheck': 0x000c01ab, // spellCheck
   'Super': 0x00000011, // superKey
   'Suspend': 0x00000014, // suspend
   'Tab': 0x0007002b, // tab
   'Turbo': 0x00000016, // turbo
   'Undo': 0x0007007a, // undo
-  'UsbErrorRollOver': 0x00070001, // usbErrorRollOver
-  'UsbErrorUndefined': 0x00070003, // usbErrorUndefined
-  'UsbPostFail': 0x00070002, // usbPostFail
-  'UsbReserved': 0x00070000, // usbReserved
   'WakeUp': 0x00010083, // wakeUp
-  'ZoomIn': 0x000c022d, // zoomIn
-  'ZoomOut': 0x000c022e, // zoomOut
   'ZoomToggle': 0x000c0232, // zoomToggle
 };
 
