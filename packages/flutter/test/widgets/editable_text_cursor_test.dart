@@ -234,7 +234,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(tester.hasRunningAnimations, false);
     }
-  }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()..remove(TargetPlatform.iOS)));
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
