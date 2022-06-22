@@ -1606,6 +1606,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConnection? _textInputConnection;
   TextSelectionOverlay? _selectionOverlay;
 
+  final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
   ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
 
@@ -3306,28 +3307,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
-    if (intent.direction == AxisDirection.down) {
-      if (position.pixels >= position.maxScrollExtent) {
-        return;
-      }
-      _scrollController.jumpTo(
-        math.min(
-          position.maxScrollExtent,
-          position.pixels + position.viewportDimension,
-        ),
-      );
-    } else {
-      if (position.pixels <= position.minScrollExtent) {
-        return;
-      }
-
-      _scrollController.jumpTo(
-        math.max(
-          position.minScrollExtent,
-          position.pixels - position.viewportDimension,
-        ),
-      );
+    final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
+    final double increment = ScrollAction.getIncrement(state!, intent);
+    final double destination = (position.pixels + increment).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (destination == position.pixels) {
+      return;
     }
+    _scrollController.jumpTo(destination);
   }
 
   /// Extend the selection down by page if the `forward` parameter is true, or
@@ -3482,6 +3471,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             includeSemantics: false,
             debugLabel: 'EditableText',
             child: Scrollable(
+              key: _scrollableKey,
               excludeFromSemantics: true,
               axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
               controller: _scrollController,
