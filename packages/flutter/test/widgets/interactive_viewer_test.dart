@@ -1269,9 +1269,11 @@ void main() {
     testWidgets('LayoutBuilder is only used for InteractiveViewer.builder', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Center(
-            child: InteractiveViewer(
-              child: const SizedBox(width: 200.0, height: 200.0),
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
             ),
           ),
         ),
@@ -1281,11 +1283,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Center(
-            child: InteractiveViewer.builder(
-              builder: (BuildContext context, Quad viewport) {
-                return const SizedBox(width: 200.0, height: 200.0);
-              },
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer.builder(
+                builder: (BuildContext context, Quad viewport) {
+                  return const SizedBox(width: 200.0, height: 200.0);
+                },
+              ),
             ),
           ),
         ),
