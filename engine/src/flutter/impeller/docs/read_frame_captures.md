@@ -451,3 +451,7 @@ effective.
   Android GPU Inspector.
 * [Watch] WWDC 2018: [Metal Shader Debugging &
   Profiling](https://developer.apple.com/videos/play/wwdc2018/608/).
+* [Watch] WWDC 2020: [Gain insights into your Metal app with
+  Xcode 12](https://developer.apple.com/videos/play/wwdc2020/10605).
+* [Watch] WWDC 2020: [Optimize Metal apps and games with GPU
+  counters](https://developer.apple.com/videos/play/wwdc2020/10603).
