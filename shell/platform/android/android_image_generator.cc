@@ -52,6 +52,10 @@ bool AndroidImageGenerator::GetPixels(const SkImageInfo& info,
                                       std::optional<unsigned int> prior_frame) {
   fully_decoded_latch_.Wait();
 
+  if (!software_decoded_data_) {
+    return false;
+  }
+
   if (kRGBA_8888_SkColorType != info.colorType()) {
     return false;
   }
