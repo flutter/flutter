@@ -566,7 +566,7 @@ abstract class FlutterCommand extends Command<void> {
               'For each new version of your app, you will provide a version number to differentiate it from previous versions.\n'
               'On Android it is used as "versionName".\n'
               'On Xcode builds it is used as "CFBundleShortVersionString".\n'
-              'On Windows it is used as the major, minor, and build parts of the product and file versions.',
+              'On Windows it is used as the major, minor, and patch parts of the product and file versions.',
         valueHelp: 'x.y.z');
   }
 
