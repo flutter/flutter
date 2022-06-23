@@ -413,18 +413,25 @@ class _MenuBarState extends State<MenuBar> {
                 // shortcut to apply everywhere but in the menu itself,
                 // since there we have to be able to traverse menus.
                 shortcuts: _kMenuTraversalShortcuts,
-                child: _MenuBarTopLevelBar(
-                  elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
-                      .resolve(state)!,
-                  height:
-                      widget.minimumHeight ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
-                  enabled: widget.enabled,
-                  color: (widget.backgroundColor ??
-                          menuTheme.barBackgroundColor ??
-                          _TokenDefaultsM3(context).barBackgroundColor)
-                      .resolve(state)!,
-                  padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                  children: widget.children,
+                child: _MenuItemWrapper(
+                  // Root menu item wrapper, so that top level items can find a
+                  // null parent (but still find a wrapper).
+                  parent: null,
+                  index: 0,
+                  child: _MenuBarTopLevelBar(
+                    elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
+                        .resolve(state)!,
+                    height: widget.minimumHeight ??
+                        menuTheme.barMinimumHeight ??
+                        _TokenDefaultsM3(context).barMinimumHeight,
+                    enabled: widget.enabled,
+                    color: (widget.backgroundColor ??
+                            menuTheme.barBackgroundColor ??
+                            _TokenDefaultsM3(context).barBackgroundColor)
+                        .resolve(state)!,
+                    padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
+                    children: widget.children,
+                  ),
                 ),
               ),
             ),
@@ -810,7 +817,7 @@ class MenuBarButton extends StatefulWidget with MenuItem {
   }
 }
 
-class _MenuBarButtonState extends State<MenuBarButton> with _MenuNode {
+class _MenuBarButtonState extends State<MenuBarButton> with DiagnosticableTreeMixin, _MenuNode {
   late _MenuBarState _menuBar;
   _MenuBarMenuState? _parent;
   int _parentIndex = -1;
@@ -855,9 +862,9 @@ class _MenuBarButtonState extends State<MenuBarButton> with _MenuNode {
     super.didChangeDependencies();
     _menuBar = _MenuBarState.of(context);
     parent?.removeChild(parentIndex, this);
-    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
-    _parent = wrapper?.parent;
-    _parentIndex = wrapper?.index ?? -1;
+    final _MenuItemWrapper wrapper = _MenuItemWrapper.of(context);
+    _parent = wrapper.parent;
+    _parentIndex = wrapper.index;
     parent?.addChild(parentIndex, this);
   }
 
@@ -1121,7 +1128,7 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
   }
 }
 
-class _MenuBarMenuState extends State<MenuBarMenu> with _MenuNode {
+class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin, _MenuNode {
   late _MenuBarState _menuBar;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
@@ -1178,9 +1185,9 @@ class _MenuBarMenuState extends State<MenuBarMenu> with _MenuNode {
     super.didChangeDependencies();
     _menuBar = _MenuBarState.of(context);
     parent?.removeChild(parentIndex, this);
-    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
-    _parent = wrapper?.parent;
-    _parentIndex = wrapper?.index ?? -1;
+    final _MenuItemWrapper wrapper = _MenuItemWrapper.of(context);
+    _parent = wrapper.parent;
+    _parentIndex = wrapper.index;
     parent?.addChild(parentIndex, this);
   }
 
@@ -1344,49 +1351,41 @@ class _MenuBarMenuState extends State<MenuBarMenu> with _MenuNode {
     final Set<MaterialState> disabled = <MaterialState>{
       if (!_enabled) MaterialState.disabled,
     };
+    final _MenuItemWrapper buttonWrapper = _MenuItemWrapper.of(this.context);
     // Because this is all in the overlay, we have to duplicate a lot of state
     // that exists in the context of the menu button.
-    int index = 0;
     return _wrapWithPosition(
       // Use the menu button's context, not the passed-in context.
       menuButtonContext: this.context,
-      child: Directionality(
-        textDirection: textDirection,
-        child: InheritedTheme.captureAll(
-          _menuBar.context,
-          Builder(
-            builder: (BuildContext context) {
-              return _MenuBarMarker(
-                state: _menuBar,
-                child: Material(
-                  color: (widget.backgroundColor ?? menuTheme.menuBackgroundColor ?? defaultTheme.menuBackgroundColor)
-                      .resolve(disabled),
-                  shape: (widget.shape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled),
-                  elevation:
-                      (widget.elevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
-                  child: Padding(
-                    padding: widget.padding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
-                    child: _MenuBarMenuList(
-                      direction: Axis.vertical,
-                      textDirection: Directionality.of(context),
-                      children: widget.children.map<Widget>((Widget child) {
-                        final Widget result = _MenuItemWrapper(
-                          parent: this,
-                          index: index,
-                          child: child,
-                        );
-                        if (child is MenuItemGroup) {
-                          index += child.members.length;
-                        } else {
-                          index += 1;
-                        }
-                        return result;
-                      }).toList(),
+      child: _MenuBarMarker(
+        state: _menuBar,
+        child: _MenuItemWrapper(
+          parent: buttonWrapper.parent,
+          index: buttonWrapper.index,
+          child: Directionality(
+            textDirection: textDirection,
+            child: InheritedTheme.captureAll(
+              _menuBar.context,
+              Builder(
+                builder: (BuildContext context) {
+                  return Material(
+                    color: (widget.backgroundColor ?? menuTheme.menuBackgroundColor ?? defaultTheme.menuBackgroundColor)
+                        .resolve(disabled),
+                    shape: (widget.shape ?? menuTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled),
+                    elevation:
+                        (widget.elevation ?? menuTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
+                    child: Padding(
+                      padding: widget.padding ?? menuTheme.menuPadding ?? defaultTheme.menuPadding,
+                      child: _MenuBarMenuList(
+                        direction: Axis.vertical,
+                        textDirection: Directionality.of(context),
+                        children: widget.children,
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
@@ -1418,7 +1417,7 @@ class MenuItemGroup extends StatefulWidget with MenuItem {
   State<MenuItemGroup> createState() => _MenuItemGroupState();
 }
 
-class _MenuItemGroupState extends State<MenuItemGroup> with _MenuNode {
+class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMixin, _MenuNode {
   _MenuNode? _parent;
   int _parentIndex = -1;
 
@@ -1444,15 +1443,15 @@ class _MenuItemGroupState extends State<MenuItemGroup> with _MenuNode {
     super.didChangeDependencies();
     // Don't add/remove groups to the parents: they are not part of the tree,
     // only the members matter.
-    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
-    _parent = wrapper?.parent;
-    _parentIndex = wrapper?.index ?? -1;
+    final _MenuItemWrapper wrapper = _MenuItemWrapper.of(context);
+    _parent = wrapper.parent;
+    _parentIndex = wrapper.index;
   }
 
   @override
   Widget build(BuildContext context) {
-    final _MenuItemWrapper? wrapper = _MenuItemWrapper.maybeOf(context);
-    final _MenuBarMenuState? parent = wrapper?.parent;
+    final _MenuItemWrapper wrapper = _MenuItemWrapper.of(context);
+    final _MenuBarMenuState? parent = wrapper.parent;
     bool skipPrevious = false;
     bool skipNext = false;
     if (parent != null) {
@@ -1472,10 +1471,12 @@ class _MenuItemGroupState extends State<MenuItemGroup> with _MenuNode {
       }
     }
     int childIndex = 0;
-    return Column(
+    final Axis axis = parent == null ? Axis.horizontal : Axis.vertical;
+    return Flex(
+      direction: axis,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (!skipPrevious) const _MenuItemDivider(),
+        if (!skipPrevious) _MenuItemDivider(axis: axis),
         ...widget.members.map<Widget>((Widget child) {
           final Widget result = _MenuItemWrapper(
             parent: parent,
@@ -1487,7 +1488,7 @@ class _MenuItemGroupState extends State<MenuItemGroup> with _MenuNode {
           childIndex += 1;
           return result;
         }),
-        if (!skipNext) const _MenuItemDivider(),
+        if (!skipNext) _MenuItemDivider(axis: axis),
       ],
     );
   }
@@ -1570,7 +1571,7 @@ class _MenuStack extends StatelessWidget {
   }
 }
 
-mixin _MenuNode {
+mixin _MenuNode on DiagnosticableTreeMixin {
   int get parentIndex;
 
   /// This is the parent of this node in the hierarchy, so that we can traverse
@@ -1635,9 +1636,19 @@ mixin _MenuNode {
     }
     return children[indices[listIndex + 1]];
   }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> result = <DiagnosticsNode>[];
+    final List<int> keys = children.keys.toList()..sort();
+    for (final int key in keys) {
+      result.add(children[key]!.toDiagnosticsNode());
+    }
+    return result;
+  }
 }
 
-class _RootMenuNode with _MenuNode {
+class _RootMenuNode with DiagnosticableTreeMixin, _MenuNode {
   /// Makes a node suitable for the root node of the tree which doesn't contain
   /// a valid [item].
   _RootMenuNode() : children = <int, _MenuNode>{};
@@ -1673,7 +1684,7 @@ class _RootMenuNode with _MenuNode {
 /// Nodes have a longer lifetime than the widgets they are connected to, since
 /// the widgets only exist while their menus are visible, but nodes exist with
 /// the same lifetime as the [MenuBar].
-class _MenuItemWrapper extends InheritedWidget {
+class _MenuItemWrapper extends InheritedWidget with Diagnosticable {
   const _MenuItemWrapper({
     required this.parent,
     required this.index,
@@ -1688,7 +1699,7 @@ class _MenuItemWrapper extends InheritedWidget {
   /// The index of this menu item in the parent's list of menu items.
   final int index;
 
-  static _MenuItemWrapper? maybeOf(BuildContext context) {
+  static _MenuItemWrapper of(BuildContext context) {
     final _MenuItemWrapper? wrapper = context.dependOnInheritedWidgetOfExactType<_MenuItemWrapper>();
     if (wrapper == null) {
       throw FlutterError('A menu item was created without a $MenuBar.\n'
@@ -1696,7 +1707,6 @@ class _MenuItemWrapper extends InheritedWidget {
           'in the widget tree. The widget that was created outside of a '
           '$MenuBar was: $context');
     }
-
     return wrapper;
   }
 
@@ -1709,6 +1719,7 @@ class _MenuItemWrapper extends InheritedWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<_MenuBarMenuState>('parent', parent, defaultValue: null));
+    properties.add(DiagnosticsProperty<int>('index', index));
   }
 }
 
@@ -1748,29 +1759,6 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
   /// These are the top level [MenuBarMenu]s.
   final List<Widget> children;
 
-  List<Widget> _expandGroups() {
-    final List<Widget> expanded = <Widget>[];
-    bool lastWasGroup = false;
-    for (final Widget item in children) {
-      if (lastWasGroup) {
-        expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
-      }
-      if (item is MenuItemGroup) {
-        if (item.members.isNotEmpty) {
-          if (!lastWasGroup && expanded.isNotEmpty) {
-            expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
-          }
-          expanded.addAll(item.members);
-          lastWasGroup = true;
-        }
-      } else {
-        expanded.add(item);
-        lastWasGroup = false;
-      }
-    }
-    return expanded;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -1783,7 +1771,7 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
           textDirection: Directionality.of(context),
           direction: Axis.horizontal,
           crossAxisMinSize: height,
-          children: _expandGroups(),
+          children: children,
         ),
       ),
     );
@@ -1827,7 +1815,7 @@ class _MenuBarItemLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isTopLevelItem = _MenuItemWrapper.maybeOf(context)?.parent == null;
+    final bool isTopLevelItem = _MenuItemWrapper.of(context).parent == null;
     final VisualDensity density = Theme.of(context).visualDensity;
     final double horizontalPadding = math.max(
       _kLabelItemMinSpacing,
@@ -1839,7 +1827,7 @@ class _MenuBarItemLabel extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(_MenuItemWrapper.maybeOf(context)?.index.toString() ?? 'X'),
+            Text('${_MenuItemWrapper.of(context).index} '),
             if (leadingIcon != null) leadingIcon!,
             Padding(
               padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
@@ -1917,20 +1905,6 @@ class _MenuBarMenuList extends StatefulWidget {
 }
 
 class _MenuBarMenuListState extends State<_MenuBarMenuList> {
-  late _MenuBarState _menuBar;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _menuBar = _MenuBarState.of(context);
-  }
-
-  @override
-  void didUpdateWidget(_MenuBarMenuList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _menuBar = _MenuBarState.of(context);
-  }
-
   Widget _intrinsicCrossSize({required Widget child}) {
     switch (widget.direction) {
       case Axis.horizontal:
@@ -1951,9 +1925,11 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
 
   @override
   Widget build(BuildContext context) {
+    final _MenuBarState menuBar = _MenuBarState.of(context);
+    final _MenuNode? parent = _MenuItemWrapper.of(context).parent;
     int index = 0;
     return _RegisteredRenderBox(
-      menuBar: _menuBar,
+      menuBar: menuBar,
       child: ConstrainedBox(
         constraints: _getMinSizeConstraint(),
         child: _intrinsicCrossSize(
@@ -1963,8 +1939,16 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ...widget.children.map<Widget>((Widget child) {
-                final Widget result = _MenuItemWrapper(parent: null, index: index, child: child);
-                index += 1;
+                final Widget result = _MenuItemWrapper(
+                  parent: parent as _MenuBarMenuState?,
+                  index: index,
+                  child: child,
+                );
+                if (child is MenuItemGroup) {
+                  index += child.members.length;
+                } else {
+                  index += 1;
+                }
                 return result;
               }).toList(),
               if (widget.direction == Axis.horizontal) const Spacer(),
