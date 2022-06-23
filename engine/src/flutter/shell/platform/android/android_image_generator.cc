@@ -96,14 +96,17 @@ void AndroidImageGenerator::DoDecodeImage() {
 
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
-  fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(
-      env, env->NewDirectByteBuffer(const_cast<void*>(data_->data()),
-                                    data_->size()));
+  // This task is run on the IO thread.  Create a frame to ensure that all
+  // local JNI references used here are freed.
+  fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+
+  jobject direct_buffer =
+      env->NewDirectByteBuffer(const_cast<void*>(data_->data()), data_->size());
 
   auto bitmap = std::make_unique<fml::jni::ScopedJavaGlobalRef<jobject>>(
-      env, env->CallStaticObjectMethod(
-               g_flutter_jni_class->obj(), g_decode_image_method,
-               direct_buffer.obj(), reinterpret_cast<long>(this)));
+      env, env->CallStaticObjectMethod(g_flutter_jni_class->obj(),
+                                       g_decode_image_method, direct_buffer,
+                                       reinterpret_cast<long>(this)));
   FML_CHECK(fml::jni::CheckException(env));
 
   if (bitmap->is_null()) {
