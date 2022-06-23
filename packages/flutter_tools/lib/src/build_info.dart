@@ -97,7 +97,7 @@ class BuildInfo {
   /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
   /// On Android it is used as versionName.
   /// On Xcode builds it is used as CFBundleShortVersionString.
-  /// On Windows it is used as the major, minor, and build parts of the product and file versions.
+  /// On Windows it is used as the major, minor, and patch parts of the product and file versions.
   final String? buildName;
 
   /// An optional directory path to save debugging information from dwarf stack
