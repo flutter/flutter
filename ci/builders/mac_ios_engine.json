@@ -14,7 +14,7 @@
                 "--simulator",
                 "--no-lto"
             ],
-            "name": "ios_debug_sym",
+            "name": "ios_debug_sim",
             "ninja": {
                 "config": "ios_debug_sim",
                 "targets": []
@@ -29,24 +29,40 @@
                 "os=Mac-12"
             ],
             "gn": [
-                "--bitcode",
                 "--ios",
                 "--runtime-mode",
-                "debug"
+                "debug",
+                "--simulator",
+                "--simulator-cpu=arm64",
+                "--no-lto",
+                "--no-goma"
             ],
-            "name": "ios_debug",
+            "name": "ios_debug_sim_arm64",
             "ninja": {
-                "config": "ios_debug",
+                "config": "ios_debug_sim_arm64",
                 "targets": []
             },
             "tests": []
         },
         {
-            "archives": [],
+            "archives": [
+                {
+                    "base_path": "out/ios_debug/zip_archives/",
+                    "include_paths": [
+                    ],
+                    "name": "ios_debug"
+                }
+            ],
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
                 "os=Mac-12"
+            ],
+            "gn": [
+                "--bitcode",
+                "--ios",
+                "--runtime-mode",
+                "debug"
             ],
             "generators": {
                 "tasks": [
@@ -58,19 +74,13 @@
                     }
                 ]
             },
-            "gn": [
-                "--bitcode",
-                "--ios",
-                "--runtime-mode",
-                "debug",
-                "--ios-cpu=arm"
-            ],
-            "name": "ios_debug_arm",
+            "name": "ios_debug",
             "ninja": {
-                "config": "ios_debug_arm",
+                "config": "ios_debug",
                 "targets": []
             },
             "tests": []
         }
-    ]
+    ],
+    "tests": []
 }
