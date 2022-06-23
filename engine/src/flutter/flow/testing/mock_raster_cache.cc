@@ -4,26 +4,12 @@
 
 #include "flutter/flow/testing/mock_raster_cache.h"
 
-#include "third_party/skia/include/core/SkPictureRecorder.h"
-
 namespace flutter {
 namespace testing {
 
 MockRasterCacheResult::MockRasterCacheResult(SkRect device_rect)
     : RasterCacheResult(nullptr, SkRect::MakeEmpty(), "RasterCacheFlow::test"),
       device_rect_(device_rect) {}
-
-std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizePicture(
-    SkPicture* picture,
-    GrDirectContext* context,
-    const SkMatrix& ctm,
-    SkColorSpace* dst_color_space,
-    bool checkerboard) const {
-  SkRect logical_rect = picture->cullRect();
-  SkRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
-
-  return std::make_unique<MockRasterCacheResult>(cache_rect);
-}
 
 std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizeDisplayList(
     DisplayList* display_list,
@@ -61,21 +47,19 @@ void MockRasterCache::AddMockLayer(int width, int height) {
 void MockRasterCache::AddMockPicture(int width, int height) {
   FML_DCHECK(access_threshold() > 0);
   SkMatrix ctm = SkMatrix::I();
-  SkPictureRecorder skp_recorder;
-  SkRTreeFactory rtree_factory;
+  DisplayListCanvasRecorder recorder(
+      SkRect::MakeLTRB(0, 0, 200 + width, 200 + height));
   SkPath path;
   path.addRect(100, 100, 100 + width, 100 + height);
-  SkCanvas* recorder_canvas = skp_recorder.beginRecording(
-      SkRect::MakeLTRB(0, 0, 200 + width, 200 + height), &rtree_factory);
-  recorder_canvas->drawPath(path, SkPaint());
-  sk_sp<SkPicture> picture = skp_recorder.finishRecordingAsPicture();
+  recorder.drawPath(path, SkPaint());
+  sk_sp<DisplayList> display_list = recorder.Build();
   PrerollContextHolder holder = GetSamplePrerollContextHolder();
   holder.preroll_context.dst_color_space = color_space_;
   for (int i = 0; i < access_threshold(); i++) {
-    Prepare(&holder.preroll_context, picture.get(), true, false, ctm);
-    Draw(*picture, mock_canvas_);
+    Prepare(&holder.preroll_context, display_list.get(), true, false, ctm);
+    Draw(*display_list, mock_canvas_);
   }
-  Prepare(&holder.preroll_context, picture.get(), true, false, ctm);
+  Prepare(&holder.preroll_context, display_list.get(), true, false, ctm);
 }
 
 PrerollContextHolder GetSamplePrerollContextHolder() {

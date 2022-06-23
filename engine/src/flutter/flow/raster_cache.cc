@@ -15,7 +15,6 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
@@ -41,10 +40,9 @@ void RasterCacheResult::draw(SkCanvas& canvas, const SkPaint* paint) const {
 }
 
 RasterCache::RasterCache(size_t access_threshold,
-                         size_t picture_and_display_list_cache_limit_per_frame)
+                         size_t display_list_cache_limit_per_frame)
     : access_threshold_(access_threshold),
-      picture_and_display_list_cache_limit_per_frame_(
-          picture_and_display_list_cache_limit_per_frame),
+      display_list_cache_limit_per_frame_(display_list_cache_limit_per_frame),
       checkerboard_images_(false) {}
 
 static bool CanRasterizeRect(const SkRect& cull_rect) {
@@ -60,32 +58,6 @@ static bool CanRasterizeRect(const SkRect& cull_rect) {
   }
 
   return true;
-}
-
-static bool IsPictureWorthRasterizing(SkPicture* picture,
-                                      bool will_change,
-                                      bool is_complex) {
-  if (will_change) {
-    // If the picture is going to change in the future, there is no point in
-    // doing to extra work to rasterize.
-    return false;
-  }
-
-  if (picture == nullptr || !CanRasterizeRect(picture->cullRect())) {
-    // No point in deciding whether the picture is worth rasterizing if it
-    // cannot be rasterized at all.
-    return false;
-  }
-
-  if (is_complex) {
-    // The caller seems to have extra information about the picture and thinks
-    // the picture is always worth rasterizing.
-    return true;
-  }
-
-  // TODO(abarth): We should find a better heuristic here that lets us avoid
-  // wasting memory on trivial layers that are easy to re-rasterize every frame.
-  return picture->approximateOpCount(true) > 5;
 }
 
 static bool IsDisplayListWorthRasterizing(
@@ -155,17 +127,6 @@ static std::unique_ptr<RasterCacheResult> Rasterize(
 
   return std::make_unique<RasterCacheResult>(surface->makeImageSnapshot(),
                                              logical_rect, type);
-}
-
-std::unique_ptr<RasterCacheResult> RasterCache::RasterizePicture(
-    SkPicture* picture,
-    GrDirectContext* context,
-    const SkMatrix& ctm,
-    SkColorSpace* dst_color_space,
-    bool checkerboard) const {
-  return Rasterize(context, ctm, dst_color_space, checkerboard,
-                   picture->cullRect(), "RasterCacheFlow::SkPicture",
-                   [=](SkCanvas* canvas) { canvas->drawPicture(picture); });
 }
 
 std::unique_ptr<RasterCacheResult> RasterCache::RasterizeDisplayList(
@@ -278,51 +239,6 @@ const SkRect& RasterCache::GetPaintBoundsFromLayer(
 }
 
 bool RasterCache::Prepare(PrerollContext* context,
-                          SkPicture* picture,
-                          bool is_complex,
-                          bool will_change,
-                          const SkMatrix& untranslated_matrix,
-                          const SkPoint& offset) {
-  if (!GenerateNewCacheInThisFrame()) {
-    return false;
-  }
-
-  if (!IsPictureWorthRasterizing(picture, will_change, is_complex)) {
-    // We only deal with pictures that are worthy of rasterization.
-    return false;
-  }
-
-  SkMatrix transformation_matrix = untranslated_matrix;
-  transformation_matrix.preTranslate(offset.x(), offset.y());
-
-  if (!transformation_matrix.invert(nullptr)) {
-    // The matrix was singular. No point in going further.
-    return false;
-  }
-
-  RasterCacheKey cache_key(picture->uniqueID(), RasterCacheKeyType::kPicture,
-                           transformation_matrix);
-
-  // Creates an entry, if not present prior.
-  Entry& entry = cache_[cache_key];
-  if (entry.access_count < access_threshold_) {
-    // Frame threshold has not yet been reached.
-    return false;
-  }
-
-  if (!entry.image) {
-    // GetIntegralTransCTM effect for matrix which only contains scale,
-    // translate, so it won't affect result of matrix decomposition and cache
-    // key.
-    entry.image =
-        RasterizePicture(picture, context->gr_context, transformation_matrix,
-                         context->dst_color_space, checkerboard_images_);
-    picture_cached_this_frame_++;
-  }
-  return true;
-}
-
-bool RasterCache::Prepare(PrerollContext* context,
                           DisplayList* display_list,
                           bool is_complex,
                           bool will_change,
@@ -385,13 +301,6 @@ void RasterCache::Touch(Layer* layer,
   Touch(cache_key_optional.value());
 }
 
-void RasterCache::Touch(SkPicture* picture,
-                        const SkMatrix& transformation_matrix) {
-  RasterCacheKey cache_key(picture->uniqueID(), RasterCacheKeyType::kPicture,
-                           transformation_matrix);
-  Touch(cache_key);
-}
-
 void RasterCache::Touch(DisplayList* display_list,
                         const SkMatrix& transformation_matrix) {
   RasterCacheKey cache_key(display_list->unique_id(),
@@ -406,14 +315,6 @@ void RasterCache::Touch(const RasterCacheKey& cache_key) {
     it->second.used_this_frame = true;
     it->second.access_count++;
   }
-}
-
-bool RasterCache::Draw(const SkPicture& picture,
-                       SkCanvas& canvas,
-                       const SkPaint* paint) const {
-  RasterCacheKey cache_key(picture.uniqueID(), RasterCacheKeyType::kPicture,
-                           canvas.getTotalMatrix());
-  return Draw(cache_key, canvas, paint);
 }
 
 bool RasterCache::Draw(const DisplayList& display_list,
@@ -458,7 +359,6 @@ bool RasterCache::Draw(const RasterCacheKey& cache_key,
 }
 
 void RasterCache::PrepareNewFrame() {
-  picture_cached_this_frame_ = 0;
   display_list_cached_this_frame_ = 0;
 }
 

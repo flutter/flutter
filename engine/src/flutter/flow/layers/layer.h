@@ -102,7 +102,6 @@ struct PrerollContext {
 };
 
 class ContainerLayer;
-class PictureLayer;
 class DisplayListLayer;
 class PerformanceOverlayLayer;
 class TextureLayer;
@@ -360,7 +359,6 @@ class Layer {
   uint64_t unique_id() const { return unique_id_; }
 
   virtual const ContainerLayer* as_container_layer() const { return nullptr; }
-  virtual const PictureLayer* as_picture_layer() const { return nullptr; }
   virtual const DisplayListLayer* as_display_list_layer() const {
     return nullptr;
   }

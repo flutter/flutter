@@ -274,7 +274,6 @@ if (enable_unittests) {
       "rasterizer_unittests.cc",
       "resource_cache_limit_calculator_unittests.cc",
       "shell_unittests.cc",
-      "skp_shader_warmup_unittests.cc",
       "switches_unittests.cc",
       "variable_refresh_rate_display_unittests.cc",
     ]

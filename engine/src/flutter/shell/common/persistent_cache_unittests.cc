@@ -10,7 +10,6 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/layers/physical_shape_layer.h"
-#include "flutter/flow/layers/picture_layer.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/log_settings.h"

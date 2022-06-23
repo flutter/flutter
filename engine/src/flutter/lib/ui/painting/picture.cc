@@ -30,24 +30,12 @@ DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
 fml::RefPtr<Picture> Picture::Create(
     Dart_Handle dart_handle,
-    flutter::SkiaGPUObject<SkPicture> picture) {
-  auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(picture));
-
-  canvas_picture->AssociateWithDartWrapper(dart_handle);
-  return canvas_picture;
-}
-
-fml::RefPtr<Picture> Picture::Create(
-    Dart_Handle dart_handle,
     flutter::SkiaGPUObject<DisplayList> display_list) {
   auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(display_list));
 
   canvas_picture->AssociateWithDartWrapper(dart_handle);
   return canvas_picture;
 }
-
-Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture)
-    : picture_(std::move(picture)) {}
 
 Picture::Picture(flutter::SkiaGPUObject<DisplayList> display_list)
     : display_list_(std::move(display_list)) {}
@@ -57,31 +45,20 @@ Picture::~Picture() = default;
 Dart_Handle Picture::toImage(uint32_t width,
                              uint32_t height,
                              Dart_Handle raw_image_callback) {
-  if (display_list_.skia_object()) {
-    return RasterizeToImage(display_list_.skia_object(), width, height,
-                            raw_image_callback);
-  } else {
-    if (!picture_.skia_object()) {
-      return tonic::ToDart("Picture is null");
-    }
-    return RasterizeToImage(
-        [picture = picture_.skia_object()](SkCanvas* canvas) {
-          canvas->drawPicture(picture);
-        },
-        width, height, raw_image_callback);
+  if (!display_list_.skia_object()) {
+    return tonic::ToDart("Picture is null");
   }
+  return RasterizeToImage(display_list_.skia_object(), width, height,
+                          raw_image_callback);
 }
 
 void Picture::dispose() {
-  picture_.reset();
   display_list_.reset();
   ClearDartWrapper();
 }
 
 size_t Picture::GetAllocationSize() const {
-  if (auto picture = picture_.skia_object()) {
-    return picture->approximateBytesUsed() + sizeof(Picture);
-  } else if (auto display_list = display_list_.skia_object()) {
+  if (auto display_list = display_list_.skia_object()) {
     return display_list->bytes() + sizeof(Picture);
   } else {
     return sizeof(Picture);
