@@ -235,8 +235,8 @@ class SystemChannels {
   ///
   ///  * `SpellCheck.initiateSpellCheck`: Sends request for specified text to be
   ///     spell checked and returns the result, either a [List<SuggestionSpan>]
-  ///     representing [SuggestionSpan]s or null if the request was cancelled. 
-  ///     The arguments are the [String] to be spell checked and the [Locale] 
+  ///     representing [SuggestionSpan]s or null if the request was cancelled.
+  ///     The arguments are the [String] to be spell checked and the [Locale]
   ///     for the text to be spell checked with.
   static const MethodChannel spellCheck = OptionalMethodChannel(
       'flutter/spellcheck',

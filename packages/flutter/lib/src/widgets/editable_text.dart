@@ -172,8 +172,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
     final bool composingRegionOutOfRange = !value.isComposingRangeValid || !withComposing;
-    final bool spellCheckEnabled = spellCheckConfiguration != null && 
-                             spellCheckConfiguration.spellCheckSuggestionsHandler != null && 
+    final bool spellCheckEnabled = spellCheckConfiguration != null &&
+                             spellCheckConfiguration.spellCheckSuggestionsHandler != null &&
                              spellCheckConfiguration.spellCheckResults != null;
 
     if (spellCheckEnabled) {
@@ -1428,12 +1428,15 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@template flutter.widgets.EditableText.spellCheckEnabled}
   /// Whether or not spell check is enabled.
   final bool spellCheckEnabled;
 
+  /// {@template flutter.widgets.EditableText.spellCheckService}
   /// Service used to fetch spell check results if spell check is enabled.
   final SpellCheckService? spellCheckService;
 
+  /// {@template flutter.widgets.EditableText.spellCheckSuggestionsHandler}
   /// Handler used to display spell check results if spell check is enabled.
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
 

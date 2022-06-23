@@ -769,13 +769,13 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.editableText.spellCheckEnabled}
+  /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
   final bool spellCheckEnabled;
 
-  /// {@macro flutter.widgets.editableText.spellCheckService}
+  /// {@macro flutter.widgets.EditableText.spellCheckService}
   final SpellCheckService? spellCheckService;
 
-  /// {@macro flutter.widgets.editableText.spellCheckSuggestionsHandler}
+  /// {@macro flutter.widgets.EditableText.spellCheckSuggestionsHandler}
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
 
   @override

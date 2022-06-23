@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
-  
+
 /// Controls how spell check is performed for text input.
 ///
 /// This configuration determines the [SpellCheckService] used to fetch the
