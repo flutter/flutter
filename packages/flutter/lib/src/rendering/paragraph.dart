@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'debug.dart';
@@ -1283,6 +1284,9 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
 
+  int _previousTextSelectionEndOffset = -1;
+  int _previousTextSelectionStartOffset = -1;
+
   LayerLink? _startHandleLayerLink;
   LayerLink? _endHandleLayerLink;
 
@@ -1423,9 +1427,21 @@ class _SelectableFragment with Selectable, ChangeNotifier {
 
   void _setSelectionPosition(TextPosition? position, {required bool isEnd}) {
     if (isEnd) {
+      if(position != null && position.offset != _previousTextSelectionEndOffset) {
+        HapticFeedback.selectionClick();
+      }
       _textSelectionEnd = position;
+      if (_textSelectionEnd != null) {
+        _previousTextSelectionEndOffset = _textSelectionEnd!.offset;
+      }
     } else {
+      if(position != null && position.offset != _previousTextSelectionStartOffset) {
+        HapticFeedback.selectionClick();
+      }
       _textSelectionStart = position;
+      if (_textSelectionStart != null) {
+        _previousTextSelectionStartOffset = _textSelectionStart!.offset;
+      }
     }
   }
 
@@ -1461,6 +1477,9 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     }
     _textSelectionStart = start;
     _textSelectionEnd = end;
+    _previousTextSelectionStartOffset = start.offset;
+    _previousTextSelectionEndOffset = end.offset;
+    HapticFeedback.mediumImpact();
     return SelectionResult.end;
   }
 
