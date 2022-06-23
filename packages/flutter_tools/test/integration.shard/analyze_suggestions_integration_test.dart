@@ -24,7 +24,7 @@ void main() {
     testUsingContext('General Info Project Validator', () async {
       final BufferLogger loggerTest = BufferLogger.test();
       final AnalyzeCommand command = AnalyzeCommand(
-          artifacts: globals.artifacts,
+          artifacts: globals.artifacts!,
           fileSystem: fileSystem,
           logger: loggerTest,
           platform: globals.platform,
@@ -34,7 +34,13 @@ void main() {
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['analyze', '--no-pub', '--suggestions', '../../dev/integration_tests/flutter_gallery']);
+      await runner.run(<String>[
+        'analyze',
+        '--no-pub',
+        '--no-current-package',
+        '--suggestions',
+        '../../dev/integration_tests/flutter_gallery',
+      ]);
 
       const String expected = '\n'
       '┌────────────────────────────────────────────────────────────────────────────┐\n'

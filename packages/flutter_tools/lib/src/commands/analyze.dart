@@ -5,12 +5,14 @@
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../project_validator.dart';
 import '../runner/flutter_command.dart';
+import 'analyze_base.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
 import 'validate_project.dart';
@@ -60,7 +62,7 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'The path to write the request and response protocol. This is '
               'only intended to be used for debugging the tooling.',
         hide: !verboseHelp);
-    argParser.addOption('suggestions',
+    argParser.addFlag('suggestions',
         help: 'Show suggestions about the current flutter project.'
     );
 
@@ -127,13 +129,25 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String? suggestionFlag = stringArg('suggestions');
-    if (suggestionFlag != null) {
+    final bool? suggestionFlag = boolArg('suggestions');
+    final Set<String> items;
+    final String directoryPath;
+    if (suggestionFlag != null && suggestionFlag == true) {
+      if (workingDirectory == null) {
+        items = findDirectories(argResults!, _fileSystem);
+        if (items.isEmpty || items.length > 1) {
+          throwToolExit('The suggestions flags needs one directory path');
+        }
+        directoryPath = items.first;
+      }
+      else {
+        directoryPath = workingDirectory!.path;
+      }
       return ValidateProject(
           fileSystem: _fileSystem,
           logger: _logger,
           allProjectValidators: _allProjectValidators,
-          userPath: suggestionFlag
+          userPath: directoryPath,
       ).run();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
