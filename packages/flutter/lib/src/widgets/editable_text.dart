@@ -473,6 +473,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: true`) | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position, or [TextSelection.base], whichever is closest in the given direction | Moves the caret to the previous/next word boundary.  |
 /// | [ExtendSelectionToLineBreakIntent](`collapseSelection: true`)                       | Collapses the selection to the start/end of the line at the selection's [TextSelection.extent] position | Moves the caret to the start/end of the current line .|
 /// | [ExtendSelectionVerticallyToAdjacentLineIntent](`collapseSelection: true`)          | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent line | Moves the caret to the closest position on the previous/next adjacent line. |
+/// | [ExtendSelectionVerticallyToAdjacentPageIntent](`collapseSelection: true`)          | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent page | Moves the caret to the closest position on the previous/next adjacent page. |
 /// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: true`)                | Collapses the selection to the start/end of the document | Moves the caret to the start/end of the document. |
 ///
 /// #### Intents for Extending the Selection
@@ -484,6 +485,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: false`) | Moves the selection's [TextSelection.extent] to the previous/next word boundary, or [TextSelection.base] whichever is closest in the given direction | Moves the selection's [TextSelection.extent] to the previous/next word boundary. |
 /// | [ExtendSelectionToLineBreakIntent](`collapseSelection: false`)                       | Moves the selection's [TextSelection.extent] to the start/end of the line |
 /// | [ExtendSelectionVerticallyToAdjacentLineIntent](`collapseSelection: false`)          | Moves the selection's [TextSelection.extent] to the closest position on the previous/next adjacent line |
+/// | [ExtendSelectionVerticallyToAdjacentPageIntent](`collapseSelection: false`)          | Moves the selection's [TextSelection.extent] to the closest position on the previous/next adjacent page |
 /// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: false`)                | Moves the selection's [TextSelection.extent] to the start/end of the document |
 /// | [SelectAllTextIntent]  | Selects the entire document |
 ///
@@ -3374,6 +3376,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this);
 
+  late final _UpdateTextSelectionToAdjacentPageAction<ExtendSelectionVerticallyToAdjacentPageIntent> _adjacentPageAction = _UpdateTextSelectionToAdjacentPageAction<ExtendSelectionVerticallyToAdjacentPageIntent>(this);
+
   void _expandSelectionToDocumentBoundary(ExpandSelectionToDocumentBoundaryIntent intent) {
     final _TextBoundary textBoundary = _documentBoundary(intent);
     _expandSelection(intent.forward, textBoundary, true);
@@ -3435,6 +3439,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
     ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ExpandSelectionToDocumentBoundaryIntent>(onInvoke: _expandSelectionToDocumentBoundary)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
+    ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_adjacentPageAction),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
@@ -4456,6 +4461,72 @@ class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovemen
       ?? state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
 
     final bool shouldMove = intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
+    final TextPosition newExtent = shouldMove
+      ? currentRun.current
+      : (intent.forward ? TextPosition(offset: state._value.text.length) : const TextPosition(offset: 0));
+    final TextSelection newSelection = collapseSelection
+      ? TextSelection.fromPosition(newExtent)
+      : value.selection.extendTo(newExtent);
+
+    Actions.invoke(
+      context!,
+      UpdateSelectionIntent(value, newSelection, SelectionChangedCause.keyboard),
+    );
+    if (state._value.selection == newSelection) {
+      _verticalMovementRun = currentRun;
+      _runSelection = newSelection;
+    }
+  }
+
+  @override
+  bool get isActionEnabled => state._value.selection.isValid;
+}
+
+class _UpdateTextSelectionToAdjacentPageAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
+  _UpdateTextSelectionToAdjacentPageAction(this.state);
+
+  final EditableTextState state;
+
+  VerticalCaretMovementRun? _verticalMovementRun;
+  TextSelection? _runSelection;
+
+  void stopCurrentVerticalRunIfSelectionChanges() {
+    final TextSelection? runSelection = _runSelection;
+    if (runSelection == null) {
+      assert(_verticalMovementRun == null);
+      return;
+    }
+    _runSelection = state._value.selection;
+    final TextSelection currentSelection = state.widget.controller.selection;
+    final bool continueCurrentRun = currentSelection.isValid && currentSelection.isCollapsed
+                                    && currentSelection.baseOffset == runSelection.baseOffset
+                                    && currentSelection.extentOffset == runSelection.extentOffset;
+    if (!continueCurrentRun) {
+      _verticalMovementRun = null;
+      _runSelection = null;
+    }
+  }
+
+  @override
+  void invoke(T intent, [BuildContext? context]) {
+    assert(state._value.selection.isValid);
+
+    final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
+    final TextEditingValue value = state._textEditingValueforTextLayoutMetrics;
+    if (!value.selection.isValid) {
+      return;
+    }
+
+    if (_verticalMovementRun?.isValid == false) {
+      _verticalMovementRun = null;
+      _runSelection = null;
+    }
+
+    final VerticalCaretMovementRun currentRun = _verticalMovementRun
+      ?? state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
+
+    final bool shouldMove = currentRun.moveByOffset(
+        (intent.forward ? 1.0 : -1.0) * state.renderEditable.size.height);
     final TextPosition newExtent = shouldMove
       ? currentRun.current
       : (intent.forward ? TextPosition(offset: state._value.text.length) : const TextPosition(offset: 0));
