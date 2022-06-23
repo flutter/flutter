@@ -1478,6 +1478,8 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/Platfor
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewWrapper.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/VirtualDisplayController.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/PathUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/Preconditions.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/Predicate.java

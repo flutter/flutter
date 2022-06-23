@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class PlatformViewUiTests {
+public class PlatformViewWithSurfaceViewUiTest {
   Intent intent;
 
   @Rule @NonNull
@@ -27,15 +27,15 @@ public class PlatformViewUiTests {
           PlatformViewsActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);
 
   private static String goldName(String suffix) {
-    return "PlatformViewUiTests_" + suffix;
+    return "PlatformViewWithSurfaceViewUiTest_" + suffix;
   }
 
   @Before
   public void setUp() {
     intent = new Intent(Intent.ACTION_MAIN);
-    // Render a native android view.
-    intent.putExtra("use_android_view", true);
-    intent.putExtra("view_type", PlatformViewsActivity.TEXT_VIEW_PV);
+    // Render a texture.
+    intent.putExtra("use_android_view", false);
+    intent.putExtra("view_type", PlatformViewsActivity.SURFACE_VIEW_PV);
   }
 
   @Test
@@ -122,5 +122,13 @@ public class PlatformViewUiTests {
     ScreenshotUtil.capture(
         activityRule.launchActivity(intent),
         goldName("testPlatformViewWithoutOverlayIntersection"));
+  }
+
+  @Test
+  public void testPlatformViewLargerThanDisplaySize() throws Exception {
+    // Regression test for https://github.com/flutter/flutter/issues/2897.
+    intent.putExtra("scenario_name", "platform_view_larger_than_display_size");
+    ScreenshotUtil.capture(
+        activityRule.launchActivity(intent), goldName("testPlatformViewLargerThanDisplaySize"));
   }
 }

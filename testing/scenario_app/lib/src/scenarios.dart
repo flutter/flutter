@@ -24,6 +24,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'locale_initialization': () => LocaleInitialization(PlatformDispatcher.instance),
   'platform_view': () => PlatformViewScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_no_overlay_intersection': () => PlatformViewNoOverlayIntersectionScenario(PlatformDispatcher.instance, id: _viewId++),
+  'platform_view_larger_than_display_size': () => PlatformViewLargerThanDisplaySize(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_partial_intersection': () => PlatformViewPartialIntersectionScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_two_intersecting_overlays': () => PlatformViewTwoIntersectingOverlaysScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_one_overlay_two_intersecting_overlays': () => PlatformViewOneOverlayTwoIntersectingOverlaysScenario(PlatformDispatcher.instance, id: _viewId++),
