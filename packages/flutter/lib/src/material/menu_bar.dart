@@ -312,10 +312,15 @@ class _MenuBarState extends State<MenuBar> {
   bool _disposed = false;
 
   // The menus that are currently open, and their builders.
-  final Map<_MenuNode, WidgetBuilder> _openMenus = <_MenuNode, WidgetBuilder>{};
+  final Set<_MenuNode> _openMenus = <_MenuNode>{};
 
-  // The top-level menus and their builders, registered
-  final Map<_MenuNode, WidgetBuilder> _topLevelMenus = <_MenuNode, WidgetBuilder>{};
+  // The most recently requested menu item, regardless of whether it has a
+  // submenu or not.
+  _MenuNode? _currentMenu;
+
+  // The top-level menus and their builders, registered when they are created so
+  // that they can be opened when traversed with the keyboard.
+  final Set<_MenuNode> _topLevelMenus = <_MenuNode>{};
 
   bool get menuIsOpen => _openMenus.isNotEmpty;
   bool get enabled => widget.enabled;
@@ -437,7 +442,9 @@ class _MenuBarState extends State<MenuBar> {
     );
   }
 
-  void openMenu(_MenuNode menu, WidgetBuilder builder) {
+  void openMenu(_MenuNode menu) {
+    _currentMenu = menu;
+    final _MenuNode menuToOpen = menu.menuBuilder != null ? menu : menu.parent!;
     if (!menuIsOpen) {
       // We're opening the first menu, so cache the primary focus so that we can
       // try to return to it when the menu is dismissed.
@@ -446,20 +453,22 @@ class _MenuBarState extends State<MenuBar> {
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
     }
     _focusBeforeClick = null;
-    final List<_MenuNode> ancestors = menu.ancestors;
-    _openMenus.removeWhere((_MenuNode key, WidgetBuilder builder) => !ancestors.contains(key));
-    _openMenus[menu] = builder;
+    final List<_MenuNode> ancestors = menuToOpen.ancestors;
+    _openMenus.removeWhere((_MenuNode item) => !ancestors.contains(item));
+    _openMenus.add(menuToOpen);
     _markMenuDirtyAndDelayIfNecessary();
   }
 
   void closeMenu(_MenuNode menu) {
-    final Set<_MenuNode> toClose = <_MenuNode>{menu};
-    for (final _MenuNode openMenu in _openMenus.keys) {
-      if (openMenu.ancestors.contains(menu)) {
+    _currentMenu = menu.parent;
+    final _MenuNode menuToClose = menu.menuBuilder != null ? menu : menu.parent!;
+    final Set<_MenuNode> toClose = <_MenuNode>{menuToClose};
+    for (final _MenuNode openMenu in _openMenus) {
+      if (openMenu.ancestors.contains(menuToClose)) {
         toClose.add(openMenu);
       }
     }
-    _openMenus.removeWhere((_MenuNode key, WidgetBuilder value) => toClose.contains(key));
+    _openMenus.removeWhere((_MenuNode item) => toClose.contains(item));
     _markMenuDirtyAndDelayIfNecessary();
   }
 
@@ -505,7 +514,7 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   // Returns true if the given menu or one of its ancestors is open.
-  bool isAnOpenMenu(_MenuNode menu) => _openMenus.containsKey(menu);
+  bool isAnOpenMenu(_MenuNode menu) => _openMenus.contains(menu);
 
   // Handles any pointer events that occur in the app, checking them against
   // open menus to see if the menus should be closed or not.
@@ -552,7 +561,7 @@ class _MenuBarState extends State<MenuBar> {
     String? result;
     assert(() {
       if (menuIsOpen) {
-        result = _openMenus.keys.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
+        result = _openMenus.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
       }
       return true;
     }());
@@ -927,6 +936,7 @@ class _MenuBarButtonState extends State<MenuBarButton> with DiagnosticableTreeMi
     if (_parent != null) {
       (_parent! as _MenuBarMenuState).open();
     }
+    _focusNode.requestFocus();
   }
 }
 
@@ -1127,14 +1137,14 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
 }
 
 class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin, _MenuNode {
-  late _MenuBarState _menuBar;
+  _MenuBarState? _menuBar;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
   _MenuNode? _parent;
   int _parentIndex = -1;
-  bool get _showingSubmenu => _menuBar.isAnOpenMenu(this);
+  bool get _showingSubmenu => _menuBar!.isAnOpenMenu(this);
   bool get _isTopLevelMenu => _parent == null;
-  bool get _enabled => _menuBar.enabled && widget.children.isNotEmpty;
+  bool get _enabled => _menuBar!.enabled && widget.children.isNotEmpty;
 
   @override
   final Map<int, _MenuNode> children = <int, _MenuNode>{};
@@ -1144,6 +1154,9 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
 
   @override
   int get parentIndex => _parentIndex;
+
+  @override
+  WidgetBuilder? get menuBuilder => _buildPositionedMenu;
 
   @override
   void addChild(int index, _MenuNode child) {
@@ -1174,6 +1187,9 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
   void dispose() {
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
+    if (_isTopLevelMenu) {
+      _menuBar?._topLevelMenus.remove(this);
+    }
     parent?.removeChild(parentIndex, this);
     super.dispose();
   }
@@ -1181,7 +1197,13 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_isTopLevelMenu) {
+      _menuBar?._topLevelMenus.remove(this);
+    }
     _menuBar = _MenuBarState.of(context);
+    if (_isTopLevelMenu) {
+      _menuBar!._topLevelMenus.add(this);
+    }
     parent?.removeChild(parentIndex, this);
     final _MenuItemWrapper wrapper = _MenuItemWrapper.of(context);
     _parent = wrapper.parent;
@@ -1206,13 +1228,14 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
 
   void close() {
     setState(() {
-      _menuBar.closeMenu(this);
+      _menuBar!.closeMenu(this);
     });
   }
 
   void open() {
     setState(() {
-      _menuBar.openMenu(this, _buildPositionedMenu);
+      _menuBar!.openMenu(this);
+      _focusNode.requestFocus();
     });
   }
 
@@ -1242,7 +1265,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
     // Don't open the top level menu bar buttons on hover unless something else
     // is already open. This means that the user has to first open the menu bar
     // before hovering allows them to traverse it.
-    if (_isTopLevelMenu && !_menuBar.menuIsOpen) {
+    if (_isTopLevelMenu && !_menuBar!.menuIsOpen) {
       return;
     }
     if (hovering) {
@@ -1304,7 +1327,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
     // this menu button for the submenu.
     final TextDirection textDirection = Directionality.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
-    final RenderBox menuBarBox = _menuBar.context.findRenderObject()! as RenderBox;
+    final RenderBox menuBarBox = _menuBar!.context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Overlay.of(context)!.context.findRenderObject()! as RenderBox;
 
     final EdgeInsets menuPadding =
@@ -1342,9 +1365,9 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
   // A builder for a submenu that should be positioned relative to the menu
   // button whose context is given.
   Widget _buildPositionedMenu(BuildContext context) {
-    final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(_menuBar.context);
-    final MenuThemeData menuTheme = MenuTheme.of(_menuBar.context);
-    final TextDirection textDirection = Directionality.of(_menuBar.context);
+    final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(_menuBar!.context);
+    final MenuThemeData menuTheme = MenuTheme.of(_menuBar!.context);
+    final TextDirection textDirection = Directionality.of(_menuBar!.context);
     final Set<MaterialState> disabled = <MaterialState>{
       if (!_enabled) MaterialState.disabled,
     };
@@ -1352,14 +1375,14 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
     // that exists in the context of the menu button.
     return _wrapWithPosition(
       child: _MenuBarMarker(
-        state: _menuBar,
+        state: _menuBar!,
         child: _MenuItemWrapper(
           parent: this,
           index: parentIndex,
           child: Directionality(
             textDirection: textDirection,
             child: InheritedTheme.captureAll(
-              _menuBar.context,
+              _menuBar!.context,
               Builder(
                 builder: (BuildContext context) {
                   return Material(
@@ -1553,11 +1576,11 @@ class _MenuStack extends StatelessWidget {
               state: menuBar,
               child: Stack(
                 children: <Widget>[
-                  ...menuBar._openMenus.entries.map<Widget>(
-                    (MapEntry<_MenuNode, WidgetBuilder> entry) {
+                  ...menuBar._openMenus.map<Widget>(
+                    (_MenuNode entry) {
                       return Builder(
-                        key: ValueKey<_MenuNode>(entry.key),
-                        builder: entry.value,
+                        key: ValueKey<_MenuNode>(entry),
+                        builder: entry.menuBuilder!,
                       );
                     },
                   ),
@@ -1581,6 +1604,10 @@ mixin _MenuNode on DiagnosticableTreeMixin {
   /// These are the menu nodes that are the children of the menu item.
   /// This is a reverse mapping of [indices].
   Map<int, _MenuNode> get children;
+
+  /// Whether this node has a submenu (or is of the right type to possibly have
+  /// a submenu, even if the children map is empty.
+  WidgetBuilder? get menuBuilder => null;
 
   /// The number of additional members that this node represents. Will be zero
   /// for everything except groups.
@@ -2222,19 +2249,21 @@ class _MenuNextFocusAction extends NextFocusAction {
 
   @override
   void invoke(NextFocusIntent intent) {
-    // if (!menuBar.menuIsOpen) {
-    //   menuBar.openMenu(menuBar.);
+    // final List<_MenuNode> topLevels = menuBar._topLevelMenus.keys.toList()..sort();
+    // if (topLevels.isEmpty) {
     //   return;
     // }
-    // final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
-    //   return menuBar.enabled &&
-    //       node != menuBar._root &&
-    //       (node.item.children.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
+    // if (!menuBar.menuIsOpen) {
+    //   menuBar.openMenu(topLevels.first, menuBar._topLevelMenus[topLevels.first]!);
+    //   return;
+    // }
+    // final List<_MenuNode> enabledNodes = topLevels.where((_MenuNode node) {
+    //   return menuBar.enabled && node.children.isNotEmpty;
     // }).toList();
     // if (enabledNodes.isEmpty) {
     //   return;
     // }
-    // final int index = enabledNodes.indexOf(menuBar.openMenu!);
+    // final int index = enabledNodes.indexOf();
     // if (index == -1) {
     //   return;
     // }
