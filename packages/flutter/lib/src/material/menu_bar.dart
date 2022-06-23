@@ -311,8 +311,11 @@ class _MenuBarState extends State<MenuBar> {
   // avoid causing widget changes after being disposed.
   bool _disposed = false;
 
-  // The set of menus that are currently open.
+  // The menus that are currently open, and their builders.
   final Map<_MenuNode, WidgetBuilder> _openMenus = <_MenuNode, WidgetBuilder>{};
+
+  // The top-level menus and their builders, registered
+  final Map<_MenuNode, WidgetBuilder> _topLevelMenus = <_MenuNode, WidgetBuilder>{};
 
   bool get menuIsOpen => _openMenus.isNotEmpty;
   bool get enabled => widget.enabled;
@@ -409,8 +412,6 @@ class _MenuBarState extends State<MenuBar> {
                 // since there we have to be able to traverse menus.
                 shortcuts: _kMenuTraversalShortcuts,
                 child: _MenuItemWrapper(
-                  // Root menu item wrapper, so that top level items can find a
-                  // null parent (but still find a wrapper).
                   parent: null,
                   index: 0,
                   child: _MenuBarTopLevelBar(
@@ -443,11 +444,6 @@ class _MenuBarState extends State<MenuBar> {
       // If we captured a focus before the click, then use that, otherwise use
       // the current primary focus.
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
-    }
-    for (final _MenuNode node in _openMenus.keys) {
-      if (node.parent == null) {
-        debugPrint('$node: ${node.toStringDeep()}');
-      }
     }
     _focusBeforeClick = null;
     final List<_MenuNode> ancestors = menu.ancestors;
@@ -1352,15 +1348,14 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
     final Set<MaterialState> disabled = <MaterialState>{
       if (!_enabled) MaterialState.disabled,
     };
-    final _MenuItemWrapper buttonWrapper = _MenuItemWrapper.of(this.context);
     // Because this is all in the overlay, we have to duplicate a lot of state
     // that exists in the context of the menu button.
     return _wrapWithPosition(
       child: _MenuBarMarker(
         state: _menuBar,
         child: _MenuItemWrapper(
-          parent: buttonWrapper.parent,
-          index: buttonWrapper.index,
+          parent: this,
+          index: parentIndex,
           child: Directionality(
             textDirection: textDirection,
             child: InheritedTheme.captureAll(
@@ -1389,6 +1384,12 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('label', widget.label));
   }
 }
 
