@@ -10,6 +10,7 @@ import android.content.ContextWrapper;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public final class ViewUtils {
@@ -56,16 +57,58 @@ public final class ViewUtils {
    * @return True if the current view or any descendant view has focus.
    */
   public static boolean childHasFocus(@Nullable View root) {
+    return traverseHierarchy(root, (View view) -> view.hasFocus());
+  }
+
+  /**
+   * Returns true if the root or any child view is an instance of the given types.
+   *
+   * @param root The root view.
+   * @param viewTypes The types of views.
+   * @return true if any child view is an instance of any of the given types.
+   */
+  public static boolean hasChildViewOfType(@Nullable View root, Class<? extends View>[] viewTypes) {
+    return traverseHierarchy(
+        root,
+        (View view) -> {
+          for (int i = 0; i < viewTypes.length; i++) {
+            final Class<? extends View> viewType = viewTypes[i];
+            if (viewType.isInstance(view)) {
+              return true;
+            }
+          }
+          return false;
+        });
+  }
+
+  /** Allows to visit a view. */
+  public interface ViewVisitor {
+    boolean run(@NonNull View view);
+  }
+
+  /**
+   * Traverses the view hierarchy in pre-order and runs the visitor for each child view including
+   * the root view.
+   *
+   * <p>If the visitor returns true, the traversal stops, and the method returns true.
+   *
+   * <p>If the visitor returns false, the traversal continues until all views are visited.
+   *
+   * @param root The root view.
+   * @param visitor The visitor.
+   * @return true if the visitor returned true for a given view.
+   */
+  public static boolean traverseHierarchy(@Nullable View root, @NonNull ViewVisitor visitor) {
     if (root == null) {
       return false;
     }
-    if (root.hasFocus()) {
+    if (visitor.run(root)) {
       return true;
     }
     if (root instanceof ViewGroup) {
       final ViewGroup viewGroup = (ViewGroup) root;
       for (int idx = 0; idx < viewGroup.getChildCount(); idx++) {
-        if (childHasFocus(viewGroup.getChildAt(idx))) {
+        if (traverseHierarchy(viewGroup.getChildAt(idx), visitor)) {
           return true;
         }
       }

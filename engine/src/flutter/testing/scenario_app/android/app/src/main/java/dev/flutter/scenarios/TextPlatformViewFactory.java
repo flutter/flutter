@@ -5,6 +5,10 @@
 package dev.flutter.scenarios;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.view.Choreographer;
+import android.view.View;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.plugin.common.MessageCodec;
@@ -40,5 +44,37 @@ public final class TextPlatformViewFactory extends PlatformViewFactory {
   public PlatformView create(@NonNull Context context, int id, @Nullable Object args) {
     String params = (String) args;
     return new TextPlatformView(context, id, params);
+  }
+
+  private static class TextPlatformView implements PlatformView {
+    final TextView textView;
+
+    @SuppressWarnings("unchecked")
+    TextPlatformView(@NonNull final Context context, int id, @Nullable String params) {
+      textView = new TextView(context);
+      textView.setTextSize(72);
+      textView.setBackgroundColor(Color.WHITE);
+      textView.setText(params);
+
+      // Investigate why this is needed to pass some gold tests.
+      Choreographer.getInstance()
+          .postFrameCallbackDelayed(
+              new Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                  textView.invalidate();
+                }
+              },
+              500);
+    }
+
+    @Override
+    @NonNull
+    public View getView() {
+      return textView;
+    }
+
+    @Override
+    public void dispose() {}
   }
 }

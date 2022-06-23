@@ -26,6 +26,7 @@ import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
@@ -419,6 +420,14 @@ public class FlutterView extends SurfaceView
   @Override
   public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
     return mTextInputPlugin.createInputConnection(this, mKeyboardManager, outAttrs);
+  }
+
+  @Override
+  public boolean checkInputConnectionProxy(View view) {
+    return mNativeView
+        .getPluginRegistry()
+        .getPlatformViewsController()
+        .checkInputConnectionProxy(view);
   }
 
   @Override

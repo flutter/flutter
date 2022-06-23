@@ -26,13 +26,13 @@ abstract class Scenario {
   ///
   /// See [PlatformDispatcher.onDrawFrame] for more details.
   void onDrawFrame() {
-    Future<void>.delayed(const Duration(seconds: 1), () {
-      if (_didScheduleScreenshot) {
-        dispatcher.sendPlatformMessage('take_screenshot', null, null);
-      } else {
-        _didScheduleScreenshot = true;
-        dispatcher.scheduleFrame();
-      }
+    if (_didScheduleScreenshot) {
+      dispatcher.sendPlatformMessage('take_screenshot', null, null);
+      return;
+    }
+    Future<void>.delayed(const Duration(seconds: 2), () {
+      _didScheduleScreenshot = true;
+      dispatcher.scheduleFrame();
     });
   }
 

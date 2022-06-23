@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class PlatformViewUiTests {
+public class PlatformViewWithTextureViewUiTest {
   Intent intent;
 
   @Rule @NonNull
@@ -27,15 +27,13 @@ public class PlatformViewUiTests {
           PlatformViewsActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);
 
   private static String goldName(String suffix) {
-    return "PlatformViewUiTests_" + suffix;
+    return "PlatformViewWithTextureViewUiTest_" + suffix;
   }
 
   @Before
   public void setUp() {
     intent = new Intent(Intent.ACTION_MAIN);
-    // Render a native android view.
-    intent.putExtra("use_android_view", true);
-    intent.putExtra("view_type", PlatformViewsActivity.TEXT_VIEW_PV);
+    intent.putExtra("view_type", PlatformViewsActivity.TEXTURE_VIEW_PV);
   }
 
   @Test

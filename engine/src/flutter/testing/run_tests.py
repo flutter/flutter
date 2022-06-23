@@ -593,7 +593,7 @@ def RunAndroidTests(android_variant='android_debug_unopt', adb_path=None):
   RunCmd([
       systrace_test, '--adb-path', adb_path, '--apk-path', scenario_apk,
       '--package-name', 'dev.flutter.scenarios', '--activity-name',
-      '.TextPlatformViewActivity'
+      '.PlatformViewsActivity'
   ])
 
 

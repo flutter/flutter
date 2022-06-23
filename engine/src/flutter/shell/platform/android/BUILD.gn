@@ -286,6 +286,8 @@ android_java_sources = [
   "io/flutter/plugin/platform/PlatformViewWrapper.java",
   "io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java",
   "io/flutter/plugin/platform/PlatformViewsController.java",
+  "io/flutter/plugin/platform/SingleViewPresentation.java",
+  "io/flutter/plugin/platform/VirtualDisplayController.java",
   "io/flutter/util/PathUtils.java",
   "io/flutter/util/Preconditions.java",
   "io/flutter/util/Predicate.java",

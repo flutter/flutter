@@ -100,4 +100,15 @@
             column="18"/>
     </issue>
 
+    <issue
+        id="UseSparseArrays"
+        message="Use `new SparseArray&lt;VirtualDisplayController>(...)` instead for better performance"
+        errorLine1="        vdControllers = new HashMap&lt;>();"
+        errorLine2="                        ~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
+            line="61"
+            column="25"/>
+</issue>
+
 </issues>

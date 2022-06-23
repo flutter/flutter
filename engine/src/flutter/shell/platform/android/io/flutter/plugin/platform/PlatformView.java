@@ -66,11 +66,8 @@ public interface PlatformView {
    *
    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
    * connection. This probably doesn't need to be implemented.
-   *
-   * <p>This method is deprecated, and will be removed in a future release.
    */
   @SuppressLint("NewApi")
-  @Deprecated
   default void onInputConnectionLocked() {}
 
   /**
@@ -78,10 +75,7 @@ public interface PlatformView {
    *
    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
    * connection. This probably doesn't need to be implemented.
-   *
-   * <p>This method is deprecated, and will be removed in a future release.
    */
   @SuppressLint("NewApi")
-  @Deprecated
   default void onInputConnectionUnlocked() {}
 }

@@ -84,6 +84,7 @@ public abstract class TestActivity extends TestableFlutterActivity {
       test.put("name", "animated_color_square");
     }
     test.put("use_android_view", launchIntent.getBooleanExtra("use_android_view", false));
+    test.put("view_type", launchIntent.getStringExtra("view_type"));
     getScenarioParams(test);
     channel.invokeMethod("set_scenario", test);
   }

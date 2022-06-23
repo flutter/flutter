@@ -5,11 +5,12 @@
 package dev.flutter.scenariosui;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import androidx.annotation.NonNull;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
-import dev.flutter.scenarios.TextPlatformViewActivity;
+import dev.flutter.scenarios.PlatformViewsActivity;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,29 +22,33 @@ public class PlatformTextureUiTests {
   Intent intent;
 
   @Rule @NonNull
-  public ActivityTestRule<TextPlatformViewActivity> activityRule =
+  public ActivityTestRule<PlatformViewsActivity> activityRule =
       new ActivityTestRule<>(
-          TextPlatformViewActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);
+          PlatformViewsActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);
+
+  private static String goldName(String suffix) {
+    return "PlatformTextureUiTests_" + suffix;
+  }
 
   @Before
   public void setUp() {
     intent = new Intent(Intent.ACTION_MAIN);
     // Render a texture.
     intent.putExtra("use_android_view", false);
+    intent.putExtra("view_type", PlatformViewsActivity.TEXT_VIEW_PV);
   }
 
   @Test
   public void testPlatformView() throws Exception {
     intent.putExtra("scenario_name", "platform_view");
-    ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformView");
+    ScreenshotUtil.capture(activityRule.launchActivity(intent), goldName("testPlatformView"));
   }
 
   @Test
   public void testPlatformViewMultiple() throws Exception {
     intent.putExtra("scenario_name", "platform_view_multiple");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformViewMultiple");
+        activityRule.launchActivity(intent), goldName("testPlatformViewMultiple"));
   }
 
   @Test
@@ -51,65 +56,64 @@ public class PlatformTextureUiTests {
     intent.putExtra("scenario_name", "platform_view_multiple_background_foreground");
     ScreenshotUtil.capture(
         activityRule.launchActivity(intent),
-        "PlatformTextureUiTests_testPlatformViewMultipleBackgroundForeground");
+        goldName("testPlatformViewMultipleBackgroundForeground"));
   }
 
   @Test
   public void testPlatformViewCliprect() throws Exception {
     intent.putExtra("scenario_name", "platform_view_cliprect");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformViewCliprect");
+        activityRule.launchActivity(intent), goldName("testPlatformViewCliprect"));
   }
 
   @Test
   public void testPlatformViewCliprrect() throws Exception {
     intent.putExtra("scenario_name", "platform_view_cliprrect");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformViewCliprrect");
+        activityRule.launchActivity(intent), goldName("testPlatformViewCliprrect"));
   }
 
   @Test
   public void testPlatformViewClippath() throws Exception {
     intent.putExtra("scenario_name", "platform_view_clippath");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformViewClippath");
+        activityRule.launchActivity(intent), goldName("testPlatformViewClippath"));
   }
 
   @Test
   public void testPlatformViewTransform() throws Exception {
     intent.putExtra("scenario_name", "platform_view_transform");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformViewTransform");
+        activityRule.launchActivity(intent), goldName("testPlatformViewTransform"));
   }
 
   @Test
   public void testPlatformViewOpacity() throws Exception {
     intent.putExtra("scenario_name", "platform_view_opacity");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformViewOpacity");
+        activityRule.launchActivity(intent), goldName("testPlatformViewOpacity"));
   }
 
   @Test
   public void testPlatformViewRotate() throws Exception {
     intent.putExtra("scenario_name", "platform_view_rotate");
-    ScreenshotUtil.capture(
-        activityRule.launchActivity(intent), "PlatformTextureUiTests_testPlatformViewRotate");
+    PlatformViewsActivity activity = activityRule.launchActivity(intent);
+    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    ScreenshotUtil.capture(activity, goldName("testPlatformViewRotate"));
   }
 
   @Test
   public void testPlatformViewMultipleWithoutOverlays() throws Exception {
     intent.putExtra("scenario_name", "platform_view_multiple_without_overlays");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent),
-        "PlatformTextureUiTests_testPlatformViewMultipleWithoutOverlays");
+        activityRule.launchActivity(intent), goldName("testPlatformViewMultipleWithoutOverlays"));
   }
 
   @Test
   public void testPlatformViewTwoIntersectingOverlays() throws Exception {
     intent.putExtra("scenario_name", "platform_view_two_intersecting_overlays");
     ScreenshotUtil.capture(
-        activityRule.launchActivity(intent),
-        "PlatformTextureUiTests_testPlatformViewTwoIntersectingOverlays");
+        activityRule.launchActivity(intent), goldName("testPlatformViewTwoIntersectingOverlays"));
   }
 
   @Test
@@ -117,6 +121,6 @@ public class PlatformTextureUiTests {
     intent.putExtra("scenario_name", "platform_view_no_overlay_intersection");
     ScreenshotUtil.capture(
         activityRule.launchActivity(intent),
-        "PlatformTextureUiTests_testPlatformViewWithoutOverlayIntersection");
+        goldName("testPlatformViewWithoutOverlayIntersection"));
   }
 }

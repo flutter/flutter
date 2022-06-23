@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
-import dev.flutter.scenarios.TextPlatformViewActivity;
+import dev.flutter.scenarios.PlatformViewsActivity;
 import leakcanary.FailTestOnLeak;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,9 +19,9 @@ import org.junit.runner.RunWith;
 @LargeTest
 public class MemoryLeakTests {
   @Rule @NonNull
-  public ActivityTestRule<TextPlatformViewActivity> activityRule =
+  public ActivityTestRule<PlatformViewsActivity> activityRule =
       new ActivityTestRule<>(
-          TextPlatformViewActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);
+          PlatformViewsActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);
 
   @Test
   @FailTestOnLeak
@@ -29,6 +29,7 @@ public class MemoryLeakTests {
     Intent intent = new Intent(Intent.ACTION_MAIN);
     intent.putExtra("scenario_name", "platform_view");
     intent.putExtra("use_android_view", true);
+    intent.putExtra("view_type", PlatformViewsActivity.TEXT_VIEW_PV);
 
     activityRule.launchActivity(intent);
   }
