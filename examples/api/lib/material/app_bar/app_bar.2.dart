@@ -25,7 +25,7 @@ class AppBarExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style = TextButton.styleFrom(
-      primary: Theme.of(context).colorScheme.onPrimary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
     return Scaffold(
       appBar: AppBar(

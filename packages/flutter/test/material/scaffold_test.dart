@@ -11,39 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  // Regression test for https://github.com/flutter/flutter/issues/103741
-  testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    Widget buildFrame({required bool extendBodyBehindAppBar}) {
-      return MediaQuery(
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Scaffold(
-            extendBodyBehindAppBar: extendBodyBehindAppBar,
-            resizeToAvoidBottomInset: false,
-            body: SingleChildScrollView(
-              controller: controller,
-              child: const FlutterLogo(
-                size: 1107,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true));
-    expect(controller.position.pixels, 0.0);
-
-    controller.jumpTo(100.0);
-    await tester.pump();
-    expect(controller.position.pixels, 100.0);
-
-    await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false));
-    expect(controller.position.pixels, 100.0);
-  });
-
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
@@ -2434,8 +2401,6 @@ void main() {
       '   ancestor was:\n'
       '     Builder\n'
       '   The ancestors of this widget were:\n'
-      '     MediaQuery\n'
-      '     LayoutBuilder\n'
       '     _BodyBuilder\n'
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.body>]\n'

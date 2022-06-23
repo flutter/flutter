@@ -1552,7 +1552,8 @@
     "value": 4294967323,
     "names": {
       "web": [
-        "Escape"
+        "Escape",
+        "Esc"
       ],
       "macos": [
         "Escape"

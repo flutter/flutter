@@ -30,7 +30,7 @@ constexpr uint64_t kPhysical${_toUpperCammel(entry.constantName)} = ${toHex(entr
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _logicalDefinitions {
-    final OutputLines<int> lines = OutputLines<int>('Logical Key list');
+    final OutputLines<int> lines = OutputLines<int>('Logical Key list', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '''
 constexpr uint64_t kLogical${_toUpperCammel(entry.constantName)} = ${toHex(entry.value, digits: 11)};''');
