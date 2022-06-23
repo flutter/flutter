@@ -12496,6 +12496,89 @@ void main() {
       );
     });
   });
+
+  testWidgets('updateTextEditingValueWithDeltas applies the given deltas to the current text editing value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'This is some text.');
+    final EditableText editableText = EditableText(
+      showSelectionHandles: true,
+      maxLines: 1,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.multiline,
+    );
+
+    final Widget widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: editableText,
+      ),
+    );
+    
+    await tester.pumpWidget(widget);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+    final String insertedText = 'This text was inserted.';
+    state.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaInsertion(
+          oldText: 'This is some text.', 
+          textInserted: insertedText, 
+          insertionOffset: controller.text.length,
+          selection: TextSelection.collapsed(offset: controller.text.length + insertedText.length),
+          composing: TextRange.empty,
+        ),
+      ],
+      SelectionChangedCause.keyboard,
+    );
+
+    expect(controller.text, 'This is some text.This text was inserted.');
+
+    state.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaDeletion(
+          oldText: 'This is some text.This text was inserted.',
+          deletedRange: const TextRange(start: 0, end: 5),
+          selection: TextSelection.collapsed(offset: controller.text.length + insertedText.length - 5),
+          composing: TextRange.empty,
+        ),
+      ],
+      SelectionChangedCause.keyboard,
+    );
+
+    expect(controller.text, 'is some text.This text was inserted.');
+
+    state.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaReplacement(
+          oldText: 'is some text.This text was inserted.',
+          replacementText: 'This is',
+          replacedRange: const TextRange(start: 0, end: 2),
+          selection: TextSelection.collapsed(offset: controller.text.length + insertedText.length + 5),
+          composing: TextRange.empty,
+        ),
+      ],
+      SelectionChangedCause.keyboard,
+    );
+
+    expect(controller.text, 'This is some text.This text was inserted.');
+
+    state.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+          oldText: 'This is some text.This text was inserted.',
+          selection: const TextSelection.collapsed(offset: 5),
+          composing: TextRange.empty,
+        ),
+      ],
+      SelectionChangedCause.keyboard,
+    );
+
+    expect(controller.selection, const TextSelection.collapsed(offset: 5));
+  });
 }
 
 class UnsettableController extends TextEditingController {
