@@ -1847,7 +1847,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // After the paste, the cursor should be collapsed and located after the
     // pasted content.
-    final int lastSelectionIndex = math.max(selection.baseOffset, selection.extentOffset);
+    final int lastSelectionIndex = math.max(selection.baseOffset, selection.baseOffset + data.text!.length);
 
     userUpdateTextEditingValueWithDeltas(
       <TextEditingDelta>[
