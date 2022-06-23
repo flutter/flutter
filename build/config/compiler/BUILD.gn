@@ -33,6 +33,12 @@ declare_args() {
   # By default, API calls to deprecated methods are errors. While prototyping,
   # this flag may be set to allow such calls.
   allow_deprecated_api_calls = false
+
+  # Whether -fstack-protector --param=ssp-buffer-size=4 should be passed
+  # unconditionally.
+  # TODO(zanderso): Remove when no longer needed in the investigation of
+  # https://github.com/flutter/flutter/issues/87952.
+  use_fstack_protector = false
 }
 
 # default_include_dirs ---------------------------------------------------------
@@ -87,13 +93,20 @@ config("compiler") {
     cflags_objcc += common_flags
 
     # Stack protection.
-    if (is_mac) {
-      cflags += [ "-fstack-protector-all" ]
-    } else if (is_linux) {
+    if (use_fstack_protector) {
       cflags += [
         "-fstack-protector",
         "--param=ssp-buffer-size=4",
       ]
+    } else {
+      if (is_mac) {
+        cflags += [ "-fstack-protector-all" ]
+      } else if (is_linux) {
+        cflags += [
+          "-fstack-protector",
+          "--param=ssp-buffer-size=4",
+        ]
+      }
     }
 
     # Linker warnings.
