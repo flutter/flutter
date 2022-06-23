@@ -1010,7 +1010,7 @@ class TextStyle with Diagnosticable {
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
   ///
-  /// Similarly, One of [backgroundColor] or [background] must be null, and if
+  /// Similarly, one of [backgroundColor] or [background] must be null, and if
   /// this or `other` has [background] specified it will be given preference
   /// over any backgroundColor parameter.
   TextStyle merge(TextStyle? other) {
