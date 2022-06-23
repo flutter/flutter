@@ -98,6 +98,14 @@
   return YES;
 }
 
+/**
+ * Declares that the initial mouse-down when the view is not in focus will send an event to the
+ * view.
+ */
+- (BOOL)acceptsFirstMouse:(NSEvent*)event {
+  return YES;
+}
+
 - (BOOL)acceptsFirstResponder {
   return YES;
 }
