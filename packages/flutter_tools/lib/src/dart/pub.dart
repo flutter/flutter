@@ -241,6 +241,8 @@ class _DefaultPub implements Pub {
     final String command = upgrade ? 'upgrade' : 'get';
     final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
+      if (_logger.supportsColor)
+        '--color',
       if (verbose)
         '--verbose',
       '--directory',
@@ -459,7 +461,10 @@ class _DefaultPub implements Pub {
   }) async {
     // Fully resolved pub or pub.bat is calculated based on current platform.
     final io.Process process = await _processUtils.start(
-      _pubCommand(arguments),
+      _pubCommand([
+          if (_logger.supportsColor) '--color',
+          ...arguments,
+      ]),
       workingDirectory: directory,
       environment: await _createPubEnvironment(PubContext.interactive),
     );
