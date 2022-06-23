@@ -83,6 +83,9 @@ TaskFunction createIOSPlatformViewTests() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
     'lib/main.dart',
+    extraOptions: <String>[
+      '--dart-define=ENABLE_DRIVER_EXTENSION=true',
+    ],
   );
 }
 

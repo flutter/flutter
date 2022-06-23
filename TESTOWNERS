@@ -195,7 +195,7 @@
 /dev/devicelab/bin/tasks/module_custom_host_app_name_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/native_ui_tests_ios.dart @jmagman @flutter/engine
+/dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/native_ui_tests_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @jmagman @flutter/ios
