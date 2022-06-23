@@ -34,6 +34,19 @@ class TestScrollController extends ScrollController {
   }
 }
 
+Widget primaryScrollControllerBoilerplate({ required Widget child, required ScrollController controller }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: MediaQuery(
+      data: const MediaQueryData(),
+      child: PrimaryScrollController(
+        controller: controller,
+        child: child,
+      ),
+    ),
+  );
+}
+
 void main() {
   testWidgets('SingleChildScrollView overflow and clipRect test', (WidgetTester tester) async {
     // the test widowSize is Size(800.0, 600.0)
@@ -210,22 +223,40 @@ void main() {
     ));
   });
 
-  testWidgets('Vertical SingleChildScrollViews are primary by default', (WidgetTester tester) async {
+  testWidgets('Vertical SingleChildScrollViews are not primary by default', (WidgetTester tester) async {
     const SingleChildScrollView view = SingleChildScrollView();
-    expect(view.primary, isTrue);
+    expect(view.primary, isNull);
   });
 
-  testWidgets('Horizontal SingleChildScrollViews are non-primary by default', (WidgetTester tester) async {
+  testWidgets('Horizontal SingleChildScrollViews are not primary by default', (WidgetTester tester) async {
     const SingleChildScrollView view = SingleChildScrollView(scrollDirection: Axis.horizontal);
-    expect(view.primary, isFalse);
+    expect(view.primary, isNull);
   });
 
-  testWidgets('SingleChildScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
+  testWidgets('SingleChildScrollViews with controllers are not primary by default', (WidgetTester tester) async {
     final SingleChildScrollView view = SingleChildScrollView(
       controller: ScrollController(),
     );
-    expect(view.primary, isFalse);
+    expect(view.primary, isNull);
   });
+
+  testWidgets('Vertical SingleChildScrollViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: const SingleChildScrollView(),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isTrue);
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets("Vertical SingleChildScrollViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: const SingleChildScrollView(),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
     const Key innerKey = Key('inner');
