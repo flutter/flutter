@@ -716,7 +716,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 4 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
