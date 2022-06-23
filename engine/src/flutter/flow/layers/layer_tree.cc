@@ -160,6 +160,7 @@ sk_sp<DisplayList> LayerTree::Flatten(const SkRect& bounds) {
       .frame_device_pixel_ratio      = device_pixel_ratio_,
       .layer_snapshot_store          = nullptr,
       .enable_leaf_layer_tracing     = false,
+      .leaf_nodes_builder            = builder.builder().get(),
       // clang-format on
   };
 
