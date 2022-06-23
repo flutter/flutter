@@ -28,7 +28,7 @@ public abstract class PlatformViewFactory {
    *     null, or no arguments were sent from the Flutter app.
    */
   @NonNull
-  public abstract PlatformView create(@Nullable Context context, int viewId, @Nullable Object args);
+  public abstract PlatformView create(Context context, int viewId, @Nullable Object args);
 
   /** Returns the codec to be used for decoding the args parameter of {@link #create}. */
   @Nullable
