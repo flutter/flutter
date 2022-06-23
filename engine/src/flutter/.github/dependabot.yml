@@ -8,4 +8,4 @@ updates:
     schedule:
       interval: "weekly"
     labels:
-      - "waiting for tree to go green"
+      - "autosubmit"
