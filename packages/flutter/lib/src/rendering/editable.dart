@@ -198,6 +198,24 @@ class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
     _currentTextPosition = position.value;
     return true;
   }
+
+  bool moveByOffset(double offset) {
+    final Offset initialOffset = _currentOffset;
+    if (offset >= 0.0) {
+      while (_currentOffset.dy < initialOffset.dy + offset) {
+        if (!moveNext()) {
+          break;
+        }
+      }
+    } else {
+      while (_currentOffset.dy > initialOffset.dy + offset) {
+        if (!movePrevious()) {
+          break;
+        }
+      }
+    }
+    return initialOffset != _currentOffset;
+  }
 }
 
 /// Displays some text in a scrollable container with a potentially blinking
