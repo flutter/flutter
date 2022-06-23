@@ -325,17 +325,21 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       if (_state == _DragState.accepted) {
+        print("pointerid : ${event.pointer}");
         bool eventExists = false;
+        int event_index = -1;
         for (int i = 0; i < _multiPointerTrackers.length; i++) {
           if (_multiPointerTrackers[i].pointer == event.pointer) {
             eventExists = true;
+            event_index = i;
             break;
           }
         }
         if(eventExists) {
+          final PointerEvent addDeltaEvent = _multiPointerTrackers[event_index].copyWith(delta: _multiPointerTrackers[event_index].delta + event.delta);
+          _multiPointerTrackers[event_index] = addDeltaEvent;
           _checkMultiPointerUpdate();
           _multiPointerTrackers.clear();
-          _multiPointerTrackers.add(event);
         } else {
           _multiPointerTrackers.add(event);
           if (_multiPointerTrackers.length == _velocityTrackers.length) {
@@ -366,8 +370,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       final List pointers = _velocityTrackers.keys.toList();
       for(var pointer in pointers) {
-        _giveUpPointer(event.pointer);
+        _giveUpPointer(pointer);
       }
+      _multiPointerTrackers.clear();
     }
   }
 
