@@ -130,21 +130,19 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final bool? suggestionFlag = boolArg('suggestions');
-    final Set<String> items;
-    final String directoryPath;
     if (suggestionFlag != null && suggestionFlag == true) {
+      final String directoryPath;
       final bool? watchFlag = boolArg('watch');
       if (watchFlag != null && watchFlag) {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
-        items = findDirectories(argResults!, _fileSystem);
+        final Set<String> items = findDirectories(argResults!, _fileSystem);
         if (items.isEmpty || items.length > 1) {
           throwToolExit('The suggestions flags needs one directory path');
         }
         directoryPath = items.first;
-      }
-      else {
+      } else {
         directoryPath = workingDirectory!.path;
       }
       return ValidateProject(
