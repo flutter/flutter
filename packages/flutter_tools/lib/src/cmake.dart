@@ -31,22 +31,14 @@ String _escapeBackslashes(String s) {
 
 String _determineVersionString(CmakeBasedProject project, BuildInfo buildInfo) {
   // Prefer the build arguments for version information.
-  final String? buildName = buildInfo.buildName;
-  if (buildName != null) {
-    final String? buildNumber = buildInfo.buildNumber;
+  final String buildName = buildInfo.buildName ?? project.parent.manifest.buildName ?? '1.0.0';
+  final String? buildNumber = buildInfo.buildName != null
+    ? buildInfo.buildNumber
+    : (buildInfo.buildNumber ?? project.parent.manifest.buildNumber);
 
-    return buildNumber != null
-      ? '$buildName+$buildNumber'
-      : buildName;
-  }
-
-  // Otherwise try to use the project manifest's version information.
-  final String? manifestVersion = project.parent.manifest.appVersion;
-  if (manifestVersion != null) {
-    return manifestVersion;
-  }
-
-  return '1.0.0';
+  return buildNumber != null
+    ? '$buildName+$buildNumber'
+    : buildName;
 }
 
 Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
@@ -61,14 +53,18 @@ Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
 }
 
 /// Attempts to map a Dart version's build identifier (the part after a +) into
-/// a single integer. Complex build identifiers like `foo` or `1.2` are converted to 0.
-int _determineBuildVersion(Version version) {
-  if (version.build.length != 1) {
+/// a single integer. Returns null for complex build identifiers like `foo` or `1.2`.
+int? _tryDetermineBuildVersion(Version version) {
+  if (version.build.isEmpty) {
     return 0;
   }
 
-  final Object buildNumber = version.build.first as Object;
-  return buildNumber is int ? buildNumber : 0;
+  if (version.build.length != 1) {
+    return null;
+  }
+
+  final Object buildIdentifier = version.build.first as Object;
+  return buildIdentifier is int ? buildIdentifier : null;
 }
 
 /// Writes a generated CMake configuration file for [project], including
@@ -83,8 +79,22 @@ void writeGeneratedCmakeConfig(
   // the rest are put into a list to pass to the re-entrant build step.
   final String escapedFlutterRoot = _escapeBackslashes(flutterRoot);
   final String escapedProjectDir = _escapeBackslashes(project.parent.directory.path);
+
   final Version version = _determineVersion(project, buildInfo);
-  final int buildVersion = _determineBuildVersion(version);
+  final int? buildVersion = _tryDetermineBuildVersion(version);
+
+  // Since complex Dart build identifiers cannot be converted into integers,
+  // different Dart versions may be converted into the same Windows numeric version.
+  // Warn the user as some Windows installers, like MSI, don't update files if their versions are equal.
+  if (buildVersion == null && project is WindowsProject) {
+      final String buildIdentifier = version.build.join('.');
+      globals.printWarning(
+        'Warning: build identifier $buildIdentifier in version $version is not numeric '
+        'and cannot be converted into a Windows build version number. Defaulting to 0.\n'
+        'This may cause issues with Windows installers.'
+      );
+  }
+
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 file(TO_CMAKE_PATH "$escapedFlutterRoot" FLUTTER_ROOT)
@@ -94,7 +104,7 @@ set(FLUTTER_VERSION "$version" PARENT_SCOPE)
 set(FLUTTER_VERSION_MAJOR ${version.major} PARENT_SCOPE)
 set(FLUTTER_VERSION_MINOR ${version.minor} PARENT_SCOPE)
 set(FLUTTER_VERSION_PATCH ${version.patch} PARENT_SCOPE)
-set(FLUTTER_VERSION_BUILD $buildVersion PARENT_SCOPE)
+set(FLUTTER_VERSION_BUILD ${buildVersion ?? 0} PARENT_SCOPE)
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
