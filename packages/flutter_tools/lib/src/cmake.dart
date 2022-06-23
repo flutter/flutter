@@ -60,14 +60,14 @@ Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
   }
 }
 
-/// Attempts to map a Dart version's build number into a single integer.
-/// Complex build numbers like `+foo` or `+1.2` will be converted to 0.
+/// Attempts to map a Dart version's build identifier (the part after a +) into
+/// a single integer. Complex build identifiers like `foo` or `1.2` are converted to 0.
 int _determineBuildVersion(Version version) {
   if (version.build.length != 1) {
     return 0;
   }
 
-  final dynamic buildNumber = version.build.first;
+  final Object buildNumber = version.build.first as Object;
   return buildNumber is int ? buildNumber : 0;
 }
 
