@@ -407,6 +407,7 @@ class TextSelectionOverlay {
           ContextMenuController.show(
             context: context,
             buildContextMenu: (BuildContext context) {
+              // TODO(justinmc): Actually this should be wrapped in some stuff.
               return buildContextMenu(context, renderObject.lastSecondaryTapDownPosition!);
             },
           );
@@ -1132,6 +1133,8 @@ class SelectionOverlay {
       selectionEndPoints.first.point.dy - lineHeightAtStart,
     );
 
+    // TODO(justinmc): This needs to wrap buildContextMenu. Also the stuff
+    // inside of _SelectionToolbarOverlay.
     return Directionality(
       textDirection: Directionality.of(this.context),
       child: _SelectionToolbarOverlay(
@@ -1223,6 +1226,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
 
   @override
   Widget build(BuildContext context) {
+    print('justin build toolbar with FadeTransition');
     return FadeTransition(
       opacity: _opacity,
       child: CompositedTransformFollower(
