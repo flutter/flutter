@@ -6,6 +6,8 @@ import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/version/version.gni")
 
 impeller_component("compiler_lib") {
+  include_dirs = [ "//third_party/vulkan-deps/spirv-cross/src/" ]
+
   sources = [
     "code_gen_template.h",
     "compiler.cc",
@@ -77,7 +79,7 @@ generated_file("impellerc_license") {
     "",
     "### spirv_cross",
     "",
-    read_file("//third_party/spirv_cross/LICENSE", "string"),
+    read_file("//third_party/vulkan-deps/spirv-cross/src/LICENSE", "string"),
   ]
 }
 

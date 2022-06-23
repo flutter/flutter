@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 
-#include "third_party/swiftshader/third_party/SPIRV-Tools/include/spirv-tools/libspirv.hpp"
+#include "spirv-tools/libspirv.hpp"
 
 namespace fs = std::filesystem;
 

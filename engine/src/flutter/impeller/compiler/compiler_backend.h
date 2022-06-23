@@ -9,8 +9,8 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "third_party/spirv_cross/spirv_glsl.hpp"
-#include "third_party/spirv_cross/spirv_msl.hpp"
+#include "spirv_glsl.hpp"
+#include "spirv_msl.hpp"
 
 namespace impeller {
 namespace compiler {

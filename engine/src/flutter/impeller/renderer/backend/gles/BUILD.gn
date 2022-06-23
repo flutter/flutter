@@ -57,7 +57,7 @@ impeller_component("gles") {
     "texture_gles.h",
   ]
 
-  if (!is_android) {
+  if (!is_android && !is_fuchsia) {
     public_configs = [ ":gles_config" ]
     sources += [
       "//third_party/angle/include/GLES2/gl2.h",

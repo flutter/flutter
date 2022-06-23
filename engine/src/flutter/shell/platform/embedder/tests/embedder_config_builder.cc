@@ -8,7 +8,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "tests/embedder_test_context.h"
 #include "third_party/skia/include/core/SkBitmap.h"
-#include "third_party/swiftshader/include/vulkan/vulkan_core.h"
+#include "vulkan/vulkan_core.h"
 
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
