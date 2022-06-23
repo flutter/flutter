@@ -204,6 +204,7 @@ class _HomeState extends State<Home> {
                               ),
                           ],
                         ),
+                        const Divider(),
                         MenuBarButton(
                           label: TestMenu.subMenu6.label,
                           shortcut: const SingleActivator(

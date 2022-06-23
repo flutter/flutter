@@ -318,13 +318,20 @@ class _MenuBarState extends State<MenuBar> {
 
   // The most recently requested menu item, regardless of whether it has a
   // submenu or not.
+  _MenuNode? get currentMenu => _currentMenu;
   _MenuNode? _currentMenu;
+  set currentMenu(_MenuNode? value) {
+    if (_currentMenu != value) {
+      debugPrint('Setting current menu to $value');
+      _currentMenu = value;
+    }
+  }
 
   // The top-level menus and their builders, registered when they are created so
   // that they can be opened when traversed with the keyboard.
   final Set<_MenuNode> _topLevelMenus = <_MenuNode>{};
 
-  bool get menuIsOpen => _currentMenu != null;
+  bool get menuIsOpen => currentMenu != null;
   bool get enabled => widget.enabled;
 
   final FocusScopeNode menuBarScope = FocusScopeNode(debugLabel: 'MenuBar');
@@ -445,8 +452,6 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   void openMenu(_MenuNode menu) {
-    _currentMenu = menu;
-    debugPrint('Opening, menu is $_currentMenu');
     final _MenuNode menuToOpen = menu.menuBuilder != null ? menu : menu.parent;
     if (!menuIsOpen) {
       // We're opening the first menu, so cache the primary focus so that we can
@@ -454,7 +459,12 @@ class _MenuBarState extends State<MenuBar> {
       // If we captured a focus before the click, then use that, otherwise use
       // the current primary focus.
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
+      debugPrint('Storing focus on $_previousFocus');
     }
+    setState((){
+      currentMenu = menu;
+    });
+    debugPrint('Opening, menu is $currentMenu');
     _focusBeforeClick = null;
     final List<_MenuNode> ancestors = menuToOpen.ancestors;
     _openMenus.removeWhere((_MenuNode item) => !ancestors.contains(item));
@@ -462,15 +472,17 @@ class _MenuBarState extends State<MenuBar> {
     // Has to happen in post frame because when clicking on the menu, it is
     // not focusable until after the frame is done.
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      _currentMenu!.focusNode?.requestFocus();
-      debugPrint('Focusing menu ${_currentMenu!.focusNode}');
+      currentMenu!.focusNode?.requestFocus();
+      debugPrint('Focusing menu ${currentMenu!.focusNode}');
     });
     _markMenuDirtyAndDelayIfNecessary();
   }
 
   void closeMenu(_MenuNode menu) {
-    _currentMenu = menu.parent;
-    debugPrint('Closing, current menu is now $_currentMenu');
+    setState((){
+      currentMenu = menu.parent;
+    });
+    debugPrint('Closing, current menu is now $currentMenu');
     final _MenuNode menuToClose = menu.menuBuilder != null ? menu : menu.parent;
     final Set<_MenuNode> toClose = <_MenuNode>{menuToClose};
     for (final _MenuNode openMenu in _openMenus) {
@@ -483,9 +495,11 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   void closeAll() {
-    _focusBeforeClick = null;
-    _openMenus.clear();
-    _previousFocus?.requestFocus();
+    setState((){
+      _focusBeforeClick = null;
+      _openMenus.clear();
+      currentMenu = null;
+    });
     _markMenuDirtyAndDelayIfNecessary();
   }
 
@@ -501,6 +515,9 @@ class _MenuBarState extends State<MenuBar> {
     } else {
       _overlayEntry?.remove();
       _overlayEntry = null;
+      debugPrint('Requesting focus on $_previousFocus');
+      _previousFocus?.requestFocus();
+      _previousFocus = null;
       // If there aren't any menus open, then there's no need to mark the
       // overlay dirty, since we just removed the overlay entry.
       widget.controller?._menuBarStateChanged();
@@ -839,7 +856,7 @@ class _MenuBarButtonState extends State<MenuBarButton> with DiagnosticableTreeMi
   FocusNode? _internalFocusNode;
 
   @override
-  Map<int, _MenuNode> get children => const <int, _MenuNode>{};
+  List<_MenuNode> get children => const <_MenuNode>[];
 
   @override
   _MenuNode get parent => _parent;
@@ -945,10 +962,11 @@ class _MenuBarButtonState extends State<MenuBarButton> with DiagnosticableTreeMi
   }
 
   void _handleHover(bool hovering) {
-    widget.onHover?.call(hovering);
-    // Will make sure that the parent is open, but all other menus (including
-    // submenus of sibling buttons) are closed.
-    _menuBar.openMenu(this);
+    // Only open on hover if a menu is already open.
+    if (_menuBar.menuIsOpen) {
+      widget.onHover?.call(hovering);
+      _menuBar.openMenu(this);
+    }
   }
 }
 
@@ -1156,7 +1174,8 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
   bool get _showingSubmenu => _menuBar!.isAnOpenMenu(this);
 
   @override
-  final Map<int, _MenuNode> children = <int, _MenuNode>{};
+  final List<_MenuNode> children = <_MenuNode>[];
+  final Map<int, _MenuNode> _childMapping = <int, _MenuNode>{};
 
   @override
   _MenuNode get parent => _parent;
@@ -1175,15 +1194,27 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
 
   @override
   void addChild(int index, _MenuNode child) {
-    assert(
-        children[index] == null, 'Index $index already set. Tried to set to $child. Already set to ${children[index]}');
-    children[index] = child;
+    assert(_childMapping[index] == null,
+        'Index $index already set. Tried to set to $child. Already set to ${_childMapping[index]}');
+    _childMapping[index] = child;
+    _updateChildren();
   }
 
   @override
   void removeChild(int index, _MenuNode child) {
-    assert(children[index] == child, 'Child $child not found at index $index in $children');
-    children.remove(index);
+    assert(_childMapping[index] == child, 'Child $child not found at index $index in $_childMapping');
+    _childMapping.remove(index);
+    _updateChildren();
+  }
+
+  void _updateChildren() {
+    // Keep track of children as a map, so that inserting at an index works even
+    // if the previous index has been removed.
+    final List<int> indices = _childMapping.keys.toList()..sort();
+    children.clear();
+    for (final int index in indices) {
+      children.add(_childMapping[index]!);
+    }
   }
 
   @override
@@ -1460,7 +1491,7 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
   int _parentIndex = -1;
 
   @override
-  final Map<int, _MenuNode> children = <int, _MenuNode>{};
+  final List<_MenuNode> children = <_MenuNode>[];
 
   @override
   int get memberCount => widget.members.length;
@@ -1504,12 +1535,12 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
         if (index == 0) {
           skipPrevious = true;
         } else if (index > 0) {
-          skipPrevious = parent.children[index - 1]!.memberCount > 0;
+          skipPrevious = parent.children[index - 1].memberCount > 0;
         }
         if (index == numChildren - 1) {
           skipNext = true;
         } else if (index > 0 && index < numChildren - 1) {
-          skipNext = parent.children[index + 1]!.memberCount > 0;
+          skipNext = parent.children[index + 1].memberCount > 0;
         }
       }
     }
@@ -1586,12 +1617,12 @@ class _MenuStack extends StatelessWidget {
             VoidCallbackIntent: VoidCallbackAction(),
           },
           child: Shortcuts(
-            // These are here to make sure that these override any shortcut
-            // bindings from the menu items when a menu is open. If someone
-            // wants to bind an arrow or tab to a menu item, it would otherwise
-            // override the default traversal keys. We want their shortcuts to
-            // apply everywhere but override these in the menu itself, since
-            // there we have to be able to traverse the menus.
+            // These shortcuts are here to make sure that these override any
+            // shortcut bindings from the menu items when a menu is open. If
+            // someone wants to bind an arrow or tab to a menu item, it would
+            // otherwise override the default traversal keys. We want their
+            // shortcuts to apply everywhere but override these in the menu
+            // itself, since there we have to be able to traverse the menus.
             shortcuts: _kMenuTraversalShortcuts,
             child: _MenuBarMarker(
               state: menuBar,
@@ -1616,8 +1647,10 @@ class _MenuStack extends StatelessWidget {
 }
 
 class _RootMenuNode with DiagnosticableTreeMixin, _MenuNode {
+  final Map<int, _MenuNode> _childMapping = <int, _MenuNode>{};
+
   @override
-  final Map<int, _MenuNode> children = <int, _MenuNode>{};
+  final List<_MenuNode> children = <_MenuNode>[];
 
   @override
   bool get enabled => false;
@@ -1636,12 +1669,24 @@ class _RootMenuNode with DiagnosticableTreeMixin, _MenuNode {
 
   @override
   void addChild(int index, _MenuNode child) {
-    children[index] = child;
+    _childMapping[index] = child;
+    _updateChildren();
   }
 
   @override
   void removeChild(int index, _MenuNode child) {
-    children.remove(index);
+    _childMapping.remove(index);
+    _updateChildren();
+  }
+
+  void _updateChildren() {
+    // Keep track of children as a map, so that inserting at an index works even
+    // if a previous index has been removed.
+    final List<int> indices = _childMapping.keys.toList()..sort();
+    children.clear();
+    for (final int index in indices) {
+      children.add(_childMapping[index]!);
+    }
   }
 }
 
@@ -1654,7 +1699,7 @@ mixin _MenuNode on DiagnosticableTreeMixin implements Comparable<_MenuNode> {
 
   /// These are the menu nodes that are the children of the menu item.
   /// This is a reverse mapping of [indices].
-  Map<int, _MenuNode> get children;
+  List<_MenuNode> get children;
 
   /// Whether this node has a submenu (or is of the right type to possibly have
   /// a submenu, even if the children map is empty.
@@ -1713,16 +1758,10 @@ mixin _MenuNode on DiagnosticableTreeMixin implements Comparable<_MenuNode> {
     if (isRoot || parentIndex == parent.children.length - 1) {
       return null;
     }
-    final List<int> indices = parent.children.keys.toList()..sort();
-    final int listIndex = indices.indexOf(parentIndex);
-    assert(listIndex == parentIndex);
-    if (listIndex == indices.length - 1) {
-      return null;
-    }
-    int searchIndex = listIndex + 1;
-    while (searchIndex < indices.length) {
-      if (parent.children[indices[searchIndex]]!.enabled) {
-        return parent.children[indices[searchIndex]];
+    int searchIndex = parentIndex + 1;
+    while (searchIndex < parent.children.length) {
+      if (parent.children[searchIndex].enabled) {
+        return parent.children[searchIndex];
       }
       searchIndex += 1;
     }
@@ -1734,16 +1773,10 @@ mixin _MenuNode on DiagnosticableTreeMixin implements Comparable<_MenuNode> {
     if (isRoot || parentIndex == 0) {
       return null;
     }
-    final List<int> indices = parent.children.keys.toList()..sort();
-    final int listIndex = indices.indexOf(parentIndex);
-    assert(listIndex == parentIndex);
-    if (listIndex == 0) {
-      return null;
-    }
-    int searchIndex = listIndex - 1;
+    int searchIndex = parentIndex - 1;
     while (searchIndex >= 0) {
-      if (parent.children[indices[searchIndex]]!.enabled) {
-        return parent.children[indices[searchIndex]];
+      if (parent.children[searchIndex].enabled) {
+        return parent.children[searchIndex];
       }
       searchIndex -= 1;
     }
@@ -1754,9 +1787,9 @@ mixin _MenuNode on DiagnosticableTreeMixin implements Comparable<_MenuNode> {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> result = <DiagnosticsNode>[];
-    final List<int> keys = children.keys.toList()..sort();
-    for (final int key in keys) {
-      result.add(children[key]!.toDiagnosticsNode());
+    final List<_MenuNode> nodes = children;
+    for (final _MenuNode node in nodes) {
+      result.add(node.toDiagnosticsNode());
     }
     return result;
   }
@@ -2339,9 +2372,11 @@ class _MenuNextFocusAction extends NextFocusAction {
     if (!menuBar.menuIsOpen) {
       return;
     }
-    final _MenuNode? next = menuBar._currentMenu!.nextSibling;
+    final _MenuNode? next = menuBar.currentMenu!.nextSibling;
     if (next != null) {
       menuBar.openMenu(next);
+    } else {
+      menuBar.openMenu(menuBar.currentMenu!.parent.children.first);
     }
   }
 }
@@ -2356,9 +2391,11 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
     if (!menuBar.menuIsOpen) {
       return;
     }
-    final _MenuNode? next = menuBar._currentMenu!.previousSibling;
+    final _MenuNode? next = menuBar.currentMenu!.previousSibling;
     if (next != null) {
       menuBar.openMenu(next);
+    } else {
+      menuBar.openMenu(menuBar.currentMenu!.parent.children.last);
     }
   }
 }
@@ -2373,29 +2410,33 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     if (!menuBar.menuIsOpen) {
       return false;
     }
-    final _MenuNode? currentMenu = menuBar._currentMenu;
+    final _MenuNode? currentMenu = menuBar.currentMenu;
     if (currentMenu == null) {
       return false;
     }
     if (currentMenu.isTopLevel) {
       final _MenuNode? next = currentMenu.nextSibling;
-      if (next != null && next.children.isNotEmpty) {
+      if (next != null) {
         menuBar.openMenu(next);
+      } else {
+        menuBar.openMenu(currentMenu.parent.children[0]);
       }
-      return next != null;
+      return true;
     }
-    if (currentMenu.hasSubmenu && currentMenu.children.isNotEmpty) {
+    if (currentMenu.hasSubmenu) {
       // If no submenu is open, then arrow opens the submenu.
-      menuBar.openMenu(currentMenu.children[0]!);
+      menuBar.openMenu(currentMenu.children[0]);
       return true;
     } else {
       // If there's no submenu, then an arrow moves to the next top
       // level sibling, wrapping around if need be.
       final _MenuNode? next = currentMenu.topLevel.nextSibling;
-      if (next != null && next.children.isNotEmpty) {
+      if (next != null) {
         menuBar.openMenu(next);
+      } else {
+        menuBar.openMenu(currentMenu.topLevel.parent.children.first);
       }
-      return next != null;
+      return true;
     }
   }
 
@@ -2403,19 +2444,45 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     if (!menuBar.menuIsOpen) {
       return false;
     }
-    final _MenuNode? currentMenu = menuBar._currentMenu;
+    final _MenuNode? currentMenu = menuBar.currentMenu;
     if (currentMenu == null) {
       return false;
     }
-    menuBar.openMenu(currentMenu.parent);
-    return true;
+    if (currentMenu.isTopLevel) {
+      final _MenuNode? previous = currentMenu.previousSibling;
+      if (previous != null) {
+        menuBar.openMenu(previous);
+      } else {
+        menuBar.openMenu(currentMenu.topLevel.parent.children.last);
+      }
+      return previous != null;
+    } else if (currentMenu.parent.isTopLevel) {
+      final _MenuNode? previous = currentMenu.parent.previousSibling;
+      if (previous != null) {
+        menuBar.openMenu(previous);
+      } else {
+        menuBar.openMenu(currentMenu.topLevel.parent.children.last);
+      }
+      return previous != null;
+    } else {
+      menuBar.openMenu(currentMenu.parent);
+      return true;
+    }
   }
 
   bool _moveUp() {
     if (!menuBar.menuIsOpen) {
       return false;
     }
-    final _MenuNode? next = menuBar._currentMenu!.previousSibling;
+    if (menuBar.currentMenu?.isTopLevel ?? false) {
+      menuBar.closeAll();
+      return true;
+    }
+    if ((menuBar.currentMenu?.parent.isTopLevel ?? false) && menuBar.currentMenu?.parentIndex == 0) {
+      menuBar.openMenu(menuBar.currentMenu!.parent);
+      return true;
+    }
+    final _MenuNode? next = menuBar.currentMenu!.previousSibling;
     if (next != null) {
       menuBar.openMenu(next);
     }
@@ -2426,11 +2493,16 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     if (!menuBar.menuIsOpen) {
       return false;
     }
-    final _MenuNode? next = menuBar._currentMenu!.nextSibling;
-    if (next != null) {
-      menuBar.openMenu(next);
+    if (menuBar.currentMenu?.isTopLevel ?? false) {
+      menuBar.openMenu(menuBar.currentMenu!.children.first);
+      return true;
+    } else {
+      final _MenuNode? next = menuBar.currentMenu!.nextSibling;
+      if (next != null) {
+        menuBar.openMenu(next);
+      }
+      return next != null;
     }
-    return next != null;
   }
 
   @override
