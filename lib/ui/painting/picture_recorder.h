@@ -40,9 +40,6 @@ class PictureRecorder : public RefCountedDartWrappable<PictureRecorder> {
  private:
   PictureRecorder();
 
-  SkRTreeFactory rtree_factory_;
-  SkPictureRecorder picture_recorder_;
-
   sk_sp<DisplayListCanvasRecorder> display_list_recorder_;
 
   fml::RefPtr<Canvas> canvas_;

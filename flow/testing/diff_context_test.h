@@ -5,7 +5,6 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
-#include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/testing/skia_gpu_object_layer_test.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -41,14 +40,6 @@ class DiffContextTest : public ThreadTest {
                        const SkIRect& additional_damage = SkIRect::MakeEmpty(),
                        int horizontal_clip_alignment = 0,
                        int vertical_alignment = 0);
-
-  // Create picture consisting of filled rect with given color; Being able
-  // to specify different color is useful to test deep comparison of pictures
-  sk_sp<SkPicture> CreatePicture(const SkRect& bounds, uint32_t color);
-
-  std::shared_ptr<PictureLayer> CreatePictureLayer(
-      sk_sp<SkPicture> picture,
-      const SkPoint& offset = SkPoint::Make(0, 0));
 
   // Create display list consisting of filled rect with given color; Being able
   // to specify different color is useful to test deep comparison of pictures

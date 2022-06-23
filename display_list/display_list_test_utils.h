@@ -13,11 +13,9 @@
 namespace flutter {
 namespace testing {
 
-sk_sp<SkPicture> GetSamplePicture();
 sk_sp<DisplayList> GetSampleDisplayList();
-sk_sp<SkPicture> GetSampleNestedPicture();
-sk_sp<DisplayList> GetSampleNestedDisplayList();
 sk_sp<DisplayList> GetSampleDisplayList(int ops);
+sk_sp<DisplayList> GetSampleNestedDisplayList();
 
 }  // namespace testing
 }  // namespace flutter
