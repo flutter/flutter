@@ -2558,9 +2558,8 @@ void main() {
     await tester.pump();
 
     // Toolbar should fade in. Starting at 0% opacity.
+    expect(find.text('Select all'), findsOneWidget);
     final Element target = tester.element(find.text('Select all'));
-    //final Element target = tester.element(find.text('Paste'));
-    //final Element target = tester.element(find.byType(CupertinoButton));
     final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>()!;
     expect(opacity.opacity.value, equals(0.0));
 

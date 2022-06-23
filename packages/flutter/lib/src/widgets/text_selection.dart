@@ -282,6 +282,7 @@ class TextSelectionOverlay {
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
+      buildContextMenu: buildContextMenu,
       context: context,
       debugRequiredFor: debugRequiredFor,
       // The metrics will be set when show handles.
@@ -393,6 +394,12 @@ class TextSelectionOverlay {
 
     ContextMenuController.hide();
 
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final Offset offset = -Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero),
+      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+    ).topLeft;
+
     // If right clicking on desktop, use the right click position as the only
     /// anchor.
     if (renderObject.lastSecondaryTapDownPosition != null) {
@@ -407,8 +414,11 @@ class TextSelectionOverlay {
           ContextMenuController.show(
             context: context,
             buildContextMenu: (BuildContext context) {
-              // TODO(justinmc): Actually this should be wrapped in some stuff.
-              return buildContextMenu(context, renderObject.lastSecondaryTapDownPosition!);
+              return _SelectionToolbarWrapper(
+                layerLink: _selectionOverlay.toolbarLayerLink,
+                offset: offset,
+                child: buildContextMenu(context, renderObject.lastSecondaryTapDownPosition!),
+              );
             },
           );
           return;
@@ -417,8 +427,6 @@ class TextSelectionOverlay {
 
     // Otherwise, calculate the anchors as the upper and lower horizontal center
     // of the selection.
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-
     ContextMenuController.show(
       context: context,
       buildContextMenu: (BuildContext context) {
@@ -456,7 +464,11 @@ class TextSelectionOverlay {
           editingRegion.top + endTextSelectionPoint.point.dy,
         );
 
-        return buildContextMenu(context, anchorAbove, anchorBelow);
+        return _SelectionToolbarWrapper(
+          layerLink: _selectionOverlay.toolbarLayerLink,
+          offset: offset,
+          child: buildContextMenu(context, anchorAbove, anchorBelow),
+        );
       },
     );
   }
@@ -709,6 +721,7 @@ class SelectionOverlay {
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   SelectionOverlay({
+    this.buildContextMenu,
     required this.context,
     this.debugRequiredFor,
     required TextSelectionHandleType startHandleType,
@@ -760,6 +773,11 @@ class SelectionOverlay {
       'app content was created above the Navigator with the WidgetsApp builder parameter.',
     );
   }
+
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  ///
+  /// If not provided then [TextSelectionControls.buildToolbar] will be used.
+  final ContextMenuBuilder? buildContextMenu;
 
   /// {@macro flutter.widgets.SelectionOverlay.selectionControls}
   final BuildContext context;
@@ -1142,7 +1160,6 @@ class SelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    // TODO(justinmc): Remove?
     if (selectionControls == null) {
       return Container();
     }
@@ -1169,58 +1186,50 @@ class SelectionOverlay {
       selectionEndPoints.first.point.dy - lineHeightAtStart,
     );
 
-    // TODO(justinmc): This needs to wrap buildContextMenu. Also the stuff
-    // inside of _SelectionToolbarOverlay.
-    return Directionality(
-      textDirection: Directionality.of(this.context),
-      child: _SelectionToolbarOverlay(
-        preferredLineHeight: lineHeightAtStart,
-        toolbarLocation: toolbarLocation,
-        layerLink: toolbarLayerLink,
-        editingRegion: editingRegion,
-        selectionControls: selectionControls,
-        midpoint: midpoint,
-        selectionEndpoints: selectionEndPoints,
-        visibility: toolbarVisible,
-        selectionDelegate: selectionDelegate,
-        clipboardStatus: clipboardStatus,
+    return _SelectionToolbarWrapper(
+      visibility: toolbarVisible,
+      layerLink: toolbarLayerLink,
+      offset: -editingRegion.topLeft,
+      child: Builder(
+        builder: (BuildContext context) {
+          return selectionControls!.buildToolbar(
+            context,
+            editingRegion,
+            lineHeightAtStart,
+            midpoint,
+            selectionEndPoints,
+            selectionDelegate,
+            clipboardStatus,
+            toolbarLocation,
+          );
+        },
       ),
     );
   }
 }
 
-/// This widget represents a selection toolbar.
-class _SelectionToolbarOverlay extends StatefulWidget {
-  /// Creates a toolbar overlay.
-  const _SelectionToolbarOverlay({
-    required this.preferredLineHeight,
-    required this.toolbarLocation,
-    required this.layerLink,
-    required this.editingRegion,
-    required this.selectionControls,
+// Wrap the given child in the widgets common to both buildContextMenu and
+// TextSelectionControls.buildToolbar.
+class _SelectionToolbarWrapper extends StatefulWidget {
+  const _SelectionToolbarWrapper({
     this.visibility,
-    required this.midpoint,
-    required this.selectionEndpoints,
-    required this.selectionDelegate,
-    required this.clipboardStatus,
-  });
+    required this.layerLink,
+    required this.offset,
+    required this.child,
+  }) : assert(layerLink != null),
+       assert(offset != null),
+       assert(child != null);
 
-  final double preferredLineHeight;
-  final Offset? toolbarLocation;
+  final Widget child;
+  final Offset offset;
   final LayerLink layerLink;
-  final Rect editingRegion;
-  final TextSelectionControls? selectionControls;
   final ValueListenable<bool>? visibility;
-  final Offset midpoint;
-  final List<TextSelectionPoint> selectionEndpoints;
-  final TextSelectionDelegate? selectionDelegate;
-  final ClipboardStatusNotifier? clipboardStatus;
 
   @override
-  _SelectionToolbarOverlayState createState() => _SelectionToolbarOverlayState();
+  State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
 }
 
-class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with SingleTickerProviderStateMixin {
+class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
@@ -1235,7 +1244,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
   }
 
   @override
-  void didUpdateWidget(_SelectionToolbarOverlay oldWidget) {
+  void didUpdateWidget(_SelectionToolbarWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.visibility == widget.visibility) {
       return;
@@ -1262,26 +1271,15 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
 
   @override
   Widget build(BuildContext context) {
-    print('justin build toolbar with FadeTransition');
-    return FadeTransition(
-      opacity: _opacity,
-      child: CompositedTransformFollower(
-        link: widget.layerLink,
-        showWhenUnlinked: false,
-        offset: -widget.editingRegion.topLeft,
-        child: Builder(
-          builder: (BuildContext context) {
-            return widget.selectionControls!.buildToolbar(
-              context,
-              widget.editingRegion,
-              widget.preferredLineHeight,
-              widget.midpoint,
-              widget.selectionEndpoints,
-              widget.selectionDelegate!,
-              widget.clipboardStatus,
-              widget.toolbarLocation,
-            );
-          },
+    return Directionality(
+      textDirection: Directionality.of(this.context),
+      child: FadeTransition(
+        opacity: _opacity,
+        child: CompositedTransformFollower(
+          link: widget.layerLink,
+          showWhenUnlinked: false,
+          offset: widget.offset,
+          child: widget.child,
         ),
       ),
     );
@@ -1317,7 +1315,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
 
   @override
   State<_SelectionHandleOverlay> createState() => _SelectionHandleOverlayState();
-
 }
 
 class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with SingleTickerProviderStateMixin {
