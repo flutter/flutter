@@ -2851,10 +2851,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _stopCursorBlink({ bool resetCharTicks = true }) {
     _cursorActive = false;
     _cursorBlinkOpacityController.value = 0.0;
-    if (EditableText.debugDeterministicCursor) {
-      return;
-    }
-    _cursorBlinkOpacityController.value = 0.0;
+    _cursorTimer?.cancel();
+    _cursorTimer = null;
     if (resetCharTicks) {
       _obscureShowCharTicksPending = 0;
     }
