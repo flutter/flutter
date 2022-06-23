@@ -1887,6 +1887,47 @@ class _RepositoryWuffsDirectory extends _RepositoryDirectory {
   }
 }
 
+class _RepositoryVulkanDepsDirectory extends _RepositoryDirectory {
+  _RepositoryVulkanDepsDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != '.git' // source control
+        && entry.name != 'glslang' // only used on hosts for tests
+        && entry.name != 'spirv-cross' // Used by impellerc with separate license and host tests. See //flutter/impeller/compiler:impellerc_license
+        && entry.name != 'spirv-headers' // only used on hosts for tests
+        && entry.name != 'spirv-tools' // only used on hosts for tests
+        && entry.name != 'vulkan-loader' // on hosts for tests
+        && entry.name != 'vulkan-tools' // on hosts for tests
+        && entry.name != 'vulkan-validation-layers'; // on hosts for tests
+  }
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'vulkan-headers') {
+      return _RepositoryVulkanDepsSubDirectory(this, entry);
+    }
+    return super.createSubdirectory(entry);
+  }
+}
+
+class _RepositoryVulkanDepsSubDirectory extends _RepositoryDirectory {
+  _RepositoryVulkanDepsSubDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name == 'src';
+  }
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'src') {
+      return _RepositoryVulkanDirectory(this, entry);
+    }
+    return super.createSubdirectory(entry);
+  }
+}
+
 class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDirectory {
   _RepositoryRootThirdPartyDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1917,10 +1958,6 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
         && entry.name != 'fontconfig' // not used in standard configurations
         && entry.name != 'swiftshader' // only used on hosts for tests
         && entry.name != 'shaderc' // Used by impellerc with separate license and host tests. See //flutter/impeller/compiler:impellerc_license
-        && entry.name != 'glslang' // only used on hosts for tests
-        && entry.name != 'spirv_tools' // only used on hosts for tests
-        && entry.name != 'spirv_headers' // only used on hosts for tests
-        && entry.name != 'spirv_cross' // Used by impellerc with separate license and host tests. See //flutter/impeller/compiler:impellerc_license
         && entry.name != 'ocmock' // only used for tests
         && entry.name != 'java' // only used for Android builds
         && entry.name != 'inja' // Only used by impellerc, which ships a separate license. See //flutter/impeller/compiler:impellerc_license
@@ -1941,8 +1978,10 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
       return _RepositoryDartDirectory(this, entry);
     if (entry.name == 'expat')
       return _RepositoryExpatDirectory(this, entry);
-    if (entry.name == 'externals')
-      return _RepositoryThirdPartyExternalsDirectory(this, entry);
+    if (entry.name == 'vulkan_memory_allocator')
+      return _RepositoryVulkanMemoryAllocatorDirectory(this, entry);
+    if (entry.name == 'vulkan-deps')
+      return _RepositoryVulkanDepsDirectory(this, entry);
     if (entry.name == 'freetype-android')
       throw '//third_party/freetype-android is no longer part of this client: remove it';
     if (entry.name == 'freetype2')
@@ -1987,18 +2026,6 @@ class _RepositoryThirdPartyWebDependenciesDirectory extends _RepositoryDirectory
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'canvaskit' // redundant; covered by Skia dependencies
         && super.shouldRecurse(entry);
-  }
-}
-
-/// Corresponds to the `src/third_party/externals` directory
-class _RepositoryThirdPartyExternalsDirectory extends _RepositoryDirectory {
-  _RepositoryThirdPartyExternalsDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'vulkanmemoryallocator')
-      return _RepositoryVulkanMemoryAllocatorDirectory(this, entry);
-    return super.createSubdirectory(entry);
   }
 }
 

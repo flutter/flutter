@@ -10,7 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/types.h"
-#include "third_party/spirv_cross/spirv_parser.hpp"
+#include "spirv_parser.hpp"
 
 namespace impeller {
 namespace compiler {

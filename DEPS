@@ -111,7 +111,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '09b25535a092e89d817a2808e7745c8d111c0be5',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '87d5dcb98983da54257f6f39d3beee2989cb0e47',
 
    # Fuchsia compatibility
    #
@@ -137,25 +137,11 @@ deps = {
   'src/third_party/shaderc':
    Var('github_git') + '/google/shaderc.git' + '@' + '948660cccfbbc303d2590c7f44a4cee40b66fdd6',
 
-  'src/third_party/glslang':
-   Var('github_git') + '/KhronosGroup/glslang.git' + '@' + '9431c53c84c14fa9e9cd37678262ebba55c62c87',
-
-  'src/third_party/spirv_tools':
-   Var('github_git') + '/KhronosGroup/SPIRV-Tools.git' + '@' + '1020e394cb1267332d58497150d2b024371a8e41',
-
-  'src/third_party/spirv_headers':
-   Var('github_git') + '/KhronosGroup/SPIRV-Headers.git' + '@' + '85b7e00c7d785962ffe851a177c84353d037dcb6',
-
-  'src/third_party/spirv_cross':
-   Var('github_git') + '/KhronosGroup/SPIRV-Cross.git' + '@' + '418542eaefdb609f548d25a1e3962fb69d80da63',
+  'src/third_party/vulkan-deps':
+   Var('chromium_git') + '/vulkan-deps' + '@' + '23b710f1a0b3c44d51035c6400a554415f95d9c6',
 
   'src/third_party/flatbuffers':
    Var('github_git') + '/google/flatbuffers.git' + '@' + '967df08b1dbddc62f867464c2e0d58d8027438ad',
-
-   # Chromium-style
-   #
-   # As part of integrating with Fuchsia, we should eventually remove all these
-   # Chromium-style dependencies.
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '12de966fcbe1d1a48dba310aee63807856ffeee8',
@@ -472,26 +458,19 @@ deps = {
   'src/third_party/pyyaml':
    Var('fuchsia_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
 
-   # Upstream Khronos Vulkan Headers (v1.1.130)
-   'src/third_party/vulkan-headers':
-   Var('github_git') + '/KhronosGroup/Vulkan-Headers.git' + '@' + '0e57fc1cfa56a203efe43e4dfb9b3c9e9b105593',
-
-   # Skia VMA dependency.
-  'src/third_party/externals/vulkanmemoryallocator':
-   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
-
+   # Upstream Khronos Vulkan Headers are part of vulkan-deps
    # Downstream Fuchsia Vulkan Headers (v1.2.198)
   'src/third_party/fuchsia-vulkan':
    Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '32640ad82ef648768c706c9bf828b77123a09bc2',
 
    'src/third_party/swiftshader':
-   Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd4130e9ac3675dadbec8442dc2310a80ea4ddfb2',
+   Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'bea8d2471bd912220ba59032e0738f3364632657',
 
    'src/third_party/angle':
-   Var('github_git') + '/google/angle.git' + '@' + 'acdec48addfdff315efff293be0d5e2e37e8e560',
+   Var('chromium_git') + '/angle/angle.git' + '@' + '3faaded8234b31dea24c929e40e33089a34a9aa5',
 
-   'src/third_party/angle/third_party/vulkan-deps/vulkan-headers/src':
-   Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '5de4e8fab88ef0bd6994d9ddbcc864e3179b9e79',
+   'src/third_party/vulkan_memory_allocator':
+   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
 
    'src/third_party/abseil-cpp':
    Var('chromium_git') + '/chromium/src/third_party/abseil-cpp.git' + '@' + '2d8c1340f0350828f1287c4eaeebefcf317bcfc9',
@@ -686,6 +665,10 @@ deps = {
      'dep_type': 'cipd',
    },
 }
+
+recursedeps = [
+  'src/third_party/vulkan-deps',
+]
 
 hooks = [
   {
