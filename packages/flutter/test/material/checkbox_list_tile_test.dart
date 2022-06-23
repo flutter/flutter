@@ -421,6 +421,47 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
+    testWidgets('CheckboxListTile can be disabled', (WidgetTester tester) async {
+      bool? value = false;
+      bool enabled = true;
+
+      await tester.pumpWidget(
+        Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return wrap(
+                child: CheckboxListTile(
+                  title: const Text('Title'),
+                  enabled: enabled,
+                  value: value,
+                  onChanged: (bool? v) {
+                    setState(() {
+                      value = v;
+                      enabled = !enabled;
+                    });
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final Finder checkbox = find.byType(Checkbox);
+      // verify initial values
+      expect(tester.widget<Checkbox>(checkbox).value, false);
+      expect(enabled, true);
+
+      // Tap the checkbox to disable CheckboxListTile
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+      expect(tester.widget<Checkbox>(checkbox).value, true);
+      expect(enabled, false);
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+      expect(tester.widget<Checkbox>(checkbox).value, true);
+    });
+
   group('feedback', () {
     late FeedbackTester feedback;
 

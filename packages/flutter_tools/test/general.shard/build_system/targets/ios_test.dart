@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -39,11 +37,11 @@ const List<String> _kSharedConfig = <String>[
 ];
 
 void main() {
-  Environment environment;
-  FileSystem fileSystem;
-  FakeProcessManager processManager;
-  Artifacts artifacts;
-  BufferLogger logger;
+  late Environment environment;
+  late FileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late Artifacts artifacts;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -323,13 +321,13 @@ void main() {
   });
 
   group('copies Flutter.framework', () {
-    Directory outputDir;
-    File binary;
-    FakeCommand copyPhysicalFrameworkCommand;
-    FakeCommand lipoCommandNonFatResult;
-    FakeCommand lipoVerifyArm64Command;
-    FakeCommand bitcodeStripCommand;
-    FakeCommand adHocCodesignCommand;
+    late Directory outputDir;
+    late File binary;
+    late FakeCommand copyPhysicalFrameworkCommand;
+    late FakeCommand lipoCommandNonFatResult;
+    late FakeCommand lipoVerifyArm64Command;
+    late FakeCommand bitcodeStripCommand;
+    late FakeCommand adHocCodesignCommand;
 
     setUp(() {
       final FileSystem fileSystem = MemoryFileSystem.test();

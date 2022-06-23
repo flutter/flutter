@@ -603,8 +603,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   @override
   void dispose() {
-    _dragInfo?.dispose();
-    _autoScroller?.stopAutoScroll();
+    _dragReset();
     super.dispose();
   }
 
@@ -658,7 +657,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   ///
   /// If no drag is active, this will do nothing.
   void cancelReorder() {
-    _dragReset();
+    setState(() {
+      _dragReset();
+    });
   }
 
   void _registerItem(_ReorderableItemState item) {
@@ -724,7 +725,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _dragCancel(_DragInfo item) {
-    _dragReset();
+    setState(() {
+      _dragReset();
+    });
   }
 
   void _dragEnd(_DragInfo item) {
@@ -753,29 +756,29 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     if (fromIndex != toIndex) {
       widget.onReorder.call(fromIndex, toIndex);
     }
-    _dragReset();
+    setState(() {
+      _dragReset();
+    });
   }
 
   void _dragReset() {
-    setState(() {
-      if (_dragInfo != null) {
-        if (_dragIndex != null && _items.containsKey(_dragIndex)) {
-          final _ReorderableItemState dragItem = _items[_dragIndex!]!;
-          dragItem._dragging = false;
-          dragItem.rebuild();
-          _dragIndex = null;
-        }
-        _dragInfo?.dispose();
-        _dragInfo = null;
-        _autoScroller?.stopAutoScroll();
-        _resetItemGap();
-        _recognizer?.dispose();
-        _recognizer = null;
-        _overlayEntry?.remove();
-        _overlayEntry = null;
-        _finalDropPosition = null;
+    if (_dragInfo != null) {
+      if (_dragIndex != null && _items.containsKey(_dragIndex)) {
+        final _ReorderableItemState dragItem = _items[_dragIndex!]!;
+        dragItem._dragging = false;
+        dragItem.rebuild();
+        _dragIndex = null;
       }
-    });
+      _dragInfo?.dispose();
+      _dragInfo = null;
+      _autoScroller?.stopAutoScroll();
+      _resetItemGap();
+      _recognizer?.dispose();
+      _recognizer = null;
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+      _finalDropPosition = null;
+    }
   }
 
   void _resetItemGap() {

@@ -1079,6 +1079,7 @@ void main() {
                 isAlwaysShown: true,
                 controller: scrollController,
                 child: const SingleChildScrollView(
+                  primary: true,
                   child: SizedBox(width: 4000.0, height: 4000.0),
                 ),
               ),
@@ -2203,7 +2204,89 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent', (WidgetTester tester) async {
+  testWidgets('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent - desktop', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/95840
+
+    final ScrollController scrollController = ScrollController();
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: CustomScrollView(
+                  primary: true,
+                  center: uniqueKey,
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      key: uniqueKey,
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 200.0, 800.0, 400.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag the thumb up to scroll up.
+    const double scrollAmount = -10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 300.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // The view has scrolled more than it would have by a swipe gesture of the
+    // same distance.
+    expect(scrollController.offset, lessThan(scrollAmount * 2));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent - mobile', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/95840
 
     final ScrollController scrollController = ScrollController();
@@ -2282,7 +2365,7 @@ void main() {
           color: const Color(0x66BCBCBC),
         ),
     );
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.mobile());
 
   test('ScrollbarPainter.shouldRepaint returns true when any of the properties changes', () {
     ScrollbarPainter createPainter({

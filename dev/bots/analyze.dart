@@ -1778,6 +1778,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/docs.sh',
 
   'dev/conductor/bin/conductor',
+  'dev/conductor/bin/roll-packages',
   'dev/conductor/core/lib/src/proto/compile_proto.sh',
 
   'dev/customer_testing/ci.sh',

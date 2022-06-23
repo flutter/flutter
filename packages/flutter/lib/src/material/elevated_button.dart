@@ -57,6 +57,7 @@ import 'theme_data.dart';
 ///  * [TextButton], a simple flat button without a shadow.
 ///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * <https://material.io/design/components/buttons.html>
+///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
   /// Create an ElevatedButton.
   ///
@@ -71,6 +72,7 @@ class ElevatedButton extends ButtonStyleButton {
     super.focusNode,
     super.autofocus = false,
     super.clipBehavior = Clip.none,
+    super.statesController,
     required super.child,
   });
 
@@ -133,9 +135,10 @@ class ElevatedButton extends ButtonStyleButton {
   /// )
   /// ```
   static ButtonStyle styleFrom({
-    Color? primary,
-    Color? onPrimary,
-    Color? onSurface,
+    Color? foregroundColor,
+    Color? backgroundColor,
+    Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     double? elevation,
@@ -154,16 +157,35 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? primary,
+    @Deprecated(
+      'Use foregroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onPrimary,
+    @Deprecated(
+      'Use disabledForegroundColor and disabledBackgroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onSurface,
   }) {
-    final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
+    final Color? background = backgroundColor ?? primary;
+    final Color? disabledBackground = disabledBackgroundColor ?? onSurface?.withOpacity(0.12);
+    final MaterialStateProperty<Color?>? backgroundColorProp = (background == null && disabledBackground == null)
       ? null
-      : _ElevatedButtonDefaultBackground(primary, onSurface);
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && onPrimary == null)
+      : _ElevatedButtonDefaultColor(background, disabledBackground);
+    final Color? foreground = foregroundColor ?? onPrimary;
+    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
-      : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (onPrimary == null)
+      : _ElevatedButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
-      : _ElevatedButtonDefaultOverlay(onPrimary);
+      : _ElevatedButtonDefaultOverlay(foreground);
     final MaterialStateProperty<double>? elevationValue = (elevation == null)
       ? null
       : _ElevatedButtonDefaultElevation(elevation);
@@ -173,8 +195,8 @@ class ElevatedButton extends ButtonStyleButton {
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColorProp,
+      foregroundColor: foregroundColorProp,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
@@ -319,9 +341,10 @@ class ElevatedButton extends ButtonStyleButton {
     return Theme.of(context).useMaterial3
       ? _TokenDefaultsM3(context)
       : styleFrom(
-          primary: colorScheme.primary,
-          onPrimary: colorScheme.onPrimary,
-          onSurface: colorScheme.onSurface,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           shadowColor: theme.shadowColor,
           elevation: 2,
           textStyle: theme.textTheme.button,
@@ -358,50 +381,34 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 }
 
 @immutable
-class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultBackground(this.primary, this.onSurface);
+class _ElevatedButtonDefaultColor extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ElevatedButtonDefaultColor(this.color, this.disabled);
 
-  final Color? primary;
-  final Color? onSurface;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.12);
-    }
-    return primary;
-  }
-}
-
-@immutable
-class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultForeground(this.onPrimary, this.onSurface);
-
-  final Color? onPrimary;
-  final Color? onSurface;
+  final Color? color;
+  final Color? disabled;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.38);
+      return disabled;
     }
-    return onPrimary;
+    return color;
   }
 }
 
 @immutable
 class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultOverlay(this.onPrimary);
+  _ElevatedButtonDefaultOverlay(this.overlay);
 
-  final Color onPrimary;
+  final Color overlay;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered)) {
-      return onPrimary.withOpacity(0.08);
+      return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-      return onPrimary.withOpacity(0.24);
+      return overlay.withOpacity(0.24);
     }
     return null;
   }
@@ -505,7 +512,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_101
 class _TokenDefaultsM3 extends ButtonStyle {
   _TokenDefaultsM3(this.context)
    : super(

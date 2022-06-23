@@ -120,7 +120,7 @@ void main() {
       await tester.pump();
       final Object? result = Actions.maybeInvoke(
         containerKey.currentContext!,
-        DoNothingIntent(),
+        const DoNothingIntent(),
       );
       expect(result, isNull);
       expect(invoked, isFalse);
@@ -146,7 +146,7 @@ void main() {
       await tester.pump();
       final Object? result = Actions.maybeInvoke(
         containerKey.currentContext!,
-        DoNothingIntent(),
+        const DoNothingIntent(),
       );
       expect(result, isNull);
       expect(invoked, isFalse);

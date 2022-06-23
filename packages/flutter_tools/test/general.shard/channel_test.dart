@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
@@ -24,7 +22,7 @@ import '../src/test_flutter_command_runner.dart';
 
 void main() {
   group('channel', () {
-    FakeProcessManager fakeProcessManager;
+    late FakeProcessManager fakeProcessManager;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -159,7 +157,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.trim())
-        .where((String line) => line?.isNotEmpty == true)
+        .where((String line) => line.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);
@@ -190,7 +188,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.trim())
-        .where((String line) => line?.isNotEmpty == true)
+        .where((String line) => line.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);

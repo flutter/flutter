@@ -291,6 +291,7 @@ enum ListTileControlAffinity {
 ///  * <https://material.io/design/components/lists.html>
 ///  * Cookbook: [Use lists](https://flutter.dev/docs/cookbook/lists/basic-list)
 ///  * Cookbook: [Implement swipe to dismiss](https://flutter.dev/docs/cookbook/gestures/dismissible)
+// TODO(plg): Add link to m3 spec below m2 spec link when available
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
   ///
