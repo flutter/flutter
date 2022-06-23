@@ -133,6 +133,10 @@ class AnalyzeCommand extends FlutterCommand {
     final Set<String> items;
     final String directoryPath;
     if (suggestionFlag != null && suggestionFlag == true) {
+      final bool? watchFlag = boolArg('watch');
+      if (watchFlag != null && watchFlag) {
+        throwToolExit('flag --watch is not compatible with --suggestions');
+      }
       if (workingDirectory == null) {
         items = findDirectories(argResults!, _fileSystem);
         if (items.isEmpty || items.length > 1) {
