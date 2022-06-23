@@ -251,16 +251,16 @@ using ContainerLayerDiffTest = DiffContextTest;
 
 // Insert PictureLayer amongst container layers
 TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
-  auto pic1 = CreatePicture(SkRect::MakeLTRB(0, 0, 50, 50), 1);
-  auto pic2 = CreatePicture(SkRect::MakeLTRB(100, 0, 150, 50), 1);
-  auto pic3 = CreatePicture(SkRect::MakeLTRB(200, 0, 250, 50), 1);
+  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50), 1);
+  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50), 1);
+  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50), 1);
 
   MockLayerTree t1;
 
-  auto t1_c1 = CreateContainerLayer(CreatePictureLayer(pic1));
+  auto t1_c1 = CreateContainerLayer(CreateDisplayListLayer(pic1));
   t1.root()->Add(t1_c1);
 
-  auto t1_c2 = CreateContainerLayer(CreatePictureLayer(pic2));
+  auto t1_c2 = CreateContainerLayer(CreateDisplayListLayer(pic2));
   t1.root()->Add(t1_c2);
 
   auto damage = DiffLayerTree(t1, MockLayerTree());
@@ -269,13 +269,13 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
   // Add in the middle
 
   MockLayerTree t2;
-  auto t2_c1 = CreateContainerLayer(CreatePictureLayer(pic1));
+  auto t2_c1 = CreateContainerLayer(CreateDisplayListLayer(pic1));
   t2_c1->AssignOldLayer(t1_c1.get());
   t2.root()->Add(t2_c1);
 
-  t2.root()->Add(CreatePictureLayer(pic3));
+  t2.root()->Add(CreateDisplayListLayer(pic3));
 
-  auto t2_c2 = CreateContainerLayer(CreatePictureLayer(pic2));
+  auto t2_c2 = CreateContainerLayer(CreateDisplayListLayer(pic2));
   t2_c2->AssignOldLayer(t1_c2.get());
   t2.root()->Add(t2_c2);
 
@@ -285,7 +285,7 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
   // Add in the beginning
 
   t2 = MockLayerTree();
-  t2.root()->Add(CreatePictureLayer(pic3));
+  t2.root()->Add(CreateDisplayListLayer(pic3));
   t2.root()->Add(t2_c1);
   t2.root()->Add(t2_c2);
   damage = DiffLayerTree(t2, t1);
@@ -296,44 +296,44 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
   t2 = MockLayerTree();
   t2.root()->Add(t2_c1);
   t2.root()->Add(t2_c2);
-  t2.root()->Add(CreatePictureLayer(pic3));
+  t2.root()->Add(CreateDisplayListLayer(pic3));
   damage = DiffLayerTree(t2, t1);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
 }
 
 // Insert picture layer amongst other picture layers
 TEST_F(ContainerLayerDiffTest, PictureInsertion) {
-  auto pic1 = CreatePicture(SkRect::MakeLTRB(0, 0, 50, 50), 1);
-  auto pic2 = CreatePicture(SkRect::MakeLTRB(100, 0, 150, 50), 1);
-  auto pic3 = CreatePicture(SkRect::MakeLTRB(200, 0, 250, 50), 1);
+  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50), 1);
+  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50), 1);
+  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50), 1);
 
   MockLayerTree t1;
-  t1.root()->Add(CreatePictureLayer(pic1));
-  t1.root()->Add(CreatePictureLayer(pic2));
+  t1.root()->Add(CreateDisplayListLayer(pic1));
+  t1.root()->Add(CreateDisplayListLayer(pic2));
 
   auto damage = DiffLayerTree(t1, MockLayerTree());
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 150, 50));
 
   MockLayerTree t2;
-  t2.root()->Add(CreatePictureLayer(pic3));
-  t2.root()->Add(CreatePictureLayer(pic1));
-  t2.root()->Add(CreatePictureLayer(pic2));
+  t2.root()->Add(CreateDisplayListLayer(pic3));
+  t2.root()->Add(CreateDisplayListLayer(pic1));
+  t2.root()->Add(CreateDisplayListLayer(pic2));
 
   damage = DiffLayerTree(t2, t1);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t3;
-  t3.root()->Add(CreatePictureLayer(pic1));
-  t3.root()->Add(CreatePictureLayer(pic3));
-  t3.root()->Add(CreatePictureLayer(pic2));
+  t3.root()->Add(CreateDisplayListLayer(pic1));
+  t3.root()->Add(CreateDisplayListLayer(pic3));
+  t3.root()->Add(CreateDisplayListLayer(pic2));
 
   damage = DiffLayerTree(t3, t1);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t4;
-  t4.root()->Add(CreatePictureLayer(pic1));
-  t4.root()->Add(CreatePictureLayer(pic2));
-  t4.root()->Add(CreatePictureLayer(pic3));
+  t4.root()->Add(CreateDisplayListLayer(pic1));
+  t4.root()->Add(CreateDisplayListLayer(pic2));
+  t4.root()->Add(CreateDisplayListLayer(pic3));
 
   damage = DiffLayerTree(t4, t1);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));

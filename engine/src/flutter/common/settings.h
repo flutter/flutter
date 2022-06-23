@@ -203,9 +203,6 @@ struct Settings {
   // not supported on the platform.
   bool enable_impeller = false;
 
-  // Selects the DisplayList for storage of rendering operations.
-  bool enable_display_list = true;
-
   // Data set by platform-specific embedders for use in font initialization.
   uint32_t font_initialization_data = 0;
 

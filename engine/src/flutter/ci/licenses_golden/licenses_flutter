@@ -174,9 +174,6 @@ FILE: ../../../flutter/flow/layers/performance_overlay_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/physical_shape_layer.cc
 FILE: ../../../flutter/flow/layers/physical_shape_layer.h
 FILE: ../../../flutter/flow/layers/physical_shape_layer_unittests.cc
-FILE: ../../../flutter/flow/layers/picture_layer.cc
-FILE: ../../../flutter/flow/layers/picture_layer.h
-FILE: ../../../flutter/flow/layers/picture_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/platform_view_layer.cc
 FILE: ../../../flutter/flow/layers/platform_view_layer.h
 FILE: ../../../flutter/flow/layers/platform_view_layer_unittests.cc
@@ -1277,7 +1274,6 @@ FILE: ../../../flutter/shell/common/shell_test_platform_view_vulkan.h
 FILE: ../../../flutter/shell/common/shell_unittests.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.h
-FILE: ../../../flutter/shell/common/skp_shader_warmup_unittests.cc
 FILE: ../../../flutter/shell/common/snapshot_surface_producer.h
 FILE: ../../../flutter/shell/common/switches.cc
 FILE: ../../../flutter/shell/common/switches.h

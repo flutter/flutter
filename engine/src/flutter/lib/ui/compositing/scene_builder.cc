@@ -17,7 +17,6 @@
 #include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/layers/performance_overlay_layer.h"
 #include "flutter/flow/layers/physical_shape_layer.h"
-#include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/layers/shader_mask_layer.h"
 #include "flutter/flow/layers/texture_layer.h"
@@ -272,15 +271,9 @@ void SceneBuilder::addPicture(double dx,
     return;
   }
 
-  // Explicitly check for both conditions, since the picture object might have
-  // been disposed but not collected yet, but the display list and picture are
-  // both null.
-  if (picture->picture()) {
-    auto layer = std::make_unique<flutter::PictureLayer>(
-        SkPoint::Make(dx, dy), UIDartState::CreateGPUObject(picture->picture()),
-        !!(hints & 1), !!(hints & 2));
-    AddLayer(std::move(layer));
-  } else if (picture->display_list()) {
+  // Explicitly check for display_list, since the picture object might have
+  // been disposed but not collected yet, but the display list is null.
+  if (picture->display_list()) {
     auto layer = std::make_unique<flutter::DisplayListLayer>(
         SkPoint::Make(dx, dy),
         UIDartState::CreateGPUObject(picture->display_list()), !!(hints & 1),

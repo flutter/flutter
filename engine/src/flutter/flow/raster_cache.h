@@ -92,19 +92,19 @@ class RasterCache {
   // generated per frame. Generating too many caches in one frame may cause jank
   // on that frame. This limit allows us to throttle the cache and distribute
   // the work across multiple frames.
-  static constexpr int kDefaultPictureAndDispLayListCacheLimitPerFrame = 3;
+  static constexpr int kDefaultDispLayListCacheLimitPerFrame = 3;
 
   explicit RasterCache(size_t access_threshold = 3,
-                       size_t picture_and_display_list_cache_limit_per_frame =
-                           kDefaultPictureAndDispLayListCacheLimitPerFrame);
+                       size_t display_list_cache_limit_per_frame =
+                           kDefaultDispLayListCacheLimitPerFrame);
 
   virtual ~RasterCache() = default;
 
   /**
-   * @brief Rasterize a picture object and produce a RasterCacheResult
+   * @brief Rasterize a display list object and produce a RasterCacheResult
    * to be stored in the cache.
    *
-   * @param picture the SkPicture object to be cached.
+   * @param display_list the DisplayList object to be cached.
    * @param context the GrDirectContext used for rendering.
    * @param ctm the transformation matrix used for rendering.
    * @param dst_color_space the destination color space that the cached
@@ -112,15 +112,9 @@ class RasterCache {
    * @param checkerboard a flag indicating whether or not a checkerboard
    *        pattern should be rendered into the cached image for debug
    *        analysis
-   * @return a RasterCacheResult that can draw the rendered picture into
+   * @return a RasterCacheResult that can draw the rendered display list into
    *         the destination using a simple image blit
    */
-  virtual std::unique_ptr<RasterCacheResult> RasterizePicture(
-      SkPicture* picture,
-      GrDirectContext* context,
-      const SkMatrix& ctm,
-      SkColorSpace* dst_color_space,
-      bool checkerboard) const;
   virtual std::unique_ptr<RasterCacheResult> RasterizeDisplayList(
       DisplayList* display_list,
       GrDirectContext* context,
@@ -158,17 +152,11 @@ class RasterCache {
   // Return true if the cache is generated.
   //
   // We may return false and not generate the cache if
-  // 1. There are too many pictures to be cached in the current frame.
-  //    (See also kDefaultPictureAndDispLayListCacheLimitPerFrame.)
-  // 2. The picture is not worth rasterizing
+  // 1. There are too many display lists to be cached in the current frame.
+  //    (See also kDefaultDispLayListCacheLimitPerFrame.)
+  // 2. The display list is not worth rasterizing
   // 3. The matrix is singular
-  // 4. The picture is accessed too few times
-  bool Prepare(PrerollContext* context,
-               SkPicture* picture,
-               bool is_complex,
-               bool will_change,
-               const SkMatrix& untranslated_matrix,
-               const SkPoint& offset = SkPoint());
+  // 4. The display list is accessed too few times
   bool Prepare(PrerollContext* context,
                DisplayList* display_list,
                bool is_complex,
@@ -176,11 +164,10 @@ class RasterCache {
                const SkMatrix& untranslated_matrix,
                const SkPoint& offset = SkPoint());
 
-  // If there is cache entry for this picture, display list or layer, mark it as
+  // If there is cache entry for this display list or layer, mark it as
   // used for this frame in order to not get evicted. This is needed during
   // partial repaint for layers that are outside of current clip and are culled
   // away.
-  void Touch(SkPicture* picture, const SkMatrix& transformation_matrix);
   void Touch(DisplayList* display_list, const SkMatrix& transformation_matrix);
   void Touch(
       Layer* layer,
@@ -192,13 +179,6 @@ class RasterCache {
       Layer* layer,
       const SkMatrix& ctm,
       RasterCacheLayerStrategy strategey = RasterCacheLayerStrategy::kLayer);
-
-  // Find the raster cache for the picture and draw it to the canvas.
-  //
-  // Return true if it's found and drawn.
-  bool Draw(const SkPicture& picture,
-            SkCanvas& canvas,
-            const SkPaint* paint = nullptr) const;
 
   // Find the raster cache for the display list and draw it to the canvas.
   //
@@ -238,16 +218,14 @@ class RasterCache {
   size_t GetLayerCachedEntriesCount() const;
 
   /**
-   * Return the number of map entries in the picture caches (SkPicture and
-   * DisplayList) regardless of whether the entries have been populated with
-   * an image.
+   * Return the number of map entries in the picture cache regardless of whether
+   * the entries have been populated with an image.
    */
   size_t GetPictureCachedEntriesCount() const;
 
   /**
    * @brief Estimate how much memory is used by picture raster cache entries in
-   * bytes, including cache entries in the SkPicture cache and the DisplayList
-   * cache.
+   * bytes, including cache entries in the DisplayList cache.
    *
    * Only SkImage's memory usage is counted as other objects are often much
    * smaller compared to SkImage. SkImageInfo::computeMinByteSize is used to
@@ -294,9 +272,8 @@ class RasterCache {
 
   bool GenerateNewCacheInThisFrame() const {
     // Disabling caching when access_threshold is zero is historic behavior.
-    return access_threshold_ != 0 &&
-           picture_cached_this_frame_ + display_list_cached_this_frame_ <
-               picture_and_display_list_cache_limit_per_frame_;
+    return access_threshold_ != 0 && display_list_cached_this_frame_ <
+                                         display_list_cache_limit_per_frame_;
   }
 
   std::optional<RasterCacheKey> TryToMakeRasterCacheKeyForLayer(
@@ -309,8 +286,7 @@ class RasterCache {
       RasterCacheLayerStrategy strategy) const;
 
   const size_t access_threshold_;
-  const size_t picture_and_display_list_cache_limit_per_frame_;
-  size_t picture_cached_this_frame_ = 0;
+  const size_t display_list_cache_limit_per_frame_;
   size_t display_list_cached_this_frame_ = 0;
   RasterCacheMetrics layer_metrics_;
   RasterCacheMetrics picture_metrics_;

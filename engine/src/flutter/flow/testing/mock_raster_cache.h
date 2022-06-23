@@ -12,7 +12,6 @@
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPicture.h"
 
 namespace flutter {
 namespace testing {
@@ -51,19 +50,10 @@ class MockRasterCacheResult : public RasterCacheResult {
  */
 class MockRasterCache : public RasterCache {
  public:
-  explicit MockRasterCache(
-      size_t access_threshold = 3,
-      size_t picture_and_display_list_cache_limit_per_frame =
-          kDefaultPictureAndDispLayListCacheLimitPerFrame)
-      : RasterCache(access_threshold,
-                    picture_and_display_list_cache_limit_per_frame) {}
-
-  std::unique_ptr<RasterCacheResult> RasterizePicture(
-      SkPicture* picture,
-      GrDirectContext* context,
-      const SkMatrix& ctm,
-      SkColorSpace* dst_color_space,
-      bool checkerboard) const override;
+  explicit MockRasterCache(size_t access_threshold = 3,
+                           size_t display_list_cache_limit_per_frame =
+                               kDefaultDispLayListCacheLimitPerFrame)
+      : RasterCache(access_threshold, display_list_cache_limit_per_frame) {}
 
   std::unique_ptr<RasterCacheResult> RasterizeDisplayList(
       DisplayList* display_list,

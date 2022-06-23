@@ -29,21 +29,6 @@ Damage DiffContextTest::DiffLayerTree(MockLayerTree& layer_tree,
                           vertical_clip_alignment);
 }
 
-sk_sp<SkPicture> DiffContextTest::CreatePicture(const SkRect& bounds,
-                                                uint32_t color) {
-  SkPictureRecorder recorder;
-  SkCanvas* recording_canvas = recorder.beginRecording(bounds);
-  recording_canvas->drawRect(bounds, SkPaint(SkColor4f::FromBytes_RGBA(color)));
-  return recorder.finishRecordingAsPicture();
-}
-
-std::shared_ptr<PictureLayer> DiffContextTest::CreatePictureLayer(
-    sk_sp<SkPicture> picture,
-    const SkPoint& offset) {
-  return std::make_shared<PictureLayer>(
-      offset, SkiaGPUObject(picture, unref_queue()), false, false);
-}
-
 sk_sp<DisplayList> DiffContextTest::CreateDisplayList(const SkRect& bounds,
                                                       SkColor color) {
   DisplayListBuilder builder;
