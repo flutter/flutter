@@ -7795,7 +7795,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
-  testWidgets('pageup/pagedown keys', (WidgetTester tester) async {
+  testWidgets('pageup/pagedown keys on Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -7887,10 +7887,10 @@ void main() {
     expect(scrollController.position.pixels, 0.0);
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: TargetPlatformVariant.all(),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgets('pageup/pagedown keys in a one line field', (WidgetTester tester) async {
+  testWidgets('pageup/pagedown keys in a one line field on Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -7965,7 +7965,7 @@ void main() {
     expect(controller.value.selection.baseOffset, 0);
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: TargetPlatformVariant.all(),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets('shift + pageup/pagedown keys', (WidgetTester tester) async {
