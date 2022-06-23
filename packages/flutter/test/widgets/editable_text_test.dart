@@ -2138,6 +2138,7 @@ void main() {
     final TextEditingController controller =
         TextEditingController(text: 'Lorem ipsum dolor sit amet');
     late SelectionChangedCause selectionCause;
+    Scribble.ensureInitialized();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2157,7 +2158,7 @@ void main() {
       ),
     );
 
-    await tester.testTextInput.scribbleFocusElement(TextInput.scribbleClients.keys.first, Offset.zero);
+    await tester.testTextInput.scribbleFocusElement(Scribble.scribbleClients.keys.first, Offset.zero);
 
     expect(focusNode.hasFocus, true);
     expect(selectionCause, SelectionChangedCause.scribble);
@@ -2183,7 +2184,7 @@ void main() {
       ),
     );
 
-    final List<dynamic> elementEntry = <dynamic>[TextInput.scribbleClients.keys.first, 0.0, 0.0, 800.0, 600.0];
+    final List<dynamic> elementEntry = <dynamic>[Scribble.scribbleClients.keys.first, 0.0, 0.0, 800.0, 600.0];
 
     List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
     expect(elements.first, containsAll(elementEntry));
@@ -4507,7 +4508,7 @@ void main() {
 
   testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.scribble.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -4538,8 +4539,8 @@ void main() {
     await tester.showKeyboard(find.byKey(ValueKey<String>(controller.text)));
 
     // There should be a new platform message updating the selection rects.
-    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setSelectionRects');
-    expect(methodCall.method, 'TextInput.setSelectionRects');
+    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'Scribble.setSelectionRects');
+    expect(methodCall.method, 'Scribble.setSelectionRects');
     expect((methodCall.arguments as List<dynamic>).length, 5);
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.

@@ -16,6 +16,7 @@ import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'raw_keyboard.dart';
 import 'restoration.dart';
+import 'scribble.dart';
 import 'system_channels.dart';
 import 'text_input.dart';
 
@@ -38,6 +39,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
+    Scribble.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
   }
 
@@ -315,7 +317,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
-
 }
 
 /// Signature for listening to changes in the [SystemUiMode].
