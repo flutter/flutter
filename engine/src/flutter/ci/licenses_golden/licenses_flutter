@@ -107,6 +107,7 @@ FILE: ../../../flutter/display_list/display_list_tile_mode.h
 FILE: ../../../flutter/display_list/display_list_unittests.cc
 FILE: ../../../flutter/display_list/display_list_utils.cc
 FILE: ../../../flutter/display_list/display_list_utils.h
+FILE: ../../../flutter/display_list/display_list_utils_unittests.cc
 FILE: ../../../flutter/display_list/display_list_vertices.cc
 FILE: ../../../flutter/display_list/display_list_vertices.h
 FILE: ../../../flutter/display_list/display_list_vertices_unittests.cc

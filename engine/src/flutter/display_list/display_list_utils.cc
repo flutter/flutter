@@ -33,6 +33,9 @@ void SkPaintDispatchHelper::save_opacity(SkScalar child_opacity) {
   set_opacity(child_opacity);
 }
 void SkPaintDispatchHelper::restore_opacity() {
+  if (save_stack_.empty()) {
+    return;
+  }
   set_opacity(save_stack_.back().opacity);
   save_stack_.pop_back();
 }
@@ -163,6 +166,9 @@ void SkMatrixDispatchHelper::save() {
   saved_.push_back(matrix_);
 }
 void SkMatrixDispatchHelper::restore() {
+  if (saved_.empty()) {
+    return;
+  }
   matrix_ = saved_.back();
   matrix33_ = matrix_.asM33();
   saved_.pop_back();
@@ -233,6 +239,9 @@ void ClipBoundsDispatchHelper::save() {
   }
 }
 void ClipBoundsDispatchHelper::restore() {
+  if (saved_.empty()) {
+    return;
+  }
   bounds_ = saved_.back();
   saved_.pop_back();
   has_clip_ = (bounds_.fLeft <= bounds_.fRight &&  //
