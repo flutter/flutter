@@ -210,6 +210,17 @@ class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMove
   }) : super(forward, collapseSelection);
 }
 
+/// Expands, or moves the current selection from the current
+/// [TextSelection.extent] position to the closest position on the adjacent
+/// page.
+class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionVerticallyToAdjacentPageIntent].
+  const ExtendSelectionVerticallyToAdjacentPageIntent({
+    required bool forward,
+    required bool collapseSelection,
+  }) : super(forward, collapseSelection);
+}
+
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the start or the end of the document.
 ///
