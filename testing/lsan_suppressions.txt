@@ -63,3 +63,8 @@ leak:fl_message_codec_decode_message
 # At the time of writing, this only amounts to 4 allocations totaling 512 bytes
 # worth of leaks.
 leak:g_realloc
+
+
+# ANGLE's egl impelementation uses annotations that our LSAN setup does
+# not respect. Ignore leaks from egl::*
+leak:egl::*

@@ -6,13 +6,16 @@ import("//flutter/testing/testing.gni")
 
 if (enable_unittests) {
   executable("spirv_assembler") {
+    include_dirs = [ "//third_party/vulkan-deps/spirv-tools/src/include/" ]
+
     sources = [ "spirv_assembler.cc" ]
 
-    configs += [ "//third_party/swiftshader_flutter:spvtools_public_config" ]
+    configs +=
+        [ "//third_party/vulkan-deps/spirv-tools/src:spvtools_public_config" ]
 
     deps = [
-      "//third_party/swiftshader_flutter:spvtools",
-      "//third_party/swiftshader_flutter:spvtools_val",
+      "//third_party/vulkan-deps/spirv-tools/src:spvtools",
+      "//third_party/vulkan-deps/spirv-tools/src:spvtools_val",
     ]
   }
 }

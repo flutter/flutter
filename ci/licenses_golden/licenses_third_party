@@ -1,4 +1,4 @@
-Signature: 26e1a7ec2e299fa57b5ef4ea950c9502
+Signature: 66371714f587d7b7751db0b42ddb833c
 
 UNUSED LICENSES:
 
@@ -228,7 +228,7 @@ LIBRARY: fuchsia-vulkan
 LIBRARY: khronos
 LIBRARY: libwebp
 LIBRARY: pkg
-LIBRARY: vulkan-headers
+LIBRARY: vulkan-deps
 LIBRARY: wuffs
 ORIGIN: ../../../flutter/third_party/txt/LICENSE
 TYPE: LicenseType.apache
@@ -1739,28 +1739,42 @@ FILE: ../../../third_party/pkg/quiver/lib/src/time/duration_unit_constants.dart
 FILE: ../../../third_party/pkg/quiver/lib/src/time/util.dart
 FILE: ../../../third_party/pkg/quiver/lib/strings.dart
 FILE: ../../../third_party/pkg/quiver/lib/time.dart
-FILE: ../../../third_party/vulkan-headers/cmake/cmake_uninstall.cmake.in
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_icd.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_layer.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_platform.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_sdk_platform.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan.hpp
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_android.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_core.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_fuchsia.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_ggp.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_ios.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_macos.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_metal.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_vi.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_wayland.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_win32.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_xcb.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_xlib.h
-FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_xlib_xrandr.h
-FILE: ../../../third_party/vulkan-headers/registry/validusage.json
-FILE: ../../../third_party/vulkan-headers/registry/vk.xml
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vk_video/vulkan_video_codec_h264std.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vk_video/vulkan_video_codec_h264std_decode.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vk_video/vulkan_video_codec_h264std_encode.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vk_video/vulkan_video_codec_h265std.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vk_video/vulkan_video_codec_h265std_decode.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vk_video/vulkan_video_codec_h265std_encode.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vk_video/vulkan_video_codecs_common.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_icd.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_layer.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_platform.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_sdk_platform.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_android.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_beta.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_core.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_directfb.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_enums.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_format_traits.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_fuchsia.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_funcs.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_ggp.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_handles.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_hash.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_ios.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_macos.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_metal.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_raii.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_screen.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_structs.hpp
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_vi.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_wayland.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_win32.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_xcb.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_xlib.h
+FILE: ../../../third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_xlib_xrandr.h
 FILE: ../../../third_party/wuffs/release/c/wuffs-v0.2.c
 FILE: ../../../third_party/wuffs/release/c/wuffs-v0.3.c
 ----------------------------------------------------------------------------------------------------
@@ -3046,6 +3060,7 @@ FILE: ../../../third_party/angle/scripts/extension_data/intel_630_win10.json
 FILE: ../../../third_party/angle/scripts/extension_data/nvidia_1660_linux.json
 FILE: ../../../third_party/angle/scripts/extension_data/nvidia_1660_win10.json
 FILE: ../../../third_party/angle/scripts/extension_data/pixel_4_android_11.json
+FILE: ../../../third_party/angle/scripts/extension_data/pixel_6_android_13.json
 FILE: ../../../third_party/angle/scripts/extension_data/swiftshader_linux.json
 FILE: ../../../third_party/angle/scripts/extension_data/swiftshader_win10.json
 FILE: ../../../third_party/angle/scripts/extension_data/swiftshader_win10_gles1.json
@@ -3511,6 +3526,7 @@ FILE: ../../../third_party/angle/src/libOpenCL/dispatch.cpp
 FILE: ../../../third_party/angle/src/libOpenCL/dispatch.h
 FILE: ../../../third_party/angle/src/libOpenCL/libOpenCL_autogen.map
 FILE: ../../../third_party/angle/util/capture/frame_capture_test_utils.cpp
+FILE: ../../../third_party/angle/util/capture/traces_export.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 The ANGLE Project Authors. All rights reserved.
 
@@ -3809,6 +3825,10 @@ FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.cpp
 FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv1_CM/libGLESv1_CM.cpp
 FILE: ../../../third_party/angle/util/EGLPlatformParameters.h
+FILE: ../../../third_party/angle/util/capture/trace_egl_loader_autogen.cpp
+FILE: ../../../third_party/angle/util/capture/trace_egl_loader_autogen.h
+FILE: ../../../third_party/angle/util/capture/trace_gles_loader_autogen.cpp
+FILE: ../../../third_party/angle/util/capture/trace_gles_loader_autogen.h
 FILE: ../../../third_party/angle/util/egl_loader_autogen.cpp
 FILE: ../../../third_party/angle/util/egl_loader_autogen.h
 FILE: ../../../third_party/angle/util/gles_loader_autogen.cpp
@@ -4398,13 +4418,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: angle
-ORIGIN: ../../../third_party/angle/include/platform/FeaturesD3D.h + ../../../third_party/angle/LICENSE
+ORIGIN: ../../../third_party/angle/include/platform/FeaturesD3D_autogen.h + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/include/platform/FeaturesD3D.h
-FILE: ../../../third_party/angle/include/platform/FeaturesGL.h
-FILE: ../../../third_party/angle/include/platform/FeaturesMtl.h
-FILE: ../../../third_party/angle/include/platform/FeaturesVk.h
-FILE: ../../../third_party/angle/include/platform/FrontendFeatures.h
+FILE: ../../../third_party/angle/include/platform/FeaturesD3D_autogen.h
+FILE: ../../../third_party/angle/include/platform/FeaturesGL_autogen.h
+FILE: ../../../third_party/angle/include/platform/FeaturesMtl_autogen.h
+FILE: ../../../third_party/angle/include/platform/FeaturesVk_autogen.h
+FILE: ../../../third_party/angle/include/platform/FrontendFeatures_autogen.h
 FILE: ../../../third_party/angle/include/platform/d3d_features.json
 FILE: ../../../third_party/angle/include/platform/frontend_features.json
 FILE: ../../../third_party/angle/include/platform/gl_features.json
@@ -4414,16 +4434,29 @@ FILE: ../../../third_party/angle/src/compiler/translator/BaseTypes.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorMetalConstantNames.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorMetalDirect/GuardFragDepthWrite.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorMetalDirect/GuardFragDepthWrite.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/AggregateAssignArraysInSSBOs.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/AggregateAssignArraysInSSBOs.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/AggregateAssignStructsInSSBOs.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/AggregateAssignStructsInSSBOs.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EmulateAdvancedBlendEquations.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EmulateAdvancedBlendEquations.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EmulateDithering.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EmulateDithering.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EmulateYUVBuiltIns.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EmulateYUVBuiltIns.h
 FILE: ../../../third_party/angle/src/libANGLE/Overlay_font_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Overlay_font_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/capture/capture_egl.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture/capture_egl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/linux/gbm/DisplayVkGbm.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/linux/gbm/DisplayVkGbm.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/src/OverlayDraw.frag
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/src/OverlayDraw.vert
 FILE: ../../../third_party/angle/util/angle_features_autogen.cpp
 FILE: ../../../third_party/angle/util/angle_features_autogen.h
+FILE: ../../../third_party/angle/util/linux/LinuxWindow.cpp
+FILE: ../../../third_party/angle/util/linux/wayland/WaylandWindow.cpp
+FILE: ../../../third_party/angle/util/linux/wayland/WaylandWindow.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 The ANGLE Project Authors. All rights reserved.
 
@@ -4752,6 +4785,7 @@ FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_autogen.def
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_no_capture_autogen.def
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_with_capture_autogen.def
 FILE: ../../../third_party/angle/src/libOpenCL/libOpenCL_autogen.cpp
+FILE: ../../../third_party/angle/util/capture/angle_trace_gl.h
 FILE: ../../../third_party/angle/util/capture/frame_capture_test_utils.h
 FILE: ../../../third_party/angle/util/display/DisplayPixmap.cpp
 FILE: ../../../third_party/angle/util/display/DisplayWindow.cpp
@@ -4950,6 +4984,10 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/wgl_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/load_functions_table.h
 FILE: ../../../third_party/angle/src/libANGLE/validationEGL.h
 FILE: ../../../third_party/angle/util/OSPixmap.h
+FILE: ../../../third_party/angle/util/linux/x11/X11Pixmap.cpp
+FILE: ../../../third_party/angle/util/linux/x11/X11Pixmap.h
+FILE: ../../../third_party/angle/util/linux/x11/X11Window.cpp
+FILE: ../../../third_party/angle/util/linux/x11/X11Window.h
 FILE: ../../../third_party/angle/util/osx/OSXPixmap.h
 FILE: ../../../third_party/angle/util/osx/OSXPixmap.mm
 FILE: ../../../third_party/angle/util/osx/OSXWindow.h
@@ -4957,10 +4995,6 @@ FILE: ../../../third_party/angle/util/osx/OSXWindow.mm
 FILE: ../../../third_party/angle/util/posix/test_utils_posix.cpp
 FILE: ../../../third_party/angle/util/windows/win32/Win32Pixmap.cpp
 FILE: ../../../third_party/angle/util/windows/win32/Win32Pixmap.h
-FILE: ../../../third_party/angle/util/x11/X11Pixmap.cpp
-FILE: ../../../third_party/angle/util/x11/X11Pixmap.h
-FILE: ../../../third_party/angle/util/x11/X11Window.cpp
-FILE: ../../../third_party/angle/util/x11/X11Window.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2015 The ANGLE Project Authors. All rights reserved.
 
@@ -5487,10 +5521,53 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: angle
+ORIGIN: ../../../third_party/angle/src/libANGLE/renderer/vulkan/linux/wayland/DisplayVkWayland.cpp + ../../../third_party/angle/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/linux/wayland/DisplayVkWayland.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/linux/wayland/DisplayVkWayland.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/linux/wayland/WindowSurfaceVkWayland.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/linux/wayland/WindowSurfaceVkWayland.h
+----------------------------------------------------------------------------------------------------
+Copyright 2021-2022 The ANGLE Project Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
+    Ltd., nor the names of their contributors may be used to endorse
+    or promote products derived from this software without specific
+    prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: angle
 ORIGIN: ../../../third_party/angle/src/third_party/ceval/LICENSE
 TYPE: LicenseType.mit
 FILE: ../../../third_party/angle/src/third_party/ceval/ceval.h
 FILE: ../../../third_party/angle/src/third_party/ceval/package.json
+FILE: ../../../third_party/angle/src/third_party/ceval/patches/0001-remove-sprintf.patch
 ----------------------------------------------------------------------------------------------------
 MIT License
 
@@ -14421,33 +14498,6 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
-LIBRARY: externals
-ORIGIN: ../../../third_party/externals/vulkanmemoryallocator/include/vk_mem_alloc.h
-TYPE: LicenseType.mit
-FILE: ../../../third_party/externals/vulkanmemoryallocator/include/vk_mem_alloc.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017-2022 Advanced Micro Devices, Inc. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-====================================================================================================
-
-====================================================================================================
 LIBRARY: ffx_spd
 ORIGIN: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/src/third_party/ffx_spd/ffx_a.h
 TYPE: LicenseType.mit
@@ -19232,6 +19282,48 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 ====================================================================================================
 LIBRARY: icu
+LIBRARY: vulkan-deps
+ORIGIN: ../../../third_party/icu/scripts/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/icu/fuzzers/icu_unicode_string_codepage_create_fuzzer.cc
+FILE: ../../../third_party/icu/scripts/accept_lang.list
+FILE: ../../../third_party/icu/scripts/chrome_ui_languages.list
+FILE: ../../../third_party/icu/scripts/currencies.list
+FILE: ../../../third_party/vulkan-deps/.gitignore
+FILE: ../../../third_party/vulkan-deps/DEPS
+FILE: ../../../third_party/vulkan-deps/additional_readme_paths.json
+----------------------------------------------------------------------------------------------------
+Copyright 2015 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: icu
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/COPYING
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/icu/DIR_METADATA
@@ -20826,44 +20918,6 @@ FILE: ../../../third_party/icu/fuzzers/icu_regex.dict
 FILE: ../../../third_party/icu/fuzzers/icu_uregex_open_fuzzer.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: icu
-ORIGIN: ../../../third_party/icu/scripts/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/icu/fuzzers/icu_unicode_string_codepage_create_fuzzer.cc
-FILE: ../../../third_party/icu/scripts/accept_lang.list
-FILE: ../../../third_party/icu/scripts/chrome_ui_languages.list
-FILE: ../../../third_party/icu/scripts/currencies.list
-----------------------------------------------------------------------------------------------------
-Copyright 2015 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -26609,6 +26663,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: vulkan_memory_allocator
+ORIGIN: ../../../third_party/vulkan_memory_allocator/include/vk_mem_alloc.h
+TYPE: LicenseType.mit
+FILE: ../../../third_party/vulkan_memory_allocator/include/vk_mem_alloc.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2017-2022 Advanced Micro Devices, Inc. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: xxhash
 ORIGIN: ../../../third_party/angle/src/common/third_party/xxhash/xxhash.c
 TYPE: LicenseType.bsd
@@ -27314,4 +27395,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 417
+Total license count: 418

@@ -146,10 +146,9 @@ if (enable_unittests) {
       "//flutter/vulkan",
     ]
 
-    # SwiftShader only supports x86/x86_64
-    if (target_cpu == "x86" || target_cpu == "x64") {
-      configs += [ "//third_party/swiftshader_flutter:swiftshader_config" ]
-      deps += [ "//third_party/swiftshader_flutter:swiftshader_vulkan" ]
+    if (!is_fuchsia) {
+      deps += [ "//third_party/swiftshader" ]
+      configs += [ "//third_party/swiftshader:swiftshader_config" ]
     }
   }
 
@@ -215,10 +214,8 @@ if (is_mac || is_ios) {
   }
 }
 
-# We only use SwiftShader on unittests and
-# SwiftShader only supports x86/x86_64
-use_swiftshader =
-    enable_unittests && (target_cpu == "x86" || target_cpu == "x64")
+# We only use SwiftShader on unittests
+use_swiftshader = enable_unittests && !is_fuchsia
 
 source_set("opengl") {
   testonly = true
@@ -234,7 +231,16 @@ source_set("opengl") {
   ]
 
   if (use_swiftshader) {
-    configs += [ "//third_party/swiftshader_flutter:swiftshader_config" ]
-    deps += [ "//third_party/swiftshader_flutter:swiftshader_gl" ]
+    configs -= [ "//build/config/clang:extra_warnings" ]
+    configs += [
+      "//flutter/vulkan:vulkan_config",  # for swiftshader
+      "//third_party/angle:gl_prototypes",
+      "//third_party/swiftshader:swiftshader_config",
+    ]
+    deps += [
+      "//third_party/angle:libEGL_static",
+      "//third_party/angle:libGLESv2_static",
+      "//third_party/swiftshader",
+    ]
   }
 }
