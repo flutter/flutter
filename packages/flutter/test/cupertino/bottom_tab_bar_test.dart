@@ -80,8 +80,7 @@ Future<void> main() async {
     expect(actualActive.text.style!.color, const Color(0xFF123456));
   });
 
-
-  testWidgets('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBarItem.label will create a text widget', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
       child: CupertinoTabBar(
@@ -101,6 +100,29 @@ Future<void> main() async {
 
     expect(find.text('Tab 1'), findsOneWidget);
     expect(find.text('Tab 2'), findsOneWidget);
+  });
+
+  testWidgets('BottomNavigationBarItem.labelWidget replaces label if provided', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+            label: 'Tab 1',
+            labelWidget: const Text('Custom Tab 1'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+            label: 'Tab 2',
+          ),
+        ],
+        currentIndex: 1,
+      ),
+    ));
+
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Custom Tab 1'), findsOneWidget);
   });
 
   testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {

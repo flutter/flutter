@@ -187,8 +187,8 @@ class BottomNavigationBar extends StatefulWidget {
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
-        items.every((BottomNavigationBarItem item) => item.label != null),
-        'Every item must have a non-null label',
+        items.every((BottomNavigationBarItem item) => item.label != null || item.labelWidget != null),
+        'Every item must have a non-null label or a non-null labelWidget',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
@@ -698,7 +698,7 @@ class _Label extends StatelessWidget {
           ),
         ),
         alignment: Alignment.bottomCenter,
-        child: Text(item.label!),
+        child: item.labelWidget ?? Text(item.label!),
       ),
     );
 

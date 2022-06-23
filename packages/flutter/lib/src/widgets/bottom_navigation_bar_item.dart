@@ -25,6 +25,7 @@ class BottomNavigationBarItem {
   const BottomNavigationBarItem({
     required this.icon,
     this.label,
+    this.labelWidget,
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
@@ -63,8 +64,13 @@ class BottomNavigationBarItem {
 
   /// The text label for this [BottomNavigationBarItem].
   ///
-  /// This will be used to create a [Text] widget to put in the bottom navigation bar.
+  /// This will be used to create a [Text] widget to put in the bottom navigation bar and
+  /// to initialize the tooltip label if [tooltip] is null.
   final String? label;
+
+  /// An optional widget that will be displayed in place of the default [Text]
+  /// widget containing the [label] if provided.
+  final Widget? labelWidget;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
   ///
