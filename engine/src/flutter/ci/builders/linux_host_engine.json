@@ -19,6 +19,8 @@
             "ninja": {
                 "config": "host_debug_unopt",
                 "targets": [
+                    "flutter",
+                    "flutter/sky/packages",
                     "flutter/lib/spirv/test/exception_shaders:spirv_compile_exception_shaders"
                 ]
             },
@@ -28,13 +30,13 @@
             "archives": [
                 {
                     "name": "host_debug",
-                    "type": "gcs",
                     "base_path": "out/host_debug/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/host_debug/zip_archives/linux-x64/artifacts.zip",
                         "out/host_debug/zip_archives/linux-x64/linux-x64-embedder.zip",
                         "out/host_debug/zip_archives/linux-x64/font-subset.zip",
-                        "out/host_debug/zip_archives/flutter_patched_sdk.zip",
+                        "out/host_debug/zip_archives/linux-x64/flutter_patched_sdk.zip",
                         "out/host_debug/zip_archives/dart-sdk-linux-x64.zip",
                         "out/host_debug/zip_archives/flutter-web-sdk-linux-x64.zip",
                         "out/host_debug/zip_archives/linux-x64/linux-x64-flutter-gtk.zip"
@@ -74,8 +76,8 @@
             "archives": [
                 {
                     "name": "host_profile",
-                    "type": "gcs",
                     "base_path": "out/host_profile/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/host_profile/zip_archives/linux-x64-profile/linux-x64-flutter-gtk.zip"
                     ]
@@ -123,8 +125,8 @@
             "archives": [
                 {
                     "name": "host_release",
-                    "type": "gcs",
                     "base_path": "out/host_release/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/host_release/zip_archives/flutter_patched_sdk_product.zip",
                         "out/host_release/zip_archives/linux-x64-release/linux-x64-flutter-gtk.zip"
