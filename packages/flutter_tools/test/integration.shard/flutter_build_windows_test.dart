@@ -70,11 +70,11 @@ void main() {
       expect(releaseDir, exists);
       expect(exeFile, exists);
 
-      // Default exe has version 1.0.0
+      // Default exe has build name 1.0.0 and build number 1.
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
 
-      expect(fileVersion, equals('1.0.0.0'));
+      expect(fileVersion, equals('1.0.0.1'));
       expect(productVersion, equals('1.0.0+1'));
     });
 
@@ -112,7 +112,7 @@ void main() {
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
 
-      expect(fileVersion, equals('1.2.3.0'));
+      expect(fileVersion, equals('1.2.3.4'));
       expect(productVersion, equals('1.2.3+4'));
     });
   }, skip: !io.Platform.isWindows); // [intended] Windows integration build.

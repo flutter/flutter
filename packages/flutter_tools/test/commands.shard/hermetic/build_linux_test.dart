@@ -451,6 +451,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
       '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
       '  "DART_OBFUSCATION=true"',
       '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',

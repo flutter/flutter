@@ -476,6 +476,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       r'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
       r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
       r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
+      r'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
       r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
       r'  "DART_OBFUSCATION=true"',
       r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
@@ -576,6 +577,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -619,6 +621,54 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
+    ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build build-name overrides pubspec', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('version: 9.9.9+9');
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>[
+        'windows',
+        '--no-pub',
+        '--build-name=1.2.3',
+      ]
+    );
+
+    final File cmakeConfig = fileSystem.currentDirectory
+      .childDirectory('windows')
+      .childDirectory('flutter')
+      .childDirectory('ephemeral')
+      .childFile('generated_config.cmake');
+
+    expect(cmakeConfig, exists);
+
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
+
+    expect(configLines, containsAll(<String>[
+      'set(FLUTTER_VERSION "1.2.3" PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -666,6 +716,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_PATCH 4 PARENT_SCOPE)',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -673,7 +724,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
-
 
   testUsingContext('hidden when not enabled on Windows host', () {
     expect(BuildWindowsCommand().hidden, true);

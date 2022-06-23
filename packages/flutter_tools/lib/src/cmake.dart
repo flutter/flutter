@@ -60,6 +60,17 @@ Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
   }
 }
 
+/// Attempts to map a Dart version's build number into a single integer.
+/// Complex build numbers like `+foo` or `+1.2` will be converted to 0.
+int _determineBuildVersion(Version version) {
+  if (version.build.length != 1) {
+    return 0;
+  }
+
+  final dynamic buildNumber = version.build.first;
+  return buildNumber is int ? buildNumber : 0;
+}
+
 /// Writes a generated CMake configuration file for [project], including
 /// variables expected by the build template and an environment variable list
 /// for calling back into Flutter.
@@ -73,6 +84,7 @@ void writeGeneratedCmakeConfig(
   final String escapedFlutterRoot = _escapeBackslashes(flutterRoot);
   final String escapedProjectDir = _escapeBackslashes(project.parent.directory.path);
   final Version version = _determineVersion(project, buildInfo);
+  final int buildVersion = _determineBuildVersion(version);
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 file(TO_CMAKE_PATH "$escapedFlutterRoot" FLUTTER_ROOT)
@@ -82,6 +94,7 @@ set(FLUTTER_VERSION "$version" PARENT_SCOPE)
 set(FLUTTER_VERSION_MAJOR ${version.major} PARENT_SCOPE)
 set(FLUTTER_VERSION_MINOR ${version.minor} PARENT_SCOPE)
 set(FLUTTER_VERSION_PATCH ${version.patch} PARENT_SCOPE)
+set(FLUTTER_VERSION_BUILD $buildVersion PARENT_SCOPE)
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
