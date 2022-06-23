@@ -325,7 +325,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       if (_state == _DragState.accepted) {
-        print("pointerid : ${event.pointer}");
         bool eventExists = false;
         int event_index = -1;
         for (int i = 0; i < _multiPointerTrackers.length; i++) {
