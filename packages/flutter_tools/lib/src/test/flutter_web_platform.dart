@@ -659,6 +659,8 @@ class BrowserManager {
   ///
   /// The browser will start in headless mode if [headless] is true.
   ///
+  /// Add arbitrary browser flags via [webBrowserFlags].
+  ///
   /// The [settings] indicate how to invoke this browser's executable.
   ///
   /// Returns the browser manager, or throws an [ApplicationException] if a
@@ -670,8 +672,13 @@ class BrowserManager {
     Future<WebSocketChannel> future, {
     bool debug = false,
     bool headless = true,
+    List<String> webBrowserFlags = const <String>[],
   }) async {
-    final Chromium chrome = await chromiumLauncher.launch(url.toString(), headless: headless);
+    final Chromium chrome = await chromiumLauncher.launch(
+      url.toString(),
+      headless: headless,
+      webBrowserFlags: webBrowserFlags,
+    );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
     unawaited(chrome.onExit.then((int? browserExitCode) {
