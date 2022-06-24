@@ -23,7 +23,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:platform/platform.dart';
 
 import 'widget_inspector_test_utils.dart';
 
@@ -2777,7 +2776,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service
+                .testExtension('addPubRootDirectories', <String, String>{
               'arg0': '/unrelated/$pubRootTest',
               'arg1': 'file://$pubRootTest',
             });
@@ -2811,10 +2811,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service
+                .testExtension('addPubRootDirectories', <String, String>{
               'arg0': 'file://$pubRootTest',
             });
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service
+                .testExtension('addPubRootDirectories', <String, String>{
               'arg0': '/unrelated/$pubRootTest',
             });
 
@@ -2920,7 +2922,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance
+          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -3100,7 +3103,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance
+          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -3168,7 +3172,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service.testExtension(
+                'addPubRootDirectories', <String, String>{
               'arg0': '/invalid/$pubRootTest',
               'isolateId': '34'
             });
@@ -3203,7 +3208,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
             await service.testExtension(
               'addPubRootDirectories',
-              <String, String>{'arg0': 'file://$pubRootTest', 'isolateId': '34'},
+              <String, String>{
+                'arg0': 'file://$pubRootTest',
+                'isolateId': '34'
+              },
             );
             expect(
               await service.testExtension(
@@ -3234,7 +3242,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service.testExtension(
+                'addPubRootDirectories', <String, String>{
               'arg0': '$pubRootTest/different',
               'isolateId': '34'
             });
@@ -3267,7 +3276,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service
+                .testExtension('addPubRootDirectories', <String, String>{
               'arg0': '/unrelated/$pubRootTest',
               'arg1': 'file://$pubRootTest',
               'isolateId': '34',
@@ -3283,39 +3293,38 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
         testWidgets(
-          'has createdByLocalProject if multiple pubRootDirectories match',
-          (WidgetTester tester) async {
-            await tester.pumpWidget(
-              Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: const <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
+            'has createdByLocalProject if multiple pubRootDirectories match',
+            (WidgetTester tester) async {
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
               ),
-            );
+            ),
+          );
 
-            final Element elementA = find.text('a').evaluate().first;
-            service.setSelection(elementA, 'my-group');
+          final Element elementA = find.text('a').evaluate().first;
+          service.setSelection(elementA, 'my-group');
 
-            await service.testExtension('addPubRootDirectories', <String, String>{
-              'arg0': pubRootTest,
-              'arg1': 'file://$pubRootTest',
-              'isolateId': '34',
-            });
+          await service.testExtension('addPubRootDirectories', <String, String>{
+            'arg0': pubRootTest,
+            'arg1': 'file://$pubRootTest',
+            'isolateId': '34',
+          });
 
-            expect(
-              await service.testExtension(
-                'getSelectedWidget',
-                <String, String>{'objectGroup': 'my-group'},
-              ),
-              contains('createdByLocalProject'),
-            );
-          }
-        );
+          expect(
+            await service.testExtension(
+              'getSelectedWidget',
+              <String, String>{'objectGroup': 'my-group'},
+            ),
+            contains('createdByLocalProject'),
+          );
+        });
 
         testWidgets(
           'has createdByLocalProject even if pubRootDirectories were previously added',
@@ -3336,11 +3345,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service
+                .testExtension('addPubRootDirectories', <String, String>{
               'arg0': 'file://$pubRootTest',
               'isolateId': '34',
             });
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service
+                .testExtension('addPubRootDirectories', <String, String>{
               'arg0': '/unrelated/$pubRootTest',
               'isolateId': '34',
             });
@@ -3424,7 +3435,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             );
 
             service.resetPubRootDirectories(<String>[]);
-            await service.testExtension('addPubRootDirectories', <String, String>{
+            await service.testExtension(
+                'addPubRootDirectories', <String, String>{
               'arg0': pubRootFramework,
               'arg1': pubRootTest,
               'isolateId': '34'
@@ -3448,7 +3460,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance
+          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -3631,7 +3644,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance
+          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
