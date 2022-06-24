@@ -1,9 +1,14 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'slot_layout_config.dart';
 
-
-/// The [SlotLayout] Widget is reponsible for picking a widget to display on the
-/// screen based on the breakpoints given in the config parameter.
+/// A Widget that takes a mapping of [SlotLayoutConfig]s to breakpoints and returns a chosen
+/// Widget based on the current screen size.
+///
+/// Commonly used with [AdaptiveLayout] but also functional on its own.
 
 // ignore: must_be_immutable
 class SlotLayout extends StatefulWidget {
@@ -13,6 +18,10 @@ class SlotLayout extends StatefulWidget {
     });
 
   bool isActive = false;
+
+  /// The mapping that is used to determine what Widget to display at what point.
+  ///
+  /// The int represents screen width.
   final Map<int, SlotLayoutConfig> config;
   @override
   State<SlotLayout> createState() => _SlotLayoutState();

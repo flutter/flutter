@@ -1,8 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'slot_layout.dart';
 
-/// The [AdaptiveLayout] Widget takes in multiple [SlotLayout] components and
-/// places them in their correct positions on the screen.
+/// A parent Widget takes in multiple [SlotLayout] components and places them
+/// into their appropriate positions on the screen.
 
 class AdaptiveLayout extends StatefulWidget {
   const AdaptiveLayout({
@@ -17,13 +21,51 @@ class AdaptiveLayout extends StatefulWidget {
     super.key,
   });
 
+  /// The slot placed on the left side of the screen
+  ///
+  /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
+  /// [SizedBox] or limit its size by any other method.
   final SlotLayout? leftNavigation;
+
+  /// The slot placed on the right side of the screen
+  ///
+  /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
+  /// [SizedBox] or limit its size by any other method.
   final SlotLayout? rightNavigation;
+
+  /// The slot placed on the top part of the screen
+  ///
+  /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
+  /// [SizedBox] or limit its size by any other method.
   final SlotLayout? topNavigation;
+
+  /// The slot placed on the bottom part of the screen
+  ///
+  /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
+  /// [SizedBox] or limit its size by any other method.
   final SlotLayout? bottomNavigation;
+
+  /// The slot that fills the rest of the space in the center.
   final SlotLayout? body;
+
+  /// A supporting slot for body. Has a sliding entrance animation by default.
+  /// The default ratio for the split between body and bodyLeft is so that the
+  /// split axis is in the center of the screen.
   final SlotLayout? bodyLeft;
+
+  /// Defines the fractional ratio of body to body left.
+  ///
+  /// For example 1 / 3 would mean body takes up 1/3 of the available space and
+  /// bodyLeft takes up the rest.
+  ///
+  /// If this value is null, the ratio is defined so that the split axis is in
+  /// the center of the screen.
   final double? bodyRatio;
+
+  /// Whether or not the developer wants the smooth entering slide transition on
+  /// bodyLeft.
+  ///
+  /// Defaults to true.
   final bool bodyAnimated;
 
   @override
@@ -97,6 +139,7 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
   }
 }
 
+/// The delegate responsible for laying out the slots in their correct positions.
 class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
   _AdaptiveLayoutDelegate({
     required this.slots,
