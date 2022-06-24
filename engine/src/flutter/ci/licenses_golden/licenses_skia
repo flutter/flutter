@@ -1,4 +1,4 @@
-Signature: 5ff5e39e447d116e2ee21efa6dff1018
+Signature: f0c88c605f12eeafaf6b09fbdb5ad311
 
 UNUSED LICENSES:
 
@@ -1349,11 +1349,12 @@ FILE: ../../../third_party/skia/src/xps/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/download_linux_amd64_toolchain.bzl
-FILE: ../../../third_party/skia/toolchain/download_mac_m1_toolchain.bzl
+FILE: ../../../third_party/skia/toolchain/download_mac_toolchain.bzl
 FILE: ../../../third_party/skia/toolchain/download_toolchains.bzl
 FILE: ../../../third_party/skia/toolchain/linux_amd64_toolchain_config.bzl
 FILE: ../../../third_party/skia/toolchain/linux_trampolines/IWYU_mapping.imp
-FILE: ../../../third_party/skia/toolchain/mac_m1_toolchain_config.bzl
+FILE: ../../../third_party/skia/toolchain/mac_toolchain_config.bzl
+FILE: ../../../third_party/skia/toolchain/utils.bzl
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 Google Inc. All rights reserved.
 
