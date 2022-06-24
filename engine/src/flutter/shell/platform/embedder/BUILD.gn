@@ -142,7 +142,7 @@ source_set("embedder_headers") {
 
 source_set("embedder_test_utils") {
   public = [
-    "test_utils/key_codes.h",
+    "test_utils/key_codes.g.h",
     "test_utils/proc_table_replacement.h",
   ]
 

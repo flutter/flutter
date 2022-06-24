@@ -7,7 +7,7 @@
 #include <cstring>
 #include <vector>
 
-#include "flutter/shell/platform/embedder/test_utils/key_codes.h"
+#include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/testing/mock_text_input_plugin.h"
 #include "gtest/gtest.h"

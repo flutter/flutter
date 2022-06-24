@@ -1102,7 +1102,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_loader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_promise.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.g.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart
@@ -1700,7 +1700,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewCon
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/IOKit.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap.g.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm
@@ -1856,7 +1856,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewC
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap.g.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.mm
@@ -1906,7 +1906,7 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.h
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.h
-FILE: ../../../flutter/shell/platform/embedder/test_utils/key_codes.h
+FILE: ../../../flutter/shell/platform/embedder/test_utils/key_codes.g.h
 FILE: ../../../flutter/shell/platform/embedder/test_utils/proc_table_replacement.h
 FILE: ../../../flutter/shell/platform/embedder/vsync_waiter_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/vsync_waiter_embedder.h
@@ -2242,7 +2242,7 @@ FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.h
 FILE: ../../../flutter/shell/platform/linux/fl_view_accessible_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view_private.h
-FILE: ../../../flutter/shell/platform/linux/key_mapping.cc
+FILE: ../../../flutter/shell/platform/linux/key_mapping.g.cc
 FILE: ../../../flutter/shell/platform/linux/key_mapping.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_binary_codec.h
@@ -2301,7 +2301,7 @@ FILE: ../../../flutter/shell/platform/windows/external_texture_d3d.cc
 FILE: ../../../flutter/shell/platform/windows/external_texture_d3d.h
 FILE: ../../../flutter/shell/platform/windows/external_texture_pixelbuffer.cc
 FILE: ../../../flutter/shell/platform/windows/external_texture_pixelbuffer.h
-FILE: ../../../flutter/shell/platform/windows/flutter_key_map.cc
+FILE: ../../../flutter/shell/platform/windows/flutter_key_map.g.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_platform_node_delegate_win32.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_platform_node_delegate_win32.h
 FILE: ../../../flutter/shell/platform/windows/flutter_project_bundle.cc

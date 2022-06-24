@@ -12,7 +12,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/embedder/test_utils/key_codes.h"
+#include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 
 using namespace flutter::testing::keycodes;
 

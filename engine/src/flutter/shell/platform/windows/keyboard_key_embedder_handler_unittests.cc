@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/embedder/test_utils/key_codes.h"
+#include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "gtest/gtest.h"
