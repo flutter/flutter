@@ -1015,14 +1015,16 @@ mixin TextSelectionDelegate {
   /// Indicates that the user has requested the delegate to apply the given
   /// [TextEditingDelta]s to its current text editing state.
   ///
-  /// The new [value] is treated as user input and thus may subject to input
-  /// formatting.
+  /// The new value that comes from applying the [textEditingDeltas] to the
+  /// current text editing state is treated as user input and thus may subject
+  /// to input formatting.
   ///
   /// See also:
   ///
   /// * [EditableTextState.userUpdateTextEditingValueWithDeltas]: an
   /// implementation that applies additional pre-processing to the specified
-  /// [textEditingDeltas], before updating the text editing state.
+  /// value that resulted from applying [textEditingDeltas], before updating
+  /// the text editing state.
   void userUpdateTextEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas, SelectionChangedCause cause);
 
   /// Hides the text selection toolbar.
