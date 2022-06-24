@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_MANAGER_H_
 
 #include <windows.h>
+#include <atomic>
 #include <deque>
 #include <functional>
 #include <map>
@@ -15,16 +16,16 @@ namespace flutter {
 // Handles keyboard and text messages on Win32.
 //
 // |KeyboardManagerWin32| consumes raw Win32 messages related to key and chars,
-// and converts them to |OnKey| or |OnText| calls suitable for
-// |KeyboardKeyHandler|.
+// and converts them to key calls (|WindowDelegate::OnKey|) and possibly
+// text calls (|WindowDelegate::OnText|).
 //
 // |KeyboardManagerWin32| requires a |WindowDelegate| to define how to
 // access Win32 system calls (to allow mocking) and where to send the results
-// of |OnKey| and |OnText| to.
+// of key calls and text calls to.
 //
 // Typically, |KeyboardManagerWin32| is owned by a |WindowWin32|, which also
-// implements the window delegate. The |OnKey| and |OnText| results are
-// passed to those of |WindowWin32|'s, and consequently, those of
+// implements the window delegate. The key calls and text calls are forwarded
+// to those of |WindowWin32|'s, and consequently, those of
 // |FlutterWindowsView|'s.
 //
 // ## Terminology
@@ -38,10 +39,12 @@ namespace flutter {
 //  * Session: One to three messages that should be processed together, such
 //    as a key down message followed by char messages.
 //  * Event: A FlutterKeyEvent/ui.KeyData sent to the framework.
+//  * Call: A call to |WindowDelegate::OnKey| or |WindowDelegate::OnText|,
+//    which contains semi-processed messages.
 class KeyboardManagerWin32 {
  public:
   // Define how the keyboard manager accesses Win32 system calls (to allow
-  // mocking) and sends the results of |OnKey| and |OnText|.
+  // mocking) and sends key calls and and text calls.
   //
   // Typically implemented by |WindowWin32|.
   class WindowDelegate {
@@ -54,6 +57,8 @@ class KeyboardManagerWin32 {
     virtual void OnText(const std::u16string& text) = 0;
 
     // Called when raw keyboard input occurs.
+    //
+    // The `callback` must be called exactly once.
     virtual void OnKey(int key,
                        int scancode,
                        int action,
@@ -141,21 +146,36 @@ class KeyboardManagerWin32 {
     bool placeholder = false;
   };
 
-  // Returns true if it's a new event, or false if it's a redispatched event.
-  void OnKey(std::unique_ptr<PendingEvent> event, OnKeyCallback callback);
+  // Resume processing the pending events.
+  //
+  // If there is at least one pending event and no event is being processed,
+  // the oldest pending event will be handed over to |PerformProcessEvent|.
+  // After the event is processed, the next pending event will be automatically
+  // started, until there are no pending events left.
+  //
+  // Otherwise, this call is a no-op.
+  void ProcessNextEvent();
 
-  // From `pending_texts_`, pop all front elements that are ready, dispatch
-  // them to |OnText|, and remove them.
-  void DispatchReadyTexts();
+  // Process an event and call `callback` when it's completed.
+  //
+  // The `callback` is constructed by |ProcessNextEvent| to start the next
+  // event, and must be called exactly once.
+  void PerformProcessEvent(std::unique_ptr<PendingEvent> event,
+                           std::function<void()> callback);
 
-  // Handle the result of |OnKey|, which might dispatch the text result to
-  // |OnText|.
+  // Handle the result of |WindowDelegate::OnKey|, possibly dispatching the text
+  // result to |WindowDelegate::OnText| and then redispatching.
   //
   // The `pending_text` is either a valid iterator of `pending_texts`, or its
   // end(). In the latter case, this OnKey message does not contain a text.
   void HandleOnKeyResult(std::unique_ptr<PendingEvent> event,
-                         bool handled,
-                         std::list<PendingText>::iterator pending_text);
+                         bool framework_handled);
+
+  // Dispatch the text content of a |PendingEvent| to |WindowDelegate::OnText|.
+  //
+  // If the content is empty of invalid, |WindowDelegate::OnText| will not be
+  // called.
+  void DispatchText(const PendingEvent& event);
 
   // Returns the type of the next WM message.
   //
@@ -176,7 +196,7 @@ class KeyboardManagerWin32 {
   // Keeps track of all messages during the current session.
   //
   // At the end of a session, it is moved to the `PendingEvent`, which is
-  // passed to `OnKey`.
+  // passed to `WindowDelegate::OnKey`.
   std::vector<Win32Message> current_session_;
 
   // Whether the last event is a CtrlLeft key down.
@@ -194,13 +214,14 @@ class KeyboardManagerWin32 {
   // This is used to resolve a corner case described in |IsKeyDownAltRight|.
   bool should_synthesize_ctrl_left_up;
 
-  // A queue of potential texts derived from char messages.
+  // Store the messages coming from |HandleMessage|.
   //
-  // The text might or might not be ready when they're added, and they might
-  // become ready or removed later. `DispatchReadyTexts` is used to dispatch all
-  // ready texts from the front to `OnText`. This queue is used to ensure
-  // they're dispatched in their arrival order.
-  std::list<PendingText> pending_texts_;
+  // Only one message is processed at a time. The next one will not start
+  // until the framework has responded to the previous message.
+  std::deque<std::unique_ptr<PendingEvent>> pending_events_;
+
+  // Whether a message is being processed.
+  std::atomic<bool> processing_event_;
 
   // The queue of messages that have been redispatched to the system but have
   // not yet been received for a second time.

@@ -5,7 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_WIN32_COMMON_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_WIN32_COMMON_H_
 
+#include <assert.h>
 #include <stdint.h>
+#include <string>
 
 namespace flutter {
 
@@ -23,6 +25,12 @@ constexpr int kDeadKeyCharMask = 0x80000000;
 inline uint32_t UndeadChar(uint32_t ch) {
   return ch & ~kDeadKeyCharMask;
 }
+
+// Encode a Unicode codepoint into a UTF-16 string.
+//
+// If the codepoint is invalid, this function throws an assertion error, and
+// returns an empty string.
+std::u16string EncodeUtf16(char32_t character);
 
 }  // namespace flutter
 

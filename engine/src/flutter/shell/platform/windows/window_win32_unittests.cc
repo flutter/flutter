@@ -206,7 +206,14 @@ TEST(MockWin32Window, KeyDownPrintable) {
   MockWin32Window window;
   LPARAM lparam = CreateKeyEventLparam(30, false, false);
 
-  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 0, false, false, _)).Times(1);
+  auto respond_false = [](int key, int scancode, int action, char32_t character,
+                          bool extended, bool was_down,
+                          std::function<void(bool)> callback) {
+    callback(false);
+  };
+  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 0, false, false, _))
+      .Times(1)
+      .WillOnce(respond_false);
   EXPECT_CALL(window, OnText(_)).Times(1);
   Win32Message messages[] = {{WM_KEYDOWN, 65, lparam, kWmResultDontCheck},
                              {WM_CHAR, 65, lparam, kWmResultDontCheck}};
@@ -238,6 +245,12 @@ TEST(MockWin32Window, KeyDownWithCtrl) {
 TEST(MockWin32Window, KeyDownWithCtrlToggled) {
   MockWin32Window window;
 
+  auto respond_false = [](int key, int scancode, int action, char32_t character,
+                          bool extended, bool was_down,
+                          std::function<void(bool)> callback) {
+    callback(false);
+  };
+
   // Simulate CONTROL toggled
   BYTE keyboard_state[256];
   memset(keyboard_state, 0, 256);
@@ -246,7 +259,9 @@ TEST(MockWin32Window, KeyDownWithCtrlToggled) {
 
   LPARAM lparam = CreateKeyEventLparam(30, false, false);
 
-  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 0, false, false, _)).Times(1);
+  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 0, false, false, _))
+      .Times(1)
+      .WillOnce(respond_false);
   EXPECT_CALL(window, OnText(_)).Times(1);
 
   // send a "A" key down event.

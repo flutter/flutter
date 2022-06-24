@@ -1954,57 +1954,6 @@ TEST(KeyboardTest, UpOnlyImeEventsAreCorrectlyHandled) {
   clear_key_calls();
 }
 
-TEST(KeyboardTest, DisorderlyRespondedEvents) {
-  KeyboardTester tester;
-
-  // Store callbacks to manually call them.
-  std::vector<MockKeyResponseController::ResponseCallback> recorded_callbacks;
-  tester.LateResponding(
-      [&recorded_callbacks](
-          const FlutterKeyEvent* event,
-          MockKeyResponseController::ResponseCallback callback) {
-        recorded_callbacks.push_back(callback);
-      });
-
-  // Press A
-  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
-      WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero),
-      WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero)});
-
-  // Press B
-  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
-      WmKeyDownInfo{kVirtualKeyB, kScanCodeKeyB, kNotExtended, kWasUp}.Build(
-          kWmResultZero),
-      WmCharInfo{'b', kScanCodeKeyB, kNotExtended, kWasUp}.Build(
-          kWmResultZero)});
-
-  EXPECT_EQ(key_calls.size(), 2);
-  EXPECT_EQ(recorded_callbacks.size(), 2);
-  clear_key_calls();
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
-
-  // Resolve the second event first to test disordered responses.
-  recorded_callbacks.back()(false);
-
-  EXPECT_EQ(key_calls.size(), 0);
-  clear_key_calls();
-  // TODO(dkwingsmt): This should probably be 0. Redispatching the messages of
-  // the second event this early means that the messages are not redispatched
-  // in the order of arrival. https://github.com/flutter/flutter/issues/98308
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
-
-  // Resolve the first event.
-  recorded_callbacks.front()(false);
-
-  EXPECT_EQ(key_calls.size(), 2);
-  EXPECT_CALL_IS_TEXT(key_calls[0], u"a");
-  EXPECT_CALL_IS_TEXT(key_calls[1], u"b");
-  clear_key_calls();
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
-}
-
 // Regression test for a crash in an earlier implementation.
 //
 // In real life, the framework responds slowly. The next real event might
@@ -2038,24 +1987,27 @@ TEST(KeyboardTest, SlowFrameworkResponse) {
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasDown}.Build(
           kWmResultZero)});
 
-  EXPECT_EQ(key_calls.size(), 2);
-  EXPECT_EQ(recorded_callbacks.size(), 2);
-  clear_key_calls();
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
+  EXPECT_EQ(recorded_callbacks.size(), 1);
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 
   // The first response.
   recorded_callbacks.front()(false);
 
-  EXPECT_EQ(key_calls.size(), 1);
-  EXPECT_CALL_IS_TEXT(key_calls[0], u"a");
-  clear_key_calls();
+  EXPECT_EQ(key_calls.size(), 3);
+  EXPECT_EQ(recorded_callbacks.size(), 2);
+  EXPECT_CALL_IS_TEXT(key_calls[1], u"a");
+  EXPECT_CALL_IS_EVENT(key_calls[2], kFlutterKeyEventTypeRepeat, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 
   // The second response.
   recorded_callbacks.back()(false);
 
-  EXPECT_EQ(key_calls.size(), 1);
-  EXPECT_CALL_IS_TEXT(key_calls[0], u"a");
+  EXPECT_EQ(key_calls.size(), 4);
+  EXPECT_CALL_IS_TEXT(key_calls[3], u"a");
   clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 }
@@ -2102,18 +2054,17 @@ TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
       WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
           kWmResultZero)});
 
-  EXPECT_EQ(key_calls.size(), 1);
-  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
-                       kLogicalKeyA, "", kNotSynthesized);
-  clear_key_calls();
+  EXPECT_EQ(key_calls.size(), 0);
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 
   // The first down event responded with false.
-  EXPECT_EQ(recorded_callbacks.size(), 2);
+  EXPECT_EQ(recorded_callbacks.size(), 1);
   recorded_callbacks.front()(false);
 
-  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_TEXT(key_calls[0], u"a");
+  EXPECT_CALL_IS_EVENT(key_calls[1], kFlutterKeyEventTypeUp, kPhysicalKeyA,
+                       kLogicalKeyA, "", kNotSynthesized);
   clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 
@@ -2124,21 +2075,28 @@ TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero)});
 
+  // Nothing more was dispatched because the first up event hasn't been
+  // responded yet.
+  EXPECT_EQ(recorded_callbacks.size(), 2);
+  EXPECT_EQ(key_calls.size(), 0);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+
+  // The first up event responded with false, which was redispatched, and caused
+  // the down event to be dispatched.
+  recorded_callbacks.back()(false);
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
                        kLogicalKeyA, "a", kNotSynthesized);
   clear_key_calls();
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+  EXPECT_EQ(recorded_callbacks.size(), 3);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 
   // Release A again
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
           kWmResultZero)});
 
-  EXPECT_EQ(key_calls.size(), 1);
-  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
-                       kLogicalKeyA, "", kNotSynthesized);
-  clear_key_calls();
+  EXPECT_EQ(key_calls.size(), 0);
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
@@ -2359,26 +2317,27 @@ void VietnameseTelexAddDiacriticWithSlowResponse(bool backspace_response) {
   // it will send a setEditingState message that updates the text state that has
   // the last character deleted  (denoted by `string1`). Processing the char
   // message before then will cause the final text to set to `string1`.
-  EXPECT_EQ(key_calls.size(), 2);
+  EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
                        kPhysicalBackspace, kLogicalBackspace, "",
                        kNotSynthesized);
-  EXPECT_CALL_IS_EVENT(key_calls[1], kFlutterKeyEventTypeUp, kPhysicalBackspace,
-                       kLogicalBackspace, "", kNotSynthesized);
   clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 
-  EXPECT_EQ(recorded_callbacks.size(), 2);
+  EXPECT_EQ(recorded_callbacks.size(), 1);
   recorded_callbacks[0](backspace_response);
 
   EXPECT_EQ(key_calls.size(), 1);
-  EXPECT_CALL_IS_TEXT(key_calls[0], u"à");
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalBackspace,
+                       kLogicalBackspace, "", kNotSynthesized);
   clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(),
             backspace_response ? 0 : 2);
 
   recorded_callbacks[1](false);
-  EXPECT_EQ(key_calls.size(), 0);
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_TEXT(key_calls[0], u"à");
+  clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 
   tester.Responding(false);
