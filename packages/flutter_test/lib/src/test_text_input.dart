@@ -277,10 +277,10 @@ class TestTextInput {
   Future<void> startScribbleInteraction() async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
+      SystemChannels.scribble.name,
+      SystemChannels.scribble.codec.encodeMethodCall(
         MethodCall(
-          'TextInputClient.scribbleInteractionBegan',
+          'Scribble.scribbleInteractionBegan',
            <dynamic>[_client ?? -1,]
         ),
       ),
@@ -292,10 +292,10 @@ class TestTextInput {
   Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
+      SystemChannels.scribble.name,
+      SystemChannels.scribble.codec.encodeMethodCall(
         MethodCall(
-          'TextInputClient.focusElement',
+          'Scribble.focusElement',
            <dynamic>[elementIdentifier, offset.dx, offset.dy]
         ),
       ),
@@ -308,15 +308,15 @@ class TestTextInput {
     assert(isRegistered);
     List<List<dynamic>> response = <List<dynamic>>[];
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
+      SystemChannels.scribble.name,
+      SystemChannels.scribble.codec.encodeMethodCall(
         MethodCall(
-          'TextInputClient.requestElementsInRect',
+          'Scribble.requestElementsInRect',
            <dynamic>[rect.left, rect.top, rect.width, rect.height]
         ),
       ),
       (ByteData? data) {
-        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>).map((dynamic element) => element as List<dynamic>).toList();
+        response = (SystemChannels.scribble.codec.decodeEnvelope(data!) as List<dynamic>).map((dynamic element) => element as List<dynamic>).toList();
       },
     );
 
@@ -327,10 +327,10 @@ class TestTextInput {
   Future<void> scribbleInsertPlaceholder() async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
+      SystemChannels.scribble.name,
+      SystemChannels.scribble.codec.encodeMethodCall(
         MethodCall(
-          'TextInputClient.insertTextPlaceholder',
+          'Scribble.insertTextPlaceholder',
            <dynamic>[_client ?? -1, 0.0, 0.0]
         ),
       ),
@@ -342,10 +342,10 @@ class TestTextInput {
   Future<void> scribbleRemovePlaceholder() async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
+      SystemChannels.scribble.name,
+      SystemChannels.scribble.codec.encodeMethodCall(
         MethodCall(
-          'TextInputClient.removeTextPlaceholder',
+          'Scribble.removeTextPlaceholder',
            <dynamic>[_client ?? -1]
         ),
       ),
