@@ -785,6 +785,7 @@ class DebuggingOptions {
     this.webUseSseForInjectedClient = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
+    this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
     this.webLaunchUrl,
     this.vmserviceOutFile,
@@ -805,6 +806,7 @@ class DebuggingOptions {
       this.webUseSseForInjectedClient = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
+      this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
@@ -871,6 +873,7 @@ class DebuggingOptions {
     required this.webUseSseForInjectedClient,
     required this.webRunHeadless,
     required this.webBrowserDebugPort,
+    required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
@@ -930,6 +933,9 @@ class DebuggingOptions {
   /// The port the browser should use for its debugging protocol.
   final int? webBrowserDebugPort;
 
+  /// Arbitrary browser flags.
+  final List<String> webBrowserFlags;
+
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
 
@@ -983,6 +989,7 @@ class DebuggingOptions {
     'webUseSseForInjectedClient': webUseSseForInjectedClient,
     'webRunHeadless': webRunHeadless,
     'webBrowserDebugPort': webBrowserDebugPort,
+    'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'vmserviceOutFile': vmserviceOutFile,
@@ -1027,6 +1034,7 @@ class DebuggingOptions {
       webUseSseForInjectedClient: (json['webUseSseForInjectedClient'] as bool?)!,
       webRunHeadless: (json['webRunHeadless'] as bool?)!,
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
+      webBrowserFlags: ((json['webBrowserFlags'] as List<dynamic>?)?.cast<String>())!,
       webEnableExpressionEvaluation: (json['webEnableExpressionEvaluation'] as bool?)!,
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
