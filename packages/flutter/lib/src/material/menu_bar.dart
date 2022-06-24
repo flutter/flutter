@@ -1452,159 +1452,6 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
   }
 }
 
-/// A widget that groups [MenuItem]s (e.g. [MenuBarButton]s and [MenuBarMenu]s)
-/// into sections delineated by a [Divider].
-///
-/// It inserts dividers as necessary before and after the group, only inserting
-/// them if there are other menu items before or after this group in the menu.
-class MenuItemGroup extends StatefulWidget with MenuItem {
-  /// Creates a const [MenuItemGroup].
-  ///
-  /// The [members] attribute is required.
-  const MenuItemGroup({super.key, required this.members});
-
-  @override
-  String get label => '';
-
-  /// The members of this [MenuItemGroup].
-  ///
-  /// It empty, then this group will not appear in the menu.
-  @override
-  final List<Widget> members;
-
-  @override
-  State<MenuItemGroup> createState() => _MenuItemGroupState();
-}
-
-class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMixin, _MenuNode {
-  late _MenuNode _parent;
-  int _parentWidgetIndex = -1;
-
-  @override
-  List<_MenuNode> get children {
-    if (_children == null) {
-      // Keep track of children as a sparse array, so that inserting at an index
-      // works even if a previous index has been removed, and we can have gaps
-      // where "regular" widgets are in the widget list.
-      final List<int> indices = _childMapping.keys.toList()
-        ..sort();
-      _children = <_MenuNode>[
-        for (final int index in indices) _childMapping[index]!,
-      ];
-      debugPrint('\nNew Group Tree:\n${topLevel.parent.toStringDeep()}');
-    }
-    return _children!;
-  }
-  List<_MenuNode>? _children;
-  final Map<int, _MenuNode> _childMapping = <int, _MenuNode>{};
-
-  @override
-  _MenuNode get parent => _parent;
-
-  @override
-  int get parentWidgetIndex => _parentWidgetIndex;
-
-  @override
-  bool get isGroup => true;
-
-  @override
-  bool get enabled => false;
-
-  @override
-  void dispose() {
-    parent.removeChild(parentWidgetIndex);
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (parentWidgetIndex != -1) {
-      parent.removeChild(parentWidgetIndex);
-    }
-    final _MenuItemWrapper wrapper = _MenuItemWrapper.of(context);
-    _parent = wrapper.menu;
-    _parentWidgetIndex = wrapper.index;
-    parent.addChild(parentWidgetIndex, this);
-  }
-
-  @override
-  void addChild(int widgetIndex, _MenuNode child) {
-    assert(_childMapping[widgetIndex] == null,
-    'Index $widgetIndex already set. Tried to set to $child. Already set to ${_childMapping[widgetIndex]}');
-    _childMapping[widgetIndex] = child;
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      setState(() {
-        _children = null;
-      });
-    });
-  }
-
-  @override
-  void removeChild(int widgetIndex) {
-    _childMapping.remove(widgetIndex);
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      setState(() {
-        _children = null;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    bool showPrevious = false;
-    bool showNext = false;
-    if (ancestors.isNotEmpty && children.isNotEmpty) {
-      final _MenuNode? previous = getPreviousSibling(expandGroups: false);
-      showPrevious = previous != null && !previous.isGroup;
-      final _MenuNode? next = getNextSibling(expandGroups: false);
-      showNext = next != null && !next.isGroup;
-    }
-    int childIndex = 0;
-    final Axis axis = isTopLevel ? Axis.horizontal : Axis.vertical;
-    return Flex(
-      direction: axis,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (showPrevious) _MenuItemDivider(axis: axis),
-        ...widget.members.map<Widget>((Widget child) {
-          final Widget result = _MenuItemWrapper(
-            menu: this,
-            index: childIndex,
-            child: child,
-          );
-          childIndex += 1;
-          return result;
-        }),
-        if (showNext) _MenuItemDivider(axis: axis),
-      ],
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(IterableProperty<_MenuNode>('children', children));
-  }
-}
-
-class _MenuItemDivider extends StatelessWidget {
-  const _MenuItemDivider({this.axis = Axis.horizontal});
-
-  /// The axis direction this divider will be in.
-  final Axis axis;
-
-  @override
-  Widget build(BuildContext context) {
-    switch (axis) {
-      case Axis.horizontal:
-        return VerticalDivider(width: math.max(2, 16 + Theme.of(context).visualDensity.horizontal * 4));
-      case Axis.vertical:
-        return Divider(height: math.max(2, 16 + Theme.of(context).visualDensity.vertical * 4));
-    }
-  }
-}
-
 // A widget used as the main widget for the overlay entry in the _MenuBarState.
 // Since the overlay is a Stack, this widget produces a Positioned widget that
 // fills the overlay, containing its own Stack to arrange the menus with.
@@ -1743,8 +1590,6 @@ mixin _MenuNode on DiagnosticableTreeMixin {
 
   bool get isRoot => false;
 
-  bool get isGroup => false;
-
   /// Adds the given child to the end of the list of children.
   void addChild(int index, _MenuNode child) {
     throw UnimplementedError("The $runtimeType class doesn't support adding menu children.");
@@ -1765,9 +1610,7 @@ mixin _MenuNode on DiagnosticableTreeMixin {
     _MenuNode node = this;
     while (!node.parent.isRoot) {
       node = node.parent;
-      if (!node.isGroup) {
-        result.add(node);
-      }
+      result.add(node);
     }
     return result;
   }
@@ -1784,42 +1627,28 @@ mixin _MenuNode on DiagnosticableTreeMixin {
     return nodeAncestors.last;
   }
 
-  List<_MenuNode> _expandChildren() {
-    final List<_MenuNode> result = <_MenuNode>[];
-    for (final _MenuNode child in children) {
-      if (child.isGroup) {
-        result.addAll(child._expandChildren());
-      } else {
-        result.add(child);
-      }
-    }
-    return result;
-  }
-
-  _MenuNode? getNextSibling({bool onlyEnabled = false, bool expandGroups = true}) {
-    final List<_MenuNode> parentMembers = expandGroups ? parent._expandChildren() : parent.children;
-    final int thisIndex = parentMembers.indexOf(this);
+  _MenuNode? getNextSibling() {
+    final int thisIndex = parent.children.indexOf(this);
     assert(thisIndex != -1);
-    if (thisIndex == parentMembers.length - 1) {
+    if (thisIndex == parent.children.length - 1) {
       return null;
     }
-    for (final _MenuNode child in parentMembers.sublist(thisIndex + 1)) {
-      if (!onlyEnabled || child.enabled) {
+    for (final _MenuNode child in parent.children.sublist(thisIndex + 1)) {
+      if (child.enabled) {
         return child;
       }
     }
     return null;
   }
 
-  _MenuNode? getPreviousSibling({bool onlyEnabled = false, bool expandGroups = true}) {
-    final List<_MenuNode> parentMembers = expandGroups ? parent._expandChildren() : parent.children;
-    final int thisIndex = parentMembers.indexOf(this);
+  _MenuNode? getPreviousSibling() {
+    final int thisIndex = parent.children.indexOf(this);
     assert(thisIndex != -1);
     if (thisIndex == 0) {
       return null;
     }
-    for (final _MenuNode child in parentMembers.sublist(0, thisIndex).reversed) {
-      if (!onlyEnabled || child.enabled) {
+    for (final _MenuNode child in parent.children.sublist(0, thisIndex).reversed) {
+      if (child.enabled) {
         return child;
       }
     }
@@ -2413,7 +2242,7 @@ class _MenuNextFocusAction extends NextFocusAction {
     if (!menuBar.menuIsOpen) {
       return;
     }
-    final _MenuNode? next = menuBar.currentMenu!.getNextSibling(onlyEnabled: true);
+    final _MenuNode? next = menuBar.currentMenu!.getNextSibling();
     if (next != null) {
       menuBar.openMenu(next);
     } else {
@@ -2432,7 +2261,7 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
     if (!menuBar.menuIsOpen) {
       return;
     }
-    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling(onlyEnabled: true);
+    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling();
     if (next != null) {
       menuBar.openMenu(next);
     } else {
@@ -2456,7 +2285,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return false;
     }
     if (currentMenu.isTopLevel) {
-      final _MenuNode? next = currentMenu.getNextSibling(onlyEnabled: true);
+      final _MenuNode? next = currentMenu.getNextSibling();
       if (next != null) {
         menuBar.openMenu(next);
       } else {
@@ -2471,7 +2300,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     } else {
       // If there's no submenu, then an arrow moves to the next top
       // level sibling, wrapping around if need be.
-      final _MenuNode? next = currentMenu.topLevel.getNextSibling(onlyEnabled: true);
+      final _MenuNode? next = currentMenu.topLevel.getNextSibling();
       if (next != null) {
         menuBar.openMenu(next);
       } else {
@@ -2490,7 +2319,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return false;
     }
     if (currentMenu.isTopLevel) {
-      final _MenuNode? previous = currentMenu.getPreviousSibling(onlyEnabled: true);
+      final _MenuNode? previous = currentMenu.getPreviousSibling();
       if (previous != null) {
         menuBar.openMenu(previous);
       } else {
@@ -2498,7 +2327,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       }
       return previous != null;
     } else if (currentMenu.parent.isTopLevel) {
-      final _MenuNode? previous = currentMenu.parent.getPreviousSibling(onlyEnabled: true);
+      final _MenuNode? previous = currentMenu.parent.getPreviousSibling();
       if (previous != null) {
         menuBar.openMenu(previous);
       } else {
@@ -2524,7 +2353,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       menuBar.openMenu(menuBar.currentMenu!.parent);
       return true;
     }
-    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling(onlyEnabled: true);
+    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling();
     if (next != null) {
       menuBar.openMenu(next);
     }
@@ -2539,7 +2368,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       menuBar.openMenu(menuBar.currentMenu!.children.first);
       return true;
     } else {
-      final _MenuNode? next = menuBar.currentMenu!.getNextSibling(onlyEnabled: true);
+      final _MenuNode? next = menuBar.currentMenu!.getNextSibling();
       if (next != null) {
         menuBar.openMenu(next);
       }

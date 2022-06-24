@@ -124,31 +124,29 @@ class _HomeState extends State<Home> {
                         ),
                       ],
                     ),
-                    MenuItemGroup(
-                      members: <Widget>[
-                        MenuBarMenu(
-                          label: TestMenu.mainMenu2.label,
-                          onOpen: () {
-                            _openItem(TestMenu.mainMenu2);
+                    const VerticalDivider(),
+                    MenuBarMenu(
+                      label: TestMenu.mainMenu2.label,
+                      onOpen: () {
+                        _openItem(TestMenu.mainMenu2);
+                      },
+                      onClose: () {
+                        _closeItem(TestMenu.mainMenu2);
+                      },
+                      children: <Widget>[
+                        MenuBarButton(
+                          label: TestMenu.subMenu3.label,
+                          shortcut: const SingleActivator(
+                            LogicalKeyboardKey.enter,
+                            control: true,
+                          ),
+                          onSelected: () {
+                            _itemSelected(TestMenu.subMenu3);
                           },
-                          onClose: () {
-                            _closeItem(TestMenu.mainMenu2);
-                          },
-                          children: <Widget>[
-                            MenuBarButton(
-                              label: TestMenu.subMenu3.label,
-                              shortcut: const SingleActivator(
-                                LogicalKeyboardKey.enter,
-                                control: true,
-                              ),
-                              onSelected: () {
-                                _itemSelected(TestMenu.subMenu3);
-                              },
-                            ),
-                          ],
                         ),
                       ],
                     ),
+                    const VerticalDivider(),
                     MenuBarMenu(
                       label: TestMenu.mainMenu3.label,
                       onOpen: () {
@@ -158,18 +156,16 @@ class _HomeState extends State<Home> {
                         _closeItem(TestMenu.mainMenu3);
                       },
                       children: <Widget>[
-                        MenuItemGroup(members: <Widget>[
-                          MenuBarButton(
-                            label: TestMenu.subMenu4.label,
-                            shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                            onSelectedIntent: const ActivateIntent(),
-                          ),
-                          MenuBarButton(
-                            label: TestMenu.subMenu4.label,
-                            shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                            onSelectedIntent: const ActivateIntent(),
-                          ),
-                        ]),
+                        MenuBarButton(
+                          label: TestMenu.subMenu4.label,
+                          shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
+                          onSelectedIntent: const ActivateIntent(),
+                        ),
+                        const MenuBarButton(
+                          label: 'Extra',
+                          onSelectedIntent: ActivateIntent(),
+                        ),
+                        const Divider(),
                         MenuBarMenu(
                           label: TestMenu.subMenu5.label,
                           onOpen: () {
