@@ -137,14 +137,15 @@ abstract class CreateBase extends FlutterCommand {
   /// `dart:io` does not recognize strings matching this pattern as absolute
   /// paths, as they have no top level back-slash; however, users often specify
   /// this
-  static final RegExp _kWindowsDrivePattern = RegExp(r'^[A-Z]:$');
+  @visibleForTesting
+  static final RegExp kWindowsDrivePattern = RegExp(r'^[a-zA-Z]:$');
 
   /// The output directory of the command.
   @protected
   @visibleForTesting
   Directory get projectDir {
     final String argProjectDir = argResults!.rest.first;
-    if (globals.platform.isWindows && _kWindowsDrivePattern.hasMatch(argProjectDir)) {
+    if (globals.platform.isWindows && kWindowsDrivePattern.hasMatch(argProjectDir)) {
       throwToolExit(
         'You attempted to create a flutter project at the path "$argProjectDir", which is the name of a drive. This '
         'is usually a mistake--you probably want to specify a containing directory, like "$argProjectDir\\app_name". '
