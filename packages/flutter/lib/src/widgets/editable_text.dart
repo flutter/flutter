@@ -1430,14 +1430,17 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.EditableText.spellCheckEnabled}
   /// Whether or not spell check is enabled.
+  /// {@endtemplate}
   final bool spellCheckEnabled;
 
   /// {@template flutter.widgets.EditableText.spellCheckService}
   /// Service used to fetch spell check results if spell check is enabled.
+  /// {@endtemplate}
   final SpellCheckService? spellCheckService;
 
   /// {@template flutter.widgets.EditableText.spellCheckSuggestionsHandler}
   /// Handler used to display spell check results if spell check is enabled.
+  /// {@endtemplate}
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
