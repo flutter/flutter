@@ -57,7 +57,7 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 /// a [MenuBar] or other cascading menu.
 ///
 /// This class is abstract, and so can't be used directly. Typically subclasses
-/// like [MenuBarItem] and [MenuItemGroup] are used in practice.
+/// like [MenuItem] and [MenuItemGroup] are used in practice.
 ///
 /// See also:
 ///
@@ -71,15 +71,10 @@ mixin MenuItem on Diagnosticable implements Widget {
   /// This is rendered by default in a [Text] widget.
   /// The label appearance can be overridden by using a [labelWidget] to render
   /// a different widget in its place.
-  ///
-  /// This label is also used as the default [semanticsLabel].
   String get label;
 
   /// An optional widget that will be displayed in place of the default [Text]
   /// widget containing the [label].
-  ///
-  /// If both the `labelWidget` and [semanticsLabel] are provided, the
-  /// [semanticsLabel] will take precedence for defining semantic information.
   Widget? get labelWidget => null;
 
   /// The optional shortcut that selects this [MenuItem].
@@ -153,7 +148,7 @@ mixin MenuItem on Diagnosticable implements Widget {
 
   /// Returns all descendants of the given item.
   ///
-  /// This API is supplied so that implementers of [MenuBarItem] can share
+  /// This API is supplied so that implementers of [MenuItem] can share
   /// this implementation.
   static List<MenuItem> getDescendants(MenuBarMenu item) {
     return <MenuItem>[
@@ -251,9 +246,6 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   ///
   /// Setting this controller will allow closing of any open menus from outside
   /// of the menu bar using [MenuBarController.closeAll].
-  ///
-  /// Descendants of the [MenuBar] can access its [MenuBarController] using
-  /// [MenuBarController.of].
   final MenuBarController? controller;
 
   /// Whether or not this menu bar is enabled.
@@ -1195,7 +1187,7 @@ class MenuBarButton extends StatefulWidget with MenuItem {
     properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
     properties.add(StringProperty('label', label));
     properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
-    properties.add(StringProperty('semanticLabel', semanticsLabel, defaultValue: null));
+    properties.add(StringProperty('semanticsLabel', semanticsLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
     properties.add(
         DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
@@ -1210,23 +1202,21 @@ class MenuBarButton extends StatefulWidget with MenuItem {
 class _MenuBarButtonState extends State<MenuBarButton> {
   _MenuNode? _menu;
   late _MenuBarState _menuBar;
-  FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
+
+  FocusNode? get _focusNode {
+    final FocusNode result = widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+    assert(() {
+      if (_internalFocusNode != null) {
+        _internalFocusNode!.debugLabel = 'MenuBarButton(${widget.label})';
+      }
+      return true;
+    }());
+    return result;
+  }
 
   bool get _enabled {
     return (widget.onSelected != null || widget.onSelectedIntent != null) && _menuBar.enabled;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.focusNode == null) {
-      _internalFocusNode = FocusNode(debugLabel: 'MenuBarItem');
-      assert(() {
-        _internalFocusNode!.debugLabel = 'MenuBarItem(${widget.label})';
-        return true;
-      }());
-    }
   }
 
   @override
@@ -1248,12 +1238,6 @@ class _MenuBarButtonState extends State<MenuBarButton> {
     if (widget.focusNode != null) {
       _internalFocusNode?.dispose();
       _internalFocusNode = null;
-    } else {
-      _internalFocusNode ??= FocusNode();
-      assert(() {
-        _internalFocusNode!.debugLabel = 'MenuBarItem(${widget.label})';
-        return true;
-      }());
     }
     _updateMenuRegistration();
     super.didUpdateWidget(oldWidget);
@@ -2252,7 +2236,7 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
 class _MenuBarItemLabel extends StatelessWidget {
   /// Creates a const [_MenuBarItemLabel].
   ///
-  /// The [menuBarItem] argument is required.
+  /// The [hasSubmenu] argument is required.
   const _MenuBarItemLabel({
     this.leadingIcon,
     required this.label,

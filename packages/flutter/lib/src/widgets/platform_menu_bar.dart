@@ -756,9 +756,7 @@ class PlatformMenuItem with Diagnosticable {
   /// over the default "flutter/menu" channel used by [DefaultPlatformMenuDelegate].
   ///
   /// The `delegate` is the [PlatformMenuDelegate] that is requesting the
-  /// serialization. The `index` is the position of this menu item in the list
-  /// of [menus] of the [PlatformMenu] it belongs to, and `count` is the number
-  /// of [menus] in the [PlatformMenu] it belongs to.
+  /// serialization.
   ///
   /// The `getId` parameter is a [MenuItemSerializableIdGenerator] function that
   /// generates a unique ID for each menu item, which is to be returned in the
