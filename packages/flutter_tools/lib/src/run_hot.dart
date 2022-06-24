@@ -618,6 +618,9 @@ class HotRunner extends ResidentRunner {
           continue;
         }
         operations.add(device.vmService!.service.kill(isolateRef.id!)
+          // TODO(srawlins): Fix this static issue,
+          // https://github.com/flutter/flutter/issues/105750.
+          // ignore: body_might_complete_normally_catch_error
           .catchError((dynamic error, StackTrace stackTrace) {
             // Do nothing on a SentinelException since it means the isolate
             // has already been killed.
