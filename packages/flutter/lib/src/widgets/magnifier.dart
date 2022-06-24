@@ -10,20 +10,19 @@ import 'package:flutter/rendering.dart';
 /// A widget that magnifies a screen region relative to itself.
 ///
 /// [Magnifier] may have a [child], which will be drawn over the lens. This is useful
-/// for overlays like tinting the lens.
+/// for overlays, like tinting the lens.
 ///
 /// Some caveats for using the magnifier:
 /// * [Magnifier] may only display widgets that come before it in the paint order; for example,
 /// if magnifier comes before `widget A` in a column, then you will not be able to see `widget A`
 /// in the magnifier.
-/// *  If the magnifier points out of the bounds of the app, will have undefined behavior. This generally
-/// results in
+/// *  If the magnifier points out of the bounds of the app, will have undefined behavior. This 
+/// generally results in the magnifier having undesired transparency, i.e. showing the layers
+/// underneath it. 
 ///
 ///
 /// This widget's magnification does not lower resolution of the subject
 /// in the [Magnifier].
-///
-///
 ///
 /// See also:
 /// * [BackdropFilter], which [Magnifier] uses along with [ImageFilter.matrix] to
@@ -65,8 +64,8 @@ class Magnifier extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant _RenderMagnification renderObject) {
-    renderObject
+      BuildContext context, covariant RenderProxyBox renderObject) {
+    (renderObject as _RenderMagnification)
       ..focalPoint = focalPoint
       ..clip = clip
       ..magnificationScale = magnificationScale;
