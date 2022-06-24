@@ -5,6 +5,7 @@
 import("//build/fuchsia/config.gni")
 import("//flutter/tools/fuchsia/fuchsia_debug_symbols.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
+import("//flutter/tools/fuchsia/gn-sdk/config/config.gni")
 
 # Compiles a CML file for a V2 component.
 #
@@ -24,12 +25,12 @@ template("_compile_cml") {
                            ])
     script = "//flutter/tools/fuchsia/compile_cml.py"
 
-    inputs = [ "//fuchsia/sdk/$host_os/tools/cmc" ]
+    inputs = [ "$fuchsia_tool_dir/cmc" ]
     sources = [ invoker.manifest ]
 
     args = [
       "--cmc-bin",
-      rebase_path("//fuchsia/sdk/$host_os/tools/cmc"),
+      rebase_path("$fuchsia_tool_dir/cmc"),
       "--manifest-file",
       rebase_path(invoker.manifest),
       "--output",
@@ -163,7 +164,7 @@ template("_fuchsia_archive") {
 
     args = [
       "--pm-bin",
-      rebase_path("//fuchsia/sdk/$host_os/tools/pm"),
+      rebase_path("$fuchsia_tool_dir/pm"),
       "--package-dir",
       rebase_path(far_base_dir),
       "--far-name",
