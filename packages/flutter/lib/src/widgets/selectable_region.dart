@@ -767,7 +767,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   }
 
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
+  void userUpdateTextEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {

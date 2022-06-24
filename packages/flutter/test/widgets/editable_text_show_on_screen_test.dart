@@ -645,8 +645,14 @@ void main() {
 
         // Change the selection. Show caret on screen even when readyOnly is
         // false.
-        state.userUpdateTextEditingValue(
-          state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 90)),
+        state.userUpdateTextEditingValueWithDeltas(
+          <TextEditingDelta>[
+            TextEditingDeltaNonTextUpdate(
+              oldText: state.textEditingValue.text,
+              selection: const TextSelection.collapsed(offset: 90),
+              composing: state.textEditingValue.composing,
+            ),
+          ],
           null,
         );
         await tester.pumpAndSettle();
@@ -669,8 +675,14 @@ void main() {
         await tester.pumpAndSettle();
         expect(isCaretOnScreen(tester), isFalse);
 
-        state.userUpdateTextEditingValue(
-          state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 100)),
+        state.userUpdateTextEditingValueWithDeltas(
+          <TextEditingDelta>[
+            TextEditingDeltaNonTextUpdate(
+              oldText: state.textEditingValue.text,
+              selection: const TextSelection.collapsed(offset: 100),
+              composing: state.textEditingValue.composing,
+            ),
+          ],
           null,
         );
         await tester.pumpAndSettle();

@@ -4120,10 +4120,14 @@ void main() {
     // scrolls to make the caret visible.
     scrollableState = tester.firstState(find.byType(Scrollable));
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.userUpdateTextEditingValue(
-      editableTextState.textEditingValue.copyWith(
-        selection: TextSelection.collapsed(offset: longText.length),
-      ),
+    editableTextState.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+          oldText: editableTextState.textEditingValue.text,
+          selection: TextSelection.collapsed(offset: longText.length),
+          composing: editableTextState.textEditingValue.composing,
+        ),
+      ],
       null,
     );
 
@@ -4157,10 +4161,14 @@ void main() {
     // Move the caret to the end of the text and check that the text field
     // scrolls to make the caret visible.
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.userUpdateTextEditingValue(
-      editableTextState.textEditingValue.copyWith(
-        selection: const TextSelection.collapsed(offset: tallText.length),
-      ),
+    editableTextState.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+          oldText: editableTextState.textEditingValue.text,
+          selection: TextSelection.collapsed(offset: tallText.length),
+          composing: editableTextState.textEditingValue.composing,
+        ),
+      ],
       null,
     );
     await tester.pump();

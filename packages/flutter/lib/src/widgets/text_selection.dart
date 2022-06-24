@@ -539,8 +539,15 @@ class TextSelectionOverlay {
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
-    selectionDelegate.userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection),
+    selectionDelegate.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+            oldText: selectionDelegate.textEditingValue.text,
+            selection: newSelection,
+            composing: selectionDelegate.textEditingValue.composing
+          ,
+        ),
+      ],
       SelectionChangedCause.drag,
     );
     selectionDelegate.bringIntoView(textPosition);
@@ -1371,10 +1378,14 @@ class TextSelectionGestureDetectorBuilder {
       extentOffset: tappedPosition.offset,
     );
 
-    editableText.userUpdateTextEditingValue(
-      editableText.textEditingValue.copyWith(
-        selection: nextSelection,
-      ),
+    editableText.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+            oldText: editableText.textEditingValue.text,
+            selection: nextSelection,
+            composing: editableText.textEditingValue.composing,
+        ),
+      ],
       cause,
     );
   }
@@ -1398,10 +1409,14 @@ class TextSelectionGestureDetectorBuilder {
       extentOffset: tappedPosition.offset,
     );
 
-    editableText.userUpdateTextEditingValue(
-      editableText.textEditingValue.copyWith(
-        selection: nextSelection,
-      ),
+    editableText.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+          oldText: editableText.textEditingValue.text,
+          selection: nextSelection,
+          composing: editableText.textEditingValue.composing,
+        ),
+      ],
       cause,
     );
   }
@@ -1796,25 +1811,33 @@ class TextSelectionGestureDetectorBuilder {
         ? nextExtent.offset < _shiftTapDragSelection!.baseOffset
         : nextExtent.offset > _shiftTapDragSelection!.baseOffset;
     if (isInverted && selection.baseOffset == _shiftTapDragSelection!.baseOffset) {
-      editableText.userUpdateTextEditingValue(
-        editableText.textEditingValue.copyWith(
-          selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.extentOffset,
-            extentOffset: nextExtent.offset,
+      editableText.userUpdateTextEditingValueWithDeltas(
+        <TextEditingDelta>[
+          TextEditingDeltaNonTextUpdate(
+            oldText: editableText.textEditingValue.text,
+            selection: TextSelection(
+              baseOffset: _shiftTapDragSelection!.extentOffset,
+              extentOffset: nextExtent.offset,
+            ),
+            composing: editableText.textEditingValue.composing,
           ),
-        ),
+        ],
         SelectionChangedCause.drag,
       );
     } else if (!isInverted
         && nextExtent.offset != _shiftTapDragSelection!.baseOffset
         && selection.baseOffset != _shiftTapDragSelection!.baseOffset) {
-      editableText.userUpdateTextEditingValue(
-        editableText.textEditingValue.copyWith(
-          selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.baseOffset,
-            extentOffset: nextExtent.offset,
+      editableText.userUpdateTextEditingValueWithDeltas(
+        <TextEditingDelta>[
+          TextEditingDeltaNonTextUpdate(
+            oldText: editableText.textEditingValue.text,
+            selection: TextSelection(
+              baseOffset: _shiftTapDragSelection!.baseOffset,
+              extentOffset: nextExtent.offset,
+            ),
+            composing: editableText.textEditingValue.composing,
           ),
-        ),
+        ],
         SelectionChangedCause.drag,
       );
     } else {

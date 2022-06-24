@@ -8363,7 +8363,18 @@ void main() {
       tester.testTextInput.log.clear();
 
       final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
-      state.userUpdateTextEditingValue(const TextEditingValue(text: 'remoteremoteremote'), SelectionChangedCause.keyboard);
+      state.userUpdateTextEditingValueWithDeltas(
+        <TextEditingDelta>[
+          TextEditingDeltaReplacement(
+            oldText: state.textEditingValue.text,
+            replacementText: 'remoteremoteremote',
+            replacedRange: '',
+            selection: const TextSelection.collapsed(offset: -1,
+            composing: TextRange.empty,
+          ),
+        ],
+        SelectionChangedCause.keyboard,
+      );
 
       // Apply in order: length formatter -> listener -> onChanged -> listener.
       expect(controller.text, 'remote listener onChanged listener');

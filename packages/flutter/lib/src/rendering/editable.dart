@@ -716,7 +716,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
+    textSelectionDelegate.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(oldText: newValue.text, selection: newValue.selection, composing: newValue.composing),
+      ], 
+      cause,
+    );
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
@@ -1341,11 +1346,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   void _handleSetText(String text) {
-    textSelectionDelegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: text.length),
-      ),
+    textSelectionDelegate.userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaReplacement(
+            oldText: textSelectionDelegate.textEditingValue.text,
+            replacementText: text,
+            replacedRange: TextRange(start: 0, end: textSelectionDelegate.textEditingValue.text.length),
+            selection: TextSelection.collapsed(offset: text.length),
+            composing: TextRange.empty),
+      ],
       SelectionChangedCause.keyboard,
     );
   }

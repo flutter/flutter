@@ -3058,6 +3058,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Indicates that the user has requested to apply [TextEditingDelta]s to its
   /// current text editing state with [deltas].
+  @override
   void userUpdateTextEditingValueWithDeltas(List<TextEditingDelta> deltas, SelectionChangedCause? cause) {
     TextEditingValue newValue = _value;
 
@@ -3065,11 +3066,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       newValue = delta.apply(newValue);
     }
 
-    userUpdateTextEditingValue(newValue, cause);
+    _userUpdateTextEditingValue(newValue, cause);
   }
-
-  @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
+  
+  void _userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final bool shouldShowCaret = widget.readOnly
@@ -3338,7 +3338,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     assert(transposing.currentCharacters.length == 2);
 
-    userUpdateTextEditingValue(
+    _userUpdateTextEditingValue(
       TextEditingValue(
         text: transposing.stringBefore
             + transposing.currentCharacters.last
@@ -3521,7 +3521,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         child: _TextEditingHistory(
           controller: widget.controller,
           onTriggered: (TextEditingValue value) {
-            userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+            _userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
           },
           child: Focus(
             focusNode: widget.focusNode,

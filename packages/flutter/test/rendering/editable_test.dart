@@ -28,8 +28,10 @@ class _FakeEditableTextState with TextSelectionDelegate {
   void hideToolbar([bool hideHandles = true]) { }
 
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
-    selection = value.selection;
+  void userUpdateTextEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas, SelectionChangedCause cause) {
+    for (final TextEditingDelta delta in textEditingDeltas) {
+      selection = delta.selection;
+    }
   }
 
   @override
