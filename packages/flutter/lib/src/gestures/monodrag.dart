@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
@@ -9,8 +12,7 @@ import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
-import 'dart:math';
-import 'dart:collection';
+
 export 'dart:ui' show PointerDeviceKind;
 
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
@@ -240,7 +242,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
-  final List<PointerEvent> _multiPointerMoveTrackers = [];
+  final List<PointerEvent> _multiPointerMoveTrackers = <PointerEvent>[];
   final Set<int> _multiPointerStartTrackers = HashSet<int>();
   bool _pointerMoveAccept = false;
 
@@ -350,7 +352,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       } else {
         final Offset delta = (event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta;
         final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
-        final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
         final Offset localPosition = (event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
         _pendingDragOffset += OffsetPair(local: localDelta, global: delta);
         _lastPendingEventTimestamp = event.timeStamp;
@@ -556,36 +557,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  Offset _getMultiPointerDelta() {
-    double positiveDeltaX = 0.0;
-    double positiveDeltaY = 0.0;
-    double negativeDeltaX = 0.0;
-    double negativeDeltaY = 0.0;
-    for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-      final event = _multiPointerMoveTrackers[i];
-      final Offset delta = ((event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta);
-      if (delta.dx > 0) {
-        positiveDeltaX = max(delta.dx, positiveDeltaX);
-      } else {
-        negativeDeltaX = min(delta.dx, negativeDeltaX);
-      }
-      if (delta.dy > 0) {
-        positiveDeltaY = max(delta.dy, positiveDeltaY);
-      } else {
-        negativeDeltaY = min(delta.dy, negativeDeltaY);
-      }
-    }
-    return Offset(positiveDeltaX, positiveDeltaY) + Offset(negativeDeltaX, negativeDeltaY);
-  }
-
   Offset _getMultiPointerLocalDelta() {
     double positiveLocalDeltaX = 0.0;
     double positiveLocalDeltaY = 0.0;
     double negativeLocalDeltaX = 0.0;
     double negativeLocalDeltaY = 0.0;
     for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-      final event = _multiPointerMoveTrackers[i];
-      final Offset localDelta = ((event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta);
+      final PointerEvent event = _multiPointerMoveTrackers[i];
+      final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
       if (localDelta.dx > 0) {
         positiveLocalDeltaX = max(localDelta.dx, positiveLocalDeltaX);
       } else {
@@ -601,25 +580,24 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   Offset _getMultiPointerPosition() {
-    Offset sumPosition = Offset(0.0, 0.0);
+    Offset sumPosition = Offset.zero;
     for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-      final event = _multiPointerMoveTrackers[i];
+      final PointerEvent event = _multiPointerMoveTrackers[i];
       sumPosition = sumPosition + ((event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan));
     }
     return sumPosition / _multiPointerMoveTrackers.length.toDouble();
   }
 
   Offset _getMultiPointerLocalPosition() {
-    Offset sumLocalPosition = Offset(0.0, 0.0);
+    Offset sumLocalPosition = Offset.zero;
     for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-      final event = _multiPointerMoveTrackers[i];
+      final PointerEvent event = _multiPointerMoveTrackers[i];
       sumLocalPosition = sumLocalPosition + ((event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan));
     }
     return sumLocalPosition / _multiPointerMoveTrackers.length.toDouble();
   }
 
   void _checkMultiPointerUpdate() {
-    final Offset delta = _getMultiPointerDelta();
     final Offset localDelta = _getMultiPointerLocalDelta();
     final Offset position = _getMultiPointerPosition();
     final Offset localPosition = _getMultiPointerLocalPosition();
