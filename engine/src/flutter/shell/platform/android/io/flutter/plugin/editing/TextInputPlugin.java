@@ -43,7 +43,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @NonNull private final TextInputChannel textInputChannel;
   @NonNull private InputTarget inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
   @Nullable private TextInputChannel.Configuration configuration;
-  @Nullable private SparseArray<TextInputChannel.Configuration> mAutofillConfigurations;
+  @Nullable private SparseArray<TextInputChannel.Configuration> autofillConfiguration;
   @NonNull private ListenableEditingState mEditable;
   private boolean mRestartInputPending;
   @Nullable private InputConnection lastInputConnection;
@@ -556,6 +556,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
     mEditable.removeEditingStateListener(this);
     notifyViewExited();
+    configuration = null;
     updateAutofillConfigurationIfNeeded(null);
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
@@ -679,7 +680,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   // have changed. However if the value of an unfocused EditableText is changed in the framework,
   // such change will not be sent to the text input plugin until the next TextInput.attach call.
   private boolean needsAutofill() {
-    return mAutofillConfigurations != null;
+    return autofillConfiguration != null;
   }
 
   private void notifyViewEntered() {
@@ -724,21 +725,20 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
     if (configuration == null || configuration.autofill == null) {
       // Disables autofill if the configuration doesn't have an autofill field.
-      mAutofillConfigurations = null;
+      autofillConfiguration = null;
       return;
     }
 
     final TextInputChannel.Configuration[] configurations = configuration.fields;
-    mAutofillConfigurations = new SparseArray<>();
+    autofillConfiguration = new SparseArray<>();
 
     if (configurations == null) {
-      mAutofillConfigurations.put(
-          configuration.autofill.uniqueIdentifier.hashCode(), configuration);
+      autofillConfiguration.put(configuration.autofill.uniqueIdentifier.hashCode(), configuration);
     } else {
       for (TextInputChannel.Configuration config : configurations) {
         TextInputChannel.Configuration.Autofill autofill = config.autofill;
         if (autofill != null) {
-          mAutofillConfigurations.put(autofill.uniqueIdentifier.hashCode(), config);
+          autofillConfiguration.put(autofill.uniqueIdentifier.hashCode(), config);
           afm.notifyValueChanged(
               mView,
               autofill.uniqueIdentifier.hashCode(),
@@ -755,9 +755,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
     final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
     final AutofillId parentId = structure.getAutofillId();
-    for (int i = 0; i < mAutofillConfigurations.size(); i++) {
-      final int autofillId = mAutofillConfigurations.keyAt(i);
-      final TextInputChannel.Configuration config = mAutofillConfigurations.valueAt(i);
+    for (int i = 0; i < autofillConfiguration.size(); i++) {
+      final int autofillId = autofillConfiguration.keyAt(i);
+      final TextInputChannel.Configuration config = autofillConfiguration.valueAt(i);
       final TextInputChannel.Configuration.Autofill autofill = config.autofill;
       if (autofill == null) {
         continue;
@@ -801,16 +801,16 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       return;
     }
 
-    final TextInputChannel.Configuration.Autofill currentAutofill = configuration.autofill;
-    if (currentAutofill == null) {
+    if (configuration == null || autofillConfiguration == null || configuration.autofill == null) {
       return;
     }
 
+    final TextInputChannel.Configuration.Autofill currentAutofill = configuration.autofill;
     final HashMap<String, TextInputChannel.TextEditState> editingValues = new HashMap<>();
     for (int i = 0; i < values.size(); i++) {
       int virtualId = values.keyAt(i);
 
-      final TextInputChannel.Configuration config = mAutofillConfigurations.get(virtualId);
+      final TextInputChannel.Configuration config = autofillConfiguration.get(virtualId);
       if (config == null || config.autofill == null) {
         continue;
       }
