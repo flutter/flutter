@@ -9,16 +9,6 @@ static void dispose_origin_from_gdk_event(gpointer origin) {
   gdk_event_free(reinterpret_cast<GdkEvent*>(origin));
 }
 
-static char* clone_string(const char* source) {
-  if (source == nullptr) {
-    return nullptr;
-  }
-  size_t length = strlen(source);
-  char* result = g_new(char, length + 1);
-  strncpy(result, source, length + 1);
-  return result;
-}
-
 FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* raw_event) {
   g_return_val_if_fail(raw_event != nullptr, nullptr);
   GdkEventKey* event = reinterpret_cast<GdkEventKey*>(raw_event);
@@ -32,7 +22,7 @@ FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* raw_event) {
   result->keycode = event->hardware_keycode;
   result->keyval = event->keyval;
   result->state = event->state;
-  result->string = clone_string(event->string);
+  result->string = g_strdup(event->string);
   result->group = event->group;
   result->origin = event;
   result->dispose_origin = dispose_origin_from_gdk_event;
@@ -53,6 +43,6 @@ void fl_key_event_dispose(FlKeyEvent* event) {
 FlKeyEvent* fl_key_event_clone(const FlKeyEvent* event) {
   FlKeyEvent* new_event = g_new(FlKeyEvent, 1);
   *new_event = *event;
-  new_event->string = clone_string(event->string);
+  new_event->string = g_strdup(event->string);
   return new_event;
 }
