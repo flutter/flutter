@@ -160,7 +160,7 @@ void main() {
   testWithoutContext('file not found', () async {
     await runCommand(
         arguments: <String>['analyze', '--no-pub', 'not_found.abc'],
-        exitMessageContains: "not_found.abc' does not exist",
+        exitMessageContains: "not_found.abc', however it does not exist on disk",
         exitCode: 1
     );
   });
