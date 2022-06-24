@@ -2571,7 +2571,6 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  /*
   testWidgets('An obscured TextField is selectable by default', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/32845
@@ -11560,5 +11559,4 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
-  */
 }

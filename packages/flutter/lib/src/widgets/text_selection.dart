@@ -2461,9 +2461,6 @@ enum ClipboardStatus {
 )
 mixin TextSelectionHandleControls on TextSelectionControls {
   @override
-  Size getHandleSize(double textLineHeight) => Size.zero;
-
-  @override
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
