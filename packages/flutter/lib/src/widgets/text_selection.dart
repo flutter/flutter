@@ -282,7 +282,6 @@ class TextSelectionOverlay {
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
-      buildContextMenu: buildContextMenu,
       context: context,
       debugRequiredFor: debugRequiredFor,
       // The metrics will be set when show handles.
@@ -722,7 +721,6 @@ class SelectionOverlay {
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   SelectionOverlay({
-    this.buildContextMenu,
     required this.context,
     this.debugRequiredFor,
     required TextSelectionHandleType startHandleType,
@@ -774,11 +772,6 @@ class SelectionOverlay {
       'app content was created above the Navigator with the WidgetsApp builder parameter.',
     );
   }
-
-  /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  ///
-  /// If not provided then [TextSelectionControls.buildToolbar] will be used.
-  final ContextMenuBuilder? buildContextMenu;
 
   /// {@macro flutter.widgets.SelectionOverlay.selectionControls}
   final BuildContext context;
@@ -1627,6 +1620,9 @@ class TextSelectionGestureDetectorBuilder {
     // trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind? kind = details.kind;
+    // TODO(justinmc): Should a desktop platform show its selection toolbar when
+    // receiving a tap event?  Say a Windows device with a touchscreen.
+    // https://github.com/flutter/flutter/issues/106586
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
