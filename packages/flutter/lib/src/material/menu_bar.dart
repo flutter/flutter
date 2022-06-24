@@ -13,7 +13,6 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
-import 'divider.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -313,19 +312,12 @@ class _MenuBarState extends State<MenuBar> {
 
   final _RootMenuNode root = _RootMenuNode();
 
-  // The menus that are currently open, and their builders.
+  // The menus that are currently open.
   final Set<_MenuNode> _openMenus = <_MenuNode>{};
 
   // The most recently requested menu item, regardless of whether it has a
   // submenu or not.
-  _MenuNode? get currentMenu => _currentMenu;
-  _MenuNode? _currentMenu;
-  set currentMenu(_MenuNode? value) {
-    if (_currentMenu != value) {
-      debugPrint('Setting current menu to $value');
-      _currentMenu = value;
-    }
-  }
+  _MenuNode? currentMenu;
 
   bool get menuIsOpen => currentMenu != null;
   bool get enabled => widget.enabled;
@@ -455,12 +447,10 @@ class _MenuBarState extends State<MenuBar> {
       // If we captured a focus before the click, then use that, otherwise use
       // the current primary focus.
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
-      debugPrint('Storing focus on $_previousFocus');
     }
     setState(() {
       currentMenu = menu;
     });
-    debugPrint('Opening, menu is $currentMenu');
     _focusBeforeClick = null;
     final List<_MenuNode> ancestors = menuToOpen.ancestors;
     _openMenus.removeWhere((_MenuNode item) => !ancestors.contains(item));
@@ -469,7 +459,6 @@ class _MenuBarState extends State<MenuBar> {
     // not focusable until after the frame is done.
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       currentMenu!.focusNode?.requestFocus();
-      debugPrint('Focusing menu ${currentMenu!.focusNode}');
     });
     _markMenuDirtyAndDelayIfNecessary();
   }
@@ -482,7 +471,6 @@ class _MenuBarState extends State<MenuBar> {
     setState(() {
       currentMenu = menu.parent;
     });
-    debugPrint('Closing, current menu is now $currentMenu');
     final _MenuNode menuToClose = menu.menuBuilder != null ? menu : menu.parent;
     final Set<_MenuNode> toClose = <_MenuNode>{menuToClose};
     for (final _MenuNode openMenu in _openMenus) {
@@ -515,7 +503,6 @@ class _MenuBarState extends State<MenuBar> {
     } else {
       _overlayEntry?.remove();
       _overlayEntry = null;
-      debugPrint('Requesting focus on $_previousFocus');
       _previousFocus?.requestFocus();
       _previousFocus = null;
       // If there aren't any menus open, then there's no need to mark the
@@ -1179,7 +1166,6 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
       _children = <_MenuNode>[
         for (final int index in indices) _childMapping[index]!,
       ];
-      debugPrint('\nNew Tree:\n${topLevel.parent.toStringDeep()}');
     }
     return _children!;
   }
@@ -1822,7 +1808,6 @@ class _MenuBarItemLabel extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text('${_MenuItemWrapper.of(context).index} '),
             if (leadingIcon != null) leadingIcon!,
             Padding(
               padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
