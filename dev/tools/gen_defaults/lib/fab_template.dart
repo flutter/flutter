@@ -15,7 +15,6 @@ class FABTemplate extends TokenTemplate {
 class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
   _${blockName}DefaultsM3(this.context, this.type, this.hasChild)
     : super(
-        elevation: ${elevation("md.comp.fab.primary.container")},
         focusElevation: ${elevation("md.comp.fab.primary.focus.container")},
         hoverElevation: ${elevation("md.comp.fab.primary.hover.container")},
         highlightElevation: ${elevation("md.comp.fab.primary.pressed.container")},
@@ -46,6 +45,7 @@ class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
 
   bool get _isExtended => type == _FloatingActionButtonType.extended;
 
+  @override double? get elevation => Scaffold.of(context).fabIsContained ? 0.0 : ${elevation("md.comp.fab.primary.container")};
   @override Color? get foregroundColor => ${componentColor("md.comp.fab.primary.icon")};
   @override Color? get backgroundColor => ${componentColor("md.comp.fab.primary.container")};
   @override Color? get splashColor => ${componentColor("md.comp.fab.primary.pressed.state-layer")};
