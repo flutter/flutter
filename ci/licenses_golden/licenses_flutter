@@ -2333,7 +2333,9 @@ FILE: ../../../flutter/shell/platform/windows/keyboard_key_handler.h
 FILE: ../../../flutter/shell/platform/windows/keyboard_key_handler_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_manager_win32.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_manager_win32.h
+FILE: ../../../flutter/shell/platform/windows/keyboard_win32_common.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_win32_common.h
+FILE: ../../../flutter/shell/platform/windows/keyboard_win32_common_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_win32_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler.h
