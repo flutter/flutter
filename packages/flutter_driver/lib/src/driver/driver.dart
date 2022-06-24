@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/services.dart' show TextInputAction;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
@@ -175,10 +176,8 @@ abstract class FlutterDriver {
   async_io.WebDriver get webDriver => throw UnimplementedError();
 
   /// Enables accessibility feature.
-  @Deprecated(
-    'Call setSemantics(true) instead. '
-    'This feature was deprecated after v2.3.0-12.1.pre.'
-  )
+  @Deprecated('Call setSemantics(true) instead. '
+      'This feature was deprecated after v2.3.0-12.1.pre.')
   Future<void> enableAccessibility() async {
     await setSemantics(true);
   }
@@ -566,8 +565,9 @@ abstract class FlutterDriver {
   ///
   /// Enabling semantics on the web causes the engine to render ARIA-annotated
   /// HTML.
-  Future<bool> setSemantics(bool enabled, { Duration? timeout }) async {
-    final SetSemanticsResult result = SetSemanticsResult.fromJson(await sendCommand(SetSemantics(enabled, timeout: timeout)));
+  Future<bool> setSemantics(bool enabled, {Duration? timeout}) async {
+    final SetSemanticsResult result = SetSemanticsResult.fromJson(
+        await sendCommand(SetSemantics(enabled, timeout: timeout)));
     return result.changedState;
   }
 

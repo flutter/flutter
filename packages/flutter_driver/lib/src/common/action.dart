@@ -7,8 +7,6 @@ import 'package:flutter/services.dart' show TextInputAction;
 import 'enum_util.dart';
 import 'message.dart';
 
-export 'package:flutter/services.dart' show TextInputAction;
-
 EnumIndex<TextInputAction> _textInputActionIndex =
     EnumIndex<TextInputAction>(TextInputAction.values);
 
