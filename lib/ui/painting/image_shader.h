@@ -28,11 +28,11 @@ class ImageShader : public Shader {
   ~ImageShader() override;
   static fml::RefPtr<ImageShader> Create();
 
-  void initWithImage(CanvasImage* image,
-                     SkTileMode tmx,
-                     SkTileMode tmy,
-                     int filter_quality_index,
-                     const tonic::Float64List& matrix4);
+  Dart_Handle initWithImage(CanvasImage* image,
+                            SkTileMode tmx,
+                            SkTileMode tmy,
+                            int filter_quality_index,
+                            tonic::Float64List& matrix4);
 
   std::shared_ptr<DlColorSource> shader(DlImageSampling) override;
 

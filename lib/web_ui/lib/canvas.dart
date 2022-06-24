@@ -155,6 +155,7 @@ abstract class Canvas {
 
 abstract class Picture {
   Future<Image> toImage(int width, int height);
+  Image toGpuImage(int width, int height);
   void dispose();
   bool get debugDisposed;
   int get approximateBytesUsed;
@@ -172,4 +173,9 @@ enum PathOperation {
   union,
   xor,
   reverseDifference,
+}
+
+abstract class PictureRasterizationException implements Exception {
+  String get message;
+  StackTrace? stack;
 }

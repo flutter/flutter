@@ -92,6 +92,11 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
 
   @override
   Future<ui.Image> toImage(int width, int height) async {
+    return toGpuImage(width, height);
+  }
+
+  @override
+  ui.Image toGpuImage(int width, int height) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
     final SkSurface skSurface = canvasKit.MakeSurface(width, height);
     final SkCanvas skCanvas = skSurface.getCanvas();

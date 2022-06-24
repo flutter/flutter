@@ -235,7 +235,8 @@ int RunTester(const flutter::Settings& settings,
       };
 
   Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
-    return std::make_unique<Rasterizer>(shell);
+    return std::make_unique<Rasterizer>(
+        shell, Rasterizer::MakeGpuImageBehavior::kBitmap);
   };
 
   auto shell = Shell::Create(flutter::PlatformData(),  //

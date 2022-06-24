@@ -60,6 +60,21 @@ void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
   DartInvoke(callback->value(), {dart_data});
 }
 
+static void ConvertGpuImageToRaster(
+    sk_sp<DlImage> dl_image,
+    std::function<void(sk_sp<SkImage>)> encode_task,
+    fml::RefPtr<fml::TaskRunner> raster_task_runner) {
+  fml::TaskRunner::RunNowOrPostTask(
+      raster_task_runner, [dl_image, encode_task = std::move(encode_task)]() {
+        auto image = dl_image->skia_image();
+        if (image == nullptr) {
+          encode_task(nullptr);
+          return;
+        }
+        encode_task(image->makeRasterImage());
+      });
+}
+
 void ConvertImageToRaster(
     sk_sp<DlImage> dl_image,
     std::function<void(sk_sp<SkImage>)> encode_task,
@@ -228,9 +243,18 @@ void EncodeImageAndInvokeDataCallback(
     });
   };
 
-  ConvertImageToRaster(std::move(image), encode_task, raster_task_runner,
-                       io_task_runner, resource_context, snapshot_delegate,
-                       is_gpu_disabled_sync_switch);
+  FML_DCHECK(image);
+  switch (image->owning_context()) {
+    case DlImage::OwningContext::kRaster:
+      ConvertGpuImageToRaster(std::move(image), encode_task,
+                              raster_task_runner);
+      break;
+    case DlImage::OwningContext::kIO:
+      ConvertImageToRaster(std::move(image), encode_task, raster_task_runner,
+                           io_task_runner, resource_context, snapshot_delegate,
+                           is_gpu_disabled_sync_switch);
+      break;
+  }
 }
 
 }  // namespace
