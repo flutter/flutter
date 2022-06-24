@@ -25,7 +25,7 @@ extern const std::map<uint32_t, uint64_t> keyCodeToPhysicalKey;
  */
 extern const std::map<uint32_t, uint64_t> keyCodeToLogicalKey;
 
-// Several mask constants. See KeyCodeMap.mm for their descriptions.
+// Several mask constants. See KeyCodeMap.g.mm for their descriptions.
 
 extern const uint64_t kValueMask;
 extern const uint64_t kUnicodePlane;

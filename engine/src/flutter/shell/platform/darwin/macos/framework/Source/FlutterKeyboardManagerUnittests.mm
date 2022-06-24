@@ -9,18 +9,18 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
-#include "flutter/shell/platform/embedder/test_utils/key_codes.h"
+#include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 #import "flutter/testing/testing.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 
 namespace {
 
+using flutter::testing::keycodes::kLogicalBracketLeft;
+using flutter::testing::keycodes::kLogicalDigit1;
 using flutter::testing::keycodes::kLogicalKeyA;
 using flutter::testing::keycodes::kLogicalKeyM;
 using flutter::testing::keycodes::kLogicalKeyQ;
 using flutter::testing::keycodes::kLogicalKeyT;
-using flutter::testing::keycodes::kLogicalDigit1;
-using flutter::testing::keycodes::kLogicalBracketLeft;
 
 using flutter::LayoutClue;
 

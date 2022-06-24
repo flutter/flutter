@@ -23,7 +23,7 @@ extern const NSDictionary* keyCodeToPhysicalKey;
  */
 extern const NSDictionary* keyCodeToLogicalKey;
 
-// Several mask constants. See KeyCodeMap.mm for their descriptions.
+// Several mask constants. See KeyCodeMap.g.mm for their descriptions.
 
 /**
  * Mask for the 32-bit value portion of the key code.

@@ -7,7 +7,7 @@ import 'package:ui/ui.dart' as ui;
 import '../engine.dart'  show registerHotRestartListener;
 import 'browser_detection.dart';
 import 'dom.dart';
-import 'key_map.dart';
+import 'key_map.g.dart';
 import 'platform_dispatcher.dart';
 import 'safe_browser_api.dart';
 import 'semantics.dart';
