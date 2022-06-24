@@ -295,8 +295,9 @@ void main() {
         statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
         messages: contains(
           const ValidationMessage.hint(
-            'Upstream repository https://githubmirror.com/flutter.git is not a standard remote. '
-            'Set "FLUTTER_GIT_URL" to https://githubmirror.com/flutter.git.'
+            'Upstream repository https://githubmirror.com/flutter.git is not a standard remote.\n'
+            'If this is intentional, set environment variable "FLUTTER_GIT_URL" to '
+            'https://githubmirror.com/flutter.git to dismiss this error.'
           )
         ),
       ));

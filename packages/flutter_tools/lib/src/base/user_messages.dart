@@ -32,7 +32,8 @@ class UserMessages {
     'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.';
   String flutterUpstreamRepositoryUrlEnvMismatch(String url) => 'Upstream repository $url is not the same as FLUTTER_GIT_URL';
   String flutterUpstreamRepositoryUrlNonStandard(String url) =>
-    'Upstream repository $url is not a standard remote. Set "FLUTTER_GIT_URL" to $url.';
+    'Upstream repository $url is not a standard remote.\n'
+    'If this is intentional, set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
