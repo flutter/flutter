@@ -1657,7 +1657,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool? _spellCheckEnabled;
 
-  /// {@macro flutter.widgets.editableText.spellCheckEnabled}
+  /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
   bool? get spellCheckEnabled => _spellCheckEnabled;
 
   /// Whether to create an input connection with the platform for text editing
