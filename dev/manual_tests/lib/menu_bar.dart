@@ -164,6 +164,11 @@ class _HomeState extends State<Home> {
                             shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
                             onSelectedIntent: const ActivateIntent(),
                           ),
+                          MenuBarButton(
+                            label: TestMenu.subMenu4.label,
+                            shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
+                            onSelectedIntent: const ActivateIntent(),
+                          ),
                         ]),
                         MenuBarMenu(
                           label: TestMenu.subMenu5.label,

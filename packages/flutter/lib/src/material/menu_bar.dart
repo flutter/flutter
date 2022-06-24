@@ -327,10 +327,6 @@ class _MenuBarState extends State<MenuBar> {
     }
   }
 
-  // The top-level menus and their builders, registered when they are created so
-  // that they can be opened when traversed with the keyboard.
-  final Set<_MenuNode> _topLevelMenus = <_MenuNode>{};
-
   bool get menuIsOpen => currentMenu != null;
   bool get enabled => widget.enabled;
 
@@ -452,7 +448,7 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   void openMenu(_MenuNode menu) {
-    final _MenuNode menuToOpen = menu.menuBuilder != null ? menu : menu.parent;
+    final _MenuNode menuToOpen = menu.menuBuilder != null ? menu : menu.ancestors.first;
     if (!menuIsOpen) {
       // We're opening the first menu, so cache the primary focus so that we can
       // try to return to it when the menu is dismissed.
@@ -871,18 +867,15 @@ class _MenuBarButtonState extends State<MenuBarButton> with DiagnosticableTreeMi
   }
 
   @override
-  FocusNode get focusNode => widget.focusNode ?? _internalFocusNode!;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.focusNode == null) {
-      _internalFocusNode = FocusNode(debugLabel: 'MenuBarItem');
-      assert(() {
+  FocusNode? get focusNode {
+    final FocusNode result = widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+    assert(() {
+      if (_internalFocusNode != null) {
         _internalFocusNode!.debugLabel = 'MenuBarItem(${widget.label})';
-        return true;
-      }());
-    }
+      }
+      return true;
+    }());
+    return result;
   }
 
   @override
@@ -911,12 +904,6 @@ class _MenuBarButtonState extends State<MenuBarButton> with DiagnosticableTreeMi
     if (widget.focusNode != null) {
       _internalFocusNode?.dispose();
       _internalFocusNode = null;
-    } else {
-      _internalFocusNode ??= FocusNode();
-      assert(() {
-        _internalFocusNode!.debugLabel = 'MenuBarItem(${widget.label})';
-        return true;
-      }());
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -952,6 +939,7 @@ class _MenuBarButtonState extends State<MenuBarButton> with DiagnosticableTreeMi
           shortcut: widget.shortcut,
           trailingIcon: widget.trailingIcon,
           hasSubmenu: false,
+          isTopLevel: isTopLevel,
         ),
       ),
     );
@@ -1174,15 +1162,39 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
 }
 
 class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin, _MenuNode {
-  _MenuBarState? _menuBar;
+  late _MenuBarState? _menuBar;
   FocusNode? _internalFocusNode;
   late _MenuNode _parent;
   int _parentIndex = -1;
   bool get _showingSubmenu => _menuBar!.isAnOpenMenu(this);
 
   @override
-  final List<_MenuNode> children = <_MenuNode>[];
+  List<_MenuNode> get children {
+    if (_children == null) {
+      // Keep track of children as a sparse array, so that inserting at an index
+      // works even if a previous index has been removed, and we can have gaps
+      // where "regular" widgets are in the widget list.
+      final List<int> indices = _childMapping.keys.toList()
+        ..sort();
+      _children = <_MenuNode>[
+        for (final int index in indices) _childMapping[index]!,
+      ];
+      debugPrint('\nNew Tree:\n${topLevel.parent.toStringDeep()}');
+    }
+    return _children!;
+  }
+  List<_MenuNode>? _children;
   final Map<int, _MenuNode> _childMapping = <int, _MenuNode>{};
+
+  @override
+  List<_MenuNode> get members {
+    // Collect all of the members of all the children, so that we collect
+    // members recursively from groups.
+    return _members ??= <_MenuNode>[
+      for (final _MenuNode child in children) ...child.members,
+    ];
+  }
+  List<_MenuNode>? _members;
 
   @override
   _MenuNode get parent => _parent;
@@ -1204,24 +1216,15 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
     assert(_childMapping[widgetIndex] == null,
         'Index $widgetIndex already set. Tried to set to $child. Already set to ${_childMapping[widgetIndex]}');
     _childMapping[widgetIndex] = child;
-    _updateChildren();
+    _children = null;
+    _members = null;
   }
 
   @override
   void removeChild(int widgetIndex) {
     _childMapping.remove(widgetIndex);
-    _updateChildren();
-  }
-
-  void _updateChildren() {
-    // Keep track of children as a sparse array, so that inserting at an index
-    // works even if a previous index has been removed, and we can have gaps
-    // where "regular" widgets are in the widget list.
-    final List<int> indices = _childMapping.keys.toList()..sort();
-    children.clear();
-    for (final int index in indices) {
-      children.add(_childMapping[index]!);
-    }
+    _children = null;
+    _members = null;
   }
 
   @override
@@ -1240,9 +1243,6 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
   void dispose() {
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
-    if (isTopLevel) {
-      _menuBar?._topLevelMenus.remove(this);
-    }
     parent.removeChild(parentWidgetIndex);
     super.dispose();
   }
@@ -1257,13 +1257,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
     _parent = wrapper.menu;
     _parentIndex = wrapper.index;
     parent.addChild(parentWidgetIndex, this);
-    if (isTopLevel) {
-      _menuBar?._topLevelMenus.remove(this);
-    }
     _menuBar = _MenuBarState.of(context);
-    if (isTopLevel) {
-      _menuBar!._topLevelMenus.add(this);
-    }
   }
 
   @override
@@ -1365,6 +1359,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
           shortcut: widget.shortcut,
           trailingIcon: widget.trailingIcon,
           hasSubmenu: true,
+          isTopLevel: isTopLevel,
         ),
       ),
     );
@@ -1498,13 +1493,35 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
   int _parentWidgetIndex = -1;
 
   @override
-  int get memberCount => widget.members.length;
-
+  List<_MenuNode> get members {
+    if (_members == null) {
+      final List<int> indices = _memberMapping.keys.toList()..sort();
+      _members = <_MenuNode>[
+        for (final int index in indices) ..._memberMapping[index]!.members,
+      ];
+    }
+    return _members!;
+  }
+  List<_MenuNode>? _members;
+  final Map<int, _MenuNode> _memberMapping = <int, _MenuNode>{};
+  
   @override
   _MenuNode get parent => _parent;
 
   @override
   int get parentWidgetIndex => _parentWidgetIndex;
+
+  @override
+  bool get isGroup => true;
+
+  @override
+  bool get enabled => false;
+
+  @override
+  void dispose() {
+    parent.removeChild(parentWidgetIndex);
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -1515,22 +1532,32 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
     final _MenuItemWrapper wrapper = _MenuItemWrapper.of(context);
     _parent = wrapper.menu;
     _parentWidgetIndex = wrapper.index;
+    parent.addChild(parentWidgetIndex, this);
+  }
+
+  @override
+  void addChild(int widgetIndex, _MenuNode child) {
+    assert(_memberMapping[widgetIndex] == null,
+    'Index $widgetIndex already set. Tried to set to $child. Already set to ${_memberMapping[widgetIndex]}');
+    _memberMapping[widgetIndex] = child;
+    _members = null;
+  }
+
+  @override
+  void removeChild(int widgetIndex) {
+    _memberMapping.remove(widgetIndex);
+    _members = null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final _MenuNode parent = _MenuItemWrapper.of(context).menu;
     bool showPrevious = true;
     bool showNext = true;
-    if (!parent.isRoot) {
-      final _MenuNode? previous = getPreviousSibling(onlyEnabled: false);
-      if ((previous?.memberCount ?? 1) > 0) {
-        showPrevious = false;
-      }
-      final _MenuNode? next = getNextSibling(onlyEnabled: false);
-      if ((next?.memberCount ?? 1) > 0) {
-        showNext = false;
-      }
+    if (ancestors.isNotEmpty && members.isNotEmpty) {
+      final _MenuNode? previous = members.first.getPreviousSibling();
+      showPrevious = previous != null && !previous.isGroup;
+      final _MenuNode? next = members.last.getNextSibling();
+      showNext = next != null && !next.isGroup;
     }
     int childIndex = 0;
     final Axis axis = isTopLevel ? Axis.horizontal : Axis.vertical;
@@ -1541,10 +1568,8 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
         if (showPrevious) _MenuItemDivider(axis: axis),
         ...widget.members.map<Widget>((Widget child) {
           final Widget result = _MenuItemWrapper(
-            menu: parent,
-            // When the group is wrapped in the parent, the parent adds enough
-            // space in the index to accommodate all of the members.
-            index: parentWidgetIndex + childIndex + 1,
+            menu: this,
+            index: childIndex,
             child: child,
           );
           childIndex += 1;
@@ -1558,7 +1583,7 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<Widget>('members', widget.members));
+    properties.add(IterableProperty<_MenuNode>('members', members.where((_MenuNode node) => node != this)));
   }
 }
 
@@ -1687,7 +1712,7 @@ mixin _MenuNode on DiagnosticableTreeMixin {
   /// Returns the index of this node in the parent's list of widgets.
   ///
   /// This is not the same as an index into the [children] array: this is an
-  /// index into a sparse array, and [children] is a packed version of the
+  /// index in a sparse array, and [children] is a packed version of the
   /// sparse array.
   int get parentWidgetIndex;
 
@@ -1709,7 +1734,7 @@ mixin _MenuNode on DiagnosticableTreeMixin {
 
   /// The number of additional members that this node represents. Will be zero
   /// for everything except groups.
-  int get memberCount => 0;
+  List<_MenuNode> get members => <_MenuNode>[this];
 
   /// Whether or not this menu item is currently enabled.
   bool get enabled => true;
@@ -1717,9 +1742,11 @@ mixin _MenuNode on DiagnosticableTreeMixin {
   /// Whether or not this menu manages a submenu.
   bool get hasSubmenu => menuBuilder != null;
 
-  bool get isTopLevel => parent.isRoot;
+  bool get isTopLevel => ancestors.isEmpty;
 
   bool get isRoot => false;
+
+  bool get isGroup => false;
 
   /// Adds the given child to the end of the list of children.
   void addChild(int index, _MenuNode child) {
@@ -1731,13 +1758,19 @@ mixin _MenuNode on DiagnosticableTreeMixin {
     throw UnimplementedError("The $runtimeType class doesn't support removing menu children.");
   }
 
-  /// Return the list of ancestors for this node.
+  /// Return the list of ancestors for this node, filtering out any group nodes,
+  /// since those don't contribute to the tree.
   List<_MenuNode> get ancestors {
+    if (isRoot || parent.isRoot) {
+      return <_MenuNode>[];
+    }
     final List<_MenuNode> result = <_MenuNode>[];
     _MenuNode node = this;
-    while (!node.isTopLevel) {
+    while (!node.parent.isRoot) {
       node = node.parent;
-      result.add(node);
+      if (!node.isGroup) {
+        result.add(node);
+      }
     }
     return result;
   }
@@ -1747,16 +1780,20 @@ mixin _MenuNode on DiagnosticableTreeMixin {
       // Top level and root nodes are their own topLevel.
       return this;
     }
-    return ancestors.last;
+    final List<_MenuNode> nodeAncestors = ancestors;
+    if (nodeAncestors.isEmpty) {
+      return this;
+    }
+    return nodeAncestors.last;
   }
 
-  _MenuNode? getNextSibling({bool onlyEnabled = true}) {
-    final int thisIndex = parent.children.indexOf(this);
+  _MenuNode? getNextSibling({bool onlyEnabled = false}) {
+    final int thisIndex = parent.members.indexOf(isGroup ? members.first : this);
     assert(thisIndex != -1);
-    if (thisIndex == parent.children.length - 1) {
+    if (thisIndex == parent.members.length - 1) {
       return null;
     }
-    for (final _MenuNode child in parent.children.sublist(thisIndex + 1)) {
+    for (final _MenuNode child in parent.members.sublist(thisIndex + 1)) {
       if (!onlyEnabled || child.enabled) {
         return child;
       }
@@ -1765,13 +1802,13 @@ mixin _MenuNode on DiagnosticableTreeMixin {
     return null;
   }
 
-  _MenuNode? getPreviousSibling({bool onlyEnabled = true}) {
-    final int thisIndex = parent.children.indexOf(this);
+  _MenuNode? getPreviousSibling({bool onlyEnabled = false}) {
+    final int thisIndex = parent.members.indexOf(isGroup ? members.first : this);
     assert(thisIndex != -1);
     if (thisIndex == 0) {
       return null;
     }
-    for (final _MenuNode child in parent.children.sublist(0, thisIndex).reversed) {
+    for (final _MenuNode child in parent.members.sublist(0, thisIndex).reversed) {
       if (!onlyEnabled || child.enabled) {
         return child;
       }
@@ -1912,6 +1949,7 @@ class _MenuBarItemLabel extends StatelessWidget {
     this.trailingIcon,
     this.shortcut,
     required this.hasSubmenu,
+    required this.isTopLevel,
   });
 
   /// The optional icon that comes before the [label].
@@ -1930,9 +1968,11 @@ class _MenuBarItemLabel extends StatelessWidget {
   /// Whether or not this menu has a submenu.
   final bool hasSubmenu;
 
+  /// Whether or not this menu is a top level menu.
+  final bool isTopLevel;
+
   @override
   Widget build(BuildContext context) {
-    final bool isTopLevelItem = _MenuItemWrapper.of(context).menu.isRoot;
     final VisualDensity density = Theme.of(context).visualDensity;
     final double horizontalPadding = math.max(
       _kLabelItemMinSpacing,
@@ -1957,8 +1997,8 @@ class _MenuBarItemLabel extends StatelessWidget {
               ),
           ],
         ),
-        if (!isTopLevelItem) SizedBox(width: horizontalPadding),
-        if (shortcut != null && !isTopLevelItem)
+        if (!isTopLevel) SizedBox(width: horizontalPadding),
+        if (shortcut != null && !isTopLevel)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
             child: Text(
@@ -1968,7 +2008,7 @@ class _MenuBarItemLabel extends StatelessWidget {
               ),
             ),
           ),
-        if (hasSubmenu && !isTopLevelItem)
+        if (hasSubmenu && !isTopLevel)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
             child: const Icon(
@@ -2061,11 +2101,7 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
                   index: index,
                   child: child,
                 );
-                if (child is MenuItemGroup) {
-                  index += child.members.length;
-                } else {
-                  index += 1;
-                }
+                index += 1;
                 return result;
               }).toList(),
               if (widget.direction == Axis.horizontal) const Spacer(),
@@ -2368,7 +2404,7 @@ class _MenuNextFocusAction extends NextFocusAction {
     if (!menuBar.menuIsOpen) {
       return;
     }
-    final _MenuNode? next = menuBar.currentMenu!.getNextSibling();
+    final _MenuNode? next = menuBar.currentMenu!.getNextSibling(onlyEnabled: true);
     if (next != null) {
       menuBar.openMenu(next);
     } else {
@@ -2387,7 +2423,7 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
     if (!menuBar.menuIsOpen) {
       return;
     }
-    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling();
+    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling(onlyEnabled: true);
     if (next != null) {
       menuBar.openMenu(next);
     } else {
@@ -2411,7 +2447,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return false;
     }
     if (currentMenu.isTopLevel) {
-      final _MenuNode? next = currentMenu.getNextSibling();
+      final _MenuNode? next = currentMenu.getNextSibling(onlyEnabled: true);
       if (next != null) {
         menuBar.openMenu(next);
       } else {
@@ -2426,7 +2462,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     } else {
       // If there's no submenu, then an arrow moves to the next top
       // level sibling, wrapping around if need be.
-      final _MenuNode? next = currentMenu.topLevel.getNextSibling();
+      final _MenuNode? next = currentMenu.topLevel.getNextSibling(onlyEnabled: true);
       if (next != null) {
         menuBar.openMenu(next);
       } else {
@@ -2445,7 +2481,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return false;
     }
     if (currentMenu.isTopLevel) {
-      final _MenuNode? previous = currentMenu.getPreviousSibling();
+      final _MenuNode? previous = currentMenu.getPreviousSibling(onlyEnabled: true);
       if (previous != null) {
         menuBar.openMenu(previous);
       } else {
@@ -2453,7 +2489,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       }
       return previous != null;
     } else if (currentMenu.parent.isTopLevel) {
-      final _MenuNode? previous = currentMenu.parent.getPreviousSibling();
+      final _MenuNode? previous = currentMenu.parent.getPreviousSibling(onlyEnabled: true);
       if (previous != null) {
         menuBar.openMenu(previous);
       } else {
@@ -2479,7 +2515,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       menuBar.openMenu(menuBar.currentMenu!.parent);
       return true;
     }
-    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling();
+    final _MenuNode? next = menuBar.currentMenu!.getPreviousSibling(onlyEnabled: true);
     if (next != null) {
       menuBar.openMenu(next);
     }
@@ -2494,7 +2530,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       menuBar.openMenu(menuBar.currentMenu!.children.first);
       return true;
     } else {
-      final _MenuNode? next = menuBar.currentMenu!.getNextSibling();
+      final _MenuNode? next = menuBar.currentMenu!.getNextSibling(onlyEnabled: true);
       if (next != null) {
         menuBar.openMenu(next);
       }
