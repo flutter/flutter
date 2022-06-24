@@ -3338,16 +3338,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     assert(transposing.currentCharacters.length == 2);
 
-    _userUpdateTextEditingValue(
-      TextEditingValue(
-        text: transposing.stringBefore
-            + transposing.currentCharacters.last
-            + transposing.currentCharacters.first
-            + transposing.stringAfter,
-        selection: TextSelection.collapsed(
-          offset: transposing.stringBeforeLength + transposing.current.length,
+    userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaReplacement(
+            oldText: text,
+            replacementText: transposing.currentCharacters.last + transposing.currentCharacters.first,
+            replacedRange: TextRange(start: transposing.stringBeforeLength, end: transposing.stringBeforeLength + transposing.current.length),
+            selection: TextSelection.collapsed(
+              offset: transposing.stringBeforeLength + transposing.current.length,
+            ),
+            composing: TextRange.empty,
         ),
-      ),
+      ],
       SelectionChangedCause.keyboard,
     );
   }
