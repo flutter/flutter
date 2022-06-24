@@ -766,7 +766,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       structure.addChildCount(1);
       final ViewStructure child = structure.newChild(i);
       child.setAutofillId(parentId, autofillId);
-      child.setAutofillHints(autofill.hints);
+      // Don't set hints when there's none.
+      // See https://github.com/flutter/flutter/issues/98505.
+      if (autofill.hints.length > 0) {
+        child.setAutofillHints(autofill.hints);
+      }
       child.setAutofillType(View.AUTOFILL_TYPE_TEXT);
       child.setVisibility(View.VISIBLE);
       if (autofill.hintText != null) {

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isNotNull;
 import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1337,7 +1338,8 @@ public class TextInputPluginTest {
     verify(viewStructure).newChild(0);
 
     verify(children[0]).setAutofillId(any(), eq("1".hashCode()));
-    verify(children[0]).setAutofillHints(aryEq(new String[] {}));
+    // The flutter application sends an empty hint list, don't set hints.
+    verify(children[0], never()).setAutofillHints(aryEq(new String[] {}));
     verify(children[0]).setDimens(anyInt(), anyInt(), anyInt(), anyInt(), gt(0), gt(0));
   }
 
@@ -1507,7 +1509,7 @@ public class TextInputPluginTest {
   }
 
   @Test
-  public void autofill_onProvideVirtualViewStructure_single() {
+  public void autofill_onProvideVirtualViewStructure_singular_textfield() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       return;
     }
