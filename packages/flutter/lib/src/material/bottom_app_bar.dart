@@ -147,12 +147,13 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMaterial3 = Theme.of(context).useMaterial3;
+    final ThemeData theme = Theme.of(context);
+    final bool isMaterial3 = theme.useMaterial3;
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
-    final BottomAppBarTheme defaults = isMaterial3 ? _TokenDefaultsM3(context) : babTheme;
+    final BottomAppBarTheme defaults = isMaterial3 ? _TokenDefaultsM3(context) : const _DefaultsM2();
 
     final bool hasFab = Scaffold.of(context).hasFloatingActionButton;
-    final NotchedShape? notchedShape = widget.shape ?? defaults.shape;
+    final NotchedShape? notchedShape = widget.shape ?? babTheme.shape ?? defaults.shape;
     final CustomClipper<Path> clipper = notchedShape != null && hasFab
       ? _BottomAppBarClipper(
           geometry: geometryListenable,
@@ -161,10 +162,11 @@ class _BottomAppBarState extends State<BottomAppBar> {
           notchMargin: widget.notchMargin,
         )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
-    final double elevation = widget.elevation ?? defaults.elevation ?? _defaultElevation;
-    final double? height = widget.height ?? defaults.height;
-    final Color color = widget.color ?? defaults.color ?? Theme.of(context).bottomAppBarColor;
-    final Color surfaceTintColor = widget.surfaceTintColor ?? defaults.surfaceTintColor ?? Theme.of(context).colorScheme.surfaceTint;
+    final double elevation = widget.elevation ?? babTheme.elevation ?? defaults.elevation ?? _defaultElevation;
+    final double? height = widget.height ?? babTheme.height ?? defaults.height;
+    final Color color = widget.color ?? babTheme.color ?? defaults.color ?? theme.bottomAppBarColor;
+    final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor
+        ?? defaults.surfaceTintColor ?? theme.colorScheme.surfaceTint;
     final Color effectiveColor = ElevationOverlay.applyOverlay(context, color, elevation);
 
     if (isMaterial3) {
@@ -247,6 +249,13 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   }
 }
 
+class _DefaultsM2 extends BottomAppBarTheme {
+  const _DefaultsM2()
+    : super(
+      elevation: 8.0,
+    );
+}
+
 // BEGIN GENERATED TOKEN PROPERTIES - BottomAppBar
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
@@ -273,7 +282,7 @@ class _TokenDefaultsM3 extends BottomAppBarTheme {
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
-  NotchedShape? get shape => const AutomaticNotchedShape(RoundedRectangleBorder());
+  NotchedShape? get shape => const AutomaticNotchedShape(const RoundedRectangleBorder());
 }
   
 // END GENERATED TOKEN PROPERTIES - BottomAppBar
