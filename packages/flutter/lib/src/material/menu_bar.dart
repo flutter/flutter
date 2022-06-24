@@ -1187,16 +1187,6 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
   final Map<int, _MenuNode> _childMapping = <int, _MenuNode>{};
 
   @override
-  List<_MenuNode> get members {
-    // Collect all of the members of all the children, so that we collect
-    // members recursively from groups.
-    return _members ??= <_MenuNode>[
-      for (final _MenuNode child in children) ...child.members,
-    ];
-  }
-  List<_MenuNode>? _members;
-
-  @override
   _MenuNode get parent => _parent;
 
   @override
@@ -1217,14 +1207,12 @@ class _MenuBarMenuState extends State<MenuBarMenu> with DiagnosticableTreeMixin,
         'Index $widgetIndex already set. Tried to set to $child. Already set to ${_childMapping[widgetIndex]}');
     _childMapping[widgetIndex] = child;
     _children = null;
-    _members = null;
   }
 
   @override
   void removeChild(int widgetIndex) {
     _childMapping.remove(widgetIndex);
     _children = null;
-    _members = null;
   }
 
   @override
@@ -1493,18 +1481,23 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
   int _parentWidgetIndex = -1;
 
   @override
-  List<_MenuNode> get members {
-    if (_members == null) {
-      final List<int> indices = _memberMapping.keys.toList()..sort();
-      _members = <_MenuNode>[
-        for (final int index in indices) ..._memberMapping[index]!.members,
+  List<_MenuNode> get children {
+    if (_children == null) {
+      // Keep track of children as a sparse array, so that inserting at an index
+      // works even if a previous index has been removed, and we can have gaps
+      // where "regular" widgets are in the widget list.
+      final List<int> indices = _childMapping.keys.toList()
+        ..sort();
+      _children = <_MenuNode>[
+        for (final int index in indices) _childMapping[index]!,
       ];
+      debugPrint('\nNew Group Tree:\n${topLevel.parent.toStringDeep()}');
     }
-    return _members!;
+    return _children!;
   }
-  List<_MenuNode>? _members;
-  final Map<int, _MenuNode> _memberMapping = <int, _MenuNode>{};
-  
+  List<_MenuNode>? _children;
+  final Map<int, _MenuNode> _childMapping = <int, _MenuNode>{};
+
   @override
   _MenuNode get parent => _parent;
 
@@ -1537,26 +1530,34 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
 
   @override
   void addChild(int widgetIndex, _MenuNode child) {
-    assert(_memberMapping[widgetIndex] == null,
-    'Index $widgetIndex already set. Tried to set to $child. Already set to ${_memberMapping[widgetIndex]}');
-    _memberMapping[widgetIndex] = child;
-    _members = null;
+    assert(_childMapping[widgetIndex] == null,
+    'Index $widgetIndex already set. Tried to set to $child. Already set to ${_childMapping[widgetIndex]}');
+    _childMapping[widgetIndex] = child;
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      setState(() {
+        _children = null;
+      });
+    });
   }
 
   @override
   void removeChild(int widgetIndex) {
-    _memberMapping.remove(widgetIndex);
-    _members = null;
+    _childMapping.remove(widgetIndex);
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      setState(() {
+        _children = null;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    bool showPrevious = true;
-    bool showNext = true;
-    if (ancestors.isNotEmpty && members.isNotEmpty) {
-      final _MenuNode? previous = members.first.getPreviousSibling();
+    bool showPrevious = false;
+    bool showNext = false;
+    if (ancestors.isNotEmpty && children.isNotEmpty) {
+      final _MenuNode? previous = getPreviousSibling(expandGroups: false);
       showPrevious = previous != null && !previous.isGroup;
-      final _MenuNode? next = members.last.getNextSibling();
+      final _MenuNode? next = getNextSibling(expandGroups: false);
       showNext = next != null && !next.isGroup;
     }
     int childIndex = 0;
@@ -1583,7 +1584,7 @@ class _MenuItemGroupState extends State<MenuItemGroup> with DiagnosticableTreeMi
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<_MenuNode>('members', members.where((_MenuNode node) => node != this)));
+    properties.add(IterableProperty<_MenuNode>('children', children));
   }
 }
 
@@ -1702,10 +1703,10 @@ class _RootMenuNode with DiagnosticableTreeMixin, _MenuNode {
   }
 
   @override
-  _MenuNode? getNextSibling({bool onlyEnabled = true}) => null;
+  _MenuNode? getNextSibling({bool onlyEnabled = false, bool expandGroups = true}) => null;
 
   @override
-  _MenuNode? getPreviousSibling({bool onlyEnabled = true}) => null;
+  _MenuNode? getPreviousSibling({bool onlyEnabled = false, bool expandGroups = true}) => null;
 }
 
 mixin _MenuNode on DiagnosticableTreeMixin {
@@ -1731,10 +1732,6 @@ mixin _MenuNode on DiagnosticableTreeMixin {
 
   /// The focus node associated with this menu item.
   FocusNode? get focusNode => null;
-
-  /// The number of additional members that this node represents. Will be zero
-  /// for everything except groups.
-  List<_MenuNode> get members => <_MenuNode>[this];
 
   /// Whether or not this menu item is currently enabled.
   bool get enabled => true;
@@ -1787,33 +1784,45 @@ mixin _MenuNode on DiagnosticableTreeMixin {
     return nodeAncestors.last;
   }
 
-  _MenuNode? getNextSibling({bool onlyEnabled = false}) {
-    final int thisIndex = parent.members.indexOf(isGroup ? members.first : this);
+  List<_MenuNode> _expandChildren() {
+    final List<_MenuNode> result = <_MenuNode>[];
+    for (final _MenuNode child in children) {
+      if (child.isGroup) {
+        result.addAll(child._expandChildren());
+      } else {
+        result.add(child);
+      }
+    }
+    return result;
+  }
+
+  _MenuNode? getNextSibling({bool onlyEnabled = false, bool expandGroups = true}) {
+    final List<_MenuNode> parentMembers = expandGroups ? parent._expandChildren() : parent.children;
+    final int thisIndex = parentMembers.indexOf(this);
     assert(thisIndex != -1);
-    if (thisIndex == parent.members.length - 1) {
+    if (thisIndex == parentMembers.length - 1) {
       return null;
     }
-    for (final _MenuNode child in parent.members.sublist(thisIndex + 1)) {
+    for (final _MenuNode child in parentMembers.sublist(thisIndex + 1)) {
       if (!onlyEnabled || child.enabled) {
         return child;
       }
     }
-    // No later siblings were enabled.
     return null;
   }
 
-  _MenuNode? getPreviousSibling({bool onlyEnabled = false}) {
-    final int thisIndex = parent.members.indexOf(isGroup ? members.first : this);
+  _MenuNode? getPreviousSibling({bool onlyEnabled = false, bool expandGroups = true}) {
+    final List<_MenuNode> parentMembers = expandGroups ? parent._expandChildren() : parent.children;
+    final int thisIndex = parentMembers.indexOf(this);
     assert(thisIndex != -1);
     if (thisIndex == 0) {
       return null;
     }
-    for (final _MenuNode child in parent.members.sublist(0, thisIndex).reversed) {
+    for (final _MenuNode child in parentMembers.sublist(0, thisIndex).reversed) {
       if (!onlyEnabled || child.enabled) {
         return child;
       }
     }
-    // No earlier siblings were enabled.
     return null;
   }
 
