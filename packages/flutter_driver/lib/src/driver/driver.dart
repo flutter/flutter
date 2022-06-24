@@ -4,7 +4,6 @@
 
 import 'dart:io';
 
-import 'package:flutter/services.dart' show TextInputAction;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;

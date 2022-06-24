@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../driver_extension.dart';
 import '../extension/wait_conditions.dart';
-import 'action.dart';
+import 'action.dart' show ReceiveAction;
 import 'diagnostics_tree.dart';
 import 'error.dart';
 import 'find.dart';
@@ -212,7 +212,7 @@ mixin CommandHandlerFactory {
             'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
     }
     final ReceiveAction receiveActionCommand = command as ReceiveAction;
-    _testTextInput.receiveAction(receiveActionCommand.textInputAction);
+    _testTextInput.receiveAction(TextInputAction.values[receiveActionCommand.textInputAction.index]);
     return Result.empty;
   }
   
