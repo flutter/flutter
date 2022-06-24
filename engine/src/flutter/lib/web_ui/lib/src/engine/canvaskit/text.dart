@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../safe_browser_api.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'font_fallbacks.dart';
@@ -44,7 +45,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           ellipsis,
           locale,
         ),
-        _textDirection = textDirection ?? ui.TextDirection.ltr,
         _fontFamily = ui.debugEmulateFlutterTesterEnvironment ? 'Ahem' : fontFamily,
         _fontSize = fontSize,
         _height = height,
@@ -53,7 +53,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
         _fontStyle = fontStyle;
 
   final SkParagraphStyle skParagraphStyle;
-  final ui.TextDirection? _textDirection;
   final String? _fontFamily;
   final double? _fontSize;
   final double? _height;
@@ -729,12 +728,14 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
 
     for (int i = 0; i < skRects.length; i++) {
       final Float32List rect = skRects[i];
+      final int skTextDirection =
+          getJsProperty(getJsProperty(rect, 'direction'), 'value');
       result.add(ui.TextBox.fromLTRBD(
         rect[0],
         rect[1],
         rect[2],
         rect[3],
-        _paragraphStyle._textDirection!,
+        ui.TextDirection.values[skTextDirection],
       ));
     }
 
