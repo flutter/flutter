@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'slot_layout.dart';
+import '../widgets/slot_layout.dart';
 
 /// A parent Widget takes in multiple [SlotLayout] components and places them
 /// into their appropriate positions on the screen.
