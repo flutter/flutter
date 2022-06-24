@@ -64,16 +64,21 @@ const std::shared_ptr<LazyGlyphAtlas>& EntityPass::GetLazyGlyphAtlas() const {
   return lazy_glyph_atlas_;
 }
 
-std::optional<Rect> EntityPass::GetElementsCoverage() const {
+std::optional<Rect> EntityPass::GetElementsCoverage(
+    std::optional<Rect> coverage_clip) const {
   std::optional<Rect> result;
   for (const auto& element : elements_) {
     std::optional<Rect> coverage;
 
     if (auto entity = std::get_if<Entity>(&element)) {
       coverage = entity->GetCoverage();
+
+      if (coverage.has_value() && coverage_clip.has_value()) {
+        coverage = coverage->Intersection(coverage_clip.value());
+      }
     } else if (auto subpass =
                    std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      coverage = GetSubpassCoverage(*subpass->get());
+      coverage = GetSubpassCoverage(*subpass->get(), coverage_clip);
     } else {
       FML_UNREACHABLE();
     }
@@ -91,8 +96,9 @@ std::optional<Rect> EntityPass::GetElementsCoverage() const {
 }
 
 std::optional<Rect> EntityPass::GetSubpassCoverage(
-    const EntityPass& subpass) const {
-  auto entities_coverage = subpass.GetElementsCoverage();
+    const EntityPass& subpass,
+    std::optional<Rect> coverage_clip) const {
+  auto entities_coverage = subpass.GetElementsCoverage(coverage_clip);
   // The entities don't cover anything. There is nothing to do.
   if (!entities_coverage.has_value()) {
     return std::nullopt;
@@ -143,7 +149,8 @@ bool EntityPass::Render(ContentContext& renderer,
         "EntityPass",  //
         StorageMode::kDevicePrivate, LoadAction::kClear, StoreAction::kStore,
         StorageMode::kDevicePrivate, LoadAction::kClear, StoreAction::kStore);
-    if (!OnRender(renderer, offscreen_target, Point(), Point(), 0)) {
+    if (!OnRender(renderer, offscreen_target.GetRenderTargetSize(),
+                  offscreen_target, Point(), Point(), 0)) {
       return false;
     }
 
@@ -178,13 +185,15 @@ bool EntityPass::Render(ContentContext& renderer,
     return true;
   }
 
-  return OnRender(renderer, render_target, Point(), Point(), 0);
+  return OnRender(renderer, render_target.GetRenderTargetSize(), render_target,
+                  Point(), Point(), 0);
 }
 
 EntityPass::EntityResult EntityPass::GetEntityForElement(
     const EntityPass::Element& element,
     ContentContext& renderer,
     InlinePassContext& pass_context,
+    ISize root_pass_size,
     Point position,
     uint32_t pass_depth,
     size_t stencil_depth_floor) const {
@@ -221,8 +230,9 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     if (subpass->delegate_->CanCollapseIntoParentPass() &&
         !subpass->backdrop_filter_proc_.has_value()) {
       // Directly render into the parent target and move on.
-      if (!subpass->OnRender(renderer, pass_context.GetRenderTarget(), position,
-                             position, stencil_depth_floor)) {
+      if (!subpass->OnRender(renderer, root_pass_size,
+                             pass_context.GetRenderTarget(), position, position,
+                             stencil_depth_floor)) {
         return EntityPass::EntityResult::Failure();
       }
       return EntityPass::EntityResult::Skip();
@@ -241,7 +251,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       pass_context.EndPass();
     }
 
-    auto subpass_coverage = GetSubpassCoverage(*subpass);
+    auto subpass_coverage =
+        GetSubpassCoverage(*subpass, Rect::MakeSize(Size(root_pass_size)));
 
     if (backdrop_contents) {
       auto backdrop_coverage = backdrop_contents->GetCoverage(Entity{});
@@ -254,6 +265,11 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
           subpass_coverage = backdrop_coverage;
         }
       }
+    }
+
+    if (subpass_coverage.has_value()) {
+      subpass_coverage =
+          subpass_coverage->Intersection(Rect::MakeSize(Size(root_pass_size)));
     }
 
     if (!subpass_coverage.has_value()) {
@@ -304,9 +320,9 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
     // Stencil textures aren't shared between EntityPasses (as much of the
     // time they are transient).
-    if (!subpass->OnRender(renderer, subpass_target, subpass_coverage->origin,
-                           position, ++pass_depth, subpass->stencil_depth_,
-                           backdrop_contents)) {
+    if (!subpass->OnRender(renderer, root_pass_size, subpass_target,
+                           subpass_coverage->origin, position, ++pass_depth,
+                           subpass->stencil_depth_, backdrop_contents)) {
       return EntityPass::EntityResult::Failure();
     }
 
@@ -327,6 +343,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 }
 
 bool EntityPass::OnRender(ContentContext& renderer,
+                          ISize root_pass_size,
                           RenderTarget render_target,
                           Point position,
                           Point parent_position,
@@ -368,8 +385,8 @@ bool EntityPass::OnRender(ContentContext& renderer,
 
   for (const auto& element : elements_) {
     EntityResult result =
-        GetEntityForElement(element, renderer, pass_context, position,
-                            pass_depth, stencil_depth_floor);
+        GetEntityForElement(element, renderer, pass_context, root_pass_size,
+                            position, pass_depth, stencil_depth_floor);
 
     switch (result.status) {
       case EntityResult::kSuccess:
