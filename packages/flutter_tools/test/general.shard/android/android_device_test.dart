@@ -356,6 +356,33 @@ flutter:
           command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'],
         ),
         const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'],
+        ),
+      ]),
+    );
+
+    final DeviceLogReader pastLogReader = await device.getLogReader(includePastLogs: true);
+    final DeviceLogReader defaultLogReader = await device.getLogReader();
+    expect(pastLogReader, isNot(equals(defaultLogReader)));
+
+    // Getting again is cached.
+    expect(pastLogReader, equals(await device.getLogReader(includePastLogs: true)));
+    expect(defaultLogReader, equals(await device.getLogReader()));
+  });
+
+  testWithoutContext('AndroidDevice AdbLogReaders for past+future and future logs are not the same (verbose mode)', () async {
+    final AndroidDevice device = setUpAndroidDevice(
+      logger: BufferLogger.test(verbose: true),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.build.version.sdk]: [23]',
+          exitCode: 1,
+        ),
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'],
+        ),
+        const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
         ),
       ])
@@ -463,11 +490,12 @@ AndroidDevice setUpAndroidDevice({
   ProcessManager? processManager,
   Platform? platform,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+  Logger? logger,
 }) {
   androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(id ?? '1234',
     modelID: 'TestModel',
-    logger: BufferLogger.test(),
+    logger: logger ?? BufferLogger.test(),
     platform: platform ?? FakePlatform(),
     androidSdk: androidSdk,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),

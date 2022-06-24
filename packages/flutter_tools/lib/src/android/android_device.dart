@@ -781,6 +781,7 @@ class AndroidDevice extends Device {
       return _logReader ??= await AdbLogReader.createLogReader(
         this,
         _processManager,
+        isVerbose: _logger.isVerbose,
       );
     }
   }
@@ -1018,6 +1019,7 @@ class AdbLogReader extends DeviceLogReader {
     AndroidDevice device,
     ProcessManager processManager, {
     bool includePastLogs = false,
+    bool isVerbose = false,
   }) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
@@ -1038,11 +1040,12 @@ class AdbLogReader extends DeviceLogReader {
       'time',
     ];
 
-    // If past logs are included then filter for 'flutter' logs only.
-    if (includePastLogs) {
+    // Filter for 'flutter' logs only unless the --verbose flag is presented.
+    if (!isVerbose || includePastLogs) {
       args.addAll(<String>['-s', 'flutter']);
-    } else if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
-      // Otherwise, filter for logs appearing past the present.
+    }
+    // Filter for logs appearing past the present.
+    if (!includePastLogs && apiVersion != null && apiVersion >= kLollipopVersionCode) {
       // '-T 0` means the timestamp of the logcat command invocation.
       final String? lastLogcatTimestamp = await device.lastLogcatTimestamp();
       args.addAll(<String>[
