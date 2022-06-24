@@ -1578,7 +1578,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             service.setSelection(elementA, 'my-group');
 
             service.addPubRootDirectories(<String>[
-              '/invalid/$pubRootTest',
+              '/unrelated/$pubRootTest',
               pubRootTest,
             ]);
             expect(
@@ -1587,8 +1587,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             );
           },
         );
+
         testWidgets(
-          'has createdByLocalProject  if multiple pubRootDirectories match',
+          'has createdByLocalProject if multiple pubRootDirectories match',
           (WidgetTester tester) async {
             final Widget widget = Directionality(
               textDirection: TextDirection.ltr,
@@ -1856,9 +1857,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
       });
     },
-    skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-  ); // [intended] Test requires --track-widget-creation flag.
-
+    skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+  );
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
       const String group1 = 'group-1';
@@ -3150,7 +3150,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
 
         testWidgets(
-          'does not have createdByLocalProject if the prefix of the pubRootDirectory is different',
+          'does not have createdByLocalProject when widget package directory is a suffix of a pubRootDirectory',
           (WidgetTester tester) async {
             await tester.pumpWidget(
               Directionality(
@@ -3183,7 +3183,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
 
         testWidgets(
-          'has createdByLocalProject if the pubRootDirectory is prefixed with file://',
+          'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
             await tester.pumpWidget(
               Directionality(
@@ -3216,7 +3216,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
 
         testWidgets(
-          'does not have createdByLocalProject if the pubRootDirectory has a different suffix',
+          'does not have createdByLocalProject when thePubRootDirectoy has a different suffix',
           (WidgetTester tester) async {
             await tester.pumpWidget(
               Directionality(
@@ -3249,7 +3249,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
 
         testWidgets(
-          'has createdByLocalProject if at least one of the pubRootDirectories matches',
+          'has createdByLocalProject even if another pubRootDirectory does not match',
           (WidgetTester tester) async {
             await tester.pumpWidget(
               Directionality(
@@ -3281,6 +3281,40 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               contains('createdByLocalProject'),
             );
           },
+        );
+        testWidgets(
+          'has createdByLocalProject if multiple pubRootDirectories match',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Stack(
+                  children: const <Widget>[
+                    Text('a'),
+                    Text('b', textDirection: TextDirection.ltr),
+                    Text('c', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ),
+            );
+
+            final Element elementA = find.text('a').evaluate().first;
+            service.setSelection(elementA, 'my-group');
+
+            await service.testExtension('addPubRootDirectories', <String, String>{
+              'arg0': pubRootTest,
+              'arg1': 'file://$pubRootTest',
+              'isolateId': '34',
+            });
+
+            expect(
+              await service.testExtension(
+                'getSelectedWidget',
+                <String, String>{'objectGroup': 'my-group'},
+              ),
+              contains('createdByLocalProject'),
+            );
+          }
         );
 
         testWidgets(
