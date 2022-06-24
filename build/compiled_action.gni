@@ -81,16 +81,15 @@ template("compiled_action") {
          "compiled_action doesn't take a sources arg. Use inputs instead.")
 
   action(target_name) {
-    if (defined(invoker.visibility)) {
-      visibility = invoker.visibility
-    }
-    if (defined(invoker.testonly)) {
-      testonly = invoker.testonly
-    }
-    if (defined(invoker.pool)) {
-      pool = invoker.pool
-    }
-
+    forward_variables_from(invoker,
+                           [
+                             "visibility",
+                             "metadata",
+                             "testonly",
+                             "pool",
+                             "outputs",
+                           ])
+                           
     script = "//build/gn_run_binary.py"
 
     if (defined(invoker.inputs)) {
@@ -98,7 +97,6 @@ template("compiled_action") {
     } else {
       inputs = []
     }
-    outputs = invoker.outputs
 
     if (defined(invoker.toolchain)) {
       toolchain = invoker.toolchain
