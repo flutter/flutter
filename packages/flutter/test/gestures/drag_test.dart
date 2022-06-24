@@ -528,7 +528,6 @@ void main() {
       'drag2-down',
       'drag2-cancel',
       '-d',
-      'drag1-update',
       '-e',
       'drag1-update',
       '-f',
@@ -1603,6 +1602,8 @@ void main() {
 
     tester.route(touchPointer.move(const Offset(25.0, 25.0)));
     expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    tester.route(touchPointer.move(const Offset(30.0, 30.0)));
     expect(updatedScrollDelta, const Offset(5.0, 5.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
@@ -1610,7 +1611,7 @@ void main() {
     tester.route(touchPointer.up());
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, isNull);
-    expect(didEndPan, isFalse);
+    expect(didEndPan, isTrue);
 
     tester.route(panZoomPointer.panZoomEnd());
     expect(didStartPan, isFalse);
@@ -1679,19 +1680,19 @@ testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureT
     // Gesture will be claimed when distance reaches kPanSlop, which was 36.0 when this test was last updated.
     tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
     expect(didStartPan, isFalse);
-    expect(updatedScrollDelta, const Offset(20.0, 20.0));
+    expect(updatedScrollDelta, isNull);
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
     expect(didStartPan, isFalse);
-    expect(updatedScrollDelta, const Offset(10.0, 10.0));
+    expect(updatedScrollDelta, const Offset(20.0, 20.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
 
     tester.route(panZoomPointer.panZoomEnd());
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, isNull);
-    expect(didEndPan, isFalse);
+    expect(didEndPan, isTrue);
 
     tester.route(touchPointer.up());
     expect(didStartPan, isFalse);

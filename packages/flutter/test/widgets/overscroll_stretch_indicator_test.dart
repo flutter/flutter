@@ -546,7 +546,11 @@ void main() {
 
     final TestGesture pointer2 = await tester.startGesture(tester.getCenter(find.text('Index 1')));
     // Add overscroll from an additional pointer
-    await pointer2.moveBy(const Offset(0.0, 210.0));
+    await pointer2.moveBy(const Offset(0.0, 105.0));
+    await tester.pumpAndSettle();
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, lastStretchedLocation);
+    await pointer2.moveBy(const Offset(0.0, 105.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(lastStretchedLocation));
@@ -554,7 +558,11 @@ void main() {
 
     final TestGesture pointer3 = await tester.startGesture(tester.getCenter(find.text('Index 1')));
     // Add overscroll from an additional pointer, exceeding the max stretch (600)
-    await pointer3.moveBy(const Offset(0.0, 210.0));
+    await pointer3.moveBy(const Offset(0.0, 105.0));
+    await tester.pumpAndSettle();
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, lastStretchedLocation);
+    await pointer3.moveBy(const Offset(0.0, 105.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(lastStretchedLocation));
