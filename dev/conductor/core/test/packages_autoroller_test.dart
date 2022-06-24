@@ -12,6 +12,7 @@ import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
 import './common.dart';
+import '../bin/packages_autoroller.dart' show run;
 
 void main() {
   const String flutterRoot = '/flutter';
@@ -189,5 +190,43 @@ void main() {
         await controller.stream.transform(const Utf8Decoder()).join();
     expect(givenToken, token);
     await rollFuture;
+  });
+
+  group('command argument validations', () {
+    const String tokenPath = '/path/to/token';
+    const String mirrorRemote = 'https://githost.com/org/project';
+
+    test('validates that file exists at --token option', () async {
+      await expectLater(
+        () => run(
+          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          fs: fileSystem,
+          processManager: processManager,
+        ),
+        throwsA(isA<ArgumentError>().having(
+          (ArgumentError err) => err.message,
+          'message',
+          contains('Provided token path $tokenPath but no file exists at'),
+        )),
+      );
+    });
+
+    test('validates that the token file is not empty', () async {
+      fileSystem.file(tokenPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('');
+      await expectLater(
+        () => run(
+          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          fs: fileSystem,
+          processManager: processManager,
+        ),
+        throwsA(isA<ArgumentError>().having(
+          (ArgumentError err) => err.message,
+          'message',
+          contains('Tried to read a GitHub access token from file $tokenPath but it was empty'),
+        )),
+      );
+    });
   });
 }

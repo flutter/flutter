@@ -9,6 +9,7 @@ import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/packages_autoroller.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -17,12 +18,21 @@ const String kGithubClient = 'github-client';
 const String kMirrorRemote = 'mirror-remote';
 const String kUpstreamRemote = 'upstream-remote';
 
-Future<void> main(List<String> args) async {
+Future<void> main(List<String> args) {
+  return run(args);
+}
+
+@visibleForTesting
+Future<void> run(
+  List<String> args, {
+  FileSystem fs = const LocalFileSystem(),
+  ProcessManager processManager = const LocalProcessManager(),
+}) async {
   final ArgParser parser = ArgParser();
   parser.addOption(
     kTokenOption,
-    help: 'GitHub access token env variable name.',
-    defaultsTo: 'GITHUB_TOKEN',
+    help: 'Path to GitHub access token file.',
+    mandatory: true,
   );
   parser.addOption(
     kGithubClient,
@@ -56,12 +66,17 @@ ${parser.usage}
 
   final String mirrorUrl = results[kMirrorRemote]! as String;
   final String upstreamUrl = results[kUpstreamRemote]! as String;
-  const Platform platform = LocalPlatform();
-  final String tokenName = results[kTokenOption]! as String;
-  final String? token = platform.environment[tokenName];
-  if (token == null || token.isEmpty) {
-    throw FormatException(
-      'Tried to read a GitHub access token from env variable \$$tokenName but it was undefined or empty',
+  final String tokenPath = results[kTokenOption]! as String;
+  final File tokenFile = fs.file(tokenPath);
+  if (!tokenFile.existsSync()) {
+    throw ArgumentError(
+      'Provided token path $tokenPath but no file exists at ${tokenFile.absolute.path}',
+    );
+  }
+  final String token = tokenFile.readAsStringSync();
+  if (token.isEmpty) {
+    throw ArgumentError(
+      'Tried to read a GitHub access token from file ${tokenFile.path} but it was empty',
     );
   }
 
@@ -76,7 +91,7 @@ ${parser.usage}
     githubClient: results[kGithubClient] as String? ?? 'gh',
     orgName: _parseOrgName(mirrorUrl),
     token: token,
-    processManager: const LocalProcessManager(),
+    processManager: processManager,
   ).roll();
 }
 
@@ -125,4 +140,9 @@ Directory get _localFlutterRoot {
     ),
   );
   return fileSystem.directory(checkoutsDirname);
+}
+
+@visibleForTesting
+void validateTokenFile(String filePath, [FileSystem fs = const LocalFileSystem()]) {
+
 }
