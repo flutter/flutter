@@ -103,7 +103,7 @@ export 'engine/html_image_codec.dart';
 export 'engine/initialization.dart';
 export 'engine/js_interop/js_loader.dart';
 export 'engine/js_interop/js_promise.dart';
-export 'engine/key_map.dart';
+export 'engine/key_map.g.dart';
 export 'engine/keyboard.dart';
 export 'engine/keyboard_binding.dart';
 export 'engine/mouse_cursor.dart';

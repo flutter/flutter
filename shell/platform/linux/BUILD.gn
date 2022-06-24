@@ -146,7 +146,7 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
-    "key_mapping.cc",
+    "key_mapping.g.cc",
   ]
 
   # Set flag to stop headers being directly included (library users should not do this)
