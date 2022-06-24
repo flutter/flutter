@@ -5,6 +5,7 @@
 import("//flutter/tools/executable_action.gni")
 import("//flutter/tools/fuchsia/fidl/fidl.gni")
 import("//flutter/tools/fuchsia/fidl/toolchain.gni")
+import("//flutter/tools/fuchsia/gn-sdk/config/config.gni")
 
 # Generates some representation of a FIDL library that's consumable by Language
 # bindings generators.
@@ -107,7 +108,7 @@ template("fidl_library") {
 
     visibility = [ ":*" ]
 
-    tool = "${fuchsia_sdk_path}/tools/fidlc"
+    tool = "$fuchsia_tool_dir/fidlc"
 
     inputs = [ response_file ]
 
