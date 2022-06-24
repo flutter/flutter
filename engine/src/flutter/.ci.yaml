@@ -180,7 +180,6 @@ targets:
 
   - name: Linux License
     recipe: engine/engine_license
-    bringup: true
     properties:
       add_recipes_cq: "true"
       clobber: "true"
