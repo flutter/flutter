@@ -178,6 +178,14 @@ targets:
       clobber: "true"
     timeout: 60
 
+  - name: Linux License
+    recipe: engine/engine_license
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      clobber: "true"
+    timeout: 60
+
   - name: Linux clang-tidy
     recipe: engine/engine_lint
     properties:
