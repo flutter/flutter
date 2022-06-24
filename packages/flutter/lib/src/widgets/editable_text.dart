@@ -3068,7 +3068,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _userUpdateTextEditingValue(newValue, cause);
   }
-  
+
   void _userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.

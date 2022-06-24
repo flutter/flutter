@@ -8369,7 +8369,7 @@ void main() {
             oldText: state.textEditingValue.text,
             replacementText: 'remoteremoteremote',
             replacedRange: '',
-            selection: const TextSelection.collapsed(offset: -1,
+            selection: const TextSelection.collapsed(offset: -1),
             composing: TextRange.empty,
           ),
         ],
@@ -12528,7 +12528,7 @@ void main() {
         child: editableText,
       ),
     );
-    
+
     await tester.pumpWidget(widget);
 
     final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
@@ -12536,8 +12536,8 @@ void main() {
     state.userUpdateTextEditingValueWithDeltas(
       <TextEditingDelta>[
         TextEditingDeltaInsertion(
-          oldText: 'This is some text.', 
-          textInserted: insertedText, 
+          oldText: 'This is some text.',
+          textInserted: insertedText,
           insertionOffset: controller.text.length,
           selection: TextSelection.collapsed(offset: controller.text.length + insertedText.length),
           composing: TextRange.empty,

@@ -719,7 +719,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     textSelectionDelegate.userUpdateTextEditingValueWithDeltas(
       <TextEditingDelta>[
         TextEditingDeltaNonTextUpdate(oldText: newValue.text, selection: newValue.selection, composing: newValue.composing),
-      ], 
+      ],
       cause,
     );
   }

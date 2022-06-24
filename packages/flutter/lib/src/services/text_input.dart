@@ -1020,7 +1020,7 @@ mixin TextSelectionDelegate {
   ///
   /// See also:
   ///
-  /// * [EditableTextState.userUpdateTextEditingValueWithDeltas]: an 
+  /// * [EditableTextState.userUpdateTextEditingValueWithDeltas]: an
   /// implementation that applies additional pre-processing to the specified
   /// [value], before updating the text editing state.
   void userUpdateTextEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas, SelectionChangedCause cause);
