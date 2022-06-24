@@ -8368,7 +8368,7 @@ void main() {
           TextEditingDeltaReplacement(
             oldText: state.textEditingValue.text,
             replacementText: 'remoteremoteremote',
-            replacedRange: '',
+            replacedRange: TextRange(start: 0, end: state.textEditingValue.text.length),
             selection: const TextSelection.collapsed(offset: -1),
             composing: TextRange.empty,
           ),
@@ -12512,7 +12512,6 @@ void main() {
     final TextEditingController controller = TextEditingController(text: 'This is some text.');
     final EditableText editableText = EditableText(
       showSelectionHandles: true,
-      maxLines: 1,
       controller: controller,
       focusNode: FocusNode(),
       cursorColor: Colors.red,
@@ -12532,7 +12531,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
-    final String insertedText = 'This text was inserted.';
+    const String insertedText = 'This text was inserted.';
     state.userUpdateTextEditingValueWithDeltas(
       <TextEditingDelta>[
         TextEditingDeltaInsertion(
@@ -12578,7 +12577,7 @@ void main() {
     expect(controller.text, 'This is some text.This text was inserted.');
 
     state.userUpdateTextEditingValueWithDeltas(
-      <TextEditingDelta>[
+      const <TextEditingDelta>[
         TextEditingDeltaNonTextUpdate(
           oldText: 'This is some text.This text was inserted.',
           selection: const TextSelection.collapsed(offset: 5),
