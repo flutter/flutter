@@ -14,7 +14,7 @@
                 "--simulator",
                 "--no-lto"
             ],
-            "name": "ios_debug_sym",
+            "name": "ios_debug_sim",
             "ninja": {
                 "config": "ios_debug_sim",
                 "targets": []
@@ -54,18 +54,20 @@
             "gn": [
                 "--ios",
                 "--runtime-mode",
-                "release",
-                "--bitcode",
-                "--no-goma",
-                "--ios-cpu=arm"
+                "debug",
+                "--simulator",
+                "--simulator-cpu=arm64",
+                "--no-lto",
+                "--no-goma"
             ],
-            "name": "ios_release_arm",
+            "name": "ios_debug_sim_arm64",
             "ninja": {
-                "config": "ios_release_arm",
+                "config": "ios_debug_sim_arm64",
                 "targets": [],
                 "tool": "autoninja"
             },
             "tests": []
         }
-    ]
+    ],
+    "tests": []
 }
