@@ -60,9 +60,12 @@ class EntityPass {
 
   void SetBackdropFilter(std::optional<BackdropFilterProc> proc);
 
-  std::optional<Rect> GetSubpassCoverage(const EntityPass& subpass) const;
+  std::optional<Rect> GetSubpassCoverage(
+      const EntityPass& subpass,
+      std::optional<Rect> coverage_clip) const;
 
-  std::optional<Rect> GetElementsCoverage() const;
+  std::optional<Rect> GetElementsCoverage(
+      std::optional<Rect> coverage_clip) const;
 
  private:
   struct EntityResult {
@@ -91,11 +94,13 @@ class EntityPass {
   EntityResult GetEntityForElement(const EntityPass::Element& element,
                                    ContentContext& renderer,
                                    InlinePassContext& pass_context,
+                                   ISize root_pass_size,
                                    Point position,
                                    uint32_t pass_depth,
                                    size_t stencil_depth_floor) const;
 
   bool OnRender(ContentContext& renderer,
+                ISize root_pass_size,
                 RenderTarget render_target,
                 Point position,
                 Point parent_position,
