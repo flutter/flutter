@@ -495,6 +495,9 @@ def to_gn_args(args):
   if args.ubsan:
     gn_args['is_ubsan'] = True
 
+  if args.fstack_protector:
+    gn_args['use_fstack_protector'] = True
+
   if args.enable_vulkan_validation_layers:
     if args.target_os != 'fuchsia':
       print(
@@ -859,6 +862,13 @@ def parse_args(args):
   parser.add_argument('--msan', default=False, action='store_true')
   parser.add_argument('--tsan', default=False, action='store_true')
   parser.add_argument('--ubsan', default=False, action='store_true')
+
+  parser.add_argument(
+      '--fstack-protector',
+      default=False,
+      action='store_true',
+      help='Whether the -fstack-protector flag should be passed unconditionally.'
+  )
 
   parser.add_argument(
       '--trace-gn',
