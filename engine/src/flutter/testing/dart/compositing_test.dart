@@ -2,12 +2,49 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show Float64List;
+import 'dart:typed_data' show Float64List, Uint32List, ByteData;
 import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
 
 void main() {
+  test('Scene.toGpuImage succeeds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint()..color = const Color(0xFF123456));
+    final Picture picture = recorder.endRecording();
+    final SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(10, 10);
+    builder.addPicture(const Offset(5, 5), picture);
+    final Scene scene = builder.build();
+
+    final Image image = scene.toGpuImage(6, 8);
+    picture.dispose();
+    scene.dispose();
+
+    expect(image.width, 6);
+    expect(image.height, 8);
+
+    final ByteData? data = await image.toByteData();
+
+    expect(data, isNotNull);
+    expect(data!.lengthInBytes, 6 * 8 * 4);
+    final Uint32List bytes = data.buffer.asUint32List();
+    // Draws a checkerboard due to flutter_tester not having a GPU context.
+    const int white = 0xFFFFFFFF;
+    const int grey  = 0xFFCCCCCC;
+    expect(bytes, const <int>[
+      white, white, white, grey,  grey,  grey, //
+      white, white, white, grey,  grey,  grey,
+      white, white, white, grey,  grey,  grey,
+      white, white, white, grey,  grey,  grey,
+      grey,  grey,  grey,  white, white, white,
+      grey,  grey,  grey,  white, white, white,
+      grey,  grey,  grey,  white, white, white,
+      grey,  grey,  grey,  white, white, white,
+    ]);
+  });
+
   test('addPicture with disposed picture does not crash', () {
     bool assertsEnabled = false;
     assert(() {

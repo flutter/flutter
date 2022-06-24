@@ -873,6 +873,8 @@ FILE: ../../../flutter/lib/ui/painting/codec.cc
 FILE: ../../../flutter/lib/ui/painting/codec.h
 FILE: ../../../flutter/lib/ui/painting/color_filter.cc
 FILE: ../../../flutter/lib/ui/painting/color_filter.h
+FILE: ../../../flutter/lib/ui/painting/display_list_deferred_image_gpu.cc
+FILE: ../../../flutter/lib/ui/painting/display_list_deferred_image_gpu.h
 FILE: ../../../flutter/lib/ui/painting/display_list_image_gpu.cc
 FILE: ../../../flutter/lib/ui/painting/display_list_image_gpu.h
 FILE: ../../../flutter/lib/ui/painting/engine_layer.cc

@@ -88,6 +88,11 @@ class EnginePicture implements ui.Picture {
     return onImageLoaded.future;
   }
 
+  @override
+  ui.Image toGpuImage(int width, int height) {
+    throw UnsupportedError('toGpuImage is not supported on the HTML backend. Use drawPicture instead, or toImage.');
+  }
+
   bool _disposed = false;
 
   @override

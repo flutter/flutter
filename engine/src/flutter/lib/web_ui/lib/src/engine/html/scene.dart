@@ -24,6 +24,11 @@ class SurfaceScene implements ui.Scene {
     throw UnsupportedError('toImage is not supported on the Web');
   }
 
+  @override
+  ui.Image toGpuImage(int width, int height) {
+    throw UnsupportedError('toGpuImage is not supported on the Web');
+  }
+
   /// Releases the resources used by this scene.
   ///
   /// After calling this function, the scene is cannot be used further.

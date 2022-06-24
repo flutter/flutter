@@ -385,74 +385,98 @@ void Canvas::drawPath(const CanvasPath* path,
   }
 }
 
-void Canvas::drawImage(const CanvasImage* image,
-                       double x,
-                       double y,
-                       const Paint& paint,
-                       const PaintData& paint_data,
-                       int filterQualityIndex) {
+Dart_Handle Canvas::drawImage(const CanvasImage* image,
+                              double x,
+                              double y,
+                              const Paint& paint,
+                              const PaintData& paint_data,
+                              int filterQualityIndex) {
   FML_DCHECK(paint.isNotNull());
   if (!image) {
-    Dart_ThrowException(
-        ToDart("Canvas.drawImage called with non-genuine Image."));
-    return;
+    return ToDart("Canvas.drawImage called with non-genuine Image.");
   }
+
+  auto dl_image = image->image();
+  if (!dl_image) {
+    return Dart_Null();
+  }
+  auto error = dl_image->get_error();
+  if (error) {
+    return ToDart(error.value());
+  }
+
   auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
   if (display_list_recorder_) {
     bool with_attributes = paint.sync_to(builder(), kDrawImageWithPaintFlags);
-    builder()->drawImage(image->image(), SkPoint::Make(x, y), sampling,
+    builder()->drawImage(dl_image, SkPoint::Make(x, y), sampling,
                          with_attributes);
   }
+  return Dart_Null();
 }
 
-void Canvas::drawImageRect(const CanvasImage* image,
-                           double src_left,
-                           double src_top,
-                           double src_right,
-                           double src_bottom,
-                           double dst_left,
-                           double dst_top,
-                           double dst_right,
-                           double dst_bottom,
-                           const Paint& paint,
-                           const PaintData& paint_data,
-                           int filterQualityIndex) {
+Dart_Handle Canvas::drawImageRect(const CanvasImage* image,
+                                  double src_left,
+                                  double src_top,
+                                  double src_right,
+                                  double src_bottom,
+                                  double dst_left,
+                                  double dst_top,
+                                  double dst_right,
+                                  double dst_bottom,
+                                  const Paint& paint,
+                                  const PaintData& paint_data,
+                                  int filterQualityIndex) {
   FML_DCHECK(paint.isNotNull());
   if (!image) {
-    Dart_ThrowException(
-        ToDart("Canvas.drawImageRect called with non-genuine Image."));
-    return;
+    return ToDart("Canvas.drawImageRect called with non-genuine Image.");
   }
+
+  auto dl_image = image->image();
+  if (!dl_image) {
+    return Dart_Null();
+  }
+  auto error = dl_image->get_error();
+  if (error) {
+    return ToDart(error.value());
+  }
+
   SkRect src = SkRect::MakeLTRB(src_left, src_top, src_right, src_bottom);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
   auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
   if (display_list_recorder_) {
     bool with_attributes =
         paint.sync_to(builder(), kDrawImageRectWithPaintFlags);
-    builder()->drawImageRect(image->image(), src, dst, sampling,
-                             with_attributes,
+    builder()->drawImageRect(dl_image, src, dst, sampling, with_attributes,
                              SkCanvas::kFast_SrcRectConstraint);
   }
+  return Dart_Null();
 }
 
-void Canvas::drawImageNine(const CanvasImage* image,
-                           double center_left,
-                           double center_top,
-                           double center_right,
-                           double center_bottom,
-                           double dst_left,
-                           double dst_top,
-                           double dst_right,
-                           double dst_bottom,
-                           const Paint& paint,
-                           const PaintData& paint_data,
-                           int bitmapSamplingIndex) {
+Dart_Handle Canvas::drawImageNine(const CanvasImage* image,
+                                  double center_left,
+                                  double center_top,
+                                  double center_right,
+                                  double center_bottom,
+                                  double dst_left,
+                                  double dst_top,
+                                  double dst_right,
+                                  double dst_bottom,
+                                  const Paint& paint,
+                                  const PaintData& paint_data,
+                                  int bitmapSamplingIndex) {
   FML_DCHECK(paint.isNotNull());
   if (!image) {
-    Dart_ThrowException(
-        ToDart("Canvas.drawImageNine called with non-genuine Image."));
-    return;
+    return ToDart("Canvas.drawImageNine called with non-genuine Image.");
   }
+  auto dl_image = image->image();
+  if (!dl_image) {
+    return Dart_Null();
+  }
+  auto error = dl_image->get_error();
+  if (error) {
+    return ToDart(error.value());
+  }
+
   SkRect center =
       SkRect::MakeLTRB(center_left, center_top, center_right, center_bottom);
   SkIRect icenter;
@@ -462,9 +486,9 @@ void Canvas::drawImageNine(const CanvasImage* image,
   if (display_list_recorder_) {
     bool with_attributes =
         paint.sync_to(builder(), kDrawImageNineWithPaintFlags);
-    builder()->drawImageNine(image->image(), icenter, dst, filter,
-                             with_attributes);
+    builder()->drawImageNine(dl_image, icenter, dst, filter, with_attributes);
   }
+  return Dart_Null();
 }
 
 void Canvas::drawPicture(Picture* picture) {
@@ -526,23 +550,34 @@ void Canvas::drawVertices(const Vertices* vertices,
   }
 }
 
-void Canvas::drawAtlas(const Paint& paint,
-                       const PaintData& paint_data,
-                       int filterQualityIndex,
-                       CanvasImage* atlas,
-                       const tonic::Float32List& transforms,
-                       const tonic::Float32List& rects,
-                       const tonic::Int32List& colors,
-                       DlBlendMode blend_mode,
-                       const tonic::Float32List& cull_rect) {
+Dart_Handle Canvas::drawAtlas(const Paint& paint,
+                              const PaintData& paint_data,
+                              int filterQualityIndex,
+                              CanvasImage* atlas,
+                              tonic::Float32List& transforms,
+                              tonic::Float32List& rects,
+                              tonic::Int32List& colors,
+                              DlBlendMode blend_mode,
+                              tonic::Float32List& cull_rect) {
   if (!atlas) {
-    Dart_ThrowException(
-        ToDart("Canvas.drawAtlas or Canvas.drawRawAtlas called with "
-               "non-genuine Image."));
-    return;
+    transforms.Release();
+    rects.Release();
+    colors.Release();
+    cull_rect.Release();
+    return ToDart(
+        "Canvas.drawAtlas or Canvas.drawRawAtlas called with "
+        "non-genuine Image.");
   }
 
   auto dl_image = atlas->image();
+  auto error = dl_image->get_error();
+  if (error) {
+    transforms.Release();
+    rects.Release();
+    colors.Release();
+    cull_rect.Release();
+    return ToDart(error.value());
+  }
 
   static_assert(sizeof(SkRSXform) == sizeof(float) * 4,
                 "SkRSXform doesn't use floats.");
@@ -562,6 +597,12 @@ void Canvas::drawAtlas(const Paint& paint,
         blend_mode, sampling, reinterpret_cast<const SkRect*>(cull_rect.data()),
         with_attributes);
   }
+
+  transforms.Release();
+  rects.Release();
+  colors.Release();
+  cull_rect.Release();
+  return Dart_Null();
 }
 
 void Canvas::drawShadow(const CanvasPath* path,

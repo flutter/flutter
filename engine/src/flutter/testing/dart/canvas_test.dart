@@ -410,6 +410,113 @@ void main() {
     expect(areEqual, true);
   }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
 
+  test('toGpuImage - too big', () async {
+    PictureRecorder recorder = PictureRecorder();
+    Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint()..color = const Color(0xFF123456));
+    final Picture picture = recorder.endRecording();
+    final Image image = picture.toGpuImage(300000, 4000000);
+    picture.dispose();
+
+    expect(image.width, 300000);
+    expect(image.height, 4000000);
+
+    recorder = PictureRecorder();
+    canvas = Canvas(recorder);
+
+    // On a slower CI machine, the raster thread may get behind the UI thread
+    // here. However, once the image is in an error state it will immediately
+    // throw on subsequent attempts.
+    bool caughtException = false;
+    for (int iterations = 0; iterations < 1000; iterations += 1) {
+      try {
+        canvas.drawImage(image, Offset.zero, Paint());
+      } on PictureRasterizationException catch (e) {
+        caughtException = true;
+        expect(e.message, contains('unable to create render target at specified size'));
+        break;
+      }
+      // Let the event loop turn.
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+    expect(caughtException, true);
+    expect(
+      () => canvas.drawImageRect(image, Rect.zero, Rect.zero, Paint()),
+      throwsException,
+    );
+    expect(
+      () => canvas.drawImageNine(image, Rect.zero, Rect.zero, Paint()),
+      throwsException,
+    );
+    expect(
+      () => canvas.drawAtlas(image, <RSTransform>[], <Rect>[], null, null, null, Paint()),
+      throwsException,
+    );
+  });
+
+  test('toGpuImage - succeeds', () async {
+    PictureRecorder recorder = PictureRecorder();
+    Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint()..color = const Color(0xFF123456));
+    final Picture picture = recorder.endRecording();
+    final Image image = picture.toGpuImage(30, 40);
+    picture.dispose();
+
+    expect(image.width, 30);
+    expect(image.height, 40);
+
+    recorder = PictureRecorder();
+    canvas = Canvas(recorder);
+    expect(
+      () => canvas.drawImage(image, Offset.zero, Paint()),
+      returnsNormally,
+    );
+    expect(
+      () => canvas.drawImageRect(image, Rect.zero, Rect.zero, Paint()),
+      returnsNormally,
+    );
+    expect(
+      () => canvas.drawImageNine(image, Rect.zero, Rect.zero, Paint()),
+      returnsNormally,
+    );
+    expect(
+      () => canvas.drawAtlas(image, <RSTransform>[], <Rect>[], null, null, null, Paint()),
+      returnsNormally,
+    );
+  });
+
+  test('toGpuImage - toByteData', () async {
+    const Color color = Color(0xFF123456);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint()..color = color);
+    final Picture picture = recorder.endRecording();
+    final Image image = picture.toGpuImage(6, 8);
+    picture.dispose();
+
+    expect(image.width, 6);
+    expect(image.height, 8);
+
+    final ByteData? data = await image.toByteData();
+
+    expect(data, isNotNull);
+    expect(data!.lengthInBytes, 6 * 8 * 4);
+    final Uint32List bytes = data.buffer.asUint32List();
+    // Draws a checkerboard due to flutter_tester not having a GPU context.
+    const int white = 0xFFFFFFFF;
+    const int grey  = 0xFFCCCCCC;
+    expect(bytes, const <int>[
+      white, white, white, grey,  grey,  grey, //
+      white, white, white, grey,  grey,  grey,
+      white, white, white, grey,  grey,  grey,
+      white, white, white, grey,  grey,  grey,
+      grey,  grey,  grey,  white, white, white,
+      grey,  grey,  grey,  white, white, white,
+      grey,  grey,  grey,  white, white, white,
+      grey,  grey,  grey,  white, white, white,
+    ]);
+  });
+
   test('Canvas.drawParagraph throws when Paragraph.layout was not called', () async {
     // Regression test for https://github.com/flutter/flutter/issues/97172
     bool assertsEnabled = false;

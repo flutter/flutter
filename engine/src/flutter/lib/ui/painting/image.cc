@@ -4,6 +4,9 @@
 
 #include "flutter/lib/ui/painting/image.h"
 
+#include <algorithm>
+#include <limits>
+
 #include "flutter/lib/ui/painting/image_encoding.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -53,7 +56,11 @@ size_t CanvasImage::GetAllocationSize() const {
   if (image_) {
     size += image_->GetApproximateByteSize();
   }
-  return size;
+  // The VM will assert if we set a value larger than or close to
+  // std::numeric_limits<intptr_t>::max().
+  // https://github.com/dart-lang/sdk/issues/49332
+  return std::clamp(
+      size, static_cast<size_t>(0),
+      static_cast<size_t>(std::numeric_limits<intptr_t>::max() / 10));
 }
-
 }  // namespace flutter

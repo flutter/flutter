@@ -28,8 +28,10 @@ namespace flutter {
 // used within this interval.
 static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
-Rasterizer::Rasterizer(Delegate& delegate)
+Rasterizer::Rasterizer(Delegate& delegate,
+                       MakeGpuImageBehavior gpu_image_behavior)
     : delegate_(delegate),
+      gpu_image_behavior_(gpu_image_behavior),
       compositor_context_(std::make_unique<flutter::CompositorContext>(*this)),
       user_override_resource_cache_bytes_(false),
       weak_factory_(this) {
@@ -243,6 +245,69 @@ RasterStatus Rasterizer::Draw(std::shared_ptr<LayerTreePipeline> pipeline,
 bool Rasterizer::ShouldResubmitFrame(const RasterStatus& raster_status) {
   return raster_status == RasterStatus::kResubmit ||
          raster_status == RasterStatus::kSkipAndRetry;
+}
+
+namespace {
+std::pair<sk_sp<SkImage>, std::string> MakeBitmapImage(SkISize picture_size) {
+  // Use 16384 as a proxy for the maximum texture size for a GPU image.
+  // This is meant to be large enough to avoid false positives in test contexts,
+  // but not so artificially large to be completely unrealistic on any platform.
+  // This limit is taken from the Metal specification. D3D, Vulkan, and GL
+  // generally have lower limits.
+  if (picture_size.width() > 16384 || picture_size.height() > 16384) {
+    return {nullptr, "unable to create render target at specified size"};
+  }
+  SkBitmap bitmap;
+  if (!bitmap.tryAllocN32Pixels(picture_size.width(), picture_size.height())) {
+    return {nullptr, "unable to create render target at specified size"};
+  }
+  bitmap.eraseColor(SK_ColorLTGRAY);
+  uint32_t half_width = std::floor(picture_size.width() / 2);
+  uint32_t half_height = std::floor(picture_size.height() / 2);
+  bitmap.erase(SK_ColorWHITE, SkIRect::MakeLTRB(0, 0, half_width, half_height));
+  bitmap.erase(SK_ColorWHITE,
+               SkIRect::MakeLTRB(half_width, half_height, picture_size.width(),
+                                 picture_size.height()));
+  bitmap.setImmutable();
+  return {bitmap.asImage(), ""};
+}
+}  // namespace
+
+std::pair<sk_sp<SkImage>, std::string> Rasterizer::MakeGpuImage(
+    sk_sp<DisplayList> display_list,
+    SkISize picture_size) {
+  TRACE_EVENT0("flutter", "Rasterizer::MakeGpuImage");
+  FML_DCHECK(display_list);
+
+  switch (gpu_image_behavior_) {
+    case MakeGpuImageBehavior::kGpu:
+      break;
+    case MakeGpuImageBehavior::kBitmap:
+      return MakeBitmapImage(picture_size);
+  }
+
+  if (!surface_) {
+    return {nullptr, "GPU surface unavilable"};
+  }
+
+  auto* context = surface_->GetContext();
+  if (!context) {
+    return {nullptr, "GPU context unavailable"};
+  }
+
+  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(picture_size);
+  sk_sp<SkSurface> surface =
+      SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, image_info);
+  if (!surface) {
+    return {nullptr, "unable to create render target at specified size"};
+  }
+
+  SkCanvas* canvas = surface->getCanvas();
+  canvas->clear(SK_ColorTRANSPARENT);
+  display_list->RenderTo(canvas);
+
+  sk_sp<SkImage> image = surface->makeImageSnapshot();
+  return {image, image ? "" : "Unable to create image"};
 }
 
 namespace {

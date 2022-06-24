@@ -6,6 +6,8 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_IMAGE_H_
 
 #include <memory>
+#include <optional>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "include/core/SkRefCnt.h"
@@ -27,6 +29,9 @@ namespace flutter {
 ///
 class DlImage : public SkRefCnt {
  public:
+  // Describes which GPU context owns this image.
+  enum class OwningContext { kRaster, kIO };
+
   static sk_sp<DlImage> Make(const SkImage* image);
 
   static sk_sp<DlImage> Make(sk_sp<SkImage> image);
@@ -80,6 +85,17 @@ class DlImage : public SkRefCnt {
   ///             convenience method that calls |DlImage::dimensions|.
   ///
   SkIRect bounds() const;
+
+  //----------------------------------------------------------------------------
+  /// @return     Specifies which context was used to create this image. The
+  ///             image must be collected on the same task runner as its
+  ///             context.
+  virtual OwningContext owning_context() const { return OwningContext::kIO; }
+
+  //----------------------------------------------------------------------------
+  /// @return     An error, if any, that occurred when trying to create the
+  ///             image.
+  virtual std::optional<std::string> get_error() const;
 
  protected:
   DlImage();

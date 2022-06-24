@@ -32,4 +32,8 @@ SkIRect DlImage::bounds() const {
   return SkIRect::MakeSize(dimensions());
 }
 
+std::optional<std::string> DlImage::get_error() const {
+  return std::nullopt;
+}
+
 }  // namespace flutter
