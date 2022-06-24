@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <optional>
 
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
@@ -63,36 +64,31 @@ class TestPassDelegate final : public EntityPassDelegate {
   const std::optional<Rect> coverage_;
 };
 
-TEST_P(EntityTest, EntityPassSubpassCoverageIsCorrect) {
+auto CreatePassWithRectPath(Rect rect, std::optional<Rect> bounds_hint) {
+  auto subpass = std::make_unique<EntityPass>();
+  Entity entity;
+  entity.SetContents(SolidColorContents::Make(
+      PathBuilder{}.AddRect(rect).TakePath(), Color::Red()));
+  subpass->AddEntity(entity);
+  subpass->SetDelegate(std::make_unique<TestPassDelegate>(bounds_hint));
+  return subpass;
+}
+
+TEST_P(EntityTest, EntityPassCoverageRespectsDelegateBoundsHint) {
   EntityPass pass;
 
-  auto subpass0 = std::make_unique<EntityPass>();
-  {
-    Entity entity;
-    entity.SetContents(SolidColorContents::Make(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath(),
-        Color::Red()));
-    subpass0->AddEntity(entity);
-    subpass0->SetDelegate(
-        std::make_unique<TestPassDelegate>(Rect::MakeLTRB(50, 50, 150, 150)));
-  }
+  auto subpass0 = CreatePassWithRectPath(Rect::MakeLTRB(0, 0, 100, 100),
+                                         Rect::MakeLTRB(50, 50, 150, 150));
+  auto subpass1 = CreatePassWithRectPath(Rect::MakeLTRB(500, 500, 1000, 1000),
+                                         Rect::MakeLTRB(800, 800, 900, 900));
 
-  auto subpass1 = std::make_unique<EntityPass>();
-  {
-    Entity entity;
-    entity.SetContents(SolidColorContents::Make(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(500, 500, 1000, 1000)).TakePath(),
-        Color::Red()));
-    subpass1->AddEntity(entity);
-    subpass1->SetDelegate(
-        std::make_unique<TestPassDelegate>(Rect::MakeLTRB(800, 800, 900, 900)));
-  }
-
-  auto subpass0_coverage = pass.GetSubpassCoverage(*subpass0.get());
+  auto subpass0_coverage =
+      pass.GetSubpassCoverage(*subpass0.get(), std::nullopt);
   ASSERT_TRUE(subpass0_coverage.has_value());
   ASSERT_RECT_NEAR(subpass0_coverage.value(), Rect::MakeLTRB(50, 50, 100, 100));
 
-  auto subpass1_coverage = pass.GetSubpassCoverage(*subpass1.get());
+  auto subpass1_coverage =
+      pass.GetSubpassCoverage(*subpass1.get(), std::nullopt);
   ASSERT_TRUE(subpass1_coverage.has_value());
   ASSERT_RECT_NEAR(subpass1_coverage.value(),
                    Rect::MakeLTRB(800, 800, 900, 900));
@@ -100,9 +96,39 @@ TEST_P(EntityTest, EntityPassSubpassCoverageIsCorrect) {
   pass.AddSubpass(std::move(subpass0));
   pass.AddSubpass(std::move(subpass1));
 
-  auto coverage = pass.GetElementsCoverage();
+  auto coverage = pass.GetElementsCoverage(std::nullopt);
   ASSERT_TRUE(coverage.has_value());
   ASSERT_RECT_NEAR(coverage.value(), Rect::MakeLTRB(50, 50, 900, 900));
+}
+
+TEST_P(EntityTest, EntityPassCoverageRespectsCoverageLimit) {
+  // Rect is drawn entirely in negative area.
+  auto pass = CreatePassWithRectPath(Rect::MakeLTRB(-200, -200, -100, -100),
+                                     std::nullopt);
+
+  // Without coverage limit.
+  {
+    auto pass_coverage = pass->GetElementsCoverage(std::nullopt);
+    ASSERT_TRUE(pass_coverage.has_value());
+    ASSERT_RECT_NEAR(pass_coverage.value(),
+                     Rect::MakeLTRB(-200, -200, -100, -100));
+  }
+
+  // With limit that doesn't overlap.
+  {
+    auto pass_coverage =
+        pass->GetElementsCoverage(Rect::MakeLTRB(0, 0, 100, 100));
+    ASSERT_FALSE(pass_coverage.has_value());
+  }
+
+  // With limit that partially overlaps.
+  {
+    auto pass_coverage =
+        pass->GetElementsCoverage(Rect::MakeLTRB(-150, -150, 0, 0));
+    ASSERT_TRUE(pass_coverage.has_value());
+    ASSERT_RECT_NEAR(pass_coverage.value(),
+                     Rect::MakeLTRB(-150, -150, -100, -100));
+  }
 }
 
 TEST_P(EntityTest, CanDrawRect) {

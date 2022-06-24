@@ -5,6 +5,7 @@
 #include "impeller/aiks/picture.h"
 
 #include <memory>
+#include <optional>
 
 #include "impeller/base/validation.h"
 #include "impeller/entity/entity.h"
@@ -14,7 +15,7 @@
 namespace impeller {
 
 std::optional<Snapshot> Picture::Snapshot(AiksContext& context) {
-  auto coverage = pass->GetElementsCoverage();
+  auto coverage = pass->GetElementsCoverage(std::nullopt);
   if (!coverage.has_value() || coverage->IsEmpty()) {
     return std::nullopt;
   }
