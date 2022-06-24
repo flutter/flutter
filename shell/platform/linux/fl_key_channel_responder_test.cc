@@ -29,20 +29,6 @@ static void responder_callback(bool handled, gpointer user_data) {
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-// Clone string onto the heap.
-//
-// If #string is nullptr, returns nullptr.  Otherwise, the returned pointer must
-// be freed with g_free.
-static char* clone_string(const char* string) {
-  if (string == nullptr) {
-    return nullptr;
-  }
-  size_t len = strlen(string);
-  char* result = g_new(char, len + 1);
-  strncpy(result, string, len + 1);
-  return result;
-}
-
 namespace {
 // A global variable to store new event. It is a global variable so that it can
 // be returned by #fl_key_event_new_by_mock for easy use.
@@ -69,7 +55,7 @@ static FlKeyEvent* fl_key_event_new_by_mock(guint32 time_in_milliseconds,
   _g_key_event.time = time_in_milliseconds;
   _g_key_event.state = state;
   _g_key_event.keyval = keyval;
-  _g_key_event.string = clone_string(string);
+  _g_key_event.string = g_strdup(string);
   _g_key_event.keycode = keycode;
   _g_key_event.origin = nullptr;
   _g_key_event.dispose_origin = nullptr;
