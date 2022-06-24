@@ -394,14 +394,9 @@ class TextSelectionOverlay {
 
     ContextMenuController.hide();
 
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    final Offset offset = -Rect.fromPoints(
-      renderBox.localToGlobal(Offset.zero),
-      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-    ).topLeft;
-
     // If right clicking on desktop, use the right click position as the only
     /// anchor.
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     if (renderObject.lastSecondaryTapDownPosition != null) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -416,7 +411,10 @@ class TextSelectionOverlay {
             buildContextMenu: (BuildContext context) {
               return _SelectionToolbarWrapper(
                 layerLink: _selectionOverlay.toolbarLayerLink,
-                offset: offset,
+                offset: -Rect.fromPoints(
+                  renderBox.localToGlobal(Offset.zero),
+                  renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+                ).topLeft,
                 child: buildContextMenu(context, renderObject.lastSecondaryTapDownPosition!),
               );
             },
@@ -466,7 +464,10 @@ class TextSelectionOverlay {
 
         return _SelectionToolbarWrapper(
           layerLink: _selectionOverlay.toolbarLayerLink,
-          offset: offset,
+          offset: -Rect.fromPoints(
+            renderBox.localToGlobal(Offset.zero),
+            renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+          ).topLeft,
           child: buildContextMenu(context, anchorAbove, anchorBelow),
         );
       },
