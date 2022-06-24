@@ -3720,6 +3720,40 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
+TEST_F(ShellTest, PictureToGpuImage) {
+#if !SHELL_ENABLE_GL
+  // GL emulation does not exist on Fuchsia.
+  GTEST_SKIP();
+#endif  // !SHELL_ENABLE_GL
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell =
+      CreateShell(settings,                                       //
+                  GetTaskRunnersForFixture(),                     //
+                  false,                                          //
+                  nullptr,                                        //
+                  false,                                          //
+                  ShellTestPlatformView::BackendType::kGLBackend  //
+      );
+
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&latch](auto args) {
+                      latch.Signal();
+                    }));
+
+  ASSERT_NE(shell, nullptr);
+  ASSERT_TRUE(shell->IsSetup());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  PlatformViewNotifyCreated(shell.get());
+  configuration.SetEntrypoint("toGpuImage");
+  RunEngine(shell.get(), std::move(configuration));
+  PumpOneFrame(shell.get());
+
+  latch.Wait();
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell));
+}
+
 }  // namespace testing
 }  // namespace flutter
 

@@ -1646,7 +1646,7 @@ enum PixelFormat {
 ///    creating a codec to decode it.
 ///  * [instantiateImageCodec], a utility method that wraps [ImageDescriptor].
 class Image {
-  Image._(this._image) {
+  Image._(this._image, this.width, this.height) {
     assert(() {
       _debugStack = StackTrace.current;
       return true;
@@ -1661,16 +1661,10 @@ class Image {
   StackTrace? _debugStack;
 
   /// The number of image pixels along the image's horizontal axis.
-  int get width {
-    assert(!_disposed && !_image._disposed);
-    return _image.width;
-  }
+  final int width;
 
   /// The number of image pixels along the image's vertical axis.
-  int get height {
-    assert(!_disposed && !_image._disposed);
-    return _image.height;
-  }
+  final int height;
 
   bool _disposed = false;
   /// Release this handle's claim on the underlying Image. This handle is no
@@ -1820,7 +1814,7 @@ class Image {
       );
     }
     assert(!_image._disposed);
-    return Image._(_image);
+    return Image._(_image, width, height);
   }
 
   /// Returns true if `other` is a [clone] of this and thus shares the same
@@ -1999,7 +1993,7 @@ class Codec extends NativeFieldWrapperClass1 {
         completer.completeError(Exception('Codec failed to produce an image, possibly due to invalid image data.'));
       } else {
         completer.complete(FrameInfo._(
-          image: Image._(image),
+          image: Image._(image, image.width, image.height),
           duration: Duration(milliseconds: durationMilliseconds),
         ));
       }
@@ -3885,10 +3879,13 @@ class ImageShader extends Shader {
     if (matrix4.length != 16)
       throw ArgumentError('"matrix4" must have 16 entries.');
     _constructor();
-    _initWithImage(image._image, tmx.index, tmy.index, filterQuality?.index ?? -1, matrix4);
+    final String? error = _initWithImage(image._image, tmx.index, tmy.index, filterQuality?.index ?? -1, matrix4);
+    if (error != null) {
+      throw Exception(error);
+    }
   }
   void _constructor() native 'ImageShader_constructor';
-  void _initWithImage(_Image image, int tmx, int tmy, int filterQualityIndex, Float64List matrix4) native 'ImageShader_initWithImage';
+  String? _initWithImage(_Image image, int tmx, int tmy, int filterQualityIndex, Float64List matrix4) native 'ImageShader_initWithImage';
 }
 
 /// An instance of [FragmentProgram] creates [Shader] objects (as used by [Paint.shader]) that run SPIR-V code.
@@ -4752,14 +4749,17 @@ class Canvas extends NativeFieldWrapperClass1 {
     assert(image != null); // image is checked on the engine side
     assert(_offsetIsValid(offset));
     assert(paint != null);
-    _drawImage(image._image, offset.dx, offset.dy, paint._objects, paint._data, paint.filterQuality.index);
+    final String? error = _drawImage(image._image, offset.dx, offset.dy, paint._objects, paint._data, paint.filterQuality.index);
+    if (error != null) {
+      throw PictureRasterizationException._(error, stack: image._debugStack);
+    }
   }
-  void _drawImage(_Image image,
-                  double x,
-                  double y,
-                  List<Object?>? paintObjects,
-                  ByteData paintData,
-                  int filterQualityIndex) native 'Canvas_drawImage';
+  String? _drawImage(_Image image,
+                     double x,
+                     double y,
+                     List<Object?>? paintObjects,
+                     ByteData paintData,
+                     int filterQualityIndex) native 'Canvas_drawImage';
 
   /// Draws the subset of the given image described by the `src` argument into
   /// the canvas in the axis-aligned rectangle given by the `dst` argument.
@@ -4775,31 +4775,34 @@ class Canvas extends NativeFieldWrapperClass1 {
     assert(_rectIsValid(src));
     assert(_rectIsValid(dst));
     assert(paint != null);
-    _drawImageRect(image._image,
-                   src.left,
-                   src.top,
-                   src.right,
-                   src.bottom,
-                   dst.left,
-                   dst.top,
-                   dst.right,
-                   dst.bottom,
-                   paint._objects,
-                   paint._data,
-                   paint.filterQuality.index);
+    final String? error = _drawImageRect(image._image,
+                                         src.left,
+                                         src.top,
+                                         src.right,
+                                         src.bottom,
+                                         dst.left,
+                                         dst.top,
+                                         dst.right,
+                                         dst.bottom,
+                                         paint._objects,
+                                         paint._data,
+                                         paint.filterQuality.index);
+    if (error != null) {
+      throw PictureRasterizationException._(error, stack: image._debugStack);
+    }
   }
-  void _drawImageRect(_Image image,
-                      double srcLeft,
-                      double srcTop,
-                      double srcRight,
-                      double srcBottom,
-                      double dstLeft,
-                      double dstTop,
-                      double dstRight,
-                      double dstBottom,
-                      List<Object?>? paintObjects,
-                      ByteData paintData,
-                      int filterQualityIndex) native 'Canvas_drawImageRect';
+  String? _drawImageRect(_Image image,
+                         double srcLeft,
+                         double srcTop,
+                         double srcRight,
+                         double srcBottom,
+                         double dstLeft,
+                         double dstTop,
+                         double dstRight,
+                         double dstBottom,
+                         List<Object?>? paintObjects,
+                         ByteData paintData,
+                         int filterQualityIndex) native 'Canvas_drawImageRect';
 
   /// Draws the given [Image] into the canvas using the given [Paint].
   ///
@@ -4819,31 +4822,34 @@ class Canvas extends NativeFieldWrapperClass1 {
     assert(_rectIsValid(center));
     assert(_rectIsValid(dst));
     assert(paint != null);
-    _drawImageNine(image._image,
-                   center.left,
-                   center.top,
-                   center.right,
-                   center.bottom,
-                   dst.left,
-                   dst.top,
-                   dst.right,
-                   dst.bottom,
-                   paint._objects,
-                   paint._data,
-                   paint.filterQuality.index);
+    final String? error = _drawImageNine(image._image,
+                                         center.left,
+                                         center.top,
+                                         center.right,
+                                         center.bottom,
+                                         dst.left,
+                                         dst.top,
+                                         dst.right,
+                                         dst.bottom,
+                                         paint._objects,
+                                         paint._data,
+                                         paint.filterQuality.index);
+    if (error != null) {
+      throw PictureRasterizationException._(error, stack: image._debugStack);
+    }
   }
-  void _drawImageNine(_Image image,
-                      double centerLeft,
-                      double centerTop,
-                      double centerRight,
-                      double centerBottom,
-                      double dstLeft,
-                      double dstTop,
-                      double dstRight,
-                      double dstBottom,
-                      List<Object?>? paintObjects,
-                      ByteData paintData,
-                      int filterQualityIndex) native 'Canvas_drawImageNine';
+  String? _drawImageNine(_Image image,
+                         double centerLeft,
+                         double centerTop,
+                         double centerRight,
+                         double centerBottom,
+                         double dstLeft,
+                         double dstTop,
+                         double dstRight,
+                         double dstBottom,
+                         List<Object?>? paintObjects,
+                         ByteData paintData,
+                         int filterQualityIndex) native 'Canvas_drawImageNine';
 
   /// Draw the given picture onto the canvas. To create a picture, see
   /// [PictureRecorder].
@@ -5121,10 +5127,14 @@ class Canvas extends NativeFieldWrapperClass1 {
     final Float32List? cullRectBuffer = cullRect?._getValue32();
     final int qualityIndex = paint.filterQuality.index;
 
-    _drawAtlas(
+    final String? error = _drawAtlas(
       paint._objects, paint._data, qualityIndex, atlas._image, rstTransformBuffer, rectBuffer,
       colorBuffer, (blendMode ?? BlendMode.src).index, cullRectBuffer
     );
+
+    if (error != null) {
+      throw PictureRasterizationException._(error, stack: atlas._debugStack);
+    }
   }
 
   /// Draws many parts of an image - the [atlas] - onto the canvas.
@@ -5290,21 +5300,25 @@ class Canvas extends NativeFieldWrapperClass1 {
       throw ArgumentError('If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
     final int qualityIndex = paint.filterQuality.index;
 
-    _drawAtlas(
+    final String? error = _drawAtlas(
       paint._objects, paint._data, qualityIndex, atlas._image, rstTransforms, rects,
       colors, (blendMode ?? BlendMode.src).index, cullRect?._getValue32()
     );
+
+    if (error != null) {
+      throw PictureRasterizationException._(error, stack: atlas._debugStack);
+    }
   }
 
-  void _drawAtlas(List<Object?>? paintObjects,
-                  ByteData paintData,
-                  int filterQualityIndex,
-                  _Image atlas,
-                  Float32List rstTransforms,
-                  Float32List rects,
-                  Int32List? colors,
-                  int blendMode,
-                  Float32List? cullRect) native 'Canvas_drawAtlas';
+  String? _drawAtlas(List<Object?>? paintObjects,
+                     ByteData paintData,
+                     int filterQualityIndex,
+                     _Image atlas,
+                     Float32List rstTransforms,
+                     Float32List rects,
+                     Int32List? colors,
+                     int blendMode,
+                     Float32List? cullRect) native 'Canvas_drawAtlas';
 
   /// Draws a shadow for a [Path] representing the given material elevation.
   ///
@@ -5345,9 +5359,6 @@ class Picture extends NativeFieldWrapperClass1 {
   /// The returned image will be `width` pixels wide and `height` pixels high.
   /// The picture is rasterized within the 0 (left), 0 (top), `width` (right),
   /// `height` (bottom) bounds. Content outside these bounds is clipped.
-  ///
-  /// Although the image is returned synchronously, the picture is actually
-  /// rasterized the first time the image is drawn and then cached.
   Future<Image> toImage(int width, int height) {
     assert(!_disposed);
     if (width <= 0 || height <= 0)
@@ -5357,13 +5368,38 @@ class Picture extends NativeFieldWrapperClass1 {
         if (image == null) {
           callback(null);
         } else {
-          callback(Image._(image));
+          callback(Image._(image, image.width, image.height));
         }
       }),
     );
   }
-
   String? _toImage(int width, int height, _Callback<_Image?> callback) native 'Picture_toImage';
+
+  /// Creates a GPU resident image from this picture.
+  ///
+  /// {@template dart.ui.painting.Picture.toGpuImage}
+  /// The returned image will be `width` pixels wide and `height` pixels high.
+  /// The picture is rasterized within the 0 (left), 0 (top), `width` (right),
+  /// `height` (bottom) bounds. Content outside these bounds is clipped.
+  ///
+  /// The image object is created and returned synchronously, but is rasterized
+  /// asynchronously. If the rasterization fails, an exception will be thrown
+  /// when the image is drawn to a [Canvas].
+  ///
+  /// In the flutter_tester, this will always created a light gray and white
+  /// checkerboard bitmap with the requested dimensions.
+  /// {@endtemplate}
+  Image toGpuImage(int width, int height) {
+    assert(!_disposed);
+    if (width <= 0 || height <= 0) {
+      throw Exception('Invalid image dimensions.');
+    }
+
+    final _Image image = _Image._();
+    _toGpuImage(width, height, image);
+    return Image._(image, image.width, image.height);
+  }
+  void _toGpuImage(int width, int height, _Image outImage) native 'Picture_toGpuImage';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
@@ -5870,4 +5906,31 @@ Future<T> _futurize<T>(_Callbacker<T> callbacker) {
   if (error != null)
     throw Exception(error);
   return completer.future;
+}
+
+/// An exception thrown by [Canvas.drawImage] and related methods when drawing
+/// an [Image] created via [Picture.toGpuImage] that is in an invalid state.
+///
+/// This exception may be thrown if the requested image dimensions exceeded the
+/// maximum 2D texture size allowed by the GPU, or if no GPU surface or context
+/// was available for rasterization at request time.
+class PictureRasterizationException implements Exception {
+  const PictureRasterizationException._(this.message, {this.stack});
+
+  /// A string containing details about the failure.
+  final String message;
+
+  /// If available, the stack trace at the time [Picture.toGpuImage] was called.
+  final StackTrace? stack;
+
+  @override
+  String toString() {
+    final StringBuffer buffer = StringBuffer('Failed to rasterize a picture: $message.');
+    if (stack != null) {
+      buffer.writeln();
+      buffer.writeln('The callstack when the image was created was:');
+      buffer.writeln(stack!.toString());
+    }
+    return buffer.toString();
+  }
 }

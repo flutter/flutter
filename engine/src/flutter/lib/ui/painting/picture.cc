@@ -8,8 +8,8 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/canvas.h"
+#include "flutter/lib/ui/painting/display_list_deferred_image_gpu.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -23,6 +23,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 #define FOR_EACH_BINDING(V) \
   V(Picture, toImage)       \
+  V(Picture, toGpuImage)    \
   V(Picture, dispose)       \
   V(Picture, GetAllocationSize)
 
@@ -50,6 +51,46 @@ Dart_Handle Picture::toImage(uint32_t width,
   }
   return RasterizeToImage(display_list_.skia_object(), width, height,
                           raw_image_callback);
+}
+
+void Picture::toGpuImage(uint32_t width,
+                         uint32_t height,
+                         Dart_Handle raw_image_handle) {
+  FML_DCHECK(display_list_.skia_object());
+  RasterizeToGpuImage(display_list_.skia_object(), width, height,
+                      raw_image_handle);
+}
+
+// static
+void Picture::RasterizeToGpuImage(sk_sp<DisplayList> display_list,
+                                  uint32_t width,
+                                  uint32_t height,
+                                  Dart_Handle raw_image_handle) {
+  auto* dart_state = UIDartState::Current();
+  auto unref_queue = dart_state->GetSkiaUnrefQueue();
+  auto snapshot_delegate = dart_state->GetSnapshotDelegate();
+  auto raster_task_runner = dart_state->GetTaskRunners().GetRasterTaskRunner();
+
+  auto image = CanvasImage::Create();
+  auto dl_image = DlDeferredImageGPU::Make(SkISize::Make(width, height));
+  image->set_image(dl_image);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      raster_task_runner,
+      [snapshot_delegate, unref_queue, dl_image = std::move(dl_image),
+       display_list = std::move(display_list)]() {
+        sk_sp<SkImage> sk_image;
+        std::string error;
+        std::tie(sk_image, error) = snapshot_delegate->MakeGpuImage(
+            display_list, dl_image->dimensions());
+        if (sk_image) {
+          dl_image->set_image(std::move(sk_image));
+        } else {
+          dl_image->set_error(std::move(error));
+        }
+      });
+
+  image->AssociateWithDartWrapper(raw_image_handle);
 }
 
 void Picture::dispose() {
