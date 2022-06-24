@@ -12580,7 +12580,7 @@ void main() {
       const <TextEditingDelta>[
         TextEditingDeltaNonTextUpdate(
           oldText: 'This is some text.This text was inserted.',
-          selection: const TextSelection.collapsed(offset: 5),
+          selection: TextSelection.collapsed(offset: 5),
           composing: TextRange.empty,
         ),
       ],

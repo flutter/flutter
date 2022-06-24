@@ -4165,7 +4165,7 @@ void main() {
       <TextEditingDelta>[
         TextEditingDeltaNonTextUpdate(
           oldText: editableTextState.textEditingValue.text,
-          selection: TextSelection.collapsed(offset: tallText.length),
+          selection: const TextSelection.collapsed(offset: tallText.length),
           composing: editableTextState.textEditingValue.composing,
         ),
       ],
