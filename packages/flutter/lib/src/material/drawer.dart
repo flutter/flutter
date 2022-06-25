@@ -148,6 +148,7 @@ class Drawer extends StatelessWidget {
     this.width,
     this.child,
     this.semanticLabel,
+    this.surfaceTintColor,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
@@ -198,9 +199,22 @@ class Drawer extends StatelessWidget {
   ///    value is used.
   final String? semanticLabel;
 
+  /// The color used as an overlay on [color] to indicate elevation.
+  ///
+  /// If this is null, no overlay will be applied. Otherwise the
+  /// color will be composited on top of [color] with an opacity related
+  /// to [elevation] and used to paint the background of the [Drawer].
+  ///
+  /// The default is null.
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this overlay is applied.
+  final Color? surfaceTintColor;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    final ThemeData theme = Theme.of(context);
+    final DrawerThemeData defaults = theme.useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2();
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     String? label = semanticLabel;
     switch (Theme.of(context).platform) {
@@ -219,11 +233,12 @@ class Drawer extends StatelessWidget {
       explicitChildNodes: true,
       label: label,
       child: ConstrainedBox(
-        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
+        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? defaults.width ?? _kWidth),
         child: Material(
-          color: backgroundColor ?? drawerTheme.backgroundColor,
-          elevation: elevation ?? drawerTheme.elevation ?? 16.0,
-          shape: shape ?? drawerTheme.shape,
+          color: backgroundColor ?? drawerTheme.backgroundColor ?? defaults.backgroundColor,
+          elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation ?? 16.0,
+          shape: shape ?? drawerTheme.shape ?? defaults.shape,
+          surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           child: child,
         ),
       ),
@@ -702,3 +717,32 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     );
   }
 }
+
+class _DefaultsM2 extends DrawerThemeData {}
+
+// BEGIN GENERATED TOKEN PROPERTIES
+
+// Generated code to the end of this file. Do not edit by hand.
+// These defaults are generated from the Material Design Token
+// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Generated version v0_101
+class _TokenDefaultsM3 extends DrawerThemeData {
+  const _TokenDefaultsM3(this.context)
+    : super(
+      elevation: 0.0,
+      width: 360.0,
+    );
+
+  final BuildContext context;
+  
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)));
+}
+// END GENERATED TOKEN PROPERTIES
