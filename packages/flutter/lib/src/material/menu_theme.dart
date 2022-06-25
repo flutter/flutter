@@ -12,7 +12,7 @@ import 'menu_bar.dart';
 import 'theme.dart';
 
 /// Defines the visual properties of [MenuBar], [MenuBarMenu] and
-/// [MenuBarButton] widgets.
+/// [MenuItemButton] widgets.
 ///
 /// Descendant widgets obtain the current [MenuThemeData] object
 /// using `MenuTheme.of(context)`. Instances of
@@ -84,28 +84,28 @@ class MenuThemeData with Diagnosticable {
 
   // MenuBarItem properties
 
-  /// The background color of a [MenuBarButton].
+  /// The background color of a [MenuItemButton].
   final MaterialStateProperty<Color?>? itemBackgroundColor;
 
-  /// The foreground color of a [MenuBarButton], used to color the text and
-  /// shortcut labels of a [MenuBarButton].
+  /// The foreground color of a [MenuItemButton], used to color the text and
+  /// shortcut labels of a [MenuItemButton].
   final MaterialStateProperty<Color?>? itemForegroundColor;
 
-  /// The overlay color of a [MenuBarButton], used to color the overlay of a
-  /// [MenuBarButton], typically seen when the [MaterialState.hovered],
+  /// The overlay color of a [MenuItemButton], used to color the overlay of a
+  /// [MenuItemButton], typically seen when the [MaterialState.hovered],
   /// [MaterialState.selected], and/or [MaterialState.focused] states apply.
   final MaterialStateProperty<Color?>? itemOverlayColor;
 
-  /// The text style of the [MenuBarButton]s in a [MenuBar].
+  /// The text style of the [MenuItemButton]s in a [MenuBar].
   ///
   /// The color in this text style will only be used if [itemForegroundColor]
   /// is unset.
   final MaterialStateProperty<TextStyle?>? itemTextStyle;
 
-  /// The padding around the outside of an individual [MenuBarButton].
+  /// The padding around the outside of an individual [MenuItemButton].
   final EdgeInsets? itemPadding;
 
-  /// The shape of an individual [MenuBarButton].
+  /// The shape of an individual [MenuItemButton].
   final MaterialStateProperty<OutlinedBorder?>? itemShape;
 
   /// Creates a copy of this object with the given fields replaced with the new
@@ -284,26 +284,26 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 }
 
 /// An inherited widget that defines the configuration for [MenuBar] and
-/// [MenuBarButton] in this widget's descendants.
+/// [MenuItemButton] in this widget's descendants.
 ///
-/// Values specified here are used for [MenuBar] and [MenuBarButton] properties
+/// Values specified here are used for [MenuBar] and [MenuItemButton] properties
 /// that are not given an explicit non-null value.
 ///
 /// See also:
-///  * [MenuBar], a widget that manages [MenuBarButton]s.
-///  * [MenuBarButton], a widget that is a selectable item in a menu bar menu.
+///  * [MenuBar], a widget that manages [MenuItemButton]s.
+///  * [MenuItemButton], a widget that is a selectable item in a menu bar menu.
 ///  * [MenuBarMenu], a widget that specifies an item with a cascading
 ///    submenu in a [MenuBar] menu.
 class MenuTheme extends InheritedTheme {
   /// Creates a theme that controls the configurations for [MenuBar] and
-  /// [MenuBarButton] in its widget subtree.
+  /// [MenuItemButton] in its widget subtree.
   const MenuTheme({
     super.key,
     required this.data,
     required super.child,
   }) : assert(data != null);
 
-  /// The properties for [MenuBar] and [MenuBarButton] in this widget's
+  /// The properties for [MenuBar] and [MenuItemButton] in this widget's
   /// descendants.
   final MenuThemeData data;
 

@@ -110,18 +110,18 @@ class _MyMenuBarState extends State<MyMenuBar> {
               autofocus: true,
               label: 'Menu App',
               menus: <MenuItem>[
-                MenuBarButton(
+                MenuItemButton(
                   label: MenuSelection.about.label,
                   onSelected: () => _activate(MenuSelection.about),
                 ),
                 // Toggles the message.
-                MenuBarButton(
+                MenuItemButton(
                   label: showingMessage ? MenuSelection.hideMessage.label : MenuSelection.showMessage.label,
                   onSelected: () => _activate(showingMessage ? MenuSelection.hideMessage : MenuSelection.showMessage),
                   shortcut: const SingleActivator(LogicalKeyboardKey.keyS, control: true),
                 ),
                 // Hides the message, but is only enabled if the message isn't already hidden.
-                MenuBarButton(
+                MenuItemButton(
                   label: MenuSelection.resetMessage.label,
                   onSelected: showingMessage ? () => _activate(MenuSelection.resetMessage) : null,
                   shortcut: const SingleActivator(LogicalKeyboardKey.escape),
@@ -130,18 +130,18 @@ class _MyMenuBarState extends State<MyMenuBar> {
                   label: 'Background Color',
                   menus: <MenuItem>[
                     MenuItemGroup(members: <MenuItem>[
-                      MenuBarButton(
+                      MenuItemButton(
                         onSelected: () => _activate(MenuSelection.colorRed),
                         label: MenuSelection.colorRed.label,
                         shortcut: const SingleActivator(LogicalKeyboardKey.keyR, control: true),
                       ),
-                      MenuBarButton(
+                      MenuItemButton(
                         onSelected: () => _activate(MenuSelection.colorGreen),
                         label: MenuSelection.colorGreen.label,
                         shortcut: const SingleActivator(LogicalKeyboardKey.keyG, control: true),
                       ),
                     ]),
-                    MenuBarButton(
+                    MenuItemButton(
                       onSelected: () => _activate(MenuSelection.colorBlue),
                       label: MenuSelection.colorBlue.label,
                       shortcut: const SingleActivator(LogicalKeyboardKey.keyB, control: true),

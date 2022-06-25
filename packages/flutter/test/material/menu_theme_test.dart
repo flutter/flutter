@@ -34,7 +34,7 @@ void main() {
   }
 
   Finder findSubMenuItem() {
-    return find.descendant(of: findMenuBarMenu().last, matching: find.byType(MenuBarButton));
+    return find.descendant(of: findMenuBarMenu().last, matching: find.byType(MenuItemButton));
   }
 
   Material getMenuTopLevelBarMaterial(WidgetTester tester) {
@@ -213,7 +213,7 @@ List<MenuItem> createTestMenus({
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
       menus: <MenuItem>[
-        MenuBarButton(
+        MenuItemButton(
           label: TestMenu.subMenu00.label,
           onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu00) : null,
           shortcut: shortcuts[TestMenu.subMenu00],
@@ -231,7 +231,7 @@ List<MenuItem> createTestMenus({
       menus: <MenuItem>[
         MenuItemGroup(
           members: <MenuItem>[
-            MenuBarButton(
+            MenuItemButton(
               label: TestMenu.subMenu10.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu10) : null,
               shortcut: shortcuts[TestMenu.subMenu10],
@@ -250,31 +250,31 @@ List<MenuItem> createTestMenus({
           menus: <MenuItem>[
             MenuItemGroup(
               members: <MenuItem>[
-                MenuBarButton(
+                MenuItemButton(
                   label: TestMenu.subSubMenu100.label,
                   onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu100) : null,
                   shortcut: shortcuts[TestMenu.subSubMenu100],
                 ),
               ],
             ),
-            MenuBarButton(
+            MenuItemButton(
               label: TestMenu.subSubMenu101.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu101) : null,
               shortcut: shortcuts[TestMenu.subSubMenu101],
             ),
-            MenuBarButton(
+            MenuItemButton(
               label: TestMenu.subSubMenu102.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu102) : null,
               shortcut: shortcuts[TestMenu.subSubMenu102],
             ),
-            MenuBarButton(
+            MenuItemButton(
               label: TestMenu.subSubMenu103.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu103) : null,
               shortcut: shortcuts[TestMenu.subSubMenu103],
             ),
           ],
         ),
-        MenuBarButton(
+        MenuItemButton(
           label: TestMenu.subMenu12.label,
           onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu12) : null,
           shortcut: shortcuts[TestMenu.subMenu12],
@@ -286,7 +286,7 @@ List<MenuItem> createTestMenus({
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
       menus: <MenuItem>[
-        MenuBarButton(
+        MenuItemButton(
           // Always disabled.
           label: TestMenu.subMenu20.label,
           shortcut: shortcuts[TestMenu.subMenu20],

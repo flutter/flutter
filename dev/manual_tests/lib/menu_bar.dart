@@ -98,7 +98,7 @@ class _HomeState extends State<Home> {
                         _closeItem(TestMenu.mainMenu1);
                       },
                       menus: <MenuItem>[
-                        MenuBarButton(
+                        MenuItemButton(
                           label: TestMenu.subMenu1.label,
                           shortcut: const SingleActivator(
                             LogicalKeyboardKey.keyB,
@@ -114,7 +114,7 @@ class _HomeState extends State<Home> {
                             });
                           },
                         ),
-                        MenuBarButton(
+                        MenuItemButton(
                           label: TestMenu.subMenu2.label,
                           leadingIcon: const Icon(Icons.send),
                           trailingIcon: const Icon(Icons.mail),
@@ -135,7 +135,7 @@ class _HomeState extends State<Home> {
                             _closeItem(TestMenu.mainMenu2);
                           },
                           menus: <MenuItem>[
-                            MenuBarButton(
+                            MenuItemButton(
                               label: TestMenu.subMenu3.label,
                               shortcut: const SingleActivator(
                                 LogicalKeyboardKey.enter,
@@ -159,8 +159,9 @@ class _HomeState extends State<Home> {
                       },
                       menus: <MenuItem>[
                         MenuItemGroup(members: <MenuItem>[
-                          MenuBarButton(
+                          MenuItemButton(
                             label: TestMenu.subMenu4.label,
+                            labelWidget: const SizedBox(width: 200, child: TextField()),
                             shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
                             onSelectedIntent: const ActivateIntent(),
                           ),
@@ -174,7 +175,7 @@ class _HomeState extends State<Home> {
                             _closeItem(TestMenu.subMenu5);
                           },
                           menus: <MenuItem>[
-                            MenuBarButton(
+                            MenuItemButton(
                               label: TestMenu.subSubMenu1.label,
                               shortcut: _addItem
                                   ? const SingleActivator(
@@ -189,14 +190,14 @@ class _HomeState extends State<Home> {
                                 _itemSelected(TestMenu.subSubMenu1);
                               },
                             ),
-                            MenuBarButton(
+                            MenuItemButton(
                               label: TestMenu.subSubMenu2.label,
                               onSelected: () {
                                 _itemSelected(TestMenu.subSubMenu2);
                               },
                             ),
                             if (_addItem)
-                              MenuBarButton(
+                              MenuItemButton(
                                 label: TestMenu.subSubMenu3.label,
                                 onSelected: () {
                                   _itemSelected(TestMenu.subSubMenu3);
@@ -204,22 +205,22 @@ class _HomeState extends State<Home> {
                               ),
                           ],
                         ),
-                        MenuBarButton(
+                        MenuItemButton(
                           label: TestMenu.subMenu6.label,
                           shortcut: const SingleActivator(
                             LogicalKeyboardKey.tab,
                             control: true,
                           ),
                         ),
-                        MenuBarButton(
+                        MenuItemButton(
                           label: TestMenu.subMenu7.label,
                           onSelected: () {},
                         ),
-                        MenuBarButton(
+                        MenuItemButton(
                           label: TestMenu.subMenu7.label,
                           onSelected: () {},
                         ),
-                        MenuBarButton(
+                        MenuItemButton(
                           label: TestMenu.subMenu8.label,
                           onSelected: () {},
                         ),

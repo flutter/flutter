@@ -18,7 +18,7 @@ void main() {
     expect(menuBar.menus, isNotEmpty);
     expect(menuBar.menus.length, equals(1));
 
-    final Finder menuButtonFinder = find.byType(MenuBarButton).first;
+    final Finder menuButtonFinder = find.byType(MenuItemButton).first;
     await tester.tap(menuButtonFinder);
     await tester.pump();
 
@@ -56,7 +56,7 @@ void main() {
       const example.MenuBarApp(),
     );
 
-    await tester.tap(find.byType(MenuBarButton).first);
+    await tester.tap(find.byType(MenuItemButton).first);
     await tester.pump();
 
     expect(find.text(example.kMessage), findsNothing);
