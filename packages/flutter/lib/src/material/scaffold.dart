@@ -1545,6 +1545,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
+    this.drawerBorderRadius,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1803,6 +1804,13 @@ class Scaffold extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// Determines the [drawer] and the [endDrawer] border-radius.
+  ///
+  /// If non-null, the corners of the drawers are rounded by this value.
+  ///
+  /// Otherwise, no border-radius is applied.
+  final double? drawerBorderRadius;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -2632,6 +2640,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
           isDrawerOpen: _endDrawerOpened.value,
+          borderRadius: widget.drawerBorderRadius != null ?
+            BorderRadiusDirectional.only(
+              topStart: Radius.circular(widget.drawerBorderRadius!),
+              bottomStart: Radius.circular(widget.drawerBorderRadius!),
+            ) : null,
           child: widget.endDrawer!,
         ),
         _ScaffoldSlot.endDrawer,
@@ -2658,6 +2671,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
           isDrawerOpen: _drawerOpened.value,
+          borderRadius: widget.drawerBorderRadius != null ?
+            BorderRadiusDirectional.only(
+              topEnd: Radius.circular(widget.drawerBorderRadius!),
+              bottomEnd: Radius.circular(widget.drawerBorderRadius!),
+            ) : null,
           child: widget.drawer!,
         ),
         _ScaffoldSlot.drawer,

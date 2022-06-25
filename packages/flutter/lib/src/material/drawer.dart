@@ -265,6 +265,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
+    this.borderRadius,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -336,6 +337,12 @@ class DrawerController extends StatefulWidget {
   /// depending on what was last saved to the target platform before the
   /// application was killed.
   final bool isDrawerOpen;
+
+  /// If non-null, the corners of [child] are rounded by this
+  /// [BorderRadiusGeometry] value.
+  ///
+  /// Used in [Scaffold] to determinants the [Drawer] border-radius.
+  final BorderRadiusGeometry? borderRadius;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -654,7 +661,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   child: FocusScope(
                     key: _drawerKey,
                     node: _focusScopeNode,
-                    child: widget.child,
+                    child: Container(
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        borderRadius: widget.borderRadius,
+                      ),
+                      child: widget.child,
+                    ),
                   ),
                 ),
               ),
