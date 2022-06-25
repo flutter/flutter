@@ -135,7 +135,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     ),
   );
   final String dotPackages = globals.fs.path.absolute(globals.fs.path.join(
-    '.packages',
+    '.dart_tool/package_config.json',
   ));
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
