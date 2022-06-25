@@ -536,7 +536,12 @@ abstract class FlutterDriver {
     await sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
   }
 
-  Future<void> receiveAction(TextInputAction action,
+  /// Simulates the user pressing one of the [TextInputAction] buttons.
+  /// Does not check that the [TextInputAction] performed is an acceptable one
+  /// based on the `inputAction` [setClientArgs].
+  ///
+  /// This can be called even if the [TestTextInput] has not been [register]ed.
+  Future<void> receiveAction(DriverTextInputAction action,
       {Duration? timeout}) async {
     await sendCommand(ReceiveAction(action, timeout: timeout));
   }
