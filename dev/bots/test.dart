@@ -1820,7 +1820,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
-    if (fatalWarnings) '--fatal-warnings',
+    //if (fatalWarnings) '--fatal-warnings',
     ...options,
     ...tags,
     ...flutterTestArgs,
