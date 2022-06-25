@@ -995,3 +995,116 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 }
 
 // END GENERATED TOKEN PROPERTIES - IconButton
+
+// BEGIN GENERATED TOKEN PROPERTIES - IconButton
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+class _IconButtonDefaultsM3 extends ButtonStyle {
+  _IconButtonDefaultsM3(this.context)
+    : super(
+        animationDuration: kThemeChangeDuration,
+        enableFeedback: true,
+        alignment: Alignment.center,
+      );
+
+    final BuildContext context;
+    late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  // No default text style
+
+  @override
+  MaterialStateProperty<Color?>? get backgroundColor =>
+    ButtonStyleButton.allOrNull<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<Color?>? get foregroundColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _colors.primary;
+      }
+      return _colors.onSurfaceVariant;
+    });
+
+ @override
+  MaterialStateProperty<Color?>? get overlayColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.primary.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.primary.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary.withOpacity(0.12);
+        }
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurfaceVariant.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurfaceVariant.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurfaceVariant.withOpacity(0.12);
+      }
+      return null;
+    });
+
+  // No default shadow color
+
+  // No default surface tint color
+
+  @override
+  MaterialStateProperty<double>? get elevation =>
+    ButtonStyleButton.allOrNull<double>(0.0);
+
+  @override
+  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(const EdgeInsets.all(8.0));
+
+  @override
+  MaterialStateProperty<Size>? get minimumSize =>
+    ButtonStyleButton.allOrNull<Size>(const Size(40.0, 40.0));
+
+  // No default fixedSize
+
+  @override
+  MaterialStateProperty<Size>? get maximumSize =>
+    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+
+  // No default side
+
+  @override
+  MaterialStateProperty<OutlinedBorder>? get shape =>
+    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+
+  @override
+  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return SystemMouseCursors.click;
+    });
+
+  @override
+  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+
+  @override
+  MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+}
+
+// END GENERATED TOKEN PROPERTIES - IconButton

@@ -854,3 +854,82 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
 }
 
 // END GENERATED TOKEN PROPERTIES - FAB
+
+// BEGIN GENERATED TOKEN PROPERTIES - FAB
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+class _FABDefaultsM3 extends FloatingActionButtonThemeData {
+  _FABDefaultsM3(this.context, this.type, this.hasChild)
+    : super(
+        elevation: 6.0,
+        focusElevation: 6.0,
+        hoverElevation: 8.0,
+        highlightElevation: 6.0,
+        enableFeedback: true,
+        sizeConstraints: const BoxConstraints.tightFor(
+          width: 56.0,
+          height: 56.0,
+        ),
+        smallSizeConstraints: const BoxConstraints.tightFor(
+          width: 40.0,
+          height: 40.0,
+        ),
+        largeSizeConstraints: const BoxConstraints.tightFor(
+          width: 96.0,
+          height: 96.0,
+        ),
+        extendedSizeConstraints: const BoxConstraints.tightFor(
+          height: 56.0,
+        ),
+        extendedIconLabelSpacing: 8.0,
+      );
+
+  final BuildContext context;
+  final _FloatingActionButtonType type;
+  final bool hasChild;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  bool get _isExtended => type == _FloatingActionButtonType.extended;
+
+  @override Color? get foregroundColor => _colors.onPrimaryContainer;
+  @override Color? get backgroundColor => _colors.primaryContainer;
+  @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.12);
+  @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.12);
+  @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
+
+  @override
+  ShapeBorder? get shape {
+    switch (type) {
+      case _FloatingActionButtonType.regular:
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+      case _FloatingActionButtonType.small:
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0)));
+      case _FloatingActionButtonType.large:
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0)));
+      case _FloatingActionButtonType.extended:
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+     }
+  }
+
+  @override
+  double? get iconSize {
+    switch (type) {
+      case _FloatingActionButtonType.regular: return 24.0;
+      case _FloatingActionButtonType.small: return  24.0;
+      case _FloatingActionButtonType.large: return 36.0;
+      case _FloatingActionButtonType.extended: return 24.0;
+    }
+  }
+
+  @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
+  @override TextStyle? get extendedTextStyle => _textTheme.labelLarge;
+}
+
+// END GENERATED TOKEN PROPERTIES - FAB

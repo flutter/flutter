@@ -24,6 +24,7 @@ import 'package:gen_defaults/chip_action_template.dart';
 import 'package:gen_defaults/chip_filter_template.dart';
 import 'package:gen_defaults/chip_input_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
+import 'package:gen_defaults/drawer_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
@@ -109,6 +110,7 @@ Future<void> main(List<String> args) async {
   ChipFilterTemplate('FilterChip', '$materialLib/chip_choice.dart', tokens).updateFile();
   ChipInputTemplate('InputChip', '$materialLib/chip_input.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
+  DrawerTemplate('Drawer', '$materialLib/drawer.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   IconButtonTemplate('IconButton', '$materialLib/icon_button.dart', tokens).updateFile();
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();

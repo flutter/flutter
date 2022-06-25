@@ -1258,3 +1258,55 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 }
 
 // END GENERATED TOKEN PROPERTIES - NavigationBar
+
+// BEGIN GENERATED TOKEN PROPERTIES - NavigationBar
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
+  _NavigationBarDefaultsM3(this.context)
+      : super(
+          height: 80.0,
+          elevation: 3.0,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        );
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override Color? get backgroundColor => _colors.surface;
+
+  @override Color? get surfaceTintColor => _colors.surfaceTint;
+
+  @override MaterialStateProperty<IconThemeData?>? get iconTheme {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      return IconThemeData(
+        size: 24.0,
+        color: states.contains(MaterialState.selected)
+          ? _colors.onSecondaryContainer
+          : _colors.onSurfaceVariant,
+      );
+    });
+  }
+
+  @override Color? get indicatorColor => _colors.secondaryContainer;
+  @override ShapeBorder? get indicatorShape => const StadiumBorder();
+
+  @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    final TextStyle style = _textTheme.labelMedium!;
+      return style.apply(color: states.contains(MaterialState.selected)
+        ? _colors.onSurface
+        : _colors.onSurfaceVariant
+      );
+    });
+  }
+}
+
+// END GENERATED TOKEN PROPERTIES - NavigationBar
