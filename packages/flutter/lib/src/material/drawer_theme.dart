@@ -37,6 +37,7 @@ class DrawerThemeData with Diagnosticable {
     this.elevation,
     this.shape,
     this.width,
+    this.surfaceTintColor,
   });
 
   /// Overrides the default value of [Drawer.backgroundColor].
@@ -54,6 +55,13 @@ class DrawerThemeData with Diagnosticable {
   /// Overrides the default value of [Drawer.width].
   final double? width;
 
+  /// Default value for [Drawer.surfaceTintColor].
+  ///
+  /// If null, [Drawer] will not display an overlay color.
+  ///
+  /// See [Material.surfaceTintColor] for more details.
+  final Color? surfaceTintColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DrawerThemeData copyWith({
@@ -62,6 +70,7 @@ class DrawerThemeData with Diagnosticable {
     double? elevation,
     ShapeBorder? shape,
     double? width,
+    Color? surfaceTintColor,
   }) {
     return DrawerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -69,6 +78,7 @@ class DrawerThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
       width: width ?? this.width,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
     );
   }
 
@@ -88,6 +98,7 @@ class DrawerThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       width: lerpDouble(a?.width, b?.width, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
     );
   }
 
@@ -98,6 +109,7 @@ class DrawerThemeData with Diagnosticable {
     elevation,
     shape,
     width,
+    surfaceTintColor,
   );
 
   @override
@@ -113,7 +125,8 @@ class DrawerThemeData with Diagnosticable {
         && other.scrimColor == scrimColor
         && other.elevation == elevation
         && other.shape == shape
-        && other.width == width;
+        && other.width == width
+        && other.surfaceTintColor == surfaceTintColor;
   }
 
   @override
@@ -124,6 +137,7 @@ class DrawerThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
   }
 }
 
