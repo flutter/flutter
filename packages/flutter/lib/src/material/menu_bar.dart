@@ -40,9 +40,6 @@ const double _kLabelItemMinSpacing = 4.0;
 const double _kTopLevelMenuHorizontalMinPadding = 4.0;
 
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
-  // SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-  // SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
-  // SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
   SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
@@ -390,13 +387,14 @@ class _MenuBarState extends State<_MenuBar> {
   @override
   void initState() {
     super.initState();
-    manager = _MenuManager(context: context, controller: widget.controller, menus: widget.menus);
+    manager = _MenuManager(context: context);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     manager.initIfNecessary();
+    _updateManager();
   }
 
   @override
@@ -409,10 +407,7 @@ class _MenuBarState extends State<_MenuBar> {
   @override
   void didUpdateWidget(_MenuBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    manager.controller = widget.controller;
-    manager.menus = widget.menus;
-    manager.enabled = widget.enabled;
-    manager.overlay = Overlay.of(context);
+    _updateManager();
   }
 
   @override
@@ -422,47 +417,58 @@ class _MenuBarState extends State<_MenuBar> {
     final MenuThemeData menuTheme = MenuTheme.of(context);
     return _MenuManagerMarker(
       manager: manager,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          NextFocusIntent: _MenuNextFocusAction(manager: manager),
-          PreviousFocusIntent: _MenuPreviousFocusAction(manager: manager),
-          DirectionalFocusIntent: _MenuDirectionalFocusAction(
-            manager: manager,
-            textDirection: Directionality.of(context),
-          ),
-          DismissIntent: _MenuDismissAction(manager: manager),
-        },
-        child: Builder(builder: (BuildContext context) {
-          return ExcludeFocus(
-            excluding: !manager.enabled || !manager.menuIsOpen,
-            child: FocusScope(
-              node: menuBarScope,
-              child: Shortcuts(
-                // Make sure that these override any shortcut bindings from
-                // the menu items when a menu is open. If someone wants to
-                // bind an arrow or tab to a menu item, it would otherwise
-                // override the default traversal keys. We want their
-                // shortcut to apply everywhere but in the menu itself,
-                // since there we have to be able to traverse menus.
-                shortcuts: _kMenuTraversalShortcuts,
-                child: _MenuBarTopLevelBar(
-                  elevation: (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
-                      .resolve(state)!,
-                  height: widget.height ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
-                  enabled: widget.enabled,
-                  color: (widget.backgroundColor ??
-                          menuTheme.barBackgroundColor ??
-                          _TokenDefaultsM3(context).barBackgroundColor)
-                      .resolve(state)!,
-                  padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                  children: widget.menus,
-                ),
+      child: AnimatedBuilder(
+          animation: manager,
+          builder: (BuildContext context, Widget? ignoredChild) {
+            return ExcludeFocus(
+              excluding: !manager.enabled || !manager.menuIsOpen,
+              child: Actions(
+                actions: <Type, Action<Intent>>{
+                  NextFocusIntent: _MenuNextFocusAction(manager: manager),
+                  PreviousFocusIntent: _MenuPreviousFocusAction(manager: manager),
+                  DirectionalFocusIntent: _MenuDirectionalFocusAction(
+                    manager: manager,
+                    textDirection: Directionality.of(context),
+                  ),
+                  DismissIntent: _MenuDismissAction(manager: manager),
+                },
+                child: Builder(builder: (BuildContext context) {
+                  return Shortcuts(
+                    shortcuts: _kMenuTraversalShortcuts,
+                    child: FocusScope(
+                      node: menuBarScope,
+                      child: _MenuNodeWrapper(
+                        menu: manager.root,
+                        child: _MenuBarTopLevelBar(
+                          elevation:
+                              (widget.elevation ?? menuTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
+                                  .resolve(state)!,
+                          height:
+                              widget.height ?? menuTheme.barMinimumHeight ?? _TokenDefaultsM3(context).barMinimumHeight,
+                          enabled: widget.enabled,
+                          color: (widget.backgroundColor ??
+                                  menuTheme.barBackgroundColor ??
+                                  _TokenDefaultsM3(context).barBackgroundColor)
+                              .resolve(state)!,
+                          padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
+                          children: widget.menus,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
               ),
-            ),
-          );
-        }),
-      ),
+            );
+          }),
     );
+  }
+
+  void _updateManager() {
+    manager.controller = widget.controller;
+    manager.context = context;
+    manager.menus = widget.menus;
+    manager.enabled = widget.enabled;
+    manager.overlay = Overlay.of(context);
   }
 }
 
@@ -472,13 +478,7 @@ class _MenuBarState extends State<_MenuBar> {
 ///
 /// [MenuBar] is implemented using this manager, as is [CascadingMenu].
 class _MenuManager extends ChangeNotifier {
-  _MenuManager({
-    required BuildContext context,
-    MenuBarController? controller,
-    required List<MenuItem> menus,
-  })  : _context = context,
-        _controller = controller,
-        _menus = menus;
+  _MenuManager({required BuildContext context}) : _context = context;
 
   // The shortcuts registered with the ShortcutRegistry when the menu bar is
   // enabled.
@@ -550,7 +550,7 @@ class _MenuManager extends ChangeNotifier {
   set controller(MenuBarController? value) {
     if (_controller != value) {
       _controller?._detach(this);
-      _controller = controller;
+      _controller = value;
       _controller?._attach(this);
       _controller?._managerStateChanged();
     }
@@ -566,7 +566,7 @@ class _MenuManager extends ChangeNotifier {
     }
   }
 
-  // Whether or not the entire menu system managed by this manager is enbled.
+  // Whether or not the entire menu system managed by this manager is enabled.
   bool get enabled => _enabled;
   bool _enabled = true;
   set enabled(bool value) {
@@ -582,18 +582,15 @@ class _MenuManager extends ChangeNotifier {
       return;
     }
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
-
-    // Apply any settings acquired through the constructor.
-    menus = _menus;
-    controller = _controller;
-    context = _context;
-
     initialized = true;
   }
 
   @override
   void dispose() {
-    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    assert(initialized);
+    if (initialized) {
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    }
     controller?._detach(this);
     root.children.clear();
     _focusNodes.clear();
@@ -745,6 +742,7 @@ class _MenuManager extends ChangeNotifier {
     _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
       node.open();
     });
+    notifyListeners();
     if (value != null && value.focusNode?.hasPrimaryFocus != true) {
       // Request focus on the new thing that is now open, if any, so that
       // focus traversal starts from that location.
@@ -1881,27 +1879,21 @@ class _MenuStackState extends State<_MenuStack> {
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: FocusScope(
-        node: _overlayScope,
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            NextFocusIntent: _MenuNextFocusAction(manager: widget.manager),
-            PreviousFocusIntent: _MenuPreviousFocusAction(manager: widget.manager),
-            DirectionalFocusIntent: _MenuDirectionalFocusAction(
-              manager: widget.manager,
-              textDirection: Directionality.of(context),
-            ),
-            DismissIntent: _MenuDismissAction(manager: widget.manager),
-            VoidCallbackIntent: VoidCallbackAction(),
-          },
-          child: Shortcuts(
-            // These are here to make sure that these override any shortcut
-            // bindings from the menu items when a menu is open. If someone
-            // wants to bind an arrow or tab to a menu item, it would otherwise
-            // override the default traversal keys. We want their shortcuts to
-            // apply everywhere but override these in the menu itself, since
-            // there we have to be able to traverse the menus.
-            shortcuts: _kMenuTraversalShortcuts,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          NextFocusIntent: _MenuNextFocusAction(manager: widget.manager),
+          PreviousFocusIntent: _MenuPreviousFocusAction(manager: widget.manager),
+          DirectionalFocusIntent: _MenuDirectionalFocusAction(
+            manager: widget.manager,
+            textDirection: Directionality.of(context),
+          ),
+          DismissIntent: _MenuDismissAction(manager: widget.manager),
+          VoidCallbackIntent: VoidCallbackAction(),
+        },
+        child: Shortcuts(
+          shortcuts: _kMenuTraversalShortcuts,
+          child: FocusScope(
+            node: _overlayScope,
             child: _MenuManagerMarker(
               manager: widget.manager,
               child: Stack(
@@ -2242,58 +2234,21 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
   /// These are the top level [MenuBarMenu]s.
   final List<MenuItem> children;
 
-  List<Widget> _expandGroups(_MenuManager manager) {
-    final List<Widget> expanded = <Widget>[];
-    int index = 0;
-    bool lastWasGroup = false;
-    for (final MenuItem item in children) {
-      if (lastWasGroup) {
-        expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
-      }
-      if (item.members.isNotEmpty) {
-        if (!lastWasGroup && expanded.isNotEmpty) {
-          expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
-        }
-        for (final MenuItem member in item.members) {
-          expanded.add(_MenuNodeWrapper(
-            menu: manager.root.children[index],
-            child: member,
-          ));
-          index += 1;
-        }
-        lastWasGroup = true;
-      } else {
-        expanded.add(_MenuNodeWrapper(
-          menu: manager.root.children[index],
-          child: item,
-        ));
-        index += 1;
-        lastWasGroup = false;
-      }
-    }
-    return expanded;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final _MenuManager manager = _MenuManager.of(context);
-
-    return _MenuNodeWrapper(
-      menu: manager.root,
-      child: _RegisteredRenderBox(
-        manager: manager,
-        child: Material(
-          color: color,
-          shape: const RoundedRectangleBorder(),
-          elevation: elevation,
-          child: Padding(
-            padding: padding,
-            child: _MenuBarMenuList(
-              textDirection: Directionality.of(context),
-              direction: Axis.horizontal,
-              crossAxisMinSize: height,
-              children: _expandGroups(manager),
-            ),
+    return _RegisteredRenderBox(
+      manager: _MenuManager.of(context),
+      child: Material(
+        color: color,
+        shape: const RoundedRectangleBorder(),
+        elevation: elevation,
+        child: Padding(
+          padding: padding,
+          child: _MenuBarMenuList(
+            textDirection: Directionality.of(context),
+            direction: Axis.horizontal,
+            crossAxisMinSize: height,
+            children: children,
           ),
         ),
       ),
