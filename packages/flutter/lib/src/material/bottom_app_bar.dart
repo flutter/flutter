@@ -40,6 +40,15 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/bottom_app_bar/bottom_app_bar.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows material 3 [BottomAppBar] with its expected look and behaviors.
+///
+/// This also includes an optional [FloatingActionButton], which illustrates
+/// the [FloatingActionButtonLocation.endContained].
+///
+/// ** See code in examples/api/lib/material/bottom_app_bar/bottom_app_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [NotchedShape] which calculates the notch for a notched [BottomAppBar].
