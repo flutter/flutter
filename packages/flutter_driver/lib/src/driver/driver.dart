@@ -543,6 +543,7 @@ abstract class FlutterDriver {
   /// This can be called even if the [TestTextInput] has not been [register]ed.
   Future<void> receiveAction(DriverTextInputAction action,
       {Duration? timeout}) async {
+    assert(action != null);
     await sendCommand(ReceiveAction(action, timeout: timeout));
   }
 

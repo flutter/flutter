@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
@@ -347,6 +348,15 @@ void main() {
         expect(result, 'hello');
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: get_text, timeout: $_kSerializedTestTimeout, finderType: ByValueKey, keyValueString: 123, keyValueType: int}',
+        ]);
+      });
+    });
+
+    group('receiveAction', () {
+      test('sends the receiveAction command with action done', () async {
+        await driver.receiveAction(DriverTextInputAction.done, timeout: _kTestTimeout);
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: receive_action, timeout: $_kSerializedTestTimeout, action: done}',
         ]);
       });
     });
