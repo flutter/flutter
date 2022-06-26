@@ -73,6 +73,8 @@ G_DEFINE_TYPE_WITH_CODE(
     G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                           fl_engine_plugin_registry_iface_init))
 
+enum { PROP_0, PROP_BINARY_MESSENGER, PROP_LAST };
+
 // Parse a locale into its components.
 static void parse_locale(const gchar* locale,
                          gchar** language,
@@ -351,6 +353,22 @@ static void fl_engine_plugin_registry_iface_init(
   iface->get_registrar_for_plugin = fl_engine_get_registrar_for_plugin;
 }
 
+static void fl_engine_set_property(GObject* object,
+                                   guint prop_id,
+                                   const GValue* value,
+                                   GParamSpec* pspec) {
+  FlEngine* self = FL_ENGINE(object);
+  switch (prop_id) {
+    case PROP_BINARY_MESSENGER:
+      g_set_object(&self->binary_messenger,
+                   FL_BINARY_MESSENGER(g_value_get_object(value)));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
 static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
@@ -397,6 +415,15 @@ static void fl_engine_dispose(GObject* object) {
 
 static void fl_engine_class_init(FlEngineClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_engine_dispose;
+  G_OBJECT_CLASS(klass)->set_property = fl_engine_set_property;
+
+  g_object_class_install_property(
+      G_OBJECT_CLASS(klass), PROP_BINARY_MESSENGER,
+      g_param_spec_object(
+          "binary-messenger", "messenger", "Binary messenger",
+          fl_binary_messenger_get_type(),
+          static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
+                                   G_PARAM_STATIC_STRINGS)));
 }
 
 static void fl_engine_init(FlEngine* self) {
@@ -406,7 +433,6 @@ static void fl_engine_init(FlEngine* self) {
   FlutterEngineGetProcAddresses(&self->embedder_api);
 
   self->texture_registrar = fl_texture_registrar_new(self);
-  self->binary_messenger = fl_binary_messenger_new(self);
 }
 
 FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer) {
@@ -416,6 +442,7 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer) {
   FlEngine* self = FL_ENGINE(g_object_new(fl_engine_get_type(), nullptr));
   self->project = FL_DART_PROJECT(g_object_ref(project));
   self->renderer = FL_RENDERER(g_object_ref(renderer));
+  self->binary_messenger = fl_binary_messenger_new(self);
   return self;
 }
 
@@ -522,7 +549,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   setup_locales(self);
 
   g_autoptr(FlSettings) settings = fl_settings_new();
-  self->settings_plugin = fl_settings_plugin_new(self->binary_messenger);
+  self->settings_plugin = fl_settings_plugin_new(self);
   fl_settings_plugin_start(self->settings_plugin, settings);
 
   result = self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE);
@@ -843,4 +870,15 @@ G_MODULE_EXPORT FlTextureRegistrar* fl_engine_get_texture_registrar(
     FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->texture_registrar;
+}
+
+void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  self->embedder_api.UpdateAccessibilityFeatures(
+      self->engine, static_cast<FlutterAccessibilityFeature>(flags));
 }

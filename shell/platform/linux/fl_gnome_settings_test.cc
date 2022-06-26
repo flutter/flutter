@@ -69,6 +69,16 @@ TEST_F(FlGnomeSettingsTest, GtkTheme) {
   EXPECT_EQ(fl_settings_get_color_scheme(settings), FL_COLOR_SCHEME_DARK);
 }
 
+TEST_F(FlGnomeSettingsTest, EnableAnimations) {
+  g_autoptr(FlSettings) settings = fl_gnome_settings_new();
+  EXPECT_TRUE(fl_settings_get_enable_animations(settings));
+}
+
+TEST_F(FlGnomeSettingsTest, HighContrast) {
+  g_autoptr(FlSettings) settings = fl_gnome_settings_new();
+  EXPECT_FALSE(fl_settings_get_high_contrast(settings));
+}
+
 TEST_F(FlGnomeSettingsTest, TextScalingFactor) {
   g_autoptr(GSettings) interface_settings =
       create_settings("ubuntu-20.04", "org.gnome.desktop.interface");

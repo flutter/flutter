@@ -40,6 +40,16 @@ static FlColorScheme fl_mock_settings_get_color_scheme(FlSettings* settings) {
   return self->mock->fl_settings_get_color_scheme(settings);
 }
 
+static gboolean fl_mock_settings_get_enable_animations(FlSettings* settings) {
+  FlMockSettings* self = FL_MOCK_SETTINGS(settings);
+  return self->mock->fl_settings_get_enable_animations(settings);
+}
+
+static gboolean fl_mock_settings_get_high_contrast(FlSettings* settings) {
+  FlMockSettings* self = FL_MOCK_SETTINGS(settings);
+  return self->mock->fl_settings_get_high_contrast(settings);
+}
+
 static gdouble fl_mock_settings_get_text_scaling_factor(FlSettings* settings) {
   FlMockSettings* self = FL_MOCK_SETTINGS(settings);
   return self->mock->fl_settings_get_text_scaling_factor(settings);
@@ -48,6 +58,8 @@ static gdouble fl_mock_settings_get_text_scaling_factor(FlSettings* settings) {
 static void fl_mock_settings_iface_init(FlSettingsInterface* iface) {
   iface->get_clock_format = fl_mock_settings_get_clock_format;
   iface->get_color_scheme = fl_mock_settings_get_color_scheme;
+  iface->get_enable_animations = fl_mock_settings_get_enable_animations;
+  iface->get_high_contrast = fl_mock_settings_get_high_contrast;
   iface->get_text_scaling_factor = fl_mock_settings_get_text_scaling_factor;
 }
 
