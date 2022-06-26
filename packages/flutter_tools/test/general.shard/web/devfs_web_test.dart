@@ -660,6 +660,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
@@ -772,6 +774,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
@@ -877,6 +881,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'any',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
@@ -912,6 +918,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
@@ -955,6 +963,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
@@ -1065,6 +1075,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null,
       useSseForDebugProxy: true,
