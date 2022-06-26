@@ -253,120 +253,6 @@ class _ZoomPageTransition extends StatelessWidget {
   }
 }
 
-abstract class _RadicallyAwesomeRenderObject extends RenderProxyBox {
-  _RadicallyAwesomeRenderObject(Animation<double> animation, bool reverse)
-    : _animation = animation, _reverse = reverse {
-    animation.addListener(markNeedsPaint);
-    animation.addStatusListener(_updateStatus);
-    _updateStatus(animation.status);
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    return child?.hitTest(result, position: position) ?? false;
-  }
-
-  @protected
-  bool willPaint(Animation<double> animation) => true;
-
-  @protected
-  void paintImage(PaintingContext context, ui.Image image, Rect area, Animation<double> animation);
-
-  AnimationStatus _status = AnimationStatus.completed;
-
-  void _updateStatus(AnimationStatus newStatus, [bool painting = false]) {
-    if (newStatus == _status) {
-      return;
-    }
-    childImage?.dispose();
-    childImage = null;
-    _status = newStatus;
-    assert(_status == animation.status);
-    if (!painting) {
-      markNeedsPaint();
-    }
-  }
-
-  Animation<double> get animation => _animation;
-  Animation<double> _animation;
-  set animation(Animation<double> value) {
-    if (value == animation) {
-      return;
-    }
-    animation.removeListener(markNeedsPaint);
-    animation.removeStatusListener(_updateStatus);
-    _animation = value;
-    animation.addStatusListener(_updateStatus);
-    animation.addListener(markNeedsPaint);
-    _updateStatus(animation.status);
-    markNeedsPaint();
-  }
-
-  bool get reverse => _reverse;
-  bool _reverse;
-  set reverse(bool value) {
-    if (value == reverse) {
-      return;
-    }
-    _reverse = value;
-    markNeedsPaint();
-  }
-
-  @override
-  void dispose() {
-    animation.removeListener(markNeedsPaint);
-    animation.removeStatusListener(_updateStatus);
-    super.dispose();
-  }
-
-  @override
-  void attach(covariant PipelineOwner owner) {
-    animation.addListener(markNeedsPaint);
-    animation.addStatusListener(_updateStatus);
-    _updateStatus(animation.status);
-    super.attach(owner);
-  }
-
-  @override
-  void detach() {
-    animation.removeListener(markNeedsPaint);
-    animation.removeStatusListener(_updateStatus);
-    super.detach();
-  }
-
-  @override
-  bool get isRepaintBoundary => child != null;
-
-  ui.Image? childImage;
-
-  void _paintChildIntoLayer(Offset offset) {
-    final PaintingContext context = PaintingContext(layer!, offset & size);
-    super.paint(context, Offset.zero);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    _updateStatus(animation.status, true);
-    switch (_status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        super.paint(context, offset);
-        return;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-    }
-    final bool updateImage = willPaint(animation);
-    if (childImage == null && updateImage) {
-      _paintChildIntoLayer(offset);
-      childImage = (layer! as OffsetLayer).toGpuImage(offset & size);
-    }
-    if (updateImage) {
-      paintImage(context, childImage!, offset & size, animation);
-    }
-  }
-}
-
 class _ZoomEnterTransition extends SingleChildRenderObjectWidget {
   const _ZoomEnterTransition({
     required this.animation,
@@ -391,8 +277,18 @@ class _ZoomEnterTransition extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderZoomEnterTransition extends _RadicallyAwesomeRenderObject {
-  _RenderZoomEnterTransition(super.animation, super.reverse);
+class _RenderZoomEnterTransition extends RenderAnimatedRaster {
+  _RenderZoomEnterTransition(super.animation, this._reverse);
+
+  bool get reverse => _reverse;
+  bool _reverse;
+  set reverse(bool value) {
+    if (value == reverse) {
+      return;
+    }
+    _reverse = value;
+    markNeedsPaint();
+  }
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -454,7 +350,7 @@ class _RenderZoomEnterTransition extends _RadicallyAwesomeRenderObject {
     final double leftOffset = (src.width - newWidth) / 2;
     final double topOffset = (src.height - newHeight) / 2;
     final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
-    context.canvas.drawImageRect(childImage!, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
+    context.canvas.drawImageRect(image, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
   }
 }
 
@@ -482,8 +378,8 @@ class _ZoomExitTransition extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderZoomExitTransition extends _RadicallyAwesomeRenderObject {
-  _RenderZoomExitTransition(super.animation, super.reverse);
+class _RenderZoomExitTransition extends RenderAnimatedRaster{
+  _RenderZoomExitTransition(super.animation, this._reverse);
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -499,6 +395,16 @@ class _RenderZoomExitTransition extends _RadicallyAwesomeRenderObject {
     begin: 1.00,
     end: 0.90,
   ).chain(_ZoomPageTransition._scaleCurveSequence);
+
+  bool get reverse => _reverse;
+  bool _reverse;
+  set reverse(bool value) {
+    if (value == reverse) {
+      return;
+    }
+    _reverse = value;
+    markNeedsPaint();
+  }
 
   @override
   bool willPaint(Animation<double> animation) {
@@ -524,7 +430,7 @@ class _RenderZoomExitTransition extends _RadicallyAwesomeRenderObject {
     final double leftOffset = (src.width - newWidth) / 2;
     final double topOffset = (src.height - newHeight) / 2;
     final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
-    context.canvas.drawImageRect(childImage!, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
+    context.canvas.drawImageRect(image, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
   }
 }
 
