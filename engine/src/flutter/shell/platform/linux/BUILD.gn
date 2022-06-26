@@ -99,6 +99,7 @@ source_set("flutter_linux_sources") {
   sources = [
     "fl_accessibility_plugin.cc",
     "fl_accessible_node.cc",
+    "fl_accessible_text_field.cc",
     "fl_backing_store_provider.cc",
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
@@ -192,6 +193,7 @@ executable("flutter_linux_unittests") {
 
   sources = [
     "fl_accessible_node_test.cc",
+    "fl_accessible_text_field_test.cc",
     "fl_basic_message_channel_test.cc",
     "fl_binary_codec_test.cc",
     "fl_binary_messenger_test.cc",
