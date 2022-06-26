@@ -327,6 +327,15 @@ gboolean fl_engine_register_external_texture(FlEngine* engine,
 gboolean fl_engine_unregister_external_texture(FlEngine* engine,
                                                int64_t texture_id);
 
+/**
+ * fl_engine_update_accessibility_features:
+ * @engine: an #FlEngine.
+ * @flags: the features to enable in the accessibility tree.
+ *
+ * Tells the Flutter engine to update the flags on the accessibility tree.
+ */
+void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_ENGINE_PRIVATE_H_

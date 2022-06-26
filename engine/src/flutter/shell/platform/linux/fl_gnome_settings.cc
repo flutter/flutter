@@ -63,6 +63,14 @@ static FlColorScheme fl_gnome_settings_get_color_scheme(FlSettings* settings) {
   return color_scheme;
 }
 
+static gboolean fl_gnome_settings_get_enable_animations(FlSettings* settings) {
+  return true;
+}
+
+static gboolean fl_gnome_settings_get_high_contrast(FlSettings* settings) {
+  return false;
+}
+
 static gdouble fl_gnome_settings_get_text_scaling_factor(FlSettings* settings) {
   FlGnomeSettings* self = FL_GNOME_SETTINGS(settings);
 
@@ -133,6 +141,8 @@ static void fl_gnome_settings_class_init(FlGnomeSettingsClass* klass) {
 static void fl_gnome_settings_iface_init(FlSettingsInterface* iface) {
   iface->get_clock_format = fl_gnome_settings_get_clock_format;
   iface->get_color_scheme = fl_gnome_settings_get_color_scheme;
+  iface->get_enable_animations = fl_gnome_settings_get_enable_animations;
+  iface->get_high_contrast = fl_gnome_settings_get_high_contrast;
   iface->get_text_scaling_factor = fl_gnome_settings_get_text_scaling_factor;
 }
 
