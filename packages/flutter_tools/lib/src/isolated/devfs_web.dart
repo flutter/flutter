@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';

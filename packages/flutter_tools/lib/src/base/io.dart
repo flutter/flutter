@@ -79,6 +79,7 @@ export 'dart:io'
         HttpResponse,
         HttpServer,
         HttpStatus,
+        SecurityContext,
         InternetAddress,
         InternetAddressType,
         IOException,
