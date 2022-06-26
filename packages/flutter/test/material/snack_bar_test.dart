@@ -1795,6 +1795,75 @@ void main() {
     expect(find.text(secondHeader), findsOneWidget);
   });
 
+  testWidgets('Should have only one SnackBar during back swipe navigation', (WidgetTester tester) async {
+    const String snackBarText = 'hello snackbar';
+    const Key snackTarget = Key('snack-target');
+    const Key transitionTarget = Key('transition-target');
+
+    Widget buildApp() {
+      return MaterialApp(
+        initialRoute: '/',
+        routes: <String, WidgetBuilder> {
+          '/': (BuildContext context) {
+            return  Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  key: transitionTarget,
+                  child: const Text('PUSH'),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/second');
+                  },
+                ),
+              ),
+
+            );
+          },
+          '/second': (BuildContext context) {
+            return Scaffold(
+              floatingActionButton: FloatingActionButton(
+                key: snackTarget,
+                onPressed: () async {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(snackBarText),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              ),
+            );
+          },
+        },
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Transition to second page.
+    await tester.tap(find.byKey(transitionTarget));
+    await tester.pumpAndSettle();
+
+    // Present SnackBar
+    await tester.tap(find.byKey(snackTarget));
+    await tester.pump(); // schedule animation
+    expect(find.text(snackBarText), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text(snackBarText), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750));
+    expect(find.text(snackBarText), findsOneWidget);
+
+    // Start the gesture at the edge of the screen.
+    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    // Trigger the swipe.
+    await gesture.moveBy(const Offset(100.0, 0.0));
+
+    // Back gestures should trigger and draw the hero transition in the very same
+    // frame (since the "from" route has already moved to reveal the "to" route).
+    await tester.pump();
+
+    // We should have only one SnackBar displayed on the screen.
+    expect(find.text(snackBarText), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
