@@ -263,6 +263,8 @@ class ResidentWebRunner extends ResidentRunner {
           port: debuggingOptions.port != null
             ? int.tryParse(debuggingOptions.port!)
             : null,
+          tlsCertPath: debuggingOptions.tlsCertPath,
+          tlsCertKeyPath: debuggingOptions.tlsCertKeyPath,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -306,7 +308,11 @@ class ResidentWebRunner extends ResidentRunner {
           mainPath: target,
           debuggingOptions: debuggingOptions,
           platformArgs: <String, Object>{
-            'uri': url.toString(),
+             'uri': (debuggingOptions.tlsCertPath != null &&
+                         debuggingOptions.tlsCertKeyPath != null
+                     ? url.replace(scheme: 'https')
+                     : url)
+                 .toString(),
           },
         );
         return attach(

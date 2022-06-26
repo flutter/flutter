@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
@@ -182,6 +183,8 @@ class WebAssetServer implements AssetReader {
     ChromiumLauncher? chromiumLauncher,
     String hostname,
     int? port,
+    String? tlsCertPath,
+    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -205,7 +208,15 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        final int httpServerPort = port ?? await globals.os.findFreePort();
+        if (tlsCertPath != null && tlsCertKeyPath != null) {
+          final SecurityContext serverContext = SecurityContext()
+             ..useCertificateChain(tlsCertPath)
+             ..usePrivateKey(tlsCertKeyPath);
+          httpServer = await HttpServer.bindSecure(address, httpServerPort, serverContext);
+         } else {
+          httpServer = await HttpServer.bind(address, httpServerPort);
+         }
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -633,6 +644,8 @@ class WebDevFS implements DevFS {
   WebDevFS({
     required this.hostname,
     required int? port,
+    required this.tlsCertPath,
+    required this.tlsCertKeyPath,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -667,6 +680,8 @@ class WebDevFS implements DevFS {
   final bool nativeNullAssertions;
   final int? _port;
   final NullSafetyMode nullSafetyMode;
+  final String? tlsCertPath;
+  final String? tlsCertKeyPath;
 
   late WebAssetServer webAssetServer;
 
@@ -740,6 +755,8 @@ class WebDevFS implements DevFS {
       chromiumLauncher,
       hostname,
       _port,
+      tlsCertPath,
+      tlsCertKeyPath,
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,

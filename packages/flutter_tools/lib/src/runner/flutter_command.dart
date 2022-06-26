@@ -218,6 +218,18 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      'web-tls-cert-path',
+      help: 'The certificate that host will use to serve using TLS connection. '
+          'If not provided, the tool will use default http scheme.',
+      hide: !verboseHelp,
+    );
+    argParser.addOption(
+      'web-tls-cert-key-path',
+      help: 'The certificate key that host will use to authenticate cert. '
+          'If not provided, the tool will use default http scheme.',
+      hide: !verboseHelp,
+    );
     argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
       defaultsTo: 'ws',
