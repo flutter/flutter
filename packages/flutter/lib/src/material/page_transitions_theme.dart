@@ -343,14 +343,18 @@ class _RenderZoomEnterTransition extends RenderAnimatedRaster {
       opacity = _scrimOpacityTween.evaluate(animation)!;
     }
 
+    final Paint paint = Paint()
+      ..filterQuality = ui.FilterQuality.low
+      ..color = const Color(0xFF000000).withOpacity(fade);
+
     context.canvas.drawRect(area, Paint()..color = Colors.black.withOpacity(opacity));
     final Rect src = area;
-    final double newWidth = src.width * scale;
-    final double newHeight = src.height * scale;
-    final double leftOffset = (src.width - newWidth) / 2;
-    final double topOffset = (src.height - newHeight) / 2;
-    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
-    context.canvas.drawImageRect(image, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
+    final double newWidth = src.width * scale / ui.window.devicePixelRatio;
+    final double newHeight = src.height * scale / ui.window.devicePixelRatio;
+    final double leftOffset = (src.width / ui.window.devicePixelRatio - newWidth) / 2;
+    final double topOffset = (src.height / ui.window.devicePixelRatio - newHeight) / 2;
+    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset, newWidth, newHeight);
+    context.canvas.drawImageRect(image, src, dst, paint);
   }
 }
 
@@ -424,13 +428,16 @@ class _RenderZoomExitTransition extends RenderAnimatedRaster{
       : _scaleUpTransition
     ).evaluate(animation);
 
+    final Paint paint = Paint()
+      ..filterQuality = ui.FilterQuality.low
+      ..color = const Color(0xFF000000).withOpacity(fade);
     final Rect src = rect;
-    final double newWidth = src.width * scale;
-    final double newHeight = src.height * scale;
-    final double leftOffset = (src.width - newWidth) / 2;
-    final double topOffset = (src.height - newHeight) / 2;
+    final double newWidth = src.width * scale / ui.window.devicePixelRatio;
+    final double newHeight = src.height * scale / ui.window.devicePixelRatio;
+    final double leftOffset = (src.width / ui.window.devicePixelRatio - newWidth) / 2;
+    final double topOffset = (src.height / ui.window.devicePixelRatio - newHeight) / 2;
     final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
-    context.canvas.drawImageRect(image, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
+    context.canvas.drawImageRect(image, src, dst, paint);
   }
 }
 

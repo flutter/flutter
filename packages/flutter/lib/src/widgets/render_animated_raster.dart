@@ -122,10 +122,12 @@ abstract class RenderAnimatedRaster extends RenderProxyBox {
     final bool updateImage = willPaint(animation);
     if (_childImage == null && updateImage) {
       _paintChildIntoLayer(offset);
-      _childImage = (layer! as OffsetLayer).toGpuImage(offset & size);
+      _childImage = (layer! as OffsetLayer).toGpuImage(offset & size, pixelRatio: ui.window.devicePixelRatio);
+      layer!.removeAllChildren();
     }
     if (updateImage) {
-      paintImage(context, _childImage!, offset & size, animation);
+      final Rect src = offset & size;
+      paintImage(context, _childImage!, Rect.fromLTWH(src.left, src.top, src.width * ui.window.devicePixelRatio, src.height * ui.window.devicePixelRatio), animation);
     }
   }
 }
