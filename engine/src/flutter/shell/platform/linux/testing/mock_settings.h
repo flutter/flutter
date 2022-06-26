@@ -26,6 +26,10 @@ class MockSettings {
   MOCK_METHOD1(fl_settings_get_color_scheme,
                FlColorScheme(FlSettings* settings));
 
+  MOCK_METHOD1(fl_settings_get_enable_animations, bool(FlSettings* settings));
+
+  MOCK_METHOD1(fl_settings_get_high_contrast, bool(FlSettings* settings));
+
   MOCK_METHOD1(fl_settings_get_text_scaling_factor,
                gdouble(FlSettings* settings));
 

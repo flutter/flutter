@@ -43,6 +43,8 @@ struct _FlSettingsInterface {
   GTypeInterface parent;
   FlClockFormat (*get_clock_format)(FlSettings* settings);
   FlColorScheme (*get_color_scheme)(FlSettings* settings);
+  gboolean (*get_enable_animations)(FlSettings* settings);
+  gboolean (*get_high_contrast)(FlSettings* settings);
   gdouble (*get_text_scaling_factor)(FlSettings* settings);
 };
 
@@ -78,6 +80,31 @@ FlClockFormat fl_settings_get_clock_format(FlSettings* settings);
  * Returns: an #FlColorScheme.
  */
 FlColorScheme fl_settings_get_color_scheme(FlSettings* settings);
+
+/**
+ * fl_settings_get_enable_animations:
+ * @settings: an #FlSettings.
+ *
+ * Whether animations should be enabled.
+ *
+ * This corresponds to `org.gnome.desktop.interface.enable-animations` in GNOME.
+ *
+ * Returns: %TRUE if animations are enabled.
+ */
+gboolean fl_settings_get_enable_animations(FlSettings* settings);
+
+/**
+ * fl_settings_get_high_contrast:
+ * @settings: an #FlSettings.
+ *
+ * Whether to use high contrast theme.
+ *
+ * This corresponds to `org.gnome.desktop.a11y.interface.high-contrast` in
+ * GNOME.
+ *
+ * Returns: %TRUE if high contrast is used.
+ */
+gboolean fl_settings_get_high_contrast(FlSettings* settings);
 
 /**
  * fl_settings_get_text_scaling_factor:

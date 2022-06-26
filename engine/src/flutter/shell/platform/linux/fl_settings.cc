@@ -35,6 +35,14 @@ FlColorScheme fl_settings_get_color_scheme(FlSettings* self) {
   return FL_SETTINGS_GET_IFACE(self)->get_color_scheme(self);
 }
 
+gboolean fl_settings_get_enable_animations(FlSettings* self) {
+  return FL_SETTINGS_GET_IFACE(self)->get_enable_animations(self);
+}
+
+gboolean fl_settings_get_high_contrast(FlSettings* self) {
+  return FL_SETTINGS_GET_IFACE(self)->get_high_contrast(self);
+}
+
 gdouble fl_settings_get_text_scaling_factor(FlSettings* self) {
   return FL_SETTINGS_GET_IFACE(self)->get_text_scaling_factor(self);
 }

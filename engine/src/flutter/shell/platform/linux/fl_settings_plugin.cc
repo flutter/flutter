@@ -6,7 +6,10 @@
 
 #include <gmodule.h>
 
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 
 static constexpr char kChannelName[] = "flutter/settings";
@@ -20,7 +23,7 @@ struct _FlSettingsPlugin {
   GObject parent_instance;
 
   FlBasicMessageChannel* channel;
-
+  FlEngine* engine;
   FlSettings* settings;
 };
 
@@ -54,6 +57,17 @@ static void update_settings(FlSettingsPlugin* self) {
       fl_value_new_string(to_platform_brightness(color_scheme)));
   fl_basic_message_channel_send(self->channel, message, nullptr, nullptr,
                                 nullptr);
+
+  if (self->engine != nullptr) {
+    int32_t flags = 0;
+    if (!fl_settings_get_enable_animations(self->settings)) {
+      flags |= kFlutterAccessibilityFeatureDisableAnimations;
+    }
+    if (fl_settings_get_high_contrast(self->settings)) {
+      flags |= kFlutterAccessibilityFeatureHighContrast;
+    }
+    fl_engine_update_accessibility_features(self->engine, flags);
+  }
 }
 
 static void fl_settings_plugin_dispose(GObject* object) {
@@ -61,6 +75,12 @@ static void fl_settings_plugin_dispose(GObject* object) {
 
   g_clear_object(&self->channel);
   g_clear_object(&self->settings);
+
+  if (self->engine != nullptr) {
+    g_object_remove_weak_pointer(G_OBJECT(self),
+                                 reinterpret_cast<gpointer*>(&(self->engine)));
+    self->engine = nullptr;
+  }
 
   G_OBJECT_CLASS(fl_settings_plugin_parent_class)->dispose(object);
 }
@@ -71,12 +91,17 @@ static void fl_settings_plugin_class_init(FlSettingsPluginClass* klass) {
 
 static void fl_settings_plugin_init(FlSettingsPlugin* self) {}
 
-FlSettingsPlugin* fl_settings_plugin_new(FlBinaryMessenger* messenger) {
-  g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
+FlSettingsPlugin* fl_settings_plugin_new(FlEngine* engine) {
+  g_return_val_if_fail(FL_IS_ENGINE(engine), nullptr);
 
   FlSettingsPlugin* self =
       FL_SETTINGS_PLUGIN(g_object_new(fl_settings_plugin_get_type(), nullptr));
 
+  self->engine = engine;
+  g_object_add_weak_pointer(G_OBJECT(self),
+                            reinterpret_cast<gpointer*>(&(self->engine)));
+
+  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
   g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
   self->channel = fl_basic_message_channel_new(messenger, kChannelName,
                                                FL_MESSAGE_CODEC(codec));

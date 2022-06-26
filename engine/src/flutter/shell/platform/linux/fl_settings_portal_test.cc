@@ -97,6 +97,32 @@ TEST(FlSettingsPortalTest, GtkTheme) {
   EXPECT_EQ(fl_settings_get_color_scheme(portal), FL_COLOR_SCHEME_LIGHT);
 }
 
+TEST(FlSettingsPortalTest, EnableAnimations) {
+  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
+
+  g_autoptr(FlSettings) portal =
+      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+  EXPECT_TRUE(fl_settings_get_enable_animations(portal));
+
+  g_variant_dict_insert_value(settings,
+                              "org.gnome.desktop.interface::enable-animations",
+                              g_variant_new_boolean(false));
+  EXPECT_FALSE(fl_settings_get_enable_animations(portal));
+}
+
+TEST(FlSettingsPortalTest, HighContrast) {
+  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
+
+  g_autoptr(FlSettings) portal =
+      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+  EXPECT_FALSE(fl_settings_get_high_contrast(portal));
+
+  g_variant_dict_insert_value(settings,
+                              "org.gnome.desktop.a11y.interface::high-contrast",
+                              g_variant_new_boolean(true));
+  EXPECT_TRUE(fl_settings_get_high_contrast(portal));
+}
+
 TEST(FlSettingsPortalTest, TextScalingFactor) {
   g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
 

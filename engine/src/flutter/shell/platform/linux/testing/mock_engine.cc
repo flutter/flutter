@@ -466,6 +466,12 @@ FlutterEngineResult FlutterEngineUpdateSemanticsEnabled(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterAccessibilityFeature features) {
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     uint64_t id,
@@ -539,5 +545,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->MarkExternalTextureFrameAvailable =
       &FlutterEngineMarkExternalTextureFrameAvailable;
   table->UnregisterExternalTexture = &FlutterEngineUnregisterExternalTexture;
+  table->UpdateAccessibilityFeatures =
+      &FlutterEngineUpdateAccessibilityFeatures;
   return kSuccess;
 }
