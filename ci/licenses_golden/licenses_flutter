@@ -2133,6 +2133,9 @@ FILE: ../../../flutter/shell/platform/linux/fl_accessibility_plugin.h
 FILE: ../../../flutter/shell/platform/linux/fl_accessible_node.cc
 FILE: ../../../flutter/shell/platform/linux/fl_accessible_node.h
 FILE: ../../../flutter/shell/platform/linux/fl_accessible_node_test.cc
+FILE: ../../../flutter/shell/platform/linux/fl_accessible_text_field.cc
+FILE: ../../../flutter/shell/platform/linux/fl_accessible_text_field.h
+FILE: ../../../flutter/shell/platform/linux/fl_accessible_text_field_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_backing_store_provider.cc
 FILE: ../../../flutter/shell/platform/linux/fl_backing_store_provider.h
 FILE: ../../../flutter/shell/platform/linux/fl_basic_message_channel.cc

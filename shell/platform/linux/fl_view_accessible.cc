@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
+#include "flutter/shell/platform/linux/fl_accessible_text_field.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 struct _FlViewAccessible {
@@ -13,6 +15,9 @@ struct _FlViewAccessible {
 
   // Semantics nodes keyed by ID
   GHashTable* semantics_nodes_by_id;
+
+  // Child IDs stored until commit_updates is called
+  GHashTable* pending_children;
 };
 
 enum { kProp0, kPropEngine, kPropLast };
@@ -36,40 +41,91 @@ static FlEngine* get_engine(FlViewAccessible* self) {
   return self->engine;
 }
 
+static FlAccessibleNode* create_node(FlViewAccessible* self,
+                                     const FlutterSemanticsNode* semantics) {
+  FlEngine* engine = get_engine(self);
+
+  if (semantics->flags & kFlutterSemanticsFlagIsTextField) {
+    return fl_accessible_text_field_new(engine, semantics->id);
+  }
+
+  return fl_accessible_node_new(engine, semantics->id);
+}
+
+static FlAccessibleNode* lookup_node(FlViewAccessible* self, int32_t id) {
+  return FL_ACCESSIBLE_NODE(
+      g_hash_table_lookup(self->semantics_nodes_by_id, GINT_TO_POINTER(id)));
+}
+
 // Gets the ATK node for the given id.
 // If the node doesn't exist it will be created.
-static FlAccessibleNode* get_node(FlViewAccessible* self, int32_t id) {
-  FlAccessibleNode* node = FL_ACCESSIBLE_NODE(
-      g_hash_table_lookup(self->semantics_nodes_by_id, GINT_TO_POINTER(id)));
+static FlAccessibleNode* get_node(FlViewAccessible* self,
+                                  const FlutterSemanticsNode* semantics) {
+  FlAccessibleNode* node = lookup_node(self, semantics->id);
   if (node != nullptr) {
     return node;
   }
 
-  FlEngine* engine = get_engine(self);
-  node = fl_accessible_node_new(engine, id);
-  if (id == 0) {
+  node = create_node(self, semantics);
+  if (semantics->id == 0) {
     fl_accessible_node_set_parent(node, ATK_OBJECT(self), 0);
+    g_signal_emit_by_name(self, "children-changed::add", 0, node, nullptr);
   }
-  g_hash_table_insert(self->semantics_nodes_by_id, GINT_TO_POINTER(id),
+  g_hash_table_insert(self->semantics_nodes_by_id,
+                      GINT_TO_POINTER(semantics->id),
                       reinterpret_cast<gpointer>(node));
 
   return node;
 }
 
+static void commit_updates(FlViewAccessible* self) {
+  g_hash_table_foreach_remove(
+      self->pending_children,
+      [](gpointer key, gpointer value, gpointer user_data) -> gboolean {
+        FlViewAccessible* self = FL_VIEW_ACCESSIBLE(user_data);
+
+        FlAccessibleNode* parent = FL_ACCESSIBLE_NODE(key);
+
+        size_t child_count = fl_value_get_length(static_cast<FlValue*>(value));
+        const int32_t* children_in_traversal_order =
+            fl_value_get_int32_list(static_cast<FlValue*>(value));
+
+        g_autoptr(GPtrArray) children = g_ptr_array_new();
+        for (size_t i = 0; i < child_count; i++) {
+          FlAccessibleNode* child =
+              lookup_node(self, children_in_traversal_order[i]);
+          g_assert(child != nullptr);
+          fl_accessible_node_set_parent(child, ATK_OBJECT(parent), i);
+          g_ptr_array_add(children, child);
+        }
+        fl_accessible_node_set_children(parent, children);
+
+        return true;
+      },
+      self);
+}
+
 // Implements AtkObject::get_n_children
 static gint fl_view_accessible_get_n_children(AtkObject* accessible) {
+  FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
+  FlAccessibleNode* node = lookup_node(self, 0);
+
+  if (node == nullptr) {
+    return 0;
+  }
+
   return 1;
 }
 
 // Implements AtkObject::ref_child
 static AtkObject* fl_view_accessible_ref_child(AtkObject* accessible, gint i) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
+  FlAccessibleNode* node = lookup_node(self, 0);
 
-  if (i != 0) {
+  if (i != 0 || node == nullptr) {
     return nullptr;
   }
 
-  FlAccessibleNode* node = get_node(self, 0);
   return ATK_OBJECT(g_object_ref(node));
 }
 
@@ -96,6 +152,9 @@ static void fl_view_accessible_set_property(GObject* object,
 
 static void fl_view_accessible_dispose(GObject* object) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(object);
+
+  g_clear_pointer(&self->semantics_nodes_by_id, g_hash_table_unref);
+  g_clear_pointer(&self->pending_children, g_hash_table_unref);
 
   if (self->engine != nullptr) {
     g_object_remove_weak_pointer(object,
@@ -125,16 +184,20 @@ static void fl_view_accessible_class_init(FlViewAccessibleClass* klass) {
 static void fl_view_accessible_init(FlViewAccessible* self) {
   self->semantics_nodes_by_id = g_hash_table_new_full(
       g_direct_hash, g_direct_equal, nullptr, g_object_unref);
+  self->pending_children =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
+                            reinterpret_cast<GDestroyNotify>(fl_value_unref));
 }
 
 void fl_view_accessible_handle_update_semantics_node(
     FlViewAccessible* self,
     const FlutterSemanticsNode* node) {
-  if (node->id == kFlutterSemanticsCustomActionIdBatchEnd) {
+  if (node->id == kFlutterSemanticsNodeIdBatchEnd) {
+    commit_updates(self);
     return;
   }
 
-  FlAccessibleNode* atk_node = get_node(self, node->id);
+  FlAccessibleNode* atk_node = get_node(self, node);
 
   fl_accessible_node_set_flags(atk_node, node->flags);
   fl_accessible_node_set_actions(atk_node, node->actions);
@@ -143,13 +206,11 @@ void fl_view_accessible_handle_update_semantics_node(
       atk_node, node->rect.left + node->transform.transX,
       node->rect.top + node->transform.transY,
       node->rect.right - node->rect.left, node->rect.bottom - node->rect.top);
+  fl_accessible_node_set_value(atk_node, node->value);
+  fl_accessible_node_set_text_selection(atk_node, node->text_selection_base,
+                                        node->text_selection_extent);
 
-  g_autoptr(GPtrArray) children = g_ptr_array_new();
-  for (size_t i = 0; i < node->child_count; i++) {
-    FlAccessibleNode* child =
-        get_node(self, node->children_in_traversal_order[i]);
-    fl_accessible_node_set_parent(child, ATK_OBJECT(atk_node), i);
-    g_ptr_array_add(children, child);
-  }
-  fl_accessible_node_set_children(atk_node, children);
+  FlValue* children = fl_value_new_int32_list(node->children_in_traversal_order,
+                                              node->child_count);
+  g_hash_table_insert(self->pending_children, atk_node, children);
 }
