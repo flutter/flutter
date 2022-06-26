@@ -261,6 +261,15 @@ abstract class _RadicallyAwesomeRenderObject extends RenderProxyBox {
     _updateStatus(animation.status);
   }
 
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    return child?.hitTest(result, position: position) ?? false;
+  }
+
+  @protected
+  bool willPaint(Animation<double> animation) => true;
+
+  @protected
   void paintImage(PaintingContext context, ui.Image image, Rect area, Animation<double> animation);
 
   AnimationStatus _status = AnimationStatus.completed;
@@ -347,13 +356,14 @@ abstract class _RadicallyAwesomeRenderObject extends RenderProxyBox {
       case AnimationStatus.reverse:
         break;
     }
-
-    if (childImage == null) {
+    final bool updateImage = willPaint(animation);
+    if (childImage == null && updateImage) {
       _paintChildIntoLayer(offset);
       childImage = (layer! as OffsetLayer).toGpuImage(offset & size);
     }
-
-    paintImage(context, childImage!, offset & size, animation);
+    if (updateImage) {
+      paintImage(context, childImage!, offset & size, animation);
+    }
   }
 }
 
@@ -403,6 +413,14 @@ class _RenderZoomEnterTransition extends _RadicallyAwesomeRenderObject {
     begin: 0.0,
     end: 0.60,
   ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
+
+  @override
+  bool willPaint(Animation<double> animation) {
+    final double fade = reverse
+      ? 1.0
+      : _fadeInTransition.evaluate(animation);
+    return fade != 0.0;
+  }
 
   @override
   void paintImage(PaintingContext context, ui.Image image, Rect area, Animation<double> animation) {
@@ -481,6 +499,14 @@ class _RenderZoomExitTransition extends _RadicallyAwesomeRenderObject {
     begin: 1.00,
     end: 0.90,
   ).chain(_ZoomPageTransition._scaleCurveSequence);
+
+  @override
+  bool willPaint(Animation<double> animation) {
+    final double fade = reverse
+      ? _fadeOutTransition.evaluate(animation)
+      : 1.0;
+    return fade != 0.0;
+  }
 
   @override
   void paintImage(PaintingContext context, ui.Image image, Rect rect, Animation<double> animation) {
