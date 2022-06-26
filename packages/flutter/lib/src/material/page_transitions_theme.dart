@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'colors.dart';
 import 'theme.dart';
@@ -250,17 +253,136 @@ class _ZoomPageTransition extends StatelessWidget {
   }
 }
 
-class _ZoomEnterTransition extends StatelessWidget {
+abstract class _RadicallyAwesomeRenderObject extends RenderProxyBox {
+  _RadicallyAwesomeRenderObject(Animation<double> animation, bool reverse)
+    : _animation = animation, _reverse = reverse {
+    animation.addListener(markNeedsPaint);
+    animation.addStatusListener(_updateStatus);
+    _updateStatus(animation.status);
+  }
+
+  void paintImage(PaintingContext context, ui.Image image, Rect area, Animation<double> animation);
+
+  AnimationStatus _status = AnimationStatus.completed;
+
+  void _updateStatus(AnimationStatus newStatus, [bool painting = false]) {
+    if (newStatus == _status) {
+      return;
+    }
+    childImage?.dispose();
+    childImage = null;
+    _status = newStatus;
+    assert(_status == animation.status);
+    if (!painting) {
+      markNeedsPaint();
+    }
+  }
+
+  Animation<double> get animation => _animation;
+  Animation<double> _animation;
+  set animation(Animation<double> value) {
+    if (value == animation) {
+      return;
+    }
+    animation.removeListener(markNeedsPaint);
+    animation.removeStatusListener(_updateStatus);
+    _animation = value;
+    animation.addStatusListener(_updateStatus);
+    animation.addListener(markNeedsPaint);
+    _updateStatus(animation.status);
+    markNeedsPaint();
+  }
+
+  bool get reverse => _reverse;
+  bool _reverse;
+  set reverse(bool value) {
+    if (value == reverse) {
+      return;
+    }
+    _reverse = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void dispose() {
+    animation.removeListener(markNeedsPaint);
+    animation.removeStatusListener(_updateStatus);
+    super.dispose();
+  }
+
+  @override
+  void attach(covariant PipelineOwner owner) {
+    animation.addListener(markNeedsPaint);
+    animation.addStatusListener(_updateStatus);
+    _updateStatus(animation.status);
+    super.attach(owner);
+  }
+
+  @override
+  void detach() {
+    animation.removeListener(markNeedsPaint);
+    animation.removeStatusListener(_updateStatus);
+    super.detach();
+  }
+
+  @override
+  bool get isRepaintBoundary => child != null;
+
+  ui.Image? childImage;
+
+  void _paintChildIntoLayer(Offset offset) {
+    final PaintingContext context = PaintingContext(layer!, offset & size);
+    super.paint(context, Offset.zero);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    _updateStatus(animation.status, true);
+    switch (_status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        super.paint(context, offset);
+        return;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
+
+    if (childImage == null) {
+      _paintChildIntoLayer(offset);
+      childImage = (layer! as OffsetLayer).toGpuImage(offset & size);
+    }
+
+    paintImage(context, childImage!, offset & size, animation);
+  }
+}
+
+class _ZoomEnterTransition extends SingleChildRenderObjectWidget {
   const _ZoomEnterTransition({
     required this.animation,
     this.reverse = false,
-    this.child,
+    super.child,
   }) : assert(animation != null),
        assert(reverse != null);
 
   final Animation<double> animation;
-  final Widget? child;
   final bool reverse;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderZoomEnterTransition(animation, reverse);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderZoomEnterTransition renderObject) {
+    renderObject
+      ..animation = animation
+      ..reverse = reverse;
+  }
+}
+
+class _RenderZoomEnterTransition extends _RadicallyAwesomeRenderObject {
+  _RenderZoomEnterTransition(super.animation, super.reverse);
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -283,7 +405,15 @@ class _ZoomEnterTransition extends StatelessWidget {
   ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
 
   @override
-  Widget build(BuildContext context) {
+  void paintImage(PaintingContext context, ui.Image image, Rect area, Animation<double> animation) {
+    final double fade = reverse
+      ? 1.0
+      : _fadeInTransition.evaluate(animation);
+    final double scale = (reverse
+      ? _scaleDownTransition
+      : _scaleUpTransition
+    ).evaluate(animation);
+
     double opacity = 0;
     // The transition's scrim opacity only increases on the forward transition.
     // In the reverse transition, the opacity should always be 0.0.
@@ -299,42 +429,43 @@ class _ZoomEnterTransition extends StatelessWidget {
       opacity = _scrimOpacityTween.evaluate(animation)!;
     }
 
-    final Animation<double> fadeTransition = reverse
-      ? kAlwaysCompleteAnimation
-      : _fadeInTransition.animate(animation);
-
-    final Animation<double> scaleTransition = (reverse
-      ? _scaleDownTransition
-      : _scaleUpTransition
-    ).animate(animation);
-
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        return ColoredBox(
-          color: Colors.black.withOpacity(opacity),
-          child: child,
-        );
-      },
-      child: FadeTransition(
-        opacity: fadeTransition,
-        child: ScaleTransition(scale: scaleTransition, child: child),
-      ),
-    );
+    context.canvas.drawRect(area, Paint()..color = Colors.black.withOpacity(opacity));
+    final Rect src = area;
+    final double newWidth = src.width * scale;
+    final double newHeight = src.height * scale;
+    final double leftOffset = (src.width - newWidth) / 2;
+    final double topOffset = (src.height - newHeight) / 2;
+    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
+    context.canvas.drawImageRect(childImage!, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
   }
 }
 
-class _ZoomExitTransition extends StatelessWidget {
+class _ZoomExitTransition extends SingleChildRenderObjectWidget {
   const _ZoomExitTransition({
     required this.animation,
     this.reverse = false,
-    this.child,
+    super.child,
   }) : assert(animation != null),
        assert(reverse != null);
 
   final Animation<double> animation;
   final bool reverse;
-  final Widget? child;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderZoomExitTransition(animation, reverse);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderZoomExitTransition renderObject) {
+    renderObject
+      ..animation = animation
+      ..reverse = reverse;
+  }
+}
+
+class _RenderZoomExitTransition extends _RadicallyAwesomeRenderObject {
+  _RenderZoomExitTransition(super.animation, super.reverse);
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -352,19 +483,22 @@ class _ZoomExitTransition extends StatelessWidget {
   ).chain(_ZoomPageTransition._scaleCurveSequence);
 
   @override
-  Widget build(BuildContext context) {
-    final Animation<double> fadeTransition = reverse
-      ? _fadeOutTransition.animate(animation)
-      : kAlwaysCompleteAnimation;
-    final Animation<double> scaleTransition = (reverse
+  void paintImage(PaintingContext context, ui.Image image, Rect rect, Animation<double> animation) {
+    final double fade = reverse
+      ? _fadeOutTransition.evaluate(animation)
+      : 1.0;
+    final double scale = (reverse
       ? _scaleDownTransition
       : _scaleUpTransition
-    ).animate(animation);
+    ).evaluate(animation);
 
-    return FadeTransition(
-      opacity: fadeTransition,
-      child: ScaleTransition(scale: scaleTransition, child: child),
-    );
+    final Rect src = rect;
+    final double newWidth = src.width * scale;
+    final double newHeight = src.height * scale;
+    final double leftOffset = (src.width - newWidth) / 2;
+    final double topOffset = (src.height - newHeight) / 2;
+    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
+    context.canvas.drawImageRect(childImage!, src, dst, Paint()..color = const Color(0xFF000000).withOpacity(fade));
   }
 }
 
