@@ -1079,6 +1079,7 @@ void main() {
                 isAlwaysShown: true,
                 controller: scrollController,
                 child: const SingleChildScrollView(
+                  primary: true,
                   child: SizedBox(width: 4000.0, height: 4000.0),
                 ),
               ),

@@ -119,6 +119,7 @@ class FlutterOptions {
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
+  static const String kWebBrowserFlag = 'web-browser-flag';
 }
 
 /// flutter command categories for usage.
@@ -269,6 +270,15 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('web-launch-url',
       help: 'The URL to provide to the browser. Defaults to an HTTP URL with the host '
           'name of "--web-hostname", the port of "--web-port", and the path set to "/".',
+    );
+    argParser.addMultiOption(
+      FlutterOptions.kWebBrowserFlag,
+      help: 'Additional flag to pass to a browser instance at startup.\n'
+          'Chrome: https://www.chromium.org/developers/how-tos/run-chromium-with-flags/\n'
+          'Firefox: https://wiki.mozilla.org/Firefox/CommandLineOptions\n'
+          'Multiple flags can be passed by repeating "--${FlutterOptions.kWebBrowserFlag}" multiple times.',
+      valueHelp: '--foo=bar',
+      hide: !verboseHelp,
     );
   }
 

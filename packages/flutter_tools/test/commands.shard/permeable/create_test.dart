@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -114,6 +115,37 @@ void main() {
     final String identifier = CreateBase.createWindowsIdentifier('org', 'project');
     expect(Uuid.isValidUUID(fromString: identifier), isTrue);
   });
+
+  testUsingContext('tool exits on Windows if given a drive letter without a path', () async {
+    // Must use LocalFileSystem as it is dependent on dart:io handling of
+    // Windows paths, which the MemoryFileSystem does not implement
+    final Directory workingDir = globals.fs.directory(r'X:\path\to\working\dir');
+    // Must use [io.IOOverrides] as directory.absolute depends on Directory.current
+    // from dart:io.
+    await io.IOOverrides.runZoned<Future<void>>(
+      () async {
+        // Verify IOOverrides is working
+        expect(io.Directory.current, workingDir);
+        final CreateCommand command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        const String driveName = 'X:';
+        await expectToolExitLater(
+          runner.run(<String>[
+            'create',
+            '--project-name',
+            'test_app',
+            '--offline',
+            driveName,
+          ]),
+          contains('You attempted to create a flutter project at the path "$driveName"'),
+        );
+      },
+      getCurrentDirectory: () => workingDir,
+    );
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test(),
+  }, skip: !io.Platform.isWindows // [intended] relies on Windows file system
+  );
 
   // Verify that we create a default project ('app') that is
   // well-formed.
