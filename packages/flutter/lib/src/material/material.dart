@@ -558,6 +558,12 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   bool absorbHitTest;
 
+  @visibleForTesting
+  List<InkFeature>? get debugInkFeatures {
+    if (kDebugMode)
+      return _inkFeatures;
+    return null;
+  }
   List<InkFeature>? _inkFeatures;
 
   @override

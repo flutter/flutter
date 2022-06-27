@@ -100,8 +100,8 @@ class FakeCommand {
   /// If provided, this exception will be thrown when the fake command is run.
   final Object? exception;
 
-  /// Indicates that output will only be emitted after the `exitCode` [Future]
-  /// on [io.Process] completes.
+  /// When true, stdout and stderr will only be emitted after the `exitCode`
+  /// [Future] on [io.Process] completes.
   final bool outputFollowsExit;
 
   void _matches(
@@ -141,24 +141,26 @@ class _FakeProcess implements io.Process {
       }),
       stdin = stdin ?? IOSink(StreamController<List<int>>().sink)
   {
-    if (_stderr == null) {
+    if (_stderr.isEmpty) {
       stderr = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
+      // Wait for the process to exit before emitting stderr.
       stderr = Stream<List<int>>.fromFuture(exitCode.then((_) {
-        return Future<List<int>>(() => utf8.encode(_stderr));
+        return Future<List<int>>(() => _stderr);
       }));
     } else {
-      stderr = Stream<List<int>>.value(utf8.encode(_stderr));
+      stderr = Stream<List<int>>.value(_stderr);
     }
 
-    if (_stdout == null) {
+    if (_stdout.isEmpty) {
       stdout = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
+      // Wait for the process to exit before emitting stdout.
       stdout = Stream<List<int>>.fromFuture(exitCode.then((_) {
-        return Future<List<int>>(() => utf8.encode(_stdout));
+        return Future<List<int>>(() => _stdout);
       }));
     } else {
-      stdout = Stream<List<int>>.value(utf8.encode(_stdout));
+      stdout = Stream<List<int>>.value(_stdout);
     }
   }
 
@@ -171,7 +173,7 @@ class _FakeProcess implements io.Process {
   @override
   final int pid;
 
-  final String _stderr;
+  final List<int> _stderr;
 
   @override
   late final Stream<List<int>> stderr;
@@ -182,7 +184,7 @@ class _FakeProcess implements io.Process {
   @override
   late final Stream<List<int>> stdout;
 
-  final String _stdout;
+  final List<int> _stdout;
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
@@ -268,9 +270,9 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.exitCode,
       fakeCommand.duration,
       _pid,
-      fakeCommand.stderr,
+      encoding?.encode(fakeCommand.stderr) ?? fakeCommand.stderr.codeUnits,
       fakeCommand.stdin,
-      fakeCommand.stdout,
+      encoding?.encode(fakeCommand.stdout) ?? fakeCommand.stdout.codeUnits,
       fakeCommand.completer,
       fakeCommand.outputFollowsExit,
     );
@@ -310,8 +312,8 @@ abstract class FakeProcessManager implements ProcessManager {
     return io.ProcessResult(
       process.pid,
       process._exitCode,
-      stdoutEncoding == null ? process.stdout : await stdoutEncoding.decodeStream(process.stdout),
-      stderrEncoding == null ? process.stderr : await stderrEncoding.decodeStream(process.stderr),
+      stdoutEncoding == null ? process._stdout : await stdoutEncoding.decodeStream(process.stdout),
+      stderrEncoding == null ? process._stderr : await stderrEncoding.decodeStream(process.stderr),
     );
   }
 
@@ -322,15 +324,15 @@ abstract class FakeProcessManager implements ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
-    Encoding? stdoutEncoding = io.systemEncoding, // actual encoder is ignored
-    Encoding? stderrEncoding = io.systemEncoding, // actual encoder is ignored
+    Encoding? stdoutEncoding = io.systemEncoding,
+    Encoding? stderrEncoding = io.systemEncoding,
   }) {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     return io.ProcessResult(
       process.pid,
       process._exitCode,
-      stdoutEncoding == null ? utf8.encode(process._stdout) : process._stdout,
-      stderrEncoding == null ? utf8.encode(process._stderr) : process._stderr,
+      stdoutEncoding == null ? process._stdout : stdoutEncoding.decode(process._stdout),
+      stderrEncoding == null ? process._stderr : stderrEncoding.decode(process._stderr),
     );
   }
 

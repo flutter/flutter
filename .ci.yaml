@@ -129,7 +129,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: x86
-      device_os: iOS-15.1
+      device_os: iOS-15
       xcode: 13a233
   windows:
     properties:
