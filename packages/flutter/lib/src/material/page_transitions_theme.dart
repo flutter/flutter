@@ -253,42 +253,38 @@ class _ZoomPageTransition extends StatelessWidget {
   }
 }
 
-class _ZoomEnterTransition extends SingleChildRenderObjectWidget {
+class _ZoomEnterTransition extends StatelessWidget {
   const _ZoomEnterTransition({
     required this.animation,
     this.reverse = false,
-    super.child,
+    this.child,
   }) : assert(animation != null),
        assert(reverse != null);
 
   final Animation<double> animation;
   final bool reverse;
+  final Widget? child;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderZoomEnterTransition(animation, reverse);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, covariant _RenderZoomEnterTransition renderObject) {
-    renderObject
-      ..animation = animation
-      ..reverse = reverse;
+  Widget build(BuildContext context) {
+    return AnimatedRaster(
+      animation: animation,
+      delegate: _ZoomEnterTransitionDelegate(reverse: reverse),
+      child: child,
+    );
   }
 }
 
-class _RenderZoomEnterTransition extends RenderAnimatedRaster {
-  _RenderZoomEnterTransition(super.animation, this._reverse);
+class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
+  const _ZoomEnterTransitionDelegate({required this.reverse});
 
-  bool get reverse => _reverse;
-  bool _reverse;
-  set reverse(bool value) {
-    if (value == reverse) {
-      return;
-    }
-    _reverse = value;
-    markNeedsPaint();
-  }
+  final bool reverse;
+
+  @override
+  int get hashCode => reverse.hashCode;
+
+  @override
+  bool operator ==(Object other) => other is _ZoomEnterTransitionDelegate && other.reverse == reverse;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -311,15 +307,7 @@ class _RenderZoomEnterTransition extends RenderAnimatedRaster {
   ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
 
   @override
-  bool willPaint(Animation<double> animation) {
-    final double fade = reverse
-      ? 1.0
-      : _fadeInTransition.evaluate(animation);
-    return fade != 0.0;
-  }
-
-  @override
-  void paintImage(PaintingContext context, ui.Image image, Rect area, Animation<double> animation) {
+  void paintImage(PaintingContext context, ui.Image image, Rect area, double pixelRatio, Animation<double> animation) {
     final double fade = reverse
       ? 1.0
       : _fadeInTransition.evaluate(animation);
@@ -349,41 +337,25 @@ class _RenderZoomEnterTransition extends RenderAnimatedRaster {
 
     context.canvas.drawRect(area, Paint()..color = Colors.black.withOpacity(opacity));
     final Rect src = area;
-    final double newWidth = src.width * scale / ui.window.devicePixelRatio;
-    final double newHeight = src.height * scale / ui.window.devicePixelRatio;
-    final double leftOffset = (src.width / ui.window.devicePixelRatio - newWidth) / 2;
-    final double topOffset = (src.height / ui.window.devicePixelRatio - newHeight) / 2;
+    final double newWidth = src.width * scale / pixelRatio;
+    final double newHeight = src.height * scale / pixelRatio;
+    final double leftOffset = (src.width / pixelRatio - newWidth) / 2;
+    final double topOffset = (src.height / pixelRatio - newHeight) / 2;
     final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset, newWidth, newHeight);
     context.canvas.drawImageRect(image, src, dst, paint);
   }
 }
 
-class _ZoomExitTransition extends SingleChildRenderObjectWidget {
-  const _ZoomExitTransition({
-    required this.animation,
-    this.reverse = false,
-    super.child,
-  }) : assert(animation != null),
-       assert(reverse != null);
+class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
+  const _ZoomExitTransitionDelegate({required this.reverse});
 
-  final Animation<double> animation;
   final bool reverse;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderZoomExitTransition(animation, reverse);
-  }
+  int get hashCode => reverse.hashCode;
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderZoomExitTransition renderObject) {
-    renderObject
-      ..animation = animation
-      ..reverse = reverse;
-  }
-}
-
-class _RenderZoomExitTransition extends RenderAnimatedRaster{
-  _RenderZoomExitTransition(super.animation, this._reverse);
+  bool operator ==(Object other) => other is _ZoomExitTransitionDelegate && other.reverse == reverse;
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -400,16 +372,6 @@ class _RenderZoomExitTransition extends RenderAnimatedRaster{
     end: 0.90,
   ).chain(_ZoomPageTransition._scaleCurveSequence);
 
-  bool get reverse => _reverse;
-  bool _reverse;
-  set reverse(bool value) {
-    if (value == reverse) {
-      return;
-    }
-    _reverse = value;
-    markNeedsPaint();
-  }
-
   @override
   bool willPaint(Animation<double> animation) {
     final double fade = reverse
@@ -419,7 +381,7 @@ class _RenderZoomExitTransition extends RenderAnimatedRaster{
   }
 
   @override
-  void paintImage(PaintingContext context, ui.Image image, Rect rect, Animation<double> animation) {
+  void paintImage(PaintingContext context, ui.Image image, Rect rect, double pixelRatio, Animation<double> animation) {
     final double fade = reverse
       ? _fadeOutTransition.evaluate(animation)
       : 1.0;
@@ -432,12 +394,34 @@ class _RenderZoomExitTransition extends RenderAnimatedRaster{
       ..filterQuality = ui.FilterQuality.low
       ..color = const Color(0xFF000000).withOpacity(fade);
     final Rect src = rect;
-    final double newWidth = src.width * scale / ui.window.devicePixelRatio;
-    final double newHeight = src.height * scale / ui.window.devicePixelRatio;
-    final double leftOffset = (src.width / ui.window.devicePixelRatio - newWidth) / 2;
-    final double topOffset = (src.height / ui.window.devicePixelRatio - newHeight) / 2;
+    final double newWidth = src.width * scale / pixelRatio;
+    final double newHeight = src.height * scale / pixelRatio;
+    final double leftOffset = (src.width / pixelRatio - newWidth) / 2;
+    final double topOffset = (src.height / pixelRatio - newHeight) / 2;
     final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
     context.canvas.drawImageRect(image, src, dst, paint);
+  }
+}
+
+class _ZoomExitTransition extends StatelessWidget {
+  const _ZoomExitTransition({
+    required this.animation,
+    this.reverse = false,
+    this.child,
+  }) : assert(animation != null),
+       assert(reverse != null);
+
+  final Animation<double> animation;
+  final bool reverse;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedRaster(
+      animation: animation,
+      delegate: _ZoomExitTransitionDelegate(reverse: reverse),
+      child: child,
+    );
   }
 }
 

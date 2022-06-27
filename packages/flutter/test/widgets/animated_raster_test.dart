@@ -1,0 +1,165 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('AnimatedRaster draws its children normally if animation is dismissed/completed', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+
+    await tester.pumpWidget(AnimatedRaster(
+      animation: kAlwaysDismissedAnimation,
+      delegate: delegate,
+      child: Container(color: Colors.red, width: 100, height: 100),
+    ));
+
+    expect(delegate.lastImage, isNull);
+
+    await tester.pumpWidget(AnimatedRaster(
+      animation: kAlwaysCompleteAnimation,
+      delegate: delegate,
+      child: Container(color: Colors.red, width: 100, height: 100),
+    ));
+
+    expect(delegate.lastImage, isNull);
+  });
+
+  testWidgets('AnimatedRaster replaces its children with a raster if the animation is forward or reverse', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+
+    await tester.pumpWidget(AnimatedRaster(
+      animation: const AlwaysStoppedAnimation<double>(0.5),
+      delegate: delegate,
+      child: Container(color: Colors.red, width: 100, height: 100),
+    ));
+
+    expect(delegate.lastImage, isNotNull);
+    delegate.lastImage = null;
+  });
+
+  testWidgets('AnimatedRaster disposes its child image when disposed', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+
+    await tester.pumpWidget(AnimatedRaster(
+      animation: const AlwaysStoppedAnimation<double>(0.5),
+      delegate: delegate,
+      child: Container(color: Colors.red, width: 100, height: 100),
+    ));
+
+    expect(delegate.lastImage, isNotNull);
+
+
+    await tester.pumpWidget(const SizedBox());
+
+    expect(delegate.lastImage!.debugDisposed, isTrue);
+  });
+
+  testWidgets('AnimatedRaster does not create image if willPaint returns false', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate()..willPaintValue = false;
+
+    await tester.pumpWidget(AnimatedRaster(
+      animation: const AlwaysStoppedAnimation<double>(0.5),
+      delegate: delegate,
+      child: Container(color: Colors.red, width: 100, height: 100),
+    ));
+
+    expect(delegate.lastImage, isNull);
+    delegate.lastImage = null;
+  });
+
+  testWidgets('AnimatedRaster uses the media query dpr to scale up the provided image', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromWindow(tester.binding.window).copyWith(devicePixelRatio: 3.0),
+        child: Center(
+          child: AnimatedRaster(
+          animation: const AlwaysStoppedAnimation<double>(0.5),
+          delegate: delegate,
+          child: Container(color: Colors.red, width: 100, height: 100),
+        ),
+      ),
+    ));
+
+    expect(delegate.lastPixelRatio, 3.0);
+    expect(delegate.lastArea, const Rect.fromLTWH(0, 0, 100 * 3.0 , 100 * 3.0));
+  });
+
+  testWidgets('RenderAnimatedRaster removes and then reattaches animation listener if attached/detached', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final TestAnimation animation = TestAnimation();
+    final PipelineOwner owner = PipelineOwner();
+    final RenderAnimatedRaster animatedRaster = RenderAnimatedRaster(animation, delegate, 1.0);
+    animatedRaster.attach(owner);
+
+    expect(animation.listeners, contains(animatedRaster.markNeedsPaint));
+    expect(animation.statusListeners, hasLength(1));
+
+    animatedRaster.detach();
+
+    expect(animation.listeners, isEmpty);
+    expect(animation.statusListeners, isEmpty);
+
+    animatedRaster.attach(owner);
+
+    expect(animation.listeners, contains(animatedRaster.markNeedsPaint));
+    expect(animation.statusListeners, hasLength(1));
+  });
+}
+
+// ignore: must_be_immutable
+class TestDelegate extends AnimatedRasterDelegate {
+  ui.Image? lastImage;
+  Rect? lastArea;
+  double? lastPixelRatio;
+  bool willPaintValue = true;
+
+  @override
+  bool willPaint(Animation<double> animation) {
+    return willPaintValue;
+  }
+
+  @override
+  void paintImage(PaintingContext context, ui.Image image, Rect area, double pixelRatio, Animation<double> animation) {
+    lastImage = image;
+    lastArea = area;
+    lastPixelRatio = pixelRatio;
+  }
+}
+
+class TestAnimation extends Animation<double> {
+  final Set<ui.VoidCallback> listeners = <ui.VoidCallback>{};
+  final Set<AnimationStatusListener> statusListeners = <AnimationStatusListener>{};
+
+  @override
+  void addListener(ui.VoidCallback listener) {
+    listeners.add(listener);
+  }
+
+  @override
+  void addStatusListener(AnimationStatusListener listener) {
+    statusListeners.add(listener);
+  }
+
+  @override
+  void removeListener(ui.VoidCallback listener) {
+    listeners.remove(listener);
+  }
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    statusListeners.remove(listener);
+  }
+
+  @override
+  AnimationStatus get status => AnimationStatus.forward;
+
+  @override
+  double get value => 0.5;
+}
