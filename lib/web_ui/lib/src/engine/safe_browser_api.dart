@@ -64,7 +64,7 @@ T setJsProperty<T>(Object object, String name, T value) {
     'Attempted to set property "$name" on a JavaScript object. This property '
     'has not been checked for safety. Possible solutions to this problem:\n'
     ' - Do not set this property.\n'
-    ' - Use a `dart:html` API that does the same thing.\n'
+    ' - Use a `js_util` API that does the same thing.\n'
     ' - Ensure that the property is safe then add it to _safeJsProperties set.',
   );
   return js_util.setProperty<T>(object, name, value);
