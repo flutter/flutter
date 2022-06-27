@@ -382,24 +382,21 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
 class _MenuBarState extends State<_MenuBar> {
   final FocusScopeNode menuBarScope = FocusScopeNode(debugLabel: 'MenuBar');
-  late final _MenuManager manager;
-
-  @override
-  void initState() {
-    super.initState();
-    manager = _MenuManager(context: context);
+  MenuBarController? _internalController;
+  MenuBarController get _controller {
+    return widget.controller ?? (_internalController ??= MenuBarController());
   }
+  _MenuManager get manager => _controller._manager;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    manager.initIfNecessary();
     _updateManager();
   }
 
   @override
   void dispose() {
-    manager.dispose();
+    _internalController?.dispose();
     menuBarScope.dispose();
     super.dispose();
   }
@@ -461,11 +458,13 @@ class _MenuBarState extends State<_MenuBar> {
   }
 
   void _updateManager() {
-    manager.controller = widget.controller;
+    manager.initIfNecessary();
     manager.context = context;
     manager.menus = widget.menus;
     manager.enabled = widget.enabled;
-    manager.overlay = Overlay.of(context);
+    if (mounted) {
+      manager.overlay = Overlay.of(context);
+    }
   }
 }
 
@@ -475,8 +474,6 @@ class _MenuBarState extends State<_MenuBar> {
 ///
 /// [MenuBar] is implemented using this manager, as is [CascadingMenu].
 class _MenuManager extends ChangeNotifier {
-  _MenuManager({required BuildContext context}) : _context = context;
-
   // The shortcuts registered with the ShortcutRegistry when the menu bar is
   // enabled.
   late Map<MenuSerializableShortcut, Intent> shortcuts;
@@ -522,8 +519,8 @@ class _MenuManager extends ChangeNotifier {
 
   bool get menuIsOpen => openMenu != null;
 
-  BuildContext get context => _context;
-  BuildContext _context;
+  BuildContext get context => _context!;
+  BuildContext? _context;
   set context(BuildContext value) {
     if (_context != value) {
       _context = value;
@@ -539,17 +536,6 @@ class _MenuManager extends ChangeNotifier {
       _overlayEntry?.remove();
       _overlayEntry = null;
       _manageOverlayEntry();
-      _markMenuDirtyAndDelayIfNecessary();
-    }
-  }
-
-  MenuBarController? get controller => _controller;
-  MenuBarController? _controller;
-  set controller(MenuBarController? value) {
-    if (_controller != value) {
-      _controller?._detach(this);
-      _controller = value;
-      _controller?._attach(this);
       _markMenuDirtyAndDelayIfNecessary();
     }
   }
@@ -592,7 +578,6 @@ class _MenuManager extends ChangeNotifier {
     if (initialized) {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     }
-    controller?._detach(this);
     root.children.clear();
     _focusNodes.clear();
     _previousFocus = null;
@@ -788,7 +773,6 @@ class _MenuManager extends ChangeNotifier {
     }
     void markMenuDirty() {
       _overlayEntry?.markNeedsBuild();
-      controller?._managerStateChanged();
       if (initialized) {
         notifyListeners();
       }
@@ -851,7 +835,7 @@ class _MenuManager extends ChangeNotifier {
     return _openMenu == menu || (_openMenu?.ancestors.contains(menu) ?? false);
   }
 
-  // Registers the given menu in the _MenuBarState whenever a menu item
+  // Registers the given menu in the _MenuManager whenever a menu item
   // widget is created or updated.
   void registerMenu({
     required BuildContext menuContext,
@@ -876,7 +860,7 @@ class _MenuManager extends ChangeNotifier {
     }
   }
 
-  // Unregisters the given context from the _MenuBarState.
+  // Unregisters the given context from the _MenuManager.
   //
   // If the given context corresponds to the currently open menu, then close
   // it.
@@ -995,11 +979,22 @@ class _MenuManagerMarker extends InheritedNotifier<_MenuManager> {
 /// The controller can be listened to for changes in the state of the menu bar,
 /// to see if [menuIsOpen] has changed, for instance.
 class MenuBarController with ChangeNotifier {
+  /// Creates a new [MenuBarController].
+  MenuBarController() : _manager = _MenuManager() {
+    _manager.addListener(_managerStateChanged);
+  }
+
+  @override
+  void dispose() {
+    _manager.dispose();
+    super.dispose();
+  }
+
   /// Closes any menus that are currently open.
-  void closeAll() => _manager?.closeAll();
+  void closeAll() => _manager.closeAll();
 
   /// Returns true if any menu in the menu bar is open.
-  bool get menuIsOpen => _manager?.menuIsOpen ?? false;
+  bool get menuIsOpen => _manager.menuIsOpen;
   bool _menuIsOpen = false;
 
   /// A testing method used to provide access to a testing description of the
@@ -1007,7 +1002,7 @@ class MenuBarController with ChangeNotifier {
   ///
   /// Only meant to be called by tests. Will return null in release mode.
   @visibleForTesting
-  String? get debugCurrentItem => _manager?.debugCurrentItem;
+  String? get debugCurrentItem => _manager.debugCurrentItem;
 
   /// A testing method used to provide access to a testing description of the
   /// currently focused menu item for tests.
@@ -1015,32 +1010,19 @@ class MenuBarController with ChangeNotifier {
   /// Only meant to be called by tests. Will return null in release mode.
   @visibleForTesting
   String? get debugFocusedItem {
-    return _manager?.debugFocusedItem;
+    return _manager.debugFocusedItem;
   }
 
-  // Called by _MenuBarState when its state changes.
+  // Called by _MenuManager when its state changes.
   void _managerStateChanged() {
-    if (_menuIsOpen != _manager?.menuIsOpen) {
-      _menuIsOpen = _manager?.menuIsOpen ?? false;
+    if (_menuIsOpen != _manager.menuIsOpen) {
+      _menuIsOpen = _manager.menuIsOpen;
       notifyListeners();
     }
   }
 
-  void _attach(_MenuManager manager) {
-    assert(_manager == null);
-    _manager = manager;
-  }
-
-  void _detach(_MenuManager manager) {
-    // Can't just assert this, since on reassemble, the order of reassembling
-    // isn't guaranteed.
-    if (_manager == manager) {
-      _manager = null;
-    }
-  }
-
-  // The menu bar this controller is attached to.
-  _MenuManager? _manager;
+  // The menu manager this controller is attached to.
+  final _MenuManager _manager;
 }
 
 /// An item in a [MenuBar] that can be activated by click, keyboard navigation,
@@ -1227,7 +1209,7 @@ class MenuItemButton extends StatefulWidget with MenuItem {
   // submenu, when the menu item is created by calling MenuItem._forMenu.
 
   // The padding around the edges of a submenu. Passed in from the MenuBarMenu
-  // so that it can be given during registration with the _MenuBarState.
+  // so that it can be given during registration with the _MenuManager.
   final EdgeInsets? _menuPadding;
 
   // The background color of the submenu, when _hasMenu is true.
@@ -1821,7 +1803,7 @@ class _MenuItemDivider extends StatelessWidget {
   }
 }
 
-// A widget used as the main widget for the overlay entry in the _MenuBarState.
+// A widget used as the main widget for the overlay entry in the _MenuManager.
 // Since the overlay is a Stack, this widget produces a Positioned widget that
 // fills the overlay, containing its own Stack to arrange the menus with.
 // Positioning of the top level submenus is relative to the position of the menu
@@ -1946,19 +1928,19 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   /// Whether or not this menu item is currently open, in order to avoid
   /// duplicate calls to [onOpen] or [onClose].
   ///
-  /// Set by the [_MenuBarState].
+  /// Set by the [_MenuManager].
   bool isOpen = false;
 
   /// The focus node that corresponds to this menu item, so that it can be
   /// focused when set as the open menu.
   ///
-  /// Set by the [_MenuBarState].
+  /// Set by the [_MenuManager].
   FocusNode? focusNode;
 
   /// The builder function that builds a submenu, if any. Will be null if there
   /// is no submenu.
   ///
-  /// Set by the [_MenuBarState].
+  /// Set by the [_MenuManager].
   WidgetBuilder? menuBuilder;
 
   /// Returns true if this menu item is a group (e.g. [MenuItemGroup]).
@@ -2075,7 +2057,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   }
 
   /// Called whenever this menu is opened by being set as the
-  /// [_MenuBarState.openMenu].
+  /// [_MenuManager.openMenu].
   ///
   /// Used to avoid calling [MenuItem.onOpen] unnecessarily.
   void open() {
@@ -2087,7 +2069,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   }
 
   /// Called whenever this menu is closed by another menu being set as the
-  /// [_MenuBarState.openMenu].
+  /// [_MenuManager.openMenu].
   ///
   /// Used to avoid calling [MenuItem.onClose] unnecessarily.
   void close() {
@@ -2400,7 +2382,7 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
   }
 }
 
-// A widget that wraps a render box that is registered with the _MenuBarState so
+// A widget that wraps a render box that is registered with the _MenuManager so
 // that when a pointer event comes in, it can check to see if the pointer hit a
 // menu or not.
 class _RegisteredRenderBox extends SingleChildRenderObjectWidget {
@@ -2420,7 +2402,7 @@ class _RegisteredRenderBox extends SingleChildRenderObjectWidget {
 }
 
 // A RenderProxyBox that registers and unregisters itself with the
-// _MenuBarState so that when a pointer event comes in, the _MenuBarState can
+// _MenuManager so that when a pointer event comes in, the _MenuManager can
 // check to see if the pointer event hit a menu or not.
 class _RenderRegisteredRenderBox extends RenderProxyBox {
   _RenderRegisteredRenderBox({required _MenuManager manager}) : _manager = manager {
