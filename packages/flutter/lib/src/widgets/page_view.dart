@@ -273,6 +273,7 @@ class PageMetrics extends FixedScrollMetrics {
     required super.viewportDimension,
     required super.axisDirection,
     required this.viewportFraction,
+    super.scrollInsets,
   });
 
   @override
@@ -283,6 +284,7 @@ class PageMetrics extends FixedScrollMetrics {
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? viewportFraction,
+    EdgeInsets? scrollInsets,
   }) {
     return PageMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -291,6 +293,7 @@ class PageMetrics extends FixedScrollMetrics {
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       viewportFraction: viewportFraction ?? this.viewportFraction,
+      scrollInsets: scrollInsets ?? this.scrollInsets,
     );
   }
 
@@ -477,11 +480,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero}) {
     final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
     return super.applyContentDimensions(
       newMinScrollExtent,
       math.max(newMinScrollExtent, maxScrollExtent - _initialPageOffset),
+      scrollInsets: scrollInsets,
     );
   }
 
@@ -493,6 +497,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? viewportFraction,
+    EdgeInsets? scrollInsets,
   }) {
     return PageMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -501,6 +506,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       viewportFraction: viewportFraction ?? this.viewportFraction,
+      scrollInsets: scrollInsets ?? this.scrollInsets,
     );
   }
 }

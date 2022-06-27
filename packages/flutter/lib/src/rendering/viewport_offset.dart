@@ -4,6 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show EdgeInsets;
 
 /// The direction of a scroll, relative to the positive scroll offset axis given
 /// by an [AxisDirection] and a [GrowthDirection].
@@ -145,7 +146,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// even if the values have not changed. It may be called many times if the
   /// scroll offset is corrected (if this returns false). This is always called
   /// after [applyViewportDimension], if that method is called.
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent);
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero});
 
   /// Apply a layout-time correction to the scroll offset.
   ///
@@ -268,7 +269,7 @@ class _FixedViewportOffset extends ViewportOffset {
   bool applyViewportDimension(double viewportDimension) => true;
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero}) => true;
 
   @override
   void correctBy(double correction) {

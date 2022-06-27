@@ -1460,6 +1460,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   // Out-of-band data computed during layout.
   late double _minScrollExtent;
   late double _maxScrollExtent;
+  EdgeInsets _scrollInsets = EdgeInsets.zero;
   bool _hasVisualOverflow = false;
 
   @override
@@ -1479,6 +1480,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       assert(firstChild == null);
       _minScrollExtent = 0.0;
       _maxScrollExtent = 0.0;
+      _scrollInsets = EdgeInsets.zero;
       _hasVisualOverflow = false;
       offset.applyContentDimensions(0.0, 0.0);
       return;
@@ -1511,6 +1513,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         if (offset.applyContentDimensions(
               math.min(0.0, _minScrollExtent + mainAxisExtent * anchor),
               math.max(0.0, _maxScrollExtent - mainAxisExtent * (1.0 - anchor)),
+              scrollInsets: _scrollInsets,
            )) {
           break;
         }
@@ -1624,6 +1627,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       case GrowthDirection.reverse:
         _minScrollExtent -= childLayoutGeometry.scrollExtent;
         break;
+    }
+    if (childLayoutGeometry.scrollInsets != null) {
+      _scrollInsets += childLayoutGeometry.scrollInsets!;
     }
     if (childLayoutGeometry.hasVisualOverflow) {
       _hasVisualOverflow = true;
@@ -1859,6 +1865,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   // Out-of-band data computed during layout.
   late double _maxScrollExtent;
   late double _shrinkWrapExtent;
+  EdgeInsets _scrollInsets = EdgeInsets.zero;
   bool _hasVisualOverflow = false;
 
   @override
@@ -1877,6 +1884,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
       }
       offset.applyViewportDimension(0.0);
       _maxScrollExtent = 0.0;
+      _scrollInsets = EdgeInsets.zero;
       _shrinkWrapExtent = 0.0;
       _hasVisualOverflow = false;
       offset.applyContentDimensions(0.0, 0.0);
@@ -1915,7 +1923,11 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
             break;
         }
         final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
-        final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
+        final bool didAcceptContentDimension = offset.applyContentDimensions(
+          0.0,
+          math.max(0.0, _maxScrollExtent - effectiveExtent),
+          scrollInsets: _scrollInsets,
+        );
         if (didAcceptViewportDimension && didAcceptContentDimension) {
           break;
         }

@@ -321,6 +321,19 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     }
   }
 
+  EdgeInsets _getInsetsForAxisDirection(double paintExtent, AxisDirection axisDirection) {
+    switch (constraints.axisDirection) {
+      case AxisDirection.up:
+        return EdgeInsets.only(bottom: paintExtent);
+      case AxisDirection.right:
+        return EdgeInsets.only(left: paintExtent);
+      case AxisDirection.down:
+        return EdgeInsets.only(top: paintExtent);
+      case AxisDirection.left:
+        return EdgeInsets.only(right: paintExtent);
+    }
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -396,6 +409,10 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     assert(_childPosition != null);
     return _childPosition!;
   }
+
+  // TODO(Piinks): This should never be called since this header is never pinned, should this throw instead?
+  @override
+  EdgeInsets _getInsetsForAxisDirection(double paintExtent, AxisDirection axisDirection) => EdgeInsets.zero;
 }
 
 /// A sliver with a [RenderBox] child which never scrolls off the viewport in
@@ -429,14 +446,18 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
       0.0;
+    final double paintExtent =  math.min(childExtent, effectiveRemainingPaintExtent);
+    final EdgeInsets scrollInsets = _getInsetsForAxisDirection(paintExtent, constraints.axisDirection);
+
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
-      paintExtent: math.min(childExtent, effectiveRemainingPaintExtent),
+      paintExtent: paintExtent,
       layoutExtent: layoutExtent,
       maxPaintExtent: maxExtent + stretchOffset,
       maxScrollObstructionExtent: minExtent,
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
+      scrollInsets: scrollInsets,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
   }
@@ -595,12 +616,18 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset!;
     final double layoutExtent = maxExtent - constraints.scrollOffset;
+    final double clampedPaintExtent = paintExtent.clamp(0.0, constraints.remainingPaintExtent);
+    final EdgeInsets scrollInsets = _getInsetsForAxisDirection(
+      clampedPaintExtent + stretchOffset,
+      constraints.axisDirection,
+    );
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
-      paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),
+      paintExtent: clampedPaintExtent,
       layoutExtent: clampDouble(layoutExtent, 0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent + stretchOffset,
+      scrollInsets: scrollInsets,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
@@ -829,6 +856,10 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
       0.0;
+    final EdgeInsets scrollInsets = _getInsetsForAxisDirection(
+      clampedPaintExtent + stretchOffset,
+      constraints.axisDirection,
+    );
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
@@ -836,6 +867,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       layoutExtent: clampDouble(layoutExtent, 0.0, clampedPaintExtent),
       maxPaintExtent: maxExtent + stretchOffset,
       maxScrollObstructionExtent: minExtent,
+      scrollInsets: scrollInsets,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return 0.0;

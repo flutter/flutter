@@ -835,13 +835,14 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   }
 
   @override
-  bool applyContentDimensions(double minScrollSize, double maxScrollSize) {
+  bool applyContentDimensions(double minScrollSize, double maxScrollSize, {EdgeInsets scrollInsets = EdgeInsets.zero}) {
     // We need to provide some extra size if we haven't yet reached the max or
     // min sizes. Otherwise, a list with fewer children than the size of
     // the available space will get stuck.
     return super.applyContentDimensions(
       minScrollSize - extent.additionalMinSize,
       maxScrollSize + extent.additionalMaxSize,
+      scrollInsets: scrollInsets,
     );
   }
 

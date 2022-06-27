@@ -539,6 +539,7 @@ class SliverGeometry with Diagnosticable {
     this.hasVisualOverflow = false,
     this.scrollOffsetCorrection,
     double? cacheExtent,
+    this.scrollInsets,
   }) : assert(scrollExtent != null),
        assert(paintExtent != null),
        assert(paintOrigin != null),
@@ -697,6 +698,9 @@ class SliverGeometry with Diagnosticable {
   ///
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheExtent;
+
+  /// Doc me!
+  final EdgeInsets? scrollInsets;
 
   /// Asserts that this geometry is internally consistent.
   ///

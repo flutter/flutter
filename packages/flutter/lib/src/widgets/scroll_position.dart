@@ -146,6 +146,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double? _maxScrollExtent;
 
   @override
+  EdgeInsets get scrollInsets => _scrollInsets;
+  EdgeInsets _scrollInsets = EdgeInsets.zero;
+
+  @override
   bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
 
   /// The additional velocity added for a [forcePixels] change in a single
@@ -526,16 +530,18 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       !(currentMetrics.extentBefore == _lastMetrics!.extentBefore
       && currentMetrics.extentInside == _lastMetrics!.extentInside
       && currentMetrics.extentAfter == _lastMetrics!.extentAfter
-      && currentMetrics.axisDirection == _lastMetrics!.axisDirection);
+      && currentMetrics.axisDirection == _lastMetrics!.axisDirection
+      && currentMetrics.scrollInsets == _lastMetrics!.scrollInsets);
   }
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero}) {
     assert(minScrollExtent != null);
     assert(maxScrollExtent != null);
     assert(haveDimensions == (_lastMetrics != null));
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
+        _scrollInsets != scrollInsets ||
         _didChangeViewportDimensionOrReceiveCorrection ||
         _lastAxis != axis) {
       assert(minScrollExtent != null);
@@ -543,6 +549,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
+      _scrollInsets = scrollInsets;
       _lastAxis = axis;
       final ScrollMetrics? currentMetrics = haveDimensions ? copyWith() : null;
       _didChangeViewportDimensionOrReceiveCorrection = false;

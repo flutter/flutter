@@ -316,6 +316,7 @@ class FixedExtentMetrics extends FixedScrollMetrics {
     required super.viewportDimension,
     required super.axisDirection,
     required this.itemIndex,
+    super.scrollInsets,
   });
 
   @override
@@ -326,6 +327,7 @@ class FixedExtentMetrics extends FixedScrollMetrics {
     double? viewportDimension,
     AxisDirection? axisDirection,
     int? itemIndex,
+    EdgeInsets? scrollInsets,
   }) {
     return FixedExtentMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -334,6 +336,7 @@ class FixedExtentMetrics extends FixedScrollMetrics {
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       itemIndex: itemIndex ?? this.itemIndex,
+      scrollInsets: scrollInsets ?? this.scrollInsets,
     );
   }
 
@@ -399,6 +402,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
     double? viewportDimension,
     AxisDirection? axisDirection,
     int? itemIndex,
+    EdgeInsets? scrollInsets,
   }) {
     return FixedExtentMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -407,6 +411,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       itemIndex: itemIndex ?? this.itemIndex,
+      scrollInsets: scrollInsets ?? this.scrollInsets,
     );
   }
 }
