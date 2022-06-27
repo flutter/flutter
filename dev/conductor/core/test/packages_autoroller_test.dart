@@ -161,7 +161,7 @@ void main() {
       const FakeCommand(command: <String>[
         'git',
         'push',
-        mirrorUrl,
+        'https://$token@github.com/$orgName/flutter.git',
         'packages-autoroller-branch-1:packages-autoroller-branch-1',
       ]),
       const FakeCommand(command: <String>[
