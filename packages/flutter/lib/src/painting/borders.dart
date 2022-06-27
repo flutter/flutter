@@ -765,7 +765,7 @@ class _CompoundBorder extends ShapeBorder {
 ///
 /// See also:
 ///
-///  * [paint], which paints an image in a rectangle on a canvas.
+///  * [paintImage], which paints an image in a rectangle on a canvas.
 ///  * [Border], which uses this function to paint its border when the border is
 ///    not uniform.
 ///  * [BoxDecoration], which describes its border using the [Border] class.

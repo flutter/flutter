@@ -135,7 +135,7 @@ class FittedSizes {
 /// See also:
 ///
 ///  * [FittedBox], a widget that applies this algorithm to another widget.
-///  * [paint], a function that applies this algorithm to images for painting.
+///  * [paintImage], a function that applies this algorithm to images for painting.
 ///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
 ///    provide access to [paintImage] at the widgets layer.
 FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
