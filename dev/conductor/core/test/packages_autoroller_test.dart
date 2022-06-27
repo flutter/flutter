@@ -151,7 +151,7 @@ void main() {
         'commit',
         '--message',
         'roll packages',
-        '--author="flutter-packages-autoroller <flutter-packages-autoroller@google.com>"',
+        '--author="fluttergithubbot <fluttergithubbot@google.com>"',
       ]),
       const FakeCommand(command: <String>[
         'git',
@@ -168,9 +168,7 @@ void main() {
     await expectLater(
       () async {
         final Future<void> rollFuture = autoroller.roll();
-        final String givenToken =
-            await controller.stream.transform(const Utf8Decoder()).join();
-        expect(givenToken, token);
+        await controller.stream.drain();
         await rollFuture;
       },
       throwsA(isA<Exception>().having(
@@ -267,7 +265,7 @@ void main() {
         'commit',
         '--message',
         'roll packages',
-        '--author="flutter-packages-autoroller <flutter-packages-autoroller@google.com>"',
+        '--author="fluttergithubbot <fluttergithubbot@google.com>"',
       ]),
       const FakeCommand(command: <String>[
         'git',
@@ -304,7 +302,7 @@ void main() {
     final Future<void> rollFuture = autoroller.roll();
     final String givenToken =
         await controller.stream.transform(const Utf8Decoder()).join();
-    expect(givenToken, token);
+    expect(givenToken.trim(), token);
     await rollFuture;
   });
 
