@@ -9,8 +9,7 @@ import 'desktop_text_selection.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_buttons.dart';
 
-// TODO(justinmc): Change "contextual menu" to "context menu" everywhere?
-/// The default Cupertino contextual menu for text selection for the current
+/// The default Cupertino context menu for text selection for the current
 /// platform.
 ///
 /// Builds the mobile Cupertino context menu for all mobile platforms, not just
@@ -24,9 +23,9 @@ import 'text_selection_toolbar_buttons.dart';
 /// See also:
 ///
 /// * [TextSelectionToolbarButtonDatasBuilder], which builds the
-///   [ContextualMenuButtonData]s.
+///   [ContextMenuButtonData]s.
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextualMenuButtonData]s.
+///   given [ContextMenuButtonData]s.
 /// * [DefaultTextSelectionToolbar], which does the same thing as this widget
 ///   but for all platforms.
 class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
@@ -60,7 +59,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// The information needed to create each child button of the menu.
   ///
   /// If provided, [children] cannot also be provided.
-  final List<ContextualMenuButtonData>? buttonDatas;
+  final List<ContextMenuButtonData>? buttonDatas;
 
   /// Used to generate the default buttons for the platform in the case that
   /// [children] and [buttonDatas] are not provided.
@@ -96,7 +95,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
 
     return TextSelectionToolbarButtonDatasBuilder(
       editableTextState: editableTextState!,
-      builder: (BuildContext context, List<ContextualMenuButtonData> buttonDatas) {
+      builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
         return _DefaultTextSelectionToolbarFromButtonDatas(
           primaryAnchor: primaryAnchor,
           secondaryAnchor: secondaryAnchor,
@@ -176,7 +175,7 @@ class _DefaultTextSelectionToolbarFromButtonDatas extends StatelessWidget {
   final Offset? secondaryAnchor;
 
   /// The information needed to create each child button of the menu.
-  final List<ContextualMenuButtonData> buttonDatas;
+  final List<ContextMenuButtonData> buttonDatas;
 
   @override
   Widget build(BuildContext context) {

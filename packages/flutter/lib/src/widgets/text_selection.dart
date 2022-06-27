@@ -16,7 +16,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'container.dart';
-import 'contextual_menu.dart';
+import 'context_menu.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -105,7 +105,7 @@ abstract class TextSelectionControls {
   /// If you want more detailed position information, can use [endpoints]
   /// to calculate it.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Widget buildToolbar(
@@ -133,7 +133,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the cut
   /// functionality to the user.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canCut(TextSelectionDelegate delegate) {
@@ -148,7 +148,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the copy
   /// functionality to the user.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canCopy(TextSelectionDelegate delegate) {
@@ -165,7 +165,7 @@ abstract class TextSelectionControls {
   /// to, for example, disallow pasting when the clipboard contains an empty
   /// string.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canPaste(TextSelectionDelegate delegate) {
@@ -179,7 +179,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the select all
   /// functionality to the user.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canSelectAll(TextSelectionDelegate delegate) {
@@ -193,7 +193,7 @@ abstract class TextSelectionControls {
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
@@ -207,7 +207,7 @@ abstract class TextSelectionControls {
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
@@ -224,7 +224,7 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
@@ -239,7 +239,7 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   void handleSelectAll(TextSelectionDelegate delegate) {

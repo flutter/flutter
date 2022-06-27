@@ -16,7 +16,7 @@ import 'theme.dart';
 /// See also:
 ///
 /// * [TextSelectionToolbarButtonDatasBuilder], which builds the
-///   [ContextualMenuButtonData]s.
+///   [ContextMenuButtonData]s.
 /// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
 class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
   /// Creates an instance of [TextSelectionToolbarButtonsBuilder].
@@ -27,28 +27,28 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
   });
 
   /// The information used to create each button Widget.
-  final List<ContextualMenuButtonData> buttonDatas;
+  final List<ContextMenuButtonData> buttonDatas;
 
   /// Called with a List of Widgets created from the given [buttonDatas].
   ///
   /// Typically builds a text selection toolbar with the given Widgets as
   /// children.
-  final ContextualMenuFromChildrenBuilder builder;
+  final ContextMenuFromChildrenBuilder builder;
 
-  static String _getButtonLabel(ContextualMenuButtonData buttonData, MaterialLocalizations localizations) {
+  static String _getButtonLabel(ContextMenuButtonData buttonData, MaterialLocalizations localizations) {
     if (buttonData.label != null) {
       return buttonData.label!;
     }
     switch (buttonData.type) {
-      case DefaultContextualMenuButtonType.cut:
+      case ContextMenuButtonType.cut:
         return localizations.cutButtonLabel;
-      case DefaultContextualMenuButtonType.copy:
+      case ContextMenuButtonType.copy:
         return localizations.copyButtonLabel;
-      case DefaultContextualMenuButtonType.paste:
+      case ContextMenuButtonType.paste:
         return localizations.pasteButtonLabel;
-      case DefaultContextualMenuButtonType.selectAll:
+      case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
-      case DefaultContextualMenuButtonType.custom:
+      case ContextMenuButtonType.custom:
         return '';
     }
   }
@@ -62,7 +62,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
         final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
         return builder(
           context,
-          buttonDatas.map((ContextualMenuButtonData buttonData) {
+          buttonDatas.map((ContextMenuButtonData buttonData) {
             return CupertinoTextSelectionToolbarButton.text(
               onPressed: buttonData.onPressed,
               text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData, localizations),
@@ -74,7 +74,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         return builder(
           context,
-          buttonDatas.map((ContextualMenuButtonData buttonData) {
+          buttonDatas.map((ContextMenuButtonData buttonData) {
             return TextSelectionToolbarTextButton(
               padding: TextSelectionToolbarTextButton.getPadding(buttonIndex++, buttonDatas.length),
               onPressed: buttonData.onPressed,
@@ -89,7 +89,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         return builder(
           context,
-          buttonDatas.map((ContextualMenuButtonData buttonData) {
+          buttonDatas.map((ContextMenuButtonData buttonData) {
             return DesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,
@@ -102,7 +102,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
         final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
         return builder(
           context,
-          buttonDatas.map((ContextualMenuButtonData buttonData) {
+          buttonDatas.map((ContextMenuButtonData buttonData) {
             return CupertinoDesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,

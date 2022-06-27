@@ -104,7 +104,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       selectionControls: controls,
       focusNode: _effectiveFocusNode,
-      buildContextMenu: (BuildContext context, List<ContextualMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+      buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
         if (widget.buildContextMenu != null) {
           return widget.buildContextMenu!(context);
         }

@@ -9,7 +9,7 @@ import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_buttons.dart';
 import 'theme.dart';
 
-/// The default contextual menu for text selection for the current platform.
+/// The default context menu for text selection for the current platform.
 ///
 /// The children can be customized using the [children] or [buttonDatas]
 /// parameters. If neither is given, then the default buttons will be used.
@@ -17,9 +17,9 @@ import 'theme.dart';
 /// See also:
 ///
 /// * [TextSelectionToolbarButtonDatasBuilder], which builds the
-///   [ContextualMenuButtonData]s.
+///   [ContextMenuButtonData]s.
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextualMenuButtonData]s.
+///   given [ContextMenuButtonData]s.
 /// * [DefaultCupertinoTextSelectionToolbar], which does the same thing as this
 ///   widget but only for Cupertino context menus.
 class DefaultTextSelectionToolbar extends StatelessWidget {
@@ -58,7 +58,7 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
   /// The information needed to create each child button of the menu.
   ///
   /// If provided, [children] cannot also be provided.
-  final List<ContextualMenuButtonData>? buttonDatas;
+  final List<ContextMenuButtonData>? buttonDatas;
 
   /// The children of the toolbar.
   ///
@@ -90,7 +90,7 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
 
     return TextSelectionToolbarButtonDatasBuilder(
       editableTextState: editableTextState!,
-      builder: (BuildContext context, List<ContextualMenuButtonData> buttonDatas) {
+      builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
         return _DefaultTextSelectionToolbarFromButtonDatas(
           primaryAnchor: primaryAnchor,
           secondaryAnchor: secondaryAnchor,
@@ -182,7 +182,7 @@ class _DefaultTextSelectionToolbarFromButtonDatas extends StatelessWidget {
   final Offset? secondaryAnchor;
 
   /// The information needed to create each child button of the menu.
-  final List<ContextualMenuButtonData> buttonDatas;
+  final List<ContextMenuButtonData> buttonDatas;
 
   @override
   Widget build(BuildContext context) {

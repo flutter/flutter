@@ -10,27 +10,10 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'inherited_theme.dart';
-import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
-
-// TODO(justinmc): Rename this file. context_menu.dart? There is already cupertino/context_menu.dart.
-
-// TODO(justinmc): Remove ContextualMenuController et. al.
-/// A function that builds a widget to use as a contextual menu.
-///
-/// See also:
-///
-///  * [EditableTextToolbarBuilder], which is a specific case of this for
-///    building text selection toolbars.
-typedef ContextualMenuBuilder = Widget Function(
-  BuildContext,
-  ContextualMenuController,
-  Offset,
-  Offset?,
-);
 
 // TODO(justinmc): Better docs.
 /// Builds a context menu.
@@ -47,8 +30,8 @@ typedef ContextMenuBuilder = Widget Function(
 ///
 /// See also:
 ///
-///  * [ContextualMenuBuilder], which is the generic type for any contextual
-///    menu builder, not just for the editable text selection toolbar.
+///  * [ContextMenuBuilder], which is the generic type for any context menu
+///    builder, not just for the editable text selection toolbar.
 typedef EditableTextToolbarBuilder = Widget Function(
   BuildContext,
   EditableTextState,
@@ -56,14 +39,31 @@ typedef EditableTextToolbarBuilder = Widget Function(
   [Offset?]
 );
 
-// TODO(justinmc): Is the ephemeral approach with just dipose right? Consumers
-// that get passed a controller call dispose on it, then it's done for.
+/// A Widget builder that is passed the [ClipboardStatus].
+typedef _ClipboardStatusWidgetBuilder = Widget Function(
+  BuildContext context,
+  ClipboardStatus clipboardStatus,
+);
+
+/// A builder function that builds a context menu given a list of
+/// [ContextMenuButtonData]s representing its children.
+///
+/// See also:
+///
+///   * [TextSelectionToolbarButtonDatasBuilder], which receives this as a
+///     parameter.
+typedef ToolbarButtonWidgetBuilder = Widget Function(
+  BuildContext context,
+  List<ContextMenuButtonData> buttonDatas,
+);
+
+// TODO(justinmc): Put in own file?
 /// Builds and manages a conext menu at the given location.
 class ContextMenuController {
   ContextMenuController._();
 
-  // The OverlayEntry is static because only one contextual menu can be
-  // displayed at one time.
+  // The OverlayEntry is static because only one context menu can be displayed
+  // at one time.
   static OverlayEntry? _menuOverlayEntry;
 
   /// True iff the menu is currently being displayed.
@@ -117,77 +117,8 @@ class ContextMenuController {
   }
 }
 
-// TODO(justinmc): Put in own file?
-/// A contextual menu that can be shown and hidden.
-class ContextualMenuController {
-  // TODO(justinmc): Update method for efficiency of moving the menu?
-  /// Creates an instance of [ContextualMenuController].
-  ContextualMenuController({
-    // TODO(justinmc): Accept these or just BuildContext?
-    required this.buildMenu,
-    this.debugRequiredFor,
-  });
-
-  /// The function that returns the contextual menu for this part of the widget
-  /// tree.
-  final ContextualMenuBuilder buildMenu;
-
-  /// Debugging information for explaining why the [Overlay] is required.
-  ///
-  /// See also:
-  ///
-  /// * [Overlay.of], which uses this parameter.
-  final Widget? debugRequiredFor;
-
-  // The OverlayEntry is static because only one contextual menu can be
-  // displayed at one time.
-  static OverlayEntry? _menuOverlayEntry;
-
-  /// True iff the contextual menu is currently being displayed.
-  bool get isVisible => _menuOverlayEntry != null;
-
-  /// Insert the Widget given by [buildMenu] into the root [Overlay].
-  ///
-  /// Will first remove the previously shown menu, if one exists.
-  void show(BuildContext context, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    hide();
-    final OverlayState? overlayState = Overlay.of(
-      context,
-      rootOverlay: true,
-      debugRequiredFor: debugRequiredFor,
-    );
-    final CapturedThemes capturedThemes = InheritedTheme.capture(
-      from: context,
-      to: Navigator.of(context).context,
-    );
-
-    _menuOverlayEntry = OverlayEntry(
-      builder: (BuildContext context) {
-        return Stack(
-          children: <Widget>[
-            ModalBarrier(
-              onDismiss: hide,
-            ),
-            capturedThemes.wrap(buildMenu(context, this, primaryAnchor, secondaryAnchor)),
-          ],
-        );
-      },
-    );
-    overlayState!.insert(_menuOverlayEntry!);
-  }
-
-  /// Remove the contextual menu from the [Overlay].
-  void hide() {
-    _menuOverlayEntry?.remove();
-    _menuOverlayEntry = null;
-  }
-}
-
-// TODO(justinmc): Now that it contains "custom" and isn't all default, rename?
-// TODO(justinmc): How does the user create a buttondata when they can't create
-// a type?
-/// The buttons that can appear in a contextual menu by default.
-enum DefaultContextualMenuButtonType {
+/// The buttons that can appear in a context menu by default.
+enum ContextMenuButtonType {
   /// A button that cuts the current text selection.
   cut,
 
@@ -210,13 +141,13 @@ enum DefaultContextualMenuButtonType {
 typedef LabelGetter = String Function (BuildContext context);
 
 // TODO(justinmc): Make `label` a method that uses the current platform.
-/// The type and callback for the available default contextual menu buttons.
+/// The type and callback for a context menu button.
 @immutable
-class ContextualMenuButtonData {
-  /// Creates an instance of [ContextualMenuButtonData].
-  const ContextualMenuButtonData({
+class ContextMenuButtonData {
+  /// Creates an instance of [ContextMenuButtonData].
+  const ContextMenuButtonData({
     required this.onPressed,
-    this.type = DefaultContextualMenuButtonType.custom,
+    this.type = ContextMenuButtonType.custom,
     this.label,
   });
 
@@ -224,23 +155,23 @@ class ContextualMenuButtonData {
   final VoidCallback onPressed;
 
   /// The type of button this represents.
-  final DefaultContextualMenuButtonType type;
+  final ContextMenuButtonType type;
 
   /// The label to display on the button.
   ///
-  /// If a [type] other than [DefaultContextualMenuButtonType.custom] is given
+  /// If a [type] other than [ContextMenuButtonType.custom] is given
   /// and a label is not provided, then the default label for that type for the
   /// platform will be looked up.
   final String? label;
 
-  /// Creates a new [ContextualMenuButtonData] with the provided parameters
+  /// Creates a new [ContextMenuButtonData] with the provided parameters
   /// overridden.
-  ContextualMenuButtonData copyWith({
+  ContextMenuButtonData copyWith({
     VoidCallback? onPressed,
-    DefaultContextualMenuButtonType? type,
+    ContextMenuButtonType? type,
     String? label,
   }) {
-    return ContextualMenuButtonData(
+    return ContextMenuButtonData(
       onPressed: onPressed ?? this.onPressed,
       type: type ?? this.type,
       label: label ?? this.label,
@@ -252,7 +183,7 @@ class ContextualMenuButtonData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ContextualMenuButtonData
+    return other is ContextMenuButtonData
         && other.label == label
         && other.onPressed == onPressed
         && other.type == type;
@@ -262,31 +193,18 @@ class ContextualMenuButtonData {
   int get hashCode => Object.hash(label, onPressed, type);
 
   @override
-  String toString() => 'ContextualMenuButtonData $type, $label';
+  String toString() => 'ContextMenuButtonData $type, $label';
 }
 
-/// A builder function that builds a contextual menu given a list of
-/// [ContextualMenuButtonData]s representing its children.
-///
-/// See also:
-///
-///   * [TextSelectionToolbarButtonDatasBuilder], which receives this as a
-///     parameter.
-typedef ToolbarButtonWidgetBuilder = Widget Function(
-  BuildContext context,
-  List<ContextualMenuButtonData> buttonDatas,
-);
-
-
-/// Calls [builder] with the [ContextualMenuButtonData]s representing the
-/// button in this platform's default text selection menu.
+/// Calls [builder] with the [ContextMenuButtonData]s representing the
+/// buttons in this platform's default text selection menu.
 ///
 /// The platform is determined by [defaultTargetPlatform].
 ///
 /// See also:
 ///
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextualMenuButtonData]s.
+///   given [ContextMenuButtonData]s.
 /// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
 class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   /// Creates an instance of [TextSelectionToolbarButtonDatasBuilder].
@@ -296,8 +214,8 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
     required this.editableTextState,
   });
 
-  /// Called with a list of [ContextualMenuButtonData]s so the contextual menu
-  /// can be built.
+  /// Called with a list of [ContextMenuButtonData]s so the context menu can be
+  /// built.
   final ToolbarButtonWidgetBuilder builder;
 
   /// The EditableTextState for the field that will display the text selection
@@ -347,44 +265,44 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
     }
   }
 
-  /// Returns the [ContextualMenuButtonData]s for the given [ToolbarOptions].
+  /// Returns the [ContextMenuButtonData]s for the given [ToolbarOptions].
   @Deprecated(
     'Use `buildContextMenu` instead of `toolbarOptions`. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
-  static List<ContextualMenuButtonData>? buttonDatasForToolbarOptions(ToolbarOptions? toolbarOptions, EditableTextState editableTextState) {
-    return toolbarOptions == null ? null : <ContextualMenuButtonData>[
+  static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(ToolbarOptions? toolbarOptions, EditableTextState editableTextState) {
+    return toolbarOptions == null ? null : <ContextMenuButtonData>[
       if (toolbarOptions.cut
           && TextSelectionToolbarButtonDatasBuilder.canCut(editableTextState))
-        ContextualMenuButtonData(
+        ContextMenuButtonData(
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
-          type: DefaultContextualMenuButtonType.selectAll,
+          type: ContextMenuButtonType.selectAll,
         ),
       if (toolbarOptions.copy
           && TextSelectionToolbarButtonDatasBuilder.canCopy(editableTextState))
-        ContextualMenuButtonData(
+        ContextMenuButtonData(
           onPressed: () {
             editableTextState.copySelection(SelectionChangedCause.toolbar);
           },
-          type: DefaultContextualMenuButtonType.copy,
+          type: ContextMenuButtonType.copy,
         ),
       if (toolbarOptions.paste && editableTextState.clipboardStatus != null
           && TextSelectionToolbarButtonDatasBuilder.canPaste(editableTextState, editableTextState.clipboardStatus!.value))
-        ContextualMenuButtonData(
+        ContextMenuButtonData(
           onPressed: () {
             editableTextState.pasteText(SelectionChangedCause.toolbar);
           },
-          type: DefaultContextualMenuButtonType.paste,
+          type: ContextMenuButtonType.paste,
         ),
       if (toolbarOptions.selectAll
           && TextSelectionToolbarButtonDatasBuilder.canSelectAll(editableTextState))
-        ContextualMenuButtonData(
+        ContextMenuButtonData(
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
-          type: DefaultContextualMenuButtonType.selectAll,
+          type: ContextMenuButtonType.selectAll,
         ),
     ];
   }
@@ -429,8 +347,9 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
         if (!_cutEnabled && !_copyEnabled && !pasteEnabled && !_selectAllEnabled) {
           return const SizedBox.shrink();
         }
-        // If the paste button is enabled, don't render anything until the state of
-        // the clipboard is known, since it's used to determine if paste is shown.
+        // If the paste button is enabled, don't render anything until the state
+        // of the clipboard is known, since it's used to determine if paste is
+        // shown.
         if (pasteEnabled && clipboardStatus == ClipboardStatus.unknown) {
           return const SizedBox.shrink();
         }
@@ -438,27 +357,27 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
         // Determine which buttons will appear so that the order and total number is
         // known. A button's position in the menu can slightly affect its
         // appearance.
-        final List<ContextualMenuButtonData> buttonDatas = <ContextualMenuButtonData>[
+        final List<ContextMenuButtonData> buttonDatas = <ContextMenuButtonData>[
           if (_cutEnabled)
-            ContextualMenuButtonData(
+            ContextMenuButtonData(
               onPressed: _handleCut,
-              type: DefaultContextualMenuButtonType.cut,
+              type: ContextMenuButtonType.cut,
             ),
           if (_copyEnabled)
-            ContextualMenuButtonData(
+            ContextMenuButtonData(
               onPressed: _handleCopy,
-              type: DefaultContextualMenuButtonType.copy,
+              type: ContextMenuButtonType.copy,
             ),
           if (pasteEnabled
               && clipboardStatus == ClipboardStatus.pasteable)
-            ContextualMenuButtonData(
+            ContextMenuButtonData(
               onPressed: _handlePaste,
-              type: DefaultContextualMenuButtonType.paste,
+              type: ContextMenuButtonType.paste,
             ),
           if (_selectAllEnabled)
-            ContextualMenuButtonData(
+            ContextMenuButtonData(
               onPressed: _handleSelectAll,
-              type: DefaultContextualMenuButtonType.selectAll,
+              type: ContextMenuButtonType.selectAll,
             ),
         ];
 
@@ -473,14 +392,8 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
   }
 }
 
-/// A Widget builder that is passed the [ClipboardStatus].
-typedef _ClipboardStatusWidgetBuilder = Widget Function(
-  BuildContext context,
-  ClipboardStatus clipboardStatus,
-);
-
 // TODO(justinmc): Should this be public? Currently it might be a little bit too
-/// tied into EditableText's nullable clipboardStatus. Maybe that can be moved?
+// tied into EditableText's nullable clipboardStatus. Maybe that can be moved?
 /// A widget builder wrapper of [ClipboardStatusNotifier].
 ///
 /// Runs the given [builder] with the current [ClipboardStatus]. If the
@@ -550,7 +463,7 @@ class _ClipboardStatusBuilderState extends State<_ClipboardStatusBuilder> with T
 }
 
 // TODO(justinmc): Update docs.
-/// Shows and hides the contextual menu based on user gestures.
+/// Shows and hides the context menu based on user gestures.
 ///
 /// By default, shows the menu on right clicks, and on mobile, long presses too.
 class ContextMenu extends StatefulWidget {
@@ -570,12 +483,12 @@ class ContextMenu extends StatefulWidget {
   /// The child widget that will be listened to for gestures.
   final Widget child;
 
-  /// True iff long press gestures show the menu.
+  /// True if long press gestures show the menu.
   ///
   /// By default, true for mobile platforms only.
   final bool longPressEnabled;
 
-  /// True iff right click gestures show the menu.
+  /// True if right click gestures show the menu.
   ///
   /// True by default.
   final bool secondaryTapEnabled;
@@ -644,9 +557,6 @@ class _ContextMenuState extends State<ContextMenu> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      // TODO(justinmc): Secondary tapping when the menu is open should fade out
-      // and then fade in to show again at the new location on Mac. On Linux, it
-      // should hide the menu and not change the selection.
       onSecondaryTapUp: widget.secondaryTapEnabled ? _onSecondaryTapUp : null,
       onTap: _onTap,
       onLongPress: widget.longPressEnabled ? _onLongPress : null,

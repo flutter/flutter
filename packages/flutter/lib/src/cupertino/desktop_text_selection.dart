@@ -48,7 +48,7 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
   /// Builder for the Mac-style copy/paste text selection toolbar.
   @Deprecated(
-    'Use `buildContextualMenu` instead. '
+    'Use `buildContextMenu` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override

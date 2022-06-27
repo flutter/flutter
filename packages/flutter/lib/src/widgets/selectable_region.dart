@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'contextual_menu.dart';
+import 'context_menu.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -39,7 +39,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///  * [ContextMenuBuilder], which doesn't include the buttonDatas.
 typedef SelectableRegionContextMenuBuilder = Widget Function(
   BuildContext context,
-  List<ContextualMenuButtonData> buttonDatas,
+  List<ContextMenuButtonData> buttonDatas,
   Offset primaryAnchor,
   [Offset secondaryAnchor]
 );
@@ -632,21 +632,21 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
             _selectable?.getSelectedContent()?.plainText;
         return widget.buildContextMenu!(
           context,
-          <ContextualMenuButtonData>[
+          <ContextMenuButtonData>[
             if (selectedText != null && selectedText != '')
-              ContextualMenuButtonData(
+              ContextMenuButtonData(
                 onPressed: () {
                   copySelection(SelectionChangedCause.toolbar);
                   ContextMenuController.hide();
                 },
-                type: DefaultContextualMenuButtonType.copy,
+                type: ContextMenuButtonType.copy,
               ),
-            ContextualMenuButtonData(
+            ContextMenuButtonData(
               onPressed: () {
                 selectAll(SelectionChangedCause.toolbar);
                 ContextMenuController.hide();
               },
-              type: DefaultContextualMenuButtonType.selectAll,
+              type: ContextMenuButtonType.selectAll,
             ),
           ],
           location,
