@@ -17,7 +17,7 @@ abstract class AnimatedRasterDelegate {
   /// const constructor so that subclasses can be const.
   const AnimatedRasterDelegate();
 
-  /// Whether [paintImage] will paint anything on the current frame.
+  /// Whether [paint] will paint anything on the current frame.
   ///
   /// This is used to optimize painting and delay rasterization if a child
   /// would not be painted. One example would be an animated opacity, if the
@@ -30,8 +30,10 @@ abstract class AnimatedRasterDelegate {
   ///
   /// The provided [image] contains a GPU resident texture of the children of
   /// this render object.
+  ///
+  /// The [pixelRatio] is the ratio of pixels in [image] to logical pixels.
   @protected
-  void paintImage(PaintingContext context, ui.Image image, Rect area, double pixelRatio, Animation<double> animation);
+  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation);
 }
 
 /// A widget that replaces [child] with a rasterized version while an animation is active.
@@ -80,7 +82,7 @@ class AnimatedRaster extends SingleChildRenderObjectWidget {
 /// [AnimationStatus.dismissed], children are painted normally. When the status
 /// is [AnimationStatus.forward] or [AnimationStatus.reverse], this render object
 /// will create a GPU resident texture the first time that [AnimatedRasterDelegate.willPaint] returns true
-/// and provide it to [AnimatedRasterDelegate.paintImage].
+/// and provide it to [AnimatedRasterDelegate.paint].
 ///
 /// See also:
 ///  * [ZoomPageTransitionsBuilder], which uses this render object to implement the fade and
@@ -202,11 +204,9 @@ class RenderAnimatedRaster extends RenderProxyBox {
       );
     }
     if (updateImage) {
-      final Rect src = offset & size;
-      delegate.paintImage(
+      delegate.paint(
         context,
         _childImage!,
-        Rect.fromLTWH(src.left, src.top, src.width * devicePixelRatio, src.height * devicePixelRatio),
         devicePixelRatio,
         animation,
       );

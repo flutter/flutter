@@ -89,7 +89,8 @@ void main() {
     ));
 
     expect(delegate.lastPixelRatio, 3.0);
-    expect(delegate.lastArea, const Rect.fromLTWH(0, 0, 100 * 3.0 , 100 * 3.0));
+    expect(delegate.lastImage?.width, 100 * 3.0);
+    expect(delegate.lastImage?.height, 100 * 3.0);
   }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderAnimatedRaster removes and then reattaches animation listener if attached/detached', (WidgetTester tester) async {
@@ -117,7 +118,6 @@ void main() {
 // ignore: must_be_immutable
 class TestDelegate extends AnimatedRasterDelegate {
   ui.Image? lastImage;
-  Rect? lastArea;
   double? lastPixelRatio;
   bool willPaintValue = true;
 
@@ -127,9 +127,8 @@ class TestDelegate extends AnimatedRasterDelegate {
   }
 
   @override
-  void paintImage(PaintingContext context, ui.Image image, Rect area, double pixelRatio, Animation<double> animation) {
+  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
     lastImage = image;
-    lastArea = area;
     lastPixelRatio = pixelRatio;
   }
 }

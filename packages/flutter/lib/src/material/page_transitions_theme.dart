@@ -358,6 +358,18 @@ class _WebZoomEnterTransition extends StatelessWidget {
   }
 }
 
+/// Take an image and draw it centered and scaled. The image is already scaled by the [pixelRatio].
+void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double scale, double pixelRatio, Paint paint) {
+  final double logicalWidth = image.width / pixelRatio;
+  final double logicalHeight = image.height / pixelRatio;
+  final double scaledLogicalWidth = logicalWidth * scale;
+  final double scaledLogicalHeight = logicalHeight * scale;
+  final double left = (logicalWidth - scaledLogicalWidth) / 2;
+  final double top = (logicalHeight - scaledLogicalHeight) / 2;
+  final Rect dst = Rect.fromLTWH(left, top, scaledLogicalWidth, scaledLogicalHeight);
+  context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
+}
+
 class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
   const _ZoomEnterTransitionDelegate({required this.reverse});
 
@@ -370,7 +382,7 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
   bool operator ==(Object other) => other is _ZoomEnterTransitionDelegate && other.reverse == reverse;
 
   @override
-  void paintImage(PaintingContext context, ui.Image image, Rect area, double pixelRatio, Animation<double> animation) {
+  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
     final double fade = reverse
       ? 1.0
       : _ZoomEnterTransition._fadeInTransition.evaluate(animation);
@@ -397,15 +409,11 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
     final Paint paint = Paint()
       ..filterQuality = ui.FilterQuality.low
       ..color = const Color(0xFF000000).withOpacity(fade);
+    final double logicalWidth = image.width / pixelRatio;
+    final double logicalHeight = image.height / pixelRatio;
 
-    context.canvas.drawRect(area, Paint()..color = Colors.black.withOpacity(opacity));
-    final Rect src = area;
-    final double newWidth = src.width * scale / pixelRatio;
-    final double newHeight = src.height * scale / pixelRatio;
-    final double leftOffset = (src.width / pixelRatio - newWidth) / 2;
-    final double topOffset = (src.height / pixelRatio - newHeight) / 2;
-    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset, newWidth, newHeight);
-    context.canvas.drawImageRect(image, src, dst, paint);
+    context.canvas.drawRect(Offset.zero & Size(logicalWidth, logicalHeight), Paint()..color = Colors.black.withOpacity(opacity));
+    _drawImageScaledAndCentered(context, image, scale, pixelRatio, paint);
   }
 }
 
@@ -483,7 +491,6 @@ class _WebZoomExitTransition extends StatelessWidget {
   }
 }
 
-
 class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
   const _ZoomExitTransitionDelegate({required this.reverse});
 
@@ -504,7 +511,7 @@ class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
   }
 
   @override
-  void paintImage(PaintingContext context, ui.Image image, Rect rect, double pixelRatio, Animation<double> animation) {
+  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
     final double fade = reverse
       ? _ZoomExitTransition._fadeOutTransition.evaluate(animation)
       : 1.0;
@@ -516,13 +523,7 @@ class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
     final Paint paint = Paint()
       ..filterQuality = ui.FilterQuality.low
       ..color = const Color(0xFF000000).withOpacity(fade);
-    final Rect src = rect;
-    final double newWidth = src.width * scale / pixelRatio;
-    final double newHeight = src.height * scale / pixelRatio;
-    final double leftOffset = (src.width / pixelRatio - newWidth) / 2;
-    final double topOffset = (src.height / pixelRatio - newHeight) / 2;
-    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
-    context.canvas.drawImageRect(image, src, dst, paint);
+    _drawImageScaledAndCentered(context, image, scale, pixelRatio, paint);
   }
 }
 
