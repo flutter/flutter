@@ -5,6 +5,21 @@
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 
+generated_file("artifacts_entitlement_config") {
+  outputs = [ "$target_gen_dir/entitlements.txt" ]
+
+  data_keys = [ "entitlement_file_path" ]
+
+  deps = [ "//flutter/lib/snapshot:generate_snapshot_bin" ]
+  if (flutter_runtime_mode == "debug") {
+    deps += [
+      "//flutter/impeller/compiler:impellerc",
+      "//flutter/impeller/tessellator:tessellator_shared",
+      "//flutter/shell/testing:testing",
+    ]
+  }
+}
+
 if (build_engine_artifacts) {
   zip_bundle("artifacts") {
     deps = [
@@ -69,6 +84,15 @@ if (build_engine_artifacts) {
         destination = "libtessellator$dll"
       },
     ]
+    if (host_os == "mac") {
+      deps += [ ":artifacts_entitlement_config" ]
+      files += [
+        {
+          source = "$target_gen_dir/entitlements.txt"
+          destination = "entitlements.txt"
+        },
+      ]
+    }
   }
 }
 

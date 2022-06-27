@@ -35,4 +35,8 @@ executable("testing") {
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",
   ]
+
+  metadata = {
+    entitlement_file_path = [ "flutter_tester" ]
+  }
 }
