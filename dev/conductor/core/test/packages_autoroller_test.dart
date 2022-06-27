@@ -265,7 +265,7 @@ void main() {
         'commit',
         '--message',
         'roll packages',
-        '--author="fluttergithubbot <fluttergithubbot@google.com>"',
+        '--author="fluttergithubbot <fluttergithubbot@gmail.com>"',
       ]),
       const FakeCommand(command: <String>[
         'git',
@@ -290,6 +290,8 @@ void main() {
         'flutter-roller:packages-autoroller-branch-1',
         '--base',
         FrameworkRepository.defaultBranch,
+        '--label',
+        'tool',
       ]),
       const FakeCommand(command: <String>[
         'gh',
