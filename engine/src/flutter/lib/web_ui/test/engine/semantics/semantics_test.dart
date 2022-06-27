@@ -1806,7 +1806,7 @@ void _testPlatformView() {
 
     ui.platformViewRegistry.registerViewFactory(
       'test-platform-view',
-      (int viewId) => html.DivElement()
+      (int viewId) => createDomHTMLDivElement()
         ..id = 'view-0'
         ..style.width = '100%'
         ..style.height = '100%',

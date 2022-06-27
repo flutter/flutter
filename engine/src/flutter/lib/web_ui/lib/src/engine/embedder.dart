@@ -345,7 +345,7 @@ class FlutterViewEmbedder {
       //
       // VisualViewport API is not enabled in Firefox as well. On the other hand
       // Firefox returns correct values for innerHeight, innerWidth.
-      // Firefox also triggers html.window.onResize therefore this timer does
+      // Firefox also triggers domWindow.onResize therefore this timer does
       // not need to be set up for Firefox.
       final int initialInnerWidth = domWindow.innerWidth!;
       // Counts how many times screen size was checked. It is checked up to 5
@@ -539,7 +539,7 @@ class FlutterViewEmbedder {
   String get currentHtml => _rootApplicationElement?.outerHTML ?? '';
 }
 
-// Applies the required global CSS to an incoming [html.CssStyleSheet] `sheet`.
+// Applies the required global CSS to an incoming [DomCSSStyleSheet] `sheet`.
 void applyGlobalCssRulesToSheet(
   DomCSSStyleSheet sheet, {
   required BrowserEngine browserEngine,

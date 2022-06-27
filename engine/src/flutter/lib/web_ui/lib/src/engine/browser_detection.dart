@@ -185,7 +185,7 @@ OperatingSystem detectOperatingSystem({
     return OperatingSystem.iOs;
   } else if (userAgent.contains('Android')) {
     // The Android OS reports itself as "Linux armv8l" in
-    // [html.window.navigator.platform]. So we have to check the user-agent to
+    // [domWindow.navigator.platform]. So we have to check the user-agent to
     // determine if the OS is Android or not.
     return OperatingSystem.android;
   } else if (platform.startsWith('Linux')) {
