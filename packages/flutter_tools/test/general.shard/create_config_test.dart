@@ -19,4 +19,13 @@ void main() {
 
     expect(isValidPackageName('Foo_bar'), false);
   });
+
+  test('kWindowsDrivePattern', () {
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'D:\'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'z:\'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'\d:'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'ef:'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'D:'), isTrue);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'c:'), isTrue);
+  });
 }
