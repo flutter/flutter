@@ -106,7 +106,6 @@ class TextSelectionToolbar extends StatelessWidget {
     // Makes up for the Padding above the Stack.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
-    // TODO(justinmc): Any way to deduplicate this with Cupertino?
     return Padding(
       padding: EdgeInsets.fromLTRB(
         _kToolbarScreenPadding,
@@ -114,6 +113,7 @@ class TextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
         _kToolbarScreenPadding,
       ),
+      // TODO(justinmc): Is this Stack unnecessary?
       child: Stack(
         children: <Widget>[
           CustomSingleChildLayout(
