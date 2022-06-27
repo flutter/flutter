@@ -417,7 +417,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         _lastMetrics!.extentBefore == metrics.extentBefore &&
         _lastMetrics!.extentInside == metrics.extentInside &&
         _lastMetrics!.extentAfter == metrics.extentAfter &&
-        _lastAxisDirection == axisDirection) {
+        _lastAxisDirection == axisDirection &&
+        _lastMetrics!.scrollInsets != metrics.scrollInsets) {
       return;
     }
 
@@ -488,7 +489,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = crossAxisMargin + padding.left;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
+        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + _scrollInsets.top);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
         borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
         break;
@@ -497,7 +498,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
+        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + _scrollInsets.top);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
         break;
@@ -506,7 +507,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = crossAxisMargin + padding.top;
-        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
+        trackOffset = Offset(mainAxisMargin + _scrollInsets.left, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
         break;
@@ -515,7 +516,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
+        trackOffset = Offset(mainAxisMargin+ _scrollInsets.left, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
         break;
@@ -604,8 +605,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double get _afterExtent => _isReversed ? _lastMetrics!.extentBefore : _lastMetrics!.extentAfter;
   // Padding of the thumb track.
   double get _mainAxisPadding => _isVertical ? padding.vertical : padding.horizontal;
+  // The inset provided by the content.
+  EdgeInsets get _scrollInsets => _lastMetrics?.scrollInsets ?? EdgeInsets.zero;
   // The size of the thumb track.
-  double get _trackExtent => _lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding;
+  double get _trackExtent {
+    final double mainAxisInsets = _isVertical ? _scrollInsets.vertical : _scrollInsets.horizontal;
+    return _lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding - mainAxisInsets;
+  }
 
   // The total size of the scrollable content.
   double get _totalContentExtent {
@@ -651,10 +657,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
     }
 
-    final double beforePadding = _isVertical ? padding.top : padding.left;
+    late double leadingThumbSpace;
+    switch (_lastMetrics!.axisDirection) {
+      case AxisDirection.up:
+        leadingThumbSpace = padding.bottom + _scrollInsets.bottom + mainAxisMargin;
+        break;
+      case AxisDirection.right:
+        leadingThumbSpace = padding.left + _scrollInsets.left + mainAxisMargin;
+        break;
+      case AxisDirection.down:
+        leadingThumbSpace = padding.top + _scrollInsets.top + mainAxisMargin;
+        break;
+      case AxisDirection.left:
+        leadingThumbSpace = padding.right + _scrollInsets.right + mainAxisMargin;
+        break;
+    }
+
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
-    _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
+    _thumbOffset = thumbOffsetLocal + leadingThumbSpace;
 
     // Do not paint a scrollbar if the scroll view is infinitely long.
     // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
