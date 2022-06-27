@@ -16,7 +16,7 @@ import 'text_selection_toolbar_button.dart';
 ///
 /// See also:
 ///
-///   * [CupertinoTextSelectionToolbarButtonBuilder], which receives this as a
+///   * [CupertinoTextSelectionToolbarButtonsBuilder], which receives this as a
 ///     parameter.
 typedef ContextMenuFromChildrenBuilder = Widget Function(
   BuildContext context,
