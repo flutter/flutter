@@ -41,8 +41,9 @@ TEST(FlSettingsPluginTest, AlwaysUse24HourFormat) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
   ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_object_new(
-      fl_engine_get_type(), "binary-messenger", messenger, nullptr));
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsPlugin) plugin = fl_settings_plugin_new(engine);
 
   g_autoptr(FlValue) use_12h = fl_value_new_bool(false);
@@ -66,8 +67,9 @@ TEST(FlSettingsPluginTest, PlatformBrightness) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
   ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_object_new(
-      fl_engine_get_type(), "binary-messenger", messenger, nullptr));
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsPlugin) plugin = fl_settings_plugin_new(engine);
 
   g_autoptr(FlValue) light = fl_value_new_string("light");
@@ -91,8 +93,9 @@ TEST(FlSettingsPluginTest, TextScaleFactor) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
   ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_object_new(
-      fl_engine_get_type(), "binary-messenger", messenger, nullptr));
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsPlugin) plugin = fl_settings_plugin_new(engine);
 
   g_autoptr(FlValue) one = fl_value_new_float(1.0);
