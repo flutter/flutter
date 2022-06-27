@@ -67,6 +67,10 @@ compiled_action("generate_snapshot_bin") {
   }
 
   args += [ rebase_path(platform_kernel) ]
+
+  metadata = {
+    entitlement_file_path = [ "gen_snapshot" ]
+  }
 }
 
 # Generates an assembly file defining a given symbol with the bytes from a
