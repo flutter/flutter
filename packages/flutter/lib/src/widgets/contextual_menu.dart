@@ -347,38 +347,6 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
     }
   }
 
-  // TODO(justinmc): Document.
-  static void handleCut(EditableTextState editableTextState) {
-    editableTextState.cutSelection(SelectionChangedCause.toolbar);
-  }
-
-  static void handleCopy(EditableTextState editableTextState) {
-    editableTextState.copySelection(SelectionChangedCause.toolbar);
-  }
-
-  static void handlePaste(EditableTextState editableTextState) {
-    editableTextState.pasteText(SelectionChangedCause.toolbar);
-  }
-
-  // TODO(justinmc): Really though, why isn't this in EditableTextState?
-  static void handleSelectAll(EditableTextState editableTextState) {
-    editableTextState.selectAll(SelectionChangedCause.toolbar);
-    editableTextState.bringIntoView(
-      editableTextState.textEditingValue.selection.extent,
-    );
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        break;
-      case TargetPlatform.macOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        editableTextState.hideToolbar();
-    }
-  }
-
   /// Returns the [ContextualMenuButtonData]s for the given [ToolbarOptions].
   @Deprecated(
     'Use `buildContextMenu` instead of `toolbarOptions`. '
@@ -390,7 +358,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
           && TextSelectionToolbarButtonDatasBuilder.canCut(editableTextState))
         ContextualMenuButtonData(
           onPressed: () {
-            TextSelectionToolbarButtonDatasBuilder.handleSelectAll(editableTextState);
+            editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
           type: DefaultContextualMenuButtonType.selectAll,
         ),
@@ -398,7 +366,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
           && TextSelectionToolbarButtonDatasBuilder.canCopy(editableTextState))
         ContextualMenuButtonData(
           onPressed: () {
-            TextSelectionToolbarButtonDatasBuilder.handleCopy(editableTextState);
+            editableTextState.copySelection(SelectionChangedCause.toolbar);
           },
           type: DefaultContextualMenuButtonType.copy,
         ),
@@ -406,7 +374,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
           && TextSelectionToolbarButtonDatasBuilder.canPaste(editableTextState, editableTextState.clipboardStatus!.value))
         ContextualMenuButtonData(
           onPressed: () {
-            TextSelectionToolbarButtonDatasBuilder.handlePaste(editableTextState);
+            editableTextState.pasteText(SelectionChangedCause.toolbar);
           },
           type: DefaultContextualMenuButtonType.paste,
         ),
@@ -414,7 +382,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
           && TextSelectionToolbarButtonDatasBuilder.canSelectAll(editableTextState))
         ContextualMenuButtonData(
           onPressed: () {
-            TextSelectionToolbarButtonDatasBuilder.handleSelectAll(editableTextState);
+            editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
           type: DefaultContextualMenuButtonType.selectAll,
         ),
@@ -433,19 +401,19 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
   bool get _selectAllEnabled => TextSelectionToolbarButtonDatasBuilder.canSelectAll(widget.editableTextState);
 
   void _handleCut() {
-    return TextSelectionToolbarButtonDatasBuilder.handleCut(widget.editableTextState);
+    return widget.editableTextState.cutSelection(SelectionChangedCause.toolbar);
   }
 
   void _handleCopy() {
-    return TextSelectionToolbarButtonDatasBuilder.handleCopy(widget.editableTextState);
+    return widget.editableTextState.copySelection(SelectionChangedCause.toolbar);
   }
 
-  void _handlePaste() {
-    return TextSelectionToolbarButtonDatasBuilder.handlePaste(widget.editableTextState);
+  Future<void> _handlePaste() {
+    return widget.editableTextState.pasteText(SelectionChangedCause.toolbar);
   }
 
   void _handleSelectAll() {
-    return TextSelectionToolbarButtonDatasBuilder.handleSelectAll(widget.editableTextState);
+    return widget.editableTextState.selectAll(SelectionChangedCause.toolbar);
   }
 
   @override
