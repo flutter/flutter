@@ -73,7 +73,7 @@ ${parser.usage}
       'Provided token path $tokenPath but no file exists at ${tokenFile.absolute.path}',
     );
   }
-  final String token = tokenFile.readAsStringSync();
+  final String token = tokenFile.readAsStringSync().trim();
   if (token.isEmpty) {
     throw ArgumentError(
       'Tried to read a GitHub access token from file ${tokenFile.path} but it was empty',

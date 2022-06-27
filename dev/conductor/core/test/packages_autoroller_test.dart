@@ -65,6 +65,122 @@ void main() {
     );
   });
 
+  test('GitHub token is redacted from exceptions while pushing', () async {
+    final StreamController<List<int>> controller =
+        StreamController<List<int>>();
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: const <String>[
+        'gh',
+        'auth',
+        'login',
+        '--hostname',
+        'github.com',
+        '--git-protocol',
+        'https',
+        '--with-token',
+      ], stdin: io.IOSink(controller.sink)),
+      const FakeCommand(command: <String>[
+        'git',
+        'clone',
+        '--origin',
+        'upstream',
+        '--',
+        FrameworkRepository.defaultUpstream,
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'remote',
+        'add',
+        'mirror',
+        mirrorUrl,
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'fetch',
+        'mirror',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'checkout',
+        FrameworkRepository.defaultBranch,
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], stdout: 'deadbeef'),
+      const FakeCommand(command: <String>[
+        'git',
+        'ls-remote',
+        '--heads',
+        'mirror',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'checkout',
+        '-b',
+        'packages-autoroller-branch-1',
+      ]),
+      const FakeCommand(command: <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+        'help',
+      ]),
+      const FakeCommand(command: <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+        '--verbose',
+        'update-packages',
+        '--force-upgrade',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'status',
+        '--porcelain',
+      ], stdout: '''
+ M packages/foo/pubspec.yaml
+ M packages/bar/pubspec.yaml
+ M dev/integration_tests/test_foo/pubspec.yaml
+'''),
+      const FakeCommand(command: <String>[
+        'git',
+        'add',
+        '--all',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'commit',
+        '--message',
+        'roll packages',
+        '--author="flutter-packages-autoroller <flutter-packages-autoroller@google.com>"',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], stdout: '000deadbeef'),
+      const FakeCommand(command: <String>[
+        'git',
+        'push',
+        'https://$token@github.com/$orgName/flutter.git',
+        'packages-autoroller-branch-1:packages-autoroller-branch-1',
+      ], exitCode: 1, stderr: 'Authentication error!'),
+    ]);
+    await expectLater(
+      () async {
+        final Future<void> rollFuture = autoroller.roll();
+        final String givenToken =
+            await controller.stream.transform(const Utf8Decoder()).join();
+        expect(givenToken, token);
+        await rollFuture;
+      },
+      throwsA(isA<Exception>().having(
+        (Exception exc) => exc.toString(),
+        'message',
+        isNot(contains(token)),
+      )),
+    );
+  });
+
   test('can roll with correct inputs', () async {
     final StreamController<List<int>> controller =
         StreamController<List<int>>();
