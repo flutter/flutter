@@ -203,9 +203,8 @@ Dart_Handle System::ChannelCreate(uint32_t options) {
 
 zx_status_t System::ConnectToService(std::string path,
                                      fml::RefPtr<Handle> channel) {
-  return fdio_ns_connect(GetNamespace(), path.c_str(),
-                         ZX_FS_RIGHT_READABLE | ZX_FS_RIGHT_WRITABLE,
-                         channel->ReleaseHandle());
+  return fdio_ns_service_connect(GetNamespace(), path.c_str(),
+                                 channel->ReleaseHandle());
 }
 
 zx::channel System::CloneChannelFromFileDescriptor(int fd) {
