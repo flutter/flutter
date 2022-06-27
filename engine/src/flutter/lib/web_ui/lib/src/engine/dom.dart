@@ -47,7 +47,10 @@ extension DomWindowExtension on DomWindow {
         if (pseudoElt != null) pseudoElt
       ]) as DomCSSStyleDeclaration;
   external DomScreen? get screen;
+  external int requestAnimationFrame(DomRequestAnimationFrameCallback callback);
 }
+
+typedef DomRequestAnimationFrameCallback = void Function(num highResTime);
 
 @JS()
 @staticInterop

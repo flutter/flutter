@@ -4,6 +4,8 @@
 
 // TODO(yjbanov): rename this file to web_only_api.dart.
 //                https://github.com/flutter/flutter/issues/100394
+//                Rather than extending this file with new APIs, we
+//                should instead use js interop.
 
 // This file contains extra web-only API that non-web engines do not have.
 //
@@ -129,13 +131,13 @@ void webOnlySetPluginHandler(Future<void> Function(String, ByteData?, PlatformMe
   engine.pluginMessageCallHandler = handler;
 }
 
-/// A function which takes a unique `id` and creates an HTML element.
-typedef PlatformViewFactory = html.Element Function(int viewId);
-
 /// A registry for factories that create platform views.
 class PlatformViewRegistry {
-  /// Register [viewTypeId] as being creating by the given [factory].
-  bool registerViewFactory(String viewTypeId, PlatformViewFactory viewFactory,
+  /// Register [viewTypeId] as being creating by the given [viewFactory].
+  /// [viewFactory] can be any function that takes an integer and returns an
+  /// `HTMLElement` DOM object.
+  bool registerViewFactory(String viewTypeId,
+      Object Function(int viewId) viewFactory,
       {bool isVisible = true}) {
     // TODO(web): Deprecate this once there's another way of calling `registerFactory` (js interop?)
     return engine.platformViewManager

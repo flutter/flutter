@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
+import 'dom.dart';
 import 'platform_dispatcher.dart';
+import 'safe_browser_api.dart';
 import 'services.dart';
 
 final ByteData? _fontChangeMessage =
@@ -22,13 +23,13 @@ FutureOr<void> sendFontChangeMessage() async {
   if (!_fontChangeScheduled) {
     _fontChangeScheduled = true;
     // Batch updates into next animationframe.
-    html.window.requestAnimationFrame((num _) {
+    domWindow.requestAnimationFrame(allowInterop((num _) {
       _fontChangeScheduled = false;
       EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
         'flutter/system',
         _fontChangeMessage,
         (_) {},
       );
-    });
+    }));
   }
 }
