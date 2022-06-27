@@ -413,7 +413,7 @@ class DaemonDomain extends Domain {
     final List<String> result = <String>[];
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
-      final supportedPlatforms = flutterProject.getSupportedPlatforms().toSet();
+      final Set<SupportedPlatform> supportedPlatforms = flutterProject.getSupportedPlatforms().toSet();
       if (featureFlags.isLinuxEnabled && supportedPlatforms.contains(SupportedPlatform.linux)) {
         result.add('linux');
       }
