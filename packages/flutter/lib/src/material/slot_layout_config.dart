@@ -11,6 +11,10 @@ import 'package:flutter/widgets.dart';
 /// this Widget as well
 // ignore: must_be_immutable
 class SlotLayoutConfig extends StatefulWidget {
+  /// Creates a [SlotLayoutConfig].
+  ///
+  /// If [animation] and or [controller] are null, the [SlotLayoutConfig] simply
+  /// returns its child.
   SlotLayoutConfig({
     required this.child,
     this.controller,

@@ -12,11 +12,17 @@ import 'slot_layout_config.dart';
 
 // ignore: must_be_immutable
 class SlotLayout extends StatefulWidget {
+
+  /// Creates a [SlotLayout].
+  ///
+  /// Returns a chosen [SlotLayoutConfig] based on the breakpoints defined in
+  /// the [config]
   SlotLayout({
     required this.config,
-    super.key
+    required super.key
     });
 
+  /// Whether this slot has a Widget currently chosen.
   bool isActive = false;
 
   /// The mapping that is used to determine what Widget to display at what point.

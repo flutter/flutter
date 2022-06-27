@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import '../widgets/slot_layout.dart';
+import '../material/slot_layout.dart';
 
 /// A parent Widget takes in multiple [SlotLayout] components and places them
 /// into their appropriate positions on the screen.
 
 class AdaptiveLayout extends StatefulWidget {
+  /// Creates an [AdaptiveLayout].
   const AdaptiveLayout({
     this.leftNavigation,
     this.rightNavigation,
