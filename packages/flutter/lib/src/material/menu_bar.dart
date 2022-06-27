@@ -416,7 +416,7 @@ class _MenuBarState extends State<_MenuBar> {
     final Set<MaterialState> state = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
     final MenuThemeData menuTheme = MenuTheme.of(context);
     return _MenuManagerMarker(
-      manager: manager,
+      notifier: manager,
       child: AnimatedBuilder(
           animation: manager,
           builder: (BuildContext context, Widget? ignoredChild) {
@@ -426,10 +426,7 @@ class _MenuBarState extends State<_MenuBar> {
                 actions: <Type, Action<Intent>>{
                   NextFocusIntent: _MenuNextFocusAction(manager: manager),
                   PreviousFocusIntent: _MenuPreviousFocusAction(manager: manager),
-                  DirectionalFocusIntent: _MenuDirectionalFocusAction(
-                    manager: manager,
-                    textDirection: Directionality.of(context),
-                  ),
+                  DirectionalFocusIntent: _MenuDirectionalFocusAction(manager: manager),
                   DismissIntent: _MenuDismissAction(manager: manager),
                 },
                 child: Builder(builder: (BuildContext context) {
@@ -451,7 +448,7 @@ class _MenuBarState extends State<_MenuBar> {
                                   _TokenDefaultsM3(context).barBackgroundColor)
                               .resolve(state)!,
                           padding: widget.padding ?? menuTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                          children: widget.menus,
+                          children: _expandGroups(manager.root, widget.menus, Axis.horizontal),
                         ),
                       ),
                     ),
@@ -542,6 +539,7 @@ class _MenuManager extends ChangeNotifier {
       _overlayEntry?.remove();
       _overlayEntry = null;
       _manageOverlayEntry();
+      _markMenuDirtyAndDelayIfNecessary();
     }
   }
 
@@ -552,7 +550,7 @@ class _MenuManager extends ChangeNotifier {
       _controller?._detach(this);
       _controller = value;
       _controller?._attach(this);
-      _controller?._managerStateChanged();
+      _markMenuDirtyAndDelayIfNecessary();
     }
   }
 
@@ -562,7 +560,7 @@ class _MenuManager extends ChangeNotifier {
     if (_menus != value) {
       _menus = value;
       _createMenuTree(_menus);
-      notifyListeners();
+      _markMenuDirtyAndDelayIfNecessary();
     }
   }
 
@@ -571,8 +569,11 @@ class _MenuManager extends ChangeNotifier {
   bool _enabled = true;
   set enabled(bool value) {
     if (_enabled != value) {
-      _enabled = enabled;
-      notifyListeners();
+      _enabled = value;
+      if (!_enabled) {
+        closeAll();
+      }
+      _markMenuDirtyAndDelayIfNecessary();
     }
   }
 
@@ -607,7 +608,7 @@ class _MenuManager extends ChangeNotifier {
   // dependency relationship that will rebuild the context when the menu bar
   // changes.
   static _MenuManager of(BuildContext context) {
-    final _MenuManager? found = context.dependOnInheritedWidgetOfExactType<_MenuManagerMarker>()?.manager;
+    final _MenuManager? found = context.dependOnInheritedWidgetOfExactType<_MenuManagerMarker>()?.notifier;
     if (found == null) {
       throw FlutterError('A ${context.widget.runtimeType} requested a '
           'MenuBarController, but was not a descendant of a MenuBar: $context');
@@ -742,7 +743,9 @@ class _MenuManager extends ChangeNotifier {
     _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
       node.open();
     });
-    notifyListeners();
+    if (!initialized) {
+      return;
+    }
     if (value != null && value.focusNode?.hasPrimaryFocus != true) {
       // Request focus on the new thing that is now open, if any, so that
       // focus traversal starts from that location.
@@ -786,6 +789,9 @@ class _MenuManager extends ChangeNotifier {
     void markMenuDirty() {
       _overlayEntry?.markNeedsBuild();
       controller?._managerStateChanged();
+      if (initialized) {
+        notifyListeners();
+      }
     }
 
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
@@ -971,18 +977,11 @@ class _MenuManager extends ChangeNotifier {
 
 // The InheritedWidget marker for _MenuBarController, used to find the nearest
 // ancestor _MenuBarController.
-class _MenuManagerMarker extends InheritedWidget {
+class _MenuManagerMarker extends InheritedNotifier<_MenuManager> {
   const _MenuManagerMarker({
-    required this.manager,
+    required super.notifier,
     required super.child,
   });
-
-  final _MenuManager manager;
-
-  @override
-  bool updateShouldNotify(_MenuManagerMarker oldWidget) {
-    return manager != oldWidget.manager;
-  }
 }
 
 /// A controller that allows control of a [MenuBar] from other places in the
@@ -1349,28 +1348,6 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     );
   }
 
-  // Expands groups and adds dividers when necessary.
-  List<Widget> _expandGroups(MenuItem parent) {
-    final List<Widget> expanded = <Widget>[];
-    bool lastWasGroup = false;
-    for (final MenuItem item in parent.menus) {
-      if (lastWasGroup) {
-        expanded.add(const _MenuItemDivider());
-      }
-      if (item.members.isNotEmpty) {
-        if (!lastWasGroup && expanded.isNotEmpty) {
-          expanded.add(const _MenuItemDivider());
-        }
-        expanded.addAll(item.members);
-        lastWasGroup = true;
-      } else {
-        expanded.add(item);
-        lastWasGroup = false;
-      }
-    }
-    return expanded;
-  }
-
   // Wraps the given child with the appropriate Positioned widget for the
   // submenu.
   Widget _wrapWithPosition({
@@ -1435,10 +1412,11 @@ class _MenuItemButtonState extends State<MenuItemButton> {
           _manager.context,
           Builder(
             builder: (BuildContext context) {
+              final _MenuManager manager = _MenuManager.of(context);
               return _MenuNodeWrapper(
                 menu: menuButtonNode,
                 child: _MenuManagerMarker(
-                  manager: _manager,
+                  notifier: manager,
                   child: Material(
                     color: (widget._menuBackgroundColor ??
                             menuTheme.menuBackgroundColor ??
@@ -1452,7 +1430,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
                       child: _MenuBarMenuList(
                         direction: Axis.vertical,
                         textDirection: Directionality.of(context),
-                        children: _expandGroups(menuButtonNode.item),
+                        children: _expandGroups(menuButtonNode, menuButtonNode.item.menus, Axis.vertical),
                       ),
                     ),
                   ),
@@ -1805,25 +1783,15 @@ class MenuItemGroup extends StatelessWidget with MenuItem {
   @override
   Widget build(BuildContext context) {
     final _MenuNode menu = _MenuNodeWrapper.of(context);
-    final bool hasDividerBefore = menu.parentIndex != 0 && !menu.previousSibling!.isGroup;
-    final bool hasDividerAfter = menu.parentIndex != (menu.parent!.children.length - 1);
     if (menu.isTopLevel) {
       return Row(
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (hasDividerBefore) const _MenuItemDivider(axis: Axis.horizontal),
-          ...members,
-          if (hasDividerAfter) const _MenuItemDivider(axis: Axis.horizontal),
-        ],
+        children: members,
       );
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (hasDividerBefore) const _MenuItemDivider(),
-        ...members,
-        if (hasDividerAfter) const _MenuItemDivider(),
-      ],
+      children: members,
     );
   }
 
@@ -1883,10 +1851,7 @@ class _MenuStackState extends State<_MenuStack> {
         actions: <Type, Action<Intent>>{
           NextFocusIntent: _MenuNextFocusAction(manager: widget.manager),
           PreviousFocusIntent: _MenuPreviousFocusAction(manager: widget.manager),
-          DirectionalFocusIntent: _MenuDirectionalFocusAction(
-            manager: widget.manager,
-            textDirection: Directionality.of(context),
-          ),
+          DirectionalFocusIntent: _MenuDirectionalFocusAction(manager: widget.manager),
           DismissIntent: _MenuDismissAction(manager: widget.manager),
           VoidCallbackIntent: VoidCallbackAction(),
         },
@@ -1895,7 +1860,7 @@ class _MenuStackState extends State<_MenuStack> {
           child: FocusScope(
             node: _overlayScope,
             child: _MenuManagerMarker(
-              manager: widget.manager,
+              notifier: widget.manager,
               child: Stack(
                 children: <Widget>[
                   ...widget.manager.openMenus.where((_MenuNode node) {
@@ -1950,16 +1915,15 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   void createChildren() {
     assert(!isGroup || item.menus.isEmpty);
     if (isGroup) {
-      // Don't add groups to the parent, just the members of the group. This
-      // attaches nodes for each of the members, but not this group item itself.
+      // Don't add groups as children of the parent, just the members of the
+      // group. This attaches nodes for each of the members, but not this group
+      // item itself.
       for (final MenuItem member in item.members) {
         _MenuNode(item: member, parent: parent).createChildren();
       }
     } else {
       assert(parent?.children.contains(this) ?? true);
       for (final MenuItem child in item.menus) {
-        // Children get automatically linked into the menu tree by attaching
-        // this node.
         _MenuNode(item: child, parent: this).createChildren();
       }
     }
@@ -2232,7 +2196,7 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
   /// The list of widgets to use as children of this menu bar.
   ///
   /// These are the top level [MenuBarMenu]s.
-  final List<MenuItem> children;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -2828,11 +2792,9 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
 
 class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   /// Creates a [DirectionalFocusAction].
-  _MenuDirectionalFocusAction({required this.manager, required this.textDirection});
+  _MenuDirectionalFocusAction({required this.manager});
 
   final _MenuManager manager;
-
-  final TextDirection textDirection;
 
   bool _moveForward() {
     if (manager.openMenu == null) {
@@ -2942,6 +2904,9 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
 
   @override
   void invoke(DirectionalFocusIntent intent) {
+    if (manager.focusedItem?.focusNode?.context == null) {
+      return;
+    }
     switch (intent.direction) {
       case TraversalDirection.up:
         if (_moveUp()) {
@@ -2954,13 +2919,15 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
         }
         break;
       case TraversalDirection.left:
-        switch (textDirection) {
+        switch (Directionality.of(manager.focusedItem!.focusNode!.context!)) {
           case TextDirection.rtl:
+            debugPrint('Moving Left/Forward');
             if (_moveForward()) {
               return;
             }
             break;
           case TextDirection.ltr:
+            debugPrint('Moving Left/Backward');
             if (_moveBackward()) {
               return;
             }
@@ -2968,13 +2935,15 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
         }
         break;
       case TraversalDirection.right:
-        switch (textDirection) {
+        switch (Directionality.of(manager.focusedItem!.focusNode!.context!)) {
           case TextDirection.rtl:
+            debugPrint('Moving Right/Backward');
             if (_moveBackward()) {
               return;
             }
             break;
           case TextDirection.ltr:
+            debugPrint('Moving Right/Forward');
             if (_moveForward()) {
               return;
             }
@@ -3083,4 +3052,38 @@ class _TokenDefaultsM3 extends MenuThemeData {
 
   @override
   MaterialStateProperty<OutlinedBorder?> get itemShape => super.itemShape!;
+}
+
+List<Widget> _expandGroups(_MenuNode node, List<MenuItem> menus, Axis axis) {
+  final List<Widget> expanded = <Widget>[];
+  int nodeIndex = 0;
+  for (int widgetIndex = 0; widgetIndex < menus.length; widgetIndex += 1) {
+    final MenuItem child = menus[widgetIndex];
+    if (child.members.isNotEmpty) {
+      if (expanded.isNotEmpty && expanded.last is! _MenuItemDivider) {
+        expanded.add(_MenuItemDivider(axis: axis));
+      }
+      expanded.addAll(child.members.map<Widget>((MenuItem member) {
+        final Widget wrapper = _MenuNodeWrapper(
+          menu: node.children[nodeIndex],
+          child: child,
+        );
+        nodeIndex += 1;
+        return wrapper;
+      }));
+      if (widgetIndex != menus.length - 1 && expanded.last is! _MenuItemDivider) {
+        expanded.add(_MenuItemDivider(axis: axis));
+      }
+    } else {
+      expanded.add(
+        _MenuNodeWrapper(
+          menu: node.children[nodeIndex],
+          child: child,
+        ),
+      );
+      nodeIndex += 1;
+    }
+  }
+  assert(nodeIndex == node.children.length);
+  return expanded;
 }
