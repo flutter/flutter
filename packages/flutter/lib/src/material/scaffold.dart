@@ -1614,8 +1614,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeDrawer], [Navigator.pop]
+  /// or press the escape key on the keyboard.
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe on mobile, set the
@@ -1638,8 +1638,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer], [Navigator.pop]
+  /// or press the escape key on the keyboard.
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
