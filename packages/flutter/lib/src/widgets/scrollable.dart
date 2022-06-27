@@ -265,8 +265,9 @@ class Scrollable extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   ///
-  /// Rather than clipping [Scrollable], this is passed to decorators in
-  /// [ScrollableDetails].
+  /// This is passed to decorators in [ScrollableDetails], and does not directly affect
+  /// clipping of the [Scrollable]. This reflects the same [Clip] that is provided
+  /// to [ScrollView.clipBehavior] and is supplied to the [Viewport].
   final Clip clipBehavior;
 
   /// The axis along which the scroll view scrolls.
@@ -1327,7 +1328,7 @@ class ScrollableDetails {
 
   /// The direction in which this widget scrolls.
   ///
-  /// Cannot be null.
+  /// Defaults to null.
   final AxisDirection direction;
 
   /// A [ScrollController] that can be used to control the position of the
