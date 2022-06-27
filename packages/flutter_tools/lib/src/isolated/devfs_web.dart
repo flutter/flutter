@@ -213,9 +213,9 @@ class WebAssetServer implements AssetReader {
              ..useCertificateChain(tlsCertPath)
              ..usePrivateKey(tlsCertKeyPath);
           httpServer = await HttpServer.bindSecure(address, httpServerPort, serverContext);
-         } else {
+        } else {
           httpServer = await HttpServer.bind(address, httpServerPort);
-         }
+        }
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
