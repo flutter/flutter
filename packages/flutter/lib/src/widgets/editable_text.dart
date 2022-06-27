@@ -2655,7 +2655,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         break;
     }
-    if (widget.selectionControls == null || widget.buildContextMenu == null) {
+    if (widget.selectionControls == null && widget.buildContextMenu == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else {
