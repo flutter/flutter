@@ -2348,43 +2348,6 @@ class _MenuBarMenuList extends StatefulWidget {
 class _MenuBarMenuListState extends State<_MenuBarMenuList> {
   late _MenuManager _manager;
 
-  List<Widget> _expandGroups() {
-    int index = 0;
-    final _MenuNode parentMenu = _MenuNodeWrapper.of(context);
-    final List<Widget> expanded = <Widget>[];
-
-    for (final Widget child in widget.children) {
-      if (child is! MenuItem) {
-        // If it's not a menu item, then it's probably a _MenuItemDivider. Don't
-        // increment the index, or wrap non-MenuItems with _MenuNodeWrapper:
-        // they're not represented in the node tree.
-        expanded.add(child);
-        continue;
-      }
-      assert(index < parentMenu.children.length);
-      if (child.members.isEmpty) {
-        expanded.add(
-          _MenuNodeWrapper(
-            menu: parentMenu.children[index],
-            child: child,
-          ),
-        );
-        index += 1;
-      } else {
-        // Groups are expanded in the node tree, so expand them here too.
-        expanded.addAll(child.members.map<Widget>((MenuItem member) {
-          final Widget wrapper = _MenuNodeWrapper(
-            menu: parentMenu.children[index],
-            child: child,
-          );
-          index += 1;
-          return wrapper;
-        }));
-      }
-    }
-    return expanded;
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -2427,7 +2390,7 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
             direction: widget.direction,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              ..._expandGroups(),
+              ...widget.children,
               if (widget.direction == Axis.horizontal) const Spacer(),
             ],
           ),
@@ -3055,35 +3018,34 @@ class _TokenDefaultsM3 extends MenuThemeData {
 }
 
 List<Widget> _expandGroups(_MenuNode node, List<MenuItem> menus, Axis axis) {
-  final List<Widget> expanded = <Widget>[];
   int nodeIndex = 0;
-  for (int widgetIndex = 0; widgetIndex < menus.length; widgetIndex += 1) {
-    final MenuItem child = menus[widgetIndex];
-    if (child.members.isNotEmpty) {
-      if (expanded.isNotEmpty && expanded.last is! _MenuItemDivider) {
-        expanded.add(_MenuItemDivider(axis: axis));
-      }
-      expanded.addAll(child.members.map<Widget>((MenuItem member) {
-        final Widget wrapper = _MenuNodeWrapper(
-          menu: node.children[nodeIndex],
-          child: child,
+
+  List<Widget> expand(List<MenuItem> childMenus) {
+    final List<Widget> result = <Widget>[];
+    for (int widgetIndex = 0; widgetIndex < childMenus.length; widgetIndex += 1) {
+      final MenuItem child = childMenus[widgetIndex];
+      if (child.members.isNotEmpty) {
+        if (result.isNotEmpty && result.last is! _MenuItemDivider) {
+          result.add(_MenuItemDivider(axis: axis));
+        }
+        result.addAll(expand(child.members));
+        if (widgetIndex != childMenus.length - 1 && result.last is! _MenuItemDivider) {
+          result.add(_MenuItemDivider(axis: axis));
+        }
+      } else {
+        result.add(
+          _MenuNodeWrapper(
+            menu: node.children[nodeIndex],
+            child: child,
+          ),
         );
         nodeIndex += 1;
-        return wrapper;
-      }));
-      if (widgetIndex != menus.length - 1 && expanded.last is! _MenuItemDivider) {
-        expanded.add(_MenuItemDivider(axis: axis));
       }
-    } else {
-      expanded.add(
-        _MenuNodeWrapper(
-          menu: node.children[nodeIndex],
-          child: child,
-        ),
-      );
-      nodeIndex += 1;
     }
+    return result;
   }
+
+  final List<Widget> expanded = expand(menus);
   assert(nodeIndex == node.children.length);
   return expanded;
 }
