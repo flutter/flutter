@@ -73,7 +73,7 @@ G_DEFINE_TYPE_WITH_CODE(
     G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                           fl_engine_plugin_registry_iface_init))
 
-enum { PROP_0, PROP_BINARY_MESSENGER, PROP_LAST };
+enum { kProp0, kPropBinaryMessenger, kPropLast };
 
 // Parse a locale into its components.
 static void parse_locale(const gchar* locale,
@@ -359,7 +359,7 @@ static void fl_engine_set_property(GObject* object,
                                    GParamSpec* pspec) {
   FlEngine* self = FL_ENGINE(object);
   switch (prop_id) {
-    case PROP_BINARY_MESSENGER:
+    case kPropBinaryMessenger:
       g_set_object(&self->binary_messenger,
                    FL_BINARY_MESSENGER(g_value_get_object(value)));
       break;
@@ -418,7 +418,7 @@ static void fl_engine_class_init(FlEngineClass* klass) {
   G_OBJECT_CLASS(klass)->set_property = fl_engine_set_property;
 
   g_object_class_install_property(
-      G_OBJECT_CLASS(klass), PROP_BINARY_MESSENGER,
+      G_OBJECT_CLASS(klass), kPropBinaryMessenger,
       g_param_spec_object(
           "binary-messenger", "messenger", "Binary messenger",
           fl_binary_messenger_get_type(),
