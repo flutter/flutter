@@ -461,7 +461,7 @@ class _DefaultPub implements Pub {
   }) async {
     // Fully resolved pub or pub.bat is calculated based on current platform.
     final io.Process process = await _processUtils.start(
-      _pubCommand([
+      _pubCommand(<String>[
           if (_logger.supportsColor) '--color',
           ...arguments,
       ]),
