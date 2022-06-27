@@ -658,7 +658,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       data = await key.bundle.load(key.name);
     } on FlutterError {
       PaintingBinding.instance.imageCache.evict(key);
-      rethrow;
+     rethrow;
     }
     if (data == null) {
       PaintingBinding.instance.imageCache.evict(key);
