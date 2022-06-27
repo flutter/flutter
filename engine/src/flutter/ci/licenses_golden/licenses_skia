@@ -1,4 +1,4 @@
-Signature: d38a729fb8a08f612dbe80fc295b0f73
+Signature: 3b7d98787940434bbe5cd4d345f6aaf1
 
 UNUSED LICENSES:
 
@@ -1341,6 +1341,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
 FILE: ../../../third_party/skia/src/sksl/tracing/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/transform/BUILD.bazel
+FILE: ../../../third_party/skia/src/svg/BUILD.bazel
 FILE: ../../../third_party/skia/src/text/BUILD.bazel
 FILE: ../../../third_party/skia/src/text/gpu/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/BUILD.bazel
@@ -5545,6 +5546,8 @@ FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
 FILE: ../../../third_party/skia/src/core/SkCapabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkCombinationBuilder.cpp
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
+FILE: ../../../third_party/skia/src/core/SkFactoryFunctions.cpp
+FILE: ../../../third_party/skia/src/core/SkFactoryFunctions.h
 FILE: ../../../third_party/skia/src/core/SkKeyContext.cpp
 FILE: ../../../third_party/skia/src/core/SkKeyContext.h
 FILE: ../../../third_party/skia/src/core/SkKeyHelpers.cpp
@@ -5553,6 +5556,7 @@ FILE: ../../../third_party/skia/src/core/SkPaintParamsKey.cpp
 FILE: ../../../third_party/skia/src/core/SkPaintParamsKey.h
 FILE: ../../../third_party/skia/src/core/SkPipelineData.cpp
 FILE: ../../../third_party/skia/src/core/SkPipelineData.h
+FILE: ../../../third_party/skia/src/core/SkPrecompile.h
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.h
