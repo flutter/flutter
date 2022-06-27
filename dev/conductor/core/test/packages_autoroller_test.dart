@@ -62,6 +62,7 @@ void main() {
       framework: framework,
       orgName: orgName,
       processManager: processManager,
+      stdio: stdio,
     );
   });
 
@@ -179,6 +180,142 @@ void main() {
     );
   });
 
+  test('Does not attempt to roll if bot already has an open PR', () async {
+    final StreamController<List<int>> controller =
+        StreamController<List<int>>();
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: const <String>[
+        'gh',
+        'auth',
+        'login',
+        '--hostname',
+        'github.com',
+        '--git-protocol',
+        'https',
+        '--with-token',
+      ], stdin: io.IOSink(controller.sink)),
+      const FakeCommand(command: <String>[
+        'gh',
+        'pr',
+        'list',
+        '--author',
+        'fluttergithubbot',
+        '--repo',
+        'flutter/flutter',
+        '--state',
+        'open',
+        '--label',
+        'tool',
+        '--json',
+        'number',
+      // Non empty array means there are open PRs by the bot with the tool label
+      // We expect no further commands to be run
+      ], stdout: '[{"number": 123}]'),
+    ]);
+    final Future<void> rollFuture = autoroller.roll();
+    await controller.stream.drain();
+    await rollFuture;
+    expect(processManager, hasNoRemainingExpectations);
+    expect(stdio.stdout, contains('fluttergithubbot already has open tool PRs'));
+    expect(stdio.stdout, contains(r'[{number: 123}]'));
+  });
+
+  test('Does not commit or create a PR if no changes were made', () async {
+    final StreamController<List<int>> controller =
+        StreamController<List<int>>();
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: const <String>[
+        'gh',
+        'auth',
+        'login',
+        '--hostname',
+        'github.com',
+        '--git-protocol',
+        'https',
+        '--with-token',
+      ], stdin: io.IOSink(controller.sink)),
+      const FakeCommand(command: <String>[
+        'gh',
+        'pr',
+        'list',
+        '--author',
+        'fluttergithubbot',
+        '--repo',
+        'flutter/flutter',
+        '--state',
+        'open',
+        '--label',
+        'tool',
+        '--json',
+        'number',
+      // Returns empty array, as there are no other open roll PRs from the bot
+      ], stdout: '[]'),
+      const FakeCommand(command: <String>[
+        'git',
+        'clone',
+        '--origin',
+        'upstream',
+        '--',
+        FrameworkRepository.defaultUpstream,
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'remote',
+        'add',
+        'mirror',
+        mirrorUrl,
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'fetch',
+        'mirror',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'checkout',
+        FrameworkRepository.defaultBranch,
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], stdout: 'deadbeef'),
+      const FakeCommand(command: <String>[
+        'git',
+        'ls-remote',
+        '--heads',
+        'mirror',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'checkout',
+        '-b',
+        'packages-autoroller-branch-1',
+      ]),
+      const FakeCommand(command: <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+        'help',
+      ]),
+      const FakeCommand(command: <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+        '--verbose',
+        'update-packages',
+        '--force-upgrade',
+      ]),
+      // Because there is no stdout to git status, the script should exit cleanly here
+      const FakeCommand(command: <String>[
+        'git',
+        'status',
+        '--porcelain',
+      ]),
+    ]);
+    final Future<void> rollFuture = autoroller.roll();
+    await controller.stream.drain();
+    await rollFuture;
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   test('can roll with correct inputs', () async {
     final StreamController<List<int>> controller =
         StreamController<List<int>>();
@@ -193,6 +330,22 @@ void main() {
         'https',
         '--with-token',
       ], stdin: io.IOSink(controller.sink)),
+      const FakeCommand(command: <String>[
+        'gh',
+        'pr',
+        'list',
+        '--author',
+        'fluttergithubbot',
+        '--repo',
+        'flutter/flutter',
+        '--state',
+        'open',
+        '--label',
+        'tool',
+        '--json',
+        'number',
+      // Returns empty array, as there are no other open roll PRs from the bot
+      ], stdout: '[]'),
       const FakeCommand(command: <String>[
         'git',
         'clone',
@@ -257,6 +410,15 @@ void main() {
 '''),
       const FakeCommand(command: <String>[
         'git',
+        'status',
+        '--porcelain',
+      ], stdout: '''
+ M packages/foo/pubspec.yaml
+ M packages/bar/pubspec.yaml
+ M dev/integration_tests/test_foo/pubspec.yaml
+'''),
+      const FakeCommand(command: <String>[
+        'git',
         'add',
         '--all',
       ]),
@@ -306,6 +468,7 @@ void main() {
         await controller.stream.transform(const Utf8Decoder()).join();
     expect(givenToken.trim(), token);
     await rollFuture;
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   group('command argument validations', () {
@@ -325,6 +488,7 @@ void main() {
           contains('Provided token path $tokenPath but no file exists at'),
         )),
       );
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     test('validates that the token file is not empty', () async {
@@ -343,6 +507,7 @@ void main() {
           contains('Tried to read a GitHub access token from file $tokenPath but it was empty'),
         )),
       );
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }
