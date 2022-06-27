@@ -64,6 +64,7 @@
 /dev/devicelab/bin/tasks/list_text_layout_impeller_perf__e2e_summary.dart @dnfield @flutter/engine
 /dev/devicelab/bin/tasks/multi_widget_construction_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__crane_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/old_gallery__transition_perf.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
