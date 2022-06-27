@@ -35,8 +35,15 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: const Center(
-        child: TextField(spellCheckEnabled: true,)
+      body: Center(
+        child: EditableText(
+          controller: TextEditingController(),
+          backgroundCursorColor: Colors.grey,
+          focusNode: FocusNode(),
+          spellCheckEnabled: true,
+          style: const TextStyle(),
+          cursorColor: Colors.red,
+        )
       ),
     );
   }

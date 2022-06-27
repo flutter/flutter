@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:sc_int_test/main.dart';
 
 late DefaultSpellCheckService defaultSpellCheckService;
 late Locale locale;
@@ -122,29 +123,26 @@ Future<void> main() async {
 
   testWidgets('EditableText spell checks when text is entered and spell check enabled', (WidgetTester tester) async {
     TextStyle style = const TextStyle();
-    TextStyle misspelledStyle = style.merge(const TextStyle(
+    TextStyle misspelledTextStyle = const TextStyle(
         decoration: TextDecoration.underline,
-        decorationColor: Colors.red,
-        decorationStyle: TextDecorationStyle.wavy));
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: [
-              EditableText(
-                controller: TextEditingController(),
-                backgroundCursorColor: Colors.grey,
-                focusNode: FocusNode(),
-                spellCheckEnabled: true,
-                style: style,
-                cursorColor: Colors.red,
-              )
-            ],
-          ),
+        decorationColor: ColorSwatch(
+          0xFFF44336,
+          <int, Color>{
+            50: Color(0xFFFFEBEE),
+            100: Color(0xFFFFCDD2),
+            200: Color(0xFFEF9A9A),
+            300: Color(0xFFE57373),
+            400: Color(0xFFEF5350),
+            500: Color(0xFFF44336),
+            600: Color(0xFFE53935),
+            700: Color(0xFFD32F2F),
+            800: Color(0xFFC62828),
+            900: Color(0xFFB71C1C),
+          },
         ),
-      ),
-    );
+        decorationStyle: TextDecorationStyle.wavy);
+
+    await tester.pumpWidget(MyApp());
 
     await tester.enterText(find.byType(EditableText), 'Hey wrororld! Hey!');
     await tester.pumpAndSettle();
@@ -156,7 +154,7 @@ Future<void> main() async {
         style: style,
         children: <TextSpan>[
           TextSpan(style: style, text: 'Hey '),
-          TextSpan(style: misspelledStyle, text: 'wrororld'),
+          TextSpan(style: misspelledTextStyle, text: 'wrororld'),
           TextSpan(style: style, text: '! Hey!'),
         ]);
 

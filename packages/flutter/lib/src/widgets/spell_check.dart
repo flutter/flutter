@@ -75,6 +75,32 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   /// indicated in the [TextSpan] tree.
   final TargetPlatform platform;
 
+  /// The style used to indicate misspeleld words on Android.
+  final TextStyle materialMisspelledTextStyle = const TextStyle(
+      decoration: TextDecoration.underline,
+      decorationColor: ColorSwatch(
+        0xFFF44336,
+        <int, Color>{
+          50: Color(0xFFFFEBEE),
+          100: Color(0xFFFFCDD2),
+          200: Color(0xFFEF9A9A),
+          300: Color(0xFFE57373),
+          400: Color(0xFFEF5350),
+          500: Color(0xFFF44336),
+          600: Color(0xFFE53935),
+          700: Color(0xFFD32F2F),
+          800: Color(0xFFC62828),
+          900: Color(0xFFB71C1C),
+        },
+      ),
+      decorationStyle: TextDecorationStyle.wavy);
+
+  /// The style used to indicate misspeleld words on iOS.
+  final TextStyle cupertinoMisspelledTextStyle = const TextStyle(
+      decoration: TextDecoration.underline,
+      decorationColor: Color.fromARGB(255, 255, 59, 48),
+      decorationStyle: TextDecorationStyle.dotted);
+
   /// Adjusts spell check results to correspond to [newText] if the only results
   /// that the handler has access to are the [results] corresponding to
   /// [resultsText].
@@ -96,9 +122,8 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     bool foundCurrentSpan = false;
     RegExp regex;
 
-    // This method assumes that the order of spans has not been jumbled for
-    // optimization purposes, and will only search since the previously found
-    // span.
+    // Assumes that the order of spans has not been jumbled for optimization
+    // purposes, and will only search since the previously found span.
     int searchStart = 0;
 
     while (spanPointer < results.length) {
@@ -152,7 +177,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       TextStyle? style,
       SpellCheckResults spellCheckResults) {
     List<SuggestionSpan>? correctedSpellCheckResults;
-    TextStyle misspelledStyle;
+    TextStyle? misspelledTextStyle;
 
     final List<SuggestionSpan> rawSpellCheckResults =
         spellCheckResults.suggestionSpans;
@@ -166,12 +191,11 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     }
 
     switch (platform) {
+      case TargetPlatform.iOS:
+        misspelledTextStyle = cupertinoMisspelledTextStyle;
+        break;
       case TargetPlatform.android:
-      default:
-        misspelledStyle = const TextStyle(
-            decoration: TextDecoration.underline,
-            decorationColor: Colors.red,
-            decorationStyle: TextDecorationStyle.wavy);
+        misspelledTextStyle = materialMisspelledTextStyle;
         break;
     }
 
@@ -181,7 +205,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
             correctedSpellCheckResults,
             value,
             style,
-            misspelledStyle,
+            misspelledTextStyle!,
             composingWithinCurrentTextRange));
   }
 
@@ -190,7 +214,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       List<SuggestionSpan>? spellCheckSuggestions,
       TextEditingValue value,
       TextStyle? style,
-      TextStyle misspelledStyle,
+      TextStyle misspelledTextStyle,
       bool composingWithinCurrentTextRange) {
     final List<TextSpan> tsTreeChildren = <TextSpan>[];
 
@@ -200,11 +224,11 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     SuggestionSpan currSpan;
     final String text = value.text;
     final TextRange composingRegion = value.composing;
-    final TextStyle composingStyle =
+    final TextStyle composingTextStyle =
         style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
             const TextStyle(decoration: TextDecoration.underline);
     final TextStyle misspelledJointStyle =
-        style?.merge(misspelledStyle) ?? misspelledStyle;
+        style?.merge(misspelledTextStyle) ?? misspelledTextStyle;
     bool textPointerWithinComposingRegion = false;
     bool currSpanIsComposingRegion = false;
 
@@ -224,7 +248,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
 
         if (textPointerWithinComposingRegion) {
           addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
-              composingRegion, style, composingStyle);
+              composingRegion, style, composingTextStyle);
           tsTreeChildren.add(TextSpan(
               style: style,
               text: text.substring(composingRegion.end, endIndex)));
@@ -241,7 +265,9 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
             endIndex <= composingRegion.end &&
             !composingWithinCurrentTextRange;
         tsTreeChildren.add(TextSpan(
-            style: currSpanIsComposingRegion ? composingStyle : misspelledJointStyle,
+            style: currSpanIsComposingRegion
+                ? composingTextStyle
+                : misspelledJointStyle,
             text: text.substring(currSpan.range.start, endIndex)));
 
         textPointer = endIndex;
@@ -253,7 +279,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       if (textPointer < composingRegion.start &&
           !composingWithinCurrentTextRange) {
         addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
-            composingRegion, style, composingStyle);
+            composingRegion, style, composingTextStyle);
 
         if (composingRegion.end != text.length) {
           tsTreeChildren.add(TextSpan(
@@ -277,11 +303,11 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       int start,
       TextRange composingRegion,
       TextStyle? style,
-      TextStyle composingStyle) {
+      TextStyle composingTextStyle) {
     treeChildren.add(TextSpan(
         style: style, text: text.substring(start, composingRegion.start)));
     treeChildren.add(TextSpan(
-        style: composingStyle,
+        style: composingTextStyle,
         text: text.substring(composingRegion.start, composingRegion.end)));
   }
 }
