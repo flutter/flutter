@@ -40,6 +40,8 @@ abstract class AnimatedRasterDelegate {
 /// can also incorporate the animation value. This is primarily used for efficient page
 /// transitions.
 ///
+/// This class depends on [Scene.toGpuImage] which is not supported on the html backend.
+///
 /// See also:
 ///  * [ZoomPageTransitionsBuilder], which uses this render object to implement the fade and
 ///    stretch effect efficiently.

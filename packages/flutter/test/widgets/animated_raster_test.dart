@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +28,7 @@ void main() {
     ));
 
     expect(delegate.lastImage, isNull);
-  });
+  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('AnimatedRaster replaces its children with a raster if the animation is forward or reverse', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
@@ -40,7 +41,7 @@ void main() {
 
     expect(delegate.lastImage, isNotNull);
     delegate.lastImage = null;
-  });
+  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('AnimatedRaster disposes its child image when disposed', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
@@ -57,7 +58,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
 
     expect(delegate.lastImage!.debugDisposed, isTrue);
-  });
+  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('AnimatedRaster does not create image if willPaint returns false', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate()..willPaintValue = false;
@@ -70,7 +71,7 @@ void main() {
 
     expect(delegate.lastImage, isNull);
     delegate.lastImage = null;
-  });
+  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('AnimatedRaster uses the media query dpr to scale up the provided image', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
@@ -89,7 +90,7 @@ void main() {
 
     expect(delegate.lastPixelRatio, 3.0);
     expect(delegate.lastArea, const Rect.fromLTWH(0, 0, 100 * 3.0 , 100 * 3.0));
-  });
+  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderAnimatedRaster removes and then reattaches animation listener if attached/detached', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
@@ -110,7 +111,7 @@ void main() {
 
     expect(animation.listeners, contains(animatedRaster.markNeedsPaint));
     expect(animation.statusListeners, hasLength(1));
-  });
+  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 }
 
 // ignore: must_be_immutable
