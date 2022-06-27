@@ -265,27 +265,6 @@ class _ZoomEnterTransition extends StatelessWidget {
   final bool reverse;
   final Widget? child;
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedRaster(
-      animation: animation,
-      delegate: _ZoomEnterTransitionDelegate(reverse: reverse),
-      child: child,
-    );
-  }
-}
-
-class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
-  const _ZoomEnterTransitionDelegate({required this.reverse});
-
-  final bool reverse;
-
-  @override
-  int get hashCode => reverse.hashCode;
-
-  @override
-  bool operator ==(Object other) => other is _ZoomEnterTransitionDelegate && other.reverse == reverse;
-
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
     end: 1.00,
@@ -306,14 +285,98 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
     end: 0.60,
   ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
 
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(yjbanov): relax check with https://github.com/flutter/flutter/issues/106689
+    if (kIsWeb) {
+      return _WebZoomEnterTransition(
+        animation: animation,
+        reverse: reverse,
+        child: child,
+      );
+    }
+    return AnimatedRaster(
+      animation: animation,
+      delegate: _ZoomEnterTransitionDelegate(reverse: reverse),
+      child: child,
+    );
+  }
+}
+
+class _WebZoomEnterTransition extends StatelessWidget {
+  const _WebZoomEnterTransition({
+    required this.animation,
+    this.reverse = false,
+    this.child,
+  }) : assert(animation != null),
+       assert(reverse != null);
+
+  final Animation<double> animation;
+  final Widget? child;
+  final bool reverse;
+
+  @override
+  Widget build(BuildContext context) {
+    double opacity = 0;
+    // The transition's scrim opacity only increases on the forward transition.
+    // In the reverse transition, the opacity should always be 0.0.
+    //
+    // Therefore, we need to only apply the scrim opacity animation when
+    // the transition is running forwards.
+    //
+    // The reason that we check that the animation's status is not `completed`
+    // instead of checking that it is `forward` is that this allows
+    // the interrupted reversal of the forward transition to smoothly fade
+    // the scrim away. This prevents a disjointed removal of the scrim.
+    if (!reverse && animation.status != AnimationStatus.completed) {
+      opacity = _ZoomEnterTransition._scrimOpacityTween.evaluate(animation)!;
+    }
+
+    final Animation<double> fadeTransition = reverse
+      ? kAlwaysCompleteAnimation
+      : _ZoomEnterTransition._fadeInTransition.animate(animation);
+
+    final Animation<double> scaleTransition = (reverse
+      ? _ZoomEnterTransition._scaleDownTransition
+      : _ZoomEnterTransition._scaleUpTransition
+    ).animate(animation);
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return ColoredBox(
+          color: Colors.black.withOpacity(opacity),
+          child: child,
+        );
+      },
+      child: FadeTransition(
+        opacity: fadeTransition,
+        child: ScaleTransition(scale: scaleTransition, child: child),
+      ),
+    );
+  }
+}
+
+class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
+  const _ZoomEnterTransitionDelegate({required this.reverse});
+
+  final bool reverse;
+
+  @override
+  int get hashCode => reverse.hashCode;
+
+  @override
+  bool operator ==(Object other) => other is _ZoomEnterTransitionDelegate && other.reverse == reverse;
+
   @override
   void paintImage(PaintingContext context, ui.Image image, Rect area, double pixelRatio, Animation<double> animation) {
     final double fade = reverse
       ? 1.0
-      : _fadeInTransition.evaluate(animation);
+      : _ZoomEnterTransition._fadeInTransition.evaluate(animation);
     final double scale = (reverse
-      ? _scaleDownTransition
-      : _scaleUpTransition
+      ? _ZoomEnterTransition._scaleDownTransition
+      : _ZoomEnterTransition._scaleUpTransition
     ).evaluate(animation);
 
     double opacity = 0;
@@ -328,7 +391,7 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
     // the interrupted reversal of the forward transition to smoothly fade
     // the scrim away. This prevents a disjointed removal of the scrim.
     if (!reverse && animation.status != AnimationStatus.completed) {
-      opacity = _scrimOpacityTween.evaluate(animation)!;
+      opacity = _ZoomEnterTransition._scrimOpacityTween.evaluate(animation)!;
     }
 
     final Paint paint = Paint()
@@ -346,16 +409,13 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
   }
 }
 
-class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
-  const _ZoomExitTransitionDelegate({required this.reverse});
-
-  final bool reverse;
-
-  @override
-  int get hashCode => reverse.hashCode;
-
-  @override
-  bool operator ==(Object other) => other is _ZoomExitTransitionDelegate && other.reverse == reverse;
+class _ZoomExitTransition extends StatelessWidget {
+  const _ZoomExitTransition({
+    required this.animation,
+    this.reverse = false,
+    this.child,
+  }) : assert(animation != null),
+       assert(reverse != null);
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -372,39 +432,30 @@ class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
     end: 0.90,
   ).chain(_ZoomPageTransition._scaleCurveSequence);
 
-  @override
-  bool willPaint(Animation<double> animation) {
-    final double fade = reverse
-      ? _fadeOutTransition.evaluate(animation)
-      : 1.0;
-    return fade != 0.0;
-  }
+  final Animation<double> animation;
+  final bool reverse;
+  final Widget? child;
 
   @override
-  void paintImage(PaintingContext context, ui.Image image, Rect rect, double pixelRatio, Animation<double> animation) {
-    final double fade = reverse
-      ? _fadeOutTransition.evaluate(animation)
-      : 1.0;
-    final double scale = (reverse
-      ? _scaleDownTransition
-      : _scaleUpTransition
-    ).evaluate(animation);
-
-    final Paint paint = Paint()
-      ..filterQuality = ui.FilterQuality.low
-      ..color = const Color(0xFF000000).withOpacity(fade);
-    final Rect src = rect;
-    final double newWidth = src.width * scale / pixelRatio;
-    final double newHeight = src.height * scale / pixelRatio;
-    final double leftOffset = (src.width / pixelRatio - newWidth) / 2;
-    final double topOffset = (src.height / pixelRatio - newHeight) / 2;
-    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
-    context.canvas.drawImageRect(image, src, dst, paint);
+  Widget build(BuildContext context) {
+    // TODO(yjbanov): relax check with https://github.com/flutter/flutter/issues/106689
+    if (kIsWeb) {
+      return _WebZoomExitTransition(
+        animation: animation,
+        reverse: reverse,
+        child: child,
+      );
+    }
+    return AnimatedRaster(
+      animation: animation,
+      delegate: _ZoomExitTransitionDelegate(reverse: reverse),
+      child: child,
+    );
   }
 }
 
-class _ZoomExitTransition extends StatelessWidget {
-  const _ZoomExitTransition({
+class _WebZoomExitTransition extends StatelessWidget {
+  const _WebZoomExitTransition({
     required this.animation,
     this.reverse = false,
     this.child,
@@ -417,11 +468,61 @@ class _ZoomExitTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedRaster(
-      animation: animation,
-      delegate: _ZoomExitTransitionDelegate(reverse: reverse),
-      child: child,
+    final Animation<double> fadeTransition = reverse
+      ? _ZoomExitTransition._fadeOutTransition.animate(animation)
+      : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition = (reverse
+      ? _ZoomExitTransition._scaleDownTransition
+      : _ZoomExitTransition._scaleUpTransition
+    ).animate(animation);
+
+    return FadeTransition(
+      opacity: fadeTransition,
+      child: ScaleTransition(scale: scaleTransition, child: child),
     );
+  }
+}
+
+
+class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
+  const _ZoomExitTransitionDelegate({required this.reverse});
+
+  final bool reverse;
+
+  @override
+  int get hashCode => reverse.hashCode;
+
+  @override
+  bool operator ==(Object other) => other is _ZoomExitTransitionDelegate && other.reverse == reverse;
+
+  @override
+  bool willPaint(Animation<double> animation) {
+    final double fade = reverse
+      ? _ZoomExitTransition._fadeOutTransition.evaluate(animation)
+      : 1.0;
+    return fade != 0.0;
+  }
+
+  @override
+  void paintImage(PaintingContext context, ui.Image image, Rect rect, double pixelRatio, Animation<double> animation) {
+    final double fade = reverse
+      ? _ZoomExitTransition._fadeOutTransition.evaluate(animation)
+      : 1.0;
+    final double scale = (reverse
+      ? _ZoomExitTransition._scaleDownTransition
+      : _ZoomExitTransition._scaleUpTransition
+    ).evaluate(animation);
+
+    final Paint paint = Paint()
+      ..filterQuality = ui.FilterQuality.low
+      ..color = const Color(0xFF000000).withOpacity(fade);
+    final Rect src = rect;
+    final double newWidth = src.width * scale / pixelRatio;
+    final double newHeight = src.height * scale / pixelRatio;
+    final double leftOffset = (src.width / pixelRatio - newWidth) / 2;
+    final double topOffset = (src.height / pixelRatio - newHeight) / 2;
+    final Rect dst = Rect.fromLTWH(src.left + leftOffset, src.top + topOffset,newWidth, newHeight);
+    context.canvas.drawImageRect(image, src, dst, paint);
   }
 }
 
