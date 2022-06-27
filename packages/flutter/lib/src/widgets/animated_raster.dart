@@ -79,8 +79,8 @@ class AnimatedRaster extends SingleChildRenderObjectWidget {
 /// While the status of [animation] is [AnimationStatus.completed] or
 /// [AnimationStatus.dismissed], children are painted normally. When the status
 /// is [AnimationStatus.forward] or [AnimationStatus.reverse], this render object
-/// will create a GPU resident texture the first time that [willPaint] returns true
-/// and provide it to [paintImage].
+/// will create a GPU resident texture the first time that [AnimatedRasterDelegate.willPaint] returns true
+/// and provide it to [AnimatedRasterDelegate.paintImage].
 ///
 /// See also:
 ///  * [ZoomPageTransitionsBuilder], which uses this render object to implement the fade and
