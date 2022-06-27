@@ -2076,6 +2076,16 @@ targets:
       task_name: routing_test
     scheduler: luci
 
+  - name: Linux_android spell_check_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: spell_check_test
+    scheduler: luci
+
   - name: Linux_android service_extensions_test
     recipe: devicelab/devicelab_drone
     presubmit: false
