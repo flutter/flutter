@@ -59,6 +59,14 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }) : _window = window,
        platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
 
+
+  int _frameNumber = 0;
+  /// Indicates that the test binding has pumped a frame.
+  void incrementFrameNumber() {
+    _frameNumber += 1;
+    platformDispatcher.frameData = _TestFrameData(_frameNumber);
+  }
+
   /// The [dart:ui.SingletonFlutterWindow] that is wrapped by this [TestWindow].
   final ui.SingletonFlutterWindow _window;
 
@@ -491,6 +499,9 @@ class TestWindow implements ui.SingletonFlutterWindow {
     platformDispatcher.onPlatformMessage = callback;
   }
 
+  @override
+  ui.FrameData get frameData => platformDispatcher.frameData;
+
   /// Delete any test value properties that have been set on this [TestWindow]
   /// as well as its [platformDispatcher].
   ///
@@ -505,6 +516,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
     clearDisplayFeaturesTestValue();
     clearPhysicalSizeTestValue();
     clearViewInsetsTestValue();
+    _frameNumber = 0;
     platformDispatcher.clearAllTestValues();
   }
 
@@ -882,6 +894,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
     clearLocalesTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
+    frameData = const _TestFrameData(0);
   }
 
   @override
@@ -914,7 +927,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   ui.PlatformConfiguration get configuration => _platformDispatcher.configuration;
 
   @override
-  ui.FrameData get frameData => _platformDispatcher.frameData;
+  ui.FrameData frameData = const _TestFrameData(0);
 
   @override
   ByteData? getPersistentIsolateData() => _platformDispatcher.getPersistentIsolateData();
@@ -929,4 +942,11 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   dynamic noSuchMethod(Invocation invocation) {
     return null;
   }
+}
+
+class _TestFrameData implements ui.FrameData {
+  const _TestFrameData(this.frameNumber);
+
+  @override
+  final int frameNumber;
 }
