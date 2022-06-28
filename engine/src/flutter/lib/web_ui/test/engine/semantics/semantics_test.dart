@@ -5,7 +5,6 @@
 @TestOn('chrome || safari || firefox')
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:quiver/testing/async.dart';
@@ -96,16 +95,17 @@ void _testEngineSemanticsOwner() {
     expect(semantics().semanticsEnabled, isFalse);
 
     // Synthesize a click on the placeholder.
-    final html.Element placeholder =
-        appHostNode.querySelector('flt-semantics-placeholder')! as html.Element;
+    final DomElement placeholder =
+        appHostNode.querySelector('flt-semantics-placeholder')!;
 
     expect(placeholder.isConnected, isTrue);
 
-    final html.Rectangle<num> rect = placeholder.getBoundingClientRect();
-    placeholder.dispatchEvent(html.MouseEvent(
-      'click',
-      clientX: (rect.left + (rect.right - rect.left) / 2).floor(),
-      clientY: (rect.top + (rect.bottom - rect.top) / 2).floor(),
+    final DomRect rect = placeholder.getBoundingClientRect();
+    placeholder.dispatchEvent(createDomMouseEvent(
+      'click', <Object?, Object?>{
+        'clientX': (rect.left + (rect.right - rect.left) / 2).floor(),
+        'clientY': (rect.top + (rect.bottom - rect.top) / 2).floor(),
+      }
     ));
 
     // On mobile semantics is enabled asynchronously.
@@ -192,8 +192,8 @@ void _testEngineSemanticsOwner() {
             .instance.configuration.accessibilityFeatures.accessibleNavigation,
         isFalse);
 
-    final html.Element placeholder =
-        appHostNode.querySelector('flt-semantics-placeholder')! as html.Element;
+    final DomElement placeholder =
+        appHostNode.querySelector('flt-semantics-placeholder')!;
 
     expect(placeholder.isConnected, isTrue);
 
@@ -521,10 +521,10 @@ void _testContainer() {
   </sem-c>
 </sem>''');
 
-    final html.Element parentElement =
-        appHostNode.querySelector('flt-semantics')! as html.Element;
-    final html.Element container =
-        appHostNode.querySelector('flt-semantics-container')! as html.Element;
+    final DomElement parentElement =
+        appHostNode.querySelector('flt-semantics')!;
+    final DomElement container =
+        appHostNode.querySelector('flt-semantics-container')!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
@@ -575,10 +575,10 @@ void _testContainer() {
   </sem-c>
 </sem>''');
 
-    final html.Element parentElement =
-        appHostNode.querySelector('flt-semantics')! as html.Element;
-    final html.Element container =
-        appHostNode.querySelector('flt-semantics-container')! as html.Element;
+    final DomElement parentElement =
+        appHostNode.querySelector('flt-semantics')!;
+    final DomElement container =
+        appHostNode.querySelector('flt-semantics-container')!;
 
     expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
     expect(parentElement.style.transformOrigin, '0px 0px 0px');
@@ -618,10 +618,10 @@ void _testContainer() {
   </sem-c>
 </sem>''');
 
-    final html.Element parentElement =
-        appHostNode.querySelector('flt-semantics')! as html.Element;
-    final html.Element container =
-        appHostNode.querySelector('flt-semantics-container')! as html.Element;
+    final DomElement parentElement =
+        appHostNode.querySelector('flt-semantics')!;
+    final DomElement container =
+        appHostNode.querySelector('flt-semantics-container')!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
@@ -826,7 +826,7 @@ void _testVerticalScrolling() {
   </sem-c>
 </sem>''');
 
-    final html.Element? scrollable = findScrollable();
+    final DomElement? scrollable = findScrollable();
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral scrollTop
@@ -896,7 +896,7 @@ void _testVerticalScrolling() {
   </sem-c>
 </sem>''');
 
-    final html.Element? scrollable = findScrollable();
+    final DomElement? scrollable = findScrollable();
     expect(scrollable, isNotNull);
 
     // When there's more content than the available size the neutral scrollTop
@@ -984,7 +984,7 @@ void _testHorizontalScrolling() {
   </sem-c>
 </sem>''');
 
-    final html.Element? scrollable = findScrollable();
+    final DomElement? scrollable = findScrollable();
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral
@@ -1035,7 +1035,7 @@ void _testHorizontalScrolling() {
   </sem-c>
 </sem>''');
 
-    final html.Element? scrollable = findScrollable();
+    final DomElement? scrollable = findScrollable();
     expect(scrollable, isNotNull);
 
     // When there's more content than the available size the neutral scrollTop
@@ -1117,9 +1117,10 @@ void _testIncrementables() {
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
 </sem>''');
 
-    final html.InputElement input = appHostNode.querySelector('input')! as html.InputElement;
+    final DomHTMLInputElement input = appHostNode.querySelector('input')! as
+        DomHTMLInputElement;
     input.value = '2';
-    input.dispatchEvent(html.Event('change'));
+    input.dispatchEvent(createDomEvent('Event', 'change'));
 
     expect(await logger.idLog.first, 0);
     expect(await logger.actionLog.first, ui.SemanticsAction.increase);
@@ -1151,9 +1152,10 @@ void _testIncrementables() {
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
 </sem>''');
 
-    final html.InputElement input = appHostNode.querySelector('input')! as html.InputElement;
+    final DomHTMLInputElement input = appHostNode.querySelector('input')! as
+        DomHTMLInputElement;
     input.value = '0';
-    input.dispatchEvent(html.Event('change'));
+    input.dispatchEvent(createDomEvent('Event', 'change'));
 
     expect(await logger.idLog.first, 0);
     expect(await logger.actionLog.first, ui.SemanticsAction.decrease);
@@ -1238,9 +1240,8 @@ void _testTextField() {
 
     semantics().updateSemantics(builder.build());
 
-    final html.Element textField =
-        appHostNode.querySelector('input[data-semantics-role="text-field"]')! as
-        html.Element;
+    final DomElement textField =
+        appHostNode.querySelector('input[data-semantics-role="text-field"]')!;
 
     expect(appHostNode.activeElement, isNot(textField));
 
@@ -1861,37 +1862,36 @@ void _testPlatformView() {
     final DomElement root = appHostNode.querySelector('#flt-semantic-node-0')!;
     expect(root.style.pointerEvents, 'none');
 
-    final html.Element child1 =
-        appHostNode.querySelector('#flt-semantic-node-1')! as html.Element;
+    final DomElement child1 =
+        appHostNode.querySelector('#flt-semantic-node-1')!;
     expect(child1.style.pointerEvents, 'all');
-    final html.Rectangle<num> child1Rect = child1.getBoundingClientRect();
+    final DomRect child1Rect = child1.getBoundingClientRect();
     expect(child1Rect.left, 0);
     expect(child1Rect.top, 0);
     expect(child1Rect.right, 20);
     expect(child1Rect.bottom, 25);
 
-    final html.Element child2 =
-        appHostNode.querySelector('#flt-semantic-node-2')! as html.Element;
+    final DomElement child2 =
+        appHostNode.querySelector('#flt-semantic-node-2')!;
     expect(child2.style.pointerEvents, 'none');
-    final html.Rectangle<num> child2Rect = child2.getBoundingClientRect();
+    final DomRect child2Rect = child2.getBoundingClientRect();
     expect(child2Rect.left, 0);
     expect(child2Rect.top, 15);
     expect(child2Rect.right, 20);
     expect(child2Rect.bottom, 45);
 
-    final html.Element child3 =
-        appHostNode.querySelector('#flt-semantic-node-3')! as html.Element;
+    final DomElement child3 =
+        appHostNode.querySelector('#flt-semantic-node-3')!;
     expect(child3.style.pointerEvents, 'all');
-    final html.Rectangle<num> child3Rect = child3.getBoundingClientRect();
+    final DomRect child3Rect = child3.getBoundingClientRect();
     expect(child3Rect.left, 0);
     expect(child3Rect.top, 35);
     expect(child3Rect.right, 20);
     expect(child3Rect.bottom, 60);
 
-    final html.Element platformViewElement =
-        flutterViewEmbedder.glassPaneElement!.querySelector('#view-0')! as
-        html.Element;
-    final html.Rectangle<num> platformViewRect = platformViewElement.getBoundingClientRect();
+    final DomElement platformViewElement =
+        flutterViewEmbedder.glassPaneElement!.querySelector('#view-0')!;
+    final DomRect platformViewRect = platformViewElement.getBoundingClientRect();
     expect(platformViewRect.left, 0);
     expect(platformViewRect.top, 15);
     expect(platformViewRect.right, 20);
@@ -1899,7 +1899,7 @@ void _testPlatformView() {
 
     // This test is only relevant for shadow DOM because we only really support
     // proper platform view embedding in browsers that support shadow DOM.
-    final html.ShadowRoot shadowRoot = appHostNode.node as html.ShadowRoot;
+    final DomShadowRoot shadowRoot = appHostNode.node as DomShadowRoot;
 
     // Hit test child 1
     expect(shadowRoot.elementFromPoint(10, 10)!, child1);
@@ -1922,7 +1922,7 @@ void _testPlatformView() {
     // See:
     //   * https://github.com/w3c/csswg-drafts/issues/556
     //   * https://bugzilla.mozilla.org/show_bug.cgi?id=1502369
-    expect(html.document.elementFromPoint(10, 30)!, platformViewElement);
+    expect(domDocument.elementFromPoint(10, 30)!, platformViewElement);
 
     // Hit test overlap between child 2 and 3
     expect(shadowRoot.elementFromPoint(10, 40)!, child3);
