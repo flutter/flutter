@@ -1395,7 +1395,7 @@ mixin WidgetInspectorService {
 
   /// Add a list of directories that should be considered part of the local
   /// project.
-  /// 
+  ///
   /// The local project directories are used to distinguish widgets created by
   /// the local project over widgets created from inside the framework.
   @protected
