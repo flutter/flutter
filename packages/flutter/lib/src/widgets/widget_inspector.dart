@@ -1372,7 +1372,7 @@ mixin WidgetInspectorService {
   /// the local project over widgets created from inside the framework.
   @Deprecated(
     'Use addPubRootDirectories instead. '
-    'This feature was deprecated after v3.0.3',
+    'This feature was deprecated after v3.0.3.',
   )
   @protected
   void setPubRootDirectories(List<String> pubRootDirectories) {
