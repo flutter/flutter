@@ -1578,30 +1578,30 @@ void main() {
       ),
     );
 
-      // Long press to put the cursor after the "w".
-      const int index = 3;
-      await tester.longPressAt(textOffsetToPosition(tester, index));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: index),
-      );
+    // Long press to put the cursor after the "w".
+    const int index = 3;
+    await tester.longPressAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: index),
+    );
 
-      // Double tap on the same location to select the word around the cursor.
-      await tester.tapAt(textOffsetToPosition(tester, index));
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.tapAt(textOffsetToPosition(tester, index));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 0, extentOffset: 7),
-      );
+    // Double tap on the same location to select the word around the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 7),
+    );
 
-      // Selected text shows 'Copy'.
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
+    // Selected text shows 'Copy'.
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsNothing);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Read only text field', (WidgetTester tester) async {
@@ -2086,8 +2086,10 @@ void main() {
     expect(controller.value.selection.baseOffset, 5);
     expect(controller.value.selection.extentOffset, 6);
 
-    // Put the cursor at the end of the field.
-    await tester.tapAt(textOffsetToPosition(tester, 10));
+    // Tap at the end of the text to move the selection to the end. On some
+    // platforms, the context menu "Cut" button blocks this tap, so move it out
+    // of the way by an Offset.
+    await tester.tapAt(textOffsetToPosition(tester, 10) + const Offset(200.0, 0.0));
     expect(controller.value.selection, isNotNull);
     expect(controller.value.selection.baseOffset, 10);
     expect(controller.value.selection.extentOffset, 10);
@@ -2557,7 +2559,16 @@ void main() {
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
     );
     // The toolbar now shows up.
-    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+    final int toolbarButtons;
+    if (isContextMenuProvidedByPlatform) {
+      toolbarButtons = 0;
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      toolbarButtons = 2;
+    } else {
+      // MacOS has no 'Select all' button.
+      toolbarButtons = 1;
+    }
+    expect(find.byType(CupertinoButton), findsNWidgets(toolbarButtons));
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 66), // Last character's position.
@@ -2613,7 +2624,16 @@ void main() {
       );
 
       // Long press toolbar.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int toolbarButtons;
+      if (isContextMenuProvidedByPlatform) {
+        toolbarButtons = 0;
+      } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+        toolbarButtons = 2;
+      } else {
+        // MacOS has no 'Select all' button.
+        toolbarButtons = 1;
+      }
+      expect(find.byType(CupertinoButton), findsNWidgets(toolbarButtons));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -2838,6 +2858,11 @@ void main() {
       renderEditable,
     );
     expect(endpoints.length, 2);
+
+    // On Mac, the toolbar blocks the drag on the right handle, so hide it.
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+    editableTextState.hideToolbar(false);
+    await tester.pumpAndSettle();
 
     // Drag the right handle until there's only 1 char selected.
     // We use a small offset because the endpoint is on the very corner

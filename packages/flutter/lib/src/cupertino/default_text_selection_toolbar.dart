@@ -150,7 +150,7 @@ class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
       case TargetPlatform.iOS:
         return CupertinoTextSelectionToolbar(
           anchorAbove: primaryAnchor,
-          anchorBelow: secondaryAnchor!,
+          anchorBelow: secondaryAnchor == null ? primaryAnchor : secondaryAnchor!,
           children: children,
         );
       case TargetPlatform.fuchsia:

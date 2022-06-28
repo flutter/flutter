@@ -272,6 +272,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
+    // TODO(justinmc): Should this really be required? Possible breaking change.
     required this.buildContextMenu,
   }) : assert(value != null),
        assert(context != null),

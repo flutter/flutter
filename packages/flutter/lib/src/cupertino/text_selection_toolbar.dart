@@ -140,23 +140,18 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         + _kToolbarHeight;
     final bool fitsAbove = anchorAbove.dy >= toolbarHeightNeeded;
 
-    // The distance between the toolbar and the content.
-    const Offset contentPaddingAdjustment = Offset(0.0, _kToolbarContentDistance);
-    // Makes up for the Padding on the screen.
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
-
     // The arrow, which points to the anchor, has some margin so it can't get
     // too close to the horizontal edges of the screen.
     final double leftMargin = _kArrowScreenPadding + mediaQuery.padding.left;
     final double rightMargin = mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding;
 
     final Offset anchorAboveAdjusted = Offset(
-      clampDouble(anchorAbove.dx - localAdjustment.dx - contentPaddingAdjustment.dx, leftMargin, rightMargin),
-      anchorAbove.dy - localAdjustment.dy - contentPaddingAdjustment.dy,
+      clampDouble(anchorAbove.dx, leftMargin, rightMargin),
+      anchorAbove.dy - _kToolbarContentDistance - paddingAbove,
     );
     final Offset anchorBelowAdjusted = Offset(
-      clampDouble(anchorBelow.dx - localAdjustment.dx + contentPaddingAdjustment.dx, leftMargin, rightMargin),
-      anchorBelow.dy - localAdjustment.dy + contentPaddingAdjustment.dy,
+      clampDouble(anchorBelow.dx, leftMargin, rightMargin),
+      anchorBelow.dy - _kToolbarContentDistance + paddingAbove,
     );
 
     return Padding(
