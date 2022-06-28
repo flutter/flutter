@@ -1432,12 +1432,12 @@ class OffsetLayer extends ContainerLayer {
 
   /// Capture an image of the current state of this layer and its children.
   ///
-  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
-  /// by the top-left corner of [bounds], and have dimensions equal to the size
-  /// of [bounds] multiplied by [pixelRatio].
+  /// The returned [ui.Image] will be offset by the top-left corner of [bounds],
+  /// and have dimensions equal to the size of [bounds] multiplied by [pixelRatio].
   ///
-  /// Unlike [toImage], this creates a GPU-resident texture and immediately
-  /// begins rasterization on the engine thread.
+  /// Unlike [toImage], this creates a GPU-resident texture which has a backend
+  /// specific byte format. Rasterization will begin immediately on the engine
+  /// thread.
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
