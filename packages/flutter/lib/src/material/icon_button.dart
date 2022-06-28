@@ -101,10 +101,14 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// The default [IconButton] is the standard type, and contained icon buttons can be produced
 /// by configuring the [IconButton] widget's properties.
 ///
-/// If [isSelected] is not null, [IconButton] is turned into a toggle button. In
-/// other words, the icon button will show a selected status if [isSelected] is
-/// set to true, and it will show an unselected status if [isSelected] is set to
-/// false.
+/// Material Design 3 also treats [IconButton]s as toggle buttons. In order
+/// to not break existing apps, the toggle feature can be optionally controlled
+/// by the [isSelected] property.
+///
+/// If [isSelected] is null it will behave as a normal button. If [isSelected] is not
+/// null then it will behave as a toggle button. If [isSelected] is true then it will
+/// show [selectedIcon], if it false it will show the normal [icon].
+/// Pressing the button will toggle the state.
 ///
 /// {@tool dartpad}
 /// This sample shows creation of [IconButton] widgets for standard, filled,
@@ -236,9 +240,9 @@ class IconButton extends StatelessWidget {
   /// The color for the button when it has the input focus.
   ///
   /// If [ThemeData.useMaterial3] is set to true, this [focusColor] will be mapped
-  /// to be the [ButtonStyle.overlayColor] in focused state. Therefore, using
-  /// a color with an opacity value would be recommended. For example, one could
-  /// customize the [focusColor] below:
+  /// to be the [ButtonStyle.overlayColor] in focused state, which paints on top of
+  /// the button, as an overlay. Therefore, using a color with some transparency
+  /// is recommended. For example, one could customize the [focusColor] below:
   ///
   /// ```dart
   /// IconButton(
@@ -252,9 +256,9 @@ class IconButton extends StatelessWidget {
   /// The color for the button when a pointer is hovering over it.
   ///
   /// If [ThemeData.useMaterial3] is set to true, this [hoverColor] will be mapped
-  /// to be the [ButtonStyle.overlayColor] in hovered state. Therefore, using
-  /// a color with an opacity value would be recommended. For example, one could
-  /// customize the [hoverColor] below:
+  /// to be the [ButtonStyle.overlayColor] in hovered state, which paints on top of
+  /// the button, as an overlay. Therefore, using a color with some transparency
+  /// is recommended. For example, one could customize the [hoverColor] below:
   ///
   /// ```dart
   /// IconButton(
@@ -299,9 +303,9 @@ class IconButton extends StatelessWidget {
   /// will show through. The highlight fades in quickly as the button is held down.
   ///
   /// If [ThemeData.useMaterial3] is set to true, this [highlightColor] will be mapped
-  /// to be the [ButtonStyle.overlayColor] in pressed state. Therefore, using
-  /// a color with an opacity value would be recommended. For example, one could
-  /// customize the [highlightColor] below:
+  /// to be the [ButtonStyle.overlayColor] in pressed state, which paints on top
+  /// of the button, as an overlay. Therefore, using a color with some transparency
+  /// is recommended. For example, one could customize the [highlightColor] below:
   ///
   /// ```dart
   /// IconButton(
@@ -393,25 +397,28 @@ class IconButton extends StatelessWidget {
 
   /// The optional selection state of the icon button.
   ///
-  /// If this property is null, the button will be a non-toggle button; otherwise,
-  /// the button will be a toggle button with the corresponding selection state.
+  /// If this property is null, the button will behave as a normal push button,
+  /// otherwise, the button will toggle between showing [icon] and [selectedIcon]
+  /// based on the value of [isSelected]. If true, it will show [selectedIcon],
+  /// if false it will show [icon].
   ///
-  /// This property is only used for Material 3 [IconButton].
+  /// This property is only used if [ThemeData.useMaterial3] is true.
   final bool? isSelected;
 
-  /// The optional icon to display inside the button when [isSelected] is true.
+  /// The icon to display inside the button when [isSelected] is true. This property
+  /// can be null. The original [icon] will be used for both selected and unselected
+  /// status if it is null.
   ///
   /// The [Icon.size] and [Icon.color] of the icon is configured automatically
-  /// based on the [iconSize] and [color] properties of _this_ widget using an
-  /// [IconTheme] and therefore should not be explicitly given in the icon
-  /// widget.
+  /// based on the [iconSize] and [color] properties using an [IconTheme] and
+  /// therefore should not be explicitly configured in the icon widget.
   ///
-  /// This property can be null. The original icon will be used for both selected
-  /// and unselected status if it is null.
+  /// This property is only used if [ThemeData.useMaterial3] is true.
   ///
-  /// This property is only used for Material 3 [IconButton].
+  /// See also:
   ///
-  /// See [Icon], [ImageIcon].
+  /// * [Icon], for icons based on glyphs from fonts instead of images.
+  /// * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
   final Widget? selectedIcon;
 
   /// A static convenience method that constructs an icon button
@@ -557,16 +564,16 @@ class IconButton extends StatelessWidget {
         adjustedStyle = style!.merge(adjustedStyle);
       }
 
-      Widget adjustedIcon = icon;
-      if (isSelected != null && isSelected! && selectedIcon != null) {
-        adjustedIcon = selectedIcon!;
+      Widget effectiveIcon = icon;
+      if ((isSelected ?? false) && selectedIcon != null) {
+        effectiveIcon = selectedIcon!;
       }
 
       Widget iconButton = IconTheme.merge(
         data: IconThemeData(
           size: effectiveIconSize,
         ),
-        child: adjustedIcon,
+        child: effectiveIcon,
       );
       if (tooltip != null) {
         iconButton = Tooltip(
@@ -694,6 +701,9 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
   void didUpdateWidget(_SelectableIconButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isSelected == null) {
+      if (statesController.value.contains(MaterialState.selected)) {
+        statesController.update(MaterialState.selected, false);
+      }
       return;
     }
     if (widget.isSelected != oldWidget.isSelected) {

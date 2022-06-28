@@ -1142,8 +1142,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                        getIconColor),
+                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {
@@ -1517,22 +1516,22 @@ void main() {
   testWidgets('The original icon is used for selected and unselected status when selectedIcon is null' , (WidgetTester tester) async {
     bool isSelected = false;
     await tester.pumpWidget(
-        MaterialApp(
-            theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
-            home: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return IconButton(
-                    isSelected: isSelected,
-                    icon: const Icon(Icons.account_box),
-                    onPressed: (){
-                      setState(() {
-                        isSelected = !isSelected;
-                      });
-                    },
-                  );
-                }
-            )
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              icon: const Icon(Icons.account_box),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
         )
+      )
     );
 
     final Finder button = find.byType(IconButton);
