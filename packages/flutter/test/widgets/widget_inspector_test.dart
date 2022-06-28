@@ -1213,6 +1213,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       setUp(() {
         service.disposeAllGroups();
       });
+
       group('setPubRootDirectories', () {
         testWidgets(
           'does not have createdByLocalProject when there are no pubRootDirectories',
@@ -1524,7 +1525,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
 
         testWidgets(
-          'does not have createdByLocalProject when thePubRootDirectoy has a different suffix',
+          'does not have createdByLocalProject when thePubRootDirectory has a different suffix',
           (WidgetTester tester) async {
             final Widget widget = Directionality(
               textDirection: TextDirection.ltr,
@@ -2354,7 +2355,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     group(
-      'ext.flutter.inspector.setPubRootDirectories',
+      'ext.flutter.inspector.setPubRootDirectories group',
       () {
         late final String pubRootTest;
 
