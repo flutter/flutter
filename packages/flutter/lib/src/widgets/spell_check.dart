@@ -88,7 +88,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   /// [TextSpan] tree based on platform.
   late final TextStyle misspelledTextStyle;
 
-
   /// The style used to indicate misspelled words on Android.
   final TextStyle materialMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
