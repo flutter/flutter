@@ -2355,7 +2355,92 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     group(
-      'ext.flutter.inspector.setPubRootDirectories group',
+      'ext.flutter.inspector.addPubRootDirectories',
+      () {
+        late final String pubRootTest;
+
+        setUpAll(() async {
+          pubRootTest = generateTestPubRootDirectory(service);
+        });
+
+        setUp(() async {
+          service.resetPubRootDirectories(<String>[]);
+        });
+
+        testWidgets(
+          'has createdByLocalProject when the widget is in the pubRootDirectory',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Stack(
+                  children: const <Widget>[
+                    Text('a'),
+                    Text('b', textDirection: TextDirection.ltr),
+                    Text('c', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ),
+            );
+
+            final Element elementA = find.text('a').evaluate().first;
+            service.setSelection(elementA, 'my-group');
+
+            await service.testExtension(
+              'addPubRootDirectories',
+              <String, String>{'arg0': pubRootTest},
+            );
+            expect(
+              await service.testExtension(
+                'getSelectedWidget',
+                <String, String>{'objectGroup': 'my-group'},
+              ),
+              contains('createdByLocalProject'),
+            );
+          },
+        );
+
+        testWidgets(
+          'has createdByLocalProject if at least one of the pubRootDirectories matches',
+          (WidgetTester tester) async {
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Stack(
+                  children: const <Widget>[
+                    Text('a'),
+                    Text('b', textDirection: TextDirection.ltr),
+                    Text('c', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ),
+            );
+
+            final Element elementA = find.text('a').evaluate().first;
+            service.setSelection(elementA, 'my-group');
+
+            await service
+                .testExtension('addPubRootDirectories', <String, String>{
+              'arg0': '/unrelated/$pubRootTest',
+              'arg1': 'file://$pubRootTest',
+            });
+
+            expect(
+              await service.testExtension(
+                'getSelectedWidget',
+                <String, String>{'objectGroup': 'my-group'},
+              ),
+              contains('createdByLocalProject'),
+            );
+          },
+        );
+      },
+      skip: !WidgetInspectorService.instance
+          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
+
+    group(
+      'ext.flutter.inspector.setPubRootDirectories',
       () {
         late final String pubRootTest;
 
@@ -2626,91 +2711,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
       },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
-    );
-
-    group(
-      'ext.flutter.inspector.addPubRootDirectories',
-      () {
-        late final String pubRootTest;
-
-        setUpAll(() async {
-          pubRootTest = generateTestPubRootDirectory(service);
-        });
-
-        setUp(() async {
-          service.resetPubRootDirectories(<String>[]);
-        });
-
-        testWidgets(
-          'has createdByLocalProject when the widget is in the pubRootDirectory',
-          (WidgetTester tester) async {
-            await tester.pumpWidget(
-              Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: const <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-
-            final Element elementA = find.text('a').evaluate().first;
-            service.setSelection(elementA, 'my-group');
-
-            await service.testExtension(
-              'addPubRootDirectories',
-              <String, String>{'arg0': pubRootTest},
-            );
-            expect(
-              await service.testExtension(
-                'getSelectedWidget',
-                <String, String>{'objectGroup': 'my-group'},
-              ),
-              contains('createdByLocalProject'),
-            );
-          },
-        );
-
-        testWidgets(
-          'has createdByLocalProject if at least one of the pubRootDirectories matches',
-          (WidgetTester tester) async {
-            await tester.pumpWidget(
-              Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: const <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-
-            final Element elementA = find.text('a').evaluate().first;
-            service.setSelection(elementA, 'my-group');
-
-            await service
-                .testExtension('addPubRootDirectories', <String, String>{
-              'arg0': '/unrelated/$pubRootTest',
-              'arg1': 'file://$pubRootTest',
-            });
-
-            expect(
-              await service.testExtension(
-                'getSelectedWidget',
-                <String, String>{'objectGroup': 'my-group'},
-              ),
-              contains('createdByLocalProject'),
-            );
-          },
-        );
-      },
-      skip: !WidgetInspectorService.instance
-          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
