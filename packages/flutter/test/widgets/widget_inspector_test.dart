@@ -1204,17 +1204,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     group(
     'WidgetInspectorService',
     () {
+      late final String pubRootTest;
+
+      setUpAll(() {
+        pubRootTest = generateTestPubRootDirectory(service);
+      });
+
+      setUp(() {
+        service.disposeAllGroups();
+      });
       group('setPubRootDirectories', () {
-        late final String pubRootTest;
-
-        setUpAll(() {
-          pubRootTest = generateTestPubRootDirectory(service);
-        });
-
-        setUp(() {
-          service.disposeAllGroups();
-        });
-
         testWidgets(
           'does not have createdByLocalProject when there are no pubRootDirectories',
           (WidgetTester tester) async {
@@ -1448,16 +1447,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       group('addPubRootDirectories', () {
-        late final String pubRootTest;
-
-        setUpAll(() {
-          pubRootTest = generateTestPubRootDirectory(service);
-        });
-
-        setUp(() {
-          service.disposeAllGroups();
-        });
-
         testWidgets(
           'has createdByLocalProject when the element is part of the pubRootDirectory',
           (WidgetTester tester) async {
@@ -1719,16 +1708,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       group('removePubRootDirectories', () {
-        late final String pubRootTest;
-
-        setUpAll(() {
-          pubRootTest = generateTestPubRootDirectory(service);
-        });
-
-        setUp(() {
-          service.disposeAllGroups();
-        });
-
         testWidgets(
           'does not have createdByLocalProject when no pubRootDirectories set and an unknown directory is removed',
           (WidgetTester tester) async {
@@ -1855,9 +1834,45 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       });
+
+      group('resetPubRootDirectories', () {
+        testWidgets(
+          'resets to populated array or default to empty',
+          (WidgetTester tester) async {
+            final Widget widget = Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            );
+            await tester.pumpWidget(widget);
+            final Element elementA = find.text('a').evaluate().first;
+            service.setSelection(elementA, 'my-group');
+
+            service.resetPubRootDirectories(<String>[pubRootTest]);
+
+            expect(
+              json.decode(service.getSelectedWidget(null, 'my-group')),
+              contains('createdByLocalProject'),
+            );
+
+            service.resetPubRootDirectories(<String>[]);
+
+            expect(
+              json.decode(service.getSelectedWidget(null, 'my-group')),
+              isNot(contains('createdByLocalProject')),
+            );
+          },
+        );
+      });
     },
     skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
   );
+
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
       const String group1 = 'group-1';
