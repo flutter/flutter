@@ -1,5 +1,8 @@
 #include "flutter_window.h"
 
+#include <flutter/event_channel.h>
+#include <flutter/event_sink.h>
+#include <flutter/event_stream_handler_functions.h>
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include <windows.h>
@@ -20,7 +23,11 @@ static int GetBatteryLevel() {
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
-FlutterWindow::~FlutterWindow() {}
+FlutterWindow::~FlutterWindow() {
+  if (power_notification_handle_) {
+    UnregisterPowerSettingNotification(power_notification_handle_);
+  }
+}
 
 bool FlutterWindow::OnCreate() {
   if (!Win32Window::OnCreate()) {
@@ -58,6 +65,20 @@ bool FlutterWindow::OnCreate() {
         }
       });
 
+  flutter::EventChannel<> charging_channel(
+      flutter_controller_->engine()->messenger(), "samples.flutter.io/charging",
+      &flutter::StandardMethodCodec::GetInstance());
+  charging_channel.SetStreamHandler(
+      std::make_unique<flutter::StreamHandlerFunctions<>>(
+          [this](auto arguments, auto events) {
+            this->OnStreamListen(std::move(events));
+            return nullptr;
+          },
+          [this](auto arguments) {
+            this->OnStreamCancel();
+            return nullptr;
+          }));
+
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   return true;
 }
@@ -88,7 +109,30 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
+    case WM_POWERBROADCAST:
+      SendBatteryStateEvent();
+      break;
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
+}
+
+void FlutterWindow::OnStreamListen(
+    std::unique_ptr<flutter::EventSink<>>&& events) {
+  event_sink_ = std::move(events);
+  SendBatteryStateEvent();
+  power_notification_handle_ =
+      RegisterPowerSettingNotification(GetHandle(), &GUID_ACDC_POWER_SOURCE, 0);
+}
+
+void FlutterWindow::OnStreamCancel() { event_sink_ = nullptr; }
+
+void FlutterWindow::SendBatteryStateEvent() {
+  SYSTEM_POWER_STATUS status;
+  if (GetSystemPowerStatus(&status) == 0 || status.ACLineStatus == 255) {
+    event_sink_->Error("UNAVAILABLE", "Charging status unavailable");
+  } else {
+    event_sink_->Success(flutter::EncodableValue(
+        status.ACLineStatus == 1 ? "charging" : "discharging"));
+  }
 }
