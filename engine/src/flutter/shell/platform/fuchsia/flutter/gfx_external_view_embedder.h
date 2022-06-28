@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "flutter/flow/embedded_views.h"
-#include "flutter/flow/rtree.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/canvas_spy.h"
@@ -139,29 +138,18 @@ class GfxExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
 
   struct EmbedderLayer {
     EmbedderLayer(const SkISize& frame_size,
-                  std::optional<flutter::EmbeddedViewParams> view_params,
-                  flutter::RTreeFactory rtree_factory)
-        : rtree(rtree_factory.getInstance()),
-          embedded_view_params(std::move(view_params)),
+                  std::optional<flutter::EmbeddedViewParams> view_params)
+        : embedded_view_params(std::move(view_params)),
           recorder(std::make_unique<SkPictureRecorder>()),
           canvas_spy(std::make_unique<flutter::CanvasSpy>(
-              recorder->beginRecording(SkRect::Make(frame_size),
-                                       &rtree_factory))),
-          surface_size(frame_size),
-          picture(nullptr) {}
-
-    // Records paint operations applied to this layer's `SkCanvas`.
-    // These records are used to determine which portions of this layer
-    // contain content. The embedder propagates this information to scenic, so
-    // that scenic can accurately decide which portions of this layer may
-    // interact with input.
-    sk_sp<flutter::RTree> rtree;
+              recorder->beginRecording(frame_size.width(),
+                                       frame_size.height()))),
+          surface_size(frame_size) {}
 
     std::optional<flutter::EmbeddedViewParams> embedded_view_params;
     std::unique_ptr<SkPictureRecorder> recorder;
     std::unique_ptr<flutter::CanvasSpy> canvas_spy;
     SkISize surface_size;
-    sk_sp<SkPicture> picture;
   };
   using EmbedderLayerId = std::optional<uint32_t>;
   constexpr static EmbedderLayerId kRootLayerId = EmbedderLayerId{};
@@ -184,32 +172,9 @@ class GfxExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
     bool pending_focusable = true;
   };
 
-  // GFX resources required to render a composited flutter layer (i.e. an
-  // SkPicture).
-  struct ScenicImage {
+  struct ScenicLayer {
     scenic::ShapeNode shape_node;
     scenic::Material material;
-  };
-
-  // All resources required to represent a flutter layer in the GFX scene
-  // graph. The structure of the subgraph for a particular layer is:
-  //
-  //         layer_node
-  //        /          \
-  //  image node     hit regions (zero or more)
-  //
-  // NOTE: `hit_regions` must be cleared before submitting each new frame;
-  // otherwise, we will report stale hittable geometry to scenic.
-  struct ScenicLayer {
-    // Root of the subtree containing the scenic resources for this layer.
-    scenic::EntityNode layer_node;
-
-    // Scenic resources used to render this layer's image.
-    ScenicImage image;
-
-    // Scenic resources that specify which parts of this layer are responsive
-    // to input.
-    std::vector<scenic::ShapeNode> hit_regions;
   };
 
   std::shared_ptr<GfxSessionConnection> session_;
