@@ -62,10 +62,10 @@ class EntityPass {
 
   std::optional<Rect> GetSubpassCoverage(
       const EntityPass& subpass,
-      std::optional<Rect> coverage_clip) const;
+      std::optional<Rect> coverage_crop) const;
 
   std::optional<Rect> GetElementsCoverage(
-      std::optional<Rect> coverage_clip) const;
+      std::optional<Rect> coverage_crop) const;
 
  private:
   struct EntityResult {
