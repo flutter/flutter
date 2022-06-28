@@ -133,6 +133,10 @@ DartComponentControllerV2::DartComponentControllerV2(
     idle_wait_.set_trigger(ZX_TIMER_SIGNALED);
     idle_wait_.Begin(async_get_default_dispatcher());
   }
+
+  // Close the runtime_dir channel if we don't intend to serve it. Otherwise any
+  // access to the runtime_dir will hang forever.
+  start_info_.clear_runtime_dir();
 }
 
 DartComponentControllerV2::~DartComponentControllerV2() {
