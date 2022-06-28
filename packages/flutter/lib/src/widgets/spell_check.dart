@@ -77,7 +77,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   /// The style used to indicate misspeleld words on Android.
   final TextStyle materialMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
-      decorationColor: ColorSwatch(
+      decorationColor: ColorSwatch<int>(
         0xFFF44336,
         <int, Color>{
           50: Color(0xFFFFEBEE),
@@ -176,7 +176,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       TextStyle? style,
       SpellCheckResults spellCheckResults) {
     List<SuggestionSpan>? correctedSpellCheckResults;
-    TextStyle? misspelledTextStyle;
+    TextStyle misspelledTextStyle;
 
     final List<SuggestionSpan> rawSpellCheckResults =
         spellCheckResults.suggestionSpans;
@@ -191,9 +191,13 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
 
     switch (platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         misspelledTextStyle = cupertinoMisspelledTextStyle;
         break;
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         misspelledTextStyle = materialMisspelledTextStyle;
         break;
     }
@@ -204,7 +208,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
             correctedSpellCheckResults,
             value,
             style,
-            misspelledTextStyle!,
+            misspelledTextStyle,
             composingWithinCurrentTextRange));
   }
 

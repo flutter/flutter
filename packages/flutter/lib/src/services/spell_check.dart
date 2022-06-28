@@ -36,8 +36,10 @@ class SuggestionSpan {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
         return true;
+    }
+
     return other is SuggestionSpan &&
         other.range.start == range.start &&
         other.range.end == range.end &&
@@ -45,7 +47,7 @@ class SuggestionSpan {
   }
 
   @override
-  int get hashCode => Object.hash(range.start, range.end, hashList(suggestions));
+  int get hashCode => Object.hash(range.start, range.end, Object.hashAll(suggestions));
 }
 
 /// A data structure grouping together the [SuggestionSpan]s and related text of
@@ -70,15 +72,17 @@ class SpellCheckResults {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
         return true;
+    }
+
     return other is SpellCheckResults &&
         other.spellCheckedText == spellCheckedText &&
         listEquals<SuggestionSpan>(other.suggestionSpans, suggestionSpans);
   }
 
   @override
-  int get hashCode => Object.hash(spellCheckedText, hashList(suggestionSpans));
+  int get hashCode => Object.hash(spellCheckedText, Object.hashAll(suggestionSpans));
 }
 
 /// Determines how spell check results are received for text input.
@@ -172,7 +176,7 @@ class DefaultSpellCheckService implements SpellCheckService {
       rawResults = await spellCheckChannel.invokeMethod(
         'SpellCheck.initiateSpellCheck',
         <String>[locale.toLanguageTag(), text],
-      );
+      ) as List<dynamic>;
     } catch (e) {
       // Spell check request canceled due to pending request.
       return null;

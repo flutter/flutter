@@ -1,4 +1,4 @@
-package com.example.sc_int_test
+package com.example.spell_check
 
 import io.flutter.embedding.android.FlutterActivity
 

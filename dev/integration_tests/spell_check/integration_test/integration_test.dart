@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:sc_int_test/main.dart';
+import 'package:spell_check/main.dart';
 
 late DefaultSpellCheckService defaultSpellCheckService;
 late Locale locale;
 late String text;
+late List<SuggestionSpan>? spellCheckSuggestionSpans;
 
 /// Copy from flutter/test/widgets/editable_text_utils.dart.
 RenderEditable findRenderEditable(WidgetTester tester, Type type) {
@@ -46,7 +45,7 @@ Future<void> main() async {
       (WidgetTester tester) async {
     text = 'Hello, world!';
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans!.length, equals(0));
@@ -59,13 +58,13 @@ Future<void> main() async {
       'fetchSpellCheckSuggestions returns correct ranges with misspelled words',
       (WidgetTester tester) async {
     text = 'Hlelo, world! Yuou are magnificente';
-    List<TextRange> misspelledWordRanges = const [
+    const List<TextRange> misspelledWordRanges = <TextRange>[
       TextRange(start: 0, end: 5),
       TextRange(start: 14, end: 18),
       TextRange(start: 23, end: 35)
     ];
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans, isNotNull);
@@ -87,13 +86,13 @@ Future<void> main() async {
       (WidgetTester tester) async {
     text = 'Wwow, whaaett a beautiful day it is!';
 
-    List<SuggestionSpan>? spellCheckSpansWithComposingRegion =
+    final List<SuggestionSpan>? spellCheckSpansWithComposingRegion =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSpansWithComposingRegion, isNotNull);
     expect(spellCheckSpansWithComposingRegion!.length, equals(2));
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(
@@ -105,20 +104,20 @@ Future<void> main() async {
       (WidgetTester tester) async {
     text = 'Wooahha it is an amazzinng dayyebf!';
 
-    List<SuggestionSpan>? modifiedSpellCheckSuggestionSpans =
+    final List<SuggestionSpan>? modifiedSpellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
-    List<SuggestionSpan> expectedSpellCheckSuggestionSpans =
+    final List<SuggestionSpan> expectedSpellCheckSuggestionSpans =
         List<SuggestionSpan>.from(modifiedSpellCheckSuggestionSpans!);
     expect(modifiedSpellCheckSuggestionSpans, isNotNull);
-    expect(modifiedSpellCheckSuggestionSpans!.length, equals(3));
+    expect(modifiedSpellCheckSuggestionSpans.length, equals(3));
 
     /// Remove one span to simulate Gboard attempting to un-ignore the composing region, after tapping away from "Yuou".
-    modifiedSpellCheckSuggestionSpans!.removeAt(1);
+    modifiedSpellCheckSuggestionSpans.removeAt(1);
 
     defaultSpellCheckService.lastSavedSpans = modifiedSpellCheckSuggestionSpans;
     defaultSpellCheckService.lastSavedText = text;
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans, isNotNull);
@@ -126,10 +125,10 @@ Future<void> main() async {
   });
 
   testWidgets('EditableText spell checks when text is entered and spell check enabled', (WidgetTester tester) async {
-    TextStyle style = const TextStyle();
-    TextStyle misspelledTextStyle = const TextStyle(
+    const TextStyle style = TextStyle();
+    const TextStyle misspelledTextStyle = TextStyle(
         decoration: TextDecoration.underline,
-        decorationColor: ColorSwatch(
+        decorationColor: ColorSwatch<int>(
           0xFFF44336,
           <int, Color>{
             50: Color(0xFFFFEBEE),
@@ -146,7 +145,7 @@ Future<void> main() async {
         ),
         decorationStyle: TextDecorationStyle.wavy);
 
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(const MyApp());
 
     await tester.enterText(find.byType(EditableText), 'Hey wrororld! Hey!');
     await tester.pumpAndSettle();
@@ -154,7 +153,7 @@ Future<void> main() async {
     final RenderEditable renderEditable = findRenderEditable(tester, EditableText);
     final TextSpan textSpanTree = renderEditable.text! as TextSpan;
 
-    TextSpan expectedTextSpanTree = TextSpan(
+    const TextSpan expectedTextSpanTree = TextSpan(
         style: style,
         children: <TextSpan>[
           TextSpan(style: style, text: 'Hey '),
@@ -174,9 +173,9 @@ Future<void> main() async {
 
     defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
-    String modifiedText = text.substring(5);
+    final String modifiedText = text.substring(5);
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(
             locale, modifiedText);
 
