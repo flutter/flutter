@@ -53,6 +53,10 @@ typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 // to transparent, is twice this duration.
 const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 
+// The time the cursor is static in opacity before animating to become
+// transparent.
+const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
+
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
@@ -304,91 +308,6 @@ class ToolbarOptions {
   ///
   /// Defaults to false. Must not be null.
   final bool selectAll;
-}
-
-// A time-value pair that represents a key frame in an animation.
-class _KeyFrame {
-  const _KeyFrame(this.time, this.value);
-  // Values extracted from iOS 15.4 UIKit.
-  static const List<_KeyFrame> iOSBlinkingCaretKeyFrames = <_KeyFrame>[
-    _KeyFrame(0,       1),     // 0
-    _KeyFrame(0.5,     1),     // 1
-    _KeyFrame(0.5375,  0.75),  // 2
-    _KeyFrame(0.575,   0.5),   // 3
-    _KeyFrame(0.6125,  0.25),  // 4
-    _KeyFrame(0.65,    0),     // 5
-    _KeyFrame(0.85,    0),     // 6
-    _KeyFrame(0.8875,  0.25),  // 7
-    _KeyFrame(0.925,   0.5),   // 8
-    _KeyFrame(0.9625,  0.75),  // 9
-    _KeyFrame(1,       1),     // 10
-  ];
-
-  // The timing, in seconds, of the specified animation `value`.
-  final double time;
-  final double value;
-}
-
-class _DiscreteKeyFrameSimulation extends Simulation {
-  _DiscreteKeyFrameSimulation.iOSBlinkingCaret() : this._(_KeyFrame.iOSBlinkingCaretKeyFrames, 1);
-  _DiscreteKeyFrameSimulation._(this._keyFrames, this.maxDuration)
-    : assert(_keyFrames.isNotEmpty),
-      assert(_keyFrames.last.time <= maxDuration),
-      assert(() {
-        for (int i = 0; i < _keyFrames.length -1; i += 1) {
-          if (_keyFrames[i].time > _keyFrames[i + 1].time) {
-            return false;
-          }
-        }
-        return true;
-      }(), 'The key frame sequence must be sorted by time.');
-
-  final double maxDuration;
-
-  final List<_KeyFrame> _keyFrames;
-
-  @override
-  double dx(double time) => 0;
-
-  @override
-  bool isDone(double time) => time >= maxDuration;
-
-  // The index of the KeyFrame corresponds to the most recent input `time`.
-  int _lastKeyFrameIndex = 0;
-
-  @override
-  double x(double time) {
-    final int length = _keyFrames.length;
-
-    // Perform a linear search in the sorted key frame list, starting from the
-    // last key frame found, since the input `time` usually monotonically
-    // increases by a small amount.
-    int searchIndex;
-    final int endIndex;
-    if (_keyFrames[_lastKeyFrameIndex].time > time) {
-      // The simulation may have restarted. Search within the index range
-      // [0, _lastKeyFrameIndex).
-      searchIndex = 0;
-      endIndex = _lastKeyFrameIndex;
-    } else {
-      searchIndex = _lastKeyFrameIndex;
-      endIndex = length;
-    }
-
-    // Find the target key frame. Don't have to check (endIndex - 1): if
-    // (endIndex - 2) doesn't work we'll have to pick (endIndex - 1) anyways.
-    while (searchIndex < endIndex - 1) {
-      assert(_keyFrames[searchIndex].time <= time);
-      final _KeyFrame next = _keyFrames[searchIndex + 1];
-      if (time < next.time) {
-        break;
-      }
-      searchIndex += 1;
-    }
-
-    _lastKeyFrameIndex = searchIndex;
-    return _keyFrames[_lastKeyFrameIndex].value;
-  }
 }
 
 /// A basic text input field.
@@ -1698,16 +1617,9 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
   Timer? _cursorTimer;
-  AnimationController get _cursorBlinkOpacityController {
-    return _backingCursorBlinkOpacityController ??= AnimationController(
-      vsync: this,
-    )..addListener(_onCursorColorTick);
-  }
-  AnimationController? _backingCursorBlinkOpacityController;
-  late final Simulation _iosBlinkCursorSimulation = _DiscreteKeyFrameSimulation.iOSBlinkingCaret();
-
+  bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
 
@@ -1723,6 +1635,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   ScrollController? _internalScrollController;
   ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
+
+  AnimationController? _cursorBlinkOpacityController;
 
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
@@ -1751,6 +1665,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// - Changing the selection using a physical keyboard.
   bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
 
+  // This value is an eyeball estimation of the time it takes for the iOS cursor
+  // to ease in and out.
+  static const Duration _fadeDuration = Duration(milliseconds: 250);
+
   // The time it takes for the floating cursor to snap to the text aligned
   // cursor position after the user has finished placing it.
   static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);
@@ -1762,7 +1680,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
-  Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+  Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
 
   @override
   bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
@@ -1927,6 +1845,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
+    _cursorBlinkOpacityController = AnimationController(
+      vsync: this,
+      duration: _fadeDuration,
+    )..addListener(_onCursorColorTick);
     clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -1963,7 +1885,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_tickersEnabled != newTickerEnabled) {
       _tickersEnabled = newTickerEnabled;
       if (_tickersEnabled && _cursorActive) {
-        _startCursorBlink();
+        _startCursorTimer();
       } else if (!_tickersEnabled && _cursorTimer != null) {
         // Cannot use _stopCursorTimer because it would reset _cursorActive.
         _cursorTimer!.cancel();
@@ -2066,8 +1988,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(!_hasInputConnection);
     _cursorTimer?.cancel();
     _cursorTimer = null;
-    _backingCursorBlinkOpacityController?.dispose();
-    _backingCursorBlinkOpacityController = null;
+    _cursorBlinkOpacityController?.dispose();
+    _cursorBlinkOpacityController = null;
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
@@ -2146,8 +2068,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       // To keep the cursor from blinking while typing, we want to restart the
       // cursor timer every time a new character is typed.
-      _stopCursorBlink(resetCharTicks: false);
-      _startCursorBlink();
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
     }
   }
 
@@ -2683,8 +2605,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // To keep the cursor from blinking while it moves, restart the timer here.
     if (_cursorTimer != null) {
-      _stopCursorBlink(resetCharTicks: false);
-      _startCursorBlink();
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
     }
   }
 
@@ -2838,14 +2760,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onCursorColorTick() {
-    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
-    _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
+    _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController!.value > 0;
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
   @visibleForTesting
-  bool get cursorCurrentlyVisible => _cursorBlinkOpacityController.value > 0;
+  bool get cursorCurrentlyVisible => _cursorBlinkOpacityController!.value > 0;
 
   /// The cursor blink interval (the amount of time the cursor is in the "on"
   /// state or the "off" state). A complete cursor blink period is twice this
@@ -2860,69 +2782,83 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   int _obscureShowCharTicksPending = 0;
   int? _obscureLatestCharIndex;
 
+  void _cursorTick(Timer timer) {
+    _targetCursorVisibility = !_targetCursorVisibility;
+    final double targetOpacity = _targetCursorVisibility ? 1.0 : 0.0;
+    if (widget.cursorOpacityAnimates) {
+      // If we want to show the cursor, we will animate the opacity to the value
+      // of 1.0, and likewise if we want to make it disappear, to 0.0. An easing
+      // curve is used for the animation to mimic the aesthetics of the native
+      // iOS cursor.
+      //
+      // These values and curves have been obtained through eyeballing, so are
+      // likely not exactly the same as the values for native iOS.
+      _cursorBlinkOpacityController!.animateTo(targetOpacity, curve: Curves.easeOut);
+    } else {
+      _cursorBlinkOpacityController!.value = targetOpacity;
+    }
+
+    if (_obscureShowCharTicksPending > 0) {
+      setState(() {
+        _obscureShowCharTicksPending = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
+          ? _obscureShowCharTicksPending - 1
+          : 0;
+      });
+    }
+  }
+
+  void _cursorWaitForStart(Timer timer) {
+    assert(_kCursorBlinkHalfPeriod > _fadeDuration);
+    assert(!EditableText.debugDeterministicCursor);
+    _cursorTimer?.cancel();
+    _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
+  }
+
   // Indicates whether the cursor should be blinking right now (but it may
   // actually not blink because it's disabled via TickerMode.of(context)).
   bool _cursorActive = false;
 
-  void _startCursorBlink() {
-    assert(!(_cursorTimer?.isActive ?? false) || !(_backingCursorBlinkOpacityController?.isAnimating ?? false));
+  void _startCursorTimer() {
+    assert(_cursorTimer == null);
     _cursorActive = true;
     if (!_tickersEnabled) {
       return;
     }
-    _cursorTimer?.cancel();
-    _cursorBlinkOpacityController.value = 1.0;
+    _targetCursorVisibility = true;
+    _cursorBlinkOpacityController!.value = 1.0;
     if (EditableText.debugDeterministicCursor) {
       return;
     }
     if (widget.cursorOpacityAnimates) {
-      _cursorBlinkOpacityController.animateWith(_iosBlinkCursorSimulation).whenComplete(_onCursorTick);
+      _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else {
-      _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, (Timer timer) { _onCursorTick(); });
+      _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
     }
   }
 
-  void _onCursorTick() {
-    if (_obscureShowCharTicksPending > 0) {
-      _obscureShowCharTicksPending = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
-        ? _obscureShowCharTicksPending - 1
-        : 0;
-      if (_obscureShowCharTicksPending == 0) {
-        setState(() { });
-      }
-    }
-
-    if (widget.cursorOpacityAnimates) {
-      _cursorTimer?.cancel();
-      // Schedule this as an async task to avoid blocking tester.pumpAndSettle
-      // indefinitely.
-      _cursorTimer = Timer(Duration.zero, () => _cursorBlinkOpacityController.animateWith(_iosBlinkCursorSimulation).whenComplete(_onCursorTick));
-    } else {
-      if (!(_cursorTimer?.isActive ?? false) && _tickersEnabled) {
-        _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, (Timer timer) { _onCursorTick(); });
-      }
-      _cursorBlinkOpacityController.value = _cursorBlinkOpacityController.value == 0 ? 1 : 0;
-    }
-  }
-
-  void _stopCursorBlink({ bool resetCharTicks = true }) {
+  void _stopCursorTimer({ bool resetCharTicks = true }) {
     _cursorActive = false;
-    _cursorBlinkOpacityController.value = 0.0;
+    _cursorTimer?.cancel();
+    _cursorTimer = null;
+    _targetCursorVisibility = false;
+    _cursorBlinkOpacityController!.value = 0.0;
     if (EditableText.debugDeterministicCursor) {
       return;
     }
-    _cursorBlinkOpacityController.value = 0.0;
     if (resetCharTicks) {
       _obscureShowCharTicksPending = 0;
+    }
+    if (widget.cursorOpacityAnimates) {
+      _cursorBlinkOpacityController!.stop();
+      _cursorBlinkOpacityController!.value = 0.0;
     }
   }
 
   void _startOrStopCursorTimerIfNeeded() {
     if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed) {
-      _startCursorBlink();
-    }
-    else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed)) {
-      _stopCursorBlink();
+      _startCursorTimer();
+    } else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed)) {
+      _stopCursorTimer();
     }
   }
 
@@ -3626,10 +3562,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      // Newer verions of iOS (iOS 15+) no longer reveal the most recently
-      // entered character.
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
-        TargetPlatform.android, TargetPlatform.fuchsia,
+        TargetPlatform.android, TargetPlatform.iOS, TargetPlatform.fuchsia,
       };
       final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);

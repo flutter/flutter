@@ -297,7 +297,7 @@ class TextSelectionOverlay {
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       toolbarVisible: _effectiveToolbarVisibility,
-      selectionEndPoints: const <TextSelectionPoint>[],
+      selectionEndpoints: const <TextSelectionPoint>[],
       selectionControls: selectionControls,
       selectionDelegate: selectionDelegate,
       clipboardStatus: clipboardStatus,
@@ -432,27 +432,27 @@ class TextSelectionOverlay {
           renderBox.localToGlobal(Offset.zero),
           renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
         );
-        final List<TextSelectionPoint> selectionEndPoints = renderObject.getEndpointsForSelection(_selection);
-        final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
+        final List<TextSelectionPoint> selectionEndpoints = renderObject.getEndpointsForSelection(_selection);
+        final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
             _getEndGlyphHeight() / 2;
 
         // If the selected text spans more than 1 line, horizontally center the toolbar.
         // Derived from both iOS and Android.
         final double midX = isMultiline
           ? editingRegion.width / 2
-          : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+          : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
 
         final double lineHeightAtStart = _getStartGlyphHeight();
         final Offset midpoint = Offset(
           midX,
           // The y-coordinate won't be made use of most likely.
-          selectionEndPoints.first.point.dy - lineHeightAtStart,
+          selectionEndpoints.first.point.dy - lineHeightAtStart,
         );
 
-        final TextSelectionPoint startTextSelectionPoint = selectionEndPoints[0];
-        final TextSelectionPoint endTextSelectionPoint = selectionEndPoints.length > 1
-          ? selectionEndPoints[1]
-          : selectionEndPoints[0];
+        final TextSelectionPoint startTextSelectionPoint = selectionEndpoints[0];
+        final TextSelectionPoint endTextSelectionPoint = selectionEndpoints.length > 1
+          ? selectionEndpoints[1]
+          : selectionEndpoints[0];
         final Offset anchorAbove = Offset(
           editingRegion.left + midpoint.dx,
           editingRegion.top + startTextSelectionPoint.point.dy - lineHeightAtStart,
@@ -507,7 +507,7 @@ class TextSelectionOverlay {
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
-      ..selectionEndPoints = renderObject.getEndpointsForSelection(_selection)
+      ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
@@ -741,7 +741,7 @@ class SelectionOverlay {
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     this.toolbarVisible,
-    required List<TextSelectionPoint> selectionEndPoints,
+    required List<TextSelectionPoint> selectionEndpoints,
     required this.selectionControls,
     required this.selectionDelegate,
     required this.clipboardStatus,
@@ -763,7 +763,7 @@ class SelectionOverlay {
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
-       _selectionEndPoints = selectionEndPoints,
+       _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation {
     final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
     assert(
@@ -882,13 +882,13 @@ class SelectionOverlay {
   final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.
-  List<TextSelectionPoint> get selectionEndPoints => _selectionEndPoints;
-  List<TextSelectionPoint> _selectionEndPoints;
-  set selectionEndPoints(List<TextSelectionPoint> value) {
-    if (!listEquals(_selectionEndPoints, value)) {
+  List<TextSelectionPoint> get selectionEndpoints => _selectionEndpoints;
+  List<TextSelectionPoint> _selectionEndpoints;
+  set selectionEndpoints(List<TextSelectionPoint> value) {
+    if (!listEquals(_selectionEndpoints, value)) {
       _markNeedsBuild();
     }
-    _selectionEndPoints = value;
+    _selectionEndpoints = value;
   }
 
   /// Debugging information for explaining why the [Overlay] is required.
@@ -965,7 +965,7 @@ class SelectionOverlay {
   /// The location of where the toolbar should be drawn in relative to the
   /// location of [toolbarLayerLink].
   ///
-  /// If this is null, the toolbar is drawn based on [selectionEndPoints] and
+  /// If this is null, the toolbar is drawn based on [selectionEndpoints] and
   /// the rect of render object of [context].
   ///
   /// This is useful for displaying toolbars at the mouse right-click locations
@@ -1166,19 +1166,19 @@ class SelectionOverlay {
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
     );
 
-    final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
+    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
         lineHeightAtEnd / 2;
 
     // If the selected text spans more than 1 line, horizontally center the toolbar.
     // Derived from both iOS and Android.
     final double midX = isMultiline
       ? editingRegion.width / 2
-      : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+      : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
 
     final Offset midpoint = Offset(
       midX,
       // The y-coordinate won't be made use of most likely.
-      selectionEndPoints.first.point.dy - lineHeightAtStart,
+      selectionEndpoints.first.point.dy - lineHeightAtStart,
     );
 
     return _SelectionToolbarWrapper(
@@ -1192,7 +1192,7 @@ class SelectionOverlay {
             editingRegion,
             lineHeightAtStart,
             midpoint,
-            selectionEndPoints,
+            selectionEndpoints,
             selectionDelegate,
             clipboardStatus,
             toolbarLocation,

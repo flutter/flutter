@@ -534,7 +534,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       onEndHandleDragEnd: (DragEndDetails details) => _stopSelectionEndEdgeUpdate(),
-      selectionEndPoints: points,
+      selectionEndpoints: points,
       selectionControls: widget.selectionControls,
       selectionDelegate: this,
       clipboardStatus: null,
@@ -570,7 +570,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       ..lineHeightAtStart = start?.lineHeight ?? end!.lineHeight
       ..endHandleType = end?.handleType ?? TextSelectionHandleType.right
       ..lineHeightAtEnd = end?.lineHeight ?? start!.lineHeight
-      ..selectionEndPoints = points;
+      ..selectionEndpoints = points;
   }
 
   /// Shows the selection handles.

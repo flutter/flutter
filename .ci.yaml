@@ -132,6 +132,18 @@ targets:
       validation: analyze
       validation_name: Analyze
 
+  - name: Linux packages_autoroller
+    presubmit: false
+    recipe: pub_autoroller/pub_autoroller
+    timeout: 30
+    properties:
+      tags: >
+        ["framework","hostonly"]
+      dependencies: >-
+          [
+            {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
+          ]
+
   - name: Linux android views
     recipe: flutter/android_views
     properties:
@@ -1957,6 +1969,17 @@ targets:
       task_name: new_gallery__crane_perf
     scheduler: luci
 
+  - name: Linux_android old_gallery__transition_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: old_gallery__transition_perf
+    scheduler: luci
+
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3108,6 +3131,7 @@ targets:
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     runIf:
       - dev/**
     timeout: 60

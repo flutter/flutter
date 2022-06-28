@@ -7,8 +7,6 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'object.dart';
 import 'proxy_box.dart';

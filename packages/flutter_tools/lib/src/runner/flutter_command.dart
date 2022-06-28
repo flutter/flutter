@@ -119,6 +119,7 @@ class FlutterOptions {
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
+  static const String kWebBrowserFlag = 'web-browser-flag';
 }
 
 /// flutter command categories for usage.
@@ -269,6 +270,15 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('web-launch-url',
       help: 'The URL to provide to the browser. Defaults to an HTTP URL with the host '
           'name of "--web-hostname", the port of "--web-port", and the path set to "/".',
+    );
+    argParser.addMultiOption(
+      FlutterOptions.kWebBrowserFlag,
+      help: 'Additional flag to pass to a browser instance at startup.\n'
+          'Chrome: https://www.chromium.org/developers/how-tos/run-chromium-with-flags/\n'
+          'Firefox: https://wiki.mozilla.org/Firefox/CommandLineOptions\n'
+          'Multiple flags can be passed by repeating "--${FlutterOptions.kWebBrowserFlag}" multiple times.',
+      valueHelp: '--foo=bar',
+      hide: !verboseHelp,
     );
   }
 
@@ -555,7 +565,8 @@ abstract class FlutterCommand extends Command<void> {
               'Each build must have a unique identifier to differentiate it from previous builds.\n'
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
               'On Android it is used as "versionCode".\n'
-              'On Xcode builds it is used as "CFBundleVersion".',
+              'On Xcode builds it is used as "CFBundleVersion".\n'
+              'On Windows it is used as the build suffix for the product and file versions.',
     );
   }
 
@@ -564,7 +575,8 @@ abstract class FlutterCommand extends Command<void> {
         help: 'A "x.y.z" string used as the version number shown to users.\n'
               'For each new version of your app, you will provide a version number to differentiate it from previous versions.\n'
               'On Android it is used as "versionName".\n'
-              'On Xcode builds it is used as "CFBundleShortVersionString".',
+              'On Xcode builds it is used as "CFBundleShortVersionString".\n'
+              'On Windows it is used as the major, minor, and patch parts of the product and file versions.',
         valueHelp: 'x.y.z');
   }
 
@@ -883,6 +895,8 @@ abstract class FlutterCommand extends Command<void> {
     usesPubOption();
     usesTargetOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    usesBuildNumberOption();
+    usesBuildNameOption();
   }
 
   /// The build mode that this command will use if no build mode is
