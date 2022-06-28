@@ -61,7 +61,7 @@ void main() {
   }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('AnimatedRaster does not create image if willPaint returns false', (WidgetTester tester) async {
-    final TestDelegate delegate = TestDelegate()..willPaintValue = false;
+    final TestDelegate delegate = TestDelegate()..useRasterValue = false;
 
     await tester.pumpWidget(AnimatedRaster(
       animation: const AlwaysStoppedAnimation<double>(0.5),
@@ -119,15 +119,18 @@ void main() {
 class TestDelegate extends AnimatedRasterDelegate {
   ui.Image? lastImage;
   double? lastPixelRatio;
-  bool willPaintValue = true;
+  bool useRasterValue = true;
 
   @override
-  bool willPaint(Animation<double> animation) {
-    return willPaintValue;
+  bool useRaster(Animation<double> animation) {
+    return useRasterValue;
   }
 
   @override
-  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
+  void paint(PaintingContext context, Animation<double> animation, ui.Rect area, PaintingContextCallback callback) { }
+
+  @override
+  void paintRaster(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
     lastImage = image;
     lastPixelRatio = pixelRatio;
   }
