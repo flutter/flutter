@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection' show HashMap;
+import 'dart:collection' show HashMap, SplayTreeSet;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
@@ -748,7 +748,7 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
-  Set<String>? _pubRootDirectories;
+  List<String>? _pubRootDirectories;
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
 
@@ -1370,15 +1370,26 @@ mixin WidgetInspectorService {
   ///
   /// The local project directories are used to distinguish widgets created by
   /// the local project over widgets created from inside the framework.
-  @Deprecated('TODO: How do I deprecate stuff?')
+  @Deprecated(
+    'Use addPubRootDirectories instead. '
+    'This feature was deprecated after v3.0.3',
+  )
   @protected
   void setPubRootDirectories(List<String> pubRootDirectories) {
     addPubRootDirectories(pubRootDirectories);
   }
 
+  /// Resets the list of directories, that should be considered part of the
+  /// local project, to the value passed in [pubRootDirectories].
+  ///
+  /// If no value is passed in [pubRootDirectories] then the list of directories
+  /// is set to an empty array.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project over widgets created from inside the framework.
   @protected
   void resetPubRootDirectories([List<String> pubRootDirectories = const <String>[]]) {
-    _pubRootDirectories = pubRootDirectories.toSet();
+    _pubRootDirectories = pubRootDirectories;
     _isLocalCreationCache.clear();
   }
 
@@ -1389,27 +1400,31 @@ mixin WidgetInspectorService {
   /// the local project over widgets created from inside the framework.
   @protected
   void addPubRootDirectories(List<String> pubRootDirectories) {
-    _pubRootDirectories ??= <String>{};
-    _pubRootDirectories!.addAll(pubRootDirectories
-        .map<String>((String directory) => Uri.parse(directory).path));
+    pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
+
+    final SplayTreeSet<String> sortedSet = SplayTreeSet<String>.from(pubRootDirectories, (String a, String b) => a.compareTo(b));
+    if(_pubRootDirectories != null){
+      sortedSet.addAll(_pubRootDirectories!);
+    }
+    _pubRootDirectories = sortedSet.toList();
 
     _isLocalCreationCache.clear();
   }
 
   /// Remove a list of directories that should no longer be considered part
   /// of the local project.
-  ///
-  /// The local project directories are used to distinguish widgets created by
-  /// the local project over widgets created from inside the framework.
   @protected
   void removePubRootDirectories(List<String> pubRootDirectories) {
     if (_pubRootDirectories == null) {
       return;
     }
+
+    final SplayTreeSet<String> sortedSet = SplayTreeSet<String>.from(_pubRootDirectories!, (String a, String b) => a.compareTo(b));
     for (int i = 0; i < pubRootDirectories.length; i++) {
       final String element = pubRootDirectories[i];
-      _pubRootDirectories!.remove(element);
+      sortedSet.remove(element);
     }
+    _pubRootDirectories = sortedSet.toList();
 
     _isLocalCreationCache.clear();
   }
