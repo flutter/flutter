@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
@@ -23,7 +21,7 @@ void testMain() {
     });
 
     tearDown(() {
-      html.document.fonts!.clear();
+      domDocument.fonts!.clear();
     });
 
     group('regular special characters', () {
@@ -34,10 +32,10 @@ void testMain() {
         fontManager.registerAsset(
             _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
-        html.document.fonts!
-            .forEach((html.FontFace f, html.FontFace f2, html.FontFaceSet s) {
+        domDocument.fonts!
+            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        });
+        }));
 
         expect(fontFamilyList.length, equals(1));
         expect(fontFamilyList.first, 'Ahem');
@@ -52,10 +50,10 @@ void testMain() {
         fontManager.registerAsset(
             _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
-        html.document.fonts!
-            .forEach((html.FontFace f, html.FontFace f2, html.FontFaceSet s) {
+        domDocument.fonts!
+            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        });
+        }));
 
         expect(fontFamilyList.length, equals(1));
         expect(fontFamilyList.first, 'Ahem ahem ahem');
@@ -72,10 +70,10 @@ void testMain() {
         fontManager.registerAsset(
             _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
-        html.document.fonts!
-            .forEach((html.FontFace f, html.FontFace f2, html.FontFaceSet s) {
+        domDocument.fonts!
+            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        });
+        }));
 
         expect(fontFamilyList.length, equals(1));
         expect(fontFamilyList.first, 'AhEm');
@@ -92,10 +90,10 @@ void testMain() {
         fontManager.registerAsset(
             _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
-        html.document.fonts!
-            .forEach((html.FontFace f, html.FontFace f2, html.FontFaceSet s) {
+        domDocument.fonts!
+            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        });
+        }));
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
@@ -118,10 +116,10 @@ void testMain() {
         fontManager.registerAsset(
             _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
-        html.document.fonts!
-            .forEach((html.FontFace f, html.FontFace f2, html.FontFaceSet s) {
+        domDocument.fonts!
+            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        });
+        }));
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
@@ -144,10 +142,10 @@ void testMain() {
         fontManager.registerAsset(
             _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
-        html.document.fonts!
-            .forEach((html.FontFace f, html.FontFace f2, html.FontFaceSet s) {
+        domDocument.fonts!
+            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        });
+        }));
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
@@ -171,10 +169,10 @@ void testMain() {
         fontManager.registerAsset(
             testFontFamily, 'url($_testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
-        html.document.fonts!
-            .forEach((html.FontFace f, html.FontFace f2, html.FontFaceSet s) {
+        domDocument.fonts!
+            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        });
+        }));
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));

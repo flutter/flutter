@@ -557,7 +557,7 @@ bool unsafeIsNull(dynamic object) {
   return object == null;
 }
 
-/// A typed variant of [html.Window.fetch].
+/// A typed variant of [domWindow.fetch].
 Future<DomResponse> httpFetch(String url) async {
   final Object? result = await domWindow.fetch(url);
   return result! as DomResponse;
