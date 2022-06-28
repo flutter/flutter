@@ -127,8 +127,8 @@ class DefaultSpellCheckService implements SpellCheckService {
   /// Merges two lists of spell check [SuggestionSpan]s.
   ///
   /// Used in cases where the text has not changed, but the spell check results
-  /// received from the shell side have. This case is caused by IMEs (GBoard
-  /// confirmed) that ignore the composing region when spell checking text.
+  /// received from the shell side have. This case is caused by IMEs (GBoard,
+  /// for instance) that ignore the composing region when spell checking text.
   List<SuggestionSpan> mergeResults(
       List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
     final List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
@@ -145,15 +145,15 @@ class DefaultSpellCheckService implements SpellCheckService {
 
       if (oldSpan.range.start == newSpan.range.start) {
         mergedResults.add(oldSpan);
-        oldSpanPointer += 1;
-        newSpanPointer += 1;
+        oldSpanPointer++;
+        newSpanPointer++;
       } else {
         if (oldSpan.range.start < newSpan.range.start) {
           mergedResults.add(oldSpan);
-          oldSpanPointer += 1;
+          oldSpanPointer++;
         } else {
           mergedResults.add(newSpan);
-          newSpanPointer += 1;
+          newSpanPointer++;
         }
       }
     }
@@ -194,13 +194,13 @@ class DefaultSpellCheckService implements SpellCheckService {
           resultParsed[2].split('\n')));
     }
 
-    // Check to merge current and previous spell check results if the text has
-    // not changed, but the spell check results have between calls.
-    final bool canMergeSpans = lastSavedText != null && lastSavedText == text;
-    final bool shouldMergeSpans =
+    // Merge current and previous spell check results if between requests,
+    // the text has not changed but the spell check results have.
+    final bool textHasNotChanged = lastSavedText != null && lastSavedText == text;
+    final bool spansHaveChanged =
         lastSavedSpans != null && !listEquals(lastSavedSpans, suggestionSpans);
 
-    if (canMergeSpans && shouldMergeSpans) {
+    if (textHasNotChanged && spansHaveChanged) {
       suggestionSpans = mergeResults(lastSavedSpans!, suggestionSpans);
     }
 

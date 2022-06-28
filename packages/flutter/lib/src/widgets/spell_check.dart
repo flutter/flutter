@@ -64,17 +64,32 @@ mixin SpellCheckSuggestionsHandler {
 ///
 ///  * [SpellCheckSuggestionsHandler], the handler that this implements and
 ///    may be overriden for use by [EditableText].
-///  * [EditableText], which may use this handler to display results.
+///  * [EditableText], which uses this handler to display spell check results
+///     by default if spell check is enabled.
 class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   /// Creates a handler to use for spell checking text input based on the
   /// provided platform.
-  DefaultSpellCheckSuggestionsHandler(this.platform);
+  DefaultSpellCheckSuggestionsHandler(TargetPlatform platform) {
+    switch (platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        this.misspelledTextStyle = cupertinoMisspelledTextStyle;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        this.misspelledTextStyle = materialMisspelledTextStyle;
+        break;
+    }
+  }
 
-  /// The platform that determines the style by which misspelled words will be
-  /// indicated in the [TextSpan] tree.
-  final TargetPlatform platform;
+  /// The text style by which misspelled words will be indicated in the
+  /// [TextSpan] tree based on platform.
+  late final TextStyle misspelledTextStyle;
 
-  /// The style used to indicate misspeleld words on Android.
+
+  /// The style used to indicate misspelled words on Android.
   final TextStyle materialMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: ColorSwatch<int>(
@@ -94,7 +109,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       ),
       decorationStyle: TextDecorationStyle.wavy);
 
-  /// The style used to indicate misspeleld words on iOS.
+  /// The style used to indicate misspelled words on iOS and macOS.
   final TextStyle cupertinoMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: Color.fromARGB(255, 255, 59, 48),
@@ -105,7 +120,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   /// [resultsText].
   ///
   /// Used in the case where the request for the spell check results of the
-  /// [newText] is lagging to avoid display of incorrect results.
+  /// [newText] is lagging in order to avoid display of incorrect results.
   List<SuggestionSpan> correctSpellCheckResults(
       String newText, String resultsText, List<SuggestionSpan> results) {
     final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
@@ -144,7 +159,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           correctedSpellCheckResults.add(adjustedSpan);
         }
       } catch (e) {
-        // currentSpan is now invalid and needs to be searched for in newText.
+        // currentSpan is invalid and needs to be searched for in newText.
       }
 
       if (!foundCurrentSpan) {
@@ -163,7 +178,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           correctedSpellCheckResults.add(adjustedSpan);
         }
       }
-      spanPointer += 1;
+      spanPointer++;
     }
 
     return correctedSpellCheckResults;
@@ -176,7 +191,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       TextStyle? style,
       SpellCheckResults spellCheckResults) {
     List<SuggestionSpan>? correctedSpellCheckResults;
-    TextStyle misspelledTextStyle;
 
     final List<SuggestionSpan> rawSpellCheckResults =
         spellCheckResults.suggestionSpans;
@@ -187,19 +201,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           value.text, spellCheckResultsText, rawSpellCheckResults);
     } else {
       correctedSpellCheckResults = rawSpellCheckResults;
-    }
-
-    switch (platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        misspelledTextStyle = cupertinoMisspelledTextStyle;
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        misspelledTextStyle = materialMisspelledTextStyle;
-        break;
     }
 
     return TextSpan(
@@ -274,7 +275,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
             text: text.substring(currSpan.range.start, endIndex)));
 
         textPointer = endIndex;
-        currSpanPointer += 1;
+        currSpanPointer++;
       }
     }
 

@@ -163,7 +163,6 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// can override this method to customize appearance of text.
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, SpellCheckConfiguration? spellCheckConfiguration}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
-
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
@@ -2692,7 +2691,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (spans == null) {
           return;
         }
-       final  SpellCheckResults results = SpellCheckResults(resultsText, spans);
+       final SpellCheckResults results = SpellCheckResults(resultsText, spans);
        _spellCheckConfiguration!.spellCheckResults = results;
         renderEditable.text = buildTextSpan();
       });
