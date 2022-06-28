@@ -225,6 +225,8 @@
 # Linux docs_test
 # Linux docs_publish
 /dev/bots/docs.sh @HansMuller @flutter/framework
+# Linux packages_autoroller
+/dev/conductor/core @fujino @flutter/tool
 # Linux web_e2e_test
 /dev/integration_tests/web_e2e_tests @yjbanov @flutter/web
 # Linux web_smoke_test
