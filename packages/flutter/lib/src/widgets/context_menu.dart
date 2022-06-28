@@ -478,6 +478,7 @@ class ContextMenu extends StatefulWidget {
   ContextMenu({
     super.key,
     required this.child,
+    // TODO(justinmc): Rename to contextMenuBuilder.
     required this.buildContextMenu,
     bool? longPressEnabled,
     bool? secondaryTapEnabled,

@@ -1829,9 +1829,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
           break;
         case TargetPlatform.macOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           hideToolbar();
