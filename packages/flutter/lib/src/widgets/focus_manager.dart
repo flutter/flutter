@@ -1434,6 +1434,8 @@ enum FocusHighlightStrategy {
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
 class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
+  bool _disposed = false;
+
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1470,6 +1472,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     }
     super.dispose();
+    _disposed = true;
   }
 
   /// Provides convenient access to the current [FocusManager] singleton from
@@ -1763,6 +1766,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   void _applyFocusChange() {
+    if (_disposed) {
+      return;
+    }
     _haveScheduledUpdate = false;
     final FocusNode? previousFocus = _primaryFocus;
 

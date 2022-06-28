@@ -88,7 +88,7 @@ class _HomeState extends State<Home> {
                 MenuBar(
                   enabled: _enabled,
                   controller: _controller,
-                  menus: <MenuItem>[
+                  menus: <Widget>[
                     MenuBarMenu(
                       label: TestMenu.mainMenu1.label,
                       onOpen: () {
@@ -97,7 +97,7 @@ class _HomeState extends State<Home> {
                       onClose: () {
                         _closeItem(TestMenu.mainMenu1);
                       },
-                      menus: <MenuItem>[
+                      menus: <Widget>[
                         MenuItemButton(
                           label: TestMenu.subMenu1.label,
                           shortcut: const SingleActivator(
@@ -125,7 +125,7 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                     MenuItemGroup(
-                      members: <MenuItem>[
+                      members: <Widget>[
                         MenuBarMenu(
                           label: TestMenu.mainMenu2.label,
                           onOpen: () {
@@ -134,7 +134,8 @@ class _HomeState extends State<Home> {
                           onClose: () {
                             _closeItem(TestMenu.mainMenu2);
                           },
-                          menus: <MenuItem>[
+                          menus: <Widget>[
+                            TextButton(child: const Text('TEST'), onPressed: () {}),
                             MenuItemButton(
                               label: TestMenu.subMenu3.label,
                               shortcut: const SingleActivator(
@@ -157,8 +158,8 @@ class _HomeState extends State<Home> {
                       onClose: () {
                         _closeItem(TestMenu.mainMenu3);
                       },
-                      menus: <MenuItem>[
-                        MenuItemGroup(members: <MenuItem>[
+                      menus: <Widget>[
+                        MenuItemGroup(members: <Widget>[
                           MenuItemButton(
                             label: TestMenu.subMenu4.label,
                             labelWidget: const SizedBox(width: 200, child: TextField()),
@@ -174,7 +175,7 @@ class _HomeState extends State<Home> {
                           onClose: () {
                             _closeItem(TestMenu.subMenu5);
                           },
-                          menus: <MenuItem>[
+                          menus: <Widget>[
                             MenuItemButton(
                               label: TestMenu.subSubMenu1.label,
                               shortcut: _addItem

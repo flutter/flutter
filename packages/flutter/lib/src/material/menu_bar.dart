@@ -83,7 +83,7 @@ mixin MenuItem on Diagnosticable implements Widget {
   ///
   /// Returns an empty list if this type of menu item doesn't have
   /// children.
-  List<MenuItem> get menus => const <MenuItem>[];
+  List<Widget> get menus => const <Widget>[];
 
   /// Returns all descendant [MenuItem]s of this item.
   ///
@@ -141,7 +141,7 @@ mixin MenuItem on Diagnosticable implements Widget {
   /// item, such as [PlatformMenuItemGroup].
   ///
   /// Defaults to an empty list.
-  List<MenuItem> get members => const <MenuItem>[];
+  List<Widget> get members => const <Widget>[];
 
   /// Returns all descendants of the given item.
   ///
@@ -149,7 +149,7 @@ mixin MenuItem on Diagnosticable implements Widget {
   /// this implementation.
   static List<MenuItem> getDescendants(MenuBarMenu item) {
     return <MenuItem>[
-      for (final MenuItem child in item.menus) ...<MenuItem>[
+      for (final MenuItem child in item.menus.whereType<MenuItem>()) ...<MenuItem>[
         child,
         ...child.descendants,
       ],
@@ -218,7 +218,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
     this.minimumHeight,
     this.padding,
     this.elevation,
-    this.menus = const <MenuItem>[],
+    this.menus = const <Widget>[],
   });
 
   /// The list of menu items that are the top level children of the
@@ -237,7 +237,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   /// `someMenuBarWidget.menus.add(...)` will result in incorrect
   /// behaviors. Whenever the menus list is modified, a new list object
   /// should be provided.
-  final List<MenuItem> menus;
+  final List<Widget> menus;
 
   /// An optional controller that allows outside control of the menu bar.
   ///
@@ -291,7 +291,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuItem item) => item.toDiagnosticsNode())];
+    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((Widget item) => item.toDiagnosticsNode())];
   }
 
   @override
@@ -316,12 +316,12 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
     this.height,
     this.padding,
     this.elevation,
-    this.menus = const <MenuItem>[],
+    this.menus = const <Widget>[],
   });
 
   /// The list of menu items that are the top level children of the
   /// [MenuBar].
-  final List<MenuItem> menus;
+  final List<Widget> menus;
 
   /// An optional controller that allows outside control of the menu bar.
   final MenuBarController? controller;
@@ -364,7 +364,7 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuItem item) => item.toDiagnosticsNode())];
+    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((Widget item) => item.toDiagnosticsNode())];
   }
 
   @override
@@ -460,7 +460,7 @@ class _MenuBarState extends State<_MenuBar> {
   void _updateManager() {
     manager.initIfNecessary();
     manager.context = context;
-    manager.menus = widget.menus;
+    manager.menus = widget.menus.whereType<MenuItem>().toList();
     manager.enabled = widget.enabled;
     if (mounted) {
       manager.overlay = Overlay.of(context);
@@ -603,9 +603,9 @@ class _MenuManager extends ChangeNotifier {
 
   void _updateShortcuts() {
     assert(_debugCheckForDuplicateShortcuts());
-    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuItem> children) {
+    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<Widget> children) {
       final Map<MenuSerializableShortcut, Intent> newShortcuts = <MenuSerializableShortcut, Intent>{};
-      for (final MenuItem child in children) {
+      for (final MenuItem child in children.whereType<MenuItem>()) {
         if (child.menus.isNotEmpty) {
           // Short circuit if it's a menu item with a submenu.
           newShortcuts.addAll(collectChildShortcuts(child.menus));
@@ -649,9 +649,9 @@ class _MenuManager extends ChangeNotifier {
     final Map<VoidCallback, MenuItem> callbackToMenuItem = <VoidCallback, MenuItem>{};
     final Map<Intent, MenuItem> intentToMenuItem = <Intent, MenuItem>{};
 
-    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuItem> children) {
+    Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<Widget> children) {
       final Map<MenuSerializableShortcut, Intent> shortcuts = <MenuSerializableShortcut, Intent>{};
-      for (final MenuItem child in children) {
+      for (final MenuItem child in children.whereType<MenuItem>()) {
         if (child.onSelected != null) {
           callbackToMenuItem[child.onSelected!] = child;
         }
@@ -704,7 +704,7 @@ class _MenuManager extends ChangeNotifier {
   _MenuNode? _openMenu;
   set openMenu(_MenuNode? value) {
     assert(value != root);
-    if (_openMenu == value) {
+    if (!initialized || _openMenu == value) {
       // Nothing changed.
       return;
     }
@@ -728,9 +728,6 @@ class _MenuManager extends ChangeNotifier {
     _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
       node.open();
     });
-    if (!initialized) {
-      return;
-    }
     if (value != null && value.focusNode?.hasPrimaryFocus != true) {
       // Request focus on the new thing that is now open, if any, so that
       // focus traversal starts from that location.
@@ -986,6 +983,7 @@ class MenuBarController with ChangeNotifier {
 
   @override
   void dispose() {
+    _manager.removeListener(_managerStateChanged);
     _manager.dispose();
     super.dispose();
   }
@@ -1509,7 +1507,7 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
     this.onOpen,
     this.onClose,
     this.onHover,
-    this.menus = const <MenuItem>[],
+    this.menus = const <Widget>[],
   });
 
   /// An optional icon to display before the label text.
@@ -1609,7 +1607,7 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
   final VoidCallback? onClose;
 
   @override
-  final List<MenuItem> menus;
+  final List<Widget> menus;
 
   @override
   State<MenuBarMenu> createState() => _MenuBarMenuState();
@@ -1620,7 +1618,7 @@ class MenuBarMenu extends StatefulWidget with MenuItem {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     return <DiagnosticsNode>[
-      ...menus.map<DiagnosticsNode>((MenuItem child) {
+      ...menus.map<DiagnosticsNode>((Widget child) {
         return child.toDiagnosticsNode();
       })
     ];
@@ -1760,7 +1758,7 @@ class MenuItemGroup extends StatelessWidget with MenuItem {
   ///
   /// It empty, then this group will not appear in the menu.
   @override
-  final List<MenuItem> members;
+  final List<Widget> members;
 
   @override
   Widget build(BuildContext context) {
@@ -1780,7 +1778,7 @@ class MenuItemGroup extends StatelessWidget with MenuItem {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<MenuItem>('members', members));
+    properties.add(IterableProperty<Widget>('members', members));
   }
 
   @override
@@ -1900,12 +1898,12 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
       // Don't add groups as children of the parent, just the members of the
       // group. This attaches nodes for each of the members, but not this group
       // item itself.
-      for (final MenuItem member in item.members) {
+      for (final MenuItem member in item.members.whereType<MenuItem>()) {
         _MenuNode(item: member, parent: parent).createChildren();
       }
     } else {
       assert(parent?.children.contains(this) ?? true);
-      for (final MenuItem child in item.menus) {
+      for (final MenuItem child in item.menus.whereType<MenuItem>()) {
         _MenuNode(item: child, parent: this).createChildren();
       }
     }
@@ -2999,13 +2997,19 @@ class _TokenDefaultsM3 extends MenuThemeData {
   MaterialStateProperty<OutlinedBorder?> get itemShape => super.itemShape!;
 }
 
-List<Widget> _expandGroups(_MenuNode node, List<MenuItem> menus, Axis axis) {
+List<Widget> _expandGroups(_MenuNode node, List<Widget> menus, Axis axis) {
   int nodeIndex = 0;
 
-  List<Widget> expand(List<MenuItem> childMenus) {
+  List<Widget> expand(List<Widget> childMenus) {
     final List<Widget> result = <Widget>[];
     for (int widgetIndex = 0; widgetIndex < childMenus.length; widgetIndex += 1) {
-      final MenuItem child = childMenus[widgetIndex];
+      final Widget child = childMenus[widgetIndex];
+      if (child is! MenuItem) {
+        // Non-MenuItems aren't counted as part of the menu item tree, just
+        // rendered.
+        result.add(child);
+        continue;
+      }
       if (child.members.isNotEmpty) {
         if (result.isNotEmpty && result.last is! _MenuItemDivider) {
           result.add(_MenuItemDivider(axis: axis));
