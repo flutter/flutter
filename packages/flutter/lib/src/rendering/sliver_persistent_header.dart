@@ -365,42 +365,31 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   // direction. Negative if we're scrolled off the top.
   double? _childPosition;
 
-  /// Updates [geometry], and returns the new value for [childMainAxisPosition].
-  ///
-  /// This is used by [performLayout].
-  @protected
-  double updateGeometry() {
-    double stretchOffset = 0.0;
-    if (stretchConfiguration != null) {
-      stretchOffset += constraints.overlap.abs();
-    }
-    final double maxExtent = this.maxExtent;
-    final double paintExtent = maxExtent - constraints.scrollOffset;
-    geometry = SliverGeometry(
-      scrollExtent: maxExtent,
-      paintOrigin: math.min(constraints.overlap, 0.0),
-      paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),
-      maxPaintExtent: maxExtent + stretchOffset,
-      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
-    );
-    return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
-  }
-
-
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent;
     layoutChild(constraints.scrollOffset, maxExtent);
+
+    double stretchOffset = 0.0;
+    if (stretchConfiguration != null) {
+      stretchOffset += constraints.overlap.abs();
+    }
     final double paintExtent = maxExtent - constraints.scrollOffset;
+    final double clampedPaintExtent = clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent);
+    final EdgeInsets scrollInsets = _getInsetsForAxisDirection(
+      clampedPaintExtent,
+      constraints.axisDirection,
+    );
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
-      paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),
-      maxPaintExtent: maxExtent,
+      paintExtent: clampedPaintExtent,
+      maxPaintExtent: maxExtent + stretchOffset,
+      scrollInsets: scrollInsets,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    _childPosition = updateGeometry();
+    _childPosition = stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
   @override
@@ -409,10 +398,6 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     assert(_childPosition != null);
     return _childPosition!;
   }
-
-  // TODO(Piinks): This should never be called since this header is never pinned, should this throw instead?
-  @override
-  EdgeInsets _getInsetsForAxisDirection(double paintExtent, AxisDirection axisDirection) => EdgeInsets.zero;
 }
 
 /// A sliver with a [RenderBox] child which never scrolls off the viewport in

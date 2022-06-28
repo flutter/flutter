@@ -1554,6 +1554,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     assert(correctedOffset.isFinite);
     _minScrollExtent = 0.0;
     _maxScrollExtent = 0.0;
+    _scrollInsets = EdgeInsets.zero;
     _hasVisualOverflow = false;
 
     // centerOffset is the offset from the leading edge of the RenderViewport
