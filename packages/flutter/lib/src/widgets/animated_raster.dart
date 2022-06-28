@@ -93,11 +93,7 @@ class AnimatedRaster extends SingleChildRenderObjectWidget {
 ///    stretch effect efficiently.
 class RenderAnimatedRaster extends RenderProxyBox {
   /// Create a new [RenderAnimatedRaster].
-  RenderAnimatedRaster(this._animation, this._delegate, this._devicePixelRatio) {
-    animation.addListener(markNeedsPaint);
-    animation.addStatusListener(_updateStatus);
-    _updateStatus(animation.status);
-  }
+  RenderAnimatedRaster(this._animation, this._delegate, this._devicePixelRatio);
 
   AnimationStatus _status = AnimationStatus.completed;
 
@@ -105,8 +101,6 @@ class RenderAnimatedRaster extends RenderProxyBox {
     if (newStatus == _status) {
       return;
     }
-    _childImage?.dispose();
-    _childImage = null;
     _status = newStatus;
     assert(_status == animation.status);
     if (!painting) {
@@ -135,7 +129,6 @@ class RenderAnimatedRaster extends RenderProxyBox {
     _devicePixelRatio = value;
     markNeedsPaint();
   }
-
 
   /// The animation used to drive this render object.
   Animation<double> get animation => _animation;
@@ -187,16 +180,8 @@ class RenderAnimatedRaster extends RenderProxyBox {
     if (child == null) {
       return;
     }
+
     _updateStatus(animation.status, true);
-    switch (_status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        super.paint(context, offset);
-        return;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-    }
     final bool useRaster = delegate.useRaster(animation);
     if (!useRaster) {
       delegate.paint(

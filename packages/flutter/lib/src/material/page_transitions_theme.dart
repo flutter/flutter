@@ -414,6 +414,14 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
 
   @override
   bool useRaster(Animation<double> animation) {
+    switch (animation.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        return false;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
     final double fade = computeFade(animation);
     final double scale = computeScale(animation);
     return (fade > 0.0 && fade < 1.0) || scale != 1.0;
@@ -553,6 +561,14 @@ class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
 
   @override
   bool useRaster(Animation<double> animation) {
+    switch (animation.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        return false;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
     final double fade = computeFade(animation);
     final double scale = computeScale(animation);
     return (fade > 0.0 && fade < 1.0) || scale != 1.0;
