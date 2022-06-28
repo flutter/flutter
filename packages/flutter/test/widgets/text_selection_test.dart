@@ -1041,7 +1041,7 @@ void main() {
         clipboardStatus: FakeClipboardStatusNotifier(),
         selectionDelegate: FakeTextSelectionDelegate(),
         selectionControls: selectionControls,
-        selectionEndPoints: const <TextSelectionPoint>[],
+        selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
       );
     }
@@ -1055,7 +1055,7 @@ void main() {
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
         ..endHandleType = TextSelectionHandleType.right
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1100,7 +1100,7 @@ void main() {
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.collapsed
         ..endHandleType = TextSelectionHandleType.collapsed
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1122,7 +1122,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1159,7 +1159,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1206,7 +1206,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
