@@ -1124,12 +1124,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-        textSelectionControls ??= cupertinoTextSelectionControls;
+        textSelectionControls ??= cupertinoTextSelectionHandleControls;
         break;
 
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
