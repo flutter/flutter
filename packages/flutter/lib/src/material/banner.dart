@@ -340,6 +340,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
       child: materialBanner,
     );
 
+    // When updated for scrolling version, offset the ScrollMetrics.scrollInsets
+    // so as to not apply the effect to things like SliverAppBars.
+    // https://github.com/flutter/flutter/issues/60024
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
     final Animation<Offset> slideOutAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.0),

@@ -129,7 +129,7 @@ class RefreshIndicator extends StatefulWidget {
     super.key,
     required this.child,
     this.displacement = 40.0,
-    this.edgeOffset = 0.0,
+    this.edgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -161,6 +161,7 @@ class RefreshIndicator extends StatefulWidget {
   /// value is calculated from that offset instead of the parent's edge.
   final double displacement;
 
+  /// TODO(Piinks): Update docs
   /// The offset where [RefreshProgressIndicator] starts to appear on drag start.
   ///
   /// Depending whether the indicator is showing on the top or bottom, the value
@@ -175,7 +176,7 @@ class RefreshIndicator extends StatefulWidget {
   ///
   ///  * [displacement], can be used to change the distance from the edge that
   ///    the indicator settles.
-  final double edgeOffset;
+  final double? edgeOffset;
 
   /// A function that's called when the user has dragged the refresh indicator
   /// far enough to demonstrate that they want the app to refresh. The returned
@@ -244,10 +245,14 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
+  ScrollMetrics? _lastMetrics;
 
   static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
   static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
+
+  double? get _edgeOffset => widget.edgeOffset ?? (_isIndicatorAtTop! ?_lastMetrics?.scrollInsets?.top : _lastMetrics?.scrollInsets?.bottom);
+
 
   @override
   void initState() {
@@ -320,7 +325,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       return false;
     }
     bool? indicatorAtTopNow;
-    switch (notification.metrics.axisDirection) {
+    final ScrollMetrics metrics = notification.metrics;
+    switch (metrics.axisDirection) {
       case AxisDirection.down:
       case AxisDirection.up:
         indicatorAtTopNow = true;
@@ -336,16 +342,16 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is ScrollUpdateNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        if ((notification.metrics.axisDirection  == AxisDirection.down && notification.metrics.extentBefore > 0.0)
-            || (notification.metrics.axisDirection  == AxisDirection.up && notification.metrics.extentAfter > 0.0)) {
+        if ((metrics.axisDirection  == AxisDirection.down && metrics.extentBefore > 0.0)
+            || (metrics.axisDirection  == AxisDirection.up && metrics.extentAfter > 0.0)) {
           _dismiss(_RefreshIndicatorMode.canceled);
         } else {
-          if (notification.metrics.axisDirection == AxisDirection.down) {
+          if (metrics.axisDirection == AxisDirection.down) {
             _dragOffset = _dragOffset! - notification.scrollDelta!;
-          } else if (notification.metrics.axisDirection == AxisDirection.up) {
+          } else if (metrics.axisDirection == AxisDirection.up) {
             _dragOffset = _dragOffset! + notification.scrollDelta!;
           }
-          _checkDragOffset(notification.metrics.viewportDimension);
+          _checkDragOffset(metrics.viewportDimension);
         }
       }
       if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails == null) {
@@ -356,12 +362,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        if (notification.metrics.axisDirection == AxisDirection.down) {
+        if (metrics.axisDirection == AxisDirection.down) {
           _dragOffset = _dragOffset! - notification.overscroll;
-        } else if (notification.metrics.axisDirection == AxisDirection.up) {
+        } else if (metrics.axisDirection == AxisDirection.up) {
           _dragOffset = _dragOffset! + notification.overscroll;
         }
-        _checkDragOffset(notification.metrics.viewportDimension);
+        _checkDragOffset(metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
       switch (_mode) {
@@ -380,6 +386,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           break;
       }
     }
+    _lastMetrics = metrics;
     return false;
   }
 
@@ -557,8 +564,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       children: <Widget>[
         child,
         if (_mode != null) Positioned(
-          top: _isIndicatorAtTop! ? widget.edgeOffset : null,
-          bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,
+          top: _isIndicatorAtTop! ? _edgeOffset : null,
+          bottom: !_isIndicatorAtTop! ? _edgeOffset : null,
           left: 0.0,
           right: 0.0,
           child: SizeTransition(

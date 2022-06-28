@@ -1926,10 +1926,27 @@ class RenderSliverOverlapInjector extends RenderSliver {
       _currentLayoutExtent! - constraints.scrollOffset,
       constraints.remainingPaintExtent,
     );
+    final double paintExtent = math.max(0.0, clampedLayoutExtent);
+    late final EdgeInsets scrollInsets;
+    switch (constraints.axisDirection) {
+      case AxisDirection.up:
+        scrollInsets = EdgeInsets.only(bottom: paintExtent);
+        break;
+      case AxisDirection.right:
+        scrollInsets = EdgeInsets.only(left: paintExtent);
+        break;
+      case AxisDirection.down:
+        scrollInsets = EdgeInsets.only(top: paintExtent);
+        break;
+      case AxisDirection.left:
+        scrollInsets = EdgeInsets.only(right: paintExtent);
+        break;
+    }
     geometry = SliverGeometry(
       scrollExtent: _currentLayoutExtent!,
-      paintExtent: math.max(0.0, clampedLayoutExtent),
+      paintExtent: paintExtent,
       maxPaintExtent: _currentMaxExtent!,
+      scrollInsets: scrollInsets,
     );
   }
 
