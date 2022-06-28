@@ -131,6 +131,31 @@ TEST_P(EntityTest, EntityPassCoverageRespectsCoverageLimit) {
   }
 }
 
+TEST_P(EntityTest, FilterCoverageRespectsCropRect) {
+  auto image = CreateTextureForFixture("boston.jpg");
+  auto filter = FilterContents::MakeBlend(Entity::BlendMode::kSoftLight,
+                                          FilterInput::Make({image}));
+
+  // Without the crop rect (default behavior).
+  {
+    auto actual = filter->GetCoverage({});
+    auto expected = Rect::MakeSize(Size(image->GetSize()));
+
+    ASSERT_TRUE(actual.has_value());
+    ASSERT_RECT_NEAR(actual.value(), expected);
+  }
+
+  // With the crop rect.
+  {
+    auto expected = Rect::MakeLTRB(50, 50, 100, 100);
+    filter->SetCoverageCrop(expected);
+    auto actual = filter->GetCoverage({});
+
+    ASSERT_TRUE(actual.has_value());
+    ASSERT_RECT_NEAR(actual.value(), expected);
+  }
+}
+
 TEST_P(EntityTest, CanDrawRect) {
   Entity entity;
   entity.SetTransformation(Matrix::MakeScale(GetContentScale()));

@@ -116,6 +116,10 @@ void FilterContents::SetInputs(FilterInput::Vector inputs) {
   inputs_ = std::move(inputs);
 }
 
+void FilterContents::SetCoverageCrop(std::optional<Rect> coverage_crop) {
+  coverage_crop_ = coverage_crop;
+}
+
 bool FilterContents::Render(const ContentContext& renderer,
                             const Entity& entity,
                             RenderPass& pass) const {
@@ -146,11 +150,22 @@ bool FilterContents::Render(const ContentContext& renderer,
   return contents->Render(renderer, e, pass);
 }
 
+std::optional<Rect> FilterContents::GetLocalCoverage(
+    const Entity& local_entity) const {
+  auto coverage = GetFilterCoverage(inputs_, local_entity);
+  if (coverage_crop_.has_value() && coverage.has_value()) {
+    coverage = coverage->Intersection(coverage_crop_.value());
+  }
+
+  return coverage;
+}
+
 std::optional<Rect> FilterContents::GetCoverage(const Entity& entity) const {
   Entity entity_with_local_transform = entity;
   entity_with_local_transform.SetTransformation(
       GetTransform(entity.GetTransformation()));
-  return GetFilterCoverage(inputs_, entity_with_local_transform);
+
+  return GetLocalCoverage(entity_with_local_transform);
 }
 
 std::optional<Rect> FilterContents::GetFilterCoverage(
@@ -186,7 +201,7 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
   entity_with_local_transform.SetTransformation(
       GetTransform(entity.GetTransformation()));
 
-  auto coverage = GetFilterCoverage(inputs_, entity_with_local_transform);
+  auto coverage = GetLocalCoverage(entity_with_local_transform);
   if (!coverage.has_value() || coverage->IsEmpty()) {
     return std::nullopt;
   }
