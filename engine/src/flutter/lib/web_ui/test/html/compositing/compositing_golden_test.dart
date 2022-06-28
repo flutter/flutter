@@ -691,8 +691,8 @@ void _testCullRectComputation() {
         .toFloat64());
 
     // TODO(yjbanov): see the TODO below.
-    // final double screenWidth = html.window.innerWidth.toDouble();
-    // final double screenHeight = html.window.innerHeight.toDouble();
+    // final double screenWidth = domWindow.innerWidth.toDouble();
+    // final double screenHeight = domWindow.innerHeight.toDouble();
 
     final Matrix4 scaleTransform = Matrix4.identity().scaled(0.5, 0.2);
     builder.pushTransform(

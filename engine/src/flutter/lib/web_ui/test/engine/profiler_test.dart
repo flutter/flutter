@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:js' as js;
 import 'dart:js_util' as js_util;
 
@@ -160,7 +159,7 @@ class BenchmarkDatapoint {
 
 void jsOnBenchmark(dynamic listener) {
   js_util.setProperty(
-    html.window,
+    domWindow,
     '_flutter_internal_on_benchmark',
     listener is Function
       ? js.allowInterop(listener)

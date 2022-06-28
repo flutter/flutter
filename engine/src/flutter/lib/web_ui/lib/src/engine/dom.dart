@@ -797,6 +797,7 @@ DomFontFace createDomFontFace(String family, Object source,
 extension DomFontFaceExtension on DomFontFace {
   Future<DomFontFace> load() =>
       js_util.promiseToFuture(js_util.callMethod(this, 'load', <Object>[]));
+  external String? get family;
 }
 
 @JS()
@@ -806,7 +807,11 @@ class DomFontFaceSet extends DomEventTarget {}
 extension DomFontFaceSetExtension on DomFontFaceSet {
   external DomFontFaceSet? add(DomFontFace font);
   external void clear();
+  external void forEach(DomFontFaceSetForEachCallback callback);
 }
+
+typedef DomFontFaceSetForEachCallback = void Function(
+    DomFontFace fontFace, DomFontFace fontFaceAgain, DomFontFaceSet set);
 
 @JS()
 @staticInterop
