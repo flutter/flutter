@@ -199,7 +199,7 @@ class ContextMenuButtonData {
 /// Calls [builder] with the [ContextMenuButtonData]s representing the
 /// buttons in this platform's default text selection menu.
 ///
-/// The platform is determined by [defaultTargetPlatform].
+/// By default the [targetPlatform] will be [defaultTargetPlatform].
 ///
 /// See also:
 ///
@@ -210,9 +210,10 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   /// Creates an instance of [TextSelectionToolbarButtonDatasBuilder].
   const TextSelectionToolbarButtonDatasBuilder({
     super.key,
+    TargetPlatform? targetPlatform,
     required this.builder,
     required this.editableTextState,
-  });
+  }) : _targetPlatform = targetPlatform;
 
   /// Called with a list of [ContextMenuButtonData]s so the context menu can be
   /// built.
@@ -221,6 +222,11 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   /// The EditableTextState for the field that will display the text selection
   /// toolbar.
   final EditableTextState editableTextState;
+
+  final TargetPlatform? _targetPlatform;
+
+  /// The platform to base the button datas on.
+  TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
 
   /// Returns true if the given [EditableTextState] supports cut.
   static bool canCut(EditableTextState editableTextState) {
@@ -242,14 +248,16 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   }
 
   /// Returns true if the given [EditableTextState] supports select all.
-  static bool canSelectAll(EditableTextState editableTextState) {
+  ///
+  /// If [targetPlatform] is not provided, [defaultTargetPlatform] will be used.
+  static bool canSelectAll(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
     if (!editableTextState.widget.enableInteractiveSelection
         || (editableTextState.widget.readOnly
             && editableTextState.widget.obscureText)) {
       return false;
     }
 
-    switch (defaultTargetPlatform) {
+    switch (targetPlatform ?? defaultTargetPlatform) {
       case TargetPlatform.macOS:
         return false;
       case TargetPlatform.iOS:
@@ -270,7 +278,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
     'Use `buildContextMenu` instead of `toolbarOptions`. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
-  static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(ToolbarOptions? toolbarOptions, EditableTextState editableTextState) {
+  static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(ToolbarOptions? toolbarOptions, EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
     return toolbarOptions == null ? null : <ContextMenuButtonData>[
       if (toolbarOptions.cut
           && TextSelectionToolbarButtonDatasBuilder.canCut(editableTextState))
@@ -297,7 +305,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
           type: ContextMenuButtonType.paste,
         ),
       if (toolbarOptions.selectAll
-          && TextSelectionToolbarButtonDatasBuilder.canSelectAll(editableTextState))
+          && TextSelectionToolbarButtonDatasBuilder.canSelectAll(editableTextState, targetPlatform))
         ContextMenuButtonData(
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
@@ -312,11 +320,11 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
 }
 
 class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionToolbarButtonDatasBuilder> with TickerProviderStateMixin {
-  bool get _cutEnabled => TextSelectionToolbarButtonDatasBuilder.canCut(widget.editableTextState);
+  bool get _canCut => TextSelectionToolbarButtonDatasBuilder.canCut(widget.editableTextState);
 
-  bool get _copyEnabled => TextSelectionToolbarButtonDatasBuilder.canCopy(widget.editableTextState);
+  bool get _canCopy => TextSelectionToolbarButtonDatasBuilder.canCopy(widget.editableTextState);
 
-  bool get _selectAllEnabled => TextSelectionToolbarButtonDatasBuilder.canSelectAll(widget.editableTextState);
+  bool get _canSelectAll => TextSelectionToolbarButtonDatasBuilder.canSelectAll(widget.editableTextState, widget.targetPlatform);
 
   void _handleCut() {
     return widget.editableTextState.cutSelection(SelectionChangedCause.toolbar);
@@ -339,18 +347,18 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
     return _ClipboardStatusBuilder(
       clipboardStatusNotifier: widget.editableTextState.clipboardStatus,
       builder: (BuildContext context, ClipboardStatus clipboardStatus) {
-        final bool pasteEnabled = TextSelectionToolbarButtonDatasBuilder.canPaste(
+        final bool canPaste = TextSelectionToolbarButtonDatasBuilder.canPaste(
           widget.editableTextState,
           clipboardStatus,
         );
         // If there are no buttons to be shown, don't render anything.
-        if (!_cutEnabled && !_copyEnabled && !pasteEnabled && !_selectAllEnabled) {
+        if (!_canCut && !_canCopy && !canPaste && !_canSelectAll) {
           return const SizedBox.shrink();
         }
         // If the paste button is enabled, don't render anything until the state
         // of the clipboard is known, since it's used to determine if paste is
         // shown.
-        if (pasteEnabled && clipboardStatus == ClipboardStatus.unknown) {
+        if (canPaste && clipboardStatus == ClipboardStatus.unknown) {
           return const SizedBox.shrink();
         }
 
@@ -358,23 +366,22 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
         // known. A button's position in the menu can slightly affect its
         // appearance.
         final List<ContextMenuButtonData> buttonDatas = <ContextMenuButtonData>[
-          if (_cutEnabled)
+          if (_canCut)
             ContextMenuButtonData(
               onPressed: _handleCut,
               type: ContextMenuButtonType.cut,
             ),
-          if (_copyEnabled)
+          if (_canCopy)
             ContextMenuButtonData(
               onPressed: _handleCopy,
               type: ContextMenuButtonType.copy,
             ),
-          if (pasteEnabled
-              && clipboardStatus == ClipboardStatus.pasteable)
+          if (canPaste && clipboardStatus == ClipboardStatus.pasteable)
             ContextMenuButtonData(
               onPressed: _handlePaste,
               type: ContextMenuButtonType.paste,
             ),
-          if (_selectAllEnabled)
+          if (_canSelectAll)
             ContextMenuButtonData(
               onPressed: _handleSelectAll,
               type: ContextMenuButtonType.selectAll,

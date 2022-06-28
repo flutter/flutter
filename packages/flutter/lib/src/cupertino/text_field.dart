@@ -818,6 +818,28 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   late _CupertinoTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
 
+  /// The platform that the current `defaultTargetPlatform` will be treated as.
+  ///
+  /// The Cupertino library has no access to Material, so it cannot build things
+  /// like the Material text selection toolbars on the platforms that use them.
+  /// Instead it will treat those non-Cupertino platforms as if they are the
+  /// platform returned here.
+  ///
+  /// For example, using a CupertionTextField on an Android device will show the
+  /// iOS text selection toolbar.
+  static TargetPlatform get _cupertinoPlatform {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return TargetPlatform.iOS;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        return TargetPlatform.macOS;
+    }
+  }
+
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   bool get forcePressEnabled => true;
@@ -1269,9 +1291,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
                 primaryAnchor: primaryAnchor,
                 secondaryAnchor: secondaryAnchor,
                 editableTextState: editableTextState,
+                targetPlatform: _cupertinoPlatform,
                 buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
                   widget.toolbarOptions,
                   editableTextState,
+                  _cupertinoPlatform,
                 ),
               );
             },

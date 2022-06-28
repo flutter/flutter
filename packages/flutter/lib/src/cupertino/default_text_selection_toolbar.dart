@@ -33,10 +33,11 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   const DefaultCupertinoTextSelectionToolbar({
     super.key,
     required this.primaryAnchor,
-    this.secondaryAnchor,
     this.buttonDatas,
     this.children,
     this.editableTextState,
+    TargetPlatform? targetPlatform,
+    this.secondaryAnchor,
   }) : assert(
          buttonDatas == null || children == null,
          'No need for both buttonDatas and children, use one or the other, or neither.',
@@ -44,7 +45,8 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
        assert(
          !(buttonDatas == null && children == null && editableTextState == null),
          'If not providing buttonDatas or children, provide editableTextState to generate them.',
-       );
+       ),
+       _targetPlatform = targetPlatform;
 
   /// The main location on which to anchor the menu.
   ///
@@ -64,6 +66,13 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// Used to generate the default buttons for the platform in the case that
   /// [children] and [buttonDatas] are not provided.
   final EditableTextState? editableTextState;
+
+  /// The platform to base the toolbar on.
+  ///
+  /// If null, then [defaultTargetPlatform] will be used.
+  TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
+
+  final TargetPlatform? _targetPlatform;
 
   /// The children of the toolbar.
   ///
@@ -95,6 +104,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
 
     return TextSelectionToolbarButtonDatasBuilder(
       editableTextState: editableTextState!,
+      targetPlatform: targetPlatform,
       builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
         return _DefaultTextSelectionToolbarFromButtonDatas(
           primaryAnchor: primaryAnchor,
