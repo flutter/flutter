@@ -262,8 +262,8 @@ class _ZoomEnterTransition extends StatelessWidget {
        assert(reverse != null);
 
   final Animation<double> animation;
-  final bool reverse;
   final Widget? child;
+  final bool reverse;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -425,6 +425,10 @@ class _ZoomExitTransition extends StatelessWidget {
   }) : assert(animation != null),
        assert(reverse != null);
 
+  final Animation<double> animation;
+  final bool reverse;
+  final Widget? child;
+
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
     end: 0.0,
@@ -439,10 +443,6 @@ class _ZoomExitTransition extends StatelessWidget {
     begin: 1.00,
     end: 0.90,
   ).chain(_ZoomPageTransition._scaleCurveSequence);
-
-  final Animation<double> animation;
-  final bool reverse;
-  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
