@@ -24,7 +24,7 @@ abstract class AnimatedRasterDelegate {
   /// first frame is fully transparent then rasterization can be delayed until
   /// the second frame.
   @protected
-  bool willPaint(Animation<double> animation) => true;
+  bool useRaster(Animation<double> animation) => true;
 
   /// Paint the children of this render object.
   ///
@@ -33,7 +33,11 @@ abstract class AnimatedRasterDelegate {
   ///
   /// The [pixelRatio] is the ratio of pixels in [image] to logical pixels.
   @protected
-  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation);
+  void paintRaster(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation);
+
+  /// Paint the children of this render object.
+  @protected
+  void paint(PaintingContext context, Animation<double> animation, Rect area, PaintingContextCallback callback);
 }
 
 /// A widget that replaces [child] with a rasterized version while an animation is active.
@@ -193,23 +197,30 @@ class RenderAnimatedRaster extends RenderProxyBox {
       case AnimationStatus.reverse:
         break;
     }
-    final bool updateImage = delegate.willPaint(animation);
-    if (_childImage == null && updateImage) {
-      _childImage = PaintingContext.paintAndDetachToGpuImage(
-        layer! as OffsetLayer,
-        estimatedBounds: offset & size,
-        child: child!,
-        pixelRatio: devicePixelRatio,
-        offset: offset,
-      );
-    }
-    if (updateImage) {
+    final bool useRaster = delegate.useRaster(animation);
+    if (!useRaster) {
       delegate.paint(
         context,
-        _childImage!,
-        devicePixelRatio,
         animation,
+        offset & size,
+        super.paint,
       );
+      _childImage?.dispose();
+      _childImage = null;
+      return;
     }
+    _childImage ??= PaintingContext.paintAndDetachToGpuImage(
+      layer! as OffsetLayer,
+      estimatedBounds: offset & size,
+      child: child!,
+      pixelRatio: devicePixelRatio,
+      offset: offset,
+    );
+    delegate.paintRaster(
+      context,
+      _childImage!,
+      devicePixelRatio,
+      animation,
+    );
   }
 }

@@ -381,16 +381,20 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
   @override
   bool operator ==(Object other) => other is _ZoomEnterTransitionDelegate && other.reverse == reverse;
 
-  @override
-  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
-    final double fade = reverse
-      ? 1.0
-      : _ZoomEnterTransition._fadeInTransition.evaluate(animation);
-    final double scale = (reverse
+  double computeScale(Animation<double> animation) {
+    return (reverse
       ? _ZoomEnterTransition._scaleDownTransition
       : _ZoomEnterTransition._scaleUpTransition
     ).evaluate(animation);
+  }
 
+  double computeFade(Animation<double> animation) {
+    return reverse
+      ? 1.0
+      : _ZoomEnterTransition._fadeInTransition.evaluate(animation);
+  }
+
+  double computeScrimOpacity(Animation<double> animation) {
     double opacity = 0;
     // The transition's scrim opacity only increases on the forward transition.
     // In the reverse transition, the opacity should always be 0.0.
@@ -405,6 +409,38 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
     if (!reverse && animation.status != AnimationStatus.completed) {
       opacity = _ZoomEnterTransition._scrimOpacityTween.evaluate(animation)!;
     }
+    return opacity;
+  }
+
+  @override
+  bool useRaster(Animation<double> animation) {
+    final double fade = computeFade(animation);
+    final double scale = computeScale(animation);
+    return (fade > 0.0 && fade < 1.0) || scale != 1.0;
+  }
+
+  @override
+  void paint(PaintingContext context, Animation<double> animation, Rect area, PaintingContextCallback callback) {
+    final double fade = computeFade(animation);
+    final double scale = computeScale(animation);
+    assert(scale == 1.0);
+    assert(fade == 0.0 || fade == 1.0);
+
+    final double scrimOpacity = computeScrimOpacity(animation);
+    if (scrimOpacity != 0) {
+      context.canvas.drawRect(area, Paint()..color = Colors.black.withOpacity(scrimOpacity));
+    }
+    if (fade == 0) {
+      return;
+    }
+    callback(context, Offset.zero);
+  }
+
+  @override
+  void paintRaster(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
+    final double fade = computeFade(animation);
+    final double scale = computeScale(animation);
+    final double scrimOpacity = computeScrimOpacity(animation);
 
     final Paint paint = Paint()
       ..filterQuality = ui.FilterQuality.low
@@ -412,7 +448,7 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
     final double logicalWidth = image.width / pixelRatio;
     final double logicalHeight = image.height / pixelRatio;
 
-    context.canvas.drawRect(Offset.zero & Size(logicalWidth, logicalHeight), Paint()..color = Colors.black.withOpacity(opacity));
+    context.canvas.drawRect(Offset.zero & Size(logicalWidth, logicalHeight), Paint()..color = Colors.black.withOpacity(scrimOpacity));
     _drawImageScaledAndCentered(context, image, scale, pixelRatio, paint);
   }
 }
@@ -502,23 +538,42 @@ class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
   @override
   bool operator ==(Object other) => other is _ZoomExitTransitionDelegate && other.reverse == reverse;
 
-  @override
-  bool willPaint(Animation<double> animation) {
-    final double fade = reverse
-      ? _ZoomExitTransition._fadeOutTransition.evaluate(animation)
-      : 1.0;
-    return fade != 0.0;
-  }
-
-  @override
-  void paint(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
-    final double fade = reverse
-      ? _ZoomExitTransition._fadeOutTransition.evaluate(animation)
-      : 1.0;
-    final double scale = (reverse
+  double computeScale(Animation<double> animation) {
+    return (reverse
       ? _ZoomExitTransition._scaleDownTransition
       : _ZoomExitTransition._scaleUpTransition
     ).evaluate(animation);
+  }
+
+  double computeFade(Animation<double> animation) {
+    return  reverse
+      ? _ZoomExitTransition._fadeOutTransition.evaluate(animation)
+      : 1.0;
+  }
+
+  @override
+  bool useRaster(Animation<double> animation) {
+    final double fade = computeFade(animation);
+    final double scale = computeScale(animation);
+    return (fade > 0.0 && fade < 1.0) || scale != 1.0;
+  }
+
+  @override
+  void paint(PaintingContext context, Animation<double> animation, Rect area, PaintingContextCallback callback) {
+    final double fade = computeFade(animation);
+    final double scale = computeFade(animation);
+    assert(fade == 0.0 || fade == 1.0);
+    assert(scale == 1.0);
+    if (fade == 0.0) {
+      return;
+    }
+    callback(context, Offset.zero);
+  }
+
+  @override
+  void paintRaster(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
+    final double fade = computeFade(animation);
+    final double scale = computeFade(animation);
 
     final Paint paint = Paint()
       ..filterQuality = ui.FilterQuality.low
