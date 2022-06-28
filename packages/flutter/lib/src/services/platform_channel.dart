@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:developer';
-import 'dart:ui' show PlatformMessageResponseCallback;
 
 import 'package:flutter/foundation.dart';
 
@@ -13,6 +12,9 @@ import 'binding.dart';
 import 'debug.dart' show debugProfilePlatformChannels;
 import 'message_codec.dart';
 import 'message_codecs.dart';
+
+export 'binary_messenger.dart' show BinaryMessenger;
+export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 
 bool _debugProfilePlatformChannelsIsRunning = false;
 const Duration _debugProfilePlatformChannelsRate = Duration(seconds: 1);
