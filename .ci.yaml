@@ -132,6 +132,18 @@ targets:
       validation: analyze
       validation_name: Analyze
 
+  - name: Linux packages_autoroller
+    bringup: true
+    recipe: pub_autoroller/pub_autoroller
+    timeout: 30
+    properties:
+      tags: >
+        ["framework","hostonly"]
+      dependencies: >-
+          [
+            {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
+          ]
+
   - name: Linux android views
     recipe: flutter/android_views
     properties:
