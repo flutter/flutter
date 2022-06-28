@@ -2,10 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show TextRange;
+
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
 import 'text_input.dart' show TextEditingValue;
+
+export 'dart:ui' show TextRange;
+
+export 'text_editing.dart' show TextSelection;
+export 'text_input.dart' show TextEditingValue;
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {

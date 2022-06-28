@@ -4,9 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Convert a UTF32 rune to its lower case.
 int runeToLowerCase(int rune) {
