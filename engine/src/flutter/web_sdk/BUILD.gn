@@ -52,7 +52,10 @@ prebuilt_dart_action("web_ui_sources") {
   input_dir = rebase_path("//flutter/lib/web_ui/lib/")
   pool = "//flutter/build/dart:dart_pool"
 
-  outputs = [ "$target_gen_dir/$target_name.stamp" ]
+  outputs = [
+    "$target_gen_dir/$target_name.stamp",
+    "$root_out_dir/flutter_web_sdk/lib/ui/",
+  ]
 
   args = [
     "--output-dir=$output_dir",
@@ -77,7 +80,10 @@ prebuilt_dart_action("web_engine_sources") {
   input_dir = rebase_path("//flutter/lib/web_ui/lib/src/")
   pool = "//flutter/build/dart:dart_pool"
 
-  outputs = [ "$target_gen_dir/$target_name.stamp" ]
+  outputs = [
+    "$target_gen_dir/$target_name.stamp",
+    "$root_out_dir/flutter_web_sdk/lib/_engine/",
+  ]
 
   args = [
     "--output-dir=$output_dir",
@@ -594,30 +600,14 @@ if (!is_fuchsia) {
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_sound")
     sources += get_target_outputs(":web_ui_library")
+    sources += get_target_outputs(":web_ui_sources")
+    sources += get_target_outputs(":web_engine_sources")
     tmp_files = []
     foreach(source, sources) {
       tmp_files += [
         {
           source = rebase_path(source)
           destination = rebase_path(source, "$root_build_dir")
-        },
-      ]
-    }
-    foreach(source, web_ui_sources) {
-      rebased_path = rebase_path(source, "//flutter/lib/web_ui/lib")
-      tmp_files += [
-        {
-          source = rebase_path(source)
-          destination = "flutter_web_sdk/lib/ui/$rebased_path"
-        },
-      ]
-    }
-    foreach(source, web_engine_sources) {
-      rebased_path = rebase_path(source, "//flutter/lib/web_ui/lib/src")
-      tmp_files += [
-        {
-          source = rebase_path(source)
-          destination = "flutter_web_sdk/lib/_engine/$rebased_path"
         },
       ]
     }
