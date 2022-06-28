@@ -431,8 +431,8 @@ class _ZoomEnterTransitionDelegate extends AnimatedRasterDelegate {
   void paint(PaintingContext context, Animation<double> animation, Rect area, PaintingContextCallback callback) {
     final double fade = computeFade(animation);
     final double scale = computeScale(animation);
-    assert(scale == 1.0);
-    assert(fade == 0.0 || fade == 1.0);
+    assert(scale == 1.0, '$scale');
+    assert(fade == 0.0 || fade == 1.0, '$fade');
 
     final double scrimOpacity = computeScrimOpacity(animation);
     if (scrimOpacity != 0) {
@@ -578,8 +578,9 @@ class _ZoomExitTransitionDelegate extends AnimatedRasterDelegate {
   void paint(PaintingContext context, Animation<double> animation, Rect area, PaintingContextCallback callback) {
     final double fade = computeFade(animation);
     final double scale = computeFade(animation);
-    assert(fade == 0.0 || fade == 1.0);
-    assert(scale == 1.0);
+    assert(scale == 1.0, '$scale');
+    assert(fade == 0.0 || fade == 1.0, '$fade');
+
     if (fade == 0.0) {
       return;
     }
