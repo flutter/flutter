@@ -65,7 +65,7 @@ const std::shared_ptr<LazyGlyphAtlas>& EntityPass::GetLazyGlyphAtlas() const {
 }
 
 std::optional<Rect> EntityPass::GetElementsCoverage(
-    std::optional<Rect> coverage_clip) const {
+    std::optional<Rect> coverage_crop) const {
   std::optional<Rect> result;
   for (const auto& element : elements_) {
     std::optional<Rect> coverage;
@@ -73,12 +73,12 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
     if (auto entity = std::get_if<Entity>(&element)) {
       coverage = entity->GetCoverage();
 
-      if (coverage.has_value() && coverage_clip.has_value()) {
-        coverage = coverage->Intersection(coverage_clip.value());
+      if (coverage.has_value() && coverage_crop.has_value()) {
+        coverage = coverage->Intersection(coverage_crop.value());
       }
     } else if (auto subpass =
                    std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      coverage = GetSubpassCoverage(*subpass->get(), coverage_clip);
+      coverage = GetSubpassCoverage(*subpass->get(), coverage_crop);
     } else {
       FML_UNREACHABLE();
     }
@@ -427,8 +427,10 @@ bool EntityPass::OnRender(ContentContext& renderer,
           FilterInput::Make(result.entity.GetContents()),
           FilterInput::Make(texture,
                             result.entity.GetTransformation().Invert())};
-      result.entity.SetContents(
-          FilterContents::MakeBlend(result.entity.GetBlendMode(), inputs));
+      auto contents =
+          FilterContents::MakeBlend(result.entity.GetBlendMode(), inputs);
+      contents->SetCoverageCrop(result.entity.GetCoverage());
+      result.entity.SetContents(std::move(contents));
       result.entity.SetBlendMode(Entity::BlendMode::kSourceOver);
     }
 
