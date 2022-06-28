@@ -811,8 +811,6 @@ static void fl_view_remove(GtkContainer* container, GtkWidget* widget) {
   if (widget == GTK_WIDGET(self->event_box)) {
     g_clear_object(&self->event_box);
   }
-
-  g_clear_object(&self->keymap);
 }
 
 // Implements GtkContainer::forall
