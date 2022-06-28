@@ -39,6 +39,7 @@ export 'src/cupertino/icon_theme_data.dart';
 export 'src/cupertino/icons.dart';
 export 'src/cupertino/interface_level.dart';
 export 'src/cupertino/localizations.dart';
+export 'src/cupertino/loupe.dart';
 export 'src/cupertino/nav_bar.dart';
 export 'src/cupertino/page_scaffold.dart';
 export 'src/cupertino/picker.dart';
