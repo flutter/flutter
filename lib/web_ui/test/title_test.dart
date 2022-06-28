@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -22,8 +20,8 @@ void testMain() {
       ui.debugEmulateFlutterTesterEnvironment = false;
 
       // TODO(yjbanov): https://github.com/flutter/flutter/issues/39159
-      document.title = '';
-      expect(document.title, '');
+      domDocument.title = '';
+      expect(domDocument.title, '');
 
       ui.window.sendPlatformMessage(
           'flutter/platform',
@@ -35,7 +33,7 @@ void testMain() {
               })),
           null);
 
-      expect(document.title, 'Title Test');
+      expect(domDocument.title, 'Title Test');
 
       ui.window.sendPlatformMessage(
           'flutter/platform',
@@ -47,7 +45,7 @@ void testMain() {
               })),
           null);
 
-      expect(document.title, 'Different title');
+      expect(domDocument.title, 'Different title');
     });
 
     test('supports null title and primaryColor', () {
@@ -55,8 +53,8 @@ void testMain() {
       ui.debugEmulateFlutterTesterEnvironment = false;
 
       // TODO(yjbanov): https://github.com/flutter/flutter/issues/39159
-      document.title = 'Something Else';
-      expect(document.title, 'Something Else');
+      domDocument.title = 'Something Else';
+      expect(domDocument.title, 'Something Else');
 
       ui.window.sendPlatformMessage(
           'flutter/platform',
@@ -68,10 +66,10 @@ void testMain() {
               })),
           null);
 
-      expect(document.title, '');
+      expect(domDocument.title, '');
 
-      document.title = 'Something Else';
-      expect(document.title, 'Something Else');
+      domDocument.title = 'Something Else';
+      expect(domDocument.title, 'Something Else');
 
       ui.window.sendPlatformMessage(
           'flutter/platform',
@@ -81,7 +79,7 @@ void testMain() {
               })),
           null);
 
-      expect(document.title, '');
+      expect(domDocument.title, '');
     });
   });
 }
