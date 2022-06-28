@@ -6,9 +6,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,10 +38,25 @@ public class FlutterFragmentTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
   boolean isDelegateAttached;
 
+  class TestDelegateFactory implements FlutterActivityAndFragmentDelegate.DelegateFactory {
+    FlutterActivityAndFragmentDelegate delegate;
+
+    TestDelegateFactory(FlutterActivityAndFragmentDelegate delegate) {
+      this.delegate = delegate;
+    }
+
+    public FlutterActivityAndFragmentDelegate createDelegate(
+        FlutterActivityAndFragmentDelegate.Host host) {
+      return delegate;
+    }
+  }
+
   @Test
   public void itCreatesDefaultFragmentWithExpectedDefaults() {
     FlutterFragment fragment = FlutterFragment.createDefault();
-    fragment.setDelegate(new FlutterActivityAndFragmentDelegate(fragment));
+    TestDelegateFactory delegateFactory =
+        new TestDelegateFactory(new FlutterActivityAndFragmentDelegate(fragment));
+    fragment.setDelegateFactory(delegateFactory);
 
     assertEquals("main", fragment.getDartEntrypointFunctionName());
     assertNull(fragment.getDartEntrypointLibraryUri());
@@ -68,7 +85,9 @@ public class FlutterFragmentTest {
             .renderMode(RenderMode.texture)
             .transparencyMode(TransparencyMode.opaque)
             .build();
-    fragment.setDelegate(new FlutterActivityAndFragmentDelegate(fragment));
+    TestDelegateFactory delegateFactory =
+        new TestDelegateFactory(new FlutterActivityAndFragmentDelegate(fragment));
+    fragment.setDelegateFactory(delegateFactory);
 
     assertEquals("custom_entrypoint", fragment.getDartEntrypointFunctionName());
     assertEquals("package:foo/bar.dart", fragment.getDartEntrypointLibraryUri());
@@ -127,6 +146,7 @@ public class FlutterFragmentTest {
   public void itCanBeDetachedFromTheEngineAndStopSendingFurtherEvents() {
     FlutterActivityAndFragmentDelegate mockDelegate =
         mock(FlutterActivityAndFragmentDelegate.class);
+    TestDelegateFactory delegateFactory = new TestDelegateFactory(mockDelegate);
     FlutterFragment fragment =
         FlutterFragment.withCachedEngine("my_cached_engine")
             .destroyEngineWithFragment(true)
@@ -136,7 +156,7 @@ public class FlutterFragmentTest {
     when(mockDelegate.isAttached()).thenAnswer(invocation -> isDelegateAttached);
     doAnswer(invocation -> isDelegateAttached = false).when(mockDelegate).onDetach();
 
-    fragment.setDelegate(mockDelegate);
+    fragment.setDelegateFactory(delegateFactory);
     fragment.onStart();
     fragment.onResume();
     fragment.onPostResume();
@@ -175,13 +195,14 @@ public class FlutterFragmentTest {
     isDelegateAttached = true;
     when(mockDelegate.isAttached()).thenAnswer(invocation -> isDelegateAttached);
     doAnswer(invocation -> isDelegateAttached = false).when(mockDelegate).onDetach();
+    TestDelegateFactory delegateFactory = new TestDelegateFactory(mockDelegate);
 
     FlutterFragment fragment =
         FlutterFragment.withCachedEngine("my_cached_engine")
             .destroyEngineWithFragment(true)
             .build();
 
-    fragment.setDelegate(mockDelegate);
+    fragment.setDelegateFactory(delegateFactory);
     fragment.onStart();
     fragment.onResume();
     fragment.onPostResume();
@@ -201,13 +222,16 @@ public class FlutterFragmentTest {
     isDelegateAttached = true;
     when(mockDelegate.isAttached()).thenAnswer(invocation -> isDelegateAttached);
     doAnswer(invocation -> isDelegateAttached = false).when(mockDelegate).onDetach();
+    TestDelegateFactory delegateFactory = new TestDelegateFactory(mockDelegate);
 
     FlutterFragment fragment =
-        FlutterFragment.withCachedEngine("my_cached_engine")
-            .destroyEngineWithFragment(true)
-            .build();
+        spy(
+            FlutterFragment.withCachedEngine("my_cached_engine")
+                .destroyEngineWithFragment(true)
+                .build());
+    when(fragment.getContext()).thenReturn(mock(Context.class));
 
-    fragment.setDelegate(mockDelegate);
+    fragment.setDelegateFactory(delegateFactory);
     fragment.onStart();
     fragment.onResume();
     fragment.onPostResume();
@@ -224,7 +248,8 @@ public class FlutterFragmentTest {
   public void itReturnsExclusiveAppComponent() {
     FlutterFragment fragment = FlutterFragment.createDefault();
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(fragment);
-    fragment.setDelegate(delegate);
+    TestDelegateFactory delegateFactory = new TestDelegateFactory(delegate);
+    fragment.setDelegateFactory(delegateFactory);
 
     assertEquals(fragment.getExclusiveAppComponent(), delegate);
   }
@@ -255,7 +280,8 @@ public class FlutterFragmentTest {
     isDelegateAttached = true;
     when(mockDelegate.isAttached()).thenAnswer(invocation -> isDelegateAttached);
     doAnswer(invocation -> isDelegateAttached = false).when(mockDelegate).onDetach();
-    fragment.setDelegate(mockDelegate);
+    TestDelegateFactory delegateFactory = new TestDelegateFactory(mockDelegate);
+    fragment.setDelegateFactory(delegateFactory);
 
     activity.onBackPressed();
 
@@ -294,11 +320,43 @@ public class FlutterFragmentTest {
 
     FlutterActivityAndFragmentDelegate mockDelegate =
         mock(FlutterActivityAndFragmentDelegate.class);
-    fragment.setDelegate(mockDelegate);
+    TestDelegateFactory delegateFactory = new TestDelegateFactory(mockDelegate);
+    fragment.setDelegateFactory(delegateFactory);
 
     assertTrue(fragment.popSystemNavigator());
 
     verify(mockDelegate, never()).onBackPressed();
     assertTrue(onBackPressedCalled.get());
+  }
+
+  @Test
+  public void itRegistersComponentCallbacks() {
+    FlutterActivityAndFragmentDelegate mockDelegate =
+        mock(FlutterActivityAndFragmentDelegate.class);
+    isDelegateAttached = true;
+    when(mockDelegate.isAttached()).thenAnswer(invocation -> isDelegateAttached);
+    doAnswer(invocation -> isDelegateAttached = false).when(mockDelegate).onDetach();
+    TestDelegateFactory delegateFactory = new TestDelegateFactory(mockDelegate);
+
+    Context spyCtx = spy(ctx);
+    // We need to mock FlutterJNI to avoid triggering native code.
+    FlutterJNI flutterJNI = mock(FlutterJNI.class);
+    when(flutterJNI.isAttached()).thenReturn(true);
+
+    FlutterEngine flutterEngine =
+        new FlutterEngine(spyCtx, new FlutterLoader(), flutterJNI, null, false);
+    FlutterEngineCache.getInstance().put("my_cached_engine", flutterEngine);
+
+    FlutterFragment fragment = spy(FlutterFragment.withCachedEngine("my_cached_engine").build());
+    when(fragment.getContext()).thenReturn(spyCtx);
+    fragment.setDelegateFactory(delegateFactory);
+
+    fragment.onAttach(spyCtx);
+    verify(spyCtx, times(1)).registerComponentCallbacks(any());
+    verify(spyCtx, never()).unregisterComponentCallbacks(any());
+
+    fragment.onDetach();
+    verify(spyCtx, times(1)).registerComponentCallbacks(any());
+    verify(spyCtx, times(1)).unregisterComponentCallbacks(any());
   }
 }
