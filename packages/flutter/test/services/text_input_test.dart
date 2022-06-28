@@ -701,7 +701,7 @@ void main() {
   });
 }
 
-class FakeTextInputClient implements TextInputClient {
+class FakeTextInputClient with TextInputClient {
   FakeTextInputClient(this.currentTextEditingValue);
 
   String latestMethodCall = '';

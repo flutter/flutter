@@ -1086,11 +1086,7 @@ mixin TextSelectionDelegate {
 ///  * [EditableText], a [TextInputClient] implementation.
 ///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
 ///    granular information from the platform's text input.
-abstract class TextInputClient {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const TextInputClient();
-
+mixin TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue? get currentTextEditingValue;
 
@@ -1225,7 +1221,7 @@ class SelectionRect {
 ///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
 ///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
 ///    to true.
-abstract class DeltaTextInputClient extends TextInputClient {
+mixin DeltaTextInputClient implements TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
   ///
