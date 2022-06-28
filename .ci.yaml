@@ -134,6 +134,7 @@ targets:
 
   - name: Linux packages_autoroller
     bringup: true
+    presubmit: false
     recipe: pub_autoroller/pub_autoroller
     timeout: 30
     properties:
