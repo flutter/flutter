@@ -10,6 +10,7 @@ Sets up githooks.
 import os
 import subprocess
 import sys
+from shutil import which  # Natively supported since python 3.3
 
 SRC_ROOT = os.path.dirname(
     os.path.dirname(
@@ -19,17 +20,13 @@ SRC_ROOT = os.path.dirname(
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 
 
-def IsWindows():
-  os_id = sys.platform
-  return os_id.startswith('win32') or os_id.startswith('cygwin')
-
-
 def Main(argv):
-  git = 'git'
   githooks = os.path.join(FLUTTER_DIR, 'tools', 'githooks')
-  if IsWindows():
-    git = 'git.bat'
-    githooks = os.path.join(githooks, 'windows')
+  git_candidates = ['git', 'git.sh', 'git.bat']
+  git = next(filter(which, git_candidates), None)
+  if git is None:
+    candidates = "', '".join(git_candidates)
+    raise IOError(f"Looks like GIT is not on the path. Tried '{candidates}'")
   result = subprocess.run([
       git,
       'config',
