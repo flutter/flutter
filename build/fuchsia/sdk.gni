@@ -104,7 +104,7 @@ template("_fuchsia_fidl_library") {
 
     args = [
       "--fidlc-bin",
-      rebase_path("$_fuchsia_sdk_path/tools/fidlc"),
+      rebase_path("$_fuchsia_sdk_path/tools/$host_cpu/fidlc"),
       "--sdk-base",
       rebase_path(_fuchsia_sdk_path),
       "--root",
