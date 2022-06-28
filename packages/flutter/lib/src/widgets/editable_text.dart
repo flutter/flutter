@@ -3257,34 +3257,46 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  VoidCallback? _semanticsOnCopy() {
+  VoidCallback? _semanticsOnCopy(TextSelectionControls? controls) {
     return widget.selectionEnabled
         && copyEnabled
         && _hasFocus
-        && TextSelectionToolbarButtonDatasBuilder.canCopy(this)
-      ? () => copySelection(SelectionChangedCause.toolbar)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? TextSelectionToolbarButtonDatasBuilder.canCopy(this)
+            : widget.selectionControls?.canCopy(this) ?? false)
+      ? () {
+        controls?.handleCopy(this);
+        copySelection(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
-  VoidCallback? _semanticsOnCut() {
+  VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
     return widget.selectionEnabled
         && cutEnabled
         && _hasFocus
-        && TextSelectionToolbarButtonDatasBuilder.canCut(this)
-      ? () => cutSelection(SelectionChangedCause.toolbar)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? TextSelectionToolbarButtonDatasBuilder.canCut(this)
+            : widget.selectionControls?.canCut(this) ?? false)
+      ? () {
+        controls?.handleCut(this);
+        cutSelection(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
-  VoidCallback? _semanticsOnPaste() {
+  VoidCallback? _semanticsOnPaste(TextSelectionControls? controls) {
     return widget.selectionEnabled
         && pasteEnabled
         && _hasFocus
-        && TextSelectionToolbarButtonDatasBuilder.canPaste(
-          this,
-          clipboardStatus?.value ?? ClipboardStatus.pasteable,
-        )
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus?.value ?? ClipboardStatus.pasteable)
+            : widget.selectionControls?.canPaste(this) ?? false)
         && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
-      ? () => pasteText(SelectionChangedCause.toolbar)
+      ? () {
+        controls?.handlePaste(this);
+        pasteText(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
@@ -3505,6 +3517,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
+    final TextSelectionControls? controls = widget.selectionControls;
     final Widget child = MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
@@ -3536,9 +3549,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 return CompositedTransformTarget(
                   link: _toolbarLayerLink,
                   child: Semantics(
-                    onCopy: _semanticsOnCopy(),
-                    onCut: _semanticsOnCut(),
-                    onPaste: _semanticsOnPaste(),
+                    onCopy: _semanticsOnCopy(controls),
+                    onCut: _semanticsOnCut(controls),
+                    onPaste: _semanticsOnPaste(controls),
                     child: _ScribbleFocusable(
                       focusNode: widget.focusNode,
                       editableKey: _editableKey,
