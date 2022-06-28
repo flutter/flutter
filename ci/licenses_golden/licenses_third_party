@@ -1,4 +1,4 @@
-Signature: 9ae3b5acdc0e4e190157d86e83269d77
+Signature: 25fee5fad42dad462f9351ab1b4f701f
 
 UNUSED LICENSES:
 
@@ -14928,6 +14928,7 @@ FILE: ../../../third_party/freetype2/.gitlab-ci.yml
 FILE: ../../../third_party/freetype2/.gitmodules
 FILE: ../../../third_party/freetype2/devel/ft2build.h
 FILE: ../../../third_party/freetype2/devel/ftoption.h
+FILE: ../../../third_party/freetype2/include/freetype-flutter-config/freetype/config/public-macros.h
 FILE: ../../../third_party/freetype2/include/freetype-flutter-config/ftmodule.h
 FILE: ../../../third_party/freetype2/include/freetype-flutter-config/ftoption.h
 FILE: ../../../third_party/freetype2/include/freetype/config/ftconfig.h
