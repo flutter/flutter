@@ -101,6 +101,8 @@ class RenderAnimatedRaster extends RenderProxyBox {
     if (newStatus == _status) {
       return;
     }
+    _childImage?.dispose();
+    _childImage = null;
     _status = newStatus;
     assert(_status == animation.status);
     if (!painting) {
@@ -180,8 +182,16 @@ class RenderAnimatedRaster extends RenderProxyBox {
     if (child == null) {
       return;
     }
-
     _updateStatus(animation.status, true);
+    switch (_status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        super.paint(context, offset);
+        return;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
     final bool useRaster = delegate.useRaster(animation);
     if (!useRaster) {
       delegate.paint(
