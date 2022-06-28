@@ -94,7 +94,9 @@ import java.util.List;
  * Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a {@code Fragment}.
  */
 public class FlutterFragment extends Fragment
-    implements FlutterActivityAndFragmentDelegate.Host, ComponentCallbacks2 {
+    implements FlutterActivityAndFragmentDelegate.Host,
+        ComponentCallbacks2,
+        FlutterActivityAndFragmentDelegate.DelegateFactory {
   /**
    * The ID of the {@code FlutterView} created by this activity.
    *
@@ -732,6 +734,14 @@ public class FlutterFragment extends Fragment
   // implementation for details about why it exists.
   @VisibleForTesting @Nullable /* package */ FlutterActivityAndFragmentDelegate delegate;
 
+  @NonNull private FlutterActivityAndFragmentDelegate.DelegateFactory delegateFactory = this;
+
+  /** Default delegate factory that creates a simple FlutterActivityAndFragmentDelegate instance. */
+  public FlutterActivityAndFragmentDelegate createDelegate(
+      FlutterActivityAndFragmentDelegate.Host host) {
+    return new FlutterActivityAndFragmentDelegate(host);
+  }
+
   private final OnBackPressedCallback onBackPressedCallback =
       new OnBackPressedCallback(true) {
         @Override
@@ -757,8 +767,10 @@ public class FlutterFragment extends Fragment
   // TODO(mattcarroll): remove this when tests allow for it
   // (https://github.com/flutter/flutter/issues/43798)
   @VisibleForTesting
-  /* package */ void setDelegate(@NonNull FlutterActivityAndFragmentDelegate delegate) {
-    this.delegate = delegate;
+  /* package */ void setDelegateFactory(
+      @NonNull FlutterActivityAndFragmentDelegate.DelegateFactory delegateFactory) {
+    this.delegateFactory = delegateFactory;
+    delegate = delegateFactory.createDelegate(this);
   }
 
   /**
@@ -773,11 +785,12 @@ public class FlutterFragment extends Fragment
   @Override
   public void onAttach(@NonNull Context context) {
     super.onAttach(context);
-    delegate = new FlutterActivityAndFragmentDelegate(this);
+    delegate = delegateFactory.createDelegate(this);
     delegate.onAttach(context);
     if (getArguments().getBoolean(ARG_SHOULD_AUTOMATICALLY_HANDLE_ON_BACK_PRESSED, false)) {
       requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
     }
+    context.registerComponentCallbacks(this);
   }
 
   @Override
@@ -873,6 +886,7 @@ public class FlutterFragment extends Fragment
 
   @Override
   public void onDetach() {
+    getContext().unregisterComponentCallbacks(this);
     super.onDetach();
     if (delegate != null) {
       delegate.onDetach();
