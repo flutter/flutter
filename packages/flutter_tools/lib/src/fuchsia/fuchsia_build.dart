@@ -124,9 +124,10 @@ Future<void> _buildAssets(
     throwToolExit('Unable to find assets.', exitCode: 1);
   }
 
-  final Map<String, DevFSContent> assetEntries =
-      Map<String, DevFSContent>.of(assets.entries);
-  await writeBundle(globals.fs.directory(assetDir), assetEntries);
+  final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.of(
+    assets.entries,
+  );
+  await writeBundle(globals.fs.directory(assetDir), assetEntries, assets.entryKinds);
 
   final String appName = fuchsiaProject.project.manifest.appName;
   final String outDir = getFuchsiaBuildDirectory();
