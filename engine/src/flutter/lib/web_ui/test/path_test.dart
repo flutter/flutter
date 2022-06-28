@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
@@ -412,7 +411,7 @@ void testMain() {
 
     // Regression test for https://github.com/flutter/flutter/issues/44470
     test('Should handle contains for devicepixelratio != 1.0', () {
-      js_util.setProperty(html.window, 'devicePixelRatio', 4.0);
+      js_util.setProperty(domWindow, 'devicePixelRatio', 4.0);
       window.debugOverrideDevicePixelRatio(4.0);
       final Path path = Path()
         ..moveTo(50, 0)
@@ -421,7 +420,7 @@ void testMain() {
         ..lineTo(50, 0)
         ..close();
       expect(path.contains(const Offset(50, 50)), isTrue);
-      js_util.setProperty(html.window, 'devicePixelRatio', 1.0);
+      js_util.setProperty(domWindow, 'devicePixelRatio', 1.0);
       window.debugOverrideDevicePixelRatio(1.0);
       // TODO(ferhat): Investigate failure on CI. Locally this passes.
       // [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"

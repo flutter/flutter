@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
@@ -61,8 +60,8 @@ void testMain() {
         () async {
       // Patch browser so that clipboard api is not available.
       final Object? originalClipboard =
-          js_util.getProperty<Object?>(html.window.navigator, 'clipboard');
-      js_util.setProperty(html.window.navigator, 'clipboard', null);
+          js_util.getProperty<Object?>(domWindow.navigator, 'clipboard');
+      js_util.setProperty(domWindow.navigator, 'clipboard', null);
       const MethodCodec codec = JSONMethodCodec();
       final Completer<ByteData?> completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
@@ -80,13 +79,13 @@ void testMain() {
         );
       }
       js_util.setProperty(
-          html.window.navigator, 'clipboard', originalClipboard);
+          domWindow.navigator, 'clipboard', originalClipboard);
     });
 
     test('can find text scale factor', () async {
       const double deltaTolerance = 1e-5;
 
-      final html.Element root = html.document.documentElement!;
+      final DomElement root = domDocument.documentElement!;
       final String oldFontSize = root.style.fontSize;
 
       addTearDown(() {
@@ -108,14 +107,14 @@ void testMain() {
       root.style.fontSize = '12.8px';
       expect(findBrowserTextScaleFactor(), closeTo(0.8, deltaTolerance));
 
-      root.style.fontSize = null;
+      root.style.fontSize = '';
       expect(findBrowserTextScaleFactor(), 1.0);
     });
 
     test(
         'calls onTextScaleFactorChanged when the <html> element\'s font-size changes',
         () async {
-      final html.Element root = html.document.documentElement!;
+      final DomElement root = domDocument.documentElement!;
       final String oldFontSize = root.style.fontSize;
       final ui.VoidCallback? oldCallback = ui.PlatformDispatcher.instance.onTextScaleFactorChanged;
 

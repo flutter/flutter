@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:web_gl';
@@ -392,8 +391,8 @@ Future<void> testMain() async {
 
   test('Creating lots of gradients doesn\'t create too many webgl contexts',
       () async {
-    final html.CanvasElement sideCanvas =
-        html.CanvasElement(width: 5, height: 5);
+    final DomCanvasElement sideCanvas =
+        createDomCanvasElement(width: 5, height: 5);
     final RenderingContext? context =
         sideCanvas.getContext('webgl') as RenderingContext?;
     expect(context, isNotNull);

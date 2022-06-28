@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
@@ -32,7 +30,7 @@ Future<void> testMain() async {
     rc.apply(engineCanvas, screenRect);
 
     // Wrap in <flt-scene> so that our CSS selectors kick in.
-    final html.Element sceneElement = html.Element.tag('flt-scene');
+    final engine.DomElement sceneElement = engine.createDomElement('flt-scene');
     if (isIosSafari) {
       // Shrink to fit on the iPhone screen.
       sceneElement.style.position = 'absolute';
@@ -41,8 +39,8 @@ Future<void> testMain() async {
     }
 
     try {
-      sceneElement.append(engineCanvas.rootElement as html.Element);
-      html.document.body!.append(sceneElement);
+      sceneElement.append(engineCanvas.rootElement);
+      engine.domDocument.body!.append(sceneElement);
       // TODO(yjbanov): 10% diff rate is excessive. Update goldens.
       await matchGoldenFile('$fileName.png', region: region);
     } finally {

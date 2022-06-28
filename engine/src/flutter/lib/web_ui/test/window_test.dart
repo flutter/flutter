@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
@@ -472,7 +471,7 @@ void testMain() {
 
 void jsSetUrlStrategy(dynamic strategy) {
   js_util.callMethod<void>(
-    html.window,
+    domWindow,
     '_flutter_web_set_location_strategy',
     <dynamic>[strategy],
   );
