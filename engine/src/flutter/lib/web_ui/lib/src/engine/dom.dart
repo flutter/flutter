@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -98,6 +99,7 @@ extension DomDocumentExtension on DomDocument {
   external DomText createTextNode(String data);
   external DomEvent createEvent(String eventType);
   external DomElement? get activeElement;
+  external DomElement? elementFromPoint(int x, int y);
 }
 
 @JS()
@@ -109,10 +111,12 @@ extension DomHTMLDocumentExtension on DomHTMLDocument {
   external DomHTMLHeadElement? get head;
   external DomHTMLBodyElement? get body;
   external set title(String? value);
+  external String? get title;
   Iterable<DomElement> getElementsByTagName(String tag) =>
       createDomListWrapper<DomElement>(js_util
           .callMethod<_DomList>(this, 'getElementsByTagName', <Object>[tag]));
   external DomElement? get activeElement;
+  external DomElement? getElementById(String id);
 }
 
 @JS('document')
@@ -265,6 +269,7 @@ extension DomElementExtension on DomElement {
       js_util.setProperty<num>(this, 'scrollLeft', value.round());
   external DomTokenList get classList;
   external set className(String value);
+  external String get className;
   external void blur();
   List<DomNode> getElementsByTagName(String tag) =>
       js_util.callMethod<List<Object?>>(
@@ -686,7 +691,7 @@ extension DomCanvasGradientExtension on DomCanvasGradient {
 @staticInterop
 class DomXMLHttpRequestEventTarget extends DomEventTarget {}
 
-@JS('XMLHttpRequest')
+@JS()
 @staticInterop
 class DomXMLHttpRequest extends DomXMLHttpRequestEventTarget {}
 
@@ -696,18 +701,20 @@ DomXMLHttpRequest createDomXMLHttpRequest() =>
 
 extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
   external dynamic get response;
+  external String? get responseText;
   external String get responseType;
   external int? get status;
   external set responseType(String value);
   void open(String method, String url, [bool? async]) => js_util.callMethod(
       this, 'open', <Object>[method, url, if (async != null) async]);
-  external void send();
+  void send([Object? bodyOrData]) => js_util
+      .callMethod(this, 'send', <Object>[if (bodyOrData != null) bodyOrData]);
 }
 
-Future<DomXMLHttpRequest> domHttpRequest(String url, {String? responseType}) {
+Future<DomXMLHttpRequest> domHttpRequest(String url,
+    {String? responseType, String method = 'GET', dynamic sendData}) {
   final Completer<DomXMLHttpRequest> completer = Completer<DomXMLHttpRequest>();
   final DomXMLHttpRequest xhr = createDomXMLHttpRequest();
-  const String method = 'GET';
   xhr.open(method, url, /* async */ true);
   if (responseType != null) {
     xhr.responseType = responseType;
@@ -727,7 +734,7 @@ Future<DomXMLHttpRequest> domHttpRequest(String url, {String? responseType}) {
   }));
 
   xhr.addEventListener('error', allowInterop(completer.completeError));
-  xhr.send();
+  xhr.send(sendData);
   return completer.future;
 }
 
@@ -776,6 +783,15 @@ extension DomRectReadOnlyExtension on DomRectReadOnly {
   external num get right;
   external num get bottom;
   external num get left;
+}
+
+DomRect createDomRectFromPoints(DomPoint a, DomPoint b) {
+  final num left = math.min(a.x, b.x);
+  final num width = math.max(a.x, b.x) - left;
+  final num top = math.min(a.y, b.y);
+  final num height = math.max(a.y, b.y) - top;
+  return domCallConstructorString(
+      'DOMRect', <Object>[left, top, width, height])! as DomRect;
 }
 
 @JS()
@@ -836,6 +852,8 @@ extension DomHTMLTextAreaElementExtension on DomHTMLTextAreaElement {
   external set name(String value);
   external int? get selectionStart;
   external int? get selectionEnd;
+  external set selectionStart(int? value);
+  external set selectionEnd(int? value);
   external String? get value;
   void setSelectionRange(int start, int end, [String? direction]) =>
       js_util.callMethod(this, 'setSelectionRange',
@@ -1098,17 +1116,26 @@ extension DomTouchExtension on DomTouch {
   DomPoint get client => DomPoint(clientX, clientY);
 }
 
+DomTouch createDomTouch([Map<dynamic, dynamic>? init]) =>
+    js_util.callConstructor(domGetConstructor('Touch')!,
+        <Object>[if (init != null) js_util.jsify(init)]) as DomTouch;
+
 DomTouchEvent createDomTouchEvent(String type, [Map<dynamic, dynamic>? init]) =>
     js_util.callConstructor(domGetConstructor('TouchEvent')!,
         <Object>[type, if (init != null) js_util.jsify(init)]);
 
 @JS()
 @staticInterop
-class DomCompositionEvent {}
+class DomCompositionEvent extends DomUIEvent {}
 
 extension DomCompositionEventExtension on DomCompositionEvent {
   external String? get data;
 }
+
+DomCompositionEvent createDomCompositionEvent(String type, [Map<dynamic,
+    dynamic>? options]) =>
+    js_util.callConstructor(domGetConstructor('CompositionEvent')!,
+        <Object>[type, if (options != null) js_util.jsify(options)]);
 
 @JS()
 @staticInterop
@@ -1127,6 +1154,8 @@ extension DomHTMLInputElementExtension on DomHTMLInputElement {
   external set autocomplete(String value);
   external int? get selectionStart;
   external int? get selectionEnd;
+  external set selectionStart(int? value);
+  external set selectionEnd(int? value);
   void setSelectionRange(int start, int end, [String? direction]) =>
       js_util.callMethod(this, 'setSelectionRange',
           <Object>[start, end, if (direction != null) direction]);
@@ -1225,6 +1254,7 @@ extension DomShadowRootExtension on DomShadowRoot {
   external DomElement? get host;
   external String? get mode;
   external bool? get delegatesFocus;
+  external DomElement? elementFromPoint(int x, int y);
 }
 
 @JS()

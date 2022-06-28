@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async' show Future;
-import 'dart:html';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/semantics.dart';
 import 'package:ui/src/engine/services.dart';
 
@@ -36,16 +36,16 @@ void testMain() {
           const Duration(milliseconds: 500);
 
       // Initially there is no accessibility-element
-      expect(document.getElementById('accessibility-element'), isNull);
+      expect(domDocument.getElementById('accessibility-element'), isNull);
 
       accessibilityAnnouncements.handleMessage(codec,
           codec.encodeMessage(testInput));
       expect(
-        document.getElementById('accessibility-element'),
+        domDocument.getElementById('accessibility-element'),
         isNotNull,
       );
-      final LabelElement input =
-          document.getElementById('accessibility-element')! as LabelElement;
+      final DomHTMLLabelElement input =
+          domDocument.getElementById('accessibility-element')! as DomHTMLLabelElement;
       expect(input.getAttribute('aria-live'), equals('polite'));
       expect(input.text, testMessage);
 
@@ -53,7 +53,7 @@ void testMain() {
       Future<void>.delayed(
           accessibilityAnnouncements.durationA11yMessageIsOnDom,
           () =>
-              expect(document.getElementById('accessibility-element'), isNull));
+              expect(domDocument.getElementById('accessibility-element'), isNull));
     });
   });
 }
