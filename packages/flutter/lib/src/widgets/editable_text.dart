@@ -1740,6 +1740,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
 
   late SpellCheckConfiguration? _spellCheckConfiguration;
+  SpellCheckConfiguration? get spellCheckConfiguration => _spellCheckConfiguration;
 
   bool? _spellCheckEnabled;
 

@@ -72,7 +72,7 @@ Future<void> main() async {
         spellCheckSuggestionSpans!.length, equals(misspelledWordRanges.length));
 
     for (int i = 0; i < misspelledWordRanges.length; i += 1) {
-      expectSync(
+      expect(
           spellCheckSuggestionSpans![i].range, equals(misspelledWordRanges[i]));
     }
 

@@ -12496,6 +12496,124 @@ void main() {
       );
     });
   });
+
+  group('Spell check', () {
+    testWidgets(
+      'Spell check configured properly when spell check disabled by default',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              autofocus: false,
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+            ),
+          ),
+        );
+
+        final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+        expect(state.spellCheckEnabled, isFalse);
+        expect(state.spellCheckConfiguration!,
+            equals(SpellCheckConfiguration.disabled));
+      });
+
+  testWidgets(
+      'Spell check configured properly when spell check disabled manually',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              autofocus: false,
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckEnabled: false,
+            ),
+          ),
+        );
+
+        final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+        expect(state.spellCheckEnabled, isFalse);
+        expect(state.spellCheckConfiguration!,
+            equals(SpellCheckConfiguration.disabled));
+      });
+
+  testWidgets(
+      'Spell check configured properly when spell check enabled without specified spell check service and handler',
+          (WidgetTester tester) async {
+        tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              autofocus: false,
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckEnabled: true,
+            ),
+          ),
+        );
+
+        final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+        expect(state.spellCheckEnabled, isTrue);
+        expect(state.spellCheckConfiguration!.spellCheckService.runtimeType,
+            equals(DefaultSpellCheckService));
+        expect(
+            state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
+            equals(DefaultSpellCheckSuggestionsHandler));
+      });
+
+  testWidgets(
+      'Spell check configured properly with specified spell check service and handler',
+          (WidgetTester tester) async {
+        SpellCheckService defaultService = DefaultSpellCheckService();
+        SpellCheckSuggestionsHandler defaultHandler =
+        DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              autofocus: false,
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckEnabled: true,
+              spellCheckService: defaultService,
+              spellCheckSuggestionsHandler: defaultHandler,
+            ),
+          ),
+        );
+
+        SpellCheckConfiguration expectedConfiguration = SpellCheckConfiguration(
+            spellCheckService: defaultService,
+            spellCheckSuggestionsHandler: defaultHandler);
+
+        final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+        expect(state.spellCheckConfiguration!, equals(expectedConfiguration));
+      });
+  }
 }
 
 class UnsettableController extends TextEditingController {

@@ -38,6 +38,22 @@ class SpellCheckConfiguration {
   /// Configuration that indicates that spell check should not be run on text
   /// input and/or spell check is not implemented on the respective platform.
   static SpellCheckConfiguration disabled = SpellCheckConfiguration();
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+        return true;
+    }
+
+    return other is SpellCheckConfiguration &&
+        other.spellCheckService == spellCheckService &&
+        other.spellCheckSuggestionsHandler == spellCheckSuggestionsHandler &&
+        other.spellCheckResults == spellCheckResults;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    spellCheckService, spellCheckSuggestionsHandler, spellCheckResults);
 }
 
 /// Determines how misspelled words are indicated in text input and how
