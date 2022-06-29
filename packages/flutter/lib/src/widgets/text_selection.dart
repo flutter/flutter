@@ -1608,12 +1608,12 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
-            // Precise devices should place the cursor at a precise position.
+              // Precise devices should place the cursor at a precise position.
               renderEditable.selectPosition(cause: SelectionChangedCause.tap);
               break;
-            // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
+              // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
               break;
           }
