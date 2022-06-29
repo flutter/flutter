@@ -1328,7 +1328,7 @@ class ScrollableDetails {
 
   /// The direction in which this widget scrolls.
   ///
-  /// Defaults to null.
+  /// Cannot be null.
   final AxisDirection direction;
 
   /// A [ScrollController] that can be used to control the position of the
@@ -1342,7 +1342,7 @@ class ScrollableDetails {
   ///
   /// This can be used by [MaterialScrollBehavior] to clip [StretchingOverscrollIndicator].
   ///
-  /// Cannot be null.
+  /// Defaults to null.
   final Clip? clipBehavior;
 }
 
