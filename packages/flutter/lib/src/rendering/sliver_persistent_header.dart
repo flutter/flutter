@@ -606,6 +606,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       clampedPaintExtent + stretchOffset,
       constraints.axisDirection,
     );
+    print('scrollInsets at app bar: $scrollInsets');
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),

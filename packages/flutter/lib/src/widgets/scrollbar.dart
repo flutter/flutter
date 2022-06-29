@@ -413,12 +413,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     ScrollMetrics metrics,
     AxisDirection axisDirection,
   ) {
+    // print('Update scrollbar, new: $metrics, old: $_lastMetrics');
     if (_lastMetrics != null &&
         _lastMetrics!.extentBefore == metrics.extentBefore &&
         _lastMetrics!.extentInside == metrics.extentInside &&
         _lastMetrics!.extentAfter == metrics.extentAfter &&
         _lastAxisDirection == axisDirection &&
-        _lastMetrics!.scrollInsets != metrics.scrollInsets) {
+        _lastMetrics!.scrollInsets == metrics.scrollInsets) {
       return;
     }
 
@@ -430,7 +431,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (!needPaint(oldMetrics) && !needPaint(metrics)) {
       return;
     }
-
+    print('notifying');
     notifyListeners();
   }
 
@@ -482,6 +483,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final Offset trackOffset, borderStart, borderEnd;
 
     _debugAssertIsValidOrientation(resolvedOrientation);
+    print('scrollbar _scrollInsets.top: ${_scrollInsets.top}');
 
     switch(resolvedOrientation) {
       case ScrollbarOrientation.left:
@@ -1848,8 +1850,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     final ScrollMetrics metrics = notification.metrics;
     if (_shouldUpdatePainter(metrics.axis)) {
+      print('updating for metrics.');
       scrollbarPainter.update(metrics, metrics.axisDirection);
-    }
+    } else { print('not updating'); }
     return false;
   }
 
@@ -1867,8 +1870,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       }
 
       if (_shouldUpdatePainter(metrics.axis)) {
+        print('updating for scrolling');
         scrollbarPainter.update(metrics, metrics.axisDirection);
-      }
+      }  else { print('not updating'); }
       return false;
     }
 
@@ -1883,8 +1887,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       _fadeoutTimer?.cancel();
 
       if (_shouldUpdatePainter(metrics.axis)) {
+        print('updating for scrolling');
         scrollbarPainter.update(metrics, metrics.axisDirection);
-      }
+      }  else { print('not updating'); }
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisOffset == null) {
         _maybeStartFadeoutTimer();
