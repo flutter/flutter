@@ -2109,20 +2109,20 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
   }
 }
 
-/// Animated version of [FractionallySizedBox] which automatically transitions the 
-/// child's size over a given duration whenever the given [widthFactor] or 
+/// Animated version of [FractionallySizedBox] which automatically transitions the
+/// child's size over a given duration whenever the given [widthFactor] or
 /// [heightFactor] changes, as well as the position whenever the given [alignment]
 /// changes.
 ///
 /// For the animation, you can choose a [curve] as well as a [duration] and the
 /// widget will automatically animate to the new target [widthFactor] or
-/// [heightFactor]. 
+/// [heightFactor].
 class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
-  /// Creates a widget that sizes its child to a fraction of the total available 
+  /// Creates a widget that sizes its child to a fraction of the total available
   /// space that animates implicitly, and positions its child by an alignment
   /// than animates implicitly.
-  /// 
-  /// 
+  ///
+  ///
   ///
   /// The [curve] and [duration] argument must not be null
   /// If non-null, the [widthFactor] and [heightFactor] arguments must be
@@ -2139,7 +2139,7 @@ class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
   }) : assert(alignment != null),
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
-  
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
