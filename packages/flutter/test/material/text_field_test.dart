@@ -7335,22 +7335,22 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-      final Offset pos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
+      final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
+      final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'.
 
       // This tap just puts the cursor somewhere different than where the double
       // tap will occur to test that the double tap moves the existing cursor first.
-      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.tapAt(wPos);
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.tapAt(pos);
+      await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         TextSelection.collapsed(offset: isTargetPlatformMobile ? 8 : 9),
       );
-      await tester.tapAt(pos);
+      await tester.tapAt(pPos);
       await tester.pumpAndSettle();
 
       // Second tap selects the word around the cursor.

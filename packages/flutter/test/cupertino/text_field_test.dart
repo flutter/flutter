@@ -1776,7 +1776,6 @@ void main() {
         ),
       );
 
-      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
       final Offset pos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'.
 
       await tester.tapAt(pos);
@@ -1908,7 +1907,6 @@ void main() {
         ),
       );
 
-      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
       final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'.
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
 
@@ -1999,7 +1997,6 @@ void main() {
         ),
       );
 
-      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
       final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
 
