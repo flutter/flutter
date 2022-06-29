@@ -308,12 +308,7 @@ flutter:
       ..createSync();
     handler.addError(directory, FileSystemOp.delete, const FileSystemException('Expected Error Text'));
 
-    await writeBundle(
-      directory,
-      <String, DevFSContent>{},
-      <String, AssetKind>{},
-      loggerOverride: testLogger,
-    );
+    await writeBundle(directory, <String, DevFSContent>{}, loggerOverride: testLogger);
 
     expect(testLogger.warningText, contains('Expected Error Text'));
   });
@@ -420,19 +415,14 @@ flutter:
         ..writeAsStringSync(r'''
   name: example
   flutter:
-    shaders:
+    assets:
       - assets/shader.frag
   ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
       expect(await bundle.build(packagesPath: '.packages'), 0);
 
-      await writeBundle(
-        output,
-        bundle.entries,
-        bundle.entryKinds,
-        loggerOverride: testLogger,
-      );
+      await writeBundle(output, bundle.entries, loggerOverride: testLogger);
 
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,

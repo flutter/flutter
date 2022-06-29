@@ -633,9 +633,6 @@ class FakeBundle extends AssetBundle {
   Map<String, DevFSContent> get entries => <String, DevFSContent>{};
 
   @override
-  Map<String, AssetKind> get entryKinds => <String, AssetKind>{};
-
-  @override
   List<File> get inputFiles => <File>[];
 
   @override
