@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
+import 'package:process/process.dart';
+
+import 'base/io.dart';
+import 'convert.dart';
+import 'dart_pub_json_formatter.dart';
 import 'flutter_manifest.dart';
 import 'project.dart';
 import 'project_validator_result.dart';
@@ -11,10 +18,6 @@ abstract class ProjectValidator {
   bool supportsProject(FlutterProject project);
   /// Can return more than one result in case a file/command have a lot of info to share to the user
   Future<List<ProjectValidatorResult>> start(FlutterProject project);
-  /// new ProjectValidators should be added here for the ValidateProjectCommand to run
-  static List <ProjectValidator> allProjectValidators = <ProjectValidator>[
-    GeneralInfoProjectValidator(),
-  ];
 }
 
 /// Validator run for all platforms that extract information from the pubspec.yaml.
@@ -108,4 +111,73 @@ class GeneralInfoProjectValidator extends ProjectValidator{
 
   @override
   String get title => 'General Info';
+}
+
+class PubDependenciesProjectValidator extends ProjectValidator {
+  PubDependenciesProjectValidator(this._processManager);
+  final ProcessManager _processManager;
+
+  @override
+  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+    const String name = 'Dart dependencies';
+    final ProcessResult processResult = await _processManager.run(<String>['dart', 'pub', 'deps', '--json']);
+    if (processResult.stdout is! String) {
+      return <ProjectValidatorResult>[
+        _createProjectValidatorError(name, 'Command dart pub deps --json failed')
+      ];
+    }
+
+    final LinkedHashMap<String, dynamic> jsonResult;
+    final List<ProjectValidatorResult> result = <ProjectValidatorResult>[];
+    try {
+      jsonResult = json.decode(
+        processResult.stdout.toString()
+      ) as LinkedHashMap<String, dynamic>;
+    } on FormatException{
+      result.add(_createProjectValidatorError(name, processResult.stdout.toString()));
+      return result;
+    }
+
+    final DartPubJson dartPubJson = DartPubJson(jsonResult);
+    final List <String> dependencies = <String>[];
+    final Set<String> hostedDependencies = {'hosted', 'root'};
+
+    for (final Package package in dartPubJson.packages) {
+      if (!hostedDependencies.contains(package.source)) {
+        dependencies.addAll(package.dependencies);
+      }
+    }
+
+    if (dependencies.isNotEmpty) {
+      result.add(
+        ProjectValidatorResult(
+          name: name,
+          value: dependencies.join(', '),
+          status: StatusProjectValidator.warning,
+        )
+      );
+    } else {
+      result.add(
+        const ProjectValidatorResult(
+          name: name,
+          value: 'All dependencies are hosted',
+          status: StatusProjectValidator.success,
+        )
+      );
+    }
+
+    return result;
+  }
+
+  @override
+  bool supportsProject(FlutterProject project) {
+    return true;
+  }
+
+  @override
+  String get title => 'Pub dependencies';
+
+  ProjectValidatorResult _createProjectValidatorError(String name, String value) {
+    return ProjectValidatorResult(name: name, value: value, status: StatusProjectValidator.error);
+  }
 }

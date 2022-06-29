@@ -138,10 +138,14 @@ class AnalyzeCommand extends FlutterCommand {
       }
       if (workingDirectory == null) {
         final Set<String> items = findDirectories(argResults!, _fileSystem);
-        if (items.isEmpty || items.length > 1) {
-          throwToolExit('The suggestions flags needs one directory path');
+        if (items.isEmpty) { // user did not specify any path
+          _logger.printStatus('Showing suggestions for current directory');
+          directoryPath = _fileSystem.currentDirectory.path;
+        } else if (items.length > 1) { // if the user sends more than one path
+          throwToolExit('The suggestions flag can process only one directory path');
+        } else {
+          directoryPath = items.first;
         }
-        directoryPath = items.first;
       } else {
         directoryPath = workingDirectory!.path;
       }
@@ -150,6 +154,7 @@ class AnalyzeCommand extends FlutterCommand {
         logger: _logger,
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
+        processManager: _processManager,
       ).run();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
