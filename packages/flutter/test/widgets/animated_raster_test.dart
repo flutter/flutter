@@ -14,39 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 part 'package:flutter/src/material/animated_raster.dart';
 
 void main() {
-  testWidgets('AnimatedRaster draws its children normally if animation is dismissed/completed', (WidgetTester tester) async {
-    final TestDelegate delegate = TestDelegate();
-
-    await tester.pumpWidget(_AnimatedRaster(
-      animation: kAlwaysDismissedAnimation,
-      delegate: delegate,
-      child: Container(color: Colors.red, width: 100, height: 100),
-    ));
-
-    expect(delegate.lastImage, isNull);
-
-    await tester.pumpWidget(_AnimatedRaster(
-      animation: kAlwaysCompleteAnimation,
-      delegate: delegate,
-      child: Container(color: Colors.red, width: 100, height: 100),
-    ));
-
-    expect(delegate.lastImage, isNull);
-  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
-
-  testWidgets('AnimatedRaster replaces its children with a raster if the animation is forward or reverse', (WidgetTester tester) async {
-    final TestDelegate delegate = TestDelegate();
-
-    await tester.pumpWidget(_AnimatedRaster(
-      animation: const AlwaysStoppedAnimation<double>(0.5),
-      delegate: delegate,
-      child: Container(color: Colors.red, width: 100, height: 100),
-    ));
-
-    expect(delegate.lastImage, isNotNull);
-    delegate.lastImage = null;
-  }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
-
   testWidgets('AnimatedRaster disposes its child image when disposed', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
 

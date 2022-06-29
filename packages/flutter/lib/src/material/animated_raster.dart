@@ -75,35 +75,24 @@ class _AnimatedRaster extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A render object that converts its children to a [ui.Image] while animating.
+/// A render object that converts its children to a [ui.Image].
 ///
-/// While the status of [animation] is [AnimationStatus.completed] or
-/// [AnimationStatus.dismissed], children are painted normally. When the status
-/// is [AnimationStatus.forward] or [AnimationStatus.reverse], this render object
-/// will create a GPU resident texture the first time that [_AnimatedRasterDelegate.willPaint] returns true
-/// and provide it to [_AnimatedRasterDelegate.paint].
+/// This render object will create a GPU resident texture the first time that
+/// [_AnimatedRasterDelegate.willPaint] returns true and and provide it to
+/// [_AnimatedRasterDelegate.paintRaster]. This will be reused until `willPaint`
+/// returns false. It is up to the implementor of the raster delegate to handle
+/// painting both the rasterized and the non-rasterized child.
 ///
 /// See also:
 ///  * [ZoomPageTransitionsBuilder], which uses this render object to implement the fade and
 ///    stretch effect efficiently.
 class _RenderAnimatedRaster extends RenderProxyBox {
   /// Create a new [_RenderAnimatedRaster].
-  _RenderAnimatedRaster(this._animation, this._delegate, this._devicePixelRatio);
-
-  AnimationStatus _status = AnimationStatus.completed;
-
-  void _updateStatus(AnimationStatus newStatus, [bool painting = false]) {
-    if (newStatus == _status) {
-      return;
-    }
-    _childImage?.dispose();
-    _childImage = null;
-    _status = newStatus;
-    assert(_status == animation.status);
-    if (!painting) {
-      markNeedsPaint();
-    }
-  }
+  _RenderAnimatedRaster(
+    this._animation,
+    this._delegate,
+    this._devicePixelRatio,
+  );
 
   /// The delegate that controls how the child raster is painted.
   _AnimatedRasterDelegate get delegate => _delegate;
@@ -135,18 +124,14 @@ class _RenderAnimatedRaster extends RenderProxyBox {
       return;
     }
     animation.removeListener(markNeedsPaint);
-    animation.removeStatusListener(_updateStatus);
     _animation = value;
-    animation.addStatusListener(_updateStatus);
     animation.addListener(markNeedsPaint);
-    _updateStatus(animation.status);
     markNeedsPaint();
   }
 
   @override
   void dispose() {
     animation.removeListener(markNeedsPaint);
-    animation.removeStatusListener(_updateStatus);
     _childImage?.dispose();
     _childImage = null;
     super.dispose();
@@ -155,15 +140,12 @@ class _RenderAnimatedRaster extends RenderProxyBox {
   @override
   void attach(covariant PipelineOwner owner) {
     animation.addListener(markNeedsPaint);
-    animation.addStatusListener(_updateStatus);
-    _updateStatus(animation.status);
     super.attach(owner);
   }
 
   @override
   void detach() {
     animation.removeListener(markNeedsPaint);
-    animation.removeStatusListener(_updateStatus);
     super.detach();
   }
 
@@ -189,16 +171,6 @@ class _RenderAnimatedRaster extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child == null) {
       return;
-    }
-    _updateStatus(animation.status, true);
-    switch (_status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        super.paint(context, offset);
-        return;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
     }
     final bool useRaster = delegate.useRaster(animation);
     if (!useRaster) {
