@@ -1087,12 +1087,12 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset pos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pos);
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pos);
       await tester.pump();
 
       // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select all'.
@@ -7297,16 +7297,16 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset pos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'.
 
-      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.tapAt(pos);
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.tapAt(pos);
       await tester.pump();
 
       // Place collapsed selection.
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 3);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 3);
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
+      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -7336,20 +7336,21 @@ void main() {
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset pos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
 
       // This tap just puts the cursor somewhere different than where the double
       // tap will occur to test that the double tap moves the existing cursor first.
       await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         TextSelection.collapsed(offset: isTargetPlatformMobile ? 8 : 9),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pos);
       await tester.pumpAndSettle();
 
       // Second tap selects the word around the cursor.
@@ -7361,7 +7362,7 @@ void main() {
       // Selected text shows 3 toolbar buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
   testWidgets(
@@ -7794,19 +7795,20 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
+      final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         TextSelection.collapsed(offset: isTargetPlatformMobile ? 8 : 9),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.tapAt(ePos);
       await tester.pump();
 
       // Place collapsed selection at the edge of first word on iOS. In iOS 12,
@@ -7912,18 +7914,18 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
 
-      await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.tapAt(ePos);
       await tester.pump();
 
       // We ended up moving the cursor to the edge of the same word and dismissed
       // the toolbar.
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 3);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 3);
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
+      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -8475,19 +8477,20 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
+      final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor to the beginning of the second word.
       expect(
         controller.selection,
         TextSelection.collapsed(offset: isTargetPlatformMobile ? 8 : 9),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.longPressAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.longPressAt(ePos);
       await tester.pumpAndSettle();
 
       // Plain collapsed selection at the exact tap position.
@@ -8523,23 +8526,24 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
+      final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'
 
-      await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.longPressAt(wPos);
       await tester.pump(const Duration(milliseconds: 50));
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 3),
       );
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         TextSelection.collapsed(offset: isTargetPlatformMobile ? 8 : 9),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.tapAt(pPos);
       await tester.pumpAndSettle();
 
       // Double tap selection.
