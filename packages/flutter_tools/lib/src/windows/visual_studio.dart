@@ -23,11 +23,16 @@ class VisualStudio {
     required Logger logger,
   }) : _platform = platform,
        _fileSystem = fileSystem,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final ProcessUtils _processUtils;
+  final Logger _logger;
+
+  /// Matches the description property from the vswhere.exe JSON output.
+  final RegExp _vswhereDescriptionProperty = RegExp(r'\s*"description":\s*".*"\s*,?');
 
   /// True if Visual Studio installation was found.
   ///
@@ -294,9 +299,8 @@ class VisualStudio {
         ...requirementArguments,
       ], encoding: encoding);
       if (whereResult.exitCode == 0) {
-        final List<Map<String, dynamic>> installations =
-            (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
-        if (installations.isNotEmpty) {
+        final List<Map<String, dynamic>>? installations = _tryDecodeVswhereJson(whereResult.stdout);
+        if (installations != null && installations.isNotEmpty) {
           return VswhereDetails.fromJson(validateRequirements, installations[0]);
         }
       }
@@ -304,10 +308,31 @@ class VisualStudio {
       // Thrown if vswhere doesn't exist; ignore and return null below.
     } on ProcessException {
       // Ignored, return null below.
-    } on FormatException {
-      // may be thrown if invalid JSON is returned.
     }
     return null;
+  }
+
+  List<Map<String, dynamic>>? _tryDecodeVswhereJson(String vswhereJson) {
+    late List<dynamic> result;
+    try {
+      // vswhere.exe is known to encode its output incorrectly, resulting in
+      // malformed JSON in the description property when interpreted as UTF-8.
+      // First, try to decode without any pre-processing.
+      try {
+        result = json.decode(vswhereJson) as List<dynamic>;
+      } on FormatException {
+        // The description property may be malformed. This property is unused,
+        // so try to decode the JSON again after removing it.
+        vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
+        result = json.decode(vswhereJson) as List<dynamic>;
+      }
+    } on FormatException catch (error) {
+      // Give up if the JSON is invalid even after removing the description property.
+      _logger.printWarning('Warning: unexpected vswhere.exe output. To see full output, run flutter doctor -vv. $error');
+      return null;
+    }
+
+    return result.cast<Map<String, dynamic>>();
   }
 
   /// Returns the details of the best available version of Visual Studio.
