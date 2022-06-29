@@ -601,11 +601,13 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   bool _showToolbar({Offset? location}) {
+    /*
     if (widget.buildContextMenu == null) {
       return false;
     }
 
     ContextMenuController.hide();
+    */
 
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
@@ -619,6 +621,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return false;
     }
 
+    /*
     // TODO(justinmc): What's that about calculating the location in the docs above?
     if (location == null) {
       return false;
@@ -653,15 +656,14 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         );
       },
     );
+    */
 
-    /*
     if (_selectionOverlay == null) {
       _createSelectionOverlay();
     }
 
     _selectionOverlay!.toolbarLocation = location;
     _selectionOverlay!.showToolbar();
-    */
     return true;
   }
 

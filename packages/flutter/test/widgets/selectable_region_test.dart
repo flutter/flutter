@@ -1110,9 +1110,6 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-              return const SizedBox.shrink();
-            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
