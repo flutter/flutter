@@ -29,7 +29,8 @@ struct SourceOptions {
 
   ~SourceOptions();
 
-  SourceOptions(const std::string& file_name);
+  explicit SourceOptions(const std::string& file_name,
+                         SourceType source_type = SourceType::kUnknown);
 };
 
 }  // namespace compiler
