@@ -12584,6 +12584,9 @@ void main() {
   testWidgets(
       'Spell check configured properly with specified spell check service and handler',
           (WidgetTester tester) async {
+        DefaultSpellCheckService defaultService = DefaultSpellCheckService();
+        DefaultSpellCheckSuggestionsHandler defaultHandler = DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
+        
         await tester.pumpWidget(
           MaterialApp(
             home: EditableText(
