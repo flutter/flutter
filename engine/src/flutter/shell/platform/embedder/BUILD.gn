@@ -189,7 +189,7 @@ test_fixtures("fixtures") {
 }
 
 if (enable_unittests) {
-  executable("embedder_unittests") {
+  source_set("embedder_unittests_library") {
     testonly = true
 
     configs += [
@@ -200,7 +200,6 @@ if (enable_unittests) {
     include_dirs = [ "." ]
 
     sources = [
-      "tests/embedder_a11y_unittests.cc",
       "tests/embedder_config_builder.cc",
       "tests/embedder_config_builder.h",
       "tests/embedder_test.cc",
@@ -215,11 +214,10 @@ if (enable_unittests) {
       "tests/embedder_test_context.h",
       "tests/embedder_test_context_software.cc",
       "tests/embedder_test_context_software.h",
-      "tests/embedder_unittests.cc",
       "tests/embedder_unittests_util.cc",
     ]
 
-    deps = [
+    public_deps = [
       ":embedder",
       ":embedder_gpu_configuration",
       ":fixtures",
@@ -241,10 +239,9 @@ if (enable_unittests) {
         "tests/embedder_test_compositor_gl.h",
         "tests/embedder_test_context_gl.cc",
         "tests/embedder_test_context_gl.h",
-        "tests/embedder_unittests_gl.cc",
       ]
 
-      deps += [
+      public_deps += [
         "//flutter/testing:opengl",
         "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
       ]
@@ -256,10 +253,9 @@ if (enable_unittests) {
         "tests/embedder_test_compositor_metal.h",
         "tests/embedder_test_context_metal.cc",
         "tests/embedder_test_context_metal.h",
-        "tests/embedder_unittests_metal.mm",
       ]
 
-      deps += [ "//flutter/testing:metal" ]
+      public_deps += [ "//flutter/testing:metal" ]
     }
 
     if (test_enable_vulkan) {
@@ -270,11 +266,49 @@ if (enable_unittests) {
         "tests/embedder_test_context_vulkan.h",
       ]
 
-      deps += [
+      public_deps += [
         "//flutter/testing:vulkan",
         "//flutter/vulkan",
       ]
     }
+  }
+
+  executable("embedder_unittests") {
+    testonly = true
+
+    configs += [
+      ":embedder_gpu_configuration_config",
+      "//flutter:export_dynamic_symbols",
+    ]
+
+    include_dirs = [ "." ]
+
+    sources = [ "tests/embedder_unittests.cc" ]
+
+    deps = [ ":embedder_unittests_library" ]
+
+    if (test_enable_gl) {
+      sources += [ "tests/embedder_unittests_gl.cc" ]
+    }
+
+    if (test_enable_metal) {
+      sources += [ "tests/embedder_unittests_metal.mm" ]
+    }
+  }
+
+  executable("embedder_a11y_unittests") {
+    testonly = true
+
+    configs += [
+      ":embedder_gpu_configuration_config",
+      "//flutter:export_dynamic_symbols",
+    ]
+
+    include_dirs = [ "." ]
+
+    sources = [ "tests/embedder_a11y_unittests.cc" ]
+
+    deps = [ ":embedder_unittests_library" ]
   }
 
   # Tests that build in FLUTTER_ENGINE_NO_PROTOTYPES mode.
