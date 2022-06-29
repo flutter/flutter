@@ -1959,7 +1959,6 @@ targets:
     bringup: true
 
   - name: Linux_android new_gallery__crane_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/105611
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
