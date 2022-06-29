@@ -326,6 +326,7 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
       make_test('dart_plugin_registrant_unittests'),
       make_test('display_list_rendertests'),
       make_test('display_list_unittests'),
+      make_test('embedder_a11y_unittests'),
       make_test('embedder_proctable_unittests'),
       make_test('embedder_unittests'),
       make_test('fml_unittests', flags=[fml_unittests_filter] + repeat_flags),
