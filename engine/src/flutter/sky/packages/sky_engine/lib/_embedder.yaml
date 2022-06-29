@@ -8,7 +8,6 @@ embedded_libs:
   "dart:core": "../../../../../third_party/dart/sdk/lib/core/core.dart"
   "dart:developer": "../../../../../third_party/dart/sdk/lib/developer/developer.dart"
   "dart:ffi": "../../../../../third_party/dart/sdk/lib/ffi/ffi.dart"
-  "dart:html": "../../../../../third_party/dart/sdk/lib/html/html_dart2js.dart"
   "dart:io": "../../../../../third_party/dart/sdk/lib/io/io.dart"
   "dart:isolate": "../../../../../third_party/dart/sdk/lib/isolate/isolate.dart"
   "dart:js": "../../../../../third_party/dart/sdk/lib/js/js.dart"
