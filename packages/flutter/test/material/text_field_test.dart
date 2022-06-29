@@ -1940,7 +1940,7 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 8);
   },
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.macOS, TargetPlatform.windows })
+      variant: TargetPlatformVariant.desktop(),
   );
 
   testWidgets('Selection updates on tap up (Mobile platforms)', (WidgetTester tester) async {
@@ -1994,7 +1994,7 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 8);
   },
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.iOS })
+      variant: TargetPlatformVariant.mobile(),
   );
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
@@ -7304,9 +7304,9 @@ void main() {
       await tester.tapAt(pos);
       await tester.pump();
 
-      // Place collapsed selection.
+      // Plain collapsed selection.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -7811,12 +7811,12 @@ void main() {
       await tester.tapAt(ePos);
       await tester.pump();
 
-      // Place collapsed selection at the edge of first word on iOS. In iOS 12,
+      // Plain collapsed selection at the edge of first word on iOS. In iOS 12,
       // the first tap after a double tap ends up putting the cursor at where
       // you tapped instead of the edge like every other single tap. This is
       // likely a bug in iOS 12 and not present in other versions.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -7924,8 +7924,8 @@ void main() {
 
       // We ended up moving the cursor to the edge of the same word and dismissed
       // the toolbar.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), findsNothing);

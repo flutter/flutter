@@ -1783,9 +1783,9 @@ void main() {
       await tester.tapAt(pos);
       await tester.pump();
 
-      // Place collapsed selection.
+      // Plain collapsed selection.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -1917,8 +1917,8 @@ void main() {
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
 
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
@@ -2003,8 +2003,8 @@ void main() {
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
 
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
@@ -2012,12 +2012,12 @@ void main() {
       await tester.tapAt(ePos);
       await tester.pump();
 
-      // Place collapsed selection at the edge of first word. In iOS 12, the
+      // Plain collapsed selection at the edge of first word. In iOS 12, the
       // first tap after a double tap ends up putting the cursor at where
       // you tapped instead of the edge like every other single tap. This is
       // likely a bug in iOS 12 and not present in other versions.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2458,8 +2458,8 @@ void main() {
 
       // We ended up moving the cursor to the edge of the same word and dismissed
       // the toolbar.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 7 : 6);
 
       // The toolbar from the long press is now dismissed by the second tap.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2641,8 +2641,8 @@ void main() {
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor to the beginning of the second word.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -2687,8 +2687,8 @@ void main() {
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
+      expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
-      expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
 
@@ -2840,8 +2840,8 @@ void main() {
     await gesture.up();
     // Fall back to a single tap which selects the edge of the word on iOS, and
     // a precise position on macOS.
+    expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
-    expect(controller.selection.extentOffset, isTargetPlatformMobile ? 8 : 9);
 
     await tester.pump();
     // Falling back to a single tap doesn't trigger a toolbar.
@@ -2951,7 +2951,7 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 8);
   },
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.macOS, TargetPlatform.windows })
+      variant: TargetPlatformVariant.desktop(),
   );
 
   testWidgets('Selection updates on tap up (Mobile platforms)', (WidgetTester tester) async {
@@ -3007,7 +3007,7 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 8);
   },
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.iOS })
+      variant: TargetPlatformVariant.mobile(),
   );
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
