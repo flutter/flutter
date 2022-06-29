@@ -13,6 +13,7 @@
 #include "impeller/compiler/compiler.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
 #include "third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp"
 
@@ -42,14 +43,17 @@ bool Main(const fml::CommandLine& command_line) {
 
   SourceOptions options;
   options.target_platform = switches.target_platform;
-  options.type = SourceTypeFromFileName(switches.source_file_name);
+  if (switches.input_type == SourceType::kUnknown) {
+    options.type = SourceTypeFromFileName(switches.source_file_name);
+  } else {
+    options.type = switches.input_type;
+  }
   options.working_directory = switches.working_directory;
   options.file_name = switches.source_file_name;
   options.include_dirs = switches.include_directories;
   options.defines = switches.defines;
   options.entry_point_name = EntryPointFunctionNameFromSourceName(
-      switches.source_file_name,
-      SourceTypeFromFileName(switches.source_file_name));
+      switches.source_file_name, options.type);
 
   Reflector::Options reflector_options;
   reflector_options.target_platform = switches.target_platform;

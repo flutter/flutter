@@ -9,8 +9,12 @@ namespace compiler {
 
 SourceOptions::SourceOptions() = default;
 
-SourceOptions::SourceOptions(const std::string& file_name)
-    : type(SourceTypeFromFileName(file_name)), file_name(file_name) {}
+SourceOptions::SourceOptions(const std::string& file_name,
+                             SourceType source_type)
+    : type(source_type == SourceType::kUnknown
+               ? SourceTypeFromFileName(file_name)
+               : source_type),
+      file_name(file_name) {}
 
 SourceOptions::~SourceOptions() = default;
 

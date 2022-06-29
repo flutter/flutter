@@ -58,14 +58,15 @@ static std::string SLFileName(const char* fixture_name,
   return stream.str();
 }
 
-bool CompilerTest::CanCompileAndReflect(const char* fixture_name) const {
+bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
+                                        SourceType source_type) const {
   auto fixture = flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!fixture->GetMapping()) {
     VALIDATION_LOG << "Could not find shader in fixtures: " << fixture_name;
     return false;
   }
 
-  SourceOptions source_options(fixture_name);
+  SourceOptions source_options(fixture_name, source_type);
   source_options.target_platform = GetParam();
   source_options.working_directory = std::make_shared<fml::UniqueFD>(
       flutter::testing::OpenFixturesDirectory());
