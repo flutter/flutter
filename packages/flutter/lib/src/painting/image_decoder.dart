@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui show Codec, FrameInfo, Image;
 
 import 'binding.dart';
+
+export 'dart:typed_data' show Uint8List;
+export 'dart:ui' show Image;
 
 /// Creates an image from a list of bytes.
 ///

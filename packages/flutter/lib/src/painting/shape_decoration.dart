@@ -13,10 +13,19 @@ import 'circle_border.dart';
 import 'colors.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
-import 'edge_insets.dart';
-import 'gradient.dart';
-import 'image_provider.dart';
 import 'rounded_rectangle_border.dart';
+
+export 'dart:ui' show Color, Offset, Path, Rect, Size, TextDirection, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'borders.dart' show ShapeBorder;
+export 'box_decoration.dart' show BoxDecoration;
+export 'box_shadow.dart' show BoxShadow;
+export 'decoration.dart' show BoxPainter, Decoration;
+export 'decoration_image.dart' show DecorationImage;
+export 'edge_insets.dart' show EdgeInsetsGeometry;
+export 'gradient.dart' show Gradient;
 
 /// An immutable description of how to paint an arbitrary shape.
 ///

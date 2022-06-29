@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'basic_types.dart';
 
+export 'dart:ui' show Canvas, Offset, Paint;
+
 /// Draw a line between two points, which cuts diagonally back and forth across
 /// the line that connects the two points.
 ///

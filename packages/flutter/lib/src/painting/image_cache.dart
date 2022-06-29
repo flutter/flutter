@@ -9,6 +9,8 @@ import 'package:flutter/scheduler.dart';
 
 import 'image_stream.dart';
 
+export 'image_stream.dart' show ImageErrorListener, ImageStreamCompleter;
+
 const int _kDefaultSize = 1000;
 const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 

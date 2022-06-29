@@ -7,6 +7,13 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'basic_types.dart';
 
+export 'dart:ui' show Offset, Rect;
+
+export 'package:flutter/foundation.dart' show DiagnosticLevel, TextTreeConfiguration;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'basic_types.dart' show Axis;
+
 /// Utility functions for working with matrices.
 class MatrixUtils {
   // This class is not meant to be instantiated or extended; this constructor

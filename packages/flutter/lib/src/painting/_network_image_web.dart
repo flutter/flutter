@@ -12,6 +12,13 @@ import 'package:flutter/foundation.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
+export 'dart:html' show HttpRequest;
+export 'dart:typed_data' show Uint8List;
+export 'dart:ui' show Codec, ImmutableBuffer;
+
+export 'image_provider.dart' show DecoderBufferCallback, DecoderCallback, ImageConfiguration;
+export 'image_stream.dart' show ImageStreamCompleter;
+
 /// Creates a type for an overridable factory function for testing purposes.
 typedef HttpRequestFactory = html.HttpRequest Function();
 

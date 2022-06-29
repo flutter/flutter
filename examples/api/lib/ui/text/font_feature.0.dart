@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 // Flutter code sample for FontFeature
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 void main() => runApp(const ExampleApp());

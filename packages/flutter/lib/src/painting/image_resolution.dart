@@ -11,6 +11,10 @@ import 'package:flutter/services.dart';
 
 import 'image_provider.dart';
 
+export 'package:flutter/services.dart' show AssetBundle;
+
+export 'image_provider.dart' show AssetBundleImageKey, ImageConfiguration;
+
 const String _kAssetManifestFileName = 'AssetManifest.json';
 
 /// A screen with a device-pixel ratio strictly less than this value is

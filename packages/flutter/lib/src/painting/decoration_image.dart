@@ -17,6 +17,13 @@ import 'debug.dart';
 import 'image_provider.dart';
 import 'image_stream.dart';
 
+export 'dart:ui' show Canvas, ColorFilter, FilterQuality, Image, Path, Rect, VoidCallback;
+
+export 'alignment.dart' show Alignment, AlignmentGeometry;
+export 'box_fit.dart' show BoxFit;
+export 'image_provider.dart' show ImageConfiguration, ImageProvider;
+export 'image_stream.dart' show ImageErrorListener;
+
 /// How to paint any portions of a box not covered by an image.
 enum ImageRepeat {
   /// Repeat the image in both the x and y directions until the box is filled.

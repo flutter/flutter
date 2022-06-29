@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 // Flutter code sample for dart:ui FontFeature.FontFeature.tabularFigures
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
 
 void main() => runApp(const ExampleApp());

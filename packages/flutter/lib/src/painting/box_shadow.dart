@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'debug.dart';
 
+export 'dart:ui' show BlurStyle, Color, Offset, Paint;
+
 /// A shadow cast by a box.
 ///
 /// [BoxShadow] can cast non-rectangular shadows if the box is non-rectangular

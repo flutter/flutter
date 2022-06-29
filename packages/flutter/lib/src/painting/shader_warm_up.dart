@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 
+export 'dart:ui' show Canvas, Size;
+
 /// Interface for drawing an image to warm up Skia shader compilations.
 ///
 /// When Skia first sees a certain type of draw operation on the GPU, it needs

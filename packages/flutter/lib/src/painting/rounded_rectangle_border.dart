@@ -12,6 +12,12 @@ import 'borders.dart';
 import 'circle_border.dart';
 import 'edge_insets.dart';
 
+export 'dart:ui' show Canvas, Path, Rect, TextDirection;
+
+export 'border_radius.dart' show BorderRadiusGeometry;
+export 'borders.dart' show BorderSide, ShapeBorder;
+export 'edge_insets.dart' show EdgeInsetsGeometry;
+
 /// A rectangular border with rounded corners.
 ///
 /// Typically used with [ShapeDecoration] to draw a box with a rounded

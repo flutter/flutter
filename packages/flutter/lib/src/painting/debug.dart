@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:ui' show Size, Picture, Image;
+import 'dart:ui' show Image, Picture, Size;
 
 import 'package:flutter/foundation.dart';
+
+export 'dart:io' show HttpClient;
+export 'dart:ui' show Image, Picture, Size;
 
 /// Whether to replace all shadows with solid color blocks.
 ///

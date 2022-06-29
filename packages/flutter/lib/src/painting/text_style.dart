@@ -11,6 +11,15 @@ import 'colors.dart';
 import 'strut_style.dart';
 import 'text_painter.dart';
 
+export 'dart:ui' show Color, FontFeature, FontStyle, FontVariation, FontWeight, Locale, Paint, ParagraphStyle, Shadow, TextAlign, TextBaseline, TextDecoration, TextDecorationStyle, TextDirection, TextHeightBehavior, TextLeadingDistribution;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'basic_types.dart' show RenderComparison;
+export 'strut_style.dart' show StrutStyle;
+// TODO(a14n): the following export leads to execution issue, see https://github.com/flutter/flutter/issues/106951
+// export 'text_painter.dart' show TextOverflow;
+
 const String _kDefaultDebugLabel = 'unknown';
 
 const String _kColorForegroundWarning = 'Cannot provide both a color and a foreground\n'

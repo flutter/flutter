@@ -8,6 +8,10 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
+export 'dart:ui' show Offset, Rect, Size, TextDirection, WindowPadding;
+
+export 'basic_types.dart' show Axis;
+
 /// Base class for [EdgeInsets] that allows for text-direction aware
 /// resolution.
 ///

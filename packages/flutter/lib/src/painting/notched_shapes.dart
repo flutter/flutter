@@ -7,6 +7,10 @@ import 'dart:math' as math;
 import 'basic_types.dart';
 import 'borders.dart';
 
+export 'dart:ui' show Path, Rect;
+
+export 'borders.dart' show ShapeBorder;
+
 /// A shape with a notch in its outline.
 ///
 /// Typically used as the outline of a 'host' widget to make a notch that

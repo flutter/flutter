@@ -9,6 +9,12 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
+export 'dart:ui' show Canvas, Color, Path, Rect, TextDirection;
+
+export 'border_radius.dart' show BorderRadius;
+export 'borders.dart' show BorderSide, BorderStyle, ShapeBorder, StrokeAlign;
+export 'edge_insets.dart' show EdgeInsetsGeometry;
+
 // Examples can assume:
 // late BuildContext context;
 

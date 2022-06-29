@@ -13,10 +13,16 @@ import 'box_fit.dart';
 import 'colors.dart';
 import 'decoration.dart';
 import 'edge_insets.dart';
-import 'image_provider.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
 import 'text_style.dart';
+
+export 'dart:ui' show Color, Offset, Path, Rect, Size, TextDirection, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'decoration.dart' show BoxPainter, Decoration;
+export 'edge_insets.dart' show EdgeInsets;
 
 /// Possible ways to draw Flutter's logo.
 enum FlutterLogoStyle {

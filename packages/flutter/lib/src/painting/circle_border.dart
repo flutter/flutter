@@ -6,9 +6,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
+
+export 'dart:ui' show Canvas, Path, Rect, TextDirection;
+
+export 'borders.dart' show BorderSide, ShapeBorder;
+export 'edge_insets.dart' show EdgeInsetsGeometry;
 
 /// A border that fits a circle within the available space.
 ///

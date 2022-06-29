@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
+export 'dart:ui' show Size;
+
 /// How a box should be inscribed into another box.
 ///
 /// See also:

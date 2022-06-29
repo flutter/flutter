@@ -9,12 +9,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'inline_span.dart';
 import 'placeholder_span.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
 
-export 'package:flutter/services.dart' show TextRange, TextSelection;
+export 'dart:ui' show BoxHeightStyle, BoxWidthStyle, Canvas, LineMetrics, Locale, Offset, PlaceholderAlignment, Rect, Size, TextAlign, TextBaseline, TextBox, TextDirection, TextHeightBehavior, TextPosition, TextRange;
+
+export 'package:flutter/services.dart' show TextSelection;
+
+export 'inline_span.dart' show InlineSpan;
+export 'strut_style.dart' show StrutStyle;
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_style.dart, as well as the

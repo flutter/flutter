@@ -4,6 +4,8 @@
 
 import 'dart:ui' show Canvas, Clip, Path, Paint, Rect, RRect, VoidCallback;
 
+export 'dart:ui' show Canvas, Clip, Path, RRect, Rect, VoidCallback;
+
 /// Clip utilities used by [PaintingContext].
 abstract class ClipContext {
   /// The canvas on which to paint.

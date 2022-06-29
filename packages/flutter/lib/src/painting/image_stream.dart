@@ -8,6 +8,10 @@ import 'dart:ui' as ui show Image, Codec, FrameInfo;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
+export 'dart:ui' show Codec, Image, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, DiagnosticsNode, InformationCollector;
+
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the

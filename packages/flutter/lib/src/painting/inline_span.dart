@@ -5,12 +5,19 @@
 import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
-import 'text_style.dart';
+
+export 'dart:ui' show ParagraphBuilder, StringAttribute, TextPosition;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+export 'package:flutter/gestures.dart' show GestureRecognizer;
+
+export 'basic_types.dart' show RenderComparison;
+export 'text_painter.dart' show PlaceholderDimensions;
+export 'text_style.dart' show TextStyle;
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.

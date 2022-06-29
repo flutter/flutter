@@ -11,6 +11,12 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
+export 'dart:ui' show Canvas, Path, Rect, TextDirection;
+
+export 'border_radius.dart' show BorderRadiusGeometry;
+export 'borders.dart' show BorderSide, ShapeBorder;
+export 'edge_insets.dart' show EdgeInsetsGeometry;
+
 /// A rectangular border with smooth continuous transitions between the straight
 /// sides and the rounded corners.
 ///

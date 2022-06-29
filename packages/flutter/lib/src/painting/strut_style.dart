@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show TextLeadingDistribution;
-
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'text_style.dart';
+
+export 'dart:ui' show FontStyle, FontWeight, TextLeadingDistribution;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'basic_types.dart' show RenderComparison;
+export 'text_style.dart' show TextStyle;
 
 /// Defines the strut, which sets the minimum height a line can be
 /// relative to the baseline.

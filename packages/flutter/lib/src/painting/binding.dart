@@ -3,11 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show instantiateImageCodec, instantiateImageCodecFromBuffer, Codec, ImmutableBuffer;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
 import 'image_cache.dart';
 import 'shader_warm_up.dart';
+
+export 'dart:typed_data' show Uint8List;
+export 'dart:ui' show Codec, ImmutableBuffer;
+
+export 'package:flutter/foundation.dart' show Listenable;
+
+export 'image_cache.dart' show ImageCache;
+export 'shader_warm_up.dart' show ShaderWarmUp;
 
 /// Binding for the painting library.
 ///

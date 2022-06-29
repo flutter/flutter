@@ -12,6 +12,12 @@ import 'package:vector_math/vector_math_64.dart';
 import 'alignment.dart';
 import 'basic_types.dart';
 
+export 'dart:ui' show Color, Rect, Shader, TextDirection, TileMode;
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'alignment.dart' show AlignmentGeometry;
+
 class _ColorsAndStops {
   _ColorsAndStops(this.colors, this.stops);
   final List<Color> colors;

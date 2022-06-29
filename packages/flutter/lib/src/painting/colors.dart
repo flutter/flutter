@@ -7,6 +7,10 @@ import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+export 'dart:ui' show Color;
+
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsSerializationDelegate, DiagnosticsTreeStyle;
+
 double _getHue(double red, double green, double blue, double max, double delta) {
   late double hue;
   if (max == 0.0) {

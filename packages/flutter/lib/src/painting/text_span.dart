@@ -12,6 +12,17 @@ import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
 
+export 'dart:ui' show Locale, ParagraphBuilder, TextPosition;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, DiagnosticsNode;
+export 'package:flutter/gestures.dart' show GestureRecognizer, HitTestEntry, HitTestTarget, PointerEnterEvent, PointerEvent, PointerExitEvent;
+export 'package:flutter/services.dart' show MouseCursor, PointerEnterEventListener, PointerExitEventListener;
+
+export 'inline_span.dart' show RenderComparison;
+export 'inline_span.dart' show Accumulator, InlineSpan, InlineSpanSemanticsInformation, InlineSpanVisitor;
+export 'text_painter.dart' show PlaceholderDimensions;
+export 'text_style.dart' show TextStyle;
+
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property. The style will

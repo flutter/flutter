@@ -13,6 +13,11 @@ import 'circle_border.dart';
 import 'edge_insets.dart';
 import 'rounded_rectangle_border.dart';
 
+export 'dart:ui' show Canvas, Path, Rect, TextDirection;
+
+export 'borders.dart' show BorderSide, ShapeBorder;
+export 'edge_insets.dart' show EdgeInsetsGeometry;
+
 /// A border that fits a stadium-shaped border (a box with semicircles on the ends)
 /// within the rectangle of the widget it is applied to.
 ///

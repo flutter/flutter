@@ -13,6 +13,12 @@ import 'debug.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
+export 'dart:typed_data' show Uint8List;
+export 'dart:ui' show Codec, ImmutableBuffer;
+
+export 'image_provider.dart' show DecoderBufferCallback, DecoderCallback, ImageConfiguration;
+export 'image_stream.dart' show ImageStreamCompleter;
+
 /// The dart:io implementation of [image_provider.NetworkImage].
 @immutable
 class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {

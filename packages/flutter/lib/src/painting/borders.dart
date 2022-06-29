@@ -10,6 +10,10 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'edge_insets.dart';
 
+export 'dart:ui' show Canvas, Color, Paint, Path, Rect, TextDirection;
+
+export 'edge_insets.dart' show EdgeInsetsGeometry;
+
 /// The style of line to draw for a [BorderSide] in a [Border].
 enum BorderStyle {
   /// Skip the border.

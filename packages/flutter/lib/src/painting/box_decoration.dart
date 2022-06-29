@@ -13,9 +13,19 @@ import 'box_shadow.dart';
 import 'colors.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
-import 'edge_insets.dart';
 import 'gradient.dart';
-import 'image_provider.dart';
+
+export 'dart:ui' show BlendMode, Color, Offset, Path, Rect, Size, TextDirection, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'border_radius.dart' show BorderRadiusGeometry;
+export 'box_border.dart' show BoxBorder, BoxShape;
+export 'box_shadow.dart' show BoxShadow;
+export 'decoration.dart' show BoxPainter, Decoration;
+export 'decoration_image.dart' show DecorationImage;
+export 'edge_insets.dart' show EdgeInsetsGeometry;
+export 'gradient.dart' show Gradient;
 
 /// An immutable description of how to paint a box.
 ///

@@ -16,6 +16,16 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
+export 'dart:io' show File;
+export 'dart:typed_data' show Uint8List;
+export 'dart:ui' show Codec, ImmutableBuffer, Locale, Size, TextDirection;
+
+export 'package:flutter/foundation.dart' show TargetPlatform;
+export 'package:flutter/services.dart' show AssetBundle;
+
+export 'image_cache.dart' show ImageCache, ImageCacheStatus;
+export 'image_stream.dart' show ImageErrorListener, ImageStream, ImageStreamCompleter;
+
 /// Signature for the callback taken by [_createErrorHandlerAndKey].
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
