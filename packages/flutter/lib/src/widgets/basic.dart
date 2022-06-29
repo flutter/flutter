@@ -2798,6 +2798,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
+  ///{@template flutter.widgets.basic.fractionallySizedBox.widthFactor}
   /// If non-null, the fraction of the incoming width given to the child.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
@@ -2805,8 +2806,10 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///
   /// If null, the incoming width constraints are passed to the child
   /// unmodified.
+  /// @{endtemplate}
   final double? widthFactor;
 
+  ///{@template flutter.widgets.basic.fractionallySizedBox.heightFactor}
   /// If non-null, the fraction of the incoming height given to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
@@ -2814,8 +2817,10 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///
   /// If null, the incoming height constraints are passed to the child
   /// unmodified.
+  /// @{endtemplate}
   final double? heightFactor;
 
+  ///{@template flutter.widgets.basic.fractionallySizedBox.alignment}
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
@@ -2834,6 +2839,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
+  /// @{endtemplate}
   final AlignmentGeometry alignment;
 
   @override
