@@ -134,6 +134,9 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     'test/cupertino/scaffold_test.dart',
     'test/rendering/platform_view_test.dart',
     'test/cupertino/context_menu_action_test.dart',
+
+    // This test uses the part of trick
+    'test/widgets/animated_raster_test.dart',
   ],
 };
 

@@ -176,6 +176,7 @@ class MaterialPage<T> extends Page<T> {
   /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
+  /// {@macro flutter.widgets.TransitionRoute.preferRasterization}
   final bool preferRasterization;
 
   @override
