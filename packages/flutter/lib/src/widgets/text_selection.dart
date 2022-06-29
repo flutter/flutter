@@ -453,9 +453,12 @@ class TextSelectionOverlay {
         final TextSelectionPoint endTextSelectionPoint = selectionEndpoints.length > 1
           ? selectionEndpoints[1]
           : selectionEndpoints[0];
+        final double topAmountInEditableRegion =
+            startTextSelectionPoint.point.dy - lineHeightAtStart;
+
         final Offset anchorAbove = Offset(
           editingRegion.left + midpoint.dx,
-          editingRegion.top + startTextSelectionPoint.point.dy - lineHeightAtStart,
+          math.max(topAmountInEditableRegion, 0) + editingRegion.top,
         );
         final Offset anchorBelow = Offset(
           editingRegion.left + midpoint.dx,
