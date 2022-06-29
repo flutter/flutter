@@ -1827,7 +1827,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               contains('createdByLocalProject'),
             );
 
-            service.removePubRootDirectories(<String>['file://$pubRootTest']);
+            service.removePubRootDirectories(<String>['/different/$pubRootTest']);
             expect(
               json.decode(service.getSelectedWidget(null, 'my-group')),
               contains('createdByLocalProject'),
