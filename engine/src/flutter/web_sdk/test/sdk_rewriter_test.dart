@@ -30,6 +30,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
+import 'dart:html' as html;
 import 'dart:js' as js;
 import 'dart:js_util' as js_util;
 import 'dart:_js_annotations';
