@@ -1067,23 +1067,6 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-              return DefaultTextSelectionToolbar(
-                primaryAnchor: primaryAnchor,
-                secondaryAnchor: secondaryAnchor,
-                buttonDatas: <ContextMenuButtonData>[
-                  // TODO(justinmc): Only show copy button when there's a selection?
-                  ContextMenuButtonData(
-                    onPressed: () {
-                      // TODO(justinmc): Actually do copy, without EditableTextState.
-                      // How did TextSelectionControls do it?
-                      ContextMenuController.hide();
-                    },
-                    type: ContextMenuButtonType.copy,
-                  ),
-                ],
-              );
-            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
