@@ -322,10 +322,13 @@ class VisualStudio {
       try {
         result = json.decode(vswhereJson) as List<dynamic>;
       } on FormatException catch (e) {
-        // Decoding without pre-processing failed. Retry after removing the
-        // unused description property.
+        // See: https://github.com/flutter/flutter/issues/106601
         error = e;
         vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
+
+        _logger.printTrace('Decoding vswhere.exe JSON output failed. $error'
+          'Retrying after removing the unused description property:\n$vswhereJson');
+
         result = json.decode(vswhereJson) as List<dynamic>;
       }
     } on FormatException {
