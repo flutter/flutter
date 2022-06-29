@@ -20,7 +20,6 @@ export 'rendering.dart' show TextSelectionHandleType;
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';
-export 'src/widgets/animated_raster.dart';
 export 'src/widgets/animated_size.dart';
 export 'src/widgets/animated_switcher.dart';
 export 'src/widgets/annotated_region.dart';

@@ -1676,7 +1676,9 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
     final RenderBox container = tester.renderObject(find.descendant(
-      of: find.byType(kIsWeb ? FadeTransition : AnimatedRaster),
+      of: kIsWeb
+        ? find.byType(FadeTransition)
+        : find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_AnimatedRaster'),
       matching: find.byType(SizedBox),
     ).first);
     expect(container.size, Size.zero);

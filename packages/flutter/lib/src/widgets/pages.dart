@@ -12,6 +12,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   PageRoute({
     super.settings,
     this.fullscreenDialog = false,
+    this.preferRasterization = true,
   });
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}
@@ -23,6 +24,9 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// with the back swipe gesture.
   /// {@endtemplate}
   final bool fullscreenDialog;
+
+  @override
+  final bool preferRasterization;
 
   @override
   bool get opaque => true;
@@ -62,6 +66,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.barrierLabel,
     this.maintainState = true,
     super.fullscreenDialog,
+    super.preferRasterization = true,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),
        assert(opaque != null),

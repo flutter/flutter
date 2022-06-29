@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder, Image;
+import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -81,22 +81,6 @@ class PaintingContext extends ClipContext {
   ///
   /// The [estimatedBounds] rectangle is in the [canvas] coordinate system.
   final Rect estimatedBounds;
-
-  /// Paint [child] with this painting context, then convert to a raster and detach all
-  /// children from this layer.
-  static ui.Image paintAndDetachToGpuImage(OffsetLayer layer, {
-    required Rect estimatedBounds,
-    required RenderObject child,
-    required Offset offset,
-    required double pixelRatio,
-  }) {
-    final PaintingContext context = PaintingContext(layer, estimatedBounds);
-    context.paintChild(child, offset);
-    context.stopRecordingIfNeeded();
-    final ui.Image image = layer.toGpuImage(estimatedBounds, pixelRatio: pixelRatio);
-    layer.removeAllChildren();
-    return image;
-  }
 
   /// Repaint the given render object.
   ///

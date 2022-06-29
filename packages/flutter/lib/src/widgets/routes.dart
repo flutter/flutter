@@ -126,6 +126,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   bool get opaque;
 
+  bool get preferRasterization;
+
   // This ensures that if we got to the dismissed state while still current,
   // we will still be disposed when we are eventually popped.
   //
@@ -1703,6 +1705,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 
   @override
   bool get maintainState => true;
+
+  @override
+  bool get preferRasterization => false;
 }
 
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the
