@@ -18,6 +18,8 @@ import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
 
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
+
 export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
 // Examples can assume:

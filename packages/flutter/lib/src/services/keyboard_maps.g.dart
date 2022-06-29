@@ -11,6 +11,8 @@
 
 import 'keyboard_key.g.dart';
 
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+
 /// Maps Android-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{
   3: LogicalKeyboardKey.goHome,

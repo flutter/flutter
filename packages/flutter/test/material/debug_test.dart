@@ -350,6 +350,8 @@ void main() {
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.snackBar>]\n'
       '     CustomMultiChildLayout\n'
+      '     _ActionsMarker\n'
+      '     Actions\n'
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
       '     AnimatedDefaultTextStyle\n'
