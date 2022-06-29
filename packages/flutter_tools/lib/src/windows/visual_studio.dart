@@ -314,21 +314,25 @@ class VisualStudio {
 
   List<Map<String, dynamic>>? _tryDecodeVswhereJson(String vswhereJson) {
     late List<dynamic> result;
+    late FormatException error;
     try {
       // vswhere.exe is known to encode its output incorrectly, resulting in
       // malformed JSON in the description property when interpreted as UTF-8.
       // First, try to decode without any pre-processing.
       try {
         result = json.decode(vswhereJson) as List<dynamic>;
-      } on FormatException {
-        // The description property may be malformed. This property is unused,
-        // so try to decode the JSON again after removing it.
+      } on FormatException catch (e) {
+        // Decoding without pre-processing failed. Retry after removing the
+        // unused description property.
+        error = e;
         vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
         result = json.decode(vswhereJson) as List<dynamic>;
       }
-    } on FormatException catch (error) {
-      // Give up if the JSON is invalid even after removing the description property.
-      _logger.printWarning('Warning: unexpected vswhere.exe output. To see full output, run flutter doctor -vv. $error');
+    } on FormatException {
+      // Removing the description property didn't help.
+      // Report the original decoding error on the unprocessed JSON.
+      _logger.printWarning('Warning: Unexpected vswhere.exe JSON output. $error'
+        'To see the full JSON, run flutter doctor -vv.');
       return null;
     }
 

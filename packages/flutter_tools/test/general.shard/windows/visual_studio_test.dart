@@ -758,7 +758,7 @@ void main() {
       expect(visualStudio.fullVersion, isNull);
       expect(visualStudio.cmakePath, isNull);
 
-      expect(fixture.logger.warningText, contains('Warning: unexpected vswhere.exe output'));
+      expect(fixture.logger.warningText, contains('Warning: Unexpected vswhere.exe JSON output'));
     });
 
     testWithoutContext('Everything returns good values when VS is present with all components', () {
