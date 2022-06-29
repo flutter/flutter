@@ -1751,7 +1751,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
     return Column(
       children: <Widget>[
-        _DayHeaders(),
+        const _DayHeaders(),
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
           child: _CalendarKeyboardNavigator(
@@ -1947,6 +1947,8 @@ class _FocusedDate extends InheritedWidget {
 
 
 class _DayHeaders extends StatelessWidget {
+  const _DayHeaders();
+
   /// Builds widgets showing abbreviated days of week. The first widget in the
   /// returned list corresponds to the first day of week for the current locale.
   ///

@@ -288,6 +288,7 @@ void main() {
             '--enable-checked-mode',
             '--verify-entry-points',
             '--enable-software-rendering',
+            '--trace-systrace',
             '--skia-deterministic-rendering',
             '--trace-skia',
             '--endless-trace-buffer',

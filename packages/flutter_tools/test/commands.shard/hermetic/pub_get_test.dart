@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -77,6 +78,24 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
+  testUsingContext('pub get on target directory', () async {
+    fileSystem.currentDirectory.childDirectory('target').createSync();
+    final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
+    targetDirectory.childFile('pubspec.yaml').createSync();
+
+    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>['get', targetDirectory.path]);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(targetDirectory);
+    expect(rootProject.packageConfigFile.existsSync(), true);
+    expect(await rootProject.packageConfigFile.readAsString(), '{"configVersion":2,"packages":[]}');
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
   testUsingContext("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
@@ -116,7 +135,7 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fileSystem.currentDirectory
+    fileSystem.directory(directory)
       .childDirectory('.dart_tool')
       .childFile('package_config.json')
       ..createSync(recursive: true)

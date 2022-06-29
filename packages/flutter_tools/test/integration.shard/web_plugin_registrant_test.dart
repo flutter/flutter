@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -21,8 +19,8 @@ import '../src/context.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
-  Directory tempDir;
-  Directory projectDir;
+  late Directory tempDir;
+  late Directory projectDir;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -137,7 +135,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     ),
   );
   final String dotPackages = globals.fs.path.absolute(globals.fs.path.join(
-    '.packages',
+    '.dart_tool/package_config.json',
   ));
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
@@ -195,8 +193,8 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
 Future<void> _addDependency(
   Directory projectDir,
   String package, {
-  String version,
-  String path,
+  String? version,
+  String? path,
 }) async {
   assert(version != null || path != null,
       'Need to define a source for the package.');
@@ -249,7 +247,7 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: target is Directory ? target.path : target.dirname,
   );
@@ -277,7 +275,7 @@ Future<void> _buildWebProject(Directory workingDir) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );

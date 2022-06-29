@@ -56,8 +56,9 @@ class SelectionArea extends StatefulWidget {
 
 class _SelectionAreaState extends State<SelectionArea> {
   FocusNode get _effectiveFocusNode {
-    if (widget.focusNode != null)
+    if (widget.focusNode != null) {
       return widget.focusNode!;
+    }
     _internalNode ??= FocusNode();
     return _internalNode!;
   }

@@ -144,8 +144,8 @@ class AndroidView extends StatefulWidget {
   ///     child: AndroidView(
   ///       viewType: 'webview',
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),
@@ -284,8 +284,8 @@ class UiKitView extends StatefulWidget {
   ///     child: UiKitView(
   ///       viewType: 'webview',
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),
@@ -569,12 +569,13 @@ class _UiKitViewState extends State<UiKitView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null) {
+    final UiKitViewController? controller = _controller;
+    if (controller == null) {
       return const SizedBox.expand();
     }
     return Focus(
       focusNode: _focusNode,
-      onFocusChange: _onFocusChange,
+      onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
       child: _UiKitPlatformView(
         controller: _controller!,
         hitTestBehavior: widget.hitTestBehavior,
@@ -659,8 +660,17 @@ class _UiKitViewState extends State<UiKitView> {
     });
   }
 
-  void _onFocusChange(bool isFocused) {
-    // TODO(hellohuanlin): send 'TextInput.setPlatformViewClient' channel message to engine after the engine is updated to handle this message.
+  void _onFocusChange(bool isFocused, UiKitViewController controller) {
+    if (!isFocused) {
+      // Unlike Android, we do not need to send "clearFocus" channel message
+      // to the engine, because focusing on another view will automatically
+      // cancel the focus on the previously focused platform view.
+      return;
+    }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      <String, dynamic>{'platformViewId': controller.id},
+    );
   }
 }
 
@@ -994,8 +1004,8 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///     height: 100.0,
   ///     child: PlatformViewSurface(
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),

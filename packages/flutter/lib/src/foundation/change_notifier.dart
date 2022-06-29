@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show VoidCallback;
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
-import 'basic_types.dart';
 import 'diagnostics.dart';
+
+export 'dart:ui' show VoidCallback;
 
 /// An object that maintains a list of listeners.
 ///
@@ -129,19 +132,22 @@ class ChangeNotifier implements Listenable {
   /// ```dart
   /// class MyNotifier with ChangeNotifier {
   ///   void doUpdate() {
-  ///     assert(debugAssertNotDisposed());
+  ///     assert(ChangeNotifier.debugAssertNotDisposed(this));
   ///     // ...
   ///   }
   /// }
   /// ```
   /// {@end-tool}
-  @protected
-  bool debugAssertNotDisposed() {
+  // This is static and not an instance method because too many people try to
+  // implement ChangeNotifier instead of extending it (and so it is too breaking
+  // to add a method, especially for debug).
+  static bool debugAssertNotDisposed(ChangeNotifier notifier) {
     assert(() {
-      if (_debugDisposed) {
+      if (notifier._debugDisposed) {
         throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
+          'A ${notifier.runtimeType} was used after being disposed.\n'
+          'Once you have called dispose() on a ${notifier.runtimeType}, it '
+          'can no longer be used.',
         );
       }
       return true;
@@ -166,7 +172,7 @@ class ChangeNotifier implements Listenable {
   /// so, stopping that same work.
   @protected
   bool get hasListeners {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     return _count > 0;
   }
 
@@ -198,7 +204,7 @@ class ChangeNotifier implements Listenable {
   ///    the list of closures that are notified when the object changes.
   @override
   void addListener(VoidCallback listener) {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -293,7 +299,7 @@ class ChangeNotifier implements Listenable {
   /// This method should only be called by the object's owner.
   @mustCallSuper
   void dispose() {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(() {
       _debugDisposed = true;
       return true;
@@ -321,7 +327,7 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     if (_count == 0) {
       return;
     }

@@ -167,7 +167,7 @@ void main() {
         // We create the geometry listener here, but it can only be set up
         // after it is pumped into the widget tree and a tester is
         // available.
-        geometryListener = _GeometryListener();
+        geometryListener = const _GeometryListener();
         geometry = null;
         listenerState = null;
         previousRect = null;
@@ -1516,6 +1516,8 @@ void main() {
 }
 
 class _GeometryListener extends StatefulWidget {
+  const _GeometryListener();
+
   @override
   State createState() => _GeometryListenerState();
 }

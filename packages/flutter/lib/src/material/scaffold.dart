@@ -1144,12 +1144,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.minInsets != minInsets
-        || oldDelegate.textDirection != textDirection
-        || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
-        || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
-        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
-        || oldDelegate.extendBody != extendBody
-        || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
+      || oldDelegate.minViewPadding != minViewPadding
+      || oldDelegate.textDirection != textDirection
+      || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
+      || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
+      || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
+      || oldDelegate.extendBody != extendBody
+      || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
   }
 }
 
@@ -1613,11 +1614,11 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeDrawer], [Navigator.pop]
+  /// or press the escape key on the keyboard.
   ///
   /// {@tool dartpad}
-  /// To disable the drawer edge swipe, set the
+  /// To disable the drawer edge swipe on mobile, set the
   /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
   /// it.
@@ -1637,8 +1638,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer], [Navigator.pop]
+  /// or press the escape key on the keyboard.
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -1739,15 +1740,19 @@ class Scaffold extends StatefulWidget {
   final double? drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag
-  /// gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool drawerEnableOpenDragGesture;
 
   /// Determines if the [Scaffold.endDrawer] can be opened with a
-  /// drag gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool endDrawerEnableOpenDragGesture;
 
   /// Restoration ID to save and restore the state of the [Scaffold].
@@ -2857,7 +2862,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     // The minimum viewPadding for interactive elements positioned by the
     // Scaffold to keep within safe interactive areas.
     final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
-      bottom: _resizeToAvoidBottomInset &&  mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
+      bottom: _resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
     );
 
     // extendBody locked when keyboard is open
@@ -2870,28 +2875,50 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         child: Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-            return CustomMultiChildLayout(
-              delegate: _ScaffoldLayout(
-                extendBody: extendBody,
-                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                minInsets: minInsets,
-                minViewPadding: minViewPadding,
-                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                textDirection: textDirection,
-                isSnackBarFloating: isSnackBarFloating,
-                extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
-                snackBarWidth: snackBarWidth,
+            return Actions(
+              actions: <Type, Action<Intent>>{
+                DismissIntent: _DismissDrawerAction(context),
+              },
+              child: CustomMultiChildLayout(
+                delegate: _ScaffoldLayout(
+                  extendBody: extendBody,
+                  extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                  minInsets: minInsets,
+                  minViewPadding: minViewPadding,
+                  currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                  floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                  floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                  geometryNotifier: _geometryNotifier,
+                  previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                  textDirection: textDirection,
+                  isSnackBarFloating: isSnackBarFloating,
+                  extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+                  snackBarWidth: snackBarWidth,
+                ),
+                children: children,
               ),
-              children: children,
             );
           }),
         ),
       ),
     );
+  }
+}
+
+class _DismissDrawerAction extends DismissAction {
+  _DismissDrawerAction(this.context);
+
+  final BuildContext context;
+
+  @override
+  bool isEnabled(DismissIntent intent) {
+    return Scaffold.of(context).isDrawerOpen || Scaffold.of(context).isEndDrawerOpen;
+  }
+
+  @override
+  void invoke(DismissIntent intent) {
+    Scaffold.of(context).closeDrawer();
+    Scaffold.of(context).closeEndDrawer();
   }
 }
 
@@ -3077,17 +3104,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     return false;
   }
 
-  Widget _wrapBottomSheet(Widget bottomSheet) {
-    return Semantics(
-      container: true,
-      onDismiss: close,
-      child:  NotificationListener<DraggableScrollableNotification>(
-        onNotification: extentChanged,
-        child: bottomSheet,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -3099,19 +3115,24 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           child: child,
         );
       },
-      child: _wrapBottomSheet(
-        BottomSheet(
-          animationController: widget.animationController,
-          enableDrag: widget.enableDrag,
-          onDragStart: _handleDragStart,
-          onDragEnd: _handleDragEnd,
-          onClosing: widget.onClosing!,
-          builder: widget.builder,
-          backgroundColor: widget.backgroundColor,
-          elevation: widget.elevation,
-          shape: widget.shape,
-          clipBehavior: widget.clipBehavior,
-          constraints: widget.constraints,
+      child: Semantics(
+        container: true,
+        onDismiss: close,
+        child:  NotificationListener<DraggableScrollableNotification>(
+          onNotification: extentChanged,
+          child: BottomSheet(
+            animationController: widget.animationController,
+            enableDrag: widget.enableDrag,
+            onDragStart: _handleDragStart,
+            onDragEnd: _handleDragEnd,
+            onClosing: widget.onClosing!,
+            builder: widget.builder,
+            backgroundColor: widget.backgroundColor,
+            elevation: widget.elevation,
+            shape: widget.shape,
+            clipBehavior: widget.clipBehavior,
+            constraints: widget.constraints,
+          ),
         ),
       ),
     );

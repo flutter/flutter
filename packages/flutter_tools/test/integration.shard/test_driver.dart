@@ -849,9 +849,9 @@ class FlutterTestTestDriver extends FlutterTestDriver {
 
     await resume();
 
-    final Future<Object> timeoutFuture =
-        Future<Object>.delayed(defaultTimeout);
-    await Future.any<Object>(<Future<Object>>[done.future, timeoutFuture]);
+    final Future<void> timeoutFuture =
+        Future<void>.delayed(defaultTimeout);
+    await Future.any<void>(<Future<void>>[done.future, timeoutFuture]);
     await subscription.cancel();
     if (!done.isCompleted) {
       await quit();

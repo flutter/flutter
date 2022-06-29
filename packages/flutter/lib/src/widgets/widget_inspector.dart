@@ -7,7 +7,6 @@ import 'dart:collection' show HashMap;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui
     show
         ClipOp,
@@ -1919,7 +1918,7 @@ mixin WidgetInspectorService {
   ///
   /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   bool isWidgetCreationTracked() {
-    _widgetCreationTracked ??= _WidgetForTypeTests() is _HasCreationLocation;
+    _widgetCreationTracked ??= const _WidgetForTypeTests() is _HasCreationLocation;
     return _widgetCreationTracked!;
   }
 
@@ -2190,6 +2189,8 @@ class _ElementLocationStatsTracker {
 }
 
 class _WidgetForTypeTests extends Widget {
+  const _WidgetForTypeTests();
+
   @override
   Element createElement() => throw UnimplementedError();
 }

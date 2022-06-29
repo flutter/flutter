@@ -10,8 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
@@ -889,6 +887,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    assert(_alpha != 255);
     final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
     updatedLayer.alpha = _alpha;
     return updatedLayer;
@@ -1062,7 +1061,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0;
+      _currentlyIsRepaintBoundary = _alpha! > 0 && _alpha! < 255;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary) {
         markNeedsCompositingBitsUpdate();
       }
@@ -1580,8 +1579,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1687,8 +1688,10 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1773,8 +1776,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1851,8 +1856,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset);
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset);
+        }
       }
       return true;
     }());
