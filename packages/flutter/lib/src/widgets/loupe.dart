@@ -2,30 +2,130 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// A common building base for Loupes.
+/// A builder function that builds a loupe with a given offset.
 ///
-/// {@template loupe_padding}
-/// This widget is globally positioned based on a [CompositedTransformTarget], but respects
-/// horizontal and vertical padding screen "safe area". For example, if the [CompositedTransformTarget]
-/// is at global position (-100, 10), but horizontal padding is 10, the loupe is positioned at 10.
+/// This function should be called exactly once when the loupe should
+/// be displayed, and then any time the loupe needs to be moved, the
+/// passed-by-refrence [ValueNotifier]'s offset should be updated.
 ///
-/// In essence, [globalPosition] is clamped to (0 + padding, screenDimension - padding).
+/// If called again, the loupe builder will build another loupe,
+/// not update the position of the old one - this is so that the
+/// Loupe can respect animations as well as restrain it's own position
+/// so it remains on screen.
 ///
-/// If [verticalViewportSafeAreaPadding] or [horizontalViewportSafeAreaPadding] is null, then no safe area is respected,
-/// and loupe may go out of the viewport. If desired to perfectly clamp to the viewport,
-/// [verticalViewportSafeAreaPadding] and [horizontalViewportSafeAreaPadding] should each be set to 0.
-/// {@endtemplate}
+/// Although this builder can theoretically return any widget,
+/// it should be a widget composed around a [Loupe], and that [Loupe]
+/// should be passed the [LoupeConfiguration]. The [LoupeConfiguration]
+/// handles the positioning and overlay management.
+typedef LoupeBuilder = Widget Function(BuildContext, LoupeConfiguration);
+
+
+class LoupeConfiguration {
+  LoupeConfiguration._(Offset initalOffset) : _loupePosition = ValueNotifier<Offset>(initalOffset);
+
+  /// We use a global offset as opposed to a layerLink and relative offset (like other
+  /// text-related overlays, like toolbar or handles) because the loupe manages it's own 
+  /// animations, as well as has the responsibility of repositioning itself on the screen 
+  /// so that it never overflows.
+  final ValueNotifier<Offset> _loupePosition;
+
+  /// This stream is used to tell the loupe that it should begin it's enter / hide animation.
+  /// The [LoupeController] sends its loupe true or false for show / hide respectively, 
+  /// and then waits for an acknowledgement on the stream by the loupe.
+  /// 
+  /// The show / hide is done in this fashion because [LoupeController] shouldn't
+  /// clean up the overlay until the loupe is done animating out.
+  final StreamController<bool> _signalLoupeState = StreamController<bool>.broadcast();
+}
+
+/// Controls an instance of a [Loupe].
+class LoupeController {
+  final LoupeBuilder _loupeBuilder;
+
+  LoupeController({required LoupeBuilder loupeBuilder})
+      : _loupeBuilder = loupeBuilder;
+
+  OverlayEntry? _loupeEntry;
+  LoupeConfiguration? _currentLoupeConfiguation;
+
+  /// If the loupe managed by this controller is shown or not.
+  /// 
+  /// If the loupe is mid out animation, this will be true until the loupe is done animating out.
+  bool get isShown => _loupeEntry != null;
+
+  void setPosition(Offset offset) {
+    assert(_currentLoupeConfiguation != null,
+        'attempted to set position of an un-inserted loupe.');
+    assert(_loupeEntry != null,
+        'attempted to set position of an un-inserted loupe.');
+    _currentLoupeConfiguation!._loupePosition.value = offset;
+  }
+
+  /// Returns a future that completes when the loupe is fully shown, i.e. done
+  /// with it's entry animation.
+  Future<void> show({
+    required BuildContext context,
+    Widget? debugRequiredFor,
+    Offset initalPosition = Offset.zero,
+  }) async {
+    _forceHide();
+    _currentLoupeConfiguation = LoupeConfiguration._(initalPosition);
+    final OverlayState? overlayState = Overlay.of(
+      context,
+      rootOverlay: true,
+      debugRequiredFor: debugRequiredFor,
+    );
+
+    _loupeEntry = OverlayEntry(
+      builder: (BuildContext context) => _loupeBuilder(context, _currentLoupeConfiguation!),
+    );
+    overlayState!.insert(_loupeEntry!);
+    await _sendMessageAndAwaitAcknowledgement(_currentLoupeConfiguation!._signalLoupeState, true);
+  }
+
+  /// hide does not immediately remove the loupe, since it's possible that 
+  Future<void> hide() async {
+    if (_currentLoupeConfiguation == null || _loupeEntry == null) {
+      return;
+    }
+
+    await _sendMessageAndAwaitAcknowledgement(_currentLoupeConfiguation!._signalLoupeState, false);
+    _forceHide();
+  }
+
+  /// Immediately hide the loupe, not executing any exit animation. 
+  void _forceHide() {
+     _loupeEntry?.remove();
+    _loupeEntry = null;
+    _currentLoupeConfiguation = null;
+  }
+
+  static Future<T> _sendMessageAndAwaitAcknowledgement<T>(StreamController<T> streamController, T message) {
+    // Setup a future that waits for the acknowledgement. Skip the first message, since it's
+    // the initalization message.
+    final Future<T> acknowedgementFuture = streamController.stream.skip(1).firstWhere((T element) => element == message);
+
+    // Send initalization message.
+    streamController.sink.add(message);
+
+    return acknowedgementFuture;
+  }
+}
+
+
+/// A common building base for Loupes, that is managed nby a
 ///
 /// See:
+/// * [LoupeController], a convienence class to handle loupes in an overlay.
 /// * [AndroidLoupe], the Android-style consumer of [Loupe].
 /// * [CupertinoLoupe], the iOS-style consumer of [Loupe].
 class Loupe extends StatefulWidget {
-  /// i am a doc
   const Loupe(
       {super.key,
       this.border,
@@ -36,32 +136,16 @@ class Loupe extends StatefulWidget {
       required this.size,
       this.verticalOffset = 0,
       this.child,
-      required this.position})
-      : assert(magnificationScale != 0,
-            'Magnification scale of 0 results in undefined behavior.'),
-        animationDuration = Duration.zero,
-        curve = Curves.bounceIn;
-
-  const Loupe.animated(
-      {super.key,
-      this.border,
-      this.borderRadius = Radius.zero,
-      required this.shadowColor,
-      this.magnificationScale = 1,
-      this.elevation = 0,
-      required this.size,
-      this.verticalOffset = 0,
-      this.child,
-      required this.position,
-      required this.animationDuration,
-      required this.curve})
+      required this.configuration,
+      this.positionAnimationDuration = Duration.zero,
+      this.positionAnimation = Curves.linear})
       : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
+  
+  final Duration positionAnimationDuration;
+  final Curve positionAnimation;
 
-  final Duration animationDuration;
-  final Curve curve;
-
-  final ValueNotifier<Offset> position;
+  final LoupeConfiguration configuration;
 
   /// The size of the loupe.
   ///
@@ -112,28 +196,42 @@ class Loupe extends StatefulWidget {
   State<Loupe> createState() => _LoupeState();
 }
 
-class _LoupeState extends State<Loupe> {
+class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
   late Offset _lensPosition;
   late Offset _focalPointOffsetFromCenter;
 
+  /// in terms of if
+  bool _displayed = false;  
+
   @override
   void initState() {
-    //TODO need to use calced vars
-    _focalPointOffsetFromCenter = Offset(0, widget.verticalOffset);
-    _lensPosition = widget.position.value;
-    widget.position.addListener(_calculateAdjustedFocalPointAndLensPosition);
+    widget.configuration._loupePosition.addListener(_setAdjustedFocalPointAndLensPosition);
     super.initState();
+  }
+
+
+  @override
+  void didChangeDependencies() {
+    _setAdjustedFocalPointAndLensPosition();
+    super.didChangeDependencies();
+  }
+
+  void _setupAnimations() {
+    widget.configuration._signalLoupeState.stream.listen((bool loupeShouldBeUp) { 
+
+
+    });
   }
 
   /// Adjust both the focal point and the lens position.
   ///
   /// The adjustments are made based on two factors:
   /// 1. Since the Loupe should never go out of bounds, but the Y axis should show
-  void _calculateAdjustedFocalPointAndLensPosition() {
+  void _setAdjustedFocalPointAndLensPosition() {
     final Size screenSize = MediaQuery.of(context).size;
 
     // The raw position that the lens would be at, prior to any adjustment.
-    final Offset unadjustedLensPosition = widget.position.value -
+    final Offset unadjustedLensPosition = widget.configuration._loupePosition.value -
         Alignment.bottomCenter.alongSize(widget.size) +
         Offset(0, widget.verticalOffset);
 
@@ -168,8 +266,8 @@ class _LoupeState extends State<Loupe> {
   Widget build(BuildContext context) {
     // The most canon anchor positon for the loupe is the exact middle.
     return AnimatedPositioned(
-      duration: widget.animationDuration,
-      curve: widget.curve,
+      duration: widget.positionAnimationDuration,
+      curve: widget.positionAnimation,
       top: _lensPosition.dy,
       left: _lensPosition.dx,
       child: Stack(

@@ -19,6 +19,7 @@ import 'container.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'loupe.dart';
 import 'overlay.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -223,7 +224,7 @@ class TextSelectionOverlay {
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
     required TextEditingValue value,
-    required BuildContext context,
+    required this.context,
     Widget? debugRequiredFor,
     required LayerLink toolbarLayerLink,
     required LayerLink startHandleLayerLink,
@@ -235,10 +236,12 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
+    LoupeBuilder? loupeBuilder,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
        _handlesVisible = handlesVisible,
+       _loupeController = loupeBuilder  != null ? LoupeController(loupeBuilder: loupeBuilder) : null,
        _value = value {
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
@@ -252,11 +255,13 @@ class TextSelectionOverlay {
       lineHeightAtStart: 0.0,
       onStartHandleDragStart: _handleSelectionStartHandleDragStart,
       onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
+      onEndHandleDragEnd: _handleAnyDragEnd,
       endHandleType: TextSelectionHandleType.collapsed,
       endHandlesVisible: _effectiveEndHandleVisibility,
       lineHeightAtEnd: 0.0,
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
+      onStartHandleDragEnd: _handleAnyDragEnd,
       toolbarVisible: _effectiveToolbarVisibility,
       selectionEndPoints: const <TextSelectionPoint>[],
       selectionControls: selectionControls,
@@ -302,6 +307,27 @@ class TextSelectionOverlay {
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
+
+  /// {@template flutter.widgets.SelectionOverlay.selectionControls}
+  /// The context in which the selection handles should appear.
+  ///
+  /// This context must have an [Overlay] as an ancestor because this object
+  /// will display the text selection handles in that [Overlay].
+  /// {@endtemplate}
+  final BuildContext context;
+  
+
+  /// The loupe and toolbar cannot be shown at the same time, and [loupeController] is 
+  /// dominant over [_effectiveToolbarVisibility]. `_effectiveToolbarVisibility.value == true && 
+  /// _loupePosition.value != null` is considered an error, and is asserted as such 
+  /// in the [_updateTextSelectionOverlayVisibilities].
+  /// 
+  /// [_loupeController.show] and [_loupeController.hide] should not be called directly, except
+  /// from inside [_showLoupe] and [_hideLoupe]. If it is desired to show or hide the loupe,
+  ///  call [_showLoupe] or [_hideLoupe]. This is because the loupe needs to orchestrate
+  /// with other properties in [TextSelectionOverlay].
+  final LoupeController? _loupeController;
+
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
@@ -333,6 +359,7 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.hideHandles}
   void hideHandles() => _selectionOverlay.hideHandles();
+
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
@@ -443,7 +470,36 @@ class TextSelectionOverlay {
 
   late Offset _dragEndPosition;
 
+
+  // Shows the loupe, and hides the toolbar if it was showing when _showLoupe
+  // was called. This is safe to call on platforms not mobile, since 
+  // a loupeBuilder will not be provided on platforms not mobile. 
+  void _showLoupe(Offset showLoupeAt) {
+  if (_loupeController == null) {
+    return;
+  }
+
+  if (toolbarIsVisible) {
+    hideToolbar();
+  }
+
+  _loupeController!.show(context: context, initalPosition: showLoupeAt);
+  }
+
+  void _hideLoupe() {
+    if (_loupeController == null) {
+      return;
+    }
+
+    _loupeController!.hide();
+    
+    // Any time a loupe is hidden, we should show the toolbar.
+    // this behavior is consistent on all mobile platforms.
+    showToolbar();
+  }
+
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
+    _showLoupe(details.globalPosition);
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
@@ -451,6 +507,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
+    _loupeController?.setPosition(details.globalPosition);
     _dragEndPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
@@ -492,6 +549,7 @@ class TextSelectionOverlay {
   late Offset _dragStartPosition;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
+    _showLoupe(details.globalPosition);
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
@@ -499,6 +557,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
+    _loupeController?.setPosition(details.globalPosition);
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
@@ -536,6 +595,8 @@ class TextSelectionOverlay {
 
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
+
+  void _handleAnyDragEnd(DragEndDetails details) => _hideLoupe();
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;

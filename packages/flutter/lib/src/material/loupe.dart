@@ -4,24 +4,24 @@ import 'package:flutter/widgets.dart';
 /// 
 /// These constants were gotten from the Android souce code.
 class MaterialLoupe extends StatelessWidget {
-  final ValueNotifier<Offset> position;
+  final LoupeConfiguration configuration;
   
   
   /// Creates a [Loupe] in the Material style. 
   MaterialLoupe({
     super.key,
-    required this.position,
+    required this.configuration,
   });
 
   @override
   Widget build(BuildContext context) {
     return Loupe(
-      position: position,
+      configuration: configuration,
       elevation: 4,
       magnificationScale: 1.25,
       verticalOffset: -18,
       borderRadius: const Radius.circular(36),
-      shadowColor: Color.fromARGB(175, 0, 0, 0),
+      shadowColor: const Color.fromARGB(175, 0, 0, 0),
       size: const Size(100, 48),
     );
   }

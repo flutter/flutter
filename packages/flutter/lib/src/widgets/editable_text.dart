@@ -26,6 +26,7 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'loupe.dart';
 import 'media_query.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
@@ -634,6 +635,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.loupeBuilder,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1495,6 +1497,8 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
+
+  final LoupeBuilder? loupeBuilder;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2562,6 +2566,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
+      loupeBuilder: widget.loupeBuilder,
     );
   }
 

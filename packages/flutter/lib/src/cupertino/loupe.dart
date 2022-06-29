@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 class CupertinoLoupe extends StatelessWidget {
-  final ValueNotifier<Offset> position;
+  final LoupeConfiguration configuration;
   
   
   /// Creates a [Loupe] in the Cupertino style. 
@@ -10,21 +10,22 @@ class CupertinoLoupe extends StatelessWidget {
   /// some 
   CupertinoLoupe({
     super.key,
-    required this.position,
+    required this.configuration,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Loupe.animated(
-      position: position,
+    return Loupe(
+      configuration: configuration,
       elevation: 6,
-      curve: Curves.easeIn,
       verticalOffset: -20,
       border: Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
       borderRadius: const Radius.circular(36),
       shadowColor: const Color.fromARGB(108, 255, 255, 255),
       size: const Size(77.5, 37.5),
-      animationDuration: const Duration(milliseconds: 50),
+
+      positionAnimation: Curves.easeIn,
+      positionAnimationDuration: const Duration(milliseconds: 50),
     );
   }
 }

@@ -203,6 +203,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
+    this.loupeBuilder,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -260,6 +261,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
+    this.loupeBuilder,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -426,6 +428,8 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
+
+  final LoupeBuilder? loupeBuilder;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -705,6 +709,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         paintCursorAboveText: paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         enableInteractiveSelection: widget.enableInteractiveSelection,
+        loupeBuilder: widget.loupeBuilder,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
