@@ -1389,7 +1389,9 @@ mixin WidgetInspectorService {
   /// the local project over widgets created from inside the framework.
   @protected
   void resetPubRootDirectories([List<String> pubRootDirectories = const <String>[]]) {
-    _pubRootDirectories = pubRootDirectories;
+    _pubRootDirectories = pubRootDirectories
+      .map<String>((String directory) => Uri.parse(directory).path)
+      .toList();
     _isLocalCreationCache.clear();
   }
 
@@ -1421,8 +1423,7 @@ mixin WidgetInspectorService {
 
     final SplayTreeSet<String> sortedSet = SplayTreeSet<String>.from(_pubRootDirectories!, (String a, String b) => a.compareTo(b));
     for (int i = 0; i < pubRootDirectories.length; i++) {
-      final String element = pubRootDirectories[i];
-      sortedSet.remove(element);
+      sortedSet.remove(Uri.parse(pubRootDirectories[i]).path);
     }
     _pubRootDirectories = sortedSet.toList();
 
