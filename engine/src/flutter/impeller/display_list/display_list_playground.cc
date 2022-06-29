@@ -52,12 +52,14 @@ static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
   if (!mapping) {
     return nullptr;
   }
-  return SkData::MakeWithProc(
+  auto data = SkData::MakeWithProc(
       mapping->GetMapping(), mapping->GetSize(),
       [](const void* ptr, void* context) {
         delete reinterpret_cast<fml::Mapping*>(context);
       },
-      mapping.release());
+      mapping.get());
+  mapping.release();
+  return data;
 }
 
 SkFont DisplayListPlayground::CreateTestFontOfSize(SkScalar scalar) {
