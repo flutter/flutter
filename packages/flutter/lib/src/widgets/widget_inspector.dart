@@ -1370,11 +1370,11 @@ mixin WidgetInspectorService {
   ///
   /// The local project directories are used to distinguish widgets created by
   /// the local project over widgets created from inside the framework.
+  @protected
   @Deprecated(
     'Use addPubRootDirectories instead. '
     'This feature was deprecated after 3.1.0-9.0.pre.',
   )
-  @protected
   void setPubRootDirectories(List<String> pubRootDirectories) {
     addPubRootDirectories(pubRootDirectories);
   }

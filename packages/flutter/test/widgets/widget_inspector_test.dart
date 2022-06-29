@@ -2773,7 +2773,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
-
     group(
       'ext.flutter.inspector.setPubRootDirectories extra args regression test',
       () {
