@@ -195,6 +195,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    this.tooltip,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
@@ -754,6 +755,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [SystemChrome.setSystemUIOverlayStyle]
   final SystemUiOverlayStyle? systemOverlayStyle;
 
+  /// {@template flutter.material.appbar.tooltip}
+  /// Defines the tooltip of [backButton] icon.
+  ///
+  /// By default, the value of `tooltip` is [backButtonTooltip] specified in the [MaterialLocalizations]
+  /// {@endtemplate}
+  final String? tooltip;
+
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
       assert(theme.platform != null);
@@ -938,7 +946,7 @@ class _AppBarState extends State<AppBar> {
         );
       } else {
         if (!hasEndDrawer && canPop)
-          leading = useCloseButton ? const CloseButton() : const BackButton();
+          leading = useCloseButton ? const CloseButton() : BackButton(tooltip: widget.tooltip);
       }
     }
     if (leading != null) {

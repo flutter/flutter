@@ -74,7 +74,7 @@ class BackButtonIcon extends StatelessWidget {
 class BackButton extends StatelessWidget {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ Key? key, this.color, this.onPressed }) : super(key: key);
+  const BackButton({ Key? key, this.color, this.onPressed, this.tooltip }) : super(key: key);
 
   /// The color to use for the icon.
   ///
@@ -92,13 +92,18 @@ class BackButton extends StatelessWidget {
   /// Defaults to null.
   final VoidCallback? onPressed;
 
+  /// The tooltip to use for back button icon.
+  ///
+  /// Defaults to the value of [backButtonTooltip] specified in the [MaterialLocalizations]
+  final String? tooltip;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: const BackButtonIcon(),
       color: color,
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+      tooltip: tooltip ?? MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
         if (onPressed != null) {
           onPressed!();
