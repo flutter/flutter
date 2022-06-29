@@ -1396,6 +1396,17 @@ targets:
       task_name: color_filter_cache_perf__e2e_summary
     scheduler: luci
 
+  - name: Linux_android raster_cache_use_memory_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: raster_cache_use_memory_perf__e2e_summary
+    scheduler: luci
+
   - name: Linux_android shader_mask_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
