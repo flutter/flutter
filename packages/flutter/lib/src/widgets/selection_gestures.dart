@@ -11,6 +11,9 @@ import 'package:flutter/widgets.dart';
 
 /// A widget that creates [GestureRecognizer] bindings to specific intents and
 /// actions for its descendants.
+/// 
+/// See more:
+///   * [DefaultSelectionGestures] defines default platform gesture recognizers for selection behavior.
 class SelectionGestures extends StatefulWidget {
   /// Creates a const [SelectionGestures] widget that owns the map of [GestureRecognizers]
   /// and creates its own manager.

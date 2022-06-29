@@ -1221,6 +1221,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     } else {
       semanticsMaxValueLength = null;
     }
+    
+    Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
+      return Action<T>.overridable(context: context, defaultAction: defaultAction);
+    }
 
     late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
       ExpandSelectionToPositionIntent : SelectionGestureCallbackAction<ExpandSelectionToPositionIntent>(
@@ -1235,13 +1239,17 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           }
       ),
-      FeedbackRequestIntent : SelectionGestureCallbackAction<FeedbackRequestIntent>(
-        onInvoke: (FeedbackRequestIntent intent) => Feedback.forLongPress(this.context),
-        enabledPredicate: (FeedbackRequestIntent intent) => widget.selectionEnabled,
+      FeedbackRequestIntent : _makeOverridable(
+        SelectionGestureCallbackAction<FeedbackRequestIntent>(
+          onInvoke: (FeedbackRequestIntent intent) => Feedback.forLongPress(this.context),
+          enabledPredicate: (FeedbackRequestIntent intent) => widget.selectionEnabled,
+        ),
       ),
-      KeyboardRequestIntent : SelectionGestureCallbackAction<KeyboardRequestIntent>(
-        onInvoke: (KeyboardRequestIntent intent) => _requestKeyboard(),
-        enabledPredicate: (KeyboardRequestIntent intent) => widget.selectionEnabled,
+      KeyboardRequestIntent : _makeOverridable(
+        SelectionGestureCallbackAction<KeyboardRequestIntent>(
+          onInvoke: (KeyboardRequestIntent intent) => _requestKeyboard(),
+          enabledPredicate: (KeyboardRequestIntent intent) => widget.selectionEnabled,
+        ),
       ),
       SelectDragPositionIntent : SelectionGestureCallbackAction<SelectDragPositionIntent>(
         onInvoke: (SelectDragPositionIntent intent) => _editableText!.selectDragPosition(intent),
@@ -1265,7 +1273,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         },
         enabledPredicate: (SelectionOnDragStartControlIntent intent) => widget.selectionEnabled,
       ),
-      SelectionToolbarControlIntent : SelectionGestureCallbackAction<SelectionToolbarControlIntent>(
+      SelectionToolbarControlIntent : _makeOverridable(
+        SelectionGestureCallbackAction<SelectionToolbarControlIntent>(
           onInvoke: (SelectionToolbarControlIntent intent) {
             if (intent.showSelectionToolbar != null) {
               if (intent.showSelectionToolbar!) {
@@ -1282,6 +1291,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             }
           },
           enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
+        ),
       ),
       ViewportOffsetOnDragStartControlIntent : SelectionGestureCallbackAction<ViewportOffsetOnDragStartControlIntent>(
         onInvoke: (ViewportOffsetOnDragStartControlIntent intent) {
@@ -1289,9 +1299,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         },
         enabledPredicate: (ViewportOffsetOnDragStartControlIntent intent) => widget.selectionEnabled,
       ),
-      UserOnTapCallbackIntent : SelectionGestureCallbackAction<UserOnTapCallbackIntent>(
-        onInvoke: (UserOnTapCallbackIntent intent) => widget.onTap?.call(),
-        enabledPredicate: (UserOnTapCallbackIntent intent) => widget.selectionEnabled,
+      UserOnTapCallbackIntent : _makeOverridable(
+        SelectionGestureCallbackAction<UserOnTapCallbackIntent>(
+          onInvoke: (UserOnTapCallbackIntent intent) => widget.onTap?.call(),
+          enabledPredicate: (UserOnTapCallbackIntent intent) => widget.selectionEnabled,
+        ),
       ),
     };
 
