@@ -7,11 +7,12 @@ library test.host;
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 
 import 'package:js/js.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:stream_channel/stream_channel.dart';
+// ignore: implementation_imports
+import 'package:ui/src/engine/dom.dart';
 
 /// A class defined in content shell, used to control its behavior.
 @JS()
@@ -46,13 +47,14 @@ class _JSApi {
 external set _jsApi(_JSApi api);
 
 /// The iframes created for each loaded test suite, indexed by the suite id.
-final Map<int, IFrameElement> _iframes = <int, IFrameElement>{};
+final Map<int, DomHTMLIFrameElement> _iframes = <int, DomHTMLIFrameElement>{};
 
 /// Subscriptions created for each loaded test suite, indexed by the suite id.
-final Map<int, List<StreamSubscription<dynamic>>> _subscriptions = <int, List<StreamSubscription<dynamic>>>{};
+final Map<int, List<DomSubscription>> _domSubscriptions = <int, List<DomSubscription>>{};
+final Map<int, List<StreamSubscription<dynamic>>> _streamSubscriptions =<int, List<StreamSubscription<dynamic>>>{};
 
 /// The URL for the current page.
-final Uri _currentUrl = Uri.parse(window.location.href);
+final Uri _currentUrl = Uri.parse(domWindow.location.href);
 
 /// Code that runs in the browser and loads test suites at the server's behest.
 ///
@@ -111,7 +113,7 @@ void main() {
   testRunner?.waitUntilDone();
 
   if (_currentUrl.queryParameters['debug'] == 'true') {
-    document.body!.classes.add('debug');
+    domDocument.body!.classList.add('debug');
   }
 
   runZonedGuarded(
@@ -126,14 +128,17 @@ void main() {
           final StreamChannel<dynamic> iframeChannel = _connectToIframe(url, messageId);
           suiteChannel.pipe(iframeChannel);
         } else if (message['command'] == 'displayPause') {
-          document.body!.classes.add('paused');
+          domDocument.body!.classList.add('paused');
         } else if (message['command'] == 'resume') {
-          document.body!.classes.remove('paused');
+          domDocument.body!.classList.remove('paused');
         } else {
           assert(message['command'] == 'closeSuite');
           _iframes.remove(message['id'])!.remove();
 
-          for (final StreamSubscription<dynamic> subscription in _subscriptions.remove(message['id'])!) {
+          for (final DomSubscription subscription in _domSubscriptions.remove(message['id'])!) {
+            subscription.cancel();
+          }
+          for (final StreamSubscription<dynamic> subscription in _streamSubscriptions.remove(message['id'])!) {
             subscription.cancel();
           }
         }
@@ -145,9 +150,10 @@ void main() {
           (_) => serverChannel.sink.add(<String, String>{'command': 'ping'}));
 
       _jsApi = _JSApi(resume: allowInterop(() {
-        if (!document.body!.classes.remove('paused')) {
+        if (!domDocument.body!.classList.contains('paused')) {
           return;
         }
+        domDocument.body!.classList.remove('paused');
         serverChannel.sink.add(<String, String>{'command': 'resume'});
       }), restartCurrent: allowInterop(() {
         serverChannel.sink.add(<String, String>{'command': 'restart'});
@@ -164,13 +170,13 @@ void main() {
 MultiChannel<dynamic> _connectToServer() {
   // The `managerUrl` query parameter contains the WebSocket URL of the remote
   // [BrowserManager] with which this communicates.
-  final WebSocket webSocket = WebSocket(_currentUrl.queryParameters['managerUrl']!);
+  final DomWebSocket webSocket = createDomWebSocket(_currentUrl.queryParameters['managerUrl']!);
 
   final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
-  webSocket.onMessage.listen((MessageEvent message) {
-    final String data = message.data as String;
+  webSocket.addEventListener('message', allowInterop((DomEvent message) {
+    final String data = (message as DomMessageEvent).data as String;
     controller.local.sink.add(jsonDecode(data));
-  });
+  }));
 
   controller.local.stream
       .listen((dynamic message) => webSocket.send(jsonEncode(message)));
@@ -183,31 +189,34 @@ MultiChannel<dynamic> _connectToServer() {
 ///
 /// [id] identifies the suite loaded in this iframe.
 StreamChannel<dynamic> _connectToIframe(String url, int id) {
-  final IFrameElement iframe = IFrameElement();
+  final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
   _iframes[id] = iframe;
   iframe
     ..src = url
     ..width = '1000'
     ..height = '1000';
-  document.body!.children.add(iframe);
+  domDocument.body!.appendChild(iframe);
 
   // Use this to communicate securely with the iframe.
-  final MessageChannel channel = MessageChannel();
+  final DomMessageChannel channel = createDomMessageChannel();
   final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
 
   // Use this to avoid sending a message to the iframe before it's sent a
   // message to us. This ensures that no messages get dropped on the floor.
   final Completer<dynamic> readyCompleter = Completer<dynamic>();
 
-  final List<StreamSubscription<dynamic>> subscriptions = <StreamSubscription<dynamic>>[];
-  _subscriptions[id] = subscriptions;
-
-  subscriptions.add(window.onMessage.listen((dynamic message) {
+  final List<DomSubscription> domSubscriptions = <DomSubscription>[];
+  final List<StreamSubscription<dynamic>> streamSubscriptions = <StreamSubscription<dynamic>>[];
+  _domSubscriptions[id] = domSubscriptions;
+  _streamSubscriptions[id] = streamSubscriptions;
+  domSubscriptions.add(DomSubscription(domWindow, 'message',
+          allowInterop((DomEvent event) {
+    final DomMessageEvent message = event as DomMessageEvent;
     // A message on the Window can theoretically come from any website. It's
     // very unlikely that a malicious site would care about hacking someone's
     // unit tests, let alone be able to find the test server while it's
     // running, but it's good practice to check the origin anyway.
-    if (message.origin != window.location.origin) {
+    if (message.origin != domWindow.location.origin) {
       return;
     }
 
@@ -220,20 +229,24 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
     if (message.data['ready'] == true) {
       // This message indicates that the iframe is actively listening for
       // events, so the message channel's second port can now be transferred.
-      iframe.contentWindow!.postMessage('port', window.location.origin, <MessagePort>[channel.port2]);
+      channel.port2.start();
+      iframe.contentWindow.postMessage('port', domWindow.location.origin,
+          <DomMessagePort>[channel.port2]);
       readyCompleter.complete();
     } else if (message.data['exception'] == true) {
       // This message from `dart.js` indicates that an exception occurred
       // loading the test.
       controller.local.sink.add(message.data['data']);
     }
-  }));
+  })));
 
-  subscriptions.add(channel.port1.onMessage.listen((dynamic message) {
-    controller.local.sink.add(message.data['data']);
-  }));
+  channel.port1.start();
+  domSubscriptions.add(DomSubscription(channel.port1, 'message',
+          allowInterop((DomEvent message) {
+    controller.local.sink.add((message as DomMessageEvent).data['data']);
+  })));
 
-  subscriptions.add(controller.local.stream.listen((dynamic message) async {
+  streamSubscriptions.add(controller.local.stream.listen((dynamic message) async {
     await readyCompleter.future;
     channel.port1.postMessage(message);
   }));

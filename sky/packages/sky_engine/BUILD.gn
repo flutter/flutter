@@ -200,7 +200,6 @@ generated_file("_embedder_yaml") {
     "  \"dart:core\": \"core/core.dart\"",
     "  \"dart:developer\": \"developer/developer.dart\"",
     "  \"dart:ffi\": \"ffi/ffi.dart\"",
-    "  \"dart:html\": \"html/html_dart2js.dart\"",
     "  \"dart:io\": \"io/io.dart\"",
     "  \"dart:isolate\": \"isolate/isolate.dart\"",
     "  \"dart:js\": \"js/js.dart\"",
