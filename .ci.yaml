@@ -3981,6 +3981,7 @@ targets:
         ["devicelab", "hostonly"]
       task_name: platform_channel_sample_test_windows
     scheduler: luci
+    bringup: true
 
   - name: Windows plugin_dependencies_test
     recipe: devicelab/devicelab_drone
