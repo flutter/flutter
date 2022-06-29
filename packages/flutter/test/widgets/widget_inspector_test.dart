@@ -2435,8 +2435,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance
-          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -2769,8 +2768,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
 
       },
-      skip: !WidgetInspectorService.instance
-          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -3035,8 +3033,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance
-          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -3094,8 +3091,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance
-          .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
