@@ -385,7 +385,7 @@ class CreateCommand extends CreateBase {
           'main.dart',
       ));
       globals.printStatus('Your module code is in $relativeMainPath.');
-    } else if (generateMethodChannelsPlugin) {
+    } else if (generateMethodChannelsPlugin || generateFfiPlugin) {
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final List<String> requestedPlatforms = _getUserRequestedPlatforms();
       final String platformsString = requestedPlatforms.join(', ');
@@ -400,7 +400,8 @@ class CreateCommand extends CreateBase {
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn);
       }
-      _printPluginAddPlatformMessage(relativePluginPath);
+      final String template = generateMethodChannelsPlugin ? 'plugin' : 'plugin_ffi';
+      _printPluginAddPlatformMessage(relativePluginPath, template);
     } else  {
       // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(projectDirPath));
@@ -715,9 +716,9 @@ You've created a plugin project that doesn't yet support any platforms.
 ''');
 }
 
-void _printPluginAddPlatformMessage(String pluginPath) {
+void _printPluginAddPlatformMessage(String pluginPath, String template) {
   globals.printStatus('''
-To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
+To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath.
 For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');
