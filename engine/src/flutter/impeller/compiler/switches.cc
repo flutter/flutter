@@ -22,6 +22,14 @@ static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
     {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
 };
 
+static const std::map<std::string, SourceType> kKnownSourceTypes = {
+    {"vert", SourceType::kVertexShader},
+    {"frag", SourceType::kFragmentShader},
+    {"tesc", SourceType::kTessellationControlShader},
+    {"tese", SourceType::kTessellationEvaluationShader},
+    {"comp", SourceType::kComputeShader},
+};
+
 void Switches::PrintHelp(std::ostream& stream) {
   stream << std::endl;
   stream << "ImpellerC is an offline shader processor and reflection engine."
@@ -35,6 +43,11 @@ void Switches::PrintHelp(std::ostream& stream) {
   }
   stream << " ]" << std::endl;
   stream << "--input=<glsl_file>" << std::endl;
+  stream << "[optional] --input-kind={";
+  for (const auto& source_type : kKnownSourceTypes) {
+    stream << source_type.first << ", ";
+  }
+  stream << "}" << std::endl;
   stream << "--sl=<sl_output_file>" << std::endl;
   stream << "--spirv=<spirv_output_file>" << std::endl;
   stream << "[optional] --reflection-json=<reflection_json_file>" << std::endl;
@@ -68,6 +81,18 @@ static TargetPlatform TargetPlatformFromCommandLine(
   return target;
 }
 
+static SourceType SourceTypeFromCommandLine(
+    const fml::CommandLine& command_line) {
+  auto source_type = SourceType::kUnknown;
+  auto source_type_option =
+      command_line.GetOptionValueWithDefault("input-type", "");
+  auto source_type_search = kKnownSourceTypes.find(source_type_option);
+  if (source_type_search == kKnownSourceTypes.end()) {
+    return SourceType::kUnknown;
+  }
+  return source_type_search->second;
+}
+
 Switches::Switches(const fml::CommandLine& command_line)
     : target_platform(TargetPlatformFromCommandLine(command_line)),
       working_directory(std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
@@ -75,6 +100,7 @@ Switches::Switches(const fml::CommandLine& command_line)
           false,  // create if necessary,
           fml::FilePermission::kRead))),
       source_file_name(command_line.GetOptionValueWithDefault("input", "")),
+      input_type(SourceTypeFromCommandLine(command_line)),
       sl_file_name(command_line.GetOptionValueWithDefault("sl", "")),
       spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")),
       reflection_json_name(

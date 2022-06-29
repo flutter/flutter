@@ -27,14 +27,19 @@ TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
 
 TEST_P(CompilerTest, CanCompile) {
   ASSERT_TRUE(CanCompileAndReflect("sample.vert"));
+  ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
 }
 
 TEST_P(CompilerTest, CanCompileTessellationControlShader) {
   ASSERT_TRUE(CanCompileAndReflect("sample.tesc"));
+  ASSERT_TRUE(CanCompileAndReflect("sample.tesc",
+                                   SourceType::kTessellationControlShader));
 }
 
 TEST_P(CompilerTest, CanCompileTessellationEvaluationShader) {
   ASSERT_TRUE(CanCompileAndReflect("sample.tese"));
+  ASSERT_TRUE(CanCompileAndReflect("sample.tese",
+                                   SourceType::kTessellationEvaluationShader));
 }
 
 TEST_P(CompilerTest, CanCompileComputeShader) {
@@ -42,6 +47,7 @@ TEST_P(CompilerTest, CanCompileComputeShader) {
     GTEST_SKIP_("Only enabled on Metal backends till ES 3.2 support is added.");
   }
   ASSERT_TRUE(CanCompileAndReflect("sample.comp"));
+  ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader));
 }
 
 TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
