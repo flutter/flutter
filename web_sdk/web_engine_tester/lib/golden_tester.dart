@@ -4,16 +4,14 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html' as html;
 
 import 'package:test/test.dart';
-// ignore: implementation_imports
 import 'package:ui/src/engine.dart' show operatingSystem, OperatingSystem, useCanvasKit;
-// ignore: implementation_imports
-import 'package:ui/src/engine/dom.dart';
 import 'package:ui/ui.dart';
 
 Future<dynamic> _callScreenshotServer(dynamic requestData) async {
-  final DomXMLHttpRequest request = await domHttpRequest(
+  final html.HttpRequest request = await html.HttpRequest.request(
     'screenshot',
     method: 'POST',
     sendData: json.encode(requestData),

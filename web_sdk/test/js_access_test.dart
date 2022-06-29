@@ -64,6 +64,8 @@ export 'foo.dart';
       final _CheckResult result = _checkFile(
           File('lib/web_ui/lib/src/engine/alarm_clock.dart'),
 '''
+import 'dart:html'
+  show HtmlElement;
 import 'dart:async';
 import 'package:ui/ui.dart'
   as ui;
@@ -71,7 +73,8 @@ import 'package:ui/ui.dart'
       );
       expect(result.failed, isTrue);
       expect(result.violations, <String>[
-        "on line 2: import is broken up into multiple lines: import 'package:ui/ui.dart'",
+        "on line 1: import is broken up into multiple lines: import 'dart:html'",
+        "on line 4: import is broken up into multiple lines: import 'package:ui/ui.dart'",
       ]);
     }
 

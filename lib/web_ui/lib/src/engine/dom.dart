@@ -49,13 +49,6 @@ extension DomWindowExtension on DomWindow {
       ]) as DomCSSStyleDeclaration;
   external DomScreen? get screen;
   external int requestAnimationFrame(DomRequestAnimationFrameCallback callback);
-  void postMessage(Object message, String targetOrigin,
-          [List<DomMessagePort>? messagePorts]) =>
-      js_util.callMethod(this, 'postMessage', <Object>[
-        message,
-        targetOrigin,
-        if (messagePorts != null) js_util.jsify(messagePorts)
-      ]);
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(num highResTime);
@@ -943,8 +936,6 @@ extension DomLocationExtension on DomLocation {
   external String? get search;
   // We have to change the name here because 'hash' is inherited from [Object].
   String get locationHash => js_util.getProperty(this, 'hash');
-  external String get origin;
-  external String get href;
 }
 
 @JS()
@@ -1141,8 +1132,8 @@ extension DomCompositionEventExtension on DomCompositionEvent {
   external String? get data;
 }
 
-DomCompositionEvent createDomCompositionEvent(String type,
-        [Map<dynamic, dynamic>? options]) =>
+DomCompositionEvent createDomCompositionEvent(String type, [Map<dynamic,
+    dynamic>? options]) =>
     js_util.callConstructor(domGetConstructor('CompositionEvent')!,
         <Object>[type, if (options != null) js_util.jsify(options)]);
 
@@ -1183,7 +1174,6 @@ class DomTokenList {}
 
 extension DomTokenListExtension on DomTokenList {
   external void add(String value);
-  external void remove(String value);
   external bool contains(String token);
 }
 
@@ -1326,64 +1316,6 @@ class DomPoint {
 
   DomPoint(this.x, this.y);
 }
-
-@JS()
-@staticInterop
-class DomWebSocket extends DomEventTarget {}
-
-extension DomWebSocketExtension on DomWebSocket {
-  external void send(Object? data);
-}
-
-DomWebSocket createDomWebSocket(String url) =>
-    domCallConstructorString('WebSocket', <Object>[url])! as DomWebSocket;
-
-@JS()
-@staticInterop
-class DomMessageEvent extends DomEvent {}
-
-extension DomMessageEventExtension on DomMessageEvent {
-  dynamic get data => js_util.dartify(js_util.getProperty(this, 'data'));
-  external String get origin;
-}
-
-@JS()
-@staticInterop
-class DomHTMLIFrameElement extends DomHTMLElement {}
-
-extension DomHTMLIFrameElementExtension on DomHTMLIFrameElement {
-  external set src(String? value);
-  external String? get src;
-  external set height(String? value);
-  external set width(String? value);
-  external DomWindow get contentWindow;
-}
-
-DomHTMLIFrameElement createDomHTMLIFrameElement() =>
-    domDocument.createElement('iframe') as DomHTMLIFrameElement;
-
-@JS()
-@staticInterop
-class DomMessagePort extends DomEventTarget {}
-
-extension DomMessagePortExtension on DomMessagePort {
-  void postMessage(Object? message) => js_util.callMethod(this, 'postMessage',
-      <Object>[if (message != null) js_util.jsify(message)]);
-  external void start();
-}
-
-@JS()
-@staticInterop
-class DomMessageChannel {}
-
-extension DomMessageChannelExtension on DomMessageChannel {
-  external DomMessagePort get port1;
-  external DomMessagePort get port2;
-}
-
-DomMessageChannel createDomMessageChannel() =>
-    domCallConstructorString('MessageChannel', <Object>[])!
-        as DomMessageChannel;
 
 Object? domGetConstructor(String constructorName) =>
     js_util.getProperty(domWindow, constructorName);
