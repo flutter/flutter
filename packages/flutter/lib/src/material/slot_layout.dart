@@ -10,20 +10,24 @@ import 'slot_layout_config.dart';
 ///
 /// Commonly used with [AdaptiveLayout] but also functional on its own.
 
-// ignore: must_be_immutable
 class SlotLayout extends StatefulWidget {
-
-  /// Creates a [SlotLayout].
-  ///
-  /// Returns a chosen [SlotLayoutConfig] based on the breakpoints defined in
-  /// the [config]
-  SlotLayout({
+  /// Creates a [SlotLayout] widget.
+  const SlotLayout({
     required this.config,
-    required super.key
+    super.key
     });
 
-  /// Whether this slot has a Widget currently chosen.
-  bool isActive = false;
+  /// Given a context and a config, it returns the [SlotLayoutConfig] that will
+  /// be chosen from the config under the context's conditions
+  static SlotLayoutConfig? pickWidget (BuildContext context,  Map<int, SlotLayoutConfig> config){
+    SlotLayoutConfig? chosenWidget;
+    config.forEach((int key, SlotLayoutConfig value) {
+      if(MediaQuery.of(context).size.width > key){
+        chosenWidget = value;
+      }
+    });
+    return chosenWidget;
+  }
 
   /// The mapping that is used to determine what Widget to display at what point.
   ///
@@ -35,8 +39,9 @@ class SlotLayout extends StatefulWidget {
 
 class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateMixin{
   late AnimationController _controller;
-  late SlotLayoutConfig chosenWidget;
+  SlotLayoutConfig? chosenWidget;
   ValueNotifier<Key> changedWidget = ValueNotifier<Key>(const Key(''));
+  List<Key> animatingWidgets = <Key>[];
 
   @override
   void initState() {
@@ -60,20 +65,30 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    chosenWidget = SlotLayoutConfig(key: const Key(''), child: const SizedBox(width: 0, height: 0));
-    widget.isActive = false;
-    widget.config.forEach((int key, SlotLayoutConfig value) {
-      pickWidget(context, key, value);
-    });
-    chosenWidget.controller = _controller;
-    changedWidget.value = chosenWidget.key!;
-    return chosenWidget;
-  }
-
-  void pickWidget(BuildContext context, int key, SlotLayoutConfig value) {
-    if(MediaQuery.of(context).size.width > key) {
-        widget.isActive = true;
-        chosenWidget = value;
+    chosenWidget = SlotLayout.pickWidget(context, widget.config);
+    if(chosenWidget!=null){
+      changedWidget.value = chosenWidget!.key!;
     }
+    return AnimatedSwitcher(
+      duration:const Duration(milliseconds:1000),
+      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+        final Stack elements = Stack(
+          children: <Widget>[
+            if (chosenWidget?.overtakeAnimation!=null && !previousChildren.contains(currentChild)) ...previousChildren.where((Widget element) => element.key!=currentChild!.key),
+            if (currentChild != null) currentChild,
+          ],
+        );
+        return elements;
+      },
+
+      transitionBuilder: (Widget child, Animation<double> animation){
+        if(child.key == chosenWidget?.key){
+          return (chosenWidget?.inAnimation!=null)? chosenWidget?.inAnimation!(_controller, child)?? child : child;
+        }else{
+          return (chosenWidget?.overtakeAnimation!=null)? chosenWidget?.overtakeAnimation!(_controller, child)?? child : child;
+        }
+      },
+      child:chosenWidget ?? const SlotLayoutConfig(key: Key(''), child: SizedBox(width: 0, height: 0)),
+    );
   }
 }

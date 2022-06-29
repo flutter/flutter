@@ -9,34 +9,40 @@ import 'package:flutter/widgets.dart';
 ///
 /// Most commonly used in [LayoutSlot] however it would be functional outside of
 /// this Widget as well
-// ignore: must_be_immutable
+///
 class SlotLayoutConfig extends StatefulWidget {
-  /// Creates a [SlotLayoutConfig].
+  /// Creates a new [SlotLayoutConfig].
   ///
-  /// If [animation] and or [controller] are null, the [SlotLayoutConfig] simply
-  /// returns its child.
-  SlotLayoutConfig({
+  /// Returns the child widget as is but holds properties to be accessed by other
+  /// classes.
+  const SlotLayoutConfig({
     required this.child,
-    this.controller,
-    this.animation,
-    super.key,
+    this.inAnimation,
+    this.overtakeAnimation,
+    required super.key,
   });
 
   /// The child Widget that the parent eventually returns with an animation.
   final Widget child;
 
-  /// A function that takes an [AnimatedController] and a [Widget] and returns a
-  /// [Widget].
+  /// A function that takes an [AnimationController] and a [Widget] and returns
+  /// a [Widget].
+  ///
+  /// The animation to be played when the child enters.
   ///
   /// While it is not enforced, the recommended usage for this property is to
   /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget]
-  final Widget Function(AnimationController?, Widget)? animation;
+  final Widget Function(AnimationController?, Widget)? inAnimation;
 
-  /// The [AnimationController] that runs this Widget's animation cycle.
+  /// A function that takes an [AnimationController] and a [Widget] and returns
+  /// a [Widget].
   ///
-  /// When [SlotLayoutConfig] is used within a [SlotLayout], the controller is
-  /// passed in by the [SlotLayout] to ensure that animations run as intended.
-  AnimationController? controller;
+  /// This animation is ran on the overtaken Widget when this child Widget is
+  /// animated into view, replacing the other Widget.
+  ///
+  /// While it is not enforced, the recommended usage for this property is to
+  /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget]
+  final Widget Function(AnimationController?, Widget)? overtakeAnimation;
 
   @override
   State<SlotLayoutConfig> createState() => _SlotLayoutConfigState();
@@ -45,8 +51,6 @@ class SlotLayoutConfig extends StatefulWidget {
 class _SlotLayoutConfigState extends State<SlotLayoutConfig> {
   @override
   Widget build(BuildContext context) {
-    return (widget.animation != null && widget.controller != null)
-        ? widget.animation!(widget.controller, widget.child)
-        : widget.child;
+    return widget.child;
   }
 }
