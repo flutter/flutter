@@ -507,7 +507,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
-    _loupeController?.setPosition(details.globalPosition);
+    //_loupeController?.setPosition(details.globalPosition);
     _dragEndPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
@@ -557,7 +557,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
-    _loupeController?.setPosition(details.globalPosition);
+    //_loupeController?.setPosition(details.globalPosition);
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
