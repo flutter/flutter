@@ -134,6 +134,7 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
+  Map<String, AssetKind> entryKinds,
   { Logger? loggerOverride }
 ) async {
   loggerOverride ??= globals.logger;
