@@ -12584,9 +12584,6 @@ void main() {
   testWidgets(
       'Spell check configured properly with specified spell check service and handler',
           (WidgetTester tester) async {
-        SpellCheckService defaultService = DefaultSpellCheckService();
-        SpellCheckSuggestionsHandler defaultHandler =
-        DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
         await tester.pumpWidget(
           MaterialApp(
             home: EditableText(
@@ -12605,15 +12602,15 @@ void main() {
           ),
         );
 
-        SpellCheckConfiguration expectedConfiguration = SpellCheckConfiguration(
-            spellCheckService: defaultService,
-            spellCheckSuggestionsHandler: defaultHandler);
-
         final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
-        expect(state.spellCheckConfiguration!, equals(expectedConfiguration));
+        expect(state.spellCheckConfiguration!.spellCheckService.runtimeType,
+            equals(DefaultSpellCheckService));
+        expect(
+            state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
+            equals(DefaultSpellCheckSuggestionsHandler));
       });
-  }
+  });
 }
 
 class UnsettableController extends TextEditingController {
