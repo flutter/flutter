@@ -332,12 +332,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       if (_state == _DragState.accepted) {
         _pointerMoveAccept = true;
         bool eventExists = false;
-        for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-          if (_multiPointerMoveTrackers[i].pointer == event.pointer) {
+        _multiPointerMoveTrackers.any((element) {
+          if (element.pointer == event.pointer) {
             eventExists = true;
-            break;
+            return true;
           }
-        }
+          return false;
+        });
         if(eventExists) {
           _checkMultiPointerUpdate();
           _multiPointerMoveTrackers.clear();
