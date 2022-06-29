@@ -203,7 +203,7 @@ void SceneBuilder::pushBackdropFilter(Dart_Handle layer_handle,
                                       int blendMode,
                                       fml::RefPtr<EngineLayer> oldLayer) {
   auto layer = std::make_shared<flutter::BackdropFilterLayer>(
-      filter->filter()->skia_object(), static_cast<SkBlendMode>(blendMode));
+      filter->filter(), static_cast<DlBlendMode>(blendMode));
   PushLayer(layer);
   EngineLayer::MakeRetained(layer_handle, layer);
 
