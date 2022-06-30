@@ -313,7 +313,7 @@ class PhysicalKeyEntry {
   String get commentName => getCommentName(constantName);
 
   /// Gets the named used for the key constant in the definitions in
-  /// keyboard_key.dart.
+  /// keyboard_key.g.dart.
   ///
   /// If set by the constructor, returns the name set, but otherwise constructs
   /// the name from the various different names available, making sure that the
