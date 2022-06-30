@@ -378,10 +378,10 @@ Rect TextInputPlugin::GetCursorRect() const {
   Point transformed_point = {
       composing_rect_.left() * editabletext_transform_[0][0] +
           composing_rect_.top() * editabletext_transform_[1][0] +
-          editabletext_transform_[3][0] + composing_rect_.width(),
+          editabletext_transform_[3][0],
       composing_rect_.left() * editabletext_transform_[0][1] +
           composing_rect_.top() * editabletext_transform_[1][1] +
-          editabletext_transform_[3][1] + composing_rect_.height()};
+          editabletext_transform_[3][1]};
   return {transformed_point, composing_rect_.size()};
 }
 

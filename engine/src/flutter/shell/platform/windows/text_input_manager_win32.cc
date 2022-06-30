@@ -172,14 +172,19 @@ void TextInputManagerWin32::MoveImeWindow(HIMC imm_context) {
   if (GetFocus() != window_handle_ || !ime_active_) {
     return;
   }
-  LONG x = caret_rect_.left();
-  LONG y = caret_rect_.top();
-  ::SetCaretPos(x, y);
+  LONG left = caret_rect_.left();
+  LONG top = caret_rect_.top();
+  LONG right = caret_rect_.right();
+  LONG bottom = caret_rect_.bottom();
+  ::SetCaretPos(left, bottom);
 
-  COMPOSITIONFORM cf = {CFS_POINT, {x, y}};
-  ::ImmSetCompositionWindow(imm_context, &cf);
+  // Set the position of composition text.
+  COMPOSITIONFORM composition_form = {CFS_POINT, {left, top}};
+  ::ImmSetCompositionWindow(imm_context, &composition_form);
 
-  CANDIDATEFORM candidate_form = {0, CFS_EXCLUDE, {x, y}, {0, 0, 0, 0}};
+  // Set the position of candidate window.
+  CANDIDATEFORM candidate_form = {
+      0, CFS_EXCLUDE, {left, bottom}, {left, top, right, bottom}};
   ::ImmSetCandidateWindow(imm_context, &candidate_form);
 }
 
