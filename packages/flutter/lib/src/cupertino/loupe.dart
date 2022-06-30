@@ -31,7 +31,7 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
       value: 0,
       vsync: this,
       duration: const Duration(milliseconds: 500),
-    );
+    )..addListener(() => setState(() {}));
     super.initState();
   }
 
@@ -80,19 +80,24 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
         top: _realLoupePosition.dy,
         child: Transform.translate(
           offset: Offset(0, -37.5 * (_inOutAnimationController.value - 1)),
-          child: Loupe(
-            transitionAnimationController: _inOutAnimationController,
-            controller: widget.controller,
-            elevation: 6,
-            focalPoint:
-                const Offset(0, CupertinoLoupe._kVerticalFocalPointOffset),
-            border:
-                Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
-            //borderRadius: const Radius.circular(36),
-            shadowColor: const Color.fromARGB(108, 255, 255, 255),
-            size: CupertinoLoupe._kLoupeSize,
-            positionAnimation: Curves.easeIn,
-            positionAnimationDuration: const Duration(milliseconds: 50),
+          child: Opacity(
+            opacity: 0.8,
+            child: Loupe(
+              transitionAnimationController: _inOutAnimationController,
+              controller: widget.controller,
+              elevation: 6,
+              focalPoint: Offset(
+                  0,
+                  CupertinoLoupe._kVerticalFocalPointOffset -
+                      CupertinoLoupe._kLoupeSize.height),
+              border:
+                  Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
+              //borderRadius: const Radius.circular(36),
+              shadowColor: const Color.fromARGB(108, 255, 255, 255),
+              size: CupertinoLoupe._kLoupeSize,
+              positionAnimation: Curves.easeIn,
+              positionAnimationDuration: const Duration(milliseconds: 50),
+            ),
           ),
         ));
   }

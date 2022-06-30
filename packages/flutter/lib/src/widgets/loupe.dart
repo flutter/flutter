@@ -8,11 +8,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// A builder that builds a Widget with a [LoupeController]. 
-/// 
-/// Used in contexts where a loupe may or may not display, since a [Loupe] requires a 
+/// A builder that builds a Widget with a [LoupeController].
+///
+/// Used in contexts where a loupe may or may not display, since a [Loupe] requires a
 /// [LoupeController].
-typedef LoupeControllerWidgetBuilder = Widget Function(BuildContext context, LoupeController controller);
+typedef LoupeControllerWidgetBuilder = Widget Function(
+    BuildContext context, LoupeController controller);
 
 /// Controls an instance of a [Loupe].
 class LoupeController {
@@ -256,12 +257,10 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     if (widget.transitionAnimationController == null) {
-      _animationRequestsSubscription = widget
-          .controller._animationStatus.stream
+      _animationRequestsSubscription = widget.controller._animationStatus.stream
           .listen(_onNoAnimationTransitionRequest);
     } else {
-      _animationRequestsSubscription = widget
-          .controller._animationStatus.stream
+      _animationRequestsSubscription = widget.controller._animationStatus.stream
           .listen(_onAnimateTransitionRequest);
     }
 
@@ -355,13 +354,12 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        SizedBox.fromSize(
-          size: widget.size,
-          child: _Magnifier(
-            magnificationScale: widget.magnificationScale,
-            shape: widget.shape,
-            focalPoint: widget.focalPoint,
-            child: widget.child,
+        ClipPath.shape(
+          shape: widget.shape,
+          child: BackdropFilter(
+            filter: _createMagnificationFilter(),
+            blendMode: BlendMode.src,
+            child: SizedBox.fromSize(size: widget.size, child: widget.child),
           ),
         ),
         _LoupeStyle(
@@ -372,6 +370,15 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
             shadowColor: widget.shadowColor)
       ],
     );
+  }
+
+  ImageFilter _createMagnificationFilter() {
+    final magnifierMatrix = Matrix4.identity()
+      ..translate(widget.focalPoint.dx * widget.magnificationScale,
+          widget.focalPoint.dy * widget.magnificationScale)
+      ..scale(widget.magnificationScale, widget.magnificationScale);
+
+    return ImageFilter.matrix(magnifierMatrix.storage);
   }
 }
 
@@ -452,170 +459,4 @@ class _DonutClip extends CustomClipper<Path> {
   @override
   bool shouldReclip(_DonutClip oldClipper) =>
       oldClipper.borderRadius != borderRadius;
-}
-
-/// A widget that magnifies a screen region relative to itself.
-///
-/// [_Magnifier] may have a [child], which will be drawn over the lens. This is useful
-/// for overlays, like tinting the lens.
-///
-/// Some caveats for using the magnifier:
-/// * [_Magnifier] may only display widgets that come before it in the paint order; for example,
-/// if magnifier comes before `widget A` in a column, then you will not be able to see `widget A`
-/// in the magnifier.
-/// *  If the magnifier points out of the bounds of the app, will have undefined behavior. This
-/// generally results in the magnifier having undesired transparency, i.e. showing the layers
-/// underneath it.
-///
-///
-/// This widget's magnification does not lower resolution of the subject
-/// in the [_Magnifier].
-///
-/// See also:
-/// * [BackdropFilter], which [_Magnifier] uses along with [ImageFilter.matrix] to
-/// Magnify a screen region.
-/// * [Loupe], which uses [_Magnifier] to magnify text.
-class _Magnifier extends SingleChildRenderObjectWidget {
-  /// Construct a [_Magnifier],
-  _Magnifier(
-      {super.child,
-      ShapeBorder? shape,
-      this.magnificationScale = 1,
-      this.focalPoint = Offset.zero})
-      : clip = shape != null
-            ? ShapeBorderClipper(
-                shape: shape,
-              )
-            : null;
-
-  ///  [focalPoint] of the magnifier is the area the center of the
-  /// [_Magnifier] points to, relative to the center of the magnifier.
-  /// If left as [Offset.zero], the magnifier will magnify whatever is directly
-  /// below it.
-  final Offset focalPoint;
-
-  /// The scale of the magnification.
-  ///
-  /// A [magnificationScale] of 1 means that the content magi
-  final double magnificationScale;
-
-  /// The shape of the magnifier is dictated by [clip], which clips
-  /// the magnifier to the shape. If null, the shape will be rectangular.
-  final ShapeBorderClipper? clip;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderMagnification(focalPoint, magnificationScale, clip);
-  }
-
-  @override
-  void updateRenderObject(
-      BuildContext context, covariant RenderProxyBox renderObject) {
-    (renderObject as _RenderMagnification)
-      ..focalPoint = focalPoint
-      ..clip = clip
-      ..magnificationScale = magnificationScale;
-  }
-}
-
-class _RenderMagnification extends RenderProxyBox {
-  _RenderMagnification(
-    this._focalPoint,
-    this._magnificationScale,
-    this._clip, {
-    RenderBox? child,
-  }) : super(child);
-
-  Offset get focalPoint => _focalPoint;
-  Offset _focalPoint;
-  set focalPoint(Offset value) {
-    if (_focalPoint == value) {
-      return;
-    }
-    _focalPoint = value;
-    markNeedsLayout();
-  }
-
-  double get magnificationScale => _magnificationScale;
-  double _magnificationScale;
-  set magnificationScale(double value) {
-    if (_magnificationScale == value) {
-      return;
-    }
-    _magnificationScale = value;
-    markNeedsLayout();
-  }
-
-  CustomClipper<Path>? get clip => _clip;
-  CustomClipper<Path>? _clip;
-  set clip(CustomClipper<Path>? value) {
-    if (_clip == value) {
-      return;
-    }
-    _clip = value;
-    markNeedsLayout();
-  }
-
-  @override
-  _MagnificationLayer? get layer => super.layer as _MagnificationLayer?;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (layer == null) {
-      layer = _MagnificationLayer(
-          size: size,
-          globalPosition: offset,
-          focalPoint: focalPoint,
-          clip: clip,
-          magnificationScale: magnificationScale);
-    } else {
-      layer!
-        ..magnificationScale = magnificationScale
-        ..size = size
-        ..globalPosition = offset
-        ..focalPoint = focalPoint;
-    }
-
-    context.pushLayer(layer!, super.paint, offset);
-  }
-}
-
-class _MagnificationLayer extends ContainerLayer {
-  _MagnificationLayer(
-      {required this.size,
-      required this.globalPosition,
-      required this.clip,
-      required this.focalPoint,
-      required this.magnificationScale});
-
-  Offset globalPosition;
-  Size size;
-
-  Offset focalPoint;
-  double magnificationScale;
-
-  CustomClipper<Path>? clip;
-
-  @override
-  void addToScene(SceneBuilder builder) {
-    // If shape is null, can push the most optimized clip, a regular rectangle.
-    if (clip == null) {
-      builder.pushClipRect(globalPosition & size);
-    } else {
-      builder.pushClipPath(clip!.getClip(size).shift(globalPosition));
-    }
-
-    // Create and push transform.
-    final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
-    final Matrix4 matrix = Matrix4.identity()
-      ..translate(
-          magnificationScale * (focalPoint.dx - thisCenter.dx) + thisCenter.dx,
-          magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
-      ..scale(magnificationScale);
-    builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage));
-    builder.pop();
-
-    super.addToScene(builder);
-    builder.pop();
-  }
 }
