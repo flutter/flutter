@@ -1408,8 +1408,8 @@ mixin WidgetInspectorService {
     if(_pubRootDirectories != null){
       sortedSet.addAll(_pubRootDirectories!);
     }
-    _pubRootDirectories = sortedSet.toList();
 
+    _pubRootDirectories = sortedSet.toList();
     _isLocalCreationCache.clear();
   }
 
