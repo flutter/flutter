@@ -1,4 +1,4 @@
-Signature: 1ef90da688e31c38c8a6b9ee72455dc7
+Signature: 3dde0a2220b1d581e4c5e3b72736eb38
 
 UNUSED LICENSES:
 
@@ -920,6 +920,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Graphite.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Graphite_NoGpu.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Graphite_NoPrecompile.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-iOS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Release-Graphite.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-ASAN.json
@@ -5569,6 +5570,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/PathTessellator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/StrokeTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/StrokeTessellator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/VertexChunkPatchAllocator.h
+FILE: ../../../third_party/skia/src/gpu/graphite/AttachmentTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack_graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandTypes.h
@@ -5583,8 +5585,11 @@ FILE: ../../../third_party/skia/src/gpu/graphite/GraphiteResourceKey.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Log.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.h
+FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h
+FILE: ../../../third_party/skia/src/gpu/graphite/RecordingPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Resource.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Resource.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ResourceCache.cpp
@@ -5599,6 +5604,9 @@ FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Geometry.h
+FILE: ../../../third_party/skia/src/gpu/graphite/geom/SubRunData.h
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.h
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.cpp
