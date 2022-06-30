@@ -2565,4 +2565,36 @@ void main() {
 
     // Go without throw.
   });
+
+  testWidgets('Track offset respects padding', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/106834
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(50.0),
+          ),
+          child: RawScrollbar(
+            controller: scrollController,
+            minThumbLength: 21,
+            minOverscrollLength: 8,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 50000.0),
+            ),
+          ),
+        )
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 550.0)) // track
+        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0))
+    ); // thumb
+  });
 }
