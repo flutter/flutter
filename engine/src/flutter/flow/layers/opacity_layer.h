@@ -5,7 +5,9 @@
 #ifndef FLUTTER_FLOW_LAYERS_OPACITY_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_OPACITY_LAYER_H_
 
-#include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/cacheable_layer.h"
+#include "flutter/flow/layers/layer.h"
+#include "include/core/SkMatrix.h"
 
 namespace flutter {
 
@@ -13,7 +15,7 @@ namespace flutter {
 // OpacityLayer is very costly due to the saveLayer call. If there's no child,
 // having the OpacityLayer or not has the same effect. In debug_unopt build,
 // |Preroll| will assert if there are no children.
-class OpacityLayer : public ContainerLayer {
+class OpacityLayer : public CacheableContainerLayer {
  public:
   // An offset is provided here because OpacityLayer.addToScene method in the
   // Flutter framework can take an optional offset argument.

@@ -189,19 +189,4 @@ void ContainerLayer::PaintChildren(PaintContext& context) const {
   }
 }
 
-void ContainerLayer::TryToPrepareRasterCache(
-    PrerollContext* context,
-    Layer* layer,
-    const SkMatrix& matrix,
-    RasterCacheLayerStrategy strategy) {
-  if (!context->has_platform_view && !context->has_texture_layer &&
-      context->raster_cache &&
-      SkRect::Intersects(context->cull_rect, layer->paint_bounds())) {
-    context->raster_cache->Prepare(context, layer, matrix, strategy);
-  } else if (context->raster_cache) {
-    // Don't evict raster cache entry during partial repaint
-    context->raster_cache->Touch(layer, matrix, strategy);
-  }
-}
-
 }  // namespace flutter

@@ -4,13 +4,18 @@
 
 #include "flutter/flow/layers/opacity_layer.h"
 
-#include "flutter/fml/trace_event.h"
+#include "flutter/flow/layers/cacheable_layer.h"
 #include "third_party/skia/include/core/SkPaint.h"
 
 namespace flutter {
 
+// the opacity_layer couldn't cache itself, so the cache_threshold is the
+// max_int
 OpacityLayer::OpacityLayer(SkAlpha alpha, const SkPoint& offset)
-    : alpha_(alpha), offset_(offset), children_can_accept_opacity_(false) {}
+    : CacheableContainerLayer(std::numeric_limits<int>::max(), true),
+      alpha_(alpha),
+      offset_(offset),
+      children_can_accept_opacity_(false) {}
 
 void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -40,32 +45,34 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->mutators_stack.PushTransform(
       SkMatrix::Translate(offset_.fX, offset_.fY));
   context->mutators_stack.PushOpacity(alpha_);
+
+  AutoCache auto_cache =
+      AutoCache(layer_raster_cache_item_.get(), context, matrix);
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
 
   // Collect inheritance information on our children in Preroll so that
   // we can decide whether or not to use a saveLayer in Paint.
   context->subtree_can_inherit_opacity = true;
-
   // ContainerLayer will turn the flag off if any children are
   // incompatible or if they overlap
   ContainerLayer::Preroll(context, child_matrix);
-
   // We store the inheritance ability of our children for |Paint|
   set_children_can_accept_opacity(context->subtree_can_inherit_opacity);
 
   // Now we let our parent layers know that we, too, can inherit opacity
   // regardless of what our children are capable of
   context->subtree_can_inherit_opacity = true;
-
   context->mutators_stack.Pop();
   context->mutators_stack.Pop();
 
   set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
 
-  if (!children_can_accept_opacity()) {
-    TryToPrepareRasterCache(context, this, child_matrix,
-                            RasterCacheLayerStrategy::kLayerChildren);
+  if (children_can_accept_opacity()) {
+    // For opacity layer, we can use raster_cache children only when the
+    // children can't accept opacity so if the children_can_accept_opacity we
+    // should tell the AutoCache object don't do raster_cache.
+    auto_cache.ShouldNotBeCached();
   }
 
   // Restore cull_rect
@@ -92,10 +99,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
   SkPaint paint;
   paint.setAlphaf(subtree_opacity);
 
-  if (context.raster_cache &&
-      context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                 RasterCacheLayerStrategy::kLayerChildren,
-                                 &paint)) {
+  if (layer_raster_cache_item_->Draw(context, &paint)) {
     return;
   }
 
