@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -126,6 +127,29 @@ void main() {
     await tester.drag(find.byType(PageView62209), const Offset(-800.0, 0.0));
     await tester.pump();
     expect(find.text('Page 9'), findsOneWidget);
+  });
+
+  testWidgets('Scroll device type controls whether pointer is ignored.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final TestGesture touchGesture = await tester.createGesture(kind: PointerDeviceKind.touch); // ignore: avoid_redundant_argument_values
+    await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
+    await touchGesture.down(tester.getCenter(find.byType(ListView)));
+    await tester.pump();
+    await touchGesture.moveBy(const Offset(0, 200));
+    await tester.pump();
+    expect(controller.position.activity?.shouldIgnorePointer, isTrue); // Pointer is ignored for touch scrolling.
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+    controller.jumpTo(0);
+    await tester.pump();
+    final TestGesture trackpadGesture = await tester.createGesture(kind: PointerDeviceKind.trackpad);
+    await trackpadGesture.down(tester.getCenter(find.byType(ListView)));
+    await tester.pump();
+    await trackpadGesture.moveBy(const Offset(0, 200));
+    await tester.pump();
+    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored for trackpad scrolling.
+    await trackpadGesture.up();
+    await tester.pumpAndSettle();
   });
 }
 
