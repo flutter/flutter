@@ -26,6 +26,7 @@ import 'application_package.dart';
 import 'code_signing.dart';
 import 'iproxy.dart';
 import 'migrations/deployment_target_migration.dart';
+import 'migrations/indirect_input_events_migration.dart';
 import 'migrations/minimum_frame_duration_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
@@ -126,6 +127,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     DeploymentTargetMigration(app.project, globals.logger),
     ProjectObjectVersionMigration(app.project, globals.logger),
     MinimumFrameDurationMigration(app.project, globals.logger),
+    IndirectInputEventsMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
