@@ -187,11 +187,16 @@ class _RenderAnimatedRaster extends RenderProxyBox {
       return;
     }
     _childImage ??= _paintAndDetachToGpuImage();
-    delegate.paintRaster(
-      context,
-      _childImage!,
-      devicePixelRatio,
-      animation,
-    );
+    try {
+      delegate.paintRaster(
+        context,
+        _childImage!,
+        devicePixelRatio,
+        animation,
+      );
+    } on ui.PictureRasterizationException {
+      // We're running on an emulator without a GPU context.
+      // For now render nothing.
+    }
   }
 }
