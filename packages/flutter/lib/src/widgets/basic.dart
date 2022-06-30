@@ -7199,7 +7199,7 @@ class KeyedSubtree extends StatelessWidget {
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
   factory KeyedSubtree.wrap(Widget child, int childIndex) {
-    final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
+    final Key key = child.key != null ? child.key! : ValueKey<int>(childIndex);
     return KeyedSubtree(key: key, child: child);
   }
 

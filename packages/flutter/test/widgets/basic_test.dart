@@ -889,6 +889,11 @@ void main() {
       contains('verticalDirection: up'),
     ]));
   });
+
+  testWidgets('KeyedSubTree returns correct key value', (WidgetTester tester) async {
+    final KeyedSubtree tree = KeyedSubtree.wrap(const Text(key: Key(''), ''), 0);
+    expect(tree.key, const Key(''));
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
