@@ -31,7 +31,7 @@ void main() {
     expect(delegate.lastImage!.debugDisposed, isTrue);
   }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('AnimatedRaster does not create image if willPaint returns false', (WidgetTester tester) async {
+  testWidgets('AnimatedRaster does not create image if useRasterValue returns false', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate()..useRasterValue = false;
 
     await tester.pumpWidget(_AnimatedRaster(
@@ -72,7 +72,7 @@ void main() {
     animatedRaster.attach(owner);
 
     expect(animation.listeners, contains(animatedRaster.markNeedsPaint));
-    expect(animation.statusListeners, hasLength(1));
+    expect(animation.statusListeners, isEmpty);
 
     animatedRaster.detach();
 
@@ -82,7 +82,7 @@ void main() {
     animatedRaster.attach(owner);
 
     expect(animation.listeners, contains(animatedRaster.markNeedsPaint));
-    expect(animation.statusListeners, hasLength(1));
+    expect(animation.statusListeners, isEmpty);
   }, skip: kIsWeb); // TODO(yjbanov): https://github.com/flutter/flutter/issues/106689
 }
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(jonahwilliams): this is temporarily a private library until we determine
+// a reasonable public API.
 part of page_transitions_theme;
 
 // Foundational widgets for the rasterized zoom page transition.
