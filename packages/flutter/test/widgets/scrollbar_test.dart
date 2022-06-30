@@ -2567,6 +2567,7 @@ void main() {
   });
 
   testWidgets('Track offset respects padding', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/106834
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -2579,7 +2580,7 @@ void main() {
             controller: scrollController,
             minThumbLength: 21,
             minOverscrollLength: 8,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SizedBox(width: 1000.0, height: 50000.0),
