@@ -734,7 +734,7 @@ void main() {
       expect(visualStudio.fullVersion, equals('16.2.29306.81'));
     });
 
-    testWithoutContext('Warns when VS is present but vswhere returns invalid JSON', () {
+    testWithoutContext('Warns and returns no installation when VS is present but vswhere returns invalid JSON', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 

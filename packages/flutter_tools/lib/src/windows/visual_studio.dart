@@ -316,13 +316,14 @@ class VisualStudio {
     late List<dynamic> result;
     late FormatException error;
     try {
-      // vswhere.exe is known to encode its output incorrectly, resulting in
-      // invalid JSON in the description property when interpreted as UTF-8.
-      // First, try to decode without any pre-processing.
-      // See: https://github.com/flutter/flutter/issues/106601
+      // Some versions of vswhere.exe are known to encode their output incorrectly,
+      // resulting in invalid JSON in the 'description' property when interpreted
+      // as UTF-8. First, try to decode without any pre-processing.
       try {
         result = json.decode(vswhereJson) as List<dynamic>;
       } on FormatException catch (e) {
+        // If that fails, remove the 'description' property and try again.
+        // See: https://github.com/flutter/flutter/issues/106601
         error = e;
         vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
 
