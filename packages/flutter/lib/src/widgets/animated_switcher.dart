@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -222,6 +225,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return FadeTransition(
+      key:child.key,
       opacity: animation,
       child: child,
     );
@@ -394,6 +398,6 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   @override
   Widget build(BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!);
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
   }
 }
