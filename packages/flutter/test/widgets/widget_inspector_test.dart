@@ -1769,6 +1769,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject when all matching pubRootDirectories are removed',
           (WidgetTester tester) async {
+            final List<String> pubRootTestSegments = List<String>.from(
+              Uri.parse(pubRootTest).pathSegments,
+            );
+            pubRootTestSegments.removeAt(pubRootTestSegments.length - 1);
+            final String parentDirectory = Uri(
+              scheme: 'file ',
+              pathSegments: pubRootTestSegments,
+            ).toFilePath();
             final Widget widget = Directionality(
               textDirection: TextDirection.ltr,
               child: Stack(
@@ -1784,7 +1792,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             service.setSelection(elementA, 'my-group');
 
             service.addPubRootDirectories(<String>[
-              'file://$pubRootTest',
+              parentDirectory,
               pubRootTest,
               'invalid/$pubRootTest',
             ]);
@@ -1794,7 +1802,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             );
 
             service.removePubRootDirectories(<String>[
-              'file://$pubRootTest',
+              parentDirectory,
               pubRootTest,
             ]);
             expect(
