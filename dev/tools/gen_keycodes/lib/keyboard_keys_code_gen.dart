@@ -46,7 +46,7 @@ class SynonymKeyInfo {
   String get constantName => upperCamelToLowerCamel(name);
 }
 
-/// Generates the keyboard_key.dart based on the information in the key data
+/// Generates the keyboard_key.g.dart based on the information in the key data
 /// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
   KeyboardKeysCodeGenerator(super.keyData, super.logicalData);

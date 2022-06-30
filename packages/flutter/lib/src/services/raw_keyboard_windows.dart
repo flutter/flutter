@@ -4,12 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
 
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
-export 'keyboard_key.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Virtual key VK_PROCESSKEY in Win32 API.

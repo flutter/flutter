@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 import 'hardware_keyboard.dart';
-import 'keyboard_key.dart';
+import 'keyboard_key.g.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
 import 'raw_keyboard_ios.dart';
@@ -19,7 +19,7 @@ import 'system_channels.dart';
 
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, ValueChanged;
 
-export 'keyboard_key.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
 /// An enum describing the side of the keyboard that a key is on, to allow
 /// discrimination between which key is pressed (e.g. the left or right SHIFT
