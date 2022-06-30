@@ -1774,7 +1774,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             );
             pubRootTestSegments.removeAt(pubRootTestSegments.length - 1);
             final String parentDirectory = Uri(
-              scheme: 'file ',
+              scheme: 'file',
               pathSegments: pubRootTestSegments,
             ).toFilePath();
             final Widget widget = Directionality(
