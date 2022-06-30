@@ -38,9 +38,12 @@ void main() {
       platform: globals.platform,
       processManager: globals.processManager,
     );
+    print('1');
     await MigrateProject.installProject('version:1.22.6_stable', currentDir);
+    print('2');
     final FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
     final FlutterProject flutterProject = flutterFactory.fromDirectory(currentDir);
+    print('3');
     context = MigrateContext(
       migrateResult: MigrateResult.empty(),
       flutterProject: flutterProject,
@@ -51,16 +54,19 @@ void main() {
       status: logger.startSpinner(),
       migrateUtils: utils,
     );
-    targetFlutterDirectory = fileSystem.directory(Cache.flutterRoot);
+    print('4');
+    targetFlutterDirectory = fileSystem.directory('targetFlutterDir');
   });
 
   group('MigrateFlutterProject', () {
+    print('5');
     testUsingContext('MigrateBaseFlutterProject creates', () async {
       final Directory workingDir = fileSystem.directory('migrate_working_dir');
       final Directory baseDir = fileSystem.directory('base_dir');
       workingDir.createSync(recursive: true);
+    print('6');
       MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
-        path: baseDir.path,
+        path: null,
         directory: baseDir,
         name: 'base',
         androidLanguage: 'java',
@@ -68,16 +74,18 @@ void main() {
         platformWhitelist: null,
       );
 
+    print('7');
       baseProject.createProject(
         context,
-        <String>[], //revisionsList
-        <String, List<MigratePlatformConfig>>{}, //revisionToConfigs
-        'fallback', //fallbackRevision
-        'target', //targetRevision
+        <String>['5391447fae6209bb21a89e6a5a6583cac1af9b4b'], //revisionsList
+        <String, List<MigratePlatformConfig>>{'5391447fae6209bb21a89e6a5a6583cac1af9b4b': <MigratePlatformConfig>[MigratePlatformConfig(platform: SupportedPlatform.android)]}, //revisionToConfigs
+        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //fallbackRevision
+        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //targetRevision
         targetFlutterDirectory, //targetFlutterDirectory
       );
 
-      expect(logger.statusText, contains('\n'));
+    print('8');
+      expect(baseDir.childFile('pubspec.yaml').existsSync(), true);
     });
 
   });

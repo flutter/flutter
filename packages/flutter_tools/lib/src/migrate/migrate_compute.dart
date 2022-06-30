@@ -650,9 +650,12 @@ class MigrateBaseFlutterProject extends MigrateFlutterProject {
   ) async {
     // Create base
     // Clone base flutter
+    print('create 1 $path');
     if (path == null) {
+    print('create 2');
       final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
       for (final String revision in revisionsList) {
+    print('create 3 $revision');
         final List<String> platforms = <String>[];
         for (final MigratePlatformConfig config in revisionToConfigs[revision]!) {
           platforms.add(config.platform.toString().split('.').last);
@@ -664,6 +667,7 @@ class MigrateBaseFlutterProject extends MigrateFlutterProject {
         //   - parsed revision
         //   - fallback revision
         //   - target revision (currently installed flutter)
+    print('create 4');
         late Directory sdkDir;
         final List<String> revisionsToTry = <String>[revision];
         if (revision != fallbackRevision) {
@@ -671,29 +675,38 @@ class MigrateBaseFlutterProject extends MigrateFlutterProject {
         }
         bool sdkAvailable = false;
         int index = 0;
+    print('create 5');
         do {
+    print('create 6');
           if (index < revisionsToTry.length) {
+    print('create 6.1');
             final String activeRevision = revisionsToTry[index++];
             if (activeRevision != revision && revisionToFlutterSdkDir.containsKey(activeRevision)) {
+    print('create 6.2');
               sdkDir = revisionToFlutterSdkDir[activeRevision]!;
               revisionToFlutterSdkDir[revision] = sdkDir;
               sdkAvailable = true;
             } else {
+    print('create 6.3');
               sdkDir = context.fileSystem.systemTempDirectory.createTempSync('flutter_$activeRevision');
               context.migrateResult.sdkDirs[activeRevision] = sdkDir;
               context.status.pause();
               context.logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
               context.status.resume();
+    print('create 6.3.1cloning');
               sdkAvailable = await context.migrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
+    print('create 6.3.2cloning');
               revisionToFlutterSdkDir[revision] = sdkDir;
             }
           } else {
+    print('create 6.4');
             // fallback to just using the modern target version of flutter.
             sdkDir = targetFlutterDirectory;
             revisionToFlutterSdkDir[revision] = sdkDir;
             sdkAvailable = true;
           }
         } while (!sdkAvailable);
+    print('create 7');
         context.status.pause();
         context.logger.printStatus('Creating base app for $platforms with revision $revision.', indent: 2, color: TerminalColor.grey);
         context.status.resume();
@@ -705,11 +718,13 @@ class MigrateBaseFlutterProject extends MigrateFlutterProject {
           outputDirectory: context.migrateResult.generatedBaseTemplateDirectory!.absolute.path,
           platforms: platforms,
         );
+    print('create 8');
         if (newDirectoryPath != context.migrateResult.generatedBaseTemplateDirectory?.path) {
           context.migrateResult.generatedBaseTemplateDirectory = context.fileSystem.directory(newDirectoryPath);
         }
         // Determine merge type for each newly generated file.
         final List<FileSystemEntity> generatedBaseFiles = context.migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
+    print('create 9');
         for (final FileSystemEntity entity in generatedBaseFiles) {
           if (entity is! File) {
             continue;
@@ -727,6 +742,7 @@ class MigrateBaseFlutterProject extends MigrateFlutterProject {
         }
       }
     }
+    print('create 10');
   }
 }
 

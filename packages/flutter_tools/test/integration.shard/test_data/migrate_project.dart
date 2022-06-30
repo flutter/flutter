@@ -39,21 +39,27 @@ class MigrateProject extends Project {
   late String _appPath;
 
   static Future<void> installProject(String verison, Directory dir, {bool vanilla = true, String? main}) async {
+    print('i1');
     final MigrateProject project = MigrateProject(verison, vanilla: vanilla, main: main);
+    print('i2');
     await project.setUpIn(dir);
+    print('i3');
 
     // Init a git repo to test uncommitted changes checks
     await globals.processManager.run(<String>[
       'git',
       'init',
     ], workingDirectory: dir.path);
+    print('i4');
     await globals.processManager.run(<String>[
       'git',
       'checkout',
       '-b',
       'master',
     ], workingDirectory: dir.path);
+    print('i5');
     await commitChanges(dir);
+    print('i6');
   }
 
   static Future<void> commitChanges(Directory dir) async {
@@ -75,14 +81,17 @@ class MigrateProject extends Project {
     bool useDeferredLoading = false,
     bool useSyntheticPackage = false,
   }) async {
+    print('s1');
     this.dir = dir;
     _appPath = dir.path;
     if (androidLocalProperties != null) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     }
+    print('s2');
     final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
     final Directory depotToolsDir = createResolvedTempDirectorySync('depot_tools.');
 
+    print('s3');
     await processManager.run(<String>[
       'git',
       'clone',
@@ -90,6 +99,7 @@ class MigrateProject extends Project {
       depotToolsDir.path,
     ], workingDirectory: dir.path);
 
+    print('s4');
     final File cipdFile = depotToolsDir.childFile(Platform.isWindows ? 'cipd.bat' : 'cipd');
     await processManager.run(<String>[
       cipdFile.path,
@@ -98,6 +108,7 @@ class MigrateProject extends Project {
       '-force',
     ], workingDirectory: dir.path);
 
+    print('s5');
     await processManager.run(<String>[
       cipdFile.path,
       'install',
@@ -107,7 +118,9 @@ class MigrateProject extends Project {
       tempDir.path,
     ], workingDirectory: dir.path);
 
+    print('s6');
     if (Platform.isWindows) {
+      print('swin');
       await processManager.run(<String>[
         'robocopy',
         tempDir.path,
@@ -128,6 +141,7 @@ class MigrateProject extends Project {
       ]);
     } else {
       // This cp command changes the symlinks to real files so the tool can edit them.
+      print('slin1');
       await processManager.run(<String>[
         'cp',
         '-R',
@@ -136,26 +150,37 @@ class MigrateProject extends Project {
         '${tempDir.path}/.',
         dir.path,
       ]);
+      print('slin2');
 
       await processManager.run(<String>[
         'rm',
         '-rf',
         '.cipd',
       ], workingDirectory: dir.path);
+      print('slin3');
+      print('slin3');
 
       final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
-      for (final FileSystemEntity file in allFiles) {
-        if (file is! File) {
-          continue;
-        }
-        await processManager.run(<String>[
-          'chmod',
-          '+w',
-          file.path,
-        ], workingDirectory: dir.path);
-      }
+      await processManager.run(<String>[
+        'chmod',
+        '+w',
+        '${dir.path}${fileSystem.path.separator}*',
+      ], workingDirectory: dir.path);
+      // for (final FileSystemEntity file in allFiles) {
+      //   print('slin4');
+      //   if (file is! File) {
+      //     continue;
+      //   }
+      //   print('slin5 ${file.path}');
+      //   print((await processManager.run(<String>[
+      //     'chmod',
+      //     '+w',
+      //     file.path,
+      //   ], workingDirectory: dir.path)).stderr);
+      // }
     }
 
+    print('s7');
     if (!vanilla) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), libMain);
       writeFile(fileSystem.path.join(dir.path, 'lib', 'other.dart'), libOther);
