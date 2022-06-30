@@ -1509,6 +1509,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mouseCursor: effectiveMouseCursor,
           onTap: _enabled ? _handleTap : null,
           canRequestFocus: _enabled,
+          borderRadius: widget.borderRadius,
           focusNode: focusNode,
           autofocus: widget.autofocus,
           focusColor: widget.focusColor ?? Theme.of(context).focusColor,

@@ -3810,7 +3810,7 @@ void main() {
     expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
   });
 
-  testWidgets('BorderRadius property clips dropdown menu', (WidgetTester tester) async {
+  testWidgets('BorderRadius property clips dropdown button and dropdown menu', (WidgetTester tester) async {
     const double radius = 20.0;
 
     await tester.pumpWidget(
@@ -3833,6 +3833,14 @@ void main() {
         ),
       ),
     );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(DropdownButtonFormField<String>)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rrect(rrect: RRect.fromLTRBR(0.0, 276.0, 800.0, 324.0, const Radius.circular(radius))));
 
     await tester.tap(find.text('One'));
     await tester.pumpAndSettle();
