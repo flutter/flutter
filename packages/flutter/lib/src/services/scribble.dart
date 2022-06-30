@@ -155,9 +155,13 @@ class Scribble {
   }
 }
 
-/// An interface to receive focus from the engine.
+/// An interface to interact with the engine for handwriting text input.
 ///
-/// This is currently only used to handle UIIndirectScribbleInteraction.
+/// This is currently only used to handle
+/// [UIIndirectScribbleInteraction](https://developer.apple.com/documentation/uikit/uiindirectscribbleinteraction),
+/// which is responsible for manually receiving handwritten text input in UIKit.
+/// The Flutter engine uses this to receive handwriting input on Flutter text
+/// input fields.
 mixin ScribbleClient {
   /// A unique identifier for this element.
   String get elementIdentifier;
@@ -165,17 +169,22 @@ mixin ScribbleClient {
   /// Called by the engine when the [ScribbleClient] should receive focus.
   ///
   /// For example, this method is called during a UIIndirectScribbleInteraction.
+  ///
+  /// The [Offset] indicates the location where the focus event happened, which
+  /// is typically where the cursor should be placed.
   void onScribbleFocus(Offset offset);
 
-  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds.
+  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds,
+  /// where the rectangle bounds are in global coordinates.
   bool isInScribbleRect(Rect rect);
 
   /// The current bounds of the [ScribbleClient].
   Rect get bounds;
 
-  /// Requests that the client show the editing toolbar, for example when the
-  /// platform changes the selection through a non-flutter method such as
-  /// scribble.
+  /// Requests that the client show the editing toolbar.
+  ///
+  /// This is used when the platform changes the selection during scribble
+  /// input.
   void showToolbar();
 
   /// Requests that the client add a text placeholder to reserve visual space
