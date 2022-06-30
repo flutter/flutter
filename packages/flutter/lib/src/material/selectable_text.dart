@@ -429,7 +429,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
-  final LoupeBuilder? loupeBuilder;
+  final LoupeControllerWidgetBuilder? loupeBuilder;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();

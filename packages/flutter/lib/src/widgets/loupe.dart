@@ -8,33 +8,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// A builder function that builds a loupe with a given offset.
-///
-/// This function should be called exactly once when the loupe should
-/// be displayed, and then any time the loupe needs to be moved, the
-/// passed-by-refrence [ValueNotifier]'s offset should be updated.
-///
-/// If called again, the loupe builder will build another loupe,
-/// not update the position of the old one - this is so that the
-/// Loupe can respect animations as well as restrain it's own position
-/// so it remains on screen.
-///
-/// Although this builder can theoretically return any widget,
-/// it should be a widget composed around a [Loupe], and that [Loupe]
-/// should be passed the [LoupeConfiguration]. The [LoupeConfiguration]
-/// handles the positioning and overlay management.
-typedef LoupeBuilder = Widget Function(BuildContext, LoupeConfiguration);
+/// A builder that builds a Widget with a [LoupeController]. 
+/// 
+/// Used in contexts where a loupe may or may not display, since a [Loupe] requires a 
+/// [LoupeController].
+typedef LoupeControllerWidgetBuilder = Widget Function(BuildContext context, LoupeController controller);
 
-class LoupeConfiguration {
-  LoupeConfiguration._(Offset initalOffset)
-      : _loupePosition = ValueNotifier<Offset>(initalOffset);
-
-  /// We use a global offset as opposed to a layerLink and relative offset (like other
-  /// text-related overlays, like toolbar or handles) because the loupe manages it's own
-  /// animations, as well as has the responsibility of repositioning itself on the screen
-  /// so that it never overflows.
-  final ValueNotifier<Offset> _loupePosition;
-
+/// Controls an instance of a [Loupe].
+class LoupeController {
   /// This stream is used to tell the loupe that it should begin it's enter / hide animation.
   /// The [LoupeController] sends its loupe true or false for show / hide respectively,
   /// and then waits for an acknowledgement on the stream by the loupe.
@@ -43,38 +24,34 @@ class LoupeConfiguration {
   /// clean up the overlay until the loupe is done animating out.
   final StreamController<AnimationStatus> _animationStatus =
       StreamController<AnimationStatus>.broadcast();
-}
-
-/// Controls an instance of a [Loupe].
-class LoupeController {
-  final LoupeBuilder _loupeBuilder;
-
-  LoupeController({required LoupeBuilder loupeBuilder})
-      : _loupeBuilder = loupeBuilder;
 
   OverlayEntry? _loupeEntry;
-  LoupeConfiguration? _currentLoupeConfiguation;
 
   /// If the loupe managed by this controller is shown or not.
   ///
   /// If the loupe is mid out animation, this will be true until the loupe is done animating out.
-  bool get isShown => _loupeEntry != null;
+  ValueNotifier<AnimationStatus> status =
+      ValueNotifier<AnimationStatus>(AnimationStatus.dismissed);
 
+  final ValueNotifier<Offset> requestedPosition =
+      ValueNotifier<Offset>(Offset.zero);
 
   /// Returns a future that completes when the loupe is fully shown, i.e. done
   /// with it's entry animation.
   Future<void> show({
     required BuildContext context,
+    required WidgetBuilder builder,
     Widget? debugRequiredFor,
     Offset initalPosition = Offset.zero,
   }) async {
     _forceHide();
-    _currentLoupeConfiguation = LoupeConfiguration._(initalPosition);
     final OverlayState? overlayState = Overlay.of(
       context,
       rootOverlay: true,
       debugRequiredFor: debugRequiredFor,
     );
+
+    requestedPosition.value = initalPosition;
 
     final CapturedThemes capturedThemes = InheritedTheme.capture(
       from: context,
@@ -82,25 +59,38 @@ class LoupeController {
     );
 
     _loupeEntry = OverlayEntry(
-      builder: (BuildContext context) => capturedThemes
-          .wrap(_loupeBuilder(context, _currentLoupeConfiguation!)),
+      builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
     overlayState!.insert(_loupeEntry!);
-    await _sendMessageAndAwaitAcknowledgement(
-      _currentLoupeConfiguation!._animationStatus,
-      AnimationStatus.forward,
-      AnimationStatus.completed,
-    );
+
+    // Schedule the animation to begin in the next frame, since
+    // we need the the loupe to begin listening to the status stream.
+    final Completer<void> didRecieveAck = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // If the loupe was force removed between this and last frame,
+      // we shouldn't attempt to get an acknowledgement, since the future
+      // will wait forever.
+      if (_loupeEntry == null) {
+        didRecieveAck.complete();
+        return;
+      }
+
+      _sendAnimationStatudAndAwaitAcknowledgement(
+        AnimationStatus.forward,
+        AnimationStatus.completed,
+      ).then((_) => didRecieveAck.complete());
+    });
+
+    return didRecieveAck.future;
   }
 
   /// hide does not immediately remove the loupe, since it's possible that
   Future<void> hide() async {
-    if (_currentLoupeConfiguation == null || _loupeEntry == null) {
+    if (_loupeEntry == null) {
       return;
     }
 
-    await _sendMessageAndAwaitAcknowledgement<AnimationStatus>(
-      _currentLoupeConfiguation!._animationStatus,
+    await _sendAnimationStatudAndAwaitAcknowledgement(
       AnimationStatus.reverse,
       AnimationStatus.dismissed,
     );
@@ -111,21 +101,72 @@ class LoupeController {
   void _forceHide() {
     _loupeEntry?.remove();
     _loupeEntry = null;
-    _currentLoupeConfiguation = null;
   }
 
-  static Future<T> _sendMessageAndAwaitAcknowledgement<T>(
-      StreamController<T> streamController, T message, T ack) {
-    // Setup a future that waits for the acknowledgement. Skip the first message, since it's
-    // the initalization message.
-    final Future<T> acknowedgementFuture = streamController.stream
+  Future<AnimationStatus> _sendAnimationStatudAndAwaitAcknowledgement(
+      AnimationStatus message, AnimationStatus ack) async {
+    assert(_loupeEntry != null,
+        'attempted to update animation status with no loupe.');
+
+    // Setup a future that waits for the acknowledgement. Skip the first message,
+    //since it's the initalization message.
+    final Future<AnimationStatus> acknowedgementFuture = _animationStatus.stream
         .skip(1)
-        .firstWhere((T element) => element == message);
+        .firstWhere((AnimationStatus element) => element == ack);
 
-    // Send initalization message.
-    streamController.sink.add(message);
+    status.value = message;
+    _animationStatus.add(message);
 
-    return acknowedgementFuture;
+    await acknowedgementFuture;
+
+    status.value = ack;
+    return ack;
+  }
+
+  /// A utility for calculating a new [Rect] from this rect such that
+  /// [rect] is fully constrained within [bounds], that is, any point
+  /// in the output rect is guaranteed to also be a point in [bounds].
+  ///
+  /// It is a runtime error for [rect.width] to be greater than [bounds.width],
+  /// and it is also an error for [rect.height] to be greater than [bounds.height].
+  ///
+  /// This algorithm makes no guarantees about where this is placed within [bounds],
+  /// only that the entirety of the output rect is inside [bounds].
+  ///
+  /// It is perfectly valid for the output rect to have a point along the edge of the
+  /// [bounds]. If the desired output rect requires that no edges are parrellel to edges
+  /// of [bounds], see [Rect.deflate] by 1 on [bounds] to achieve this effect.
+  static Rect shiftWithinBounds({
+    required Rect rect,
+    required Rect bounds,
+  }) {
+    assert(rect.width <= bounds.width,
+        'attempted to shift $rect within $bounds, but the rect has a greater width.');
+    assert(rect.height <= bounds.height,
+        'attempted to shift $rect within $bounds, but the rect has a greater height.');
+
+    Offset rectShift = Offset.zero;
+    if (rect.left < bounds.left) {
+      rectShift += Offset(bounds.left - rect.left, 0);
+    } else if (rect.right > bounds.right) {
+      rectShift += Offset(bounds.right - rect.right, 0);
+    }
+
+    if (rect.top < bounds.top) {
+      rectShift += Offset(0, bounds.top - rect.top);
+    } else if (rect.bottom > bounds.bottom) {
+      rectShift += Offset(0, bounds.bottom - rect.bottom);
+    }
+
+    return rect.shift(rectShift);
+  }
+
+  /// A utility for calculating a new focal point based off of an old focal point,
+  /// as well as
+  static Offset shiftFocalPoint({
+    required Offset oldFocalPoint,
+  }) {
+    return oldFocalPoint;
   }
 }
 
@@ -139,14 +180,14 @@ class Loupe extends StatefulWidget {
   const Loupe(
       {super.key,
       this.border,
-      this.borderRadius = Radius.zero,
+      required this.controller,
+      this.shape = const RoundedRectangleBorder(),
       required this.shadowColor,
       this.magnificationScale = 1,
       this.elevation = 0,
       required this.size,
-      this.verticalOffset = 0,
+      this.focalPoint = Offset.zero,
       this.child,
-      required this.configuration,
       this.positionAnimationDuration = Duration.zero,
       this.positionAnimation = Curves.linear,
       this.transitionAnimationController})
@@ -158,7 +199,7 @@ class Loupe extends StatefulWidget {
   final Duration positionAnimationDuration;
   final Curve positionAnimation;
 
-  final LoupeConfiguration configuration;
+  final LoupeController controller;
 
   /// The size of the loupe.
   ///
@@ -174,7 +215,7 @@ class Loupe extends StatefulWidget {
   ///
   /// Since the loupe is never displayed out of bounds, this offset will be shrunk
   /// in the case that the offset
-  final double verticalOffset;
+  final Offset focalPoint;
 
   /// The corner radius of the loupe.
   final Radius borderRadius;
@@ -210,23 +251,17 @@ class Loupe extends StatefulWidget {
 }
 
 class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
-  late Offset _lensPosition;
-  late Offset _focalPointOffsetFromCenter;
-
   late StreamSubscription<AnimationStatus> _animationRequestsSubscription;
 
   @override
   void initState() {
-    widget.configuration._loupePosition
-        .addListener(_setAdjustedFocalPointAndLensPosition);
-
     if (widget.transitionAnimationController == null) {
       _animationRequestsSubscription = widget
-          .configuration._animationStatus.stream
+          .controller._animationStatus.stream
           .listen(_onNoAnimationTransitionRequest);
     } else {
       _animationRequestsSubscription = widget
-          .configuration._animationStatus.stream
+          .controller._animationStatus.stream
           .listen(_onAnimateTransitionRequest);
     }
 
@@ -239,12 +274,6 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    _setAdjustedFocalPointAndLensPosition();
-    super.didChangeDependencies();
-  }
-
   // Automatically signals to the controller that the animation is complete,
   // since there is no animation to run.
   void _onNoAnimationTransitionRequest(AnimationStatus animationStatus) {
@@ -253,36 +282,33 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
       case AnimationStatus.completed:
         break;
       case AnimationStatus.forward:
-        widget.configuration._animationStatus.sink
-            .add(AnimationStatus.completed);
+        widget.controller._animationStatus.add(AnimationStatus.completed);
         break;
       case AnimationStatus.reverse:
-        widget.configuration._animationStatus.sink
-            .add(AnimationStatus.dismissed);
+        widget.controller._animationStatus.add(AnimationStatus.dismissed);
         break;
     }
   }
 
   // Runs the animation in the desired direction, then, when the animation is
   // complete, signals to the controller that the animation is complete.
-  void _onAnimateTransitionRequest(AnimationStatus animationStatus) {
+  void _onAnimateTransitionRequest(AnimationStatus animationStatus) async {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         break;
       case AnimationStatus.forward:
-        widget.transitionAnimationController!.forward().then((_) => widget
-            .configuration._animationStatus.sink
-            .add(AnimationStatus.completed));
+        await widget.transitionAnimationController!.forward();
+        widget.controller._animationStatus.add(AnimationStatus.completed);
         break;
       case AnimationStatus.reverse:
-        widget.transitionAnimationController!.reverse().then((_) => widget
-            .configuration._animationStatus.sink
-            .add(AnimationStatus.dismissed));
+        await widget.transitionAnimationController!.reverse();
+        widget.controller._animationStatus.add(AnimationStatus.dismissed);
         break;
     }
   }
 
+  /*
   /// Adjust both the focal point and the lens position.
   ///
   /// The adjustments are made based on two factors:
@@ -292,13 +318,13 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
 
     // The raw position that the lens would be at, prior to any adjustment.
     final Offset unadjustedLensPosition =
-        widget.configuration._loupePosition.value -
+        widget.configuration._rawLoupePosition.value -
             Alignment.bottomCenter.alongSize(widget.size) +
             Offset(0, widget.verticalOffset);
 
     // Adjust the lens position so that even if the offset "asks" us to draw the lens off the screen,
     // the lens position gets adjusted so that it does not draw off the screen.
-    final Offset adjustedLensPosition = _lensPosition = Offset(
+    final Offset adjustedLensPosition = Offset(
       unadjustedLensPosition.dx.clamp(0, screenSize.width - widget.size.width),
       unadjustedLensPosition.dy
           .clamp(0, screenSize.height - widget.size.height),
@@ -312,20 +338,20 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
     // the lens stops moving, the focal point continues to track the offset. Clamped
     // so that the lens doesn't ever point offscreen.
     final Offset adjustedFocalPointOffsetFromCenter = Offset(
-        (_lensPosition.dx - unadjustedLensPosition.dx)
+        (adjustedLensPosition.dx - unadjustedLensPosition.dx)
             .clamp(-horizontalFocalPointClamp, horizontalFocalPointClamp),
         (widget.verticalOffset - Alignment.center.alongSize(widget.size).dy) +
-            (_lensPosition.dy - unadjustedLensPosition.dy));
+            (adjustedLensPosition.dy - unadjustedLensPosition.dy));
 
-    setState(() {
-      _focalPointOffsetFromCenter = adjustedFocalPointOffsetFromCenter;
-      _lensPosition = adjustedLensPosition;
-    });
+    // setState not called here because parent widget calls setState when
+    // value notifier gets updated.,
+    _focalPointOffsetFromCenter = adjustedFocalPointOffsetFromCenter;
+    widget.configuration._adjustedLoupePosition.value = adjustedLensPosition;
   }
+  */
 
   @override
   Widget build(BuildContext context) {
-    // The most canon anchor positon for the loupe is the exact middle.
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
@@ -333,15 +359,13 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
           size: widget.size,
           child: _Magnifier(
             magnificationScale: widget.magnificationScale,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(widget.borderRadius),
-            ),
-            focalPoint: _focalPointOffsetFromCenter,
+            shape: widget.shape,
+            focalPoint: widget.focalPoint,
             child: widget.child,
           ),
         ),
         _LoupeStyle(
-            borderRadius: widget.borderRadius,
+            shape: widget.shape,
             elevation: widget.elevation,
             size: widget.size,
             border: widget.border,

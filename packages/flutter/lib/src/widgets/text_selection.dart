@@ -236,12 +236,13 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    LoupeBuilder? loupeBuilder,
+    LoupeControllerWidgetBuilder? loupeBuilder,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
        _handlesVisible = handlesVisible,
-       _loupeController = loupeBuilder  != null ? LoupeController(loupeBuilder: loupeBuilder) : null,
+       _loupeBuilder = loupeBuilder,
+       _loupeController = loupeBuilder != null ? LoupeController() : null,
        _value = value {
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
@@ -327,6 +328,7 @@ class TextSelectionOverlay {
   ///  call [_showLoupe] or [_hideLoupe]. This is because the loupe needs to orchestrate
   /// with other properties in [TextSelectionOverlay].
   final LoupeController? _loupeController;
+  final LoupeControllerWidgetBuilder? _loupeBuilder;
 
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
@@ -483,7 +485,11 @@ class TextSelectionOverlay {
     hideToolbar();
   }
 
-  _loupeController!.show(context: context, initalPosition: showLoupeAt);
+  _loupeController!.show(
+    context: context, 
+    initalPosition: showLoupeAt, 
+    builder: (BuildContext context) => _loupeBuilder!(context, _loupeController!
+  ));
   }
 
   void _hideLoupe() {
@@ -507,7 +513,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
-    //_loupeController?.setPosition(details.globalPosition);
+    _loupeController?.requestedPosition.value = details.globalPosition;
     _dragEndPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
@@ -557,7 +563,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
-    //_loupeController?.setPosition(details.globalPosition);
+    _loupeController?.requestedPosition.value = details.globalPosition;
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
@@ -918,6 +924,7 @@ class SelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
   void showToolbar() {
+    return;
     if (_toolbar != null) {
       return;
     }

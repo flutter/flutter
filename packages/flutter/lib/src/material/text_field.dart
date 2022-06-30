@@ -1148,7 +1148,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
     VoidCallback? handleDidGainAccessibilityFocus;
-    LoupeBuilder? loupeBuilder;
+    LoupeControllerWidgetBuilder? loupeBuilder;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -1162,7 +1162,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         autocorrectionTextRectColor = selectionColor;
-        loupeBuilder = (BuildContext context, LoupeConfiguration configuration) => CupertinoLoupe(configuration: configuration);
+        loupeBuilder = (BuildContext context, LoupeController controller) => CupertinoLoupe(controller: controller);
         break;
 
       case TargetPlatform.macOS:
@@ -1185,7 +1185,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         if (theme.platform == TargetPlatform.android) {
-          loupeBuilder = (BuildContext context, LoupeConfiguration configuration) => CupertinoLoupe(configuration: configuration);
+          loupeBuilder = (BuildContext context, LoupeController controller) => CupertinoLoupe(controller: controller);
         }
 
         forcePressEnabled = false;
