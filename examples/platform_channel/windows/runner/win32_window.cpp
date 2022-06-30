@@ -81,8 +81,6 @@ const wchar_t* WindowClassRegistrar::GetWindowClass() {
     window_class.cbClsExtra = 0;
     window_class.cbWndExtra = 0;
     window_class.hInstance = GetModuleHandle(nullptr);
-    window_class.hIcon =
-        LoadIcon(window_class.hInstance, MAKEINTRESOURCE(IDI_APP_ICON));
     window_class.hbrBackground = 0;
     window_class.lpszMenuName = nullptr;
     window_class.lpfnWndProc = Win32Window::WndProc;
@@ -97,17 +95,14 @@ void WindowClassRegistrar::UnregisterWindowClass() {
   class_registered_ = false;
 }
 
-Win32Window::Win32Window() {
-  ++g_active_window_count;
-}
+Win32Window::Win32Window() { ++g_active_window_count; }
 
 Win32Window::~Win32Window() {
   --g_active_window_count;
   Destroy();
 }
 
-bool Win32Window::CreateAndShow(const std::wstring& title,
-                                const Point& origin,
+bool Win32Window::CreateAndShow(const std::wstring& title, const Point& origin,
                                 const Size& size) {
   Destroy();
 
@@ -134,8 +129,7 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
 }
 
 // static
-LRESULT CALLBACK Win32Window::WndProc(HWND const window,
-                                      UINT const message,
+LRESULT CALLBACK Win32Window::WndProc(HWND const window, UINT const message,
                                       WPARAM const wparam,
                                       LPARAM const lparam) noexcept {
   if (message == WM_NCCREATE) {
@@ -154,9 +148,7 @@ LRESULT CALLBACK Win32Window::WndProc(HWND const window,
 }
 
 LRESULT
-Win32Window::MessageHandler(HWND hwnd,
-                            UINT const message,
-                            WPARAM const wparam,
+Win32Window::MessageHandler(HWND hwnd, UINT const message, WPARAM const wparam,
                             LPARAM const lparam) noexcept {
   switch (message) {
     case WM_DESTROY:
@@ -231,9 +223,7 @@ RECT Win32Window::GetClientArea() {
   return frame;
 }
 
-HWND Win32Window::GetHandle() {
-  return window_handle_;
-}
+HWND Win32Window::GetHandle() { return window_handle_; }
 
 void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
