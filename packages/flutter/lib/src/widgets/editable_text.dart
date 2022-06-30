@@ -1070,6 +1070,8 @@ class EditableText extends StatefulWidget {
   ///    runs and can validate and change ("format") the input value.
   ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
   ///    which are more specialized input change notifications.
+  ///  * [TextEditingController], which implements the [Listenable] interface
+  ///    and notifies its listeners on [TextEditingValue] changes.
   final ValueChanged<String>? onChanged;
 
   /// {@template flutter.widgets.editableText.onEditingComplete}
@@ -1138,6 +1140,11 @@ class EditableText extends StatefulWidget {
   /// not be applied until the next time the user inserts or deletes text.
   /// Similar to the [onChanged] callback, formatters don't run when the text is
   /// changed programmatically via [controller].
+  ///
+  /// See also:
+  ///
+  ///  * [TextEditingController], which implements the [Listenable] interface
+  ///    and notifies its listeners on [TextEditingValue] changes.
   /// {@endtemplate}
   final List<TextInputFormatter>? inputFormatters;
 
