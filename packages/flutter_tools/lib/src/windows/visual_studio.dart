@@ -32,7 +32,7 @@ class VisualStudio {
   final Logger _logger;
 
   /// Matches the description property from the vswhere.exe JSON output.
-  final RegExp _vswhereDescriptionProperty = RegExp(r'\s*"description":\s*".*"\s*,?');
+  final RegExp _vswhereDescriptionProperty = RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
 
   /// True if Visual Studio installation was found.
   ///
