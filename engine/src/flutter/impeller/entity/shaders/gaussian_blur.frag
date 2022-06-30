@@ -9,6 +9,8 @@
 //     support for SamplerAddressMode::ClampToBorder in the texture sampler.
 //   * Sample from higher mipmap levels when the blur radius is high enough.
 
+#include <impeller/texture.glsl>
+
 uniform sampler2D texture_sampler;
 uniform sampler2D alpha_mask_sampler;
 
@@ -31,12 +33,6 @@ float Gaussian(float x) {
   return exp(-0.5 * x * x / variance) / (kSqrtTwoPi * v_blur_sigma);
 }
 
-// Emulate SamplerAddressMode::ClampToBorder.
-vec4 SampleWithBorder(sampler2D tex, vec2 uv) {
-  float within_bounds = float(uv.x >= 0 && uv.y >= 0 && uv.x < 1 && uv.y < 1);
-  return texture(tex, uv) * within_bounds;
-}
-
 void main() {
   vec4 total_color = vec4(0);
   float gaussian_integral = 0;
@@ -46,13 +42,14 @@ void main() {
     float gaussian = Gaussian(i);
     gaussian_integral += gaussian;
     total_color +=
-        gaussian * SampleWithBorder(texture_sampler,
-                                    v_texture_coords + blur_uv_offset * i);
+        gaussian * IPSampleClampToBorder(texture_sampler,
+                                         v_texture_coords + blur_uv_offset * i);
   }
 
   vec4 blur_color = total_color / gaussian_integral;
 
-  vec4 src_color = SampleWithBorder(alpha_mask_sampler, v_src_texture_coords);
+  vec4 src_color =
+      IPSampleClampToBorder(alpha_mask_sampler, v_src_texture_coords);
   float blur_factor = v_inner_blur_factor * float(src_color.a > 0) +
                       v_outer_blur_factor * float(src_color.a == 0);
 
