@@ -2124,6 +2124,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         return false;
       }
 
+      // Stop the animation and unmount the dismissed sheets from the tree immediately,
+      // otherwise may cause duplicate GlobalKey assertion if the sheet sub-tree contains
+      // GlobalKey widgets.
+      if (_dismissedBottomSheets.isNotEmpty) {
+        final List<_StandardBottomSheet> sheets = List<_StandardBottomSheet>.of(_dismissedBottomSheets, growable: false);
+        for (final _StandardBottomSheet sheet in sheets) {
+          sheet.animationController.reset();
+        }
+        assert(_dismissedBottomSheets.isEmpty);
+      }
+
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) {
           return NotificationListener<DraggableScrollableNotification>(
