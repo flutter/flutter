@@ -326,7 +326,7 @@ class VisualStudio {
         error = e;
         vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
 
-        _logger.printTrace('Decoding vswhere.exe JSON output failed. $error'
+        _logger.printTrace('Failed to decode vswhere.exe JSON output. $error'
           'Retrying after removing the unused description property:\n$vswhereJson');
 
         result = json.decode(vswhereJson) as List<dynamic>;
