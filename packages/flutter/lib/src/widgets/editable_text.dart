@@ -3485,6 +3485,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     onPaste: _semanticsOnPaste(controls),
                     child: _ScribbleFocusable(
                       enabled: widget.scribbleEnabled,
+                      focusNode: widget.focusNode,
                       onPlaceholderLocationChanged: _onPlaceholderLocationChanged,
                       onScribbleFocus: _onScribbleFocus,
                       onShowToolbar: showToolbar,
@@ -3797,6 +3798,7 @@ class _ScribbleFocusable extends StatefulWidget {
   const _ScribbleFocusable({
     required this.child,
     required this.enabled,
+    required this.focusNode,
     required this.onPlaceholderLocationChanged,
     required this.onScribbleFocus,
     required this.onShowToolbar,
@@ -3806,6 +3808,7 @@ class _ScribbleFocusable extends StatefulWidget {
 
   final Widget child;
   final bool enabled;
+  final FocusNode focusNode;
   final _PlaceholderLocationCallback onPlaceholderLocationChanged;
   final _ScribbleFocusCallback onScribbleFocus;
   final VoidCallback onShowToolbar;
@@ -3819,10 +3822,23 @@ class _ScribbleFocusable extends StatefulWidget {
 class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleClient {
   _ScribbleFocusableState(): _elementIdentifier = (_nextElementIdentifier++).toString();
 
+  void _onFocusChange() {
+    _updateClient(widget.focusNode.hasFocus);
+  }
+
+  void _updateClient(bool hasFocus) {
+    if (hasFocus && Scribble.client != this) {
+      Scribble.client = this;
+    } else {
+      Scribble.client = null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    Scribble.client = this;
+    _updateClient(widget.focusNode.hasFocus);
+    widget.focusNode.addListener(_onFocusChange);
     if (widget.enabled) {
       Scribble.registerScribbleElement(elementIdentifier, this);
     }
@@ -3831,6 +3847,11 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
   @override
   void didUpdateWidget(_ScribbleFocusable oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode.removeListener(_onFocusChange);
+      widget.focusNode.addListener(_onFocusChange);
+      _updateClient(widget.focusNode.hasFocus);
+    }
     if (!oldWidget.enabled && widget.enabled) {
       Scribble.registerScribbleElement(elementIdentifier, this);
     }
@@ -3843,6 +3864,8 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
   @override
   void dispose() {
     Scribble.unregisterScribbleElement(elementIdentifier);
+    widget.focusNode.removeListener(_onFocusChange);
+    Scribble.client = null;
     super.dispose();
   }
 

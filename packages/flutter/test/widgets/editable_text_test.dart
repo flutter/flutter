@@ -4585,6 +4585,76 @@ void main() {
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
+  testWidgets('scribble client is set based on most recent focus', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    controller.text = 'Text1';
+
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final FocusNode focusNode1 = FocusNode();
+    final FocusNode focusNode2 = FocusNode();
+
+    Scribble.client = null;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
+              EditableText(
+                key: key1,
+                controller: TextEditingController(),
+                focusNode: focusNode1,
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                scribbleEnabled: false,
+              ),
+              EditableText(
+                key: key2,
+                controller: TextEditingController(),
+                focusNode: focusNode2,
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                scribbleEnabled: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(Scribble.client, isNull);
+
+    focusNode1.requestFocus();
+    await tester.pump();
+
+    expect(Scribble.client, isNotNull);
+    final ScribbleClient client1 = Scribble.client!;
+
+    focusNode2.requestFocus();
+    await tester.pump();
+
+    expect(Scribble.client, isNot(client1));
+    expect(Scribble.client, isNotNull);
+
+    focusNode2.unfocus();
+    await tester.pump();
+
+    expect(Scribble.client, isNull);
+
+    // On web, we should rely on the browser's implementation of Scribble.
+  }, skip: kIsWeb); // [intended]
+
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
