@@ -1133,9 +1133,11 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
   ///
-  /// Formatters are run in the provided order when the text input changes. When
-  /// this parameter changes, the new formatters will not be applied until the
-  /// next time the user inserts or deletes text.
+  /// Formatters are run in the provided order when the user changes the text
+  /// this widget contains. When this parameter changes, the new formatters will
+  /// not be applied until the next time the user inserts or deletes text.
+  /// Similar to the [onChanged] callback, formatters don't run when the text is
+  /// changed programmatically via [controller].
   /// {@endtemplate}
   final List<TextInputFormatter>? inputFormatters;
 
