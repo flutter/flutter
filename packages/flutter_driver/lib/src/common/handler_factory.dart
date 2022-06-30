@@ -208,8 +208,8 @@ mixin CommandHandlerFactory {
 
   Future<Result> _receiveAction(Command command) async {
     if (!_testTextInput.isRegistered) {
-      throw 'Unable to fulfill `FlutterDriver.receiveAction`. Text emulation is '
-            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
+      throw StateError('Unable to fulfill `FlutterDriver.receiveAction`. Text emulation is '
+            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.');
     }
     final ReceiveAction receiveActionCommand = command as ReceiveAction;
     _testTextInput.receiveAction(TextInputAction.values[receiveActionCommand.textInputAction.index]);
