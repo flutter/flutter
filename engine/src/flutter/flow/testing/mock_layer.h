@@ -5,7 +5,15 @@
 #ifndef FLOW_TESTING_MOCK_LAYER_H_
 #define FLOW_TESTING_MOCK_LAYER_H_
 
+#include <functional>
+#include <memory>
+#include "flutter/flow/diff_context.h"
+#include "flutter/flow/layers/cacheable_layer.h"
+#include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/layer.h"
+#include "flutter/flow/layers/layer_raster_cache_item.h"
+#include "flutter/flow/raster_cache.h"
+#include "flutter/flow/raster_cache_item.h"
 
 namespace flutter {
 namespace testing {
@@ -55,6 +63,57 @@ class MockLayer : public Layer {
   bool fake_opacity_compatible_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(MockLayer);
+};
+
+class MockCacheableContainerLayer : public CacheableContainerLayer {
+ public:
+  // if render more than 3 frames, try to cache itself.
+  // if less 3 frames, cache his children
+  static std::shared_ptr<MockCacheableContainerLayer> CacheLayerOrChildren() {
+    return std::make_shared<MockCacheableContainerLayer>(true);
+  }
+
+  // if render more than 3 frames, try to cache itself.
+  // if less 3 frames, cache nothing
+  static std::shared_ptr<MockCacheableContainerLayer> CacheLayerOnly() {
+    return std::make_shared<MockCacheableContainerLayer>();
+  }
+
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+
+  explicit MockCacheableContainerLayer(bool cache_children = false)
+      : CacheableContainerLayer(3, cache_children) {}
+};
+
+class MockLayerCacheableItem : public LayerRasterCacheItem {
+ public:
+  using LayerRasterCacheItem::LayerRasterCacheItem;
+};
+class MockCacheableLayer : public MockLayer {
+ public:
+  explicit MockCacheableLayer(SkPath path,
+                              SkPaint paint = SkPaint(),
+                              int render_limit = 3,
+                              bool fake_has_platform_view = false,
+                              bool fake_reads_surface = false,
+                              bool fake_opacity_compatible = false)
+      : MockLayer(path,
+                  paint,
+                  fake_has_platform_view,
+                  fake_reads_surface,
+                  fake_opacity_compatible) {
+    raster_cache_item_ =
+        std::make_unique<MockLayerCacheableItem>(this, render_limit);
+  }
+
+  const LayerRasterCacheItem* raster_cache_item() const {
+    return raster_cache_item_.get();
+  }
+
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+
+ private:
+  std::unique_ptr<LayerRasterCacheItem> raster_cache_item_;
 };
 
 }  // namespace testing

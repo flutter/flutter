@@ -5,12 +5,12 @@
 #ifndef FLUTTER_FLOW_LAYERS_SHADER_MASK_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_SHADER_MASK_LAYER_H_
 
-#include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/cacheable_layer.h"
 #include "third_party/skia/include/core/SkShader.h"
 
 namespace flutter {
 
-class ShaderMaskLayer : public ContainerLayer {
+class ShaderMaskLayer : public CacheableContainerLayer {
  public:
   ShaderMaskLayer(sk_sp<SkShader> shader,
                   const SkRect& mask_rect,
@@ -26,9 +26,6 @@ class ShaderMaskLayer : public ContainerLayer {
   sk_sp<SkShader> shader_;
   SkRect mask_rect_;
   SkBlendMode blend_mode_;
-
-  static constexpr int kMinimumRendersBeforeCachingFilterLayer = 3;
-  int render_count_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);
 };

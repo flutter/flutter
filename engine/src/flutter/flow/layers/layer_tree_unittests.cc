@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stddef.h>
 #include "flutter/flow/layers/layer_tree.h"
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/raster_cache.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/canvas_test.h"
@@ -14,7 +16,6 @@
 
 namespace flutter {
 namespace testing {
-
 class LayerTreeTest : public CanvasTest {
  public:
   LayerTreeTest()
@@ -198,7 +199,7 @@ TEST_F(LayerTreeTest, PrerollContextInitialization) {
   // PrerollContext that this test must be revisited and updated.
   // If any fields get removed or replaced, then the expect_defaults closure
   // will fail to compile, again bringing attention to updating this test.
-  EXPECT_EQ(sizeof(PrerollContext), size_t(104));
+  EXPECT_EQ(sizeof(PrerollContext), size_t(112));
 
   MutatorsStack mock_mutators;
   FixedRefreshRateStopwatch mock_raster_time;
@@ -225,6 +226,7 @@ TEST_F(LayerTreeTest, PrerollContextInitialization) {
     EXPECT_EQ(context.has_texture_layer, false);
 
     EXPECT_EQ(context.subtree_can_inherit_opacity, false);
+    EXPECT_EQ(context.raster_cached_entries, nullptr);
   };
 
   // These 4 initializers are required because they are handled by reference
@@ -242,14 +244,14 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
   // PaintContext that this test must be revisited and updated.
   // If any fields get removed or replaced, then the expect_defaults closure
   // will fail to compile, again bringing attention to updating this test.
-  EXPECT_EQ(sizeof(Layer::PaintContext), size_t(96));
+  EXPECT_EQ(sizeof(PaintContext), size_t(104));
 
   FixedRefreshRateStopwatch mock_raster_time;
   FixedRefreshRateStopwatch mock_ui_time;
   TextureRegistry mock_registry;
 
   auto expect_defaults = [&mock_raster_time, &mock_ui_time,
-                          &mock_registry](const Layer::PaintContext& context) {
+                          &mock_registry](const PaintContext& context) {
     EXPECT_EQ(context.internal_nodes_canvas, nullptr);
     EXPECT_EQ(context.leaf_nodes_canvas, nullptr);
     EXPECT_EQ(context.gr_context, nullptr);
@@ -269,7 +271,7 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
   };
 
   // These 4 initializers are required because they are handled by reference
-  Layer::PaintContext context{
+  PaintContext context{
       .raster_time = mock_raster_time,
       .ui_time = mock_ui_time,
       .texture_registry = mock_registry,

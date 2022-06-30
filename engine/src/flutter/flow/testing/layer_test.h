@@ -10,6 +10,7 @@
 
 #include <optional>
 #include <utility>
+#include <vector>
 
 #include "flutter/flow/testing/mock_raster_cache.h"
 #include "flutter/fml/macros.h"
@@ -58,6 +59,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
             .has_platform_view             = false,
+            .raster_cached_entries         = &cacheable_items_,
             // clang-format on
         },
         paint_context_{
@@ -158,14 +160,16 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     set_raster_cache_(std::make_unique<RasterCache>());
   }
 
+  std::vector<RasterCacheItem*>& cacheable_items() { return cacheable_items_; }
+
   TextureRegistry& texture_regitry() { return texture_registry_; }
   RasterCache* raster_cache() { return raster_cache_.get(); }
   PrerollContext* preroll_context() { return &preroll_context_; }
-  Layer::PaintContext& paint_context() { return paint_context_; }
-  Layer::PaintContext& display_list_paint_context() {
+  PaintContext& paint_context() { return paint_context_; }
+  PaintContext& display_list_paint_context() {
     return display_list_paint_context_;
   }
-  Layer::PaintContext& check_board_context() { return check_board_context_; }
+  PaintContext& check_board_context() { return check_board_context_; }
   LayerSnapshotStore& layer_snapshot_store() { return snapshot_store_; }
 
   sk_sp<DisplayList> display_list() {
@@ -205,13 +209,15 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
 
   std::unique_ptr<RasterCache> raster_cache_;
   PrerollContext preroll_context_;
-  Layer::PaintContext paint_context_;
+  PaintContext paint_context_;
   DisplayListCanvasRecorder display_list_recorder_;
   sk_sp<DisplayList> display_list_;
   SkNWayCanvas internal_display_list_canvas_;
-  Layer::PaintContext display_list_paint_context_;
-  Layer::PaintContext check_board_context_;
+  PaintContext display_list_paint_context_;
+  PaintContext check_board_context_;
   LayerSnapshotStore snapshot_store_;
+
+  std::vector<RasterCacheItem*> cacheable_items_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LayerTestBase);
 };

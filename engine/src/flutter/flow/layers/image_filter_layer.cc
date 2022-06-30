@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/layers/image_filter_layer.h"
+#include "flutter/flow/layers/layer.h"
+#include "flutter/flow/raster_cache_util.h"
 
 namespace flutter {
 
 ImageFilterLayer::ImageFilterLayer(sk_sp<SkImageFilter> filter)
-    : filter_(std::move(filter)),
-      transformed_filter_(nullptr),
-      render_count_(1) {}
+    : CacheableContainerLayer(
+          RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer),
+      filter_(std::move(filter)),
+      transformed_filter_(nullptr) {}
 
 void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -39,8 +42,11 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 void ImageFilterLayer::Preroll(PrerollContext* context,
                                const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "ImageFilterLayer::Preroll");
+
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
+
+  AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context, matrix);
 
   SkRect child_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, matrix, &child_bounds);
@@ -62,39 +68,13 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
 
   set_paint_bounds(child_bounds);
 
-  SkMatrix child_matrix(matrix);
+  // CacheChildren only when the transformed_filter_ doesn't equal null.
+  // So in here we reset the LayerRasterCacheItem cache state.
+  layer_raster_cache_item_->MarkNotCacheChildren();
 
-  transformed_filter_ = nullptr;
-  if (render_count_ >= kMinimumRendersBeforeCachingFilterLayer) {
-    // We have rendered this same ImageFilterLayer object enough
-    // times to consider its properties and children to be stable
-    // from frame to frame so we try to cache the layer itself
-    // for maximum performance.
-    TryToPrepareRasterCache(context, this, child_matrix,
-                            RasterCacheLayerStrategy::kLayer);
-  } else {
-    // This ImageFilterLayer is not yet considered stable so we
-    // increment the count to measure how many times it has been
-    // seen from frame to frame.
-    render_count_++;
-
-    // Now we will try to pre-render the children into the cache.
-    // To apply the filter to pre-rendered children, we must first
-    // modify the filter to be aware of the transform under which
-    // the cached bitmap was produced. Some SkImageFilter
-    // instances can do this operation on some transforms and some
-    // (filters or transforms) cannot. We can only cache the children
-    // and apply the filter on the fly if this operation succeeds.
-    transformed_filter_ = filter_->makeWithLocalMatrix(child_matrix);
-    if (transformed_filter_) {
-      // With a modified SkImageFilter we can now try to cache the
-      // children to avoid their rendering costs if they remain
-      // stable between frames and also avoiding a rendering surface
-      // switch during the Paint phase even if they are not stable.
-      // This benefit is seen most during animations.
-      TryToPrepareRasterCache(context, this, matrix,
-                              RasterCacheLayerStrategy::kLayerChildren);
-    }
+  transformed_filter_ = filter_->makeWithLocalMatrix(matrix);
+  if (transformed_filter_) {
+    layer_raster_cache_item_->MarkCacheChildren();
   }
 }
 
@@ -104,20 +84,11 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
 
   AutoCachePaint cache_paint(context);
 
-  if (context.raster_cache) {
-    if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                   RasterCacheLayerStrategy::kLayer,
-                                   cache_paint.paint())) {
-      return;
-    }
-    if (transformed_filter_) {
-      cache_paint.setImageFilter(transformed_filter_);
-      if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                     RasterCacheLayerStrategy::kLayerChildren,
-                                     cache_paint.paint())) {
-        return;
-      }
-    }
+  if (layer_raster_cache_item_->IsCacheChildren()) {
+    cache_paint.setImageFilter(transformed_filter_);
+  }
+  if (layer_raster_cache_item_->Draw(context, cache_paint.paint())) {
+    return;
   }
 
   cache_paint.setImageFilter(filter_);

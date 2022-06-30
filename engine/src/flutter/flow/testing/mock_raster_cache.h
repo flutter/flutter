@@ -5,13 +5,17 @@
 #ifndef FLOW_TESTING_MOCK_RASTER_CACHE_H_
 #define FLOW_TESTING_MOCK_RASTER_CACHE_H_
 
+#include <vector>
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache.h"
+#include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/testing/mock_canvas.h"
+#include "include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkPicture.h"
 
 namespace flutter {
 namespace testing {
@@ -50,24 +54,12 @@ class MockRasterCacheResult : public RasterCacheResult {
  */
 class MockRasterCache : public RasterCache {
  public:
-  explicit MockRasterCache(size_t access_threshold = 3,
-                           size_t display_list_cache_limit_per_frame =
-                               kDefaultDispLayListCacheLimitPerFrame)
-      : RasterCache(access_threshold, display_list_cache_limit_per_frame) {}
-
-  std::unique_ptr<RasterCacheResult> RasterizeDisplayList(
-      DisplayList* display_list,
-      GrDirectContext* context,
-      const SkMatrix& ctm,
-      SkColorSpace* dst_color_space,
-      bool checkerboard) const override;
-
-  std::unique_ptr<RasterCacheResult> RasterizeLayer(
-      PrerollContext* context,
-      Layer* layer,
-      RasterCacheLayerStrategy stategy,
-      const SkMatrix& ctm,
-      bool checkerboard) const override;
+  explicit MockRasterCache(
+      size_t access_threshold = 3,
+      size_t picture_and_display_list_cache_limit_per_frame =
+          RasterCacheUtil::kDefaultPictureAndDispLayListCacheLimitPerFrame)
+      : RasterCache(access_threshold,
+                    picture_and_display_list_cache_limit_per_frame) {}
 
   void AddMockLayer(int width, int height);
   void AddMockPicture(int width, int height);
@@ -97,6 +89,23 @@ class MockRasterCache : public RasterCache {
       .has_texture_layer             = false,
       // clang-format on
   };
+
+  PaintContext paint_context_ = {
+      // clang-format off
+          .internal_nodes_canvas         = nullptr,
+          .leaf_nodes_canvas             = nullptr,
+          .gr_context                    = nullptr,
+          .dst_color_space               = color_space_,
+          .view_embedder                 = nullptr,
+          .raster_time                   = raster_time_,
+          .ui_time                       = ui_time_,
+          .texture_registry              = texture_registry_,
+          .raster_cache                  = nullptr,
+          .checkerboard_offscreen_layers = false,
+          .frame_device_pixel_ratio      = 1.0f,
+          .inherited_opacity             = SK_Scalar1,
+      // clang-format on
+  };
 };
 
 struct PrerollContextHolder {
@@ -104,7 +113,22 @@ struct PrerollContextHolder {
   sk_sp<SkColorSpace> srgb;
 };
 
-PrerollContextHolder GetSamplePrerollContextHolder();
+struct PaintContextHolder {
+  PaintContext paint_context;
+  sk_sp<SkColorSpace> srgb;
+};
+
+PrerollContextHolder GetSamplePrerollContextHolder(
+    RasterCache* raster_cache = nullptr);
+
+PaintContextHolder GetSamplePaintContextHolder(
+    RasterCache* raster_cache = nullptr);
+
+bool DisplayListRasterCacheItemTryToRasterCache(
+    DisplayListRasterCacheItem& display_list_item,
+    PrerollContext& context,
+    PaintContext& paint_context,
+    const SkMatrix& matrix);
 
 }  // namespace testing
 }  // namespace flutter

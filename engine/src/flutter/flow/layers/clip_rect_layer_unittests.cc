@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/clip_rect_layer.h"
 
+#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
@@ -491,24 +492,27 @@ TEST_F(ClipRectLayerTest, LayerCached) {
 
   use_mock_raster_cache();
 
-  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
+  const auto* clip_cache_item = layer->raster_cache_item();
 
   layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
 
   layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
 
   layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
-  EXPECT_TRUE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                   RasterCacheLayerStrategy::kLayer));
+  EXPECT_EQ(clip_cache_item->cache_state(),
+            RasterCacheItem::CacheState::kCurrent);
+  SkPaint paint;
+  EXPECT_TRUE(raster_cache()->Draw(clip_cache_item->GetId().value(),
+                                   cache_canvas, &paint));
 }
 
 }  // namespace testing
