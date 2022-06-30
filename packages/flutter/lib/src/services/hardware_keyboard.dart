@@ -13,7 +13,7 @@ export 'dart:ui' show KeyData;
 
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
-export 'keyboard_key.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 export 'raw_keyboard.dart' show RawKeyboard, RawKeyEvent;
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
