@@ -1523,6 +1523,10 @@ class TextInput {
 
   /// Ensure that a [TextInput] instance has been set up so that the platform
   /// can handle messages on the text input method channel.
+  @Deprecated(
+    'Use Scribble.ensureInitialized instead. '
+    'This feature was deprecated after v3.1.0-9.0.pre.'
+  )
   static void ensureInitialized() {
     _instance; // ignore: unnecessary_statements
   }
