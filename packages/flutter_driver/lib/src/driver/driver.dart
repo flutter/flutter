@@ -518,7 +518,7 @@ abstract class FlutterDriver {
   /// based on the `inputAction` [setClientArgs].
   ///
   /// This can be called even if the [TestTextInput] has not been [register]ed.
-  /// 
+  ///
   /// Example:
   ///
   /// ```dart
