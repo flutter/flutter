@@ -1427,6 +1427,36 @@ void main() {
     expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
     handle.dispose();
   });
+
+  testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
+    // First try without cancelling.
+    await pumpTest(tester, null);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(const Duration(seconds: 5));
+    final double withoutCancelResult = getScrollOffset(tester);
+    resetScrollOffset(tester);
+
+    // Now cancel partway into the inertia.
+    await pumpTest(tester, null);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(const Duration(milliseconds: 200));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    testPointer.hover(tester.getCenter(find.byType(Scrollable)));
+    await tester.sendEventToBinding(testPointer.scrollInertiaCancel());
+    await tester.pump();
+    final double atCancelResult = getScrollOffset(tester);
+    await tester.pump(const Duration(milliseconds: 4800)); // Add up to the same 5 seconds as before.
+    final double withCancelResult = getScrollOffset(tester);
+
+    expect(withCancelResult, lessThan(withoutCancelResult)); // Inertia was stopped before reaching full distance
+    expect(withCancelResult, atCancelResult); // Scroll position remains as it was when inertia cancel event occured.
+  });
 }
 
 // ignore: must_be_immutable
