@@ -1420,13 +1420,12 @@ mixin WidgetInspectorService {
     if (_pubRootDirectories == null) {
       return;
     }
+    pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
     final SplayTreeSet<String> sortedSet = SplayTreeSet<String>.from(_pubRootDirectories!, (String a, String b) => a.compareTo(b));
-    for (int i = 0; i < pubRootDirectories.length; i++) {
-      sortedSet.remove(Uri.parse(pubRootDirectories[i]).path);
-    }
-    _pubRootDirectories = sortedSet.toList();
+    sortedSet.removeAll(pubRootDirectories);
 
+    _pubRootDirectories = sortedSet.toList();
     _isLocalCreationCache.clear();
   }
 
