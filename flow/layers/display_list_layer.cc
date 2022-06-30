@@ -4,11 +4,15 @@
 
 #include "flutter/flow/layers/display_list_layer.h"
 
+#include <utility>
+
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_flags.h"
 #include "flutter/flow/layer_snapshot_store.h"
+#include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/offscreen_surface.h"
 #include "flutter/flow/raster_cache.h"
+#include "flutter/flow/raster_cache_util.h"
 
 namespace flutter {
 
@@ -16,10 +20,14 @@ DisplayListLayer::DisplayListLayer(const SkPoint& offset,
                                    SkiaGPUObject<DisplayList> display_list,
                                    bool is_complex,
                                    bool will_change)
-    : offset_(offset),
-      display_list_(std::move(display_list)),
-      is_complex_(is_complex),
-      will_change_(will_change) {}
+    : offset_(offset), display_list_(std::move(display_list)) {
+  if (display_list_.skia_object() != nullptr) {
+    bounds_ = display_list_.skia_object()->bounds().makeOffset(offset_.x(),
+                                                               offset_.y());
+    display_list_raster_cache_item_ = DisplayListRasterCacheItem::Make(
+        display_list_.skia_object().get(), offset_, is_complex, will_change);
+  }
+}
 
 bool DisplayListLayer::IsReplacing(DiffContext* context,
                                    const Layer* layer) const {
@@ -86,28 +94,14 @@ bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
 void DisplayListLayer::Preroll(PrerollContext* context,
                                const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "DisplayListLayer::Preroll");
-
   DisplayList* disp_list = display_list();
 
-  SkRect bounds = disp_list->bounds().makeOffset(offset_.x(), offset_.y());
-
+  AutoCache cache =
+      AutoCache(display_list_raster_cache_item_.get(), context, matrix);
   if (disp_list->can_apply_group_opacity()) {
     context->subtree_can_inherit_opacity = true;
   }
-
-  if (auto* cache = context->raster_cache) {
-    TRACE_EVENT0("flutter", "DisplayListLayer::RasterCache (Preroll)");
-    if (context->cull_rect.intersects(bounds)) {
-      if (cache->Prepare(context, disp_list, is_complex_, will_change_, matrix,
-                         offset_)) {
-        context->subtree_can_inherit_opacity = true;
-      }
-    } else {
-      // Don't evict raster cache entry during partial repaint
-      cache->Touch(disp_list, matrix);
-    }
-  }
-  set_paint_bounds(bounds);
+  set_paint_bounds(bounds_);
 }
 
 void DisplayListLayer::Paint(PaintContext& context) const {
@@ -118,10 +112,9 @@ void DisplayListLayer::Paint(PaintContext& context) const {
   SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
   context.leaf_nodes_canvas->translate(offset_.x(), offset_.y());
 
-  if (context.raster_cache) {
+  if (context.raster_cache && display_list_raster_cache_item_) {
     AutoCachePaint cache_paint(context);
-    if (context.raster_cache->Draw(*display_list(), *context.leaf_nodes_canvas,
-                                   cache_paint.paint())) {
+    if (display_list_raster_cache_item_->Draw(context, cache_paint.paint())) {
       TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
       return;
     }
@@ -148,7 +141,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
         fml::TimePoint::Now() - start_time;
 
     const SkRect device_bounds =
-        RasterCache::GetDeviceBounds(paint_bounds(), ctm);
+        RasterCacheUtil::GetDeviceBounds(paint_bounds(), ctm);
     sk_sp<SkData> raster_data = offscreen_surface->GetRasterData(true);
     LayerSnapshotData snapshot_data(unique_id(), offscreen_render_time,
                                     raster_data, device_bounds);

@@ -59,7 +59,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
   ASSERT_TRUE(surface != nullptr);
 
   flutter::TextureRegistry unused_texture_registry;
-  flutter::Layer::PaintContext paintContext = {
+  flutter::PaintContext paintContext = {
       // clang-format off
       .internal_nodes_canvas         = nullptr,
       .leaf_nodes_canvas             = surface->getCanvas(),

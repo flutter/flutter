@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/clip_rrect_layer.h"
 
+#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
@@ -486,6 +487,7 @@ TEST_F(ClipRRectLayerTest, OpacityInheritanceSaveLayerPainting) {
 
 TEST_F(ClipRRectLayerTest, LayerCached) {
   auto path1 = SkPath().addRect({10, 10, 30, 30});
+  SkPaint paint = SkPaint();
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
   SkRect clip_rect = SkRect::MakeWH(500, 500);
   SkRRect clip_r_rect = SkRRect::MakeRectXY(clip_rect, 20, 20);
@@ -500,24 +502,61 @@ TEST_F(ClipRRectLayerTest, LayerCached) {
 
   use_mock_raster_cache();
 
-  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
+  const auto* clip_cache_item = layer->raster_cache_item();
 
   layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
 
   layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
 
   layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
-  EXPECT_TRUE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                   RasterCacheLayerStrategy::kLayer));
+  EXPECT_EQ(clip_cache_item->cache_state(),
+            RasterCacheItem::CacheState::kCurrent);
+  EXPECT_TRUE(raster_cache()->Draw(clip_cache_item->GetId().value(),
+                                   cache_canvas, &paint));
+}
+
+TEST_F(ClipRRectLayerTest, NoSaveLayerShouldNotCache) {
+  auto path1 = SkPath().addRect({10, 10, 30, 30});
+
+  auto mock1 = MockLayer::MakeOpacityCompatible(path1);
+  SkRect clip_rect = SkRect::MakeWH(500, 500);
+  SkRRect clip_r_rect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  auto layer = std::make_shared<ClipRRectLayer>(clip_r_rect, Clip::antiAlias);
+  layer->Add(mock1);
+
+  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
+  SkMatrix cache_ctm = initial_transform;
+  SkCanvas cache_canvas;
+  cache_canvas.setMatrix(cache_ctm);
+
+  use_mock_raster_cache();
+
+  const auto* clip_cache_item = layer->raster_cache_item();
+
+  layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
+
+  layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
+
+  layer->Preroll(preroll_context(), initial_transform);
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
 }
 
 }  // namespace testing

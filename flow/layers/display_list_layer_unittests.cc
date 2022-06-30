@@ -265,11 +265,11 @@ TEST_F(DisplayListLayerTest, CachedIncompatibleDisplayListOpacityInheritance) {
   //       display_list_bounds.makeOffset(layer_offset.fX, layer_offset.fY);
   //   save_layer_bounds.roundOut(&save_layer_bounds);
   //   auto opacity_integral_matrix =
-  //       RasterCache::GetIntegralTransCTM(SkMatrix::Translate(opacity_offset));
+  //       RasterCacheUtil::GetIntegralTransCTM(SkMatrix::Translate(opacity_offset));
   //   SkMatrix layer_offset_matrix = opacity_integral_matrix;
   //   layer_offset_matrix.postTranslate(layer_offset.fX, layer_offset.fY);
   //   auto layer_offset_integral_matrix =
-  //       RasterCache::GetIntegralTransCTM(layer_offset_matrix);
+  //       RasterCacheUtil::GetIntegralTransCTM(layer_offset_matrix);
   //   // Using a recorder instead of a DisplayListBuilder so we can hand it
   //   // off to the RasterCache::Draw() method
   //   DisplayListCanvasRecorder recorder(SkRect::MakeWH(1000, 1000));
