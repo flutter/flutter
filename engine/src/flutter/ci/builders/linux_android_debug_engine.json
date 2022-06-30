@@ -85,6 +85,7 @@
                     "type": "gcs",
                     "base_path": "out/android_debug/zip_archives/",
                     "include_paths": [
+                        "out/android_debug/zip_archives/android-arm/artifacts.zip",
                         "out/android_debug/zip_archives/android-arm/symbols.zip",
                         "out/android_debug/zip_archives/download.flutter.io",
                         "out/android_debug/zip_archives/sky_engine.zip",
