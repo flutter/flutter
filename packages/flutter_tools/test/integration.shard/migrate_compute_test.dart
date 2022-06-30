@@ -74,7 +74,7 @@ void main() {
         <String>['5391447fae6209bb21a89e6a5a6583cac1af9b4b'], //revisionsList
         <String, List<MigratePlatformConfig>>{
           '5391447fae6209bb21a89e6a5a6583cac1af9b4b': <MigratePlatformConfig>[
-            MigratePlatformConfig(platform: SupportedPlatform.android)
+            MigratePlatformConfig(platform: SupportedPlatform.android),
             MigratePlatformConfig(platform: SupportedPlatform.ios)
           ],
         }, //revisionToConfigs
@@ -84,7 +84,70 @@ void main() {
       );
 
       expect(baseDir.childFile('pubspec.yaml').existsSync(), true);
+      expect(baseDir.childDirectory('android').childFile('build.gradle').existsSync(), true);
     });
 
+    testUsingContext('MigrateTargetFlutterProject creates', () async {
+      final Directory workingDir = createResolvedTempDirectorySync('migrate_working_dir.');
+      final Directory targetDir = createResolvedTempDirectorySync('target_dir.');
+      context.migrateResult.generatedTargetTemplateDirectory = targetDir;
+      await context.migrateUtils.cloneFlutter('5391447fae6209bb21a89e6a5a6583cac1af9b4b', targetFlutterDirectory.absolute.path);
+      workingDir.createSync(recursive: true);
+      MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
+        path: null,
+        directory: targetDir,
+        name: 'base',
+        androidLanguage: 'java',
+        iosLanguage: 'objc',
+        platformWhitelist: null,
+      );
+
+      await targetProject.createProject(
+        context,
+        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //revisionsList
+        targetFlutterDirectory, //targetFlutterDirectory
+      );
+
+      expect(targetDir.childFile('pubspec.yaml').existsSync(), true);
+      expect(targetDir.childDirectory('android').childFile('build.gradle').existsSync(), true);
+    });
+
+    testUsingContext('Migrate___FlutterProject skips when path exists', () async {
+      final Directory workingDir = createResolvedTempDirectorySync('migrate_working_dir.');
+      final Directory targetDir = createResolvedTempDirectorySync('target_dir.');
+      final Directory baseDir = createResolvedTempDirectorySync('base_dir.');
+      context.migrateResult.generatedTargetTemplateDirectory = targetDir;
+      context.migrateResult.generatedBaseTemplateDirectory = baseDir;
+      workingDir.createSync(recursive: true);
+
+      MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
+        path: 'some_existing_base_path',
+        directory: baseDir,
+        name: 'base',
+        androidLanguage: 'java',
+        iosLanguage: 'objc',
+        platformWhitelist: null,
+      );
+      MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
+        path: 'some_existing_target_path',
+        directory: targetDir,
+        name: 'base',
+        androidLanguage: 'java',
+        iosLanguage: 'objc',
+        platformWhitelist: null,
+      );
+
+      await targetProject.createProject(
+        context,
+        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //revisionsList
+        targetFlutterDirectory, //targetFlutterDirectory
+      );
+
+      expect(baseDir.childFile('pubspec.yaml').existsSync(), false);
+      expect(baseDir.childDirectory('android').childFile('build.gradle').existsSync(), false);
+
+      expect(targetDir.childFile('pubspec.yaml').existsSync(), false);
+      expect(targetDir.childDirectory('android').childFile('build.gradle').existsSync(), false);
+    });
   });
 }
