@@ -1958,6 +1958,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   final GlobalKey<DrawerControllerState> _drawerKey = GlobalKey<DrawerControllerState>();
   final GlobalKey<DrawerControllerState> _endDrawerKey = GlobalKey<DrawerControllerState>();
 
+  final GlobalKey _bodyKey = GlobalKey();
+
   /// Whether this scaffold has a non-null [Scaffold.appBar].
   bool get hasAppBar => widget.appBar != null;
   /// Whether this scaffold has a non-null [Scaffold.drawer].
@@ -2653,7 +2655,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       widget.body == null ? null : _BodyBuilder(
         extendBody: widget.extendBody,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-        body: widget.body!,
+        body: KeyedSubtree(key: _bodyKey, child: widget.body!),
       ),
       _ScaffoldSlot.body,
       removeLeftPadding: false,
