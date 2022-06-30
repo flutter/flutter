@@ -1,4 +1,4 @@
-Signature: 3dde0a2220b1d581e4c5e3b72736eb38
+Signature: 914e11dada2367354853ce35b11c7f47
 
 UNUSED LICENSES:
 
@@ -529,11 +529,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
+LIBRARY: skia
 LIBRARY: vulkan
 ORIGIN: ../../../third_party/skia/include/third_party/skcms/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/third_party/skcms/BUILD.bazel
 FILE: ../../../third_party/skia/include/third_party/vulkan/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skcms/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skcms/version.sha1
 FILE: ../../../third_party/skia/third_party/skcms/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/skcms/version.sha1
 ----------------------------------------------------------------------------------------------------
@@ -568,10 +571,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
+LIBRARY: skia
 LIBRARY: vulkanmemoryallocator
 ORIGIN: ../../../third_party/skia/include/third_party/skcms/skcms.h + ../../../third_party/skia/include/third_party/skcms/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/third_party/skcms/skcms.h
+FILE: ../../../third_party/skia/modules/skcms/skcms.cc
+FILE: ../../../third_party/skia/modules/skcms/skcms.h
+FILE: ../../../third_party/skia/modules/skcms/skcms_internal.h
+FILE: ../../../third_party/skia/modules/skcms/src/Transform_inl.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
 FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
