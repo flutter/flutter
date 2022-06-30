@@ -22,7 +22,7 @@ class CupertinoLoupe extends StatefulWidget {
 class _CupertinoLoupeState extends State<CupertinoLoupe>
     with SingleTickerProviderStateMixin {
   late AnimationController _inOutAnimationController;
-  late Offset _realLoupePosition = widget.controller.requestedPosition.value;
+  late Offset _realLoupePosition;
 
   @override 
   void initState() {
@@ -36,6 +36,12 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
   }
 
   @override
+  void didChangeDependencies() {
+    _updateRealLoupePosition();
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     widget.controller.requestedPosition
         .removeListener(_updateRealLoupePosition);
@@ -46,8 +52,6 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
   void _updateRealLoupePosition() {
     final Offset bottomCenterRawLoupePosition =
         widget.controller.requestedPosition.value;
-
-
 
     // TODO this math can be done w/ alginment so it is more clear
     // Since we want the bottom center of our loupe to be right where the requested
@@ -72,27 +76,24 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: _realLoupePosition.dx,
-      top: _realLoupePosition.dy,
-      child: Transform.translate(
-        offset: Offset(0, -37.5 * (_inOutAnimationController.value - 1)),
-        child: Opacity(
-          opacity: 0.6,
+        left: _realLoupePosition.dx,
+        top: _realLoupePosition.dy,
+        child: Transform.translate(
+          offset: Offset(0, -37.5 * (_inOutAnimationController.value - 1)),
           child: Loupe(
             transitionAnimationController: _inOutAnimationController,
             controller: widget.controller,
             elevation: 6,
             focalPoint:
                 const Offset(0, CupertinoLoupe._kVerticalFocalPointOffset),
-            border: Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
+            border:
+                Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
             //borderRadius: const Radius.circular(36),
             shadowColor: const Color.fromARGB(108, 255, 255, 255),
             size: CupertinoLoupe._kLoupeSize,
             positionAnimation: Curves.easeIn,
             positionAnimationDuration: const Duration(milliseconds: 50),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

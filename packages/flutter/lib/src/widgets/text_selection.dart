@@ -497,7 +497,7 @@ class TextSelectionOverlay {
       return;
     }
 
-    _loupeController!.hide();
+   // _loupeController!.hide();
     
     // Any time a loupe is hidden, we should show the toolbar.
     // this behavior is consistent on all mobile platforms.
