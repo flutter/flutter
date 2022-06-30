@@ -2137,7 +2137,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
 class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
   /// Creates a widget that sizes its child to a fraction of the total available
   /// space that animates implicitly, and positions its child by an alignment
-  /// than animates implicitly.
+  /// that animates implicitly.
   ///
   /// The [curve] and [duration] argument must not be null
   /// If non-null, the [widthFactor] and [heightFactor] arguments must be
