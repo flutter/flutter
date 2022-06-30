@@ -54,7 +54,7 @@ mixin ScrollMetrics {
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
-      scrollInsets: scrollInsets ?? (hasContentDimensions ? this.scrollInsets : null),
+      scrollInsets: scrollInsets ?? (hasContentDimensions ? this.scrollInsets : EdgeInsets.zero),
     );
   }
 
@@ -75,7 +75,7 @@ mixin ScrollMetrics {
   double get maxScrollExtent;
 
   /// Doc me!
-  EdgeInsets? get scrollInsets;
+  EdgeInsets get scrollInsets;
 
   /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.
   bool get hasContentDimensions;
@@ -142,7 +142,7 @@ class FixedScrollMetrics with ScrollMetrics {
     required double? pixels,
     required double? viewportDimension,
     required this.axisDirection,
-    EdgeInsets? scrollInsets,
+    EdgeInsets scrollInsets = EdgeInsets.zero,
   }) : _minScrollExtent = minScrollExtent,
        _maxScrollExtent = maxScrollExtent,
        _pixels = pixels,
@@ -158,8 +158,8 @@ class FixedScrollMetrics with ScrollMetrics {
   final double? _maxScrollExtent;
 
   @override
-  EdgeInsets? get scrollInsets => _scrollInsets;
-  final EdgeInsets? _scrollInsets;
+  EdgeInsets get scrollInsets => _scrollInsets;
+  final EdgeInsets _scrollInsets;
 
   @override
   bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;

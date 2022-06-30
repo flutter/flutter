@@ -279,6 +279,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _shape = value;
     notifyListeners();
   }
+
   /// The amount of space by which to inset the scrollbar's start and end, as
   /// well as its side to the nearest edge, in logical pixels.
   ///
@@ -299,7 +300,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _padding = value;
     notifyListeners();
   }
-
 
   /// The preferred smallest size the scrollbar thumb can shrink to when the total
   /// scrollable extent is large, the current visible viewport is small, and the
@@ -453,20 +453,20 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     switch(_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
-        return math.max(padding.top, _lastMetrics!.scrollInsets!.top) + mainAxisMargin;
+        return math.max(padding.top, _lastMetrics!.scrollInsets.top) + mainAxisMargin;
       case ScrollbarOrientation.top:
       case ScrollbarOrientation.bottom:
-        return math.max(padding.left, _lastMetrics!.scrollInsets!.left) + mainAxisMargin;
+        return math.max(padding.left, _lastMetrics!.scrollInsets.left) + mainAxisMargin;
     }
   }
   double get _trailingMainAxisInset {
     switch(_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
-        return math.max(padding.bottom, _lastMetrics!.scrollInsets!.bottom) + mainAxisMargin;
+        return math.max(padding.bottom, _lastMetrics!.scrollInsets.bottom) + mainAxisMargin;
       case ScrollbarOrientation.top:
       case ScrollbarOrientation.bottom:
-        return math.max(padding.right, _lastMetrics!.scrollInsets!.right) + mainAxisMargin;
+        return math.max(padding.right, _lastMetrics!.scrollInsets.right) + mainAxisMargin;
     }
   }
   // The total size of the scrollable content.
@@ -693,18 +693,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   bool? hitTest(Offset? position) {
+    // There is nothing painted to hit.
     if (_thumbRect == null) {
       return null;
     }
+    // Interaction disabled.
     if (ignorePointer) {
       return false;
     }
-
     // The thumb is not able to be hit when transparent.
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
-
+    // Not scrollable.
     if (!_lastMetricsAreScrollable) {
       return false;
     }
