@@ -215,7 +215,7 @@ mixin CommandHandlerFactory {
     _testTextInput.receiveAction(TextInputAction.values[receiveActionCommand.textInputAction.index]);
     return Result.empty;
   }
-  
+
   Future<RequestDataResult> _requestData(Command command) async {
     final RequestData requestDataCommand = command as RequestData;
     final DataHandler? dataHandler = getDataHandler();

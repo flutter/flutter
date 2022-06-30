@@ -354,6 +354,7 @@ void main() {
 
     group('receiveAction', () {
       test('sends the receiveAction command with action done', () async {
+                fakeClient.responses['receive_action'] = makeFakeResponse(<String, dynamic>{});
         await driver.receiveAction(DriverTextInputAction.done, timeout: _kTestTimeout);
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: receive_action, timeout: $_kSerializedTestTimeout, action: done}',
