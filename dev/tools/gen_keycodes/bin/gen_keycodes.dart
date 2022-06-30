@@ -8,6 +8,7 @@ import 'dart:io' hide Platform;
 import 'package:args/args.dart';
 import 'package:gen_keycodes/android_code_gen.dart';
 import 'package:gen_keycodes/base_code_gen.dart';
+import 'package:gen_keycodes/data.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
 import 'package:gen_keycodes/ios_code_gen.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
@@ -90,30 +91,6 @@ Future<void> generate(String name, String outDir, BaseCodeGenerator generator) {
   print('Writing ${name.padRight(15)}${codeFile.absolute}');
   return codeFile.writeAsString(generator.generate());
 }
-
-const Map<String, String> kIosSpecialKeyMapping = <String, String>{
-  'UIKeyInputEscape': 'Escape',
-  'UIKeyInputF1': 'F1',
-  'UIKeyInputF2': 'F2',
-  'UIKeyInputF3': 'F3',
-  'UIKeyInputF4': 'F4',
-  'UIKeyInputF5': 'F5',
-  'UIKeyInputF6': 'F6',
-  'UIKeyInputF7': 'F7',
-  'UIKeyInputF8': 'F8',
-  'UIKeyInputF9': 'F9',
-  'UIKeyInputF10': 'F10',
-  'UIKeyInputF11': 'F11',
-  'UIKeyInputF12': 'F12',
-  'UIKeyInputUpArrow': 'ArrowUp',
-  'UIKeyInputDownArrow': 'ArrowDown',
-  'UIKeyInputLeftArrow': 'ArrowLeft',
-  'UIKeyInputRightArrow': 'ArrowRight',
-  'UIKeyInputHome': 'Home',
-  'UIKeyInputEnd': 'Enter',
-  'UIKeyInputPageUp': 'PageUp',
-  'UIKeyInputPageDown': 'PageDown',
-};
 
 Future<void> main(List<String> rawArguments) async {
   if (!_assertsEnabled()) {
