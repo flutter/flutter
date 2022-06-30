@@ -149,10 +149,11 @@ class PubDependenciesProjectValidator extends ProjectValidator {
     }
 
     if (dependencies.isNotEmpty) {
+      final String verb = dependencies.length == 1 ? 'is' : 'are';
       result.add(
         ProjectValidatorResult(
           name: name,
-          value: dependencies.join(', '),
+          value: '${dependencies.join(', ')} $verb not hosted',
           status: StatusProjectValidator.warning,
         )
       );
