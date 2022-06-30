@@ -58,7 +58,7 @@ typedef ToolbarButtonWidgetBuilder = Widget Function(
 );
 
 // TODO(justinmc): Put in own file?
-/// Builds and manages a conext menu at the given location.
+/// Builds and manages a context menu at the given location.
 class ContextMenuController {
   ContextMenuController._();
 
