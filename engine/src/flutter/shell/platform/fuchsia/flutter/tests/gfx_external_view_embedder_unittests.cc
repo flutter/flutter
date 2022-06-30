@@ -149,18 +149,6 @@ class FakeSurfaceProducer : public SurfaceProducer {
   uint32_t buffer_id_{1};
 };
 
-struct FakeCompositorLayer {
-  enum class LayerType : uint32_t {
-    Image,
-    View,
-  };
-
-  std::shared_ptr<FakeResource> layer_root;
-
-  LayerType layer_type{LayerType::Image};
-  size_t layer_index{0};
-};
-
 std::string GetCurrentTestName() {
   return ::testing::UnitTest::GetInstance()->current_test_info()->name();
 }
@@ -253,12 +241,28 @@ void ExpectRootSceneGraph(
   EXPECT_EQ(scene_graph.resource_map.size(), 3u);
 }
 
-void ExpectImageCompositorLayer(const FakeCompositorLayer& layer,
-                                const SkISize layer_size) {
+/// Verifies the scene subgraph for a particular flutter embedder layer.
+///
+/// ARGUMENTS
+///
+/// scenic_node: The root of the layer's scenic subgraph.
+///
+/// layer_size: The expected dimensions of the layer's image.
+///
+/// flutter_layer_index: This layer's 0-indexed position in the list of
+/// flutter layers present in this frame, sorted in paint order.
+///
+/// paint_regions: List of non-overlapping rects, in canvas coordinate space,
+/// where content was drawn. For each "paint region" present in the frame, the
+/// embedder reports a corresponding "hit region" to scenic as a hittable
+/// ShapeNode. ShapeNodes are centered at (0, 0), by default, so they must be
+/// translated to match the locations of the corresopnding paint regions.
+void ExpectImageCompositorLayer(const FakeResource& scenic_node,
+                                const SkISize layer_size,
+                                size_t flutter_layer_index,
+                                std::vector<SkRect> paint_regions) {
   const SkSize float_layer_size =
       SkSize::Make(layer_size.width(), layer_size.height());
-  const size_t flutter_layer_index =
-      (layer.layer_index + 1) / 2;  // Integer division
   const float views_under_layer_depth =
       flutter_layer_index *
       GfxExternalViewEmbedder::kScenicZElevationForPlatformView;
@@ -266,27 +270,50 @@ void ExpectImageCompositorLayer(const FakeCompositorLayer& layer,
       flutter_layer_index *
           GfxExternalViewEmbedder::kScenicZElevationBetweenLayers +
       views_under_layer_depth;
-  const bool layer_hit_testable = (flutter_layer_index == 0)
-                                      ? FakeNode::kIsHitTestable
-                                      : FakeNode::kIsNotHitTestable;
   const float layer_opacity =
       (flutter_layer_index == 0)
           ? GfxExternalViewEmbedder::kBackgroundLayerOpacity / 255.f
           : GfxExternalViewEmbedder::kOverlayLayerOpacity / 255.f;
-  EXPECT_EQ(layer.layer_type, FakeCompositorLayer::LayerType::Image);
-  EXPECT_EQ(layer.layer_index % 2, 0u);
+
   EXPECT_THAT(
-      layer.layer_root,
-      Pointee(FieldsAre(
+      scenic_node,
+      FieldsAre(
           _, "Flutter::Layer", FakeResource::kDefaultEmptyEventMask,
+          VariantWith<FakeEntityNode>(FieldsAre(
+              FieldsAre(
+                  // Verify children separately below, since the
+                  // expected number of children may vary across
+                  // different test cases that call this method.
+                  _, FakeNode::kDefaultZeroRotation, FakeNode::kDefaultOneScale,
+                  FakeNode::kDefaultZeroTranslation,
+                  FakeNode::kDefaultZeroAnchor, FakeNode::kIsHitTestable,
+                  FakeNode::kIsSemanticallyVisible),
+              _))));
+
+  const auto* layer_node_state =
+      std::get_if<FakeEntityNode>(&scenic_node.state);
+  ASSERT_TRUE(layer_node_state);
+
+  const auto& layer_node_children = layer_node_state->node_state.children;
+
+  // The layer entity node should have a child node for the image, and
+  // separate children for each of the hit regions.
+  ASSERT_EQ(layer_node_children.size(), paint_regions.size() + 1);
+
+  // Verify image node.
+  EXPECT_THAT(
+      layer_node_children[0],
+      Pointee(FieldsAre(
+          _, "Flutter::Layer::Image", FakeResource::kDefaultEmptyEventMask,
           VariantWith<FakeShapeNode>(FieldsAre(
               FieldsAre(IsEmpty(), FakeNode::kDefaultZeroRotation,
                         FakeNode::kDefaultOneScale,
                         std::array<float, 3>{float_layer_size.width() / 2.f,
                                              float_layer_size.height() / 2.f,
                                              -layer_depth},
-                        FakeNode::kDefaultZeroAnchor, layer_hit_testable,
-                        FakeNode::kIsSemanticallyVisible),
+                        FakeNode::kDefaultZeroAnchor,
+                        FakeNode::kIsNotHitTestable,
+                        FakeNode::kIsNotSemanticallyVisible),
               Pointee(
                   FieldsAre(_, "", FakeResource::kDefaultEmptyEventMask,
                             VariantWith<FakeShape>(
@@ -305,13 +332,39 @@ void ExpectImageCompositorLayer(const FakeCompositorLayer& layer,
                               IsNull())))),
                       std::array<float, 4>{1.f, 1.f, 1.f,
                                            layer_opacity})))))))));
+
+  // Verify hit regions.
+  for (size_t i = 0; i < paint_regions.size(); ++i) {
+    ASSERT_LT(i, layer_node_children.size());
+    const auto& paint_region = paint_regions[i];
+    EXPECT_THAT(
+        layer_node_children[i + 1],
+        Pointee(FieldsAre(
+            _, "Flutter::Layer::HitRegion",
+            FakeResource::kDefaultEmptyEventMask,
+            VariantWith<FakeShapeNode>(FieldsAre(
+                FieldsAre(IsEmpty(), FakeNode::kDefaultZeroRotation,
+                          FakeNode::kDefaultOneScale,
+                          std::array<float, 3>{
+                              paint_region.x() + paint_region.width() / 2.f,
+                              paint_region.y() + paint_region.height() / 2.f,
+                              -layer_depth},
+                          FakeNode::kDefaultZeroAnchor,
+                          FakeNode::kIsHitTestable,
+                          FakeNode::kIsSemanticallyVisible),
+                Pointee(FieldsAre(
+                    _, "", FakeResource::kDefaultEmptyEventMask,
+                    VariantWith<FakeShape>(FieldsAre(
+                        VariantWith<FakeShape::RectangleDef>(FieldsAre(
+                            paint_region.width(), paint_region.height())))))),
+                IsNull())))));
+  }
 }
 
-void ExpectViewCompositorLayer(const FakeCompositorLayer& layer,
+void ExpectViewCompositorLayer(const FakeResource& scenic_node,
                                const fuchsia::ui::views::ViewToken& view_token,
-                               const flutter::EmbeddedViewParams& view_params) {
-  const size_t flutter_layer_index =
-      (layer.layer_index + 1) / 2;  // Integer division
+                               const flutter::EmbeddedViewParams& view_params,
+                               size_t flutter_layer_index) {
   const float views_under_layer_depth =
       flutter_layer_index > 0
           ? (flutter_layer_index - 1) *
@@ -321,11 +374,9 @@ void ExpectViewCompositorLayer(const FakeCompositorLayer& layer,
       flutter_layer_index *
           GfxExternalViewEmbedder::kScenicZElevationBetweenLayers +
       views_under_layer_depth;
-  EXPECT_EQ(layer.layer_type, FakeCompositorLayer::LayerType::View);
-  EXPECT_EQ(layer.layer_index % 2, 1u);
   EXPECT_THAT(
-      layer.layer_root,
-      Pointee(FieldsAre(
+      scenic_node,
+      FieldsAre(
           _, _ /*"Flutter::PlatformView::OpacityMutator" */,
           FakeResource::kDefaultEmptyEventMask,
           VariantWith<FakeOpacityNode>(FieldsAre(
@@ -372,10 +423,10 @@ void ExpectViewCompositorLayer(const FakeCompositorLayer& layer,
                   FakeNode::kDefaultZeroTranslation,
                   FakeNode::kDefaultZeroAnchor, FakeNode::kIsHitTestable,
                   FakeNode::kIsSemanticallyVisible),
-              FakeOpacityNode::kDefaultOneOpacity)))));
+              FakeOpacityNode::kDefaultOneOpacity))));
 }
 
-std::vector<FakeCompositorLayer> ExtractLayersFromSceneGraph(
+std::vector<FakeResource> ExtractLayersFromSceneGraph(
     const FakeSceneGraph& scene_graph) {
   AssertRootSceneGraph(scene_graph, false);
 
@@ -387,20 +438,12 @@ std::vector<FakeCompositorLayer> ExtractLayersFromSceneGraph(
   auto* layer_tree_state = std::get_if<FakeEntityNode>(
       &metrics_watcher_state->node_state.children[0]->state);
 
-  std::vector<FakeCompositorLayer> layers;
+  std::vector<FakeResource> scenic_layers;
   for (auto& layer_resource : layer_tree_state->node_state.children) {
-    const size_t layer_index = layers.size();
-    const FakeCompositorLayer::LayerType layer_type =
-        (layer_index % 2 == 0) ? FakeCompositorLayer::LayerType::Image
-                               : FakeCompositorLayer::LayerType::View;
-    layers.emplace_back(FakeCompositorLayer{
-        .layer_root = layer_resource,
-        .layer_type = layer_type,
-        .layer_index = layer_index,
-    });
+    scenic_layers.push_back(*layer_resource);
   }
 
-  return layers;
+  return scenic_layers;
 }
 
 void DrawSimpleFrame(GfxExternalViewEmbedder& external_view_embedder,
@@ -528,6 +571,7 @@ class GfxExternalViewEmbedderTest
   std::shared_ptr<FakeSurfaceProducer> fake_surface_producer_;
 };
 
+// Tests the trivial case where flutter does not present any content to scenic.
 TEST_F(GfxExternalViewEmbedderTest, RootScene) {
   const std::string debug_name = GetCurrentTestName();
   auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
@@ -558,6 +602,7 @@ TEST_F(GfxExternalViewEmbedderTest, RootScene) {
                        view_holder_token, view_ref);
 }
 
+// Tests the case where flutter renders a single image.
 TEST_F(GfxExternalViewEmbedderTest, SimpleScene) {
   const std::string debug_name = GetCurrentTestName();
   auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
@@ -579,29 +624,34 @@ TEST_F(GfxExternalViewEmbedderTest, SimpleScene) {
 
   // Draw the scene.  The scene graph shouldn't change yet.
   const SkISize frame_size = SkISize::Make(512, 512);
+  SkRect paint_region;
   DrawSimpleFrame(
-      external_view_embedder, frame_size, 1.f, [](SkCanvas* canvas) {
+      external_view_embedder, frame_size, 1.f,
+      [&paint_region](SkCanvas* canvas) {
         const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
                                                 canvas->imageInfo().height());
         SkPaint rect_paint;
         rect_paint.setColor(SK_ColorGREEN);
-        canvas->translate(canvas_size.width() / 4.f,
-                          canvas_size.height() / 2.f);
-        canvas->drawRect(SkRect::MakeWH(canvas_size.width() / 32.f,
-                                        canvas_size.height() / 32.f),
-                         rect_paint);
+
+        paint_region = SkRect::MakeXYWH(
+            canvas_size.width() / 4.f, canvas_size.height() / 2.f,
+            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+
+        canvas->drawRect(paint_region, rect_paint);
       });
   ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
                        view_holder_token, view_ref);
 
   // Pump the message loop.  The scene updates should propogate to Scenic.
   loop().RunUntilIdle();
-  std::vector<FakeCompositorLayer> compositor_layers =
+  std::vector<FakeResource> scenic_layers =
       ExtractLayersFromSceneGraph(fake_session().SceneGraph());
-  EXPECT_EQ(compositor_layers.size(), 1u);
-  ExpectImageCompositorLayer(compositor_layers[0], frame_size);
+  EXPECT_EQ(scenic_layers.size(), 1u);
+  ExpectImageCompositorLayer(scenic_layers[0], frame_size,
+                             /* flutter layer index = */ 0, {paint_region});
 }
 
+// Tests the case where flutter embeds a platform view on top of an image layer.
 TEST_F(GfxExternalViewEmbedderTest, SceneWithOneView) {
   const std::string debug_name = GetCurrentTestName();
   auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
@@ -633,48 +683,180 @@ TEST_F(GfxExternalViewEmbedderTest, SceneWithOneView) {
 
   // Draw the scene.  The scene graph shouldn't change yet.
   const SkISize frame_size = SkISize::Make(512, 512);
+
+  SkRect main_surface_paint_region, overlay_paint_region;
+
   DrawFrameWithView(
       external_view_embedder, frame_size, 1.f, child_view_id, child_view_params,
-      [](SkCanvas* canvas) {
+      [&main_surface_paint_region](SkCanvas* canvas) {
         const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
                                                 canvas->imageInfo().height());
+
+        main_surface_paint_region = SkRect::MakeXYWH(
+            canvas_size.width() / 4.f, canvas_size.width() / 2.f,
+            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+
         SkPaint rect_paint;
         rect_paint.setColor(SK_ColorGREEN);
-        canvas->translate(canvas_size.width() / 4.f,
-                          canvas_size.height() / 2.f);
-        canvas->drawRect(SkRect::MakeWH(canvas_size.width() / 32.f,
-                                        canvas_size.height() / 32.f),
-                         rect_paint);
+        canvas->drawRect(main_surface_paint_region, rect_paint);
       },
-      [](SkCanvas* canvas) {
+      [&overlay_paint_region](SkCanvas* canvas) {
         const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
                                                 canvas->imageInfo().height());
+        overlay_paint_region = SkRect::MakeXYWH(
+            canvas_size.width() * 3.f / 4.f, canvas_size.height() / 2.f,
+            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+
         SkPaint rect_paint;
         rect_paint.setColor(SK_ColorRED);
-        canvas->translate(canvas_size.width() * 3.f / 4.f,
-                          canvas_size.height() / 2.f);
-        canvas->drawRect(SkRect::MakeWH(canvas_size.width() / 32.f,
-                                        canvas_size.height() / 32.f),
-                         rect_paint);
+        canvas->drawRect(overlay_paint_region, rect_paint);
       });
   ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
                        view_holder_token, view_ref);
 
   // Pump the message loop.  The scene updates should propagate to Scenic.
   loop().RunUntilIdle();
-  std::vector<FakeCompositorLayer> compositor_layers =
+  std::vector<FakeResource> scenic_layers =
       ExtractLayersFromSceneGraph(fake_session().SceneGraph());
-  EXPECT_EQ(compositor_layers.size(), 3u);
-  ExpectImageCompositorLayer(compositor_layers[0], frame_size);
-  ExpectViewCompositorLayer(compositor_layers[1], child_view_token,
-                            child_view_params);
-  ExpectImageCompositorLayer(compositor_layers[2], frame_size);
+  EXPECT_EQ(scenic_layers.size(), 3u);
+  ExpectImageCompositorLayer(scenic_layers[0], frame_size,
+                             /* flutter layer index = */ 0,
+                             {main_surface_paint_region});
+  ExpectViewCompositorLayer(scenic_layers[1], child_view_token,
+                            child_view_params,
+                            /* flutter layer index = */ 1);
+  ExpectImageCompositorLayer(scenic_layers[2], frame_size,
+                             /* flutter layer index = */ 1,
+                             {overlay_paint_region});
 
   // Destroy the view.
   external_view_embedder.DestroyView(child_view_id, [](scenic::ResourceId) {});
 
   // Pump the message loop.
   loop().RunUntilIdle();
+}
+
+// Tests the case where flutter renders an image with two non-overlapping pieces
+// of content. In this case, the embedder should report two separate hit regions
+// to scenic.
+TEST_F(GfxExternalViewEmbedderTest, SimpleSceneDisjointHitRegions) {
+  const std::string debug_name = GetCurrentTestName();
+  auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
+  auto view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRef view_ref;
+  view_ref_pair.view_ref.Clone(&view_ref);
+
+  // Create the `GfxExternalViewEmbedder` and pump the message loop until
+  // the initial scene graph is setup.
+  GfxExternalViewEmbedder external_view_embedder(
+      debug_name, std::move(view_token), std::move(view_ref_pair),
+      session_connection(), fake_surface_producer());
+  loop().RunUntilIdle();
+  fake_session().FireOnFramePresentedEvent(
+      MakeFramePresentedInfoForOnePresent(0, 0));
+  loop().RunUntilIdle();
+  ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
+                       view_holder_token, view_ref);
+
+  // Draw the scene.  The scene graph shouldn't change yet.
+  SkRect paint_region_1, paint_region_2;
+  const SkISize frame_size = SkISize::Make(512, 512);
+  DrawSimpleFrame(
+      external_view_embedder, frame_size, 1.f,
+      [&paint_region_1, &paint_region_2](SkCanvas* canvas) {
+        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
+                                                canvas->imageInfo().height());
+
+        paint_region_1 = SkRect::MakeXYWH(
+            canvas_size.width() / 4.f, canvas_size.height() / 2.f,
+            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+
+        SkPaint rect_paint;
+        rect_paint.setColor(SK_ColorGREEN);
+        canvas->drawRect(paint_region_1, rect_paint);
+
+        paint_region_2 = SkRect::MakeXYWH(
+            canvas_size.width() * 3.f / 4.f, canvas_size.height() / 2.f,
+            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+
+        rect_paint.setColor(SK_ColorRED);
+        canvas->drawRect(paint_region_2, rect_paint);
+      });
+  ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
+                       view_holder_token, view_ref);
+
+  // Pump the message loop.  The scene updates should propogate to Scenic.
+  loop().RunUntilIdle();
+  std::vector<FakeResource> scenic_layers =
+      ExtractLayersFromSceneGraph(fake_session().SceneGraph());
+  EXPECT_EQ(scenic_layers.size(), 1u);
+  ExpectImageCompositorLayer(scenic_layers[0], frame_size,
+                             /* flutter layer index = */ 0,
+                             {paint_region_1, paint_region_2});
+}
+
+// Tests the case where flutter renders an image with two overlapping pieces of
+// content. In this case, the embedder should report a single joint hit region
+// to scenic.
+TEST_F(GfxExternalViewEmbedderTest, SimpleSceneOverlappingHitRegions) {
+  const std::string debug_name = GetCurrentTestName();
+  auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
+  auto view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRef view_ref;
+  view_ref_pair.view_ref.Clone(&view_ref);
+
+  // Create the `GfxExternalViewEmbedder` and pump the message loop until
+  // the initial scene graph is setup.
+  GfxExternalViewEmbedder external_view_embedder(
+      debug_name, std::move(view_token), std::move(view_ref_pair),
+      session_connection(), fake_surface_producer());
+  loop().RunUntilIdle();
+  fake_session().FireOnFramePresentedEvent(
+      MakeFramePresentedInfoForOnePresent(0, 0));
+  loop().RunUntilIdle();
+  ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
+                       view_holder_token, view_ref);
+
+  // Draw the scene.  The scene graph shouldn't change yet.
+  SkRect joined_paint_region = SkRect::MakeEmpty();
+  const SkISize frame_size = SkISize::Make(512, 512);
+  DrawSimpleFrame(
+      external_view_embedder, frame_size, 1.f,
+      [&joined_paint_region](SkCanvas* canvas) {
+        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
+                                                canvas->imageInfo().height());
+
+        auto paint_region_1 = SkRect::MakeXYWH(
+            canvas_size.width() / 4.f, canvas_size.height() / 4.f,
+            canvas_size.width() / 2.f, canvas_size.height() / 2.f);
+        SkPaint rect_paint;
+        rect_paint.setColor(SK_ColorGREEN);
+        canvas->drawRect(paint_region_1, rect_paint);
+
+        auto paint_region_2 = SkRect::MakeXYWH(
+            canvas_size.width() * 3.f / 8.f, canvas_size.height() / 4.f,
+            canvas_size.width() / 2.f, canvas_size.height() / 2.f);
+        rect_paint.setColor(SK_ColorRED);
+        canvas->drawRect(paint_region_2, rect_paint);
+
+        joined_paint_region.join(paint_region_1);
+        joined_paint_region.join(paint_region_2);
+      });
+  ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
+                       view_holder_token, view_ref);
+
+  EXPECT_EQ(joined_paint_region.x(), 128.f);
+  EXPECT_EQ(joined_paint_region.y(), 128.f);
+  EXPECT_EQ(joined_paint_region.width(), 320.f);
+  EXPECT_EQ(joined_paint_region.height(), 256.f);
+  // Pump the message loop.  The scene updates should propogate to Scenic.
+  loop().RunUntilIdle();
+  std::vector<FakeResource> scenic_layers =
+      ExtractLayersFromSceneGraph(fake_session().SceneGraph());
+  EXPECT_EQ(scenic_layers.size(), 1u);
+  ExpectImageCompositorLayer(scenic_layers[0], frame_size,
+                             /* flutter layer index = */ 0,
+                             {joined_paint_region});
 }
 
 }  // namespace flutter_runner::testing
