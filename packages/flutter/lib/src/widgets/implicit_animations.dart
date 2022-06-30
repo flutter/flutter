@@ -2118,6 +2118,14 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
 /// widget will automatically animate to the new target [widthFactor] or
 /// [heightFactor].
 /// 
+/// {@tool dartpad}
+/// The following example transitions an [AnimatedFractionallySizedBox]
+/// between two states. It adjusts the [heightFactor], [widthFactor], and
+/// [alignment] properties when tapped, using a [curve] of [Curves.fastOutSlowIn]
+///
+/// ** See code in examples/api/lib/widgets/implicit_animations/animated_fractionally_sized_box.0.dart **
+/// {@end-tool}
+/// 
 /// See also:
 ///
 ///  * [AnimatedAlign], which is an implicitly animated version of [Align].
