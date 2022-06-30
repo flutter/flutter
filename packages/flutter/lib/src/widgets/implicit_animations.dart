@@ -2117,12 +2117,19 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
 /// For the animation, you can choose a [curve] as well as a [duration] and the
 /// widget will automatically animate to the new target [widthFactor] or
 /// [heightFactor].
+/// 
+/// See also:
+///
+///  * [AnimatedAlign], which is an implicitly animated version of [Align].
+///  * [AnimatedContainer], which can transition more values at once.
+///  * [AnimatedSlide], which can animate the translation of child by a given offset relative to its size.
+///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
+///    transitions its child's position over a given duration whenever the given
+///    position changes.
 class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
   /// Creates a widget that sizes its child to a fraction of the total available
   /// space that animates implicitly, and positions its child by an alignment
   /// than animates implicitly.
-  ///
-  ///
   ///
   /// The [curve] and [duration] argument must not be null
   /// If non-null, the [widthFactor] and [heightFactor] arguments must be
