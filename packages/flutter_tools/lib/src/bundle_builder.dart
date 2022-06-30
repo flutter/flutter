@@ -169,11 +169,25 @@ Future<void> writeBundle(
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
+        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         file.parent.createSync(recursive: true);
         final DevFSContent devFSContent = entry.value;
         if (devFSContent is DevFSFileContent) {
           final File input = devFSContent.file as File;
-          if (!await shaderCompiler.compileShader(input: input, outputPath: file.path)) {
+          bool doCopy = true;
+          switch (assetKind) {
+            case AssetKind.regular:
+              break;
+            case AssetKind.font:
+              break;
+            case AssetKind.shader:
+              doCopy = !await shaderCompiler.compileShader(
+                input: input,
+                outputPath: file.path,
+              );
+              break;
+          }
+          if (doCopy) {
             input.copySync(file.path);
           }
         } else {

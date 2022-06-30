@@ -444,6 +444,7 @@ flutter:
             '--flutter-spirv',
             '--spirv=$outputPath',
             '--input=/$shaderPath',
+            '--input-type=frag',
           ],
           onRun: () {
             fileSystem.file(outputPath).createSync(recursive: true);
