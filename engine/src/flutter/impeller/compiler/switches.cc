@@ -83,7 +83,6 @@ static TargetPlatform TargetPlatformFromCommandLine(
 
 static SourceType SourceTypeFromCommandLine(
     const fml::CommandLine& command_line) {
-  auto source_type = SourceType::kUnknown;
   auto source_type_option =
       command_line.GetOptionValueWithDefault("input-type", "");
   auto source_type_search = kKnownSourceTypes.find(source_type_option);
