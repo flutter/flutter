@@ -34,16 +34,20 @@ static std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
   return JsonMessageCodec::GetInstance().EncodeMessage(*response_doc);
 }
 
-class EmptyTextInputPluginDelegate : public TextInputPluginDelegate {
+class MockTextInputPluginDelegate : public TextInputPluginDelegate {
  public:
-  void OnCursorRectUpdated(const Rect& rect) override {}
-  void OnResetImeComposing() override { ime_was_reset_ = true; }
+  MockTextInputPluginDelegate() {}
+  virtual ~MockTextInputPluginDelegate() = default;
 
-  bool ime_was_reset() const { return ime_was_reset_; }
+  // Prevent copying.
+  MockTextInputPluginDelegate(MockTextInputPluginDelegate const&) = delete;
+  MockTextInputPluginDelegate& operator=(MockTextInputPluginDelegate const&) =
+      delete;
 
- private:
-  bool ime_was_reset_ = false;
+  MOCK_METHOD1(OnCursorRectUpdated, void(const Rect&));
+  MOCK_METHOD0(OnResetImeComposing, void());
 };
+
 }  // namespace
 
 TEST(TextInputPluginTest, TextMethodsWorksWithEmptyModel) {
@@ -55,7 +59,7 @@ TEST(TextInputPluginTest, TextMethodsWorksWithEmptyModel) {
       [&received_scancode, &handled_message, &unhandled_message](
           const std::string& channel, const uint8_t* message,
           size_t message_size, BinaryReply reply) {});
-  EmptyTextInputPluginDelegate delegate;
+  MockTextInputPluginDelegate delegate;
 
   int redispatch_scancode = 0;
   TextInputPlugin handler(&messenger, &delegate);
@@ -76,14 +80,15 @@ TEST(TextInputPluginTest, ClearClientResetsComposing) {
                                    BinaryReply reply) {});
   BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
 
-  EmptyTextInputPluginDelegate delegate;
+  MockTextInputPluginDelegate delegate;
   TextInputPlugin handler(&messenger, &delegate);
+
+  EXPECT_CALL(delegate, OnResetImeComposing());
 
   auto& codec = JsonMethodCodec::GetInstance();
   auto message = codec.EncodeMethodCall({"TextInput.clearClient", nullptr});
   messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
-  EXPECT_TRUE(delegate.ime_was_reset());
 }
 
 // Verify that the embedder sends state update messages to the framework during
@@ -96,7 +101,7 @@ TEST(TextInputPluginTest, VerifyComposingSendStateUpdate) {
                       BinaryReply reply) { sent_message = true; });
   BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
 
-  EmptyTextInputPluginDelegate delegate;
+  MockTextInputPluginDelegate delegate;
   TextInputPlugin handler(&messenger, &delegate);
 
   auto& codec = JsonMethodCodec::GetInstance();
@@ -152,7 +157,7 @@ TEST(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
       [&received_scancode, &handled_message, &unhandled_message](
           const std::string& channel, const uint8_t* message,
           size_t message_size, BinaryReply reply) {});
-  EmptyTextInputPluginDelegate delegate;
+  MockTextInputPluginDelegate delegate;
 
   int redispatch_scancode = 0;
   TextInputPlugin handler(&messenger, &delegate);
@@ -197,6 +202,76 @@ TEST(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
   handler.ComposeEndHook();
 
   // Passes if it did not crash
+}
+
+TEST(TextInputPluginTest, TransformCursorRect) {
+  // A position of `EditableText`.
+  double view_x = 100;
+  double view_y = 200;
+
+  // A position and size of marked text, in `EditableText` local coordinates.
+  double ime_x = 3;
+  double ime_y = 4;
+  double ime_width = 50;
+  double ime_height = 60;
+
+  // Transformation matrix.
+  std::array<std::array<double, 4>, 4> editabletext_transform = {
+      1.0, 0.0, 0.0, view_x,  //
+      0.0, 1.0, 0.0, view_y,  //
+      0.0, 0.0, 0.0, 0.0,     //
+      0.0, 0.0, 0.0, 1.0};
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  MockTextInputPluginDelegate delegate;
+  TextInputPlugin handler(&messenger, &delegate);
+
+  auto& codec = JsonMethodCodec::GetInstance();
+
+  EXPECT_CALL(delegate, OnCursorRectUpdated(Rect{{view_x, view_y}, {0, 0}}));
+
+  {
+    auto arguments =
+        std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
+    auto& allocator = arguments->GetAllocator();
+
+    rapidjson::Value transoform(rapidjson::kArrayType);
+    for (int i = 0; i < 4 * 4; i++) {
+      // Pack 2-dimensional array by column-major order.
+      transoform.PushBack(editabletext_transform[i % 4][i / 4], allocator);
+    }
+
+    arguments->AddMember("transform", transoform, allocator);
+
+    auto message = codec.EncodeMethodCall(
+        {"TextInput.setEditableSizeAndTransform", std::move(arguments)});
+    messenger.SimulateEngineMessage(kChannelName, message->data(),
+                                    message->size(), reply_handler);
+  }
+
+  EXPECT_CALL(delegate,
+              OnCursorRectUpdated(Rect{{view_x + ime_x, view_y + ime_y},
+                                       {ime_width, ime_height}}));
+
+  {
+    auto arguments =
+        std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
+    auto& allocator = arguments->GetAllocator();
+
+    arguments->AddMember("x", ime_x, allocator);
+    arguments->AddMember("y", ime_y, allocator);
+    arguments->AddMember("width", ime_width, allocator);
+    arguments->AddMember("height", ime_height, allocator);
+
+    auto message = codec.EncodeMethodCall(
+        {"TextInput.setMarkedTextRect", std::move(arguments)});
+    messenger.SimulateEngineMessage(kChannelName, message->data(),
+                                    message->size(), reply_handler);
+  }
 }
 
 }  // namespace testing
