@@ -16,7 +16,7 @@ class SdkWebConfigurationProvider extends SdkConfigurationProvider {
   SdkWebConfigurationProvider(this._artifacts);
 
   final Artifacts _artifacts;
-  late SdkConfiguration _configuration;
+  SdkConfiguration _configuration;
 
   /// Create and validate configuration matching the default SDK layout.
   /// Create configuration matching the default SDK layout.
