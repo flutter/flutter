@@ -129,7 +129,7 @@ class Icon extends StatelessWidget {
   /// axis, otherwise has no effect.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.weight].
-  /// 
+  ///
   /// See also:
   ///  * [fill], a [FontVariation] for controlling fill.
   ///  * [grade], a [FontVariation] for controlling stroke grade.
@@ -159,7 +159,7 @@ class Icon extends StatelessWidget {
   /// axis, otherwise has no effect.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.grade].
-  /// 
+  ///
   /// See also:
   ///  * [fill], a [FontVariation] for controlling fill.
   ///  * [weight], a [FontVariation] for controlling stroke weight.
@@ -179,7 +179,7 @@ class Icon extends StatelessWidget {
   /// axis, otherwise has no effect.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.opticalSize].
-  /// 
+  ///
   /// See also:
   ///  * [fill], a [FontVariation] for controlling fill.
   ///  * [weight], a [FontVariation] for controlling stroke weight.
@@ -214,7 +214,7 @@ class Icon extends StatelessWidget {
   ///
   /// Shadows must be in the same order for [Icon] to be considered as
   /// equivalent as order produces differing transparency.
-  /// 
+  ///
   /// Defaults to the nearest [IconTheme]'s [IconThemeData.shadows].
   final List<Shadow>? shadows;
 

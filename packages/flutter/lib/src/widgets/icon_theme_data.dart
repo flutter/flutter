@@ -29,7 +29,7 @@ class IconThemeData with Diagnosticable {
     this.grade,
     this.opticalSize,
     this.color,
-    double? opacity, 
+    double? opacity,
     this.shadows,
   }) : _opacity = opacity;
 
@@ -50,13 +50,13 @@ class IconThemeData with Diagnosticable {
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   IconThemeData copyWith({
-    double? size, 
-    double? fill, 
-    double? weight, 
-    double? grade, 
-    double? opticalSize, 
-    Color? color, 
-    double? opacity, 
+    double? size,
+    double? fill,
+    double? weight,
+    double? grade,
+    double? opticalSize,
+    Color? color,
+    double? opacity,
     List<Shadow>? shadows,
   }) {
     return IconThemeData(
@@ -119,32 +119,32 @@ class IconThemeData with Diagnosticable {
     && shadows != null;
 
   /// The default for [Icon.size].
-  /// 
+  ///
   /// Falls back to 24.0.
   final double? size;
-  
+
   /// The default for [Icon.fill].
-  /// 
+  ///
   /// Falls back to 0.0.
   final double? fill;
-  
+
   /// The default for [Icon.weight].
-  /// 
+  ///
   /// Falls back to 400.0.
   final double? weight;
-  
+
   /// The default for [Icon.grade].
-  /// 
+  ///
   /// Falls back to 0.0.
   final double? grade;
-  
+
   /// The default for [Icon.opticalSize].
-  /// 
+  ///
   /// Falls back to 48.0.
   final double? opticalSize;
 
-  /// The default for [Icon.color]. 
-  /// 
+  /// The default for [Icon.color].
+  ///
   /// In material apps, if there is a [Theme] without any [IconTheme]s
   /// specified, icon colors default to white if [ThemeData.brightness] is dark
   /// and black if [ThemeData.brightness] is light.
@@ -153,7 +153,7 @@ class IconThemeData with Diagnosticable {
   final Color? color;
 
   /// An opacity to apply to both explicit and default icon colors.
-  /// 
+  ///
   /// Falls back to 1.0.
   double? get opacity => _opacity == null ? null : clampDouble(_opacity!, 0.0, 1.0);
   final double? _opacity;
