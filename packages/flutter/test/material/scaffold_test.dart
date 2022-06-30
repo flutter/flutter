@@ -6,44 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  // Regression test for https://github.com/flutter/flutter/issues/103741
-  testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    Widget buildFrame({required bool extendBodyBehindAppBar}) {
-      return MediaQuery(
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Scaffold(
-            extendBodyBehindAppBar: extendBodyBehindAppBar,
-            resizeToAvoidBottomInset: false,
-            body: SingleChildScrollView(
-              controller: controller,
-              child: const FlutterLogo(
-                size: 1107,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true));
-    expect(controller.position.pixels, 0.0);
-
-    controller.jumpTo(100.0);
-    await tester.pump();
-    expect(controller.position.pixels, 100.0);
-
-    await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false));
-    expect(controller.position.pixels, 100.0);
-  });
-
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
@@ -70,17 +38,17 @@ void main() {
 
     scaffoldState.openDrawer();
     await tester.pumpAndSettle();
-    expect(true, isDrawerOpen);
+    expect(isDrawerOpen, true);
     scaffoldState.openEndDrawer();
     await tester.pumpAndSettle();
-    expect(false, isDrawerOpen);
+    expect(isDrawerOpen, false);
 
     scaffoldState.openEndDrawer();
     await tester.pumpAndSettle();
-    expect(true, isEndDrawerOpen);
+    expect(isEndDrawerOpen, true);
     scaffoldState.openDrawer();
     await tester.pumpAndSettle();
-    expect(false, isEndDrawerOpen);
+    expect(isEndDrawerOpen, false);
   });
 
   testWidgets('Scaffold drawer callback test - only call when changed', (WidgetTester tester) async {
@@ -107,14 +75,14 @@ void main() {
     ));
 
     await tester.flingFrom(Offset.zero, const Offset(10.0, 0.0), 10.0);
-    expect(false, onDrawerChangedCalled);
+    expect(onDrawerChangedCalled, false);
 
     await tester.pumpAndSettle();
 
     final double width = tester.getSize(find.byType(MaterialApp)).width;
     await tester.flingFrom(Offset(width - 1, 0.0), const Offset(-10.0, 0.0), 10.0);
     await tester.pumpAndSettle();
-    expect(false, onEndDrawerChangedCalled);
+    expect(onEndDrawerChangedCalled, false);
   });
 
   testWidgets('Scaffold control test', (WidgetTester tester) async {
@@ -1605,29 +1573,29 @@ void main() {
 
       await tester.tap(drawerOpenButton);
       await tester.pumpAndSettle();
-      expect(true, scaffoldState.isDrawerOpen);
+      expect(scaffoldState.isDrawerOpen, true);
       await tester.tap(endDrawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
-      expect(false, scaffoldState.isDrawerOpen);
+      expect(scaffoldState.isDrawerOpen,  false);
 
       await tester.tap(endDrawerOpenButton);
       await tester.pumpAndSettle();
-      expect(true, scaffoldState.isEndDrawerOpen);
+      expect(scaffoldState.isEndDrawerOpen, true);
       await tester.tap(drawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
-      expect(false, scaffoldState.isEndDrawerOpen);
+      expect(scaffoldState.isEndDrawerOpen, false);
 
       scaffoldState.openDrawer();
-      expect(true, scaffoldState.isDrawerOpen);
+      expect(scaffoldState.isDrawerOpen, true);
       await tester.tap(endDrawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
-      expect(false, scaffoldState.isDrawerOpen);
+      expect(scaffoldState.isDrawerOpen, false);
 
       scaffoldState.openEndDrawer();
-      expect(true, scaffoldState.isEndDrawerOpen);
+      expect(scaffoldState.isEndDrawerOpen, true);
 
       scaffoldState.openDrawer();
-      expect(true, scaffoldState.isDrawerOpen);
+      expect(scaffoldState.isDrawerOpen, true);
     });
 
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
@@ -2434,12 +2402,12 @@ void main() {
       '   ancestor was:\n'
       '     Builder\n'
       '   The ancestors of this widget were:\n'
-      '     MediaQuery\n'
-      '     LayoutBuilder\n'
       '     _BodyBuilder\n'
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.body>]\n'
       '     CustomMultiChildLayout\n'
+      '     _ActionsMarker\n'
+      '     Actions\n'
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
       '     AnimatedDefaultTextStyle\n'
@@ -2531,6 +2499,54 @@ void main() {
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
     expect(find.text(snackBarContent), findsNothing);
+  });
+
+  testWidgets('Drawer can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/106131
+    bool isDrawerOpen = false;
+    bool isEndDrawerOpen = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        drawer: Container(
+          color: Colors.blue,
+        ),
+        onDrawerChanged: (bool isOpen) {
+          isDrawerOpen = isOpen;
+        },
+        endDrawer: Container(
+          color: Colors.green,
+        ),
+        onEndDrawerChanged: (bool isOpen) {
+          isEndDrawerOpen = isOpen;
+        },
+        body: Container(),
+      ),
+    ));
+
+    final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+    scaffoldState.openDrawer();
+    await tester.pumpAndSettle();
+    expect(isDrawerOpen, true);
+    expect(isEndDrawerOpen, false);
+
+    // Try to dismiss the drawer with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(isDrawerOpen, false);
+    expect(isEndDrawerOpen, false);
+
+    scaffoldState.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(isDrawerOpen, false);
+    expect(isEndDrawerOpen, true);
+
+    // Try to dismiss the drawer with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(isDrawerOpen, false);
+    expect(isEndDrawerOpen, false);
   });
 }
 

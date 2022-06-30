@@ -9,7 +9,9 @@
 // Edit the template dev/tools/gen_keycodes/data/keyboard_maps.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
-import 'keyboard_key.dart';
+import 'keyboard_key.g.dart';
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
 /// Maps Android-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{
@@ -2211,6 +2213,7 @@ const Map<String, LogicalKeyboardKey> kWebToLogicalKey = <String, LogicalKeyboar
   'EndCall': LogicalKeyboardKey.endCall,
   'Enter': LogicalKeyboardKey.enter,
   'EraseEof': LogicalKeyboardKey.eraseEof,
+  'Esc': LogicalKeyboardKey.escape,
   'Escape': LogicalKeyboardKey.escape,
   'ExSel': LogicalKeyboardKey.exSel,
   'Execute': LogicalKeyboardKey.execute,
@@ -2495,6 +2498,7 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Enter': PhysicalKeyboardKey.enter,
   'Equal': PhysicalKeyboardKey.equal,
   'Escape': PhysicalKeyboardKey.escape,
+  'Esc': PhysicalKeyboardKey.escape,
   'F1': PhysicalKeyboardKey.f1,
   'F10': PhysicalKeyboardKey.f10,
   'F11': PhysicalKeyboardKey.f11,

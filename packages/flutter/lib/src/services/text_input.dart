@@ -15,15 +15,22 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-import '../../services.dart' show Clipboard;
 import 'autofill.dart';
+import 'clipboard.dart' show Clipboard;
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'text_editing.dart';
 import 'text_editing_delta.dart';
 
-export 'dart:ui' show TextAffinity;
+export 'dart:ui' show Brightness, FontWeight, Offset, Rect, Size, TextAlign, TextDirection, TextPosition, TextRange;
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'autofill.dart' show AutofillConfiguration, AutofillScope;
+export 'text_editing.dart' show TextSelection;
+// TODO(a14n): the following export leads to Segmentation fault, see https://github.com/flutter/flutter/issues/106332
+// export 'text_editing_delta.dart' show TextEditingDelta;
 
 /// Indicates how to handle the intelligent replacement of dashes in text input.
 ///
@@ -1086,11 +1093,7 @@ mixin TextSelectionDelegate {
 ///  * [EditableText], a [TextInputClient] implementation.
 ///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
 ///    granular information from the platform's text input.
-abstract class TextInputClient {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const TextInputClient();
-
+mixin TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue? get currentTextEditingValue;
 
@@ -1225,7 +1228,7 @@ class SelectionRect {
 ///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
 ///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
 ///    to true.
-abstract class DeltaTextInputClient extends TextInputClient {
+mixin DeltaTextInputClient implements TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
   ///

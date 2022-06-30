@@ -202,9 +202,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @protected
   Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int? browserDebugPort = featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
+    final int? webBrowserDebugPort = featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
       ? int.parse(stringArgDeprecated('web-browser-debug-port')!)
       : null;
+    final List<String> webBrowserFlags = featureFlags.isWebEnabled
+        ? stringsArg(FlutterOptions.kWebBrowserFlag)
+        : const <String>[];
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -216,7 +219,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-injected-client-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArgDeprecated('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArgDeprecated('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
+        webBrowserDebugPort: webBrowserDebugPort,
+        webBrowserFlags: webBrowserFlags,
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
       );
@@ -253,7 +257,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-injected-client-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArgDeprecated('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArgDeprecated('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
+        webBrowserDebugPort: webBrowserDebugPort,
+        webBrowserFlags: webBrowserFlags,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArgDeprecated('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArgDeprecated('web-launch-url') : null,
         vmserviceOutFile: stringArgDeprecated('vmservice-out-file'),
