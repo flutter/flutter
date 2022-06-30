@@ -2117,7 +2117,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
 /// For the animation, you can choose a [curve] as well as a [duration] and the
 /// widget will automatically animate to the new target [widthFactor] or
 /// [heightFactor].
-/// 
+///
 /// {@tool dartpad}
 /// The following example transitions an [AnimatedFractionallySizedBox]
 /// between two states. It adjusts the [heightFactor], [widthFactor], and
@@ -2125,7 +2125,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
 ///
 /// ** See code in examples/api/lib/widgets/implicit_animations/animated_fractionally_sized_box.0.dart **
 /// {@end-tool}
-/// 
+///
 /// See also:
 ///
 ///  * [AnimatedAlign], which is an implicitly animated version of [Align].
