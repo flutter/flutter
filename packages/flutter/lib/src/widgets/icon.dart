@@ -14,8 +14,10 @@ import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 
+// TODO(plg): Update documentation about Symbols where [Icons] are mentioned
+
 /// A graphical icon widget drawn with a glyph from a font described in
-/// an [IconData] such as material's predefined [IconData]s in [Icons] and [Symbols].
+/// an [IconData] such as material's predefined [IconData]s in [Icons].
 ///
 /// Icons are not interactive. For an interactive icon, consider material's
 /// [IconButton].
@@ -64,7 +66,6 @@ import 'icon_theme_data.dart';
 ///
 ///  * [IconButton], for interactive icons.
 ///  * [Icons], for the list of available Material Icons for use with this class.
-///  * [Symbols], for the list of available Material Symbols for use with this class.
 ///  * [IconTheme], which provides ambient configuration for icons.
 ///  * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
 class Icon extends StatelessWidget {
