@@ -28,7 +28,9 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for iOS, based on the information in the key
 /// data structure given to it.
 class IOSCodeGenerator extends PlatformCodeGenerator {
-  IOSCodeGenerator(super.keyData, super.logicalData);
+  IOSCodeGenerator(super.keyData, super.logicalData, this.specialKeyMapping);
+
+  final Map<String, String> specialKeyMapping;
 
   /// This generates the map of iOS key codes to physical keys.
   String get _scanCodeMap {
@@ -105,6 +107,15 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     return modifierKeyMap.toString().trimRight();
   }
 
+  String get _specialKeyMapping {
+    final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
+    specialKeyMapping.forEach((String key, String logicalName) {
+      final int value = logicalData.entryByName(logicalName).value;
+      lines.add(value, '  $key : @(${toHex(value)}),');
+    });
+    return lines.join().trimRight();
+  }
+
   /// This generates some keys that needs special attention.
   String get _specialKeyConstants {
     final StringBuffer specialKeyConstants = StringBuffer();
@@ -137,6 +148,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
+      'SPECIAL_KEY_MAPPING': _specialKeyMapping,
     };
   }
 }

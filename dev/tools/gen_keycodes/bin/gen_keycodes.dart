@@ -91,6 +91,30 @@ Future<void> generate(String name, String outDir, BaseCodeGenerator generator) {
   return codeFile.writeAsString(generator.generate());
 }
 
+const Map<String, String> kIosSpecialKeyMapping = <String, String>{
+  'UIKeyInputEscape': 'Escape',
+  'UIKeyInputF1': 'F1',
+  'UIKeyInputF2': 'F2',
+  'UIKeyInputF3': 'F3',
+  'UIKeyInputF4': 'F4',
+  'UIKeyInputF5': 'F5',
+  'UIKeyInputF6': 'F6',
+  'UIKeyInputF7': 'F7',
+  'UIKeyInputF8': 'F8',
+  'UIKeyInputF9': 'F9',
+  'UIKeyInputF10': 'F10',
+  'UIKeyInputF11': 'F11',
+  'UIKeyInputF12': 'F12',
+  'UIKeyInputUpArrow': 'ArrowUp',
+  'UIKeyInputDownArrow': 'ArrowDown',
+  'UIKeyInputLeftArrow': 'ArrowLeft',
+  'UIKeyInputRightArrow': 'ArrowRight',
+  'UIKeyInputHome': 'Home',
+  'UIKeyInputEnd': 'Enter',
+  'UIKeyInputPageUp': 'PageUp',
+  'UIKeyInputPageDown': 'PageDown',
+};
+
 Future<void> main(List<String> rawArguments) async {
   if (!_assertsEnabled()) {
     print('The gen_keycodes script must be run with --enable-asserts.');
@@ -223,7 +247,7 @@ Future<void> main(List<String> rawArguments) async {
       KeyboardKeysCodeGenerator(physicalData, logicalData));
   await generate('key maps',
       parsedArguments['maps'] as String,
-      KeyboardMapsCodeGenerator(physicalData, logicalData));
+      KeyboardMapsCodeGenerator(physicalData, logicalData, kIosSpecialKeyMapping));
   await generate('engine utils',
       path.join(PlatformCodeGenerator.engineRoot,
           'shell', 'platform', 'embedder', 'test_utils', 'key_codes.g.h'),
@@ -246,6 +270,7 @@ Future<void> main(List<String> rawArguments) async {
     'ios': IOSCodeGenerator(
       physicalData,
       logicalData,
+      kIosSpecialKeyMapping,
     ),
     'windows': WindowsCodeGenerator(
       physicalData,
