@@ -7694,6 +7694,56 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
+  testWidgets('Drag selection hides the selection menu', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+    final Offset midBlah2 = textOffsetToPosition(tester, 8);
+
+    // Right click the second word.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah2,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The toolbar is shown.
+    expect(find.text('Paste'), findsOneWidget);
+
+    // Drag the mouse to the first word.
+    final TestGesture gesture2 = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    await gesture2.moveTo(midBlah2);
+    await tester.pump();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+
+    // The toolbar is hidden.
+    expect(find.text('Paste'), findsNothing);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
   testWidgets(
     'Long press on an autofocused field shows the selection menu',
     (WidgetTester tester) async {
