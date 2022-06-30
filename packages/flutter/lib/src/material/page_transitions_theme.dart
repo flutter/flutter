@@ -384,7 +384,7 @@ void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double
 }
 
 class _ZoomEnterTransitionDelegate extends _AnimatedRasterDelegate {
-  const _ZoomEnterTransitionDelegate({required this.reverse});
+  const _ZoomEnterTransitionDelegate({ required this.reverse });
 
   final bool reverse;
 
@@ -429,7 +429,7 @@ class _ZoomEnterTransitionDelegate extends _AnimatedRasterDelegate {
   bool useRaster(Animation<double> animation) {
     final double fade = computeFade(animation);
     final double scale = computeScale(animation);
-    return (fade > 0.0 && fade < 1.0) || scale != 1.0;
+    return (fade != 1.0 && fade != 0.0) || scale != 1.0;
   }
 
   @override
@@ -443,7 +443,7 @@ class _ZoomEnterTransitionDelegate extends _AnimatedRasterDelegate {
     if (scrimOpacity != 0) {
       context.canvas.drawRect(area, Paint()..color = Colors.black.withOpacity(scrimOpacity));
     }
-    if (fade == 0) {
+    if (fade <= 0.0) {
       return;
     }
     callback(context, Offset.zero);
@@ -457,7 +457,7 @@ class _ZoomEnterTransitionDelegate extends _AnimatedRasterDelegate {
 
     final Paint paint = Paint()
       ..filterQuality = ui.FilterQuality.low
-      ..color = const Color(0xFF000000).withOpacity(fade);
+      ..color = Color.fromRGBO(0, 0, 0, fade);
     final double logicalWidth = image.width / pixelRatio;
     final double logicalHeight = image.height / pixelRatio;
 
@@ -543,7 +543,7 @@ class _AnimatingZoomExitTransition extends StatelessWidget {
 }
 
 class _ZoomExitTransitionDelegate extends _AnimatedRasterDelegate {
-  const _ZoomExitTransitionDelegate({required this.reverse});
+  const _ZoomExitTransitionDelegate({ required this.reverse });
 
   final bool reverse;
 
@@ -561,26 +561,27 @@ class _ZoomExitTransitionDelegate extends _AnimatedRasterDelegate {
   }
 
   double computeFade(Animation<double> animation) {
-    return  reverse
+    final double exitFade = reverse
       ? _ZoomExitTransition._fadeOutTransition.evaluate(animation)
       : 1.0;
+    return exitFade;
   }
 
   @override
   bool useRaster(Animation<double> animation) {
     final double fade = computeFade(animation);
     final double scale = computeScale(animation);
-    return (fade > 0.0 && fade < 1.0) || scale != 1.0;
+    return (fade != 0.0 && fade != 1.0) || scale != 1.0;
   }
 
   @override
   void paint(PaintingContext context, Animation<double> animation, Rect area, PaintingContextCallback callback) {
     final double fade = computeFade(animation);
-    final double scale = computeFade(animation);
+    final double scale = computeScale(animation);
     assert(scale == 1.0, '$scale');
     assert(fade == 0.0 || fade == 1.0, '$fade');
 
-    if (fade == 0.0) {
+    if (fade <= 0.0) {
       return;
     }
     callback(context, Offset.zero);
@@ -589,11 +590,11 @@ class _ZoomExitTransitionDelegate extends _AnimatedRasterDelegate {
   @override
   void paintRaster(PaintingContext context, ui.Image image, double pixelRatio, Animation<double> animation) {
     final double fade = computeFade(animation);
-    final double scale = computeFade(animation);
+    final double scale = computeScale(animation);
 
     final Paint paint = Paint()
       ..filterQuality = ui.FilterQuality.low
-      ..color = const Color(0xFF000000).withOpacity(fade);
+      ..color = Color.fromRGBO(0, 0, 0, fade);
     _drawImageScaledAndCentered(context, image, scale, pixelRatio, paint);
   }
 }

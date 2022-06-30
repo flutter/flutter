@@ -148,6 +148,8 @@ class _RenderAnimatedRaster extends RenderProxyBox {
   @override
   void detach() {
     animation.removeListener(markNeedsPaint);
+    _childImage?.dispose();
+    _childImage = null;
     super.detach();
   }
 
