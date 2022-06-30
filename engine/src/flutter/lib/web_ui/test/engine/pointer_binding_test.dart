@@ -2136,6 +2136,30 @@ void testMain() {
 
   _testEach<_PointerEventContext>(
     <_PointerEventContext>[
+      if (!isIosSafari) _PointerEventContext(),
+    ],
+    'ignores pointer up or pointer cancel events for unknown device',
+    (_PointerEventContext context) {
+      PointerBinding.instance!.debugOverrideDetector(context);
+      final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      context.multiTouchUp(const <_TouchDetails>[
+        _TouchDetails(pointer: 23, clientX: 200, clientY: 202),
+      ]).forEach(glassPane.dispatchEvent);
+      expect(packets, hasLength(0));
+
+      context.multiTouchCancel(const <_TouchDetails>[
+        _TouchDetails(pointer: 24, clientX: 200, clientY: 202),
+      ]).forEach(glassPane.dispatchEvent);
+      expect(packets, hasLength(0));
+    },
+  );
+
+  _testEach<_PointerEventContext>(
+    <_PointerEventContext>[
       _PointerEventContext(),
     ],
     'handles random pointer id on up events',
