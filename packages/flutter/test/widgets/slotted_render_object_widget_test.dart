@@ -139,31 +139,6 @@ void main() {
     expect(_RenderTest().publicNameForSlot(slot), slot.toString());
   });
 
-  testWidgets('global key reparenting', (WidgetTester tester) async {
-    final Widget widget1 = SizedBox(key: GlobalKey(debugLabel: 'smol'), height: 10, width: 10);
-    final Widget widget2 = SizedBox(key: GlobalKey(debugLabel: 'big'), height: 100, width: 100);
-
-    await tester.pumpWidget(buildWidget(topLeft: widget1, bottomRight: widget2));
-    final _RenderDiagonal renderObject = tester.renderObject(find.byType(_Diagonal));
-    expect(renderObject._topLeft!.size, const Size(10, 10));
-    expect(renderObject._bottomRight!.size, const Size(100, 100));
-
-    // Swapping.
-    await tester.pumpWidget(buildWidget(topLeft: widget2, bottomRight: widget1));
-    expect(renderObject._topLeft!.size, const Size(100, 100));
-    expect(renderObject._bottomRight!.size, const Size(10, 10));
-
-    // Moving + Deleting.
-    await tester.pumpWidget(buildWidget(bottomRight: widget2));
-    expect(renderObject._topLeft, null);
-    expect(renderObject._bottomRight!.size, const Size(100, 100));
-
-    // Moving.
-    await tester.pumpWidget(buildWidget(topLeft: widget2));
-    expect(renderObject._topLeft!.size, const Size(100, 100));
-    expect(renderObject._bottomRight, null);
-  });
-
   testWidgets('debugDescribeChildren', (WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
       topLeft: const SizedBox(
