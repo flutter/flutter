@@ -41,26 +41,24 @@ void main() {
     await _restoreFlutterToolsSnapshot();
   });
 
-  testUsingContext('generated plugin registrant passes analysis', () async {
+  // See: https://github.com/dart-lang/dart-services/pull/874
+  testUsingContext('generated plugin registrant for dartpad exists and passes analysis', () async {
     await _createProject(projectDir, <String>[]);
     // We need to add a dependency with web support to trigger
     // the generated_plugin_registrant generation.
     await _addDependency(projectDir, 'shared_preferences',
         version: '^2.0.0');
-    // The plugin registrant is only created after a build...
-    await _buildWebProject(projectDir);
+    // The plugin registrant for dartpad is created on flutter pub get.
+    await _doFlutterPubGet(projectDir);
 
-    // Find the web_plugin_registrant, now that it lives outside "lib":
-    final Directory buildDir = projectDir
-        .childDirectory('.dart_tool/flutter_build')
-        .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+    final Directory dartpadDir = projectDir.childDirectory('.dart_tool/dartpad');
+    expect(dartpadDir.childFile('web_plugin_registrant.dart'), exists);
 
-    expect(
-      buildDir.childFile('web_plugin_registrant.dart'),
-      exists,
-    );
-    await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
+    await _analyzeEntity(dartpadDir.childFile('web_plugin_registrant.dart'));
+
+    // Assert the full build hasn't happened!
+    final Directory buildDir = projectDir.childDirectory('.dart_tool/flutter_build');
+    expect(buildDir, isNot(exists));
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
           fileSystem: globals.fs,
@@ -72,28 +70,12 @@ void main() {
         ),
   });
 
-  testUsingContext(
-      'generated plugin registrant ignores lines longer than 80 chars',
-      () async {
+  testUsingContext('generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
-    await _addAnalysisOptions(
-        projectDir, <String>['lines_longer_than_80_chars']);
-    await _createProject(tempDir.childDirectory('test_plugin'), <String>[
-      '--template=plugin',
-      '--platforms=web',
-      '--project-name',
-      'test_web_plugin_with_a_purposefully_extremely_long_package_name',
-    ]);
-    // The line for the test web plugin (`  TestWebPluginWithAPurposefullyExtremelyLongPackageNameWeb.registerWith(registrar);`)
-    // exceeds 80 chars.
-    // With the above lint rule added, we want to ensure that the `generated_plugin_registrant.dart`
-    // file does not fail analysis (this is a regression test - an ignore was
-    // added to cover this case).
-    await _addDependency(
-      projectDir,
-      'test_web_plugin_with_a_purposefully_extremely_long_package_name',
-      path: '../test_plugin',
-    );
+    // We need to add a dependency with web support to trigger
+    // the generated_plugin_registrant generation.
+    await _addDependency(projectDir, 'shared_preferences',
+        version: '^2.0.0');
     // The plugin registrant is only created after a build...
     await _buildWebProject(projectDir);
 
@@ -280,6 +262,34 @@ Future<void> _buildWebProject(Directory workingDir) async {
     workingDirectory: workingDir.path,
   );
   printOnFailure('Output of flutter build web:');
+  printOnFailure(exec.stdout.toString());
+  printOnFailure(exec.stderr.toString());
+  expect(exec.exitCode, 0);
+}
+
+Future<void> _doFlutterPubGet(Directory workingDir) async {
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
+    globals.fs.path.join(
+      '..',
+      '..',
+      'bin',
+      'cache',
+      'flutter_tools.snapshot',
+    ),
+  );
+
+  final List<String> args = <String>[
+    flutterToolsSnapshotPath,
+    'pub',
+    'get',
+  ];
+
+  final ProcessResult exec = await Process.run(
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    args,
+    workingDirectory: workingDir.path,
+  );
+  printOnFailure('Output of flutter pub get:');
   printOnFailure(exec.stdout.toString());
   printOnFailure(exec.stderr.toString());
   expect(exec.exitCode, 0);
