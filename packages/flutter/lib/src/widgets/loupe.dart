@@ -171,7 +171,8 @@ class LoupeController {
   }
 }
 
-class LoupeDecoration /* extends Decoration */ {
+/*
+class LoupeDecoration extends ShapeDecoration {
   final ShapeBorder shape;
   final Border? border;
   final BoxShadow? shadow;
@@ -179,6 +180,7 @@ class LoupeDecoration /* extends Decoration */ {
   const LoupeDecoration(
       {this.shape = const RoundedRectangleBorder(), this.border, this.shadow});
 }
+*/
 
 /// A common building base for Loupes, that is managed nby a
 ///
@@ -194,14 +196,14 @@ class Loupe extends StatefulWidget {
       required this.size,
       this.focalPoint = Offset.zero,
       this.child,
-      this.decoration = const LoupeDecoration(),
+      this.decoration = const ShapeDecoration(shape: RoundedRectangleBorder()),
       this.transitionAnimationController})
       : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
   final AnimationController? transitionAnimationController;
 
-  final LoupeDecoration decoration;
+  final ShapeDecoration decoration;
 
   final LoupeController controller;
 
@@ -367,7 +369,7 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
 class _LoupeStyle extends StatelessWidget {
   const _LoupeStyle(this.decoration, {required this.size});
 
-  final LoupeDecoration decoration;
+  final ShapeDecoration decoration;
   final Size size;
 
   @override
@@ -377,11 +379,8 @@ class _LoupeStyle extends StatelessWidget {
       clipper: _DonutClip(
         shape: decoration.shape,
       ),
-      child: Container(
-        decoration: BoxDecoration(
-            boxShadow: decoration.shadow != null
-                ? <BoxShadow>[decoration.shadow!]
-                : null),
+      child: DecoratedBox(
+        decoration: decoration,
         child: SizedBox.fromSize(
           size: size,
         ),

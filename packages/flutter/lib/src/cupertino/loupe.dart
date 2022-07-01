@@ -71,7 +71,9 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
+    return AnimatedPositioned(
+        duration: const Duration(milliseconds: 45),
+        curve: Curves.easeOut,
         left: _realLoupePosition.dx,
         top: _realLoupePosition.dy,
         child: Loupe(
@@ -81,16 +83,18 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
               0,
               CupertinoLoupe._kVerticalFocalPointOffset -
                   CupertinoLoupe._kLoupeSize.height / 2),
-          decoration: LoupeDecoration(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
-            border: Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
-            shadow: const BoxShadow(
-              color: Color.fromARGB(105, 215, 215, 215),
-              blurRadius: 2,
-              spreadRadius: 3,
-              offset: Offset(0, 3)
-            ),
+          decoration: ShapeDecoration(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(36),
+                side: const BorderSide(
+                    color: Color.fromARGB(255, 235, 235, 235))),
+            shadows: const <BoxShadow>[
+              BoxShadow(
+                  color: Color.fromARGB(34, 0, 0, 0),
+                  blurRadius: 5,
+                  spreadRadius: 0.2,
+                  offset: Offset(0, 3))
+            ],
           ),
           size: CupertinoLoupe._kLoupeSize,
         ));

@@ -497,7 +497,7 @@ class TextSelectionOverlay {
       return;
     }
 
-   // _loupeController!.hide();
+   _loupeController!.hide();
     
     // Any time a loupe is hidden, we should show the toolbar.
     // this behavior is consistent on all mobile platforms.
@@ -505,16 +505,24 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
-    _showLoupe(details.globalPosition);
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+    _showLoupe(Offset(details.globalPosition.dx, (details.globalPosition - details.localPosition).dy + (handleSize.height / 2)));
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
-    _loupeController?.requestedPosition.value = details.globalPosition;
+    // Set the loupe at the details X position, but the Y should point at the handles midpoint.
+    final Offset topLeftCorner = details.globalPosition - details.localPosition;
+    final double handleHeight = selectionControls!.getHandleSize(
+      renderObject.preferredLineHeight,
+    ).height;
+    _loupeController?.requestedPosition.value = Offset(details.globalPosition.dx, topLeftCorner.dy + (handleHeight / 2));
+    
+    
     _dragEndPosition += details.delta;
+
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
     if (_selection.isCollapsed) {
@@ -555,15 +563,20 @@ class TextSelectionOverlay {
   late Offset _dragStartPosition;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
-    _showLoupe(details.globalPosition);
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+    _showLoupe(Offset(details.globalPosition.dx, (details.globalPosition - details.localPosition).dy + (handleSize.height)));
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
-    _loupeController?.requestedPosition.value = details.globalPosition;
+    final Offset topLeftCorner = details.globalPosition - details.localPosition;
+    final double handleHeight = selectionControls!.getHandleSize(
+      renderObject.preferredLineHeight,
+    ).height;
+    _loupeController?.requestedPosition.value = Offset(details.globalPosition.dx, topLeftCorner.dy + handleHeight);
+
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
