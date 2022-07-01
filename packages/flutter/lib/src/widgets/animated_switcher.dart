@@ -3,7 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'ticker_provider.dart';
+import 'transitions.dart';
 
 // Internal representation of a child that, now or in the past, was set on the
 // AnimatedSwitcher.child field, but is now in the process of
