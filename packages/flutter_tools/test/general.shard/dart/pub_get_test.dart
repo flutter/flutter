@@ -51,8 +51,8 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ]),
@@ -98,8 +98,8 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ]),
@@ -145,8 +145,8 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ]),
@@ -255,8 +255,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
       ]),
@@ -292,9 +292,9 @@ void main() {
     'but the current framework version does not exist yet', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-           'bin/cache/dart-sdk/bin/dart',
+          'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
       ]),
@@ -330,8 +330,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
       ], onRun: () {
@@ -367,8 +367,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
       ]),
@@ -402,8 +402,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
       ]),
@@ -440,8 +440,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
       ]),
@@ -482,8 +482,8 @@ void main() {
     const FakeCommand pubGetCommand = FakeCommand(
       command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
       ],
@@ -575,8 +575,8 @@ void main() {
     const FakeCommand pubGetCommand = FakeCommand(
       command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
           '--offline',
@@ -623,8 +623,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -669,8 +669,8 @@ void main() {
       FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -678,8 +678,8 @@ void main() {
           throw const ProcessException(
             'bin/cache/dart-sdk/bin/dart',
             <String>[
+              '--no-analytics',
               'pub',
-              '--verbosity=warning',
               'get',
               '--no-precompile',
             ],
@@ -731,8 +731,8 @@ void main() {
       FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -773,8 +773,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -896,8 +896,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -938,8 +938,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -981,8 +981,8 @@ void main() {
       FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -994,8 +994,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -1003,8 +1003,8 @@ void main() {
       FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -1016,8 +1016,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
+          '--no-analytics',
           'pub',
-          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
