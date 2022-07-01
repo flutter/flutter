@@ -456,4 +456,3 @@ class StatefulTestState extends State<StatefulTest> {
   @override
   Widget build(BuildContext context) => Container();
 }
-
