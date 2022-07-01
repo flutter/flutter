@@ -1942,6 +1942,30 @@ void main() {
     expect(getBorderWeight(tester), 2.0);
   });
 
+  testWidgets('ErrorWidget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          errorWidget: Text('errorWidget'),
+        )
+      )
+    );
+
+    /// Check that errorWidget is displayed under the border
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: InputDecoration(
+          errorWidget: const Text('errorWidget'),
+          errorText: 'errorText'
+        )
+      )
+    );
+
+    /// Check that we can't define both errorWidget and errorText
+
+  });
+
   testWidgets('InputDecorator respects increased theme visualDensity', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
