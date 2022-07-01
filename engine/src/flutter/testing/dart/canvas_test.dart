@@ -543,6 +543,45 @@ void main() {
     }
   });
 
+  Future<Image> drawText(String text) {
+    return toImage((Canvas canvas) {
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+        fontFamily: 'RobotoSerif',
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.normal,
+        fontSize: 15.0,
+      ));
+      builder.pushStyle(TextStyle(color: const Color(0xFF0000FF)));
+      builder.addText(text);
+
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 20 * 5.0));
+
+      canvas.drawParagraph(paragraph, Offset.zero);
+    }, 100, 100);
+  }
+
+  test('Canvas.drawParagraph renders tab as space instead of tofu', () async {
+    // Skia renders a tofu if the font does not have a glyph for a character.
+    // However, Flutter opts-in to a Skia feature to render tabs as a single space.
+    // See: https://github.com/flutter/flutter/issues/79153
+    final File file = File(path.join('flutter', 'testing', 'resources', 'RobotoSlab-VariableFont_wght.ttf'));
+    final Uint8List fontData = await file.readAsBytes();
+    await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
+
+    // The backspace character, \b, does not have a corresponding glyph and is rendered as a tofu.
+    final Image tabImage = await drawText('>\t<');
+    final Image spaceImage = await drawText('> <');
+    final Image tofuImage = await drawText('>\b<');
+
+    // The tab's image should be identical to the space's image but not the tofu's image.
+    final bool tabToSpaceComparison = await fuzzyCompareImages(tabImage, spaceImage);
+    final bool tabToTofuComparison = await fuzzyCompareImages(tabImage, tofuImage);
+
+    expect(tabToSpaceComparison, isTrue);
+    expect(tabToTofuComparison, isFalse);
+  });
+
   Matcher closeToTransform(Float64List expected) => (dynamic v) {
     Expect.type<Float64List>(v);
     final Float64List value = v;

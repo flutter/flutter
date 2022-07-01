@@ -79,6 +79,7 @@ skt::ParagraphStyle TxtToSkia(const ParagraphStyle& txt) {
       static_cast<skt::TextHeightBehavior>(txt.text_height_behavior));
 
   skia.turnHintingOff();
+  skia.setReplaceTabCharacters(true);
 
   return skia;
 }
