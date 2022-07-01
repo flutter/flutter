@@ -28,7 +28,7 @@ const String _switchText =
 const String _switchCode = 'selectioncontrols_switch';
 
 class SelectionControlsDemo extends StatefulWidget {
-  const SelectionControlsDemo({Key? key}) : super(key: key);
+  const SelectionControlsDemo({super.key});
 
   static const String routeName = '/material/selection-controls';
 

@@ -392,7 +392,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -407,7 +407,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -422,7 +422,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
@@ -431,14 +431,12 @@ void main() {
     const Color directSplashColor = Color(0xFF000011);
     const Color directHighlightColor = Color(0xFF000011);
 
-    Widget buttonWidget = Material(
-      child: Center(
-        child: MaterialButton(
-          splashColor: directSplashColor,
-          highlightColor: directHighlightColor,
-          onPressed: () { /* to make sure the button is enabled */ },
-          clipBehavior: Clip.antiAlias,
-        ),
+    Widget buttonWidget = Center(
+      child: MaterialButton(
+        splashColor: directSplashColor,
+        highlightColor: directHighlightColor,
+        onPressed: () { /* to make sure the button is enabled */ },
+        clipBehavior: Clip.antiAlias,
       ),
     );
 
@@ -459,14 +457,16 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    const Rect expectedClipRect = Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
+    // Painter is translated to the center by the Center widget and not
+    // the Material widget.
+    const Rect expectedClipRect = Rect.fromLTRB(0.0, 0.0, 88.0, 36.0);
     final Path expectedClipPath = Path()
       ..addRRect(RRect.fromRectAndRadius(
           expectedClipRect,
           const Radius.circular(2.0),
       ));
     expect(
-      Material.of(tester.element(find.byType(MaterialButton))),
+      Material.of(tester.element(find.byType(InkWell))),
       paints
         ..clipPath(pathMatcher: coversSameAreaAs(
             expectedClipPath,
@@ -479,12 +479,10 @@ void main() {
     const Color themeSplashColor1 = Color(0xFF001100);
     const Color themeHighlightColor1 = Color(0xFF001100);
 
-    buttonWidget = Material(
-      child: Center(
-        child: MaterialButton(
-          onPressed: () { /* to make sure the button is enabled */ },
-          clipBehavior: Clip.antiAlias,
-        ),
+    buttonWidget = Center(
+      child: MaterialButton(
+        onPressed: () { /* to make sure the button is enabled */ },
+        clipBehavior: Clip.antiAlias,
       ),
     );
 
@@ -503,7 +501,7 @@ void main() {
     );
 
     expect(
-      Material.of(tester.element(find.byType(MaterialButton))),
+      Material.of(tester.element(find.byType(InkWell))),
       paints
         ..clipPath(pathMatcher: coversSameAreaAs(
             expectedClipPath,
@@ -531,7 +529,7 @@ void main() {
     );
 
     expect(
-      Material.of(tester.element(find.byType(MaterialButton))),
+      Material.of(tester.element(find.byType(InkWell))),
       paints
         ..circle(color: themeSplashColor2)
         ..rect(color: themeHighlightColor2),
@@ -542,12 +540,10 @@ void main() {
 
   testWidgets('MaterialButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
-    final Widget buttonWidget = Material(
-      child: Center(
-        child: MaterialButton(
-          key: buttonKey,
-          onPressed: () { /* to make sure the button is enabled */ },
-        ),
+    final Widget buttonWidget = Center(
+      child: MaterialButton(
+        key: buttonKey,
+        onPressed: () { /* to make sure the button is enabled */ },
       ),
     );
 
@@ -583,12 +579,10 @@ void main() {
     // enabled button
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Material(
-        child: Center(
-          child: MaterialButton(
-            child: const Text('Button'),
-            onPressed: () { /* to make sure the button is enabled */ },
-          ),
+      child: Center(
+        child: MaterialButton(
+          child: const Text('Button'),
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     ));
@@ -618,12 +612,10 @@ void main() {
     // disabled button
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: Material(
-        child: Center(
-          child: MaterialButton(
-            onPressed: null, // button is disabled
-            child: Text('Button'),
-          ),
+      child: Center(
+        child: MaterialButton(
+          onPressed: null, // button is disabled
+          child: Text('Button'),
         ),
       ),
     ));
@@ -724,13 +716,11 @@ void main() {
         data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: MaterialButton(
-                key: key1,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
+          child: Center(
+            child: MaterialButton(
+              key: key1,
+              child: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
             ),
           ),
         ),
@@ -745,13 +735,11 @@ void main() {
         data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: MaterialButton(
-                key: key2,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
+          child: Center(
+            child: MaterialButton(
+              key: key2,
+              child: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
             ),
           ),
         ),

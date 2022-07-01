@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -13,7 +14,7 @@ import 'context.dart';
 import 'git.dart';
 import 'globals.dart';
 import 'proto/conductor_state.pb.dart' as pb;
-import 'proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'proto/conductor_state.pbenum.dart';
 import 'repository.dart';
 import 'state.dart' as state_import;
 import 'stdio.dart';
@@ -26,10 +27,10 @@ const String kEngineUpstreamOption = 'engine-upstream';
 const String kFrameworkCherrypicksOption = 'framework-cherrypicks';
 const String kFrameworkMirrorOption = 'framework-mirror';
 const String kFrameworkUpstreamOption = 'framework-upstream';
-const String kIncrementOption = 'increment';
 const String kEngineMirrorOption = 'engine-mirror';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
+const String kVersionOverrideOption = 'version-override';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -89,22 +90,15 @@ class StartCommand extends Command<void> {
       kDartRevisionOption,
       help: 'New Dart revision to cherrypick.',
     );
-    argParser.addOption(
-      kIncrementOption,
-      help: 'Specifies which part of the x.y.z version number to increment. Required.',
-      valueHelp: 'level',
-      allowed: kReleaseIncrements,
-      allowedHelp: <String, String>{
-        'y': 'Indicates the first dev release after a beta release.',
-        'z': 'Indicates a hotfix to a stable release.',
-        'm': 'Indicates a standard dev release.',
-        'n': 'Indicates a hotfix to a dev or beta release.',
-      },
-    );
     argParser.addFlag(
       kForceFlag,
       abbr: 'f',
       help: 'Override all validations of the command line inputs.',
+    );
+    argParser.addOption(
+      kVersionOverrideOption,
+      help: 'Explicitly set the desired version. This should only be used if '
+        'the version computed by the tool is not correct.',
     );
   }
 
@@ -177,11 +171,6 @@ class StartCommand extends Command<void> {
       platform.environment,
       allowNull: true,
     );
-    final String incrementLetter = getValueFromEnvOrArgs(
-      kIncrementOption,
-      argumentResults,
-      platform.environment,
-    )!;
     final bool force = getBoolFromEnvOrArgs(
       kForceFlag,
       argumentResults,
@@ -190,6 +179,16 @@ class StartCommand extends Command<void> {
     final File stateFile = checkouts.fileSystem.file(
       getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
     );
+    final String? versionOverrideString = getValueFromEnvOrArgs(
+      kVersionOverrideOption,
+      argumentResults,
+      platform.environment,
+      allowNull: true,
+    );
+    Version? versionOverride;
+    if (versionOverrideString != null) {
+      versionOverride = Version.fromString(versionOverrideString);
+    }
 
     final StartContext context = StartContext(
       candidateBranch: candidateBranch,
@@ -202,11 +201,11 @@ class StartCommand extends Command<void> {
       frameworkCherrypickRevisions: frameworkCherrypickRevisions,
       frameworkMirror: frameworkMirror,
       frameworkUpstream: frameworkUpstream,
-      incrementLetter: incrementLetter,
       processManager: processManager,
       releaseChannel: releaseChannel,
       stateFile: stateFile,
       force: force,
+      versionOverride: versionOverride,
     );
     return context.run();
   }
@@ -226,16 +225,16 @@ class StartContext extends Context {
     required this.frameworkMirror,
     required this.frameworkUpstream,
     required this.conductorVersion,
-    required this.incrementLetter,
     required this.processManager,
     required this.releaseChannel,
-    required Checkouts checkouts,
-    required File stateFile,
+    required super.checkouts,
+    required super.stateFile,
     this.force = false,
+    this.versionOverride,
   }) : git = Git(processManager),
   engine = EngineRepository(
     checkouts,
-    initialRef: candidateBranch,
+    initialRef: 'upstream/$candidateBranch',
     upstreamRemote: Remote(
       name: RemoteName.upstream,
       url: engineUpstream,
@@ -246,7 +245,7 @@ class StartContext extends Context {
     ),
   ), framework = FrameworkRepository(
     checkouts,
-    initialRef: candidateBranch,
+    initialRef: 'upstream/$candidateBranch',
     upstreamRemote: Remote(
       name: RemoteName.upstream,
       url: frameworkUpstream,
@@ -255,10 +254,6 @@ class StartContext extends Context {
       name: RemoteName.mirror,
       url: frameworkMirror,
     ),
-  ),
-  super(
-    checkouts: checkouts,
-    stateFile: stateFile,
   );
 
   final String candidateBranch;
@@ -270,16 +265,36 @@ class StartContext extends Context {
   final String frameworkMirror;
   final String frameworkUpstream;
   final String conductorVersion;
-  final String incrementLetter;
   final Git git;
   final ProcessManager processManager;
   final String releaseChannel;
+  final Version? versionOverride;
 
   /// If validations should be overridden.
   final bool force;
 
   final EngineRepository engine;
   final FrameworkRepository framework;
+
+  /// Determine which part of the version to increment in the next release.
+  ///
+  /// If [atBranchPoint] is true, then this is a [ReleaseType.BETA_INITIAL].
+  @visibleForTesting
+  ReleaseType computeReleaseType(Version lastVersion, bool atBranchPoint) {
+    if (atBranchPoint) {
+      return ReleaseType.BETA_INITIAL;
+    }
+
+    if (releaseChannel == 'stable') {
+      if (lastVersion.type == VersionType.stable) {
+        return ReleaseType.STABLE_HOTFIX;
+      } else {
+        return ReleaseType.STABLE_INITIAL;
+      }
+    }
+
+    return ReleaseType.BETA_HOTFIX;
+  }
 
   Future<void> run() async {
     if (stateFile.existsSync()) {
@@ -299,7 +314,6 @@ class StartContext extends Context {
     state.releaseChannel = releaseChannel;
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
-    state.incrementLevel = incrementLetter;
 
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
@@ -377,17 +391,38 @@ class StartContext extends Context {
       candidateBranch,
       exact: false,
     ));
-    // [force] means we know this would fail but need to publish anyway
-    if (!force) {
-      lastVersion.ensureValid(candidateBranch, incrementLetter);
+
+    final String frameworkHead = await framework.reverseParse('HEAD');
+    final String branchPoint = await framework.branchPoint(
+      '${framework.upstreamRemote.name}/$candidateBranch',
+      '${framework.upstreamRemote.name}/${FrameworkRepository.defaultBranch}',
+    );
+    final bool atBranchPoint = branchPoint == frameworkHead;
+
+    final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);
+    state.releaseType = releaseType;
+
+    try {
+      lastVersion.ensureValid(candidateBranch, releaseType);
+    } on ConductorException catch (e) {
+      // Let the user know, but resume execution
+      stdio.printError(e.message);
     }
 
-    Version nextVersion = calculateNextVersion(lastVersion);
-    nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+    Version nextVersion;
+    if (versionOverride != null) {
+      nextVersion = versionOverride!;
+    } else {
+      nextVersion = calculateNextVersion(lastVersion, releaseType);
+      nextVersion = await ensureBranchPointTagged(
+        branchPoint: branchPoint,
+        requestedVersion: nextVersion,
+        framework: framework,
+      );
+    }
 
     state.releaseVersion = nextVersion.toString();
 
-    final String frameworkHead = await framework.reverseParse('HEAD');
     state.framework = pb.Repository(
       candidateBranch: candidateBranch,
       workingBranch: workingBranchName,
@@ -411,42 +446,51 @@ class StartContext extends Context {
   }
 
   /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
-  Version calculateNextVersion(Version lastVersion) {
-    if (incrementLetter == 'm') {
-      return Version.fromCandidateBranch(candidateBranch);
+  Version calculateNextVersion(Version lastVersion, ReleaseType releaseType) {
+    late final Version nextVersion;
+    switch (releaseType) {
+      case ReleaseType.STABLE_INITIAL:
+        nextVersion = Version(
+            x: lastVersion.x,
+            y: lastVersion.y,
+            z: 0,
+            type: VersionType.stable,
+        );
+        break;
+      case ReleaseType.STABLE_HOTFIX:
+        nextVersion = Version.increment(lastVersion, 'z');
+        break;
+      case ReleaseType.BETA_INITIAL:
+        nextVersion = Version.fromCandidateBranch(candidateBranch);
+        break;
+      case ReleaseType.BETA_HOTFIX:
+        nextVersion = Version.increment(lastVersion, 'n');
+        break;
     }
-    if (incrementLetter == 'z') {
-      if (lastVersion.type == VersionType.stable) {
-        return Version.increment(lastVersion, incrementLetter);
-      }
-      // This is the first stable release, so hardcode the z as 0
-      return Version(
-        x: lastVersion.x,
-        y: lastVersion.y,
-        z: 0,
-        type: VersionType.stable,
-      );
-    }
-    return Version.increment(lastVersion, incrementLetter);
+    return nextVersion;
   }
 
   /// Ensures the branch point [candidateBranch] and `master` has a version tag.
   ///
   /// This is necessary for version reporting for users on the `master` channel
   /// to be correct.
-  Future<Version> ensureBranchPointTagged(
-    Version requestedVersion,
-    FrameworkRepository framework,
-  ) async {
-    if (incrementLetter != 'm') {
-      // in this case, there must have been a previous tagged release, so skip
-      // tagging the branch point
+  Future<Version> ensureBranchPointTagged({
+    required Version requestedVersion,
+    required String branchPoint,
+    required FrameworkRepository framework,
+  }) async {
+    if (await framework.isCommitTagged(branchPoint)) {
+      // The branch point is tagged, no work to be done
       return requestedVersion;
     }
-    final String branchPoint = await framework.branchPoint(
-      candidateBranch,
-      FrameworkRepository.defaultBranch,
-    );
+    if (requestedVersion.n != 0) {
+      stdio.printError(
+        'Tried to tag the branch point, however the target version is '
+        '$requestedVersion, which does not have n == 0!',
+      );
+      return requestedVersion;
+    }
+
     final bool response = await prompt(
       'About to tag the release candidate branch branchpoint of $branchPoint '
       'as $requestedVersion and push it to ${framework.upstreamRemote.url}. '

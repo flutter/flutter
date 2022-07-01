@@ -93,6 +93,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',
@@ -109,7 +110,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('KernelSnapshot does not use track widget creation on profile builds', () async {
+  testWithoutContext('KernelSnapshot does use track widget creation on profile builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -129,6 +130,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',
@@ -166,6 +168,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',
@@ -204,6 +207,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',

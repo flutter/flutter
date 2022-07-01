@@ -166,16 +166,11 @@ abstract class OperatingSystemUtils {
 
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   void makeExecutable(File file) {
@@ -295,16 +290,11 @@ class _PosixUtils extends OperatingSystemUtils {
 
 class _LinuxUtils extends _PosixUtils {
   _LinuxUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -367,16 +357,11 @@ class _LinuxUtils extends _PosixUtils {
 
 class _MacOSUtils extends _PosixUtils {
   _MacOSUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -387,10 +372,16 @@ class _MacOSUtils extends _PosixUtils {
         _processUtils.runSync(<String>['sw_vers', '-productName']),
         _processUtils.runSync(<String>['sw_vers', '-productVersion']),
         _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+        _processUtils.runSync(<String>['uname', '-m']),
       ];
       if (results.every((RunResult result) => result.exitCode == 0)) {
+        String osName = getNameForHostPlatform(hostPlatform);
+        // If the script is running in Rosetta, "uname -m" will return x86_64.
+        if (hostPlatform == HostPlatform.darwin_arm && results[3].stdout.contains('x86_64')) {
+          osName = '$osName (Rosetta)';
+        }
         _name =
-            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForHostPlatform(hostPlatform)}';
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} $osName';
       }
       _name ??= super.name;
     }
@@ -451,8 +442,9 @@ class _MacOSUtils extends _PosixUtils {
         );
         for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
           // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
           _processUtils.runSync(
-            <String>['rsync', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
             throwOnError: true,
             verboseExceptions: true,
           );
@@ -474,16 +466,11 @@ class _MacOSUtils extends _PosixUtils {
 
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   HostPlatform hostPlatform = HostPlatform.windows_x64;
@@ -538,10 +525,32 @@ class _WindowsUtils extends OperatingSystemUtils {
         continue;
       }
 
-      final File destFile = _fileSystem.file(_fileSystem.path.join(
+      final File destFile = _fileSystem.file(
+        _fileSystem.path.canonicalize(
+          _fileSystem.path.join(
+            targetDirectory.path,
+            archiveFile.name,
+          ),
+        ),
+      );
+
+      // Validate that the destFile is within the targetDirectory we want to
+      // extract to.
+      //
+      // See https://snyk.io/research/zip-slip-vulnerability for more context.
+      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(
+        destFile.path,
+      );
+      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
         targetDirectory.path,
-        archiveFile.name,
-      ));
+      );
+      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
+        throw StateError(
+          'Tried to extract the file $destinationFileCanonicalPath outside of the '
+          'target directory $targetDirectoryCanonicalPath',
+        );
+      }
+
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }

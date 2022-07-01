@@ -55,7 +55,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios', '--no-codesign'],
+          options: <String>['ios', '--no-codesign', '--verbose'],
         );
       });
 
@@ -78,6 +78,26 @@ Future<void> main() async {
           'Ephemeral host app ${ephemeralIOSHostApp.path} was not a release build as expected'
         );
       }
+
+      section('Build ephemeral host app when SDK is on external disk');
+
+      // Pretend the SDK was on an external drive with stray "._" files in the xcframework
+      // and build again.
+      Directory(path.join(
+        projectDir.path,
+        '.ios',
+        'Flutter',
+        'engine',
+        'Flutter.xcframework',
+        '._ios-arm64_x86_64-simulator',
+      )).createSync(recursive: true);
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>['ios', '--no-codesign', '--simulator', '--debug'],
+        );
+      });
 
       section('Clean build');
 
@@ -152,14 +172,28 @@ Future<void> main() async {
         await flutter('clean');
       });
 
+      // Make a fake Dart-only plugin, since there are no existing examples.
+      section('Create local plugin');
+
+      const String dartPluginName = 'dartplugin';
+      await _createFakeDartPlugin(dartPluginName, tempDir);
+
       section('Add plugins');
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        // One dynamic framework, one static framework, and one that does not support iOS.
-        '\ndependencies:\n  device_info: 0.4.2+4\n  google_sign_in: 4.5.1\n  android_alarm_manager: 0.4.5+11\n',
+        // One dynamic framework, one static framework, one Dart-only,
+        // and one that does not support iOS.
+        '''
+dependencies:
+  device_info: 2.0.3
+  google_sign_in: 4.5.1
+  android_alarm_manager: 0.4.5+11
+  $dartPluginName:
+    path: ../$dartPluginName
+''',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -191,7 +225,8 @@ Future<void> main() async {
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
-        || podfileLockOutput.contains('android_alarm_manager')) {
+        || podfileLockOutput.contains('android_alarm_manager')
+        || podfileLockOutput.contains(dartPluginName)) {
         print(podfileLockOutput);
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
@@ -204,6 +239,9 @@ Future<void> main() async {
 
       // Android-only, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'android_alarm_manager.framework'));
+
+      // Dart-only, no embedded framework.
+      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$dartPluginName.framework'));
 
       section('Clean and pub get module');
 
@@ -228,6 +266,9 @@ Future<void> main() async {
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
 
       section('Build iOS Objective-C host app');
+
+      final File dummyAppFramework = File(path.join(projectDir.path, '.ios', 'Flutter', 'App.framework', 'App'));
+      checkFileNotExists(dummyAppFramework.path);
       await inDirectory(objectiveCHostApp, () async {
         await exec(
           'pod',
@@ -243,9 +284,18 @@ Future<void> main() async {
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
-            || hostPodfileLockOutput.contains('android_alarm_manager')) {
+            || hostPodfileLockOutput.contains('android_alarm_manager')
+            || hostPodfileLockOutput.contains(dartPluginName)) {
           print(hostPodfileLockOutput);
           throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
+        }
+
+        // Just running "pod install" should create a fake App.framework so CocoaPods recognizes
+        // it as a framework that needs to be embedded, before Flutter actually creates it.
+        checkFileExists(dummyAppFramework.path);
+        final String? version = await minPhoneOSVersion(dummyAppFramework.path);
+        if (version != '9.0') {
+          throw TaskResult.failure('Minimum version set to $version, expected 9.0');
         }
 
         await exec(
@@ -500,4 +550,47 @@ Future<bool> _isAppAotBuild(Directory app) async {
   );
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
+}
+
+Future<void> _createFakeDartPlugin(String name, Directory parent) async {
+  // Start from a standard plugin template.
+  await inDirectory(parent, () async {
+    await flutter(
+      'create',
+      options: <String>[
+        '--org',
+        'io.flutter.devicelab',
+        '--template=plugin',
+        '--platforms=ios',
+        name,
+      ],
+    );
+  });
+
+  final String pluginDir = path.join(parent.path, name);
+
+  // Convert the metadata to Dart-only.
+  final String dartPluginClass = 'DartClassFor$name';
+  final File pubspec = File(path.join(pluginDir, 'pubspec.yaml'));
+  String content = await pubspec.readAsString();
+  content = content.replaceAll(
+    RegExp(r' pluginClass: .*?\n'),
+    ' dartPluginClass: $dartPluginClass\n',
+  );
+  await pubspec.writeAsString(content, flush: true);
+
+  // Add the Dart registration hook that the build will generate a call to.
+  final File dartCode = File(path.join(pluginDir, 'lib', '$name.dart'));
+  content = await dartCode.readAsString();
+  content = '''
+$content
+
+class $dartPluginClass {
+  static void registerWith() {}
+}
+''';
+  await dartCode.writeAsString(content, flush: true);
+
+  // Remove the native plugin code.
+  await Directory(path.join(pluginDir, 'ios')).delete(recursive: true);
 }

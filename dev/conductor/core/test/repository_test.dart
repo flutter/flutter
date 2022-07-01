@@ -340,6 +340,23 @@ vars = {
       expect(processManager.hasRemainingExpectations, false);
     });
 
+    test('updateCandidateBranchVersion() returns false if branch is the same as version file', () async {
+      const String branch = 'flutter-2.15-candidate.3';
+      final File versionFile = fileSystem.file('/release-candidate-branch.version')..writeAsStringSync(branch);
+
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final bool didUpdate = await repo.updateCandidateBranchVersion(branch, versionFile: versionFile);
+      expect(didUpdate, false);
+    });
+
     test('updateEngineRevision() returns false if newCommit is the same as version file', () async {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
@@ -384,130 +401,6 @@ vars = {
       );
     });
 
-    test('ciYaml.enableBranch() will prepend the given branch to the yaml list of enabled_branches', () async {
-      const String commit1 = 'abc123';
-      final File ciYaml = fileSystem.file('/flutter_conductor_checkouts/framework/.ci.yaml');
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-            command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          FrameworkRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
-        ],
-        onRun: () {
-          ciYaml.createSync(recursive: true);
-          ciYaml.writeAsStringSync('''
-# Friendly note
-
-enabled_branches:
-  - ${FrameworkRepository.defaultBranch}
-  - dev
-  - beta
-  - stable
-''');
-        }),
-        const FakeCommand(command: <String>[
-          'git',
-          'checkout',
-          FrameworkRepository.defaultBranch,
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit1),
-      ]);
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final FrameworkRepository framework = FrameworkRepository(checkouts);
-      expect(
-        (await framework.ciYaml).enabledBranches,
-        <String>[FrameworkRepository.defaultBranch, 'dev', 'beta', 'stable'],
-      );
-
-      (await framework.ciYaml).enableBranch('foo');
-      expect(
-        (await framework.ciYaml).enabledBranches,
-        <String>['foo', FrameworkRepository.defaultBranch, 'dev', 'beta', 'stable'],
-      );
-
-      expect(
-        (await framework.ciYaml).stringContents,
-        '''
-# Friendly note
-
-enabled_branches:
-  - foo
-  - ${FrameworkRepository.defaultBranch}
-  - dev
-  - beta
-  - stable
-'''
-      );
-    });
-
-    test('ciYaml.enableBranch() will throw if the input branch is already present in the yaml file', () {
-      const String commit1 = 'abc123';
-      final File ciYaml = fileSystem.file('/flutter_conductor_checkouts/framework/.ci.yaml');
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-            command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          FrameworkRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
-        ],
-        onRun: () {
-          ciYaml.createSync(recursive: true);
-          ciYaml.writeAsStringSync('''
-enabled_branches:
-  - ${FrameworkRepository.defaultBranch}
-  - dev
-  - beta
-  - stable
-''');
-        }),
-        const FakeCommand(command: <String>[
-          'git',
-          'checkout',
-          FrameworkRepository.defaultBranch,
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit1),
-      ]);
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final FrameworkRepository framework = FrameworkRepository(checkouts);
-      expect(
-        () async => (await framework.ciYaml).enableBranch(FrameworkRepository.defaultBranch),
-        throwsExceptionWith('.ci.yaml already contains the branch ${FrameworkRepository.defaultBranch}'),
-      );
-    });
-
     test('framework repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
       const String commit = 'deadbeef';
       const String candidateBranch = 'flutter-1.2-candidate.3';
@@ -531,9 +424,6 @@ enabled_branches:
         ),
         const FakeCommand(
           command: <String>['git', 'checkout', 'beta', '--'],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', 'dev', '--'],
         ),
         const FakeCommand(
           command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],

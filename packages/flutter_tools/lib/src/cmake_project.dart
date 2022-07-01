@@ -86,7 +86,7 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
 
 /// The Windows UWP version of the Windows project.
 class WindowsUwpProject extends WindowsProject {
-  WindowsUwpProject.fromFlutter(FlutterProject parent) : super.fromFlutter(parent);
+  WindowsUwpProject.fromFlutter(super.parent) : super.fromFlutter();
 
   @override
   String get _childDirectory => 'winuwp';

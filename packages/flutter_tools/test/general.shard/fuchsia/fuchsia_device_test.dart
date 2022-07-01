@@ -440,7 +440,11 @@ void main() {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
-        throwsA(equals('file.invalid must be a .ppm file')),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'message',
+          contains('file.invalid must be a .ppm file')
+        )),
       );
     });
 
@@ -460,7 +464,11 @@ void main() {
 
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
-        throwsA(equals('Could not take a screenshot on device tester:\n<error-message>')),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'message',
+          contains('Could not take a screenshot on device tester:\n<error-message>')
+        )),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -506,7 +514,11 @@ void main() {
 
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
-        throwsA(equals('Failed to copy screenshot from device:\n<error-message>')),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'message',
+          contains('Failed to copy screenshot from device:\n<error-message>')
+        )),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -932,6 +944,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {}
 
   @override

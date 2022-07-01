@@ -477,7 +477,7 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pump();
 
-      expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
       // Test default
       await tester.pumpWidget(
@@ -491,7 +491,7 @@ void main() {
         ),
       );
 
-      expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     });
     testWidgets('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
@@ -960,6 +960,75 @@ void main() {
         buttonNode.requestFocus();
         await tester.pump();
         expect(buttonNode.hasFocus, isFalse);
+      },
+    );
+
+    testWidgets(
+      'FocusableActionDetector can prevent its descendants from being traversable',
+          (WidgetTester tester) async {
+        final FocusNode buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
+        final FocusNode buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FocusableActionDetector(
+              child: Column(
+                children: <Widget>[
+                  MaterialButton(
+                    focusNode: buttonNode1,
+                    child: const Text('Node 1'),
+                    onPressed: () {},
+                  ),
+                  MaterialButton(
+                    focusNode: buttonNode2,
+                    child: const Text('Node 2'),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        buttonNode1.requestFocus();
+        await tester.pump();
+        expect(buttonNode1.hasFocus, isTrue);
+        expect(buttonNode2.hasFocus, isFalse);
+        primaryFocus!.nextFocus();
+        await tester.pump();
+        expect(buttonNode1.hasFocus, isFalse);
+        expect(buttonNode2.hasFocus, isTrue);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FocusableActionDetector(
+              descendantsAreTraversable: false,
+              child: Column(
+                children: <Widget>[
+                  MaterialButton(
+                    focusNode: buttonNode1,
+                    child: const Text('Node 1'),
+                    onPressed: () {},
+                  ),
+                  MaterialButton(
+                    focusNode: buttonNode2,
+                    child: const Text('Node 2'),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        buttonNode1.requestFocus();
+        await tester.pump();
+        expect(buttonNode1.hasFocus, isTrue);
+        expect(buttonNode2.hasFocus, isFalse);
+        primaryFocus!.nextFocus();
+        await tester.pump();
+        expect(buttonNode1.hasFocus, isTrue);
+        expect(buttonNode2.hasFocus, isFalse);
       },
     );
   });

@@ -21,10 +21,10 @@ import 'theme_data.dart';
 ///
 /// ### This class is obsolete.
 ///
-/// FlatButton, RaisedButton, and OutlineButton have been replaced by
-/// TextButton, ElevatedButton, and OutlinedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme,
-/// ElevatedButtonTheme, and OutlinedButtonTheme. The appearance of the
+/// FlatButton and RaisedButton have been replaced by
+/// TextButton and ElevatedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme and
+/// ElevatedButtonTheme. The appearance of the
 /// new widgets can be customized by specifying a [ButtonStyle]
 /// or by creating a one-off style using a `styleFrom` method like
 /// [TextButton.styleFrom]. The original button classes
@@ -38,8 +38,8 @@ import 'theme_data.dart';
 /// MaterialButtons whose [onPressed] and [onLongPress] callbacks are null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for [onPressed] or [onLongPress].
 ///
-/// Rather than using this class directly, consider using [FlatButton],
-/// [OutlineButton], or [RaisedButton], which configure this class with
+/// Rather than using this class directly, consider using [FlatButton]
+/// or [RaisedButton], which configure this class with
 /// appropriate defaults that match the material design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use
@@ -131,6 +131,8 @@ class MaterialButton extends StatelessWidget {
   final ValueChanged<bool>? onHighlightChanged;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
@@ -455,9 +457,15 @@ class MaterialButton extends StatelessWidget {
   }
 }
 
-/// The type of [MaterialButton]s created with [RaisedButton.icon], [FlatButton.icon],
-/// and [OutlineButton.icon].
+/// The type of [MaterialButton]s created with RaisedButton.icon] and
+/// FlatButton.icon.
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
+@Deprecated(
+  'This was used to differentiate types of FlatButton, RaisedButton, and OutlineButton in ButtonTheme. '
+  'These buttons have been replaced with TextButton, ElevatedButton, and OutlinedButton, each of which have their own respective themes now. '
+  'Use one of these button classes instead. '
+  'This feature was deprecated after v2.11.0-0.0.pre.',
+)
 mixin MaterialButtonWithIconMixin { }

@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/web/flutter_js.dart' as flutter_js;
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -82,11 +83,12 @@ void main() {
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
-    // Main
-    expect(generated, contains('entrypoint.main();'));
-
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+
+    // Main
+    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('entrypoint.main as _'));
   }));
 
   test('version.json is created after release build', () => testbed.run(() async {
@@ -211,11 +213,12 @@ void main() {
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
-    // Main
-    expect(generated, contains('entrypoint.main();'));
-
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+
+    // Main
+    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     Platform: () => windows,
   }));
@@ -233,8 +236,14 @@ void main() {
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
+
+    // Import.
+    expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+
     // Main
-    expect(generated, contains('entrypoint.main();'));
+    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('entrypoint.main as _'));
+
   }));
 
   test('WebEntrypointTarget generates an entrypoint with a language version', () => testbed.run(() async {
@@ -279,8 +288,12 @@ void main() {
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
 
+    // Import.
+    expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+
     // Main
-    expect(generated, contains('entrypoint.main();'));
+    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('entrypoint.main as _'));
   }));
 
   test('Dart2JSTarget calls dart2js with expected args with csp', () => testbed.run(() async {
@@ -682,5 +695,17 @@ void main() {
     // Expected twice, once for RESOURCES and once for CORE.
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
       contains('"main.dart.js"'));
+  }));
+
+  test('flutter.js is not dynamically generated', () => testbed.run(() async {
+    globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/foo')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('OL');
+
+    await WebBuiltInAssets(globals.fs, globals.cache).build(environment);
+
+    // No caching of source maps.
+    expect(environment.outputDir.childFile('flutter.js').readAsStringSync(),
+      equals(flutter_js.generateFlutterJsFile()));
   }));
 }

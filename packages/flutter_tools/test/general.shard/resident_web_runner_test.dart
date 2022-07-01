@@ -569,7 +569,7 @@ void main() {
     final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
     expect(entrypointContents, contains('// Flutter web bootstrap script'));
     expect(entrypointContents, contains("import 'dart:ui' as ui;"));
-    expect(entrypointContents, contains('await ui.webOnlyInitializePlatform();'));
+    expect(entrypointContents, contains('await ui.webOnlyWarmupEngine('));
 
     expect(logger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
@@ -936,7 +936,7 @@ void main() {
 
   // While this file should be ignored on web, generating it here will cause a
   // perf regression in hot restart.
-  testUsingContext('Does not generate generated_main.dart', () async {
+  testUsingContext('Does not generate dart_plugin_registrant.dart', () async {
     // Create necessary files for [DartPluginRegistrantTarget]
     final File packageConfig = globals.fs.directory('.dart_tool')
         .childFile('package_config.json');
@@ -954,10 +954,10 @@ void main() {
   ]
 }
 ''');
-    // Start with a generated_main.dart file.
+    // Start with a dart_plugin_registrant.dart file.
     globals.fs.directory('.dart_tool')
               .childDirectory('flutter_build')
-              .childFile('generated_main.dart')
+              .childFile('dart_plugin_registrant.dart')
               .createSync(recursive: true);
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
@@ -965,7 +965,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     await residentWebRunner.runSourceGenerators();
 
-    // generated_main.dart should be untouched, indicating that its
+    // dart_plugin_registrant.dart should be untouched, indicating that its
     // generation didn't run. If it had run, the file would have been removed as
     // there are no plugins in the project.
     expect(project.dartPluginRegistrant.existsSync(), true);
@@ -1225,6 +1225,8 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   @override
   Future<ConnectionResult> connect(bool useDebugExtension) async {
     if (exception != null) {
+      assert(exception is Exception || exception is Error);
+      // ignore: only_throw_errors, exception is either Error or Exception here.
       throw exception;
     }
     return result;
@@ -1299,7 +1301,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     success: true,
     invalidatedSourcesCount: 1,
   );
-  Object reportError;
+  Exception reportError;
 
   @override
   ResidentCompiler generator;
@@ -1346,6 +1348,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) async { }

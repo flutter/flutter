@@ -48,8 +48,12 @@ class CreateCommand extends CreateBase {
         flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
             'Dart code.',
         flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
-            'in Dart code with a platform-specific implementation for Android, for iOS code, or '
-            'for both.',
+            'in Dart code with a platform-specific implementation through method channels for Android, iOS, '
+            'Linux, macOS, Windows, web, or any combination of these.',
+        flutterProjectTypeToString(FlutterProjectType.ffiPlugin):
+            'Generate a shareable Flutter project containing an API '
+            'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
+            'Linux, macOS, Windows, or any combination of these.',
         flutterProjectTypeToString(FlutterProjectType.module): 'Generate a project to add a Flutter module to an '
             'existing Android or iOS application.',
       },
@@ -159,18 +163,17 @@ class CreateCommand extends CreateBase {
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     if (argResults['template'] != null) {
       template = stringToProjectType(stringArg('template'));
-    } else {
-      // If the project directory exists and isn't empty, then try to determine the template
-      // type from the project directory.
-      if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-        detectedProjectType = determineTemplateType();
-        if (detectedProjectType == null && metadataExists) {
-          // We can only be definitive that this is the wrong type if the .metadata file
-          // exists and contains a type that we don't understand, or doesn't contain a type.
-          throwToolExit('Sorry, unable to detect the type of project to recreate. '
-              'Try creating a fresh project and migrating your existing code to '
-              'the new project manually.');
-        }
+    }
+    // If the project directory exists and isn't empty, then try to determine the template
+    // type from the project directory.
+    if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
+      detectedProjectType = determineTemplateType();
+      if (detectedProjectType == null && metadataExists) {
+        // We can only be definitive that this is the wrong type if the .metadata file
+        // exists and contains a type that we don't understand, or doesn't contain a type.
+        throwToolExit('Sorry, unable to detect the type of project to recreate. '
+            'Try creating a fresh project and migrating your existing code to '
+            'the new project manually.');
       }
     }
     template ??= detectedProjectType ?? FlutterProjectType.app;
@@ -206,7 +209,8 @@ class CreateCommand extends CreateBase {
 
     final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
-    final bool generatePlugin = template == FlutterProjectType.plugin;
+    final bool generateMethodChannelsPlugin = template == FlutterProjectType.plugin;
+    final bool generateFfiPlugin = template == FlutterProjectType.ffiPlugin;
     final bool generatePackage = template == FlutterProjectType.package;
 
     final List<String> platforms = stringsArg('platforms');
@@ -220,6 +224,23 @@ class CreateCommand extends CreateBase {
     } else if (platforms == null || platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
         exitCode: 2);
+    } else if (generateFfiPlugin && argResults.wasParsed('platforms') && platforms.contains('web')) {
+      throwToolExit(
+        'The web platform is not supported in plugin_ffi template.',
+        exitCode: 2,
+      );
+    } else if (generateFfiPlugin && argResults.wasParsed('ios-language')) {
+      throwToolExit(
+        'The "ios-language" option is not supported with the plugin_ffi '
+        'template: the language will always be C or C++.',
+        exitCode: 2,
+      );
+    } else if (generateFfiPlugin && argResults.wasParsed('android-language')) {
+      throwToolExit(
+        'The "android-language" option is not supported with the plugin_ffi '
+        'template: the language will always be C or C++.',
+        exitCode: 2,
+      );
     }
 
     final String organization = await getOrganization();
@@ -257,7 +278,8 @@ class CreateCommand extends CreateBase {
       titleCaseProjectName: titleCaseProjectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
-      withPluginHook: generatePlugin,
+      withPlatformChannelPluginHook: generateMethodChannelsPlugin,
+      withFfiPluginHook: generateFfiPlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       iosDevelopmentTeam: developmentTeam,
@@ -293,20 +315,22 @@ class CreateCommand extends CreateBase {
     switch (template) {
       case FlutterProjectType.app:
         generatedFileCount += await generateApp(
-          'app',
+          <String>['app', 'app_test_widget'],
           relativeDir,
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
       case FlutterProjectType.skeleton:
         generatedFileCount += await generateApp(
-          'skeleton',
+          <String>['skeleton'],
           relativeDir,
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          generateMetadata: false,
         );
         break;
       case FlutterProjectType.module:
@@ -326,11 +350,21 @@ class CreateCommand extends CreateBase {
         );
         break;
       case FlutterProjectType.plugin:
-        generatedFileCount += await _generatePlugin(
+        generatedFileCount += await _generateMethodChannelPlugin(
           relativeDir,
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
+        );
+        break;
+      case FlutterProjectType.ffiPlugin:
+        generatedFileCount += await _generateFfiPlugin(
+          relativeDir,
+          templateContext,
+          overwrite: overwrite,
+          printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
     }
@@ -354,7 +388,7 @@ class CreateCommand extends CreateBase {
           'main.dart',
       ));
       globals.printStatus('Your module code is in $relativeMainPath.');
-    } else if (generatePlugin) {
+    } else if (generateMethodChannelsPlugin) {
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final List<String> requestedPlatforms = _getUserRequestedPlatforms();
       final String platformsString = requestedPlatforms.join(', ');
@@ -406,7 +440,7 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
-        : 'A new flutter module project.';
+        : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
       globals.fs.path.join('module', 'common'),
@@ -460,11 +494,12 @@ Your $application code is in $relativeAppMain.
     return generatedCount;
   }
 
-  Future<int> _generatePlugin(
+  Future<int> _generateMethodChannelPlugin(
     Directory directory,
     Map<String, dynamic> templateContext, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
+    FlutterProjectType projectType,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults.wasParsed('platforms')) {
@@ -485,10 +520,10 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
-        : 'A new flutter plugin project.';
+        : 'A new Flutter plugin project.';
     templateContext['description'] = description;
-    generatedCount += await renderTemplate(
-      'plugin',
+    generatedCount += await renderMerged(
+      <String>['plugin', 'plugin_shared'],
       directory,
       templateContext,
       overwrite: overwrite,
@@ -525,12 +560,91 @@ Your $application code is in $relativeAppMain.
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
     generatedCount += await generateApp(
-      'app',
+      <String>['app', 'app_test_widget'],
       project.example.directory,
       templateContext,
       overwrite: overwrite,
       pluginExampleApp: true,
       printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
+    );
+    return generatedCount;
+  }
+
+  Future<int> _generateFfiPlugin(
+    Directory directory,
+    Map<String, dynamic> templateContext, {
+    bool overwrite = false,
+    bool printStatusWhenWriting = true,
+    FlutterProjectType projectType,
+  }) async {
+    // Plugins only add a platform if it was requested explicitly by the user.
+    if (!argResults.wasParsed('platforms')) {
+      for (final String platform in kAllCreatePlatforms) {
+        templateContext[platform] = false;
+      }
+    }
+    final List<String> platformsToAdd =
+        _getSupportedPlatformsFromTemplateContext(templateContext);
+
+    final List<String> existingPlatforms =
+        _getSupportedPlatformsInPlugin(directory);
+    for (final String existingPlatform in existingPlatforms) {
+      // re-generate files for existing platforms
+      templateContext[existingPlatform] = true;
+    }
+
+    final bool willAddPlatforms = platformsToAdd.isNotEmpty;
+    templateContext['no_platforms'] = !willAddPlatforms;
+    int generatedCount = 0;
+    final String description = argResults.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Flutter FFI plugin project.';
+    templateContext['description'] = description;
+    generatedCount += await renderMerged(
+      <String>['plugin_ffi', 'plugin_shared'],
+      directory,
+      templateContext,
+      overwrite: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
+    );
+
+    if (boolArg('pub')) {
+      await pub.get(
+        context: PubContext.createPlugin,
+        directory: directory.path,
+        offline: boolArg('offline'),
+        generateSyntheticPackage: false,
+      );
+    }
+
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
+    final bool generateAndroid = templateContext['android'] == true;
+    if (generateAndroid) {
+      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+    }
+
+    final String projectName = templateContext['projectName'] as String;
+    final String organization = templateContext['organization'] as String;
+    final String androidPluginIdentifier = templateContext['androidIdentifier'] as String;
+    final String exampleProjectName = '${projectName}_example';
+    templateContext['projectName'] = exampleProjectName;
+    templateContext['androidIdentifier'] = CreateBase.createAndroidIdentifier(organization, exampleProjectName);
+    templateContext['iosIdentifier'] = CreateBase.createUTIIdentifier(organization, exampleProjectName);
+    templateContext['macosIdentifier'] = CreateBase.createUTIIdentifier(organization, exampleProjectName);
+    templateContext['windowsIdentifier'] = CreateBase.createWindowsIdentifier(organization, exampleProjectName);
+    templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
+    templateContext['pluginProjectName'] = projectName;
+    templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
+
+    generatedCount += await generateApp(
+      <String>['app'],
+      project.example.directory,
+      templateContext,
+      overwrite: overwrite,
+      pluginExampleApp: true,
+      printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
     );
     return generatedCount;
   }

@@ -20,6 +20,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 
@@ -294,7 +295,6 @@ class FlutterTesterTestDevice extends TestDevice {
     @required Process process,
     @required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
-    const String observatoryString = 'Observatory listening on ';
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
       process.stdout,
@@ -306,9 +306,10 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
           logger.printTrace('test $id: Shell: $line');
 
-          if (line.startsWith(observatoryString)) {
+          final Match match = globals.kVMServiceMessageRegExp.firstMatch(line);
+          if (match != null) {
             try {
-              final Uri uri = Uri.parse(line.substring(observatoryString.length));
+              final Uri uri = Uri.parse(match[1]);
               if (reportObservatoryUri != null) {
                 await reportObservatoryUri(uri);
               }

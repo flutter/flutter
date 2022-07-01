@@ -5,6 +5,8 @@
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1244,7 +1246,6 @@ void main() {
     }
   });
 
-
   testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
@@ -1329,5 +1330,39 @@ void main() {
 
     expect(scrollController.offset, 0);
     expect(groupValue, 1);
+  });
+
+  testWidgets('Hovering over Cupertino sliding segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset firstChild = tester.getCenter(find.text('A'));
+    await gesture.moveTo(firstChild);
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }

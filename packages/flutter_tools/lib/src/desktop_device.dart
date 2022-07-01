@@ -22,9 +22,9 @@ import 'protocol_discovery.dart';
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(String identifier, {
-      required PlatformType platformType,
-      required bool ephemeral,
+  DesktopDevice(super.identifier, {
+      required PlatformType super.platformType,
+      required super.ephemeral,
       required Logger logger,
       required ProcessManager processManager,
       required FileSystem fileSystem,
@@ -34,10 +34,7 @@ abstract class DesktopDevice extends Device {
          _fileSystem = fileSystem,
          _operatingSystemUtils = operatingSystemUtils,
          super(
-          identifier,
           category: Category.desktop,
-          platformType: platformType,
-          ephemeral: ephemeral,
         );
 
   final Logger _logger;

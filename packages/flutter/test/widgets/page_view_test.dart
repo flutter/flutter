@@ -7,11 +7,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return PageView.builder(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
     final PageController controller = PageController(

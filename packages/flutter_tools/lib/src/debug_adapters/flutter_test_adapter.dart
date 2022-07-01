@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
+import 'package:dds/dap.dart' hide PidTracker;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
@@ -19,7 +19,7 @@ import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter tests.
 class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
-    with PidTracker, PackageConfigUtils, TestAdapter {
+    with PidTracker, TestAdapter {
   FlutterTestDebugAdapter(
     ByteStreamServerChannel channel, {
     required this.fileSystem,
@@ -29,14 +29,13 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     bool enableAuthCodes = true,
     Logger? logger,
   }) : super(
-          channel,
-          ipv6: ipv6,
-          enableDds: enableDds,
-          enableAuthCodes: enableAuthCodes,
-          logger: logger,
-        );
+    channel,
+    ipv6: ipv6,
+    enableDds: enableDds,
+    enableAuthCodes: enableAuthCodes,
+    logger: logger,
+  );
 
-  @override
   FileSystem fileSystem;
   Platform platform;
   Process? _process;
@@ -115,25 +114,6 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
       if (program != null) program,
       ...?args.args,
     ];
-
-    // Find the package_config file for this script. This is used by the
-    // debugger to map package: URIs to file paths to check whether they're in
-    // the editors workspace (args.cwd/args.additionalProjectPaths) so they can
-    // be correctly classes as "my code", "sdk" or "external packages".
-    // TODO(dantup): Remove this once https://github.com/dart-lang/sdk/issues/45530
-    // is done as it will not be necessary.
-    final String? possibleRoot = program == null
-        ? args.cwd
-        : fileSystem.path.isAbsolute(program)
-            ? fileSystem.path.dirname(program)
-            : fileSystem.path.dirname(
-                fileSystem.path.normalize(fileSystem.path.join(args.cwd ?? '', args.program)));
-    if (possibleRoot != null) {
-      final File? packageConfig = findPackageConfigFile(possibleRoot);
-      if (packageConfig != null) {
-        usePackageConfigFile(packageConfig);
-      }
-    }
 
     await launchAsProcess(executable, processArgs);
 

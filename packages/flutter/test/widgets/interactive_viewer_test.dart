@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 
@@ -1168,10 +1169,8 @@ void main() {
         ),
       );
 
-      expect(
-        find.byType(ClipRect),
-        findsNothing,
-      );
+      final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      expect(renderClip.clipBehavior, equals(Clip.none));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1310,6 +1309,86 @@ void main() {
       );
 
       expect(find.byType(LayoutBuilder), findsOneWidget);
+    });
+
+    testWidgets('scaleFactor', (WidgetTester tester) async {
+      const double scrollAmount = 30.0;
+      final TransformationController transformationController = TransformationController();
+      Future<void> pumpScaleFactor(double scaleFactor) {
+        return tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: InteractiveViewer(
+                  boundaryMargin: const EdgeInsets.all(double.infinity),
+                  transformationController: transformationController,
+                  scaleFactor: scaleFactor,
+                  child: const SizedBox(width: 200.0, height: 200.0),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Start with the default scaleFactor.
+      await pumpScaleFactor(200.0);
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Zoom out. The scale decreases.
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, scrollAmount));
+      await tester.pumpAndSettle();
+      final double scaleZoomedOut = transformationController.value.getMaxScaleOnAxis();
+      expect(scaleZoomedOut, lessThan(1.0));
+
+      // Zoom in. The scale increases.
+      await scrollAt(center, tester, const Offset(0.0, -scrollAmount));
+      await tester.pumpAndSettle();
+      final double scaleZoomedIn = transformationController.value.getMaxScaleOnAxis();
+      expect(scaleZoomedIn, greaterThan(scaleZoomedOut));
+
+      // Reset and decrease the scaleFactor below the default, so that scaling
+      // will happen more quickly.
+      transformationController.value = Matrix4.identity();
+      await pumpScaleFactor(100.0);
+
+      // Zoom out. The scale decreases more quickly than with the default
+      // (higher) scaleFactor.
+      await scrollAt(center, tester, const Offset(0.0, scrollAmount));
+      await tester.pumpAndSettle();
+      final double scaleLowZoomedOut = transformationController.value.getMaxScaleOnAxis();
+      expect(scaleLowZoomedOut, lessThan(1.0));
+      expect(scaleLowZoomedOut, lessThan(scaleZoomedOut));
+
+      // Zoom in. The scale increases more quickly than with the default
+      // (higher) scaleFactor.
+      await scrollAt(center, tester, const Offset(0.0, -scrollAmount));
+      await tester.pumpAndSettle();
+      final double scaleLowZoomedIn = transformationController.value.getMaxScaleOnAxis();
+      expect(scaleLowZoomedIn, greaterThan(scaleLowZoomedOut));
+      expect(scaleLowZoomedIn - scaleLowZoomedOut, greaterThan(scaleZoomedIn - scaleZoomedOut));
+
+      // Reset and increase the scaleFactor above the default.
+      transformationController.value = Matrix4.identity();
+      await pumpScaleFactor(400.0);
+
+      // Zoom out. The scale decreases, but not by as much as with the default
+      // (higher) scaleFactor.
+      await scrollAt(center, tester, const Offset(0.0, scrollAmount));
+      await tester.pumpAndSettle();
+      final double scaleHighZoomedOut = transformationController.value.getMaxScaleOnAxis();
+      expect(scaleHighZoomedOut, lessThan(1.0));
+      expect(scaleHighZoomedOut, greaterThan(scaleZoomedOut));
+
+      // Zoom in. The scale increases, but not by as much as with the default
+      // (higher) scaleFactor.
+      await scrollAt(center, tester, const Offset(0.0, -scrollAmount));
+      await tester.pumpAndSettle();
+      final double scaleHighZoomedIn = transformationController.value.getMaxScaleOnAxis();
+      expect(scaleHighZoomedIn, greaterThan(scaleHighZoomedOut));
+      expect(scaleHighZoomedIn - scaleHighZoomedOut, lessThan(scaleZoomedIn - scaleZoomedOut));
     });
   });
 

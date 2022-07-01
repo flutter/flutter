@@ -374,8 +374,8 @@ void main() {
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
-  IntelliJValidatorTestTarget(String title, String installPath,  FileSystem fileSystem)
-    : super(title, installPath, fileSystem: fileSystem, userMessages: UserMessages());
+  IntelliJValidatorTestTarget(super.title, super.installPath,  FileSystem fileSystem)
+    : super(fileSystem: fileSystem, userMessages: UserMessages());
 
   @override
   String get pluginsPath => 'plugins';

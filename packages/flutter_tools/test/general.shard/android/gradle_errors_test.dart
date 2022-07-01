@@ -34,6 +34,8 @@ void main() {
           lockFileDepMissing,
           multidexErrorHandler,
           incompatibleKotlinVersionHandler,
+          minCompileSdkVersionHandler,
+          jvm11Required,
         ])
       );
     });
@@ -101,8 +103,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -132,8 +133,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -154,8 +154,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -192,8 +191,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -222,8 +220,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -263,8 +260,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -291,8 +287,7 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -323,8 +318,7 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -787,6 +781,8 @@ assembleProfile
           "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
           '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
           '│ Android SDK.                                                                                  │\n'
+          '│ For more information, see:                                                                    │\n'
+          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -907,6 +903,102 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       ProcessManager: () => FakeProcessManager.empty(),
     });
   });
+
+  group('Required compileSdkVersion', () {
+    const String errorMessage = '''
+Execution failed for task ':app:checkDebugAarMetadata'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
+   > One or more issues found when checking AAR metadata values:
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window-java:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/2adc32c5b3f24bed763d33fbfb203338/transformed/jetified-window-java-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/88f7e476ef68cecca729426edff955b5/transformed/jetified-window-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        minCompileSdkVersionHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await minCompileSdkVersionHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
+          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   compileSdkVersion 31                                                        │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Java 11 requirement', () {
+    testWithoutContext('pattern', () {
+      expect(
+        jvm11Required.test('''
+* What went wrong:
+A problem occurred evaluating project ':flutter'.
+> Failed to apply plugin 'com.android.internal.library'.
+   > Android Gradle plugin requires Java 11 to run. You are currently using Java 1.8.
+     You can try some of the following options:
+       - changing the IDE settings.
+       - changing the JAVA_HOME environment variable.
+       - changing `org.gradle.java.home` in `gradle.properties`.'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await jvm11Required.handler();
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] You need Java 11 or higher to build your app with this version of Gradle. │\n'
+          '│                                                                               │\n'
+          '│ To get Java 11, update to the latest version of Android Studio on             │\n'
+          '│ https://developer.android.com/studio/install.                                 │\n'
+          '│                                                                               │\n'
+          '│ To check the Java version used by Flutter, run `flutter doctor -v`.           │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {

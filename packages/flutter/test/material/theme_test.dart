@@ -84,6 +84,11 @@ void main() {
     );
   });
 
+  testWidgets('ThemeData with null typography uses proper defaults', (WidgetTester tester) async {
+    expect(ThemeData().typography, Typography.material2014());
+    expect(ThemeData(useMaterial3: true).typography, Typography.material2021());
+  });
+
   testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5572
     final Key popupMenuButtonKey = UniqueKey();
@@ -329,16 +334,16 @@ void main() {
   );
 
   testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (WidgetTester tester) async {
-    const double _kMagicFontSize = 4321.0;
+    const double kMagicFontSize = 4321.0;
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
         bodyText2: fallback.primaryTextTheme.bodyText2!.copyWith(
-          fontSize: _kMagicFontSize,
+          fontSize: kMagicFontSize,
         ),
       ),
     );
-    expect(customTheme.primaryTextTheme.bodyText2!.fontSize, _kMagicFontSize);
+    expect(customTheme.primaryTextTheme.bodyText2!.fontSize, kMagicFontSize);
 
     late double actualFontSize;
     await tester.pumpWidget(Directionality(
@@ -356,7 +361,7 @@ void main() {
       ),
     ));
 
-    expect(actualFontSize, _kMagicFontSize);
+    expect(actualFontSize, kMagicFontSize);
   });
 
   testWidgets('Default Theme provides all basic TextStyle properties', (WidgetTester tester) async {

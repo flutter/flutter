@@ -10,8 +10,11 @@
 
 ## Linux Android DeviceLab tests
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @blasten @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_lifecycles_test.dart @blasten @flutter/engine
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/android_stack_size_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/animated_image_gc_perf.dart @zanderso @flutter/engine
@@ -20,6 +23,8 @@
 /dev/devicelab/bin/tasks/basic_material_app_android__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/codegen_integration.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/color_filter_cache_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_android__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf__devtools_memory.dart @zanderso @flutter/engine
@@ -46,6 +51,8 @@
 /dev/devicelab/bin/tasks/flutter_gallery_v2_web_compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/flutter_test_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/frame_policy_delay_test_android.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/fullscreen_textfield_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/fullscreen_textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @blasten @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @zanderso @flutter/engine
@@ -66,6 +73,8 @@
 /dev/devicelab/bin/tasks/opacity_peephole_one_rect_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/opacity_peephole_opacity_of_grid_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/opacity_peephole_fade_transition_text_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary.dart @flar @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
@@ -149,11 +158,13 @@
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/ios_content_validation_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/ios_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery_impeller_ios__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_swift.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine
@@ -163,9 +174,7 @@
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
-
-## Mac iOS32 DeviceLab tests
-/dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios32.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/route_test_ios.dart @jasguerrero @flutter/tool
 
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @zanderso @flutter/tool
@@ -193,6 +202,9 @@
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/module_test_ios.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
+/dev/devicelab/bin/tasks/entrypoint_dart_registrant.dart @aaclarke @flutter/plugin
+/dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 
 ## Host only framework tests
 # Linux analyze
@@ -236,3 +248,4 @@
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # verify_binaries_codesigned @christopherfujino @flutter/releases
+# google_test @renyou

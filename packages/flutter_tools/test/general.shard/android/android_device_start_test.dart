@@ -68,7 +68,7 @@ void main() {
       final File apkFile = fileSystem.file('app.apk')..createSync();
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
-        file: apkFile,
+        applicationPackage: apkFile,
         launchActivity: 'FlutterActivity',
         versionCode: 1,
       );
@@ -133,7 +133,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -171,7 +171,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -200,7 +200,7 @@ void main() {
         '10',
         'app.apk'
       ],
-      stdout: '\n\nObservatory listening on http://127.0.0.1:456\n\n',
+      stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
     ));
     processManager.addCommand(kShaCommand);
     processManager.addCommand(const FakeCommand(

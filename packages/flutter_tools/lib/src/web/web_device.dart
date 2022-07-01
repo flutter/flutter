@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -128,7 +129,17 @@ abstract class ChromiumDevice extends Device {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
-    final String url = platformArgs['uri']! as String;
+    String url;
+    if (debuggingOptions.webLaunchUrl != null) {
+      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+      if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
+        url = debuggingOptions.webLaunchUrl!;
+      } else {
+        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL.');
+      }
+    } else {
+      url = platformArgs['uri']! as String;
+    }
     final bool launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
       _chrome = await chromeLauncher.launch(
@@ -180,15 +191,13 @@ class GoogleChromeDevice extends ChromiumDevice {
     required Platform platform,
     required ProcessManager processManager,
     required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required FileSystem fileSystem,
+    required super.logger,
+    required super.fileSystem,
   }) : _platform = platform,
        _processManager = processManager,
        super(
           name: 'chrome',
           chromeLauncher: chromiumLauncher,
-          logger: logger,
-          fileSystem: fileSystem,
        );
 
   final Platform _platform;
@@ -236,15 +245,13 @@ class GoogleChromeDevice extends ChromiumDevice {
 class MicrosoftEdgeDevice extends ChromiumDevice {
   MicrosoftEdgeDevice({
     required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required FileSystem fileSystem,
+    required super.logger,
+    required super.fileSystem,
     required ProcessManager processManager,
   }) : _processManager = processManager,
        super(
          name: 'edge',
          chromeLauncher: chromiumLauncher,
-         logger: logger,
-         fileSystem: fileSystem,
        );
 
   final ProcessManager _processManager;

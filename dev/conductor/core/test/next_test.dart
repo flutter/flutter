@@ -25,7 +25,7 @@ void main() {
   const String remoteUrl = 'https://github.com/org/repo.git';
   const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
   const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
-  const String revision3 = '98a5ca242b9d270ce000b26309b8a3cdc9c89df5';
+  const String revision3 = 'ffffffffffffffffffffffffffffffffffffffff';
   const String revision4 = '280e23318a0d8341415c66aa32581352a421d974';
   const String releaseVersion = '1.2.0-3.0.pre';
   const String releaseChannel = 'beta';
@@ -82,12 +82,7 @@ void main() {
 
     group('APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES', () {
       test('does not prompt user and updates currentPhase if there are no engine cherrypicks', () async {
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(
-            command: <String>['git', 'checkout', workingBranch],
-          ),
-        ]);
+        final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -145,24 +140,7 @@ void main() {
         final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
             ..createSync(recursive: true);
         _initializeCiYamlFile(ciYaml);
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM blah',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>[
-            'git',
-            'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
-          ]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
-          ),
-        ]);
+        final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -214,7 +192,7 @@ void main() {
 
       test('updates lastPhase if user responds yes', () async {
         const String remoteUrl = 'https://github.com/org/repo.git';
-        const String releaseChannel = 'dev';
+        const String releaseChannel = 'beta';
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
@@ -227,16 +205,6 @@ void main() {
                   ..createSync(recursive: true);
               _initializeCiYamlFile(file);
             },
-          ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM .ci.yaml',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>['git', 'commit', "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'"]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
           ),
           const FakeCommand(command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch']),
         ]);
@@ -355,6 +323,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error.contains('Aborting command.'), true);
@@ -392,6 +361,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       });
@@ -526,13 +496,13 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM /path/to/.ci.yaml',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+            "--message='Create candidate branch version $candidateBranch for $releaseChannel'",
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -540,7 +510,7 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM /path/to/engine.version',
+            stdout: 'MM bin/internal/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
@@ -616,13 +586,13 @@ void main() {
           const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/.ci.yaml',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+            "--message='Create candidate branch version $candidateBranch for $releaseChannel'",
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -630,7 +600,7 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/engine.version',
+            stdout: 'MM bin/internal/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
@@ -694,13 +664,13 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/.ci.yaml',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+            "--message='Create candidate branch version $candidateBranch for $releaseChannel'",
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -708,7 +678,7 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/engine.version',
+            stdout: 'MM bin/internal/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
@@ -1226,16 +1196,9 @@ class _TestRepository extends Repository {
 
 class _TestNextContext extends NextContext {
   const _TestNextContext({
-    bool autoAccept = false,
-    bool force = false,
-    required File stateFile,
-    required Checkouts checkouts,
-  }) : super(
-    autoAccept: autoAccept,
-    force: force,
-    checkouts: checkouts,
-    stateFile: stateFile,
-  );
+    required super.stateFile,
+    required super.checkouts,
+  }) : super(autoAccept: false, force: false);
 
   @override
   Future<bool> prompt(String message) {
@@ -1248,7 +1211,7 @@ void _initializeCiYamlFile(
   File file, {
   List<String>? enabledBranches,
 }) {
-  enabledBranches ??= <String>['master', 'dev', 'beta', 'stable'];
+  enabledBranches ??= <String>['master', 'beta', 'stable'];
   file.createSync(recursive: true);
   final StringBuffer buffer = StringBuffer('enabled_branches:\n');
   for (final String branch in enabledBranches) {

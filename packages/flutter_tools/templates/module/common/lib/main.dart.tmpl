@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-{{#withPluginHook}}
+{{#withPlatformChannelPluginHook}}
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
-{{/withPluginHook}}
+{{/withPlatformChannelPluginHook}}
 
 void main() => runApp(const MyApp());
 
-{{^withPluginHook}}
+{{^withPlatformChannelPluginHook}}
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -117,8 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-{{/withPluginHook}}
-{{#withPluginHook}}
+{{/withPlatformChannelPluginHook}}
+{{#withPlatformChannelPluginHook}}
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -171,4 +171,4 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-{{/withPluginHook}}
+{{/withPlatformChannelPluginHook}}

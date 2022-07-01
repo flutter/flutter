@@ -55,6 +55,8 @@ If you want to help us triage, you are very welcome to do so!
 Developing for Flutter
 ----------------------
 
+If you would prefer to write code, you may wish to start with our list of [good first contributions](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+contribution%22).
+
 To develop for Flutter, you will eventually need to become familiar
 with our processes and conventions. This section lists the documents
 that describe these methodologies. The following list is ordered: you
@@ -97,8 +99,11 @@ presented.
    which should be used when proposing a new technical design.  This is a good
    practice to do before coding more intricate changes.
 
-In addition to the above, there are many pages on [our
-Wiki](https://github.com/flutter/flutter/wiki/) and an article [Contributing to Flutter:
-Getting Started](https://medium.com/@ayushbherwani/contributing-to-flutter-getting-started-a0db68cbcd5b)
+[![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/0.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
+
+In addition to the documents, there is a video linked above on **How to contribute to Flutter**
+from the [Flutter](https://youtube.com/c/flutterdev) YouTube channel,
+there are many pages on [our Wiki](https://github.com/flutter/flutter/wiki/),
+and an article [Contributing to Flutter: Getting Started](https://medium.com/@ayushbherwani/contributing-to-flutter-getting-started-a0db68cbcd5b)
 on Medium that may be of interest. For a curated list of pages see the sidebar
 on the wiki's home page. They are more or less listed in order of importance.

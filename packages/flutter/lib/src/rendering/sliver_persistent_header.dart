@@ -359,7 +359,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   @protected
   double updateGeometry() {
     double stretchOffset = 0.0;
-    if (stretchConfiguration != null && _childPosition == 0.0) {
+    if (stretchConfiguration != null) {
       stretchOffset += constraints.overlap.abs();
     }
     final double maxExtent = this.maxExtent;
@@ -596,7 +596,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   @protected
   double updateGeometry() {
     double stretchOffset = 0.0;
-    if (stretchConfiguration != null && _childPosition == 0.0) {
+    if (stretchConfiguration != null) {
       stretchOffset += constraints.overlap.abs();
     }
     final double maxExtent = this.maxExtent;

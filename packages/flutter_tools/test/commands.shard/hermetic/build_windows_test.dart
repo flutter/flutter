@@ -616,7 +616,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Usage: () => usage,
   });
 
-  testUsingContext('Windows build fails when there is no windows project', () async {
+  testUsingContext('Windows UWP build fails when there is no windows project', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
@@ -650,7 +650,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 
-  testUsingContext('Windows UWP uild fails on non windows platform', () async {
+  testUsingContext('Windows UWP build fails on non windows platform', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;

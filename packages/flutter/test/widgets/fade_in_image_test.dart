@@ -321,7 +321,7 @@ Future<void> main() async {
           expect(cacheHeight, 30);
           expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
         }
         final ImageProvider resizeImage = image.placeholder;
         expect(image.placeholder, isA<ResizeImage>());
@@ -344,7 +344,7 @@ Future<void> main() async {
           expect(cacheHeight, null);
           expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
         }
         // image.placeholder should be an instance of MemoryImage instead of ResizeImage
         final ImageProvider memoryImage = image.placeholder;

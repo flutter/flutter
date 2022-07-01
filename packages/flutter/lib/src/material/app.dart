@@ -57,6 +57,11 @@ enum ThemeMode {
 /// adding material-design specific functionality, such as [AnimatedTheme] and
 /// [GridPaper].
 ///
+/// [MaterialApp] configures its [WidgetsApp.textStyle] with an ugly red/yellow
+/// text style that's intended to warn the developer that their app hasn't defined
+/// a default text style. Typically the app's [Scaffold] builds a [Material] widget
+/// whose default [Material.textStyle] defines the text style for the entire scaffold.
+///
 /// The [MaterialApp] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
@@ -145,6 +150,28 @@ enum ThemeMode {
 /// ```
 /// {@end-tool}
 ///
+/// ## Troubleshooting
+///
+/// ### Why is my app's text red with yellow underlines?
+///
+/// [Text] widgets that lack a [Material] ancestor will be rendered with an ugly
+/// red/yellow text style.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_unspecified_textstyle.png)
+///
+/// The typical fix is to give the widget a [Scaffold] ancestor. The [Scaffold] creates
+/// a [Material] widget that defines its default text style.
+///
+/// ```dart
+/// MaterialApp(
+///   title: 'Material App',
+///   home: Scaffold(
+///     body: Center(
+///       child: Text('Hello World'),
+///     ),
+///   ),
+/// )
+/// ```
 /// See also:
 ///
 ///  * [Scaffold], which provides standard app elements like an [AppBar] and a [Drawer].
@@ -560,7 +587,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -696,10 +723,17 @@ class MaterialApp extends StatefulWidget {
 /// When using the desktop platform, if the [Scrollable] widget scrolls in the
 /// [Axis.vertical], a [Scrollbar] is applied.
 ///
+/// If the scroll direction is [Axis.horizontal] scroll views are less
+/// discoverable, so consider adding a Scrollbar in these cases, either directly
+/// or through the [buildScrollbar] method.
+///
 /// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
 /// overscroll indicator that is used on [TargetPlatform.android]. When null,
 /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
-/// overscroll indicator is the [GlowingOverscrollIndicator].
+/// overscroll indicator is the [GlowingOverscrollIndicator]. These properties
+/// are deprecated. In order to use the [StretchingOverscrollIndicator], use
+/// the [ThemeData.useMaterial3] flag, or override
+/// [ScrollBehavior.buildOverscrollIndicator].
 ///
 /// See also:
 ///
@@ -714,6 +748,10 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
   /// overscroll indicator is the [GlowingOverscrollIndicator].
   const MaterialScrollBehavior({
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) : _androidOverscrollIndicator = androidOverscrollIndicator,
        super(androidOverscrollIndicator: androidOverscrollIndicator);
@@ -751,9 +789,14 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
-    final AndroidOverscrollIndicator indicator = _androidOverscrollIndicator
+    late final AndroidOverscrollIndicator indicator;
+    if (Theme.of(context).useMaterial3) {
+      indicator = AndroidOverscrollIndicator.stretch;
+    } else {
+      indicator = _androidOverscrollIndicator
         ?? Theme.of(context).androidOverscrollIndicator
         ?? androidOverscrollIndicator;
+    }
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
