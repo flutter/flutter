@@ -292,13 +292,15 @@ class _HelperError extends StatefulWidget {
     this.helperMaxLines,
     this.errorText,
     this.errorStyle,
-    this.errorMaxLines,
+    this.errorMaxLines, 
+    this.errorWidget,
   });
 
   final TextAlign? textAlign;
   final String? helperText;
   final TextStyle? helperStyle;
   final int? helperMaxLines;
+  final Widget? errorWidget;
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
@@ -323,7 +325,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       duration: _kTransitionDuration,
       vsync: this,
     );
-    if (widget.errorText != null) {
+    if (widget.errorText != null || widget.errorWidget != null) {
       _error = _buildError();
       _controller.value = 1.0;
     } else if (widget.helperText != null) {
@@ -387,7 +389,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 
   Widget _buildError() {
-    assert(widget.errorText != null);
+    assert(widget.errorText != null || widget.errorWidget != null);
     return Semantics(
       container: true,
       liveRegion: true,
@@ -398,7 +400,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: Text(
+          child: widget.errorWidget ?? Text(
             widget.errorText!,
             style: widget.errorStyle,
             textAlign: widget.textAlign,
@@ -412,6 +414,10 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
+    if(widget.errorWidget != null) {
+      return _error = _buildError();
+    }
+
     if (_controller.isDismissed) {
       _error = null;
       if (widget.helperText != null) {
@@ -538,7 +544,6 @@ class FloatingLabelAlignment {
 enum _DecorationSlot {
   icon,
   input,
-  errorWidget,
   label,
   hint,
   prefix,
@@ -566,7 +571,6 @@ class _Decoration {
     this.visualDensity,
     this.icon,
     this.input,
-    this.errorWidget,
     this.label,
     this.hint,
     this.prefix,
@@ -594,7 +598,6 @@ class _Decoration {
   final VisualDensity? visualDensity;
   final Widget? icon;
   final Widget? input;
-  final Widget? errorWidget;
   final Widget? label;
   final Widget? hint;
   final Widget? prefix;
@@ -624,7 +627,6 @@ class _Decoration {
         && other.visualDensity == visualDensity
         && other.icon == icon
         && other.input == input
-        && other.errorWidget == errorWidget
         && other.label == label
         && other.hint == hint
         && other.prefix == prefix
@@ -706,7 +708,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
-  RenderBox? get errorWidget => childForSlot(_DecorationSlot.errorWidget);
   RenderBox? get label => childForSlot(_DecorationSlot.label);
   RenderBox? get hint => childForSlot(_DecorationSlot.hint);
   RenderBox? get prefix => childForSlot(_DecorationSlot.prefix);
@@ -743,8 +744,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         counter!,
       if (container != null)
         container!,
-      if(errorWidget != null)
-        errorWidget!
     ];
   }
 
@@ -833,10 +832,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     if (label != null) {
       visitor(label!);
-    }
-
-    if(errorWidget != null){
-      visitor(errorWidget!);
     }
 
     if (hint != null) {
@@ -1616,8 +1611,6 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
         return decoration.counter;
       case _DecorationSlot.container:
         return decoration.container;
-      case _DecorationSlot.errorWidget:
-      return decoration.errorWidget;
     }
   }
 
@@ -2184,18 +2177,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final Widget? errorWidget = decoration!.errorWidget == null && decoration!.errorText == null ? null : _Shaker(
-      animation: _shakingErrorController.view,
-      child: decoration!.errorWidget ?? Text(
-        decoration!.errorText!,
-        overflow: TextOverflow.ellipsis,
-        textAlign: textAlign,
-      ),
-    );
-
-
-    
-
     final Widget? prefix = decoration!.prefix == null && decoration!.prefixText == null ? null :
       _AffixText(
         labelIsFloating: widget._labelShouldWithdraw,
@@ -2275,6 +2256,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperText: decoration!.helperText,
       helperStyle: _getHelperStyle(themeData),
       helperMaxLines: decoration!.helperMaxLines,
+      errorWidget: decoration!.errorWidget,
       errorText: decoration!.errorText,
       errorStyle: _getErrorStyle(themeData),
       errorMaxLines: decoration!.errorMaxLines,
@@ -2342,7 +2324,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         visualDensity: themeData.visualDensity,
         icon: icon,
         input: widget.child,
-        errorWidget: errorWidget,
         label: label,
         hint: hint,
         prefix: prefix,
