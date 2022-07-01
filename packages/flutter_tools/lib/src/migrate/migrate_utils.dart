@@ -148,7 +148,7 @@ class MigrateUtils {
         );
       }
     }
-    checkForErrors(result, commandDescription: cmdArgs.join(' '), silent: true);
+    checkForErrors(result, commandDescription: cmdArgs.join(' '));
 
     if (legacyNameParameter) {
       return _fileSystem.path.join(outputDirectory, name);
