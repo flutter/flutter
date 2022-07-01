@@ -520,10 +520,10 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
-    _logger.printError(
-      'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
-      emphasis: true,
-    );
+    //_logger.printError(
+    //  'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
+    //  emphasis: true,
+    //);
     _hasWarnedAboutStorageOverride = true;
   }
 
