@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -4616,6 +4615,131 @@ void main() {
       ),
     );
     gesture.removePointer();
+  });
+
+  testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/104994.
+    List<String> tabTextContent = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabTextContent.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Default TabBar Preview'),
+                  bottom: tabTextContent.isNotEmpty
+                      ? TabBar(
+                    isScrollable: true,
+                    tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
+                  )
+                      : null,
+                ),
+                body: LayoutBuilder(
+                  builder: (_, __) {
+                    return tabTextContent.isNotEmpty
+                      ? TabBarView(
+                        children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList(),
+                      )
+                      : const Center(child: Text('No tabs'));
+                  },
+                ),
+                bottomNavigationBar: BottomAppBar(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconButton(
+                        key: const Key('Add tab'),
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..add('Tab ${tabTextContent.length + 1}');
+                          });
+                        },
+                      ),
+                      IconButton(
+                        key: const Key('Delete tab'),
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..removeLast();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs properly
+    expect(find.text('No tabs'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('Add tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text("Tab 1's view"), findsOneWidget);
+
+    // Dynamically updates to zero tabs properly
+    await tester.tap(find.byKey(const Key('Delete tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('No tabs'), findsOneWidget);
+  });
+
+  testWidgets("Throw if the controller's length mismatch the tabs count", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets("Throw if the controller's length mismatch the TabBarView‘s children count", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[
+                Icon(Icons.directions_car),
+                Icon(Icons.directions_transit),
+                Icon(Icons.directions_bike),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
   });
 }
 

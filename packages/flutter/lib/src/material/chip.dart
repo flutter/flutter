@@ -1094,10 +1094,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     );
   }
 
-  static const double _defaultElevation = 0.0;
-  static const double _defaultPressElevation = 8.0;
-  static const Color _defaultShadowColor = Colors.black;
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1128,37 +1124,31 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
 
     final double elevation = widget.elevation
       ?? chipTheme.elevation
-      ?? theme.chipTheme.elevation
-      ?? _defaultElevation;
+      ?? chipDefaults.elevation!;
     final double pressElevation = widget.pressElevation
       ?? chipTheme.pressElevation
-      ?? theme.chipTheme.pressElevation
-      ?? _defaultPressElevation;
+      ?? chipDefaults.pressElevation!;
     final Color shadowColor = widget.shadowColor
       ?? chipTheme.shadowColor
-      ?? theme.chipTheme.shadowColor
-      ?? _defaultShadowColor;
+      ?? chipDefaults.shadowColor!;
     final Color selectedShadowColor = widget.selectedShadowColor
       ?? chipTheme.selectedShadowColor
-      ?? theme.chipTheme.selectedShadowColor
-      ?? _defaultShadowColor;
+      ?? chipDefaults.selectedShadowColor!;
     final Color? checkmarkColor = widget.checkmarkColor
       ?? chipTheme.checkmarkColor
-      ?? theme.chipTheme.checkmarkColor;
+      ?? chipDefaults.checkmarkColor;
     final bool showCheckmark = widget.showCheckmark
       ?? chipTheme.showCheckmark
-      ?? theme.chipTheme.showCheckmark
-      ?? true;
+      ?? chipDefaults.showCheckmark!;
     final EdgeInsetsGeometry padding = widget.padding
       ?? chipTheme.padding
-      ?? theme.chipTheme.padding
       ?? chipDefaults.padding!;
+    // Widget's label style is merged with this below.
     final TextStyle labelStyle = chipTheme.labelStyle
-      ?? theme.chipTheme.labelStyle
       ?? chipDefaults.labelStyle!;
     final EdgeInsetsGeometry labelPadding = widget.labelPadding
       ?? chipTheme.labelPadding
-      ?? theme.chipTheme.labelPadding
+      ?? chipDefaults.labelPadding
       ?? defaultLabelPadding;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);

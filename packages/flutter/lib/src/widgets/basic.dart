@@ -2798,6 +2798,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
+  /// {@template flutter.widgets.basic.fractionallySizedBox.widthFactor}
   /// If non-null, the fraction of the incoming width given to the child.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
@@ -2805,8 +2806,10 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///
   /// If null, the incoming width constraints are passed to the child
   /// unmodified.
+  /// {@endtemplate}
   final double? widthFactor;
 
+  /// {@template flutter.widgets.basic.fractionallySizedBox.heightFactor}
   /// If non-null, the fraction of the incoming height given to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
@@ -2814,8 +2817,10 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///
   /// If null, the incoming height constraints are passed to the child
   /// unmodified.
+  /// {@endtemplate}
   final double? heightFactor;
 
+  /// {@template flutter.widgets.basic.fractionallySizedBox.alignment}
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
@@ -2834,6 +2839,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
+  /// {@endtemplate}
   final AlignmentGeometry alignment;
 
   @override
@@ -3845,6 +3851,13 @@ class Stack extends MultiChildRenderObjectWidget {
 /// If value is null, then nothing is displayed.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_O0PPD1Xfbk}
+///
+/// {@tool dartpad}
+/// This example shows a [IndexedStack] widget being used to lay out one card
+/// at a time from a series of cards, each keeping their respective states.
+///
+/// ** See code in examples/api/lib/widgets/basic/indexed_stack.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///

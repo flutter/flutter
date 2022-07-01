@@ -2738,6 +2738,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Called for every [RenderBox] when [debugPaintSizeEnabled] is true.
   @protected
+  @visibleForTesting
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
       final Paint paint = Paint()

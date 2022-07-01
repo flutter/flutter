@@ -10,8 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
@@ -632,6 +630,12 @@ class RenderParagraph extends RenderBox
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
+  /// Whether this paragraph currently has overflow and needs clipping.
+  ///
+  /// Used to test this object. Not for use in production.
+  @visibleForTesting
+  bool get debugNeedsClipping => _needsClipping;
+
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(
@@ -783,7 +787,7 @@ class RenderParagraph extends RenderBox
     size = constraints.constrain(textSize);
 
     final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
-    final bool didOverflowWidth = size.width < textSize.width;
+    final bool didOverflowWidth = size.width < textSize.width || size.width < _textPainter.longestLine;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become

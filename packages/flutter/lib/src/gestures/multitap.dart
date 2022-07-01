@@ -3,16 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'events.dart';
-import 'gesture_settings.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
 import 'tap.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'events.dart' show PointerDownEvent;
+export 'tap.dart' show GestureTapCancelCallback, GestureTapDownCallback, TapDownDetails, TapUpDetails;
 
 /// Signature for callback when the user has tapped the screen at the same
 /// location twice in quick succession.

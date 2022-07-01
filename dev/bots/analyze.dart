@@ -368,7 +368,7 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
 
 final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
 final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
-final RegExp _leadingComment = RegExp(r'\/\/');
+final RegExp _leadingComment = RegExp(r'//');
 final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
 final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
 
@@ -433,10 +433,10 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
 }
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
-final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
-final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
-final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)(\-[0-9]+\.[0-9]+\.pre)?\.',?$");
-final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
+final RegExp _deprecationStartPattern = RegExp(r'^(?<indent> *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
+final RegExp _deprecationMessagePattern = RegExp(r"^ *'(?<message>.+) '$");
+final RegExp _deprecationVersionPattern = RegExp(r"^ *'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.',?$");
+final RegExp _deprecationEndPattern = RegExp(r'^ *\)$');
 
 /// Some deprecation notices are special, for example they're used to annotate members that
 /// will never go away and were never allowed but which we are trying to show messages for.
@@ -446,7 +446,7 @@ final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 const String _ignoreDeprecation = ' // flutter_ignore: deprecation_syntax (see analyze.dart)';
 
 /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
-final RegExp _legacyDeprecation = RegExp(r' // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
+final RegExp _legacyDeprecation = RegExp(r' // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+$');
 
 Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
@@ -464,18 +464,18 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
     }
     for (int lineNumber in linesWithDeprecations) {
       try {
-        final Match? match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
-        if (match1 == null)
+        final RegExpMatch? startMatch = _deprecationStartPattern.firstMatch(lines[lineNumber]);
+        if (startMatch == null)
           throw 'Deprecation notice does not match required pattern.';
-        final String indent = match1[1]!;
+        final String indent = startMatch.namedGroup('indent')!;
         lineNumber += 1;
         if (lineNumber >= lines.length)
           throw 'Incomplete deprecation notice.';
-        Match? match3;
+        RegExpMatch? versionMatch;
         String? message;
         do {
-          final Match? match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
-          if (match2 == null) {
+          final RegExpMatch? messageMatch = _deprecationMessagePattern.firstMatch(lines[lineNumber]);
+          if (messageMatch == null) {
             String possibleReason = '';
             if (lines[lineNumber].trimLeft().startsWith('"')) {
               possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
@@ -485,31 +485,34 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
           if (!lines[lineNumber].startsWith("$indent  '"))
             throw 'Unexpected deprecation notice indent.';
           if (message == null) {
-            final String firstChar = String.fromCharCode(match2[1]!.runes.first);
+            message = messageMatch.namedGroup('message');
+            final String firstChar = String.fromCharCode(message!.runes.first);
             if (firstChar.toUpperCase() != firstChar)
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
           }
-          message = match2[1];
           lineNumber += 1;
           if (lineNumber >= lines.length)
             throw 'Incomplete deprecation notice.';
-          match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
-        } while (match3 == null);
-        final int v1 = int.parse(match3[1]!);
-        final int v2 = int.parse(match3[2]!);
-        final bool hasV4 = match3[4] != null;
-        if (v1 > 1 || (v1 == 1 && v2 >= 20)) {
-          if (!hasV4)
-            throw 'Deprecation notice does not accurately indicate a dev branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest dev build version number.';
+          versionMatch = _deprecationVersionPattern.firstMatch(lines[lineNumber]);
+        } while (versionMatch == null);
+        final int major = int.parse(versionMatch.namedGroup('major')!);
+        final int minor = int.parse(versionMatch.namedGroup('minor')!);
+        final int patch = int.parse(versionMatch.namedGroup('patch')!);
+        final bool hasBuild = versionMatch.namedGroup('build') != null;
+        // There was a beta release that was mistakenly labeled 3.1.0 without a build.
+        final bool specialBeta = major == 3 && minor == 1 && patch == 0;
+        if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
+          if (!hasBuild)
+            throw 'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.';
         }
-        if (!message!.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
         if (!lines[lineNumber].startsWith("$indent  '"))
           throw 'Unexpected deprecation notice indent.';
         lineNumber += 1;
         if (lineNumber >= lines.length)
           throw 'Incomplete deprecation notice.';
-        if (!lines[lineNumber].contains(_deprecationPattern4))
+        if (!lines[lineNumber].contains(_deprecationEndPattern))
           throw 'End of deprecation notice does not match required pattern.';
         if (!lines[lineNumber].startsWith('$indent)'))
           throw 'Unexpected deprecation notice indent.';
@@ -541,6 +544,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'cpp', overrideMinimumMatches ?? 0, _generateLicense('// '));
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
@@ -637,7 +641,7 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
 
 final RegExp _skipTestCommentPattern = RegExp(r'//(.*)$');
 const Pattern _skipTestIntentionalPattern = '[intended]';
-final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
+final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/\d+');
 
 Future<void> verifySkipTestComments(String workingDirectory) async {
   final List<String> errors = <String>[];
@@ -1721,7 +1725,7 @@ Future<void> _checkConsumerDependencies() async {
 }
 
 const String _kDebugOnlyAnnotation = '@_debugOnly';
-final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w\<\> ,{}()]+ : null;');
+final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w<> ,{}()]+ : null;');
 
 Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, {int minimumMatches = 400}) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
@@ -1775,6 +1779,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/docs.sh',
 
   'dev/conductor/bin/conductor',
+  'dev/conductor/bin/packages_autoroller',
   'dev/conductor/core/lib/src/proto/compile_proto.sh',
 
   'dev/customer_testing/ci.sh',

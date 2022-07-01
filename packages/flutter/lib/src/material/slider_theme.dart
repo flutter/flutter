@@ -2366,7 +2366,19 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
     final Path path = Path()
       ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        _debugDrawShadow(canvas, path, evaluatedElevation);
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    if (paintShadows) {
+      canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+    }
 
     canvas.drawCircle(
       center,
@@ -2475,7 +2487,19 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     final double evaluatedElevation = isPressed! ? elevationTween.evaluate(activationAnimation) : elevation;
     final Path shadowPath = Path()
       ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        _debugDrawShadow(canvas, shadowPath, evaluatedElevation);
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    if (paintShadows) {
+      canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+    }
 
     canvas.drawCircle(
       center,
@@ -3357,5 +3381,17 @@ class RangeLabels {
   @override
   String toString() {
     return '${objectRuntimeType(this, 'RangeLabels')}($start, $end)';
+  }
+}
+
+void _debugDrawShadow(Canvas canvas, Path path, double elevation) {
+  if (elevation > 0.0) {
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = Colors.black
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = elevation * 2.0,
+    );
   }
 }

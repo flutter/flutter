@@ -258,7 +258,7 @@ class TextSelectionOverlay {
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       toolbarVisible: _effectiveToolbarVisibility,
-      selectionEndPoints: const <TextSelectionPoint>[],
+      selectionEndpoints: const <TextSelectionPoint>[],
       selectionControls: selectionControls,
       selectionDelegate: selectionDelegate,
       clipboardStatus: clipboardStatus,
@@ -373,7 +373,7 @@ class TextSelectionOverlay {
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
-      ..selectionEndPoints = renderObject.getEndpointsForSelection(_selection)
+      ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
@@ -459,13 +459,31 @@ class TextSelectionOverlay {
       return;
     }
 
-    final TextSelection newSelection = TextSelection(
-      baseOffset: _selection.baseOffset,
-      extentOffset: position.offset,
-    );
-
-    if (newSelection.baseOffset >= newSelection.extentOffset) {
-      return; // Don't allow order swapping.
+    final TextSelection newSelection;
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        newSelection = TextSelection(
+          extentOffset: position.offset,
+          baseOffset: _selection.start,
+        );
+        if (position.offset <= _selection.start) {
+          return; // Don't allow order swapping.
+        }
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        newSelection = TextSelection(
+          baseOffset: _selection.baseOffset,
+          extentOffset: position.offset,
+        );
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
+          return; // Don't allow order swapping.
+        }
+        break;
     }
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
@@ -489,13 +507,31 @@ class TextSelectionOverlay {
       return;
     }
 
-    final TextSelection newSelection = TextSelection(
-      baseOffset: position.offset,
-      extentOffset: _selection.extentOffset,
-    );
-
-    if (newSelection.baseOffset >= newSelection.extentOffset) {
-      return; // Don't allow order swapping.
+    final TextSelection newSelection;
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        newSelection = TextSelection(
+          extentOffset: position.offset,
+          baseOffset: _selection.end,
+        );
+        if (newSelection.extentOffset >= _selection.end) {
+          return; // Don't allow order swapping.
+        }
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        newSelection = TextSelection(
+          baseOffset: position.offset,
+          extentOffset: _selection.extentOffset,
+        );
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
+          return; // Don't allow order swapping.
+        }
+        break;
     }
 
     _handleSelectionHandleChanged(newSelection, isEnd: false);
@@ -553,7 +589,7 @@ class SelectionOverlay {
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
     this.toolbarVisible,
-    required List<TextSelectionPoint> selectionEndPoints,
+    required List<TextSelectionPoint> selectionEndpoints,
     required this.selectionControls,
     required this.selectionDelegate,
     required this.clipboardStatus,
@@ -567,7 +603,7 @@ class SelectionOverlay {
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
-       _selectionEndPoints = selectionEndPoints,
+       _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation {
     final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
     assert(
@@ -685,13 +721,13 @@ class SelectionOverlay {
   final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.
-  List<TextSelectionPoint> get selectionEndPoints => _selectionEndPoints;
-  List<TextSelectionPoint> _selectionEndPoints;
-  set selectionEndPoints(List<TextSelectionPoint> value) {
-    if (!listEquals(_selectionEndPoints, value)) {
+  List<TextSelectionPoint> get selectionEndpoints => _selectionEndpoints;
+  List<TextSelectionPoint> _selectionEndpoints;
+  set selectionEndpoints(List<TextSelectionPoint> value) {
+    if (!listEquals(_selectionEndpoints, value)) {
       _markNeedsBuild();
     }
-    _selectionEndPoints = value;
+    _selectionEndpoints = value;
   }
 
   /// Debugging information for explaining why the [Overlay] is required.
@@ -764,7 +800,7 @@ class SelectionOverlay {
   /// The location of where the toolbar should be drawn in relative to the
   /// location of [toolbarLayerLink].
   ///
-  /// If this is null, the toolbar is drawn based on [selectionEndPoints] and
+  /// If this is null, the toolbar is drawn based on [selectionEndpoints] and
   /// the rect of render object of [context].
   ///
   /// This is useful for displaying toolbars at the mouse right-click locations
@@ -952,19 +988,19 @@ class SelectionOverlay {
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
     );
 
-    final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
+    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
         lineHeightAtEnd / 2;
 
     // If the selected text spans more than 1 line, horizontally center the toolbar.
     // Derived from both iOS and Android.
     final double midX = isMultiline
       ? editingRegion.width / 2
-      : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+      : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
 
     final Offset midpoint = Offset(
       midX,
       // The y-coordinate won't be made use of most likely.
-      selectionEndPoints.first.point.dy - lineHeightAtStart,
+      selectionEndpoints.first.point.dy - lineHeightAtStart,
     );
 
     return Directionality(
@@ -976,7 +1012,7 @@ class SelectionOverlay {
         editingRegion: editingRegion,
         selectionControls: selectionControls,
         midpoint: midpoint,
-        selectionEndpoints: selectionEndPoints,
+        selectionEndpoints: selectionEndpoints,
         visibility: toolbarVisible,
         selectionDelegate: selectionDelegate,
         clipboardStatus: clipboardStatus,
@@ -1116,7 +1152,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
 }
 
 class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
@@ -1419,6 +1454,9 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
   void onTapDown(TapDownDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
     renderEditable.handleTapDown(details);
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
@@ -1430,13 +1468,21 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    if (_isShiftPressed && renderEditable.selection?.baseOffset != null) {
-      _isShiftTapping = true;
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          // On these platforms, a shift-tapped unfocused field expands from 0,
-          // not from the previous selection.
+    final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // On mobile platforms the selection is set on tap up.
+        if (_isShiftTapping) {
+          _isShiftTapping = false;
+        }
+        break;
+      case TargetPlatform.macOS:
+        // On macOS, a shift-tapped unfocused field expands from 0, not from the
+        // previous selection.
+        if (isShiftPressedValid) {
+          _isShiftTapping = true;
           final TextSelection? fromSelection = renderEditable.hasFocus
               ? null
               : const TextSelection.collapsed(offset: 0);
@@ -1445,14 +1491,23 @@ class TextSelectionGestureDetectorBuilder {
             SelectionChangedCause.tap,
             fromSelection,
           );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
+          return;
+        }
+        // On macOS, a tap/click places the selection in a precise position.
+        // This differs from iOS/iPadOS, where if the gesture is done by a touch
+        // then the selection moves to the closest word edge, instead of a
+        // precise position.
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        if (isShiftPressedValid) {
+          _isShiftTapping = true;
           _extendSelection(details.globalPosition, SelectionChangedCause.tap);
-          break;
-      }
+          return;
+        }
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+        break;
     }
   }
 
@@ -1512,15 +1567,42 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleTapUp(TapUpDetails details) {
-    if (_isShiftTapping) {
-      _isShiftTapping = false;
-      return;
-    }
-
     if (delegate.selectionEnabled) {
+      // Handle shift + click selection if needed.
+      final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
         case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          // On desktop platforms the selection is set on tap down.
+          if (_isShiftTapping) {
+            _isShiftTapping = false;
+          }
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          if (isShiftPressedValid) {
+            _isShiftTapping = true;
+            _extendSelection(details.globalPosition, SelectionChangedCause.tap);
+            return;
+          }
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
+        case TargetPlatform.iOS:
+          if (isShiftPressedValid) {
+            // On iOS, a shift-tapped unfocused field expands from 0, not from
+            // the previous selection.
+            _isShiftTapping = true;
+            final TextSelection? fromSelection = renderEditable.hasFocus
+                ? null
+                : const TextSelection.collapsed(offset: 0);
+            _expandSelection(
+              details.globalPosition,
+              SelectionChangedCause.tap,
+              fromSelection,
+            );
+            return;
+          }
           switch (details.kind) {
             case PointerDeviceKind.mouse:
             case PointerDeviceKind.trackpad:
@@ -1531,17 +1613,10 @@ class TextSelectionGestureDetectorBuilder {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
+              // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
               break;
           }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           break;
       }
     }

@@ -10,23 +10,39 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_utils.dart';
 import '../runner/flutter_command.dart';
+import 'migrate_abandon.dart';
+import 'migrate_apply.dart';
 import 'migrate_status.dart';
 
 /// Base command for the migration tool.
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
-    bool verbose = false,
+    required bool verbose,
     required this.logger,
-    // TODO(garyq): Add parameter in as they are needed for subcommands.
     required FileSystem fileSystem,
+    required Terminal terminal,
     required Platform platform,
     required ProcessManager processManager,
   }) {
-    // TODO(garyq): Add each subcommand back in as they land.
     addSubcommand(MigrateStatusCommand(
       verbose: verbose,
       logger: logger,
       fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager
+    ));
+    addSubcommand(MigrateAbandonCommand(
+      logger: logger,
+      fileSystem: fileSystem,
+      terminal: terminal,
+      platform: platform,
+      processManager: processManager
+    ));
+    addSubcommand(MigrateApplyCommand(
+      verbose: verbose,
+      logger: logger,
+      fileSystem: fileSystem,
+      terminal: terminal,
       platform: platform,
       processManager: processManager
     ));
