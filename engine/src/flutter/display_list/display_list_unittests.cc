@@ -2250,5 +2250,58 @@ TEST(DisplayList, DiffClipPathDoesNotAffectClipBounds) {
   ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
 }
 
+TEST(DisplayList, FlatDrawPointsProducesBounds) {
+  SkPoint horizontal_points[2] = {{10, 10}, {20, 10}};
+  SkPoint vertical_points[2] = {{10, 10}, {10, 20}};
+  {
+    DisplayListBuilder builder;
+    builder.drawPoints(SkCanvas::kPolygon_PointMode, 2, horizontal_points);
+    SkRect bounds = builder.Build()->bounds();
+    EXPECT_TRUE(bounds.contains(10, 10));
+    EXPECT_TRUE(bounds.contains(20, 10));
+    EXPECT_GE(bounds.width(), 10);
+  }
+  {
+    DisplayListBuilder builder;
+    builder.drawPoints(SkCanvas::kPolygon_PointMode, 2, vertical_points);
+    SkRect bounds = builder.Build()->bounds();
+    EXPECT_TRUE(bounds.contains(10, 10));
+    EXPECT_TRUE(bounds.contains(10, 20));
+    EXPECT_GE(bounds.height(), 10);
+  }
+  {
+    DisplayListBuilder builder;
+    builder.drawPoints(SkCanvas::kPoints_PointMode, 1, horizontal_points);
+    SkRect bounds = builder.Build()->bounds();
+    EXPECT_TRUE(bounds.contains(10, 10));
+  }
+  {
+    DisplayListBuilder builder;
+    builder.setStrokeWidth(2);
+    builder.drawPoints(SkCanvas::kPolygon_PointMode, 2, horizontal_points);
+    SkRect bounds = builder.Build()->bounds();
+    EXPECT_TRUE(bounds.contains(10, 10));
+    EXPECT_TRUE(bounds.contains(20, 10));
+    EXPECT_EQ(bounds, SkRect::MakeLTRB(9, 9, 21, 11));
+  }
+  {
+    DisplayListBuilder builder;
+    builder.setStrokeWidth(2);
+    builder.drawPoints(SkCanvas::kPolygon_PointMode, 2, vertical_points);
+    SkRect bounds = builder.Build()->bounds();
+    EXPECT_TRUE(bounds.contains(10, 10));
+    EXPECT_TRUE(bounds.contains(10, 20));
+    EXPECT_EQ(bounds, SkRect::MakeLTRB(9, 9, 11, 21));
+  }
+  {
+    DisplayListBuilder builder;
+    builder.setStrokeWidth(2);
+    builder.drawPoints(SkCanvas::kPoints_PointMode, 1, horizontal_points);
+    SkRect bounds = builder.Build()->bounds();
+    EXPECT_TRUE(bounds.contains(10, 10));
+    EXPECT_EQ(bounds, SkRect::MakeLTRB(9, 9, 11, 11));
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter
