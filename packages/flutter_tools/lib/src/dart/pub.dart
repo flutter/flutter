@@ -455,7 +455,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, '__deprecated_pub', ...arguments];
+    return <String>[sdkPath, 'pub', ...arguments];
   }
 
   // Returns the environment value that should be used when running pub.
