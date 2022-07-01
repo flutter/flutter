@@ -1590,9 +1590,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
 
       final PipelineOwner? owner = this.owner;
-      // Detached nodes are allowed to mutate and the "can perform mutations`
-      // check will be performed when they re-attach. This assert is
-      // only useful during layout.
+      // Detached nodes are allowed to mutate and the "can perform mutations"
+      // check will be performed when they re-attach. This assert is only useful
+      // during layout.
       if (owner == null || !owner.debugDoingLayout) {
         result = true;
         return true;
