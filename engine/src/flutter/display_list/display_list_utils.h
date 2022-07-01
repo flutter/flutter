@@ -364,7 +364,7 @@ class BoundsAccumulator {
   bool is_not_empty() const { return min_x_ < max_x_ && min_y_ < max_y_; }
 
   SkRect bounds() const {
-    return (max_x_ > min_x_ && max_y_ > min_y_)
+    return (max_x_ >= min_x_ && max_y_ >= min_y_)
                ? SkRect::MakeLTRB(min_x_, min_y_, max_x_, max_y_)
                : SkRect::MakeEmpty();
   }
