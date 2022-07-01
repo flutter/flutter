@@ -112,7 +112,6 @@ void main() {
     await _createProject(projectDir, <String>[]);
     await _addDependency(projectDir, 'shared_preferences',
         version: '^2.0.0');
-
     // The plugin registrant for dartpad is created on flutter pub get.
     await _doFlutterPubGet(projectDir);
 
