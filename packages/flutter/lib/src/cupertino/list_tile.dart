@@ -382,11 +382,11 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       return child;
 
     return GestureDetector(
-      onTapDown: (_) => setState(() => _tapped = true),
-      onTapCancel: () => setState(() => _tapped = false),
+      onTapDown: (_) => setState(() { _tapped = true; }),
+      onTapCancel: () => setState(() { _tapped = false; }),
       onTap: () async {
         await widget.onTap!();
-        setState(() => _tapped = false);
+        setState(() { _tapped = false; });
       },
       behavior: HitTestBehavior.opaque,
       child: child,

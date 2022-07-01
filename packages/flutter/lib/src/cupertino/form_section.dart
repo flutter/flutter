@@ -61,7 +61,7 @@ const EdgeInsetsDirectional _kFormDefaultFooterMargin = EdgeInsetsDirectional.fr
 ///    [CupertinoFormSection].
 ///  * [CupertinoListSection], an iOS-style list section.
 class CupertinoFormSection extends StatelessWidget {
-  /// Creates a section that mimicks standard iOS forms.
+  /// Creates a section that mimics standard iOS forms.
   ///
   /// The base constructor for [CupertinoFormSection] constructs an
   /// edge-to-edge style section which includes an iOS-style header,
@@ -106,7 +106,7 @@ class CupertinoFormSection extends StatelessWidget {
         assert(children.length > 0),
         super(key: key);
 
-  /// Creates a section that mimicks standard "Inset Grouped" iOS forms.
+  /// Creates a section that mimics standard "Inset Grouped" iOS forms.
   ///
   /// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
   /// padded section that is commonly seen in notched-displays like iPhone X and
