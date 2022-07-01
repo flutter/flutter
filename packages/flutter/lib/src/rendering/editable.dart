@@ -186,6 +186,11 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
     return true;
   }
 
+  /// Move back to the previous element.
+  ///
+  /// Returns `true` and updates [current] if successful. Returns `false`
+  /// and updates [current] to an implementation defined state if there is no
+  /// previous element
   bool movePrevious() {
     assert(isValid);
     if (_currentLine <= 0) {
