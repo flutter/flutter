@@ -723,7 +723,7 @@ void main() {
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
-    
+
     // When drag cursor, the cursor shouldn't blink.
     await checkCursorNoBlinking();
 
@@ -733,7 +733,7 @@ void main() {
     // After dragging, the cursor should blink.
     await checkCursorBinking();
   });
-
+  
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
