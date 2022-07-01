@@ -175,7 +175,9 @@
 @end
 
 namespace flutter::testing {
-TEST(FlutterMenuPluginTest, TestSetMenu) {
+// TODO(gspencergoog): Re-enabled when deflaked
+// https://github.com/flutter/flutter/issues/106589
+TEST(FlutterMenuPluginTest, DISABLED_TestSetMenu) {
   ASSERT_TRUE([[FlutterMenuPluginTestObjc alloc] testSetMenu]);
 }
 }  // namespace flutter::testing
