@@ -1691,6 +1691,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 }
 
 /// A modal route that overlays a widget over the current route.
+///
+/// When [barrierDismissible] is true, the user can dismiss the route by tapping
+/// the modal barrier or pressing the escape key on the keyboard.
+///
+/// When [barrierDismissible] is false, the user can dismiss the route only by calling
+/// route popping functions such as [Navigator.pop].
+///
+/// {@tool dartpad}
+/// This example shows how to create a dialog box that is dismissible.
+///
+/// ** See code in examples/api/lib/widgets/routes/popup_route.0.dart **
+/// {@end-tool}
+///
+/// See also:
+/// * [ModalRoute], which is the base class for this class.
+/// * [Navigator.pop] to pop a route off the navigator.
 abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
