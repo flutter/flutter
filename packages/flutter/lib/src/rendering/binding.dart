@@ -59,7 +59,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-
     assert(() {
       // these service extensions only work in debug mode
       registerBoolServiceExtension(
@@ -215,7 +214,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _debugIsRenderViewInitialized = true;
       return true;
     }());
+    assert(!_hasDeviceMetrics);
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
+    if (renderView.configuration.size != Size.zero) {
+      _hasDeviceMetrics = true;
+    }
     renderView.prepareInitialFrame();
   }
   bool _debugIsRenderViewInitialized = false;
@@ -247,6 +250,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   void handleMetricsChanged() {
     assert(renderView != null);
     renderView.configuration = createViewConfiguration();
+    if (!_hasDeviceMetrics && renderView.configuration.size != Size.zero) {
+      _hasDeviceMetrics = true;
+      scheduleWarmUpFrame();
+    }
     if (renderView.child != null) {
       scheduleForcedFrame();
     }
@@ -398,6 +405,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   int _firstFrameDeferredCount = 0;
   bool _firstFrameSent = false;
+
+  @override
+  bool get isReadyForDoFrame => _hasDeviceMetrics;
+  bool _hasDeviceMetrics = false;
 
   /// Whether frames produced by [drawFrame] are sent to the engine.
   ///

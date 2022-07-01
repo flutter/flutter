@@ -735,6 +735,11 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
+  /// Whether ready for schedule a frame.
+  ///
+  /// Return true if the real [window] size is communicated.
+  bool get isReadyForDoFrame => true;
+
   /// Ensures callbacks for [PlatformDispatcher.onBeginFrame] and
   /// [PlatformDispatcher.onDrawFrame] are registered.
   @protected
@@ -864,7 +869,7 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
   void scheduleWarmUpFrame() {
-    if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle) {
+    if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle || !isReadyForDoFrame) {
       return;
     }
 
@@ -1041,6 +1046,9 @@ mixin SchedulerBinding on BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration? rawTimeStamp) {
+    if (!isReadyForDoFrame) {
+      return;
+    }
     _frameTimelineTask?.start('Frame');
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
@@ -1095,6 +1103,9 @@ mixin SchedulerBinding on BindingBase {
   /// See [handleBeginFrame] for a discussion about debugging hooks that may be
   /// useful when working with frame callbacks.
   void handleDrawFrame() {
+    if (!isReadyForDoFrame) {
+      return;
+    }
     assert(_schedulerPhase == SchedulerPhase.midFrameMicrotasks);
     _frameTimelineTask?.finish(); // end the "Animate" phase
     try {
