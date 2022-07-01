@@ -100,6 +100,53 @@ void main() {
           platform: globals.platform,
         ),
   });
+
+  testUsingContext(
+      'generated plugin registrant ignores lines longer than 80 chars',
+      () async {
+    await _createProject(projectDir, <String>[]);
+    await _addAnalysisOptions(
+        projectDir, <String>['lines_longer_than_80_chars']);
+    await _createProject(tempDir.childDirectory('test_plugin'), <String>[
+      '--template=plugin',
+      '--platforms=web',
+      '--project-name',
+      'test_web_plugin_with_a_purposefully_extremely_long_package_name',
+    ]);
+    // The line for the test web plugin (`  TestWebPluginWithAPurposefullyExtremelyLongPackageNameWeb.registerWith(registrar);`)
+    // exceeds 80 chars.
+    // With the above lint rule added, we want to ensure that the `generated_plugin_registrant.dart`
+    // file does not fail analysis (this is a regression test - an ignore was
+    // added to cover this case).
+    await _addDependency(
+      projectDir,
+      'test_web_plugin_with_a_purposefully_extremely_long_package_name',
+      path: '../test_plugin',
+    );
+    // The plugin registrant is only created after a build...
+    await _buildWebProject(projectDir);
+
+    // Find the web_plugin_registrant, now that it lives outside "lib":
+    final Directory buildDir = projectDir
+        .childDirectory('.dart_tool/flutter_build')
+        .listSync()
+        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+
+    expect(
+      buildDir.childFile('web_plugin_registrant.dart'),
+      exists,
+    );
+    await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          usage: globals.flutterUsage,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+        ),
+  });
 }
 
 Future<void> _ensureFlutterToolsSnapshot() async {
@@ -240,34 +287,18 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
 }
 
 Future<void> _buildWebProject(Directory workingDir) async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join(
-      '..',
-      '..',
-      'bin',
-      'cache',
-      'flutter_tools.snapshot',
-    ),
-  );
-
-  final List<String> args = <String>[
-    flutterToolsSnapshotPath,
-    'build',
-    'web',
-  ];
-
-  final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
-    args,
-    workingDirectory: workingDir.path,
-  );
-  printOnFailure('Output of flutter build web:');
-  printOnFailure(exec.stdout.toString());
-  printOnFailure(exec.stderr.toString());
-  expect(exec.exitCode, 0);
+  return _runFlutterSnapshot(<String>['build', 'web'], workingDir);
 }
 
 Future<void> _doFlutterPubGet(Directory workingDir) async {
+  return _runFlutterSnapshot(<String>['pub', 'get'], workingDir);
+}
+
+// Runs a flutter command from a snapshot build.
+// `flutterCommandArgs` are the arguments passed to flutter, like: ['build', 'web']
+// to run `flutter build web`.
+// `workingDir` is the directory on which the flutter command will be run.
+Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory workingDir) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
     globals.fs.path.join(
       '..',
@@ -280,8 +311,7 @@ Future<void> _doFlutterPubGet(Directory workingDir) async {
 
   final List<String> args = <String>[
     flutterToolsSnapshotPath,
-    'pub',
-    'get',
+    ...flutterCommandArgs
   ];
 
   final ProcessResult exec = await Process.run(
@@ -289,7 +319,7 @@ Future<void> _doFlutterPubGet(Directory workingDir) async {
     args,
     workingDirectory: workingDir.path,
   );
-  printOnFailure('Output of flutter pub get:');
+  printOnFailure('Output of flutter ${flutterCommandArgs.join(" ")}:');
   printOnFailure(exec.stdout.toString());
   printOnFailure(exec.stderr.toString());
   expect(exec.exitCode, 0);
