@@ -1585,12 +1585,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
-      ..trackColor = _showTrack
-          ? widget.trackColor ?? const Color(0x08000000)
-          : const Color(0x00000000)
-      ..trackBorderColor = _showTrack
-          ? widget.trackBorderColor ?? const Color(0x1a000000)
-          : const Color(0x00000000)
+      ..trackColor = _showTrack ? const Color(0x08000000) : const Color(0x00000000)
+      ..trackBorderColor = _showTrack ? const Color(0x1a000000) : const Color(0x00000000)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
