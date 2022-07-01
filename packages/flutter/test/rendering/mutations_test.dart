@@ -103,7 +103,11 @@ void main() {
       expect(error, isFlutterError);
       expect(
         (error! as FlutterError).message,
-        contains('A disposed RenderObject was mutated.'),
+        equalsIgnoringWhitespace(
+          'A disposed RenderObject was mutated.\n'
+          'The disposed RenderObject was:\n'
+          '${box.toStringShort()}'
+        )
       );
     });
 
@@ -114,27 +118,35 @@ void main() {
 
       expect(
         catchLayoutError(block).message,
-        allOf(
-          contains('A RenderLayoutTestBox was mutated in its own performLayout implementation.\n'),
-          contains('A RenderObject must not re-dirty itself while still being laid out.\n'),
+        equalsIgnoringWhitespace(
+          'A RenderLayoutTestBox was mutated in its own performLayout implementation.\n'
+          'A RenderObject must not re-dirty itself while still being laid out.\n'
+          'The RenderObject being mutated was:\n'
+          '${child1.toStringShort()}\n'
+          'Consider using the LayoutBuilder widget to dynamically change a subtree during layout.'
         )
       );
     });
 
     test('marking a sibling dirty in performLayout', () {
-      late RenderBox child1;
+      late RenderBox child1, child2;
       final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
       block.add(child1 = RenderLayoutTestBox(() {}));
-      block.add(RenderLayoutTestBox(() {}, onPerformLayout: () { child1.markNeedsLayout(); }));
+      block.add(child2 = RenderLayoutTestBox(() {}, onPerformLayout: () { child1.markNeedsLayout(); }));
 
       expect(
         catchLayoutError(block).message,
-        allOf(
-          contains('A RenderLayoutTestBox was mutated in RenderLayoutTestBox.performLayout.\n'),
-          contains('A RenderObject must not mutate another RenderObject from a different render subtree in its performLayout method.\n'),
-          contains('The RenderObject that was mutating the said RenderLayoutTestBox was:\n'),
-          contains('Their common ancestor was:'),
-        ),
+        equalsIgnoringWhitespace(
+          'A RenderLayoutTestBox was mutated in RenderLayoutTestBox.performLayout.\n'
+          'A RenderObject must not mutate another RenderObject from a different render subtree in its performLayout method.\n'
+          'The RenderObject being mutated was:\n'
+          '${child1.toStringShort()}\n'
+          'The RenderObject that was mutating the said RenderLayoutTestBox was:\n'
+          '${child2.toStringShort()}\n'
+          'Their common ancestor was:\n'
+          '${block.toStringShort()}\n'
+          'Mutating the layout of another RenderObject may cause some RenderObjects in its subtree to be laid out more than once. Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
+        )
       );
     });
 
@@ -146,17 +158,20 @@ void main() {
 
       expect(
         catchLayoutError(block).message,
-        allOf(
-          contains('A RenderLayoutTestBox was mutated in RenderFlex.performLayout.\n'),
-          contains('A RenderObject must not mutate its descendants in its performLayout method.\n'),
-          contains('The ancestor RenderObject that was mutating the said RenderLayoutTestBox was:\n'),
-          isNot(contains('Their common ancestor was:')),
+        equalsIgnoringWhitespace(
+          'A RenderLayoutTestBox was mutated in RenderFlex.performLayout.\n'
+          'A RenderObject must not mutate its descendants in its performLayout method.\n'
+          'The RenderObject being mutated was:\n'
+          '${child1.toStringShort()}\n'
+          'The ancestor RenderObject that was mutating the said RenderLayoutTestBox was:\n'
+          '${block.toStringShort()}\n'
+          'Mutating the layout of another RenderObject may cause some RenderObjects in its subtree to be laid out more than once. Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
         ),
       );
     });
 
     test('marking an out-of-band mutation in performLayout', () {
-      late RenderProxyBox child1, child11, child2;
+      late RenderProxyBox child1, child11, child2, child21;
       final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
       block.add(child1 = RenderLayoutTestBox(() {}));
       block.add(child2 = RenderLayoutTestBox(() {}));
@@ -165,10 +180,11 @@ void main() {
 
       expect(block.debugNeedsLayout, false);
       expect(child1.debugNeedsLayout, false);
+      expect(child11.debugNeedsLayout, false);
       expect(child2.debugNeedsLayout, false);
 
-      // Add a new child to a relayout boundary.
-      child2.child = RenderLayoutTestBox(() {}, onPerformLayout: child11.markNeedsLayout);
+      // Add a new child to child2 which is a relayout boundary.
+      child2.child = child21 = RenderLayoutTestBox(() {}, onPerformLayout: child11.markNeedsLayout);
 
       FlutterError? error;
       pumpFrame(onErrors: () {
@@ -177,10 +193,13 @@ void main() {
 
       expect(
         error?.message,
-        allOf(
-          contains('A RenderLayoutTestBox was mutated in RenderLayoutTestBox.performLayout.'),
-          contains('The RenderObject was marked as needing layout when none of its ancestors is actively performing layout.'),
-          isNot(contains('Their common ancestor was:')),
+        equalsIgnoringWhitespace(
+          'A RenderLayoutTestBox was mutated in RenderLayoutTestBox.performLayout.\n'
+          'The RenderObject was mutated when none of its ancestors is actively performing layout.\n'
+          'The RenderObject being mutated was:\n'
+          '${child11.toStringShort()}\n'
+          'The RenderObject that was mutating the said RenderLayoutTestBox was:\n'
+          '${child21.toStringShort()}'
         ),
       );
     });

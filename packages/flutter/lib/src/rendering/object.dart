@@ -1601,20 +1601,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       RenderObject? activeLayoutRoot = this;
       while (activeLayoutRoot != null && !activeLayoutRoot._debugMutationsLocked) {
         final bool mutationsToDirtySubtreesAllowed = activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
-        if (mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout) {
+        final bool doingLayoutWithCallback = activeLayoutRoot._doingThisLayoutWithCallback;
+        // It's allowed to mutate the subtree within a layout callback.
+        if (mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout || doingLayoutWithCallback) {
           result = true;
           return true;
         }
         final AbstractNode? p = activeLayoutRoot.parent;
         activeLayoutRoot = p is RenderObject ? p : null;
-      }
-
-      // Mutations are not permitted if the PipelineOwner is currently working
-      // on a render subtree that does not include this node. Otherwise,
-      // it's allowed to mutate the subtree within a layout callback.
-      if (activeLayoutRoot != null && activeLayoutRoot._doingThisLayoutWithCallback) {
-        result = true;
-        return true;
       }
 
       final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
@@ -1626,8 +1620,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A $runtimeType was mutated in $culpritFullMethodName.'),
           ErrorDescription(
-            'The RenderObject was marked as needing layout '
-            'when none of its ancestors is actively performing layout.',
+            'The RenderObject was mutated when none of its ancestors is actively performing layout.',
           ),
           DiagnosticsProperty<RenderObject>(
             'The RenderObject being mutated was',
@@ -1877,6 +1870,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Only call this if [parent] is not null.
   @protected
   void markParentNeedsLayout() {
+    assert(_debugCanPerformMutations);
     _needsLayout = true;
     assert(this.parent != null);
     final RenderObject parent = this.parent! as RenderObject;
