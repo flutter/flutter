@@ -538,6 +538,7 @@ class FloatingLabelAlignment {
 enum _DecorationSlot {
   icon,
   input,
+  errorWidget,
   label,
   hint,
   prefix,
@@ -565,6 +566,7 @@ class _Decoration {
     this.visualDensity,
     this.icon,
     this.input,
+    this.errorWidget,
     this.label,
     this.hint,
     this.prefix,
@@ -592,6 +594,7 @@ class _Decoration {
   final VisualDensity? visualDensity;
   final Widget? icon;
   final Widget? input;
+  final Widget? errorWidget;
   final Widget? label;
   final Widget? hint;
   final Widget? prefix;
@@ -621,6 +624,7 @@ class _Decoration {
         && other.visualDensity == visualDensity
         && other.icon == icon
         && other.input == input
+        && other.errorWidget == errorWidget
         && other.label == label
         && other.hint == hint
         && other.prefix == prefix
@@ -702,6 +706,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
+  RenderBox? get errorWidget => childForSlot(_DecorationSlot.errorWidget);
   RenderBox? get label => childForSlot(_DecorationSlot.label);
   RenderBox? get hint => childForSlot(_DecorationSlot.hint);
   RenderBox? get prefix => childForSlot(_DecorationSlot.prefix);
@@ -738,6 +743,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         counter!,
       if (container != null)
         container!,
+      if(errorWidget != null)
+        errorWidget!
     ];
   }
 
@@ -827,6 +834,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     if (label != null) {
       visitor(label!);
     }
+
+    if(errorWidget != null){
+      visitor(errorWidget!);
+    }
+
     if (hint != null) {
       if (isFocused) {
         visitor(hint!);
@@ -835,6 +847,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       }
     }
 
+    
     if (input != null)
       visitor(input!);
     if (suffixIcon != null)
@@ -1603,6 +1616,8 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
         return decoration.counter;
       case _DecorationSlot.container:
         return decoration.container;
+      case _DecorationSlot.errorWidget:
+      return decoration.errorWidget;
     }
   }
 
@@ -1821,6 +1836,7 @@ class InputDecorator extends StatefulWidget {
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
   late AnimationController _floatingLabelController;
   late AnimationController _shakingLabelController;
+  late AnimationController _shakingErrorController;
   final _InputBorderGap _borderGap = _InputBorderGap();
 
   @override
@@ -1842,6 +1858,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       duration: _kTransitionDuration,
       vsync: this,
     );
+
+    _shakingErrorController = AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+    );
   }
 
   @override
@@ -1854,6 +1875,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void dispose() {
     _floatingLabelController.dispose();
     _shakingLabelController.dispose();
+    _shakingErrorController.dispose();
     super.dispose();
   }
 
@@ -2162,6 +2184,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
+    final Widget? errorWidget = decoration!.errorWidget == null && decoration!.errorText == null ? null : _Shaker(
+      animation: _shakingErrorController.view,
+      child: decoration!.errorWidget ?? Text(
+        decoration!.errorText!,
+        overflow: TextOverflow.ellipsis,
+        textAlign: textAlign,
+      ),
+    );
+
+
+    
+
     final Widget? prefix = decoration!.prefix == null && decoration!.prefixText == null ? null :
       _AffixText(
         labelIsFloating: widget._labelShouldWithdraw,
@@ -2308,6 +2342,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         visualDensity: themeData.visualDensity,
         icon: icon,
         input: widget.child,
+        errorWidget: errorWidget,
         label: label,
         hint: hint,
         prefix: prefix,
@@ -2438,6 +2473,7 @@ class InputDecoration {
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
+    this.errorWidget,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -2477,6 +2513,7 @@ class InputDecoration {
     this.constraints,
   }) : assert(enabled != null),
        assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
+       assert(!(errorText != null && errorWidget != null), 'Declaring both error and errorWidget is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
@@ -2508,6 +2545,7 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
+       errorWidget = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2728,6 +2766,14 @@ class InputDecoration {
   /// In a [TextFormField], this is overridden by the value returned from
   /// [TextFormField.validator], if that is not null.
   final String? errorText;
+
+  /// Widget that appears below the [InputDecorator.child] and the border.
+  ///
+  /// If non-null, the border's color animates to red and the [helperText] is
+  /// not shown.
+  ///
+  /// Only one of [errorText] and [errorWidget] can be specified.
+  final Widget? errorWidget;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
   /// The style to use for the [InputDecoration.errorText].
@@ -3367,6 +3413,7 @@ class InputDecoration {
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
     int? hintMaxLines,
+    Widget? errorWidget,
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
@@ -3419,6 +3466,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
+      errorWidget: errorWidget ?? this.errorWidget,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3516,6 +3564,7 @@ class InputDecoration {
         && other.hintStyle == hintStyle
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
+        && other.errorWidget == errorWidget
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
@@ -3624,6 +3673,7 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
+      if (errorWidget != null) 'errorWidget: "$errorWidget"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
