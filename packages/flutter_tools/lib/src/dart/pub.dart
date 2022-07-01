@@ -242,9 +242,7 @@ class _DefaultPub implements Pub {
     final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
       if (verbose)
-        '--verbose'
-      else
-        '--verbosity=warning',
+        '--verbose',
       ...<String>[
         command,
         '--no-precompile',
@@ -455,7 +453,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, 'pub', ...arguments];
+    return <String>[sdkPath, '--no-analytics', 'pub', ...arguments];
   }
 
   // Returns the environment value that should be used when running pub.
