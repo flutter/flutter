@@ -19,6 +19,12 @@ import 'material_localizations.dart';
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
 
+const double _kHandleSize = 22.0;
+
+// Padding between the toolbar and the anchor.
+const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
+const double _kToolbarContentDistance = 8.0;
+
 /// A fully-functional Material-style text selection toolbar.
 ///
 /// Tries to position itself above [anchorAbove], but if it doesn't fit, then
@@ -87,10 +93,17 @@ class TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Incorporate the padding distance between the content and toolbar.
+    final Offset anchorAbovePadded =
+        anchorAbove - const Offset(0.0, _kToolbarContentDistance);
+    final Offset anchorBelowPadded =
+        anchorBelow + const Offset(0.0, _kToolbarContentDistanceBelow);
+
     final double paddingAbove = MediaQuery.of(context).padding.top
         + _kToolbarScreenPadding;
-    final double availableHeight = anchorAbove.dy - paddingAbove;
+    final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
+    // Makes up for the Padding above the Stack.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(
@@ -100,12 +113,13 @@ class TextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
         _kToolbarScreenPadding,
       ),
+      // TODO(justinmc): Is this Stack unnecessary?
       child: Stack(
         children: <Widget>[
           CustomSingleChildLayout(
             delegate: TextSelectionToolbarLayoutDelegate(
-              anchorAbove: anchorAbove - localAdjustment,
-              anchorBelow: anchorBelow - localAdjustment,
+              anchorAbove: anchorAbovePadded - localAdjustment,
+              anchorBelow: anchorBelowPadded - localAdjustment,
               fitsAbove: fitsAbove,
             ),
             child: _TextSelectionToolbarOverflowable(

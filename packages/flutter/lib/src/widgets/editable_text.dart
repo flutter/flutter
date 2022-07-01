@@ -19,6 +19,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'context_menu.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'focus_manager.dart';
@@ -262,10 +263,18 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// [EditableText] and its derived widgets have their own default [ToolbarOptions].
 /// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
 /// option.
+@Deprecated(
+  'Use `buildContextMenu` instead. '
+  'This feature was deprecated after v2.12.0-4.1.pre.',
+)
 class ToolbarOptions {
   /// Create a toolbar configuration with given options.
   ///
   /// All options default to false if they are not explicitly set.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   const ToolbarOptions({
     this.copy = false,
     this.cut = false,
@@ -545,6 +554,10 @@ class EditableText extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
     this.autofillClient,
@@ -553,6 +566,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextMenu,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -589,6 +603,7 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -1415,6 +1430,13 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@template flutter.widgets.EditableText.buildContextMenu}
+  /// Builds the text selection toolbar when requested by the user.
+  /// {@endtemplate}
+  ///
+  /// If not provided, no context menu will be shown.
+  final EditableTextToolbarBuilder? buildContextMenu;
+
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -1600,7 +1622,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
-  final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+
+  // TODO(justinmc): Could this be moved out of EditableText and into the
+  // toolbar widgets somewhere? I think it would have to be after the deprecated
+  // buildToolbar is removed.
+  // Otherwise, could it be private as it is on master?
+  /// Detects whether the clipboard can paste.
+  final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
   TextInputConnection? _textInputConnection;
   TextSelectionOverlay? _selectionOverlay;
@@ -1713,7 +1741,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
-    _clipboardStatus?.update();
+    clipboardStatus?.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -1739,7 +1767,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       hideToolbar();
     }
-    _clipboardStatus?.update();
+    clipboardStatus?.update();
   }
 
   /// Paste text from [Clipboard].
@@ -1798,6 +1826,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          hideToolbar();
+          break;
+      }
     }
   }
 
@@ -1810,7 +1849,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       vsync: this,
       duration: _fadeDuration,
     )..addListener(_onCursorColorTick);
-    _clipboardStatus?.addListener(_onChangedClipboardStatus);
+    clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_updateSelectionOverlayForScroll);
@@ -1930,8 +1969,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       }
     }
-    if (widget.selectionEnabled && pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false)) {
-      _clipboardStatus?.update();
+    final bool canPaste = widget.selectionControls is TextSelectionHandleControls
+        ? TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus!.value)
+        : widget.selectionControls?.canPaste(this) ?? false;
+    if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
+      clipboardStatus!.update();
     }
   }
 
@@ -1952,8 +1994,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
-    _clipboardStatus?.removeListener(_onChangedClipboardStatus);
-    _clipboardStatus?.dispose();
+    clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    clipboardStatus?.dispose();
     _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -2472,7 +2514,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _createSelectionOverlay() {
     _selectionOverlay = TextSelectionOverlay(
-      clipboardStatus: _clipboardStatus,
+      clipboardStatus: clipboardStatus,
       context: context,
       value: _value,
       debugRequiredFor: widget,
@@ -2484,6 +2526,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
+      buildContextMenu: (
+        BuildContext context,
+        Offset primaryAnchor,
+        [Offset? secondaryAnchor]
+      ) {
+        if (widget.buildContextMenu == null) {
+          return const SizedBox.shrink();
+        }
+        return widget.buildContextMenu!(
+          context,
+          this,
+          primaryAnchor,
+          secondaryAnchor,
+        );
+      },
     );
   }
 
@@ -2520,7 +2577,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         break;
     }
-    if (widget.selectionControls == null) {
+    if (widget.selectionControls == null && widget.buildContextMenu == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else {
@@ -3030,7 +3087,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
       return false;
     }
-    _clipboardStatus?.update();
+    clipboardStatus?.update();
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3140,8 +3197,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && copyEnabled
         && _hasFocus
-        && (controls?.canCopy(this) ?? false)
-      ? () => controls!.handleCopy(this)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? TextSelectionToolbarButtonDatasBuilder.canCopy(this)
+            : widget.selectionControls?.canCopy(this) ?? false)
+      ? () {
+        controls?.handleCopy(this);
+        copySelection(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
@@ -3149,8 +3211,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && cutEnabled
         && _hasFocus
-        && (controls?.canCut(this) ?? false)
-      ? () => controls!.handleCut(this)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? TextSelectionToolbarButtonDatasBuilder.canCut(this)
+            : widget.selectionControls?.canCut(this) ?? false)
+      ? () {
+        controls?.handleCut(this);
+        cutSelection(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
@@ -3158,9 +3225,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && pasteEnabled
         && _hasFocus
-        && (controls?.canPaste(this) ?? false)
-        && (_clipboardStatus == null || _clipboardStatus!.value == ClipboardStatus.pasteable)
-      ? () => controls!.handlePaste(this)
+        && (widget.selectionControls is TextSelectionHandleControls
+            ? TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus?.value ?? ClipboardStatus.pasteable)
+            : widget.selectionControls?.canPaste(this) ?? false)
+        && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
+      ? () {
+        controls?.handlePaste(this);
+        pasteText(SelectionChangedCause.toolbar);
+      }
       : null;
   }
 
@@ -3382,7 +3454,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    return MouseRegion(
+    final Widget child = MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
         actions: _actions,
@@ -3477,12 +3549,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ),
       ),
     );
+
+    return child;
   }
 
   /// Builds [TextSpan] from current editing value.
   ///
   /// By default makes text in composing range appear as underlined.
-  /// Descendants can override this method to customize appearance of text.
+  /// Descendants can override this method to customize appearance of text
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
       String text = _value.text;

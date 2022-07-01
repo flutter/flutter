@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
@@ -55,6 +56,26 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// Called when this button is pressed.
   /// {@endtemplate}
   final VoidCallback? onPressed;
+
+  /// Returns the default button label String for the button of the given
+  /// [ContextMenuButtonType].
+  static String getButtonLabel(ContextMenuButtonData buttonData, CupertinoLocalizations localizations) {
+    if (buttonData.label != null) {
+      return buttonData.label!;
+    }
+    switch (buttonData.type) {
+      case ContextMenuButtonType.cut:
+        return localizations.cutButtonLabel;
+      case ContextMenuButtonType.copy:
+        return localizations.copyButtonLabel;
+      case ContextMenuButtonType.paste:
+        return localizations.pasteButtonLabel;
+      case ContextMenuButtonType.selectAll:
+        return localizations.selectAllButtonLabel;
+      case ContextMenuButtonType.custom:
+        return '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
