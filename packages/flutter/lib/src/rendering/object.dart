@@ -1599,23 +1599,33 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
 
       RenderObject? activeLayoutRoot = this;
-      while (activeLayoutRoot != null && !activeLayoutRoot._debugMutationsLocked) {
+      while (activeLayoutRoot != null) {
         final bool mutationsToDirtySubtreesAllowed = activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
         final bool doingLayoutWithCallback = activeLayoutRoot._doingThisLayoutWithCallback;
-        // It's allowed to mutate the subtree within a layout callback.
-        if (mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout || doingLayoutWithCallback) {
+        // Mutations on this subtree is allowed when:
+        // - the subtree is being mutated in a layout callback.
+        // - a different part of the render tree is doing a layout callback,
+        //   and this subtree is being reparented to that subtree, as a result
+        //   of global key reparenting.
+        if (doingLayoutWithCallback || mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout) {
           result = true;
           return true;
         }
-        final AbstractNode? p = activeLayoutRoot.parent;
-        activeLayoutRoot = p is RenderObject ? p : null;
+
+        if (!activeLayoutRoot._debugMutationsLocked) {
+          final AbstractNode? p = activeLayoutRoot.parent;
+          activeLayoutRoot = p is RenderObject ? p : null;
+        } else {
+          // activeLayoutRoot found.
+          break;
+        }
       }
 
       final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
       final String culpritMethodName = debugActiveLayout.debugDoingThisLayout ? 'performLayout' : 'performResize';
       final String culpritFullMethodName = '${debugActiveLayout.runtimeType}.$culpritMethodName';
-      assert(activeLayoutRoot == null || activeLayoutRoot._debugMutationsLocked);
       result = false;
+
       if (activeLayoutRoot == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A $runtimeType was mutated in $culpritFullMethodName.'),
