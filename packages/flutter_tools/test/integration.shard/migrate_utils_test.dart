@@ -205,13 +205,17 @@ void main() {
       expect(projectRoot.childFile('README.md').existsSync(), true);
 
       final Directory appDir = fileSystem.systemTempDirectory.createTempSync('flutter_app');
-      await utils.createFromTemplates(
-        projectRoot.childDirectory('bin').path,
-        name: 'testapp',
-        androidLanguage: 'java',
-        iosLanguage: 'objc',
-        outputDirectory: appDir.path,
-      );
+      try {
+        await utils.createFromTemplates(
+          projectRoot.childDirectory('bin').path,
+          name: 'testapp',
+          androidLanguage: 'java',
+          iosLanguage: 'objc',
+          outputDirectory: appDir.path,
+        );
+      } on ToolExit catch (toolExit) {
+        fail('Creating a new app from template failed:\n${logger.errorText}\n$toolExit');
+      }
       expect(appDir.childFile('pubspec.yaml').existsSync(), true);
       expect(appDir.childFile('.metadata').existsSync(), true);
       expect(appDir.childFile('.metadata').readAsStringSync(), contains(revision));
