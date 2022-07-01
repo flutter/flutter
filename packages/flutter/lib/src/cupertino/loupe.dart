@@ -30,7 +30,7 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
     _inOutAnimationController = AnimationController(
       value: 0,
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 75),
     )..addListener(() => setState(() {}));
     super.initState();
   }
@@ -50,23 +50,19 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
   }
 
   void _updateRealLoupePosition() {
-    final Offset bottomCenterRawLoupePosition =
+    final Offset requestedLoupeFocalPoint =
         widget.controller.requestedPosition.value;
 
-    // TODO this math can be done w/ alginment so it is more clear
-    // Since we want the bottom center of our loupe to be right where the requested
-    // position is, create a new rect tha
-    final Rect globalLoupeRect =
-        (bottomCenterRawLoupePosition & CupertinoLoupe._kLoupeSize).shift(
-            Offset(
-                -CupertinoLoupe._kLoupeSize.width,
-                -(CupertinoLoupe._kLoupeSize.height * 2) +
-                    CupertinoLoupe._kVerticalFocalPointOffset));
+    final Offset rawLoupePosition = requestedLoupeFocalPoint -
+        Offset(
+            CupertinoLoupe._kLoupeSize.width / 2,
+            CupertinoLoupe._kLoupeSize.height -
+                CupertinoLoupe._kVerticalFocalPointOffset);
 
     final Offset adjustedLoupePosition = LoupeController.shiftWithinBounds(
       bounds: Offset.zero & MediaQuery.of(context).size,
-      rect: globalLoupeRect,
-    ).bottomCenter;
+      rect: rawLoupePosition & CupertinoLoupe._kLoupeSize,
+    ).topLeft;
 
     setState(() {
       _realLoupePosition = adjustedLoupePosition;
@@ -78,27 +74,25 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
     return Positioned(
         left: _realLoupePosition.dx,
         top: _realLoupePosition.dy,
-        child: Transform.translate(
-          offset: Offset(0, -37.5 * (_inOutAnimationController.value - 1)),
-          child: Opacity(
-            opacity: 0.8,
-            child: Loupe(
-              transitionAnimationController: _inOutAnimationController,
-              controller: widget.controller,
-              elevation: 6,
-              focalPoint: Offset(
-                  0,
-                  CupertinoLoupe._kVerticalFocalPointOffset -
-                      CupertinoLoupe._kLoupeSize.height),
-              border:
-                  Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
-              //borderRadius: const Radius.circular(36),
-              shadowColor: const Color.fromARGB(108, 255, 255, 255),
-              size: CupertinoLoupe._kLoupeSize,
-              positionAnimation: Curves.easeIn,
-              positionAnimationDuration: const Duration(milliseconds: 50),
+        child: Loupe(
+          transitionAnimationController: _inOutAnimationController,
+          controller: widget.controller,
+          focalPoint: Offset(
+              0,
+              CupertinoLoupe._kVerticalFocalPointOffset -
+                  CupertinoLoupe._kLoupeSize.height / 2),
+          decoration: LoupeDecoration(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
+            border: Border.all(color: const Color.fromARGB(255, 235, 235, 235)),
+            shadow: const BoxShadow(
+              color: Color.fromARGB(105, 215, 215, 215),
+              blurRadius: 2,
+              spreadRadius: 3,
+              offset: Offset(0, 3)
             ),
           ),
+          size: CupertinoLoupe._kLoupeSize,
         ));
   }
 }

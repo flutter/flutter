@@ -171,6 +171,15 @@ class LoupeController {
   }
 }
 
+class LoupeDecoration /* extends Decoration */ {
+  final ShapeBorder shape;
+  final Border? border;
+  final BoxShadow? shadow;
+
+  const LoupeDecoration(
+      {this.shape = const RoundedRectangleBorder(), this.border, this.shadow});
+}
+
 /// A common building base for Loupes, that is managed nby a
 ///
 /// See:
@@ -180,25 +189,19 @@ class LoupeController {
 class Loupe extends StatefulWidget {
   const Loupe(
       {super.key,
-      this.border,
       required this.controller,
-      this.shape = const RoundedRectangleBorder(),
-      required this.shadowColor,
       this.magnificationScale = 1,
-      this.elevation = 0,
       required this.size,
       this.focalPoint = Offset.zero,
       this.child,
-      this.positionAnimationDuration = Duration.zero,
-      this.positionAnimation = Curves.linear,
+      this.decoration = const LoupeDecoration(),
       this.transitionAnimationController})
       : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
   final AnimationController? transitionAnimationController;
 
-  final Duration positionAnimationDuration;
-  final Curve positionAnimation;
+  final LoupeDecoration decoration;
 
   final LoupeController controller;
 
@@ -217,24 +220,6 @@ class Loupe extends StatefulWidget {
   /// Since the loupe is never displayed out of bounds, this offset will be shrunk
   /// in the case that the offset
   final Offset focalPoint;
-
-  /// The corner radius of the loupe.
-  final Radius borderRadius;
-
-  /// An optional border for the loupe.
-  ///
-  /// This border respects [borderRadius] and wraps the
-  /// entire [_Magnifier].
-  final Border? border;
-
-  /// The color of the shadow that the [Loupe] casts.
-  ///
-  /// The shadow will not be shown in the [Loupe], irrespective of
-  /// [offset] and [elevation].
-  final Color shadowColor;
-
-  /// The elevation of the loupe, backed by [PhysicalModel.elevation].
-  final double elevation;
 
   /// An optional widget to posiiton inside the len of the [_Magnifier].
   ///
@@ -355,19 +340,16 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
       clipBehavior: Clip.none,
       children: <Widget>[
         ClipPath.shape(
-          shape: widget.shape,
+          shape: widget.decoration.shape,
           child: BackdropFilter(
             filter: _createMagnificationFilter(),
-            blendMode: BlendMode.src,
             child: SizedBox.fromSize(size: widget.size, child: widget.child),
           ),
         ),
         _LoupeStyle(
-            shape: widget.shape,
-            elevation: widget.elevation,
-            size: widget.size,
-            border: widget.border,
-            shadowColor: widget.shadowColor)
+          widget.decoration,
+          size: widget.size,
+        )
       ],
     );
   }
@@ -383,43 +365,25 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
 }
 
 class _LoupeStyle extends StatelessWidget {
-  const _LoupeStyle(
-      {required this.borderRadius,
-      required this.elevation,
-      required this.size,
-      required this.shadowColor,
-      this.border});
+  const _LoupeStyle(this.decoration, {required this.size});
 
-  final Radius borderRadius;
-  final double elevation;
+  final LoupeDecoration decoration;
   final Size size;
-  final Color shadowColor;
-  final Border? border;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size.width,
-      height: size.height,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(borderRadius), border: border),
-      child: ClipPath(
-        clipBehavior: Clip.hardEdge,
-        clipper: _DonutClip(
-          borderRadius: borderRadius,
-        ),
-        child: PhysicalModel(
-          borderRadius: BorderRadius.all(borderRadius),
-          shadowColor: shadowColor,
-          elevation: elevation,
-          color: const Color.fromARGB(255, 255, 255, 255),
-          child: Container(
-            decoration:
-                BoxDecoration(borderRadius: BorderRadius.all(borderRadius)),
-            child: SizedBox.fromSize(
-              size: size,
-            ),
-          ),
+    return ClipPath(
+      clipBehavior: Clip.hardEdge,
+      clipper: _DonutClip(
+        shape: decoration.shape,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+            boxShadow: decoration.shadow != null
+                ? <BoxShadow>[decoration.shadow!]
+                : null),
+        child: SizedBox.fromSize(
+          size: size,
         ),
       ),
     );

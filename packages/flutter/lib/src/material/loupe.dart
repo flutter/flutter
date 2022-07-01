@@ -17,6 +17,8 @@ class MaterialLoupe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Container();
+    /*
     return Loupe(
       controller: controller,
       elevation: 4,
@@ -27,5 +29,6 @@ class MaterialLoupe extends StatelessWidget {
       size: const Size(100, 48),
       //TODO: child needs to be a gray film
     );
+    */
   }
 }
