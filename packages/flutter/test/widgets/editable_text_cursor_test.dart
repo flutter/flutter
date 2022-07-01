@@ -656,6 +656,97 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets("Drag the floating cursor, it won't blink", (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableText =
+        tester.state(find.byType(EditableText));
+
+    // Check that the cursor visibility toggles after each blink interval.
+    Future<void> checkCursorToggle() async {
+      final bool initialShowCursor = editableText.cursorCurrentlyVisible;
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+    }
+
+    // Check that the cursor visibility .
+    Future<void> checkCursorQuitely() async {
+      final bool initialShowCursor = true;
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+    }
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(EditableText));
+
+    await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+    await tester.pumpAndSettle();
+
+    await checkCursorToggle();
+
+    // await tester.tap(find.byType(EditableText));
+    // final RenderEditable renderEditable = findRenderEditable(tester);
+    // renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    // expect(controller.selection.baseOffset, 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+    
+    await checkCursorQuitely();
+
+    // editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update));
+
+
+    // expect(controller.selection.baseOffset, 29);
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+
+    await tester.pumpAndSettle();
+
+    await checkCursorToggle();
+    // The cursor did not change.
+    // expect(controller.selection.baseOffset, 29);
+    // expect(tester.takeException(), null);
+  });
+
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
