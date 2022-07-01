@@ -122,13 +122,6 @@ Future<void> main() async {
         expect(binding.defaultTestTimeout, newTimeout);
       });
     });
-
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    testWidgets('root widgets are wrapped with a RepaintBoundary', (WidgetTester tester) async {
-      await tester.pumpWidget(const Placeholder());
-
-      expect(find.byType(RepaintBoundary), findsOneWidget);
-    });
   });
 
   tearDownAll(() async {
