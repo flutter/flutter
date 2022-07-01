@@ -211,8 +211,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Mustn't be null.
   final Animation<double> fadeoutOpacityAnimation;
 
-  /// Distance from the scrollbar's start and end to the edge of the viewport
-  /// in logical pixels. It affects the amount of available paint area.
+  /// Distance from the scrollbar thumb's start and end to the edge of the
+  /// viewport in logical pixels. It affects the amount of available paint area.
+  ///
+  /// The scrollbar track consumes this space.
   ///
   /// Mustn't be null and defaults to 0.
   double get mainAxisMargin => _mainAxisMargin;
@@ -229,6 +231,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   /// Distance from the scrollbar thumb to the nearest cross axis edge
   /// in logical pixels.
+  ///
+  /// The scrollbar track consumes this space.
   ///
   /// Must not be null and defaults to 0.
   double get crossAxisMargin => _crossAxisMargin;
@@ -488,7 +492,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = crossAxisMargin + padding.left;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+        trackOffset = Offset(x - crossAxisMargin, padding.top);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
         borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
         break;
@@ -497,7 +501,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+        trackOffset = Offset(x - crossAxisMargin, padding.top);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
         break;
@@ -506,7 +510,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = crossAxisMargin + padding.top;
-        trackOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+        trackOffset = Offset(padding.left, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
         break;
@@ -515,7 +519,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+        trackOffset = Offset(padding.left, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
         break;
@@ -563,13 +567,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         0.0,
         1.0);
 
+    // Scrollbar thumb respects margin, track paints full length.
+    final double traversibleTrackExtent = _trackExtent - (2 * mainAxisMargin);
+
     final double thumbExtent = math.max(
-      math.min(_trackExtent, minOverscrollLength),
-      _trackExtent * fractionVisible,
+      math.min(traversibleTrackExtent, minOverscrollLength),
+      traversibleTrackExtent * fractionVisible,
     );
 
     final double fractionOverscrolled = 1.0 - _lastMetrics!.extentInside / _lastMetrics!.viewportDimension;
-    final double safeMinLength = math.min(minLength, _trackExtent);
+    final double safeMinLength = math.min(minLength, traversibleTrackExtent);
     final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
       // Thumb extent is no smaller than minLength if scrolling normally.
       ? safeMinLength
@@ -588,7 +595,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.
-    return clampDouble(thumbExtent, newMinLength, _trackExtent);
+    final double extent = clampDouble(thumbExtent, newMinLength, traversibleTrackExtent);
+    return extent;
   }
 
   @override
@@ -605,7 +613,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Padding of the thumb track.
   double get _mainAxisPadding => _isVertical ? padding.vertical : padding.horizontal;
   // The size of the thumb track.
-  double get _trackExtent => _lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding;
+  double get _trackExtent => _lastMetrics!.viewportDimension - _mainAxisPadding;
 
   // The total size of the scrollable content.
   double get _totalContentExtent {
@@ -630,12 +638,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // thumb track.
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
     final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
+    final double traversibleExtent = _trackExtent - 2 * mainAxisMargin;
 
     final double fractionPast = (scrollableExtent > 0)
       ? clampDouble((metrics.pixels - metrics.minScrollExtent) / scrollableExtent, 0.0, 1.0)
       : 0;
 
-    return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);
+    return (_isReversed ? 1 - fractionPast : fractionPast) * (traversibleExtent - thumbExtent);
   }
 
   @override
@@ -1342,14 +1351,18 @@ class RawScrollbar extends StatefulWidget {
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
 
-  /// Distance from the scrollbar's start and end to the edge of the viewport
-  /// in logical pixels. It affects the amount of available paint area.
+  /// Distance from the scrollbar thumb's start and end to the edge of the
+  /// viewport in logical pixels. It affects the amount of available paint area.
+  ///
+  /// The scrollbar track consumes this space.
   ///
   /// Mustn't be null and defaults to 0.
   final double mainAxisMargin;
 
-  /// Distance from the scrollbar thumb side to the nearest cross axis edge
+  /// Distance from the scrollbar thumb's side to the nearest cross axis edge
   /// in logical pixels.
+  ///
+  /// The scrollbar track consumes this space.
   ///
   /// Must not be null and defaults to 0.
   final double crossAxisMargin;
