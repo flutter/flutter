@@ -1575,12 +1575,20 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  bool get isReadyForDoFrame => _hasDeviceMetrics;
+
+  bool _hasDeviceMetrics = false;
+
+  @override
   void initRenderView() {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
       window: window,
     );
+    if (renderView.configuration.size != Size.zero) {
+      _hasDeviceMetrics = true;
+    }
     renderView.prepareInitialFrame();
   }
 

@@ -59,6 +59,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
+
     assert(() {
       // these service extensions only work in debug mode
       registerBoolServiceExtension(
