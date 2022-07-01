@@ -190,4 +190,3 @@ ButtonStyle disabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
     side: selected ? null : BorderSide(color: colors.outline.withOpacity(0.12)),
   );
 }
-
