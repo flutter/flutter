@@ -14,12 +14,14 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 import dev.flutter.scenarios.ExternalTextureFlutterActivity;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
+@Ignore("Test had flakes in Skia Gold image matching.")
 public class ExternalTextureTests {
   private static final int SURFACE_WIDTH = 192;
   private static final int SURFACE_HEIGHT = 256;
