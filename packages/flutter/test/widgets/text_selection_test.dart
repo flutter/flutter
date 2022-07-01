@@ -557,9 +557,9 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
         break;
+      case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

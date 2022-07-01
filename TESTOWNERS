@@ -70,6 +70,7 @@
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/plugin_dependencies_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/raster_cache_use_memory_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/opacity_peephole_col_of_rows_perf__e2e_summary.dart @flar @flutter/engine
@@ -198,6 +199,7 @@
 /dev/devicelab/bin/tasks/module_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/native_ui_tests_macos.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/platform_channel_sample_test_windows.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @jmagman @flutter/ios
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
