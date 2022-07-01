@@ -198,7 +198,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> super.widget);
 
   final Map<S, Element> _slotToChild = <S, Element>{};
-  Map<GlobalKey, S> _globalKeyToSlot = <GlobalKey, S>{};
+  Map<Key, S> _keyToSlot = <Key, S>{};
 
   @override
   SlottedContainerRenderObjectMixin<S> get renderObject => super.renderObject as SlottedContainerRenderObjectMixin<S>;
@@ -240,24 +240,24 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     }(), '${widget.runtimeType}.slots must not change.');
     assert(slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length == slottedMultiChildRenderObjectWidgetMixin.slots.length, 'slots must be unique');
 
-    final Map<GlobalKey, S> oldGlobalKeyedSlots = _globalKeyToSlot;
-    _globalKeyToSlot = <GlobalKey, S>{};
+    final Map<Key, S> oldKeyedSlots = _keyToSlot;
+    _keyToSlot = <Key, S>{};
 
-    // New slots for children that are moved to a different slot by global key
+    // New slots for children that are moved to a different slot by key
     // reparenting. It shouldn't be updated in place because two children could
     // swap slots.
     final Map<S, Element> slotToKeyedChild = <S, Element>{};
 
-    // Process children that need to be moved to new slots because of global
-    // key reparenting first.
+    // Process children that need to be moved to new slots because of key
+    // reparenting first.
     for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
       final Widget? widget = slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot);
       final Key? newWidgetKey = widget?.key;
-      if (widget != null && newWidgetKey is GlobalKey) {
-        final S? oldSlot = oldGlobalKeyedSlots[newWidgetKey];
-        _globalKeyToSlot[newWidgetKey] = slot;
+      if (widget != null && newWidgetKey != null) {
+        final S? oldSlot = oldKeyedSlots[newWidgetKey];
+        _keyToSlot[newWidgetKey] = slot;
         if (oldSlot != null && oldSlot != slot) {
-          slotToKeyedChild[slot] = _updateSlotForGlobalKeyedChild(widget, oldSlot, slot);
+          slotToKeyedChild[slot] = _updateSlotForKeyedChild(widget, oldSlot, slot);
         }
       }
     }
@@ -271,7 +271,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     }
   }
 
-  Element _updateSlotForGlobalKeyedChild(Widget widget, S oldSlot, S newSlot) {
+  Element _updateSlotForKeyedChild(Widget widget, S oldSlot, S newSlot) {
     final Element? oldChild = _slotToChild.remove(oldSlot);
     final Element? newChild = updateChild(oldChild, widget, newSlot);
     assert(newChild != null);

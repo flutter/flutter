@@ -139,9 +139,9 @@ void main() {
     expect(_RenderTest().publicNameForSlot(slot), slot.toString());
   });
 
-  testWidgets('global key reparenting', (WidgetTester tester) async {
-    final Widget widget1 = SizedBox(key: GlobalKey(debugLabel: 'smol'), height: 10, width: 10);
-    final Widget widget2 = SizedBox(key: GlobalKey(debugLabel: 'big'), height: 100, width: 100);
+  testWidgets('key reparenting', (WidgetTester tester) async {
+    const Widget widget1 = SizedBox(key: ValueKey<String>('smol'), height: 10, width: 10);
+    const Widget widget2 = SizedBox(key: ValueKey<String>('big'), height: 100, width: 100);
 
     await tester.pumpWidget(buildWidget(topLeft: widget1, bottomRight: widget2));
     final _RenderDiagonal renderObject = tester.renderObject(find.byType(_Diagonal));
