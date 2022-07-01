@@ -199,7 +199,7 @@ class CupertinoListSection extends StatelessWidget {
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoListSection({
-    Key? key,
+    super.key,
     this.children,
     this.header,
     this.footer,
@@ -214,8 +214,7 @@ class CupertinoListSection extends StatelessWidget {
   }) : assert((children != null && children.length > 0) || header != null),
        _type = CupertinoListSectionType.base,
        additionalDividerMargin = additionalDividerMargin ??
-           (hasLeading ? _kBaseAdditionalDividerMargin : 0.0),
-       super(key: key);
+           (hasLeading ? _kBaseAdditionalDividerMargin : 0.0);
 
   /// Creates a section that mimicks standard "Inset Grouped" iOS list section.
   ///
@@ -263,7 +262,7 @@ class CupertinoListSection extends StatelessWidget {
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoListSection.insetGrouped({
-    Key? key,
+    super.key,
     this.children,
     this.header,
     this.footer,
@@ -281,8 +280,7 @@ class CupertinoListSection extends StatelessWidget {
            (hasLeading
                ? _kInsetAdditionalDividerMargin
                : _kInsetAdditionalDividerMarginWithoutLeading),
-       margin = margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader),
-       super(key: key);
+       margin = margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader);
 
   final CupertinoListSectionType _type;
 

@@ -116,7 +116,7 @@ class CupertinoListTile extends StatefulWidget {
   /// look, depending on a type of [CupertinoListTile]. For native look, it
   /// should not be provided.
   const CupertinoListTile({
-    Key? key,
+    super.key,
     required this.title,
     this.subtitle,
     this.additionalInfo,
@@ -128,8 +128,7 @@ class CupertinoListTile extends StatefulWidget {
     this.padding,
     this.leadingSize = _kLeadingSize,
     this.leadingToTitle = _kLeadingToTitle,
-  }) : _type = _CupertinoListTileType.base,
-       super(key: key);
+  }) : _type = _CupertinoListTileType.base;
 
   /// Creates a notched iOS-style list tile like the tiles in iOS Notes app or
   /// Reminders app.
@@ -180,7 +179,7 @@ class CupertinoListTile extends StatefulWidget {
   /// look, depending on a type of [CupertinoListTile]. For native look, it
   /// should not be provided.
   const CupertinoListTile.notched({
-    Key? key,
+    super.key,
     required this.title,
     this.subtitle,
     this.additionalInfo,
@@ -192,8 +191,7 @@ class CupertinoListTile extends StatefulWidget {
     this.padding,
     this.leadingSize = _kNotchedLeadingSize,
     this.leadingToTitle = _kNotchedLeadingToTitle,
-  }) : _type = _CupertinoListTileType.notched,
-       super(key: key);
+  }) : _type = _CupertinoListTileType.notched;
 
   final _CupertinoListTileType _type;
 
@@ -378,8 +376,9 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       ),
     );
 
-    if (widget.onTap == null)
+    if (widget.onTap == null) {
       return child;
+    }
 
     return GestureDetector(
       onTapDown: (_) => setState(() { _tapped = true; }),
@@ -402,7 +401,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
 class CupertinoListTileChevron extends StatelessWidget {
   /// Creates a typical widget used to denote that a `CupertinoListTile` is a
   /// button with action.
-  const CupertinoListTileChevron({Key? key}) : super(key: key);
+  const CupertinoListTileChevron({super.key});
 
   @override
   Widget build(BuildContext context) {
