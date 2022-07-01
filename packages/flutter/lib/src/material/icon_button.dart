@@ -108,7 +108,6 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// If [isSelected] is null it will behave as a normal button. If [isSelected] is not
 /// null then it will behave as a toggle button. If [isSelected] is true then it will
 /// show [selectedIcon], if it false it will show the normal [icon].
-/// Pressing the button will toggle the state.
 ///
 /// {@tool dartpad}
 /// This sample shows creation of [IconButton] widgets for standard, filled,
