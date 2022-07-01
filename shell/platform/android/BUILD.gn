@@ -590,7 +590,10 @@ zip_bundle("android_javadoc") {
 if (target_cpu != "x86") {
   zip_bundle("gen_snapshot") {
     gen_snapshot_bin = "gen_snapshot"
-    gen_snapshot_path = rebase_path("$root_out_dir/clang_x64/$gen_snapshot_bin")
+    gen_snapshot_out_dir = get_label_info(
+            "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
+            "root_out_dir")
+    gen_snapshot_path = rebase_path("$gen_snapshot_out_dir/$gen_snapshot_bin")
 
     if (host_os == "linux") {
       output = "$android_zip_archive_dir/linux-x64.zip"
@@ -598,6 +601,35 @@ if (target_cpu != "x86") {
       output = "$android_zip_archive_dir/darwin-x64.zip"
     } else if (host_os == "win") {
       output = "$android_zip_archive_dir/windows-x64.zip"
+      gen_snapshot_bin = "gen_snapshot.exe"
+      gen_snapshot_path = rebase_path("$root_out_dir/$gen_snapshot_bin")
+    }
+
+    files = [
+      {
+        source = gen_snapshot_path
+        destination = gen_snapshot_bin
+      },
+    ]
+
+    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+  }
+
+  # TODO(godofredoc): Remove gen_snapshot and rename new_gen_snapshot when v2 migration is complete.
+  # BUG: https://github.com/flutter/flutter/issues/105351
+  zip_bundle("new_gen_snapshot") {
+    gen_snapshot_bin = "gen_snapshot"
+    gen_snapshot_out_dir = get_label_info(
+            "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
+            "root_out_dir")
+    gen_snapshot_path = rebase_path("$gen_snapshot_out_dir/$gen_snapshot_bin")
+
+    if (host_os == "linux") {
+      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/linux-x64.zip"
+    } else if (host_os == "mac") {
+      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/darwin-x64.zip"
+    } else if (host_os == "win") {
+      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/windows-x64.zip"
       gen_snapshot_bin = "gen_snapshot.exe"
       gen_snapshot_path = rebase_path("$root_out_dir/$gen_snapshot_bin")
     }
