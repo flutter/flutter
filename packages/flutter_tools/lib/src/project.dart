@@ -734,7 +734,20 @@ class WebProject extends FlutterProjectPlatform {
       .childDirectory('web')
       .childFile('index.html');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {}
+  /// The .dart_tool/dartpad directory
+  Directory get dartpadToolDirectory => parent.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('dartpad');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
+    /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
+    /// See: https://github.com/dart-lang/dart-services/pull/874
+    await injectBuildTimePluginFiles(
+      parent,
+      destination: dartpadToolDirectory,
+      webPlatform: true,
+    );
+  }
 }
 
 /// The Fuchsia sub project.
