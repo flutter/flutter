@@ -338,6 +338,45 @@ void main() {
     ]);
   });
 
+  testWidgets('Transform.scale with 0.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.scale(
+        scale: 0.0,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1)); // root transform layer
+
+    await tester.pumpWidget(
+      Transform.scale(
+        scaleX: 0.0,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+
+    await tester.pumpWidget(
+      Transform.scale(
+        scaleY: 0.0,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+
+    await tester.pumpWidget(
+      Transform.scale(
+        scale: 0.01, // small but non-zero
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(3));
+  });
+
+
   testWidgets('Translated child into translated box - hit test', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     bool pointerDown = false;

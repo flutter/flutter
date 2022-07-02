@@ -2605,6 +2605,12 @@ class RenderTransform extends RenderProxyBox {
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
+          // if either the x or y is scaled by `0.0` nothing will be drawn anyway,
+          // so short-circuit and avoid more work.
+          if (transform[0] == 0.0 || transform[5] == 0.0) {
+            layer = null;
+            return;
+          }
           layer = context.pushTransform(
             needsCompositing,
             offset,
