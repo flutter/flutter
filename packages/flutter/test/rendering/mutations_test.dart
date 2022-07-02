@@ -79,7 +79,7 @@ void main() {
     expect(movedChild2, isFalse);
   });
 
-  group('Throws when invalid mutations are attempted: ', () {
+  group('Throws when illegal mutations are attempted: ', () {
     FlutterError catchLayoutError(RenderBox box) {
       Object? error;
       layout(box, onErrors: () {
