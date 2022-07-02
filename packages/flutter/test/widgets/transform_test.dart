@@ -338,7 +338,18 @@ void main() {
     ]);
   });
 
-  testWidgets('Transform.scale with 0.0', (WidgetTester tester) async {
+  testWidgets('Transform.rotate does not remove layers due to singular short-circuit', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(3));
+  });
+
+  testWidgets('Transform.scale with 0.0 does not paint child layers', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.scale(
         scale: 0.0,
