@@ -297,11 +297,106 @@ class ExpansionTile extends StatefulWidget {
   /// which means that the expansion arrow icon will appear on the tile's trailing edge.
   final ListTileControlAffinity? controlAffinity;
 
+  /// Finds the [ExpansionTileState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will cause an
+  /// assert in debug mode, and throw an exception in release mode.
+  ///
+  /// {@tool dartpad}
+  /// Typical usage of the [ExpansionTile.of] function is to call it from within the
+  /// `build` method of a child of a [ExpansionTile].
+  ///
+  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.of.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// When the [ExpansionTile] is actually created in the same `build` function, the
+  /// `context` argument to the `build` function can't be used to find the
+  /// [ExpansionTile] (since it's "above" the widget being returned in the widget
+  /// tree). In such cases, the following technique with a [Builder] can be used
+  /// to provide a new scope with a [BuildContext] that is "under" the
+  /// [ExpansionTile]:
+  ///
+  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.of.1.dart **
+  /// {@end-tool}
+  ///
+  /// A more efficient solution is to split your build function into several
+  /// widgets. This introduces a new context from which you can obtain the
+  /// [ExpansionTile]. In this solution, you would have an outer widget that creates
+  /// the [ExpansionTile] populated by instances of your new inner widgets, and then
+  /// in these inner widgets you would use [ExpansionTile.of].
+  ///
+  /// An other solution is assign a [GlobalKey] to the [ExpansionTile], then use
+  /// the `key.currentState` property to obtain the [ExpansionTileState].
+  /// This is the recommended solution if you want to access the [ExpansionTileState]
+  /// from a place in the widget tree which is not a descendant of the [ExpansionTile].
+  ///
+  /// If there is no [ExpansionTile] in scope, then this will throw an exception.
+  /// To return null if there is no [ExpansionTile], use [maybeOf] instead.
+  static ExpansionTileState of(BuildContext context) {
+    assert(context != null);
+    final ExpansionTileState? result = context.findAncestorStateOfType<ExpansionTileState>();
+    if (result != null) {
+      return result;
+    }
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'ExpansionTileState.of() called with a context that does not contain a ExpansionTile.',
+      ),
+      ErrorDescription(
+        'No ExpansionTile ancestor could be found starting from the context that was passed to ExpansionTile.of(). '
+            'This usually happens when the context provided is from the same StatefulWidget as that '
+            'whose build function actually creates the ExpansionTile widget being sought.',
+      ),
+      ErrorHint(
+        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+        'context that is "under" the ExpansionTile. For an example of this, please see the '
+        'documentation for ExpansionTile.of():\n'
+        '  https://api.flutter.dev/flutter/material/ExpansionTile/of.html',
+      ),
+      ErrorHint(
+        'A more efficient solution is to split your build function into several widgets. This '
+        'introduces a new context from which you can obtain the ExpansionTile. In this solution, '
+        'you would have an outer widget that creates the ExpansionTile populated by instances of '
+        'your new inner widgets, and then in these inner widgets you would use ExpansionTile.of().\n'
+        'An other solution is assign a GlobalKey to the ExpansionTile, '
+        'then use the key.currentState property to obtain the ExpansionTile rather than '
+        'using the ExpansionTile.of() function.',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
+
+  /// Finds the [ExpansionTileState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will return null.
+  /// To throw an exception instead, use [of] instead of this function.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function to this one that throws if no instance
+  ///    encloses the given context. Also includes some sample code in its
+  ///    documentation.
+  static ExpansionTileState? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.findAncestorStateOfType<ExpansionTileState>();
+  }
+
   @override
-  State<ExpansionTile> createState() => _ExpansionTileState();
+  State<ExpansionTile> createState() => ExpansionTileState();
 }
 
-class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
+/// State for an [ExpansionTile].
+///
+/// Allows to expand or collapse the [ExpansionTile] programmatically.
+///
+/// Retrieve a [ExpansionTileState]:
+///  * using [ExpansionTile.of]
+///  * assign a [GlobalKey] to the [ExpansionTile], then use the `key.currentState`
+///  property to obtain the [ExpansionTileState]
+class ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
   static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
@@ -344,7 +439,58 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     super.dispose();
   }
 
-  void _handleTap() {
+  /// Whether this [ExpansionTile] is in expanded state.
+  ///
+  /// This property doesn't take the animation into account. It reports `true`
+  /// even if the expansion animation is not completed.
+  ///
+  /// See also:
+  ///
+  ///  * [ExpansionTile.expand], which expands the [ExpansionTile].
+  ///  * [ExpansionTile.collapse], which collapses the [ExpansionTile].
+  bool get isExpanded => _isExpanded;
+
+  /// Expands the current [ExpansionTile].
+  ///
+  /// Normally the tile is expanded automatically when the user tap on the header.
+  /// It can be useful sometime to trigger the expansion programmatically due
+  /// to some external changes.
+  ///
+  /// If the tile is already in the expanded state (see [isExpanded]), calling
+  /// this method has no effect.
+  ///
+  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
+  ///
+  /// See also:
+  ///
+  ///  * [ExpansionTile.collapse], which collapses the [ExpansionTile].
+  void expand() {
+    if (!_isExpanded) {
+      _toggleExpansion();
+    }
+  }
+
+  /// Collapses the current [ExpansionTile].
+  ///
+  /// Normally the tile is collapsed automatically when the user tap on the header.
+  /// It can be useful sometime to trigger the collapse programmatically due
+  /// to some external changes.
+  ///
+  /// If the tile is already in the collapsed state (see [isExpanded]), calling
+  /// this method has no effect.
+  ///
+  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
+  ///
+  /// See also:
+  ///
+  ///  * [ExpansionTile.expand], which expands the [ExpansionTile].
+  void collapse() {
+    if (_isExpanded) {
+      _toggleExpansion();
+    }
+  }
+
+  void _toggleExpansion() {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -362,6 +508,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
+  }
+
+  void _handleTap() {
+    _toggleExpansion();
   }
 
   // Platform or null affinity defaults to trailing.

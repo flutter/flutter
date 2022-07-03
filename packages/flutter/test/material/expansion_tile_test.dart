@@ -666,4 +666,163 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
   });
+
+  testWidgets('ExpansionTileState can programmatically expand and collapse ExpansionTile', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          children: <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileState state = tester.firstState(find.byType(ExpansionTile));
+    expect(find.text('Child 0'), findsNothing);
+    expect(state.isExpanded, isFalse);
+    state.expand();
+    expect(state.isExpanded, isTrue);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(state.isExpanded, isTrue);
+    state.collapse();
+    expect(state.isExpanded, isFalse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+  });
+
+  testWidgets('Calling ExpansionTileState.expand/collapsed has no effect if it is already expanded/collapsed',
+          (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          initiallyExpanded: true,
+          children: <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileState state = tester.firstState(find.byType(ExpansionTile));
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(state.isExpanded, isTrue);
+    state.expand();
+    expect(state.isExpanded, isTrue);
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(find.text('Child 0'), findsOneWidget);
+    state.collapse();
+    expect(state.isExpanded, isFalse);
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.pumpAndSettle();
+    expect(state.isExpanded, isFalse);
+    expect(find.text('Child 0'), findsNothing);
+    state.collapse();
+    expect(state.isExpanded, isFalse);
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('Call to ExpansionTile.of()', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey childKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          title: Text('Title', key: titleKey),
+          children: <Widget>[
+            Text('Child 0', key: childKey),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileState state1 = ExpansionTile.of(childKey.currentContext!);
+    expect(state1.isExpanded, isTrue);
+
+    final ExpansionTileState state2 = ExpansionTile.of(titleKey.currentContext!);
+    expect(state2.isExpanded, isTrue);
+
+    expect(state1, state2);
+  });
+
+  testWidgets('Call to ExpansionTile.maybeOf()', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey nonDescendantKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('Title', key: titleKey),
+              children: const <Widget>[
+                Text('Child 0'),
+              ],
+            ),
+            Text('Non descendant', key: nonDescendantKey),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileState? state1 = ExpansionTile.maybeOf(titleKey.currentContext!);
+    expect(state1, isNotNull);
+    expect(state1?.isExpanded, isFalse);
+
+    final ExpansionTileState? state2 = ExpansionTile.maybeOf(nonDescendantKey.currentContext!);
+    expect(state2, isNull);
+  });
+
+  testWidgets('Call to ExpansionTile.of() without context', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            ExpansionTile.of(context);
+            return Container();
+          },
+        ),
+      ),
+    );
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception as FlutterError;
+    expect(error.diagnostics.length, 5);
+    expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      equalsIgnoringHashCodes(
+          'There are several ways to avoid this problem. The simplest is to\n'
+          'use a Builder to get a context that is "under" the ExpansionTile.\n'
+          'For an example of this, please see the documentation for\n'
+          'ExpansionTile.of():\n'
+          '  https://api.flutter.dev/flutter/material/ExpansionTile/of.html\n'
+      ),
+    );
+    expect(error.diagnostics[3].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[3].toStringDeep(),
+      equalsIgnoringHashCodes(
+          'A more efficient solution is to split your build function into\n'
+          'several widgets. This introduces a new context from which you can\n'
+          'obtain the ExpansionTile. In this solution, you would have an\n'
+          'outer widget that creates the ExpansionTile populated by\n'
+          'instances of your new inner widgets, and then in these inner\n'
+          'widgets you would use ExpansionTile.of().\n'
+          'An other solution is assign a GlobalKey to the ExpansionTile,\n'
+          'then use the key.currentState property to obtain the\n'
+          'ExpansionTile rather than using the ExpansionTile.of() function.\n'
+      ),
+    );
+    await tester.pumpAndSettle();
+  });
+
 }
