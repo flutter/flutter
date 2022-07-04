@@ -1375,7 +1375,8 @@ mixin WidgetInspectorService {
   /// project.
   ///
   /// The local project directories are used to distinguish widgets created by
-  /// the local project over widgets created from inside the framework.
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
   @protected
   @Deprecated(
     'Use addPubRootDirectories instead. '
@@ -1388,11 +1389,9 @@ mixin WidgetInspectorService {
   /// Resets the list of directories, that should be considered part of the
   /// local project, to the value passed in [pubRootDirectories].
   ///
-  /// If no value is passed in [pubRootDirectories] then the list of directories
-  /// is set to an empty array.
-  ///
   /// The local project directories are used to distinguish widgets created by
-  /// the local project over widgets created from inside the framework.
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
   @visibleForTesting
   @protected
   void resetPubRootDirectories() {
@@ -1404,7 +1403,8 @@ mixin WidgetInspectorService {
   /// project.
   ///
   /// The local project directories are used to distinguish widgets created by
-  /// the local project over widgets created from inside the framework.
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
   @protected
   void addPubRootDirectories(List<String> pubRootDirectories) {
     pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
@@ -1420,6 +1420,10 @@ mixin WidgetInspectorService {
 
   /// Remove a list of directories that should no longer be considered part
   /// of the local project.
+  /// 
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
   @protected
   void removePubRootDirectories(List<String> pubRootDirectories) {
     if (_pubRootDirectories == null) {
