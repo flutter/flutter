@@ -446,8 +446,8 @@ class ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderS
   ///
   /// See also:
   ///
-  ///  * [ExpansionTile.expand], which expands the [ExpansionTile].
-  ///  * [ExpansionTile.collapse], which collapses the [ExpansionTile].
+  ///  * [expand], which expands the [ExpansionTile].
+  ///  * [collapse], which collapses the [ExpansionTile].
   bool get isExpanded => _isExpanded;
 
   /// Expands the current [ExpansionTile].
@@ -463,7 +463,8 @@ class ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderS
   ///
   /// See also:
   ///
-  ///  * [ExpansionTile.collapse], which collapses the [ExpansionTile].
+  ///  * [collapse], which collapses the tile.
+  ///  * [isExpanded] to check whether the tile is expanded.
   void expand() {
     if (!_isExpanded) {
       _toggleExpansion();
@@ -483,7 +484,8 @@ class ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderS
   ///
   /// See also:
   ///
-  ///  * [ExpansionTile.expand], which expands the [ExpansionTile].
+  ///  * [expand], which expands the tile.
+  ///  * [isExpanded] to check whether the tile is expanded.
   void collapse() {
     if (_isExpanded) {
       _toggleExpansion();
