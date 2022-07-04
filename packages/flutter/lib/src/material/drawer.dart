@@ -683,7 +683,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    return ListTileTheme(
+    return ListTileTheme.merge(
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),
     );

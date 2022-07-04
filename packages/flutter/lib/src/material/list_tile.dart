@@ -759,7 +759,7 @@ class ListTile extends StatelessWidget {
       ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     return InkWell(
-      customBorder: shape ?? tileTheme.shape ?? theme.listTileTheme.shape,
+      customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
       mouseCursor: effectiveMouseCursor,
