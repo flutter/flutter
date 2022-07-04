@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: const ExpansionTile(
           title: Text('ExpansionTile'),
-          children: [
+          children: <Widget>[
             MyExpansionTileBody(),
           ],
         ),
