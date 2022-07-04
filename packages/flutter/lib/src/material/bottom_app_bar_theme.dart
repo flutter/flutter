@@ -66,12 +66,14 @@ class BottomAppBarTheme with Diagnosticable {
     double? elevation,
     NotchedShape? shape,
     double? height,
+    Color? surfaceTintColor,
   }) {
     return BottomAppBarTheme(
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
       height: height ?? this.height,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
     );
   }
 
@@ -92,6 +94,7 @@ class BottomAppBarTheme with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: t < 0.5 ? a?.shape : b?.shape,
       height: lerpDouble(a?.height, b?.height, t),
+      surfaceTintColor: Color.lerp(a?.color, b?.color, t),
     );
   }
 
@@ -101,6 +104,7 @@ class BottomAppBarTheme with Diagnosticable {
     elevation,
     shape,
     height,
+    surfaceTintColor,
   );
 
   @override
@@ -115,7 +119,8 @@ class BottomAppBarTheme with Diagnosticable {
         && other.color == color
         && other.elevation == elevation
         && other.shape == shape
-        && other.height == height;
+        && other.height == height
+        && other.surfaceTintColor == surfaceTintColor;
   }
 
   @override
@@ -125,5 +130,6 @@ class BottomAppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('height', height, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
   }
 }
