@@ -14,8 +14,8 @@ import 'theme.dart';
 // Examples can assume:
 // late Widget bottomAppBarContents;
 
-/// A container that is typically used with [Scaffold.bottomNavigationBar], and
-/// can have a notch along the top that makes room for an overlapping
+/// A container that is typically used with [Scaffold.bottomNavigationBar],
+/// on old material it can have a notch along the top that makes room for an overlapping
 /// [FloatingActionButton].
 ///
 /// Typically used with a [Scaffold] and a [FloatingActionButton].
@@ -99,11 +99,13 @@ class BottomAppBar extends StatefulWidget {
   /// value is non-negative.
   ///
   /// If this property is null then [BottomAppBarTheme.elevation] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null, the default value
-  /// is 8.
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null and
+  /// [ThemeData.useMaterial3] is true, than the default value is 3 else is 8.
   final double? elevation;
 
   /// The notch that is made for the floating action button.
+  ///
+  /// Material 3 doesn't applies any notch, so this property has no effect on [BottomAppBar].
   ///
   /// If this property is null then [BottomAppBarTheme.shape] of
   /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
@@ -134,9 +136,8 @@ class BottomAppBar extends StatefulWidget {
 
   /// The double value used to indicate the height of the [BottomAppBar].
   ///
-  /// If this is null, default value is the minimum in relation to the content.
-  ///
-  /// On Material 3, if [ThemeData.useMaterial3] is true the default height value is 80.0.
+  /// If this is null, the default value is the minimum in relation to the content,
+  /// unless [ThemeData.useMaterial3] is true, in which case it defaults to 80.0.
   final double? height;
 
   @override
