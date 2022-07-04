@@ -1393,11 +1393,10 @@ mixin WidgetInspectorService {
   ///
   /// The local project directories are used to distinguish widgets created by
   /// the local project over widgets created from inside the framework.
+  @visibleForTesting
   @protected
-  void resetPubRootDirectories([List<String> pubRootDirectories = const <String>[]]) {
-    _pubRootDirectories = pubRootDirectories
-      .map<String>((String directory) => Uri.parse(directory).path)
-      .toList();
+  void resetPubRootDirectories() {
+    _pubRootDirectories = <String>[];
     _isLocalCreationCache.clear();
   }
 

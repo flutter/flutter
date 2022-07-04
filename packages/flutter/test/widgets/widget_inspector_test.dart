@@ -947,7 +947,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Element elementB = find.text('b').evaluate().first;
 
       service.disposeAllGroups();
-      service.resetPubRootDirectories(<String>[]);
+      service.resetPubRootDirectories();
       service.setSelection(elementA, 'my-group');
       final Map<String, Object?> jsonA = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
       final Map<String, Object?> creationLocationA = jsonA['creationLocation']! as Map<String, Object?>;
@@ -1009,7 +1009,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Strip a couple subdirectories away to generate a plausible pub root
         // directory.
         pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-        service.resetPubRootDirectories(<String>[pubRootTest]);
+        service.resetPubRootDirectories();
+        service.addPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -1071,7 +1072,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Strip a couple subdirectories away to generate a plausible pub root
         // directory.
         pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-        service.resetPubRootDirectories(<String>[pubRootTest]);
+        service.resetPubRootDirectories();
+        service.addPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -1529,7 +1531,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             // Strip off /src/widgets/text.dart.
             final String pubRootFramework =
                 '/${pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/')}';
-            service.resetPubRootDirectories(<String>[]);
+            service.resetPubRootDirectories();
             service.addPubRootDirectories(<String>[pubRootFramework]);
             expect(
               json.decode(service.getSelectedWidget(null, 'my-group')),
@@ -1541,7 +1543,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               isNot(contains('createdByLocalProject')),
             );
 
-            service.resetPubRootDirectories(<String>[]);
+            service.resetPubRootDirectories();
             service
                 .addPubRootDirectories(<String>[pubRootFramework, pubRootTest]);
             service.setSelection(elementA, 'my-group');
@@ -1712,14 +1714,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = find.text('a').evaluate().first;
             service.setSelection(elementA, 'my-group');
 
-            service.resetPubRootDirectories(<String>[pubRootTest]);
+            service.resetPubRootDirectories();
+            service.addPubRootDirectories(<String>[pubRootTest]);
 
             expect(
               json.decode(service.getSelectedWidget(null, 'my-group')),
               contains('createdByLocalProject'),
             );
 
-            service.resetPubRootDirectories(<String>[]);
+            service.resetPubRootDirectories();
 
             expect(
               json.decode(service.getSelectedWidget(null, 'my-group')),
@@ -2048,11 +2051,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Element elementA = find.text('a').evaluate().first;
 
       service.disposeAllGroups();
-      service.resetPubRootDirectories(<String>[]);
+      service.resetPubRootDirectories();
       service.setSelection(elementA, 'my-group');
       final Map<String, dynamic> jsonA = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, dynamic>;
 
-      service.resetPubRootDirectories(<String>[]);
+      service.resetPubRootDirectories();
       Map<String, Object?> rootJson = (await service.testExtension('getRootWidgetSummaryTree', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
       // We haven't yet properly specified which directories are summary tree
       // directories so we get an empty tree other than the root that is always
@@ -2071,7 +2074,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-      service.resetPubRootDirectories(<String>[pubRootTest]);
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
 
       rootJson = (await service.testExtension('getRootWidgetSummaryTree', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
       childrenJson = rootJson['children']! as List<Object?>;
@@ -2136,12 +2140,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final DiagnosticsNode richTextDiagnostic = children.first;
 
       service.disposeAllGroups();
-      service.resetPubRootDirectories(<String>[]);
+      service.resetPubRootDirectories();
       service.setSelection(elementA, 'my-group');
       final Map<String, Object?> jsonA = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
       service.setSelection(richTextDiagnostic.value, 'my-group');
 
-      service.resetPubRootDirectories(<String>[]);
+      service.resetPubRootDirectories();
       Map<String, Object?>? summarySelection = await service.testExtension('getSelectedSummaryWidget', <String, String>{'objectGroup': group}) as Map<String, Object?>?;
       // No summary selection because we haven't set the pub root directories
       // yet to indicate what directories are in the summary tree.
@@ -2155,7 +2159,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-      service.resetPubRootDirectories(<String>[pubRootTest]);
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
 
       summarySelection = (await service.testExtension('getSelectedSummaryWidget', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
       expect(summarySelection['valueId'], isNotNull);
@@ -2186,7 +2191,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Element elementB = find.text('b').evaluate().first;
 
       service.disposeAllGroups();
-      service.resetPubRootDirectories(<String>[]);
+      service.resetPubRootDirectories();
       service.setSelection(elementA, 'my-group');
       final Map<String, Object?> jsonA = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
       final Map<String, Object?> creationLocationA = jsonA['creationLocation']! as Map<String, Object?>;
@@ -2222,7 +2227,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         });
 
         setUp(() async {
-          service.resetPubRootDirectories(<String>[]);
+          service.resetPubRootDirectories();
         });
 
         testWidgets(
@@ -2306,7 +2311,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         });
 
         setUp((){
-          service.resetPubRootDirectories(<String>[]);
+          service.resetPubRootDirectories();
         });
 
         testWidgets(
@@ -2522,7 +2527,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             // Strip off /src/widgets/text.dart.
             final String pubRootFramework =
                 '/${pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/')}';
-            service.resetPubRootDirectories(<String>[]);
+            service.resetPubRootDirectories();
             await service.testExtension(
               'setPubRootDirectories',
               <String, String>{'arg0': pubRootFramework},
@@ -2543,7 +2548,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               isNot(contains('createdByLocalProject')),
             );
 
-            service.resetPubRootDirectories(<String>[]);
+            service.resetPubRootDirectories();
             await service.testExtension(
               'setPubRootDirectories',
               <String, String>{'arg0': pubRootFramework, 'arg1': pubRootTest},
@@ -2580,7 +2585,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         });
 
         setUp(() async {
-          service.resetPubRootDirectories(<String>[]);
+          service.resetPubRootDirectories();
         });
 
         testWidgets(
@@ -2816,7 +2821,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         });
 
         setUp(() async {
-          service.resetPubRootDirectories(<String>[]);
+          service.resetPubRootDirectories();
         });
 
         testWidgets(
@@ -2904,7 +2909,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         });
 
         setUp(() async {
-          service.resetPubRootDirectories(<String>[]);
+          service.resetPubRootDirectories();
         });
 
         testWidgets(
@@ -2979,7 +2984,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-      service.resetPubRootDirectories(<String>[pubRootTest]);
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
 
       final List<Map<Object, Object?>> rebuildEvents =
           service.getEventsDispatched('Flutter.RebuiltWidgets');
@@ -3189,7 +3195,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-      service.resetPubRootDirectories(<String>[pubRootTest]);
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
 
       final List<Map<Object, Object?>> repaintEvents =
           service.getEventsDispatched('Flutter.RepaintWidgets');
@@ -3930,7 +3937,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<String> segments = Uri.parse(file).pathSegments;
       // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-      service.resetPubRootDirectories(<String>[pubRootTest]);
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
 
       final String summary = service.getRootWidgetSummaryTree('foo1');
       // ignore: avoid_dynamic_calls
@@ -4149,8 +4157,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   }
 
   static void setupDefaultPubRootDirectory(TestWidgetInspectorService service) {
+    service.resetPubRootDirectories();
     service
-        .resetPubRootDirectories(<String>[generateTestPubRootDirectory(service)]);
+        .addPubRootDirectories(<String>[generateTestPubRootDirectory(service)]);
   }
 }
 
