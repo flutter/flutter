@@ -748,6 +748,12 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
+  /// the pubRootDirectories that are currently configured for the widget inspector.
+  /// 
+  /// This is for testing use only.
+  @visibleForTesting
+  @protected
+  List<String>? get pubRootDirectories => _pubRootDirectories == null ? const <String>[] : List<String>.from(_pubRootDirectories!);
   List<String>? _pubRootDirectories;
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();

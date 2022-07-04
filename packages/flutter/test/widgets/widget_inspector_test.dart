@@ -1201,6 +1201,89 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[3].runtimeType, StringProperty);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());  // [intended] Test requires --track-widget-creation flag.
 
+    group('pubRootDirectory', () {
+      const String directoryA = '/a/b/c';
+      const String directoryB = '/d/e/f';
+      const String directoryC = '/g/h/i';
+
+      setUp(() {
+        service.resetPubRootDirectories();
+      });
+
+      group('addPubRootDirectories', () {
+        test('can add multiple directories', () {
+          const List<String> directories = <String>[directoryA, directoryB];
+          service.addPubRootDirectories(directories);
+
+          expect(service.pubRootDirectories, equals(directories));
+        });
+
+        test('can add multiple directories seperately', () {
+          service.addPubRootDirectories(<String>[directoryA]);
+          service.addPubRootDirectories(<String>[directoryB]);
+          service.addPubRootDirectories(<String>[]);
+
+          expect(service.pubRootDirectories, equals(<String>[directoryA, directoryB]));
+        });
+
+        test('handles duplicates', () {
+          const List<String> directories = <String>[
+            directoryA,
+            'file://$directoryA',
+            directoryB,
+            directoryB
+          ];
+          service.addPubRootDirectories(directories);
+
+          expect(service.pubRootDirectories, equals(<String>[
+            directoryA,
+            directoryB,
+          ]));
+        });
+      });
+
+      group('removePubRootDirectories', () {
+        setUp(() {
+          service.addPubRootDirectories(<String>[directoryA, directoryB, directoryC]);
+        });
+
+        test('removes multiple directories', () {
+          service.removePubRootDirectories(<String>[directoryA, directoryB,]);
+
+          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+        });
+
+        test('removes multiple directories seperately', () {
+          service.removePubRootDirectories(<String>[directoryA]);
+          service.removePubRootDirectories(<String>[directoryB]);
+          service.removePubRootDirectories(<String>[]);
+
+          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+        });
+
+        test('handles duplicates', () {
+          service.removePubRootDirectories(<String>[
+            'file://$directoryA',
+            directoryA,
+            directoryB,
+            directoryB,
+          ]);
+
+          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+        });
+
+        test("does nothing if the directories doesn't exist ", () {
+          service.removePubRootDirectories(<String>['/x/y/z']);
+
+          expect(service.pubRootDirectories, equals(<String>[
+            directoryA,
+            directoryB,
+            directoryC,
+          ]));
+        });
+      });
+    });
+
     group(
     'WidgetInspectorService',
     () {
