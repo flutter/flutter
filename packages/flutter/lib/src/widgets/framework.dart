@@ -8,7 +8,6 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/persistent_hash_map.dart';
 
 import 'binding.dart';
 import 'debug.dart';

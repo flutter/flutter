@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/foundation/persistent_hash_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 @immutable
