@@ -2003,7 +2003,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get hasEndDrawer => widget.endDrawer != null;
   /// Whether this scaffold has a non-null [Scaffold.floatingActionButton].
   bool get hasFloatingActionButton => widget.floatingActionButton != null;
-  /// Whether the FAB location is contained, this is helpful to remove the FAB elevation on the [BottomAppBar].
+  /// Whether the FAB location is contained.
+  ///
+  /// This is helpful to remove the FAB elevation on the [BottomAppBar].
   bool get fabIsContained => _floatingActionButtonLocation == FloatingActionButtonLocation.endContained;
 
   double? _appBarMaxHeight;

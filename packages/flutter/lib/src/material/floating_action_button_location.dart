@@ -423,8 +423,8 @@ abstract class FloatingActionButtonLocation {
   /// [Scaffold.bottomNavigationBar] so that the floating
   /// action button lines up with the center of the bottom navigation bar.
   ///
-  /// This is unlikely to be a useful location for apps that lack a [BottomNavigationBar]
-  /// or a [BottomAppBar] with olds material.
+  /// This is unlikely to be a useful location for apps which has a [BottomNavigationBar]
+  /// or a non material 3 [BottomAppBar].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_end_contained.png)
   static const FloatingActionButtonLocation endContained = _EndContainedFabLocation();

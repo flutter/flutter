@@ -133,14 +133,17 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
               )
             : null,
         floatingActionButtonLocation: _fabLocation,
-        bottomNavigationBar: _DemoBottomAppBar(_isElevated, _isVisible),
+        bottomNavigationBar: _DemoBottomAppBar(isElevated: _isElevated, isVisible: _isVisible),
       ),
     );
   }
 }
 
 class _DemoBottomAppBar extends StatelessWidget {
-  const _DemoBottomAppBar(this.isElevated, this.isVisible);
+  const _DemoBottomAppBar({
+    required this.isElevated,
+    required this.isVisible,
+  });
 
   final bool isElevated;
   final bool isVisible;

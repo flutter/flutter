@@ -185,10 +185,12 @@ class _BottomAppBarState extends State<BottomAppBar> {
           elevation: elevation,
           surfaceTintColor: surfaceTintColor,
           clipBehavior: widget.clipBehavior,
-          child: SafeArea(child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-            child: widget.child,
-          )),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              child: widget.child,
+            ),
+          ),
         ),
       );
     }
