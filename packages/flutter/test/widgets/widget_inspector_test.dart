@@ -1217,7 +1217,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           const List<String> directories = <String>[directoryA, directoryB];
           service.addPubRootDirectories(directories);
 
-          expect(service.pubRootDirectories, equals(directories));
+          expect(service.pubRootDirectories, unorderedEquals(directories));
         });
 
         test('can add multiple directories seperately', () {
@@ -1225,7 +1225,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           service.addPubRootDirectories(<String>[directoryB]);
           service.addPubRootDirectories(<String>[]);
 
-          expect(service.pubRootDirectories, equals(<String>[directoryA, directoryB]));
+          expect(service.pubRootDirectories, unorderedEquals(<String>[
+            directoryA,
+            directoryB,
+          ]));
         });
 
         test('handles duplicates', () {
@@ -1237,7 +1240,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ];
           service.addPubRootDirectories(directories);
 
-          expect(service.pubRootDirectories, equals(<String>[
+          expect(service.pubRootDirectories, unorderedEquals(<String>[
             directoryA,
             directoryB,
           ]));
@@ -1277,7 +1280,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         test("does nothing if the directories doesn't exist ", () {
           service.removePubRootDirectories(<String>['/x/y/z']);
 
-          expect(service.pubRootDirectories, equals(<String>[
+          expect(service.pubRootDirectories, unorderedEquals(<String>[
             directoryA,
             directoryB,
             directoryC,

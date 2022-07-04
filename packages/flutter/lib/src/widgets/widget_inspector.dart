@@ -1409,12 +1409,12 @@ mixin WidgetInspectorService {
   void addPubRootDirectories(List<String> pubRootDirectories) {
     pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
-    final SplayTreeSet<String> sortedSet = SplayTreeSet<String>.from(pubRootDirectories, (String a, String b) => a.compareTo(b));
+    final Set<String> directorySet = Set<String>.from(pubRootDirectories);
     if(_pubRootDirectories != null){
-      sortedSet.addAll(_pubRootDirectories!);
+      directorySet.addAll(_pubRootDirectories!);
     }
 
-    _pubRootDirectories = sortedSet.toList();
+    _pubRootDirectories = directorySet.toList();
     _isLocalCreationCache.clear();
   }
 
@@ -1427,10 +1427,10 @@ mixin WidgetInspectorService {
     }
     pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
-    final SplayTreeSet<String> sortedSet = SplayTreeSet<String>.from(_pubRootDirectories!, (String a, String b) => a.compareTo(b));
-    sortedSet.removeAll(pubRootDirectories);
+    final Set<String> directorySet = Set<String>.from(_pubRootDirectories!);
+    directorySet.removeAll(pubRootDirectories);
 
-    _pubRootDirectories = sortedSet.toList();
+    _pubRootDirectories = directorySet.toList();
     _isLocalCreationCache.clear();
   }
 
