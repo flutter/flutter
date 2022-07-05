@@ -54,7 +54,243 @@ class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
   const ChangeNotifierInherited({ super.key, required super.child, super.notifier });
 }
 
+@optionalTypeArgs
+class RemoveDependencySpy<T> extends InheritedWidget {
+  const RemoveDependencySpy({
+    super.key,
+    required super.child,
+     this.onRemoveDependency,
+    this.clearDependencyOnRebuild = true,
+  });
+
+  final void Function(Element dependency)? onRemoveDependency;
+  final bool clearDependencyOnRebuild;
+
+  @override
+  RemoveDependencySpyElement createElement() => RemoveDependencySpyElement(this);
+  
+  @override
+  bool updateShouldNotify(covariant RemoveDependencySpy oldWidget) {
+    assert(clearDependencyOnRebuild == oldWidget.clearDependencyOnRebuild);
+    return false;
+  }
+}
+
+class RemoveDependencySpyElement extends InheritedElement {
+  RemoveDependencySpyElement(super.widget);
+
+  @override
+  bool get clearDependencyOnRebuild => (widget as RemoveDependencySpy).clearDependencyOnRebuild;
+  
+  @override
+  void removeDependencies(Element dependent) {
+    final RemoveDependencySpy widget = this.widget as RemoveDependencySpy;
+    widget.onRemoveDependency?.call(dependent);
+    super.removeDependencies(dependent);
+  }
+
+  @override
+  // ignore: unnecessary_overrides, Override to remove the @protected
+  Object? getDependencies(Element dependent) {
+    return super.getDependencies(dependent);
+  }
+
+  @override
+  void updateDependencies(Element dependent, Object? aspect) {
+    setDependencies(dependent, Object());
+  }
+}
+
 void main() {
+  testWidgets('Calls removeDependency when dependents are unmounted', (WidgetTester tester) async {
+    final List<Key> log = <Key>[];
+
+    void onRemoveDependency(Element element) {
+      log.add(element.widget.key!);
+    }
+
+    const Key firstKey = ValueKey<int>(1);
+    const Key secondKey = ValueKey<int>(2);
+
+    Widget builder(BuildContext context) {
+      context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>();
+      return Container();
+    }
+
+    await tester.pumpWidget(
+      RemoveDependencySpy(
+        onRemoveDependency: onRemoveDependency,
+        child: Column(
+          children: <Widget>[
+            Builder(key: firstKey, builder: builder),
+            Builder(key: secondKey, builder: builder),
+          ],
+        ),
+      ),
+    );
+
+    expect(log, isEmpty);
+
+    await tester.pumpWidget(
+      RemoveDependencySpy(
+        onRemoveDependency: onRemoveDependency,
+        child: Container(),
+      ),
+    );
+
+    expect(log, unorderedEquals(<Key>[firstKey, secondKey]));
+  });
+
+  testWidgets(
+    'Calls removeDependency on InheritedElements with clearDependencyOnRebuild: true '
+    'when dependents rebuild', (WidgetTester tester) async {
+    final List<Key> log = <Key>[];
+
+    const Key key = ValueKey<int>(0);
+
+    void onRemoveDependency(Element element) {
+      log.add(element.widget.key!);
+    }
+
+    Widget build() {
+      return RemoveDependencySpy(
+        onRemoveDependency: onRemoveDependency,
+        child: Builder(
+          key: key,
+          builder: (BuildContext context) {
+            context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>();
+            return Container();
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    expect(log, isEmpty);
+
+    await tester.pumpWidget(build());
+
+    expect(log, const <Key>[key]);
+  });
+
+  testWidgets(
+    'Does not call removeDependency on InheritedElements with clearDependencyOnRebuild: false '
+    'when dependents rebuild', (WidgetTester tester) async {
+    final List<Key> log = <Key>[];
+
+    const Key key = ValueKey<int>(0);
+
+    void onRemoveDependency(Element element) {
+      log.add(element.widget.key!);
+    }
+
+    Widget build() {
+      return RemoveDependencySpy(
+        onRemoveDependency: onRemoveDependency,
+        clearDependencyOnRebuild: false,
+        child: Builder(
+          key: key,
+          builder: (BuildContext context) {
+            context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>();
+            return Container();
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    expect(log, isEmpty);
+
+    await tester.pumpWidget(build());
+
+    expect(log, isEmpty);
+  });
+
+  testWidgets(
+    'On dependent rebuild, only clears dependencies with clearDependencyOnRebuild: true', (WidgetTester tester) async {
+    const ValueKey<int> firstKey = ValueKey<int>(0);
+    const ValueKey<int> secondKey = ValueKey<int>(2);
+
+    Widget build({required bool isFirstBuild}) {
+      return RemoveDependencySpy<int>(
+        key: firstKey,
+        clearDependencyOnRebuild: false,
+        child: RemoveDependencySpy(
+        key: secondKey,
+          child: Builder(
+            builder: (BuildContext context) {
+              if (isFirstBuild) {
+                context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>();
+                context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy<int>>();
+              }
+              return Container();
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(isFirstBuild: true));
+
+    final RemoveDependencySpyElement notifierElement = tester.element<RemoveDependencySpyElement>(find.byKey(firstKey));
+    final RemoveDependencySpyElement spyElement = tester.element<RemoveDependencySpyElement>(find.byKey(secondKey));
+    final Element builderElement = tester.element(find.byType(Builder));
+
+    expect(spyElement.getDependencies(builderElement), isNotNull);
+    expect(notifierElement.getDependencies(builderElement), isNotNull);
+
+    await tester.pumpWidget(build(isFirstBuild: false));
+
+    expect(spyElement.getDependencies(builderElement), isNull);
+    expect(notifierElement.getDependencies(builderElement), isNotNull);
+  });
+
+  testWidgets(
+    'Does not call removeDependency twice on InheritedElements with clearDependencyOnRebuild: false '
+    'when dependents rebuild then are unmounted', (WidgetTester tester) async {
+    final List<Key> log = <Key>[];
+
+    const Key key = ValueKey<int>(0);
+
+    void onRemoveDependency(Element element) {
+      log.add(element.widget.key!);
+    }
+
+    Widget build({required bool callDependOn}) {
+      return RemoveDependencySpy(
+        onRemoveDependency: onRemoveDependency,
+        child: Builder(
+          key: key,
+          builder: (BuildContext context) {
+            if (callDependOn) {
+              context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>();
+            }
+            return Container();
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(callDependOn: true));
+
+    expect(log, isEmpty);
+
+    await tester.pumpWidget(build(callDependOn: false));
+
+    expect(log, const <Key>[key]);
+
+    await tester.pumpWidget(
+      RemoveDependencySpy(
+        onRemoveDependency: onRemoveDependency,
+        child: Container(),
+      ),
+    );
+
+    expect(log, const <Key>[key]);
+  });
+
   testWidgets('Inherited notifies dependents', (WidgetTester tester) async {
     final List<TestInherited> log = <TestInherited>[];
 

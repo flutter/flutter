@@ -2143,11 +2143,7 @@ abstract class BuildContext {
   ///
   /// All of the qualifications about when [dependOnInheritedWidgetOfExactType] can
   /// be called apply to this method as well.
-  InheritedWidget dependOnInheritedElement(
-    InheritedElement ancestor, {
-    Object aspect,
-    bool clearDependencyOnRebuild = false,
-  });
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect });
 
   /// Obtains the nearest widget of the given type `T`, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
@@ -2188,10 +2184,7 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
-    Object? aspect,
-    bool clearDependencyOnRebuild = false,
-  });
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect});
 
   /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -4023,7 +4016,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(depth != null);
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       for (final InheritedElement dependency in _dependencies!) {
-        dependency._dependents.remove(this);
+        dependency.removeDependencies(this);
       }
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
@@ -4225,6 +4218,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
+  /// A cache of whether this [Element] depends on an [InheritedElement] with
+  /// [InheritedElement.clearDependencyOnRebuild] as true.
+  /// 
+  /// This avoids having to iterate over the list of all dependencies whenever
+  /// the widget rebuilds.
+  /// This only works if we assume that [InheritedElement.clearDependencyOnRebuild]
+  /// never changes.
+  bool _hasDependencyWhichNeedsClearingOnRebuild = false;
   Map<Type, InheritedElement>? _inheritedWidgets;
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
@@ -4256,12 +4257,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _dependencies != null && _dependencies!.contains(ancestor);
 
   @override
-  InheritedWidget dependOnInheritedElement(
-    InheritedElement ancestor, {
-    Object? aspect,
-    bool clearDependencyOnRebuild = false,
-  }) {
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
     assert(ancestor != null);
+    _hasDependencyWhichNeedsClearingOnRebuild = _hasDependencyWhichNeedsClearingOnRebuild || ancestor.clearDependencyOnRebuild;
     _dependencies ??= HashSet<InheritedElement>();
     _dependencies!.add(ancestor);
     ancestor.updateDependencies(this, aspect);
@@ -4269,18 +4267,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
-    Object? aspect,
-    bool clearDependencyOnRebuild = false,
-  }) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     if (ancestor != null) {
-      return dependOnInheritedElement(
-        ancestor,
-        aspect: aspect,
-        clearDependencyOnRebuild: clearDependencyOnRebuild,
-      ) as T;
+      return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -4606,6 +4597,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner!._debugCurrentBuildTarget = this;
       return true;
     }());
+    if (_hasDependencyWhichNeedsClearingOnRebuild) {
+      final Set<InheritedElement> dependencies =  _dependencies!;
+      for (final InheritedElement dependency in dependencies) {
+        if (dependency.clearDependencyOnRebuild) {
+          dependency.removeDependencies(this);
+        }
+      }
+
+      dependencies.removeWhere((InheritedElement dep) => dep.clearDependencyOnRebuild);
+    }
     performRebuild();
     assert(() {
       assert(owner!._debugCurrentBuildTarget == this);
@@ -5180,11 +5181,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.dependOnInheritedElement(
-      ancestor as InheritedElement,
-      aspect: aspect,
-      clearDependencyOnRebuild: clearDependencyOnRebuild,
-    );
+    return super.dependOnInheritedElement(ancestor as InheritedElement, aspect: aspect);
   }
 
   /// This controls whether we should call [State.didChangeDependencies] from
@@ -5329,6 +5326,15 @@ class InheritedElement extends ProxyElement {
 
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
+  /// Whether dependent widgets should unsubscribe to this [InheritedElement]
+  /// when they rebuild.
+  ///
+  /// This defaults to false as a performance optimization, since few widgets
+  /// conditionally depend on an [InheritedElement].
+  /// 
+  /// This value should never change for the lifetime of the element.
+  bool get clearDependencyOnRebuild => false;
+
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
@@ -5431,6 +5437,25 @@ class InheritedElement extends ProxyElement {
   @protected
   void updateDependencies(Element dependent, Object? aspect) {
     setDependencies(dependent, null);
+  }
+
+  /// Called by dependent widgets when they stop listening to this [InheritedElement].
+  /// 
+  /// This either happens when the dependent is unmounted, or, if
+  /// [clearDependencyOnRebuild] is true, before the dependent rebuilds.
+  ///
+  /// See also:
+  ///
+  ///  * [getDependencies], which returns the current value for a dependent
+  ///    element.
+  ///  * [setDependencies], which sets the value for a dependent element.
+  ///  * [notifyDependent], which can be overridden to use a dependent's
+  ///    dependencies value to decide if the dependent needs to be rebuilt.
+  ///  * [InheritedModel], which is an example of a class that uses this method
+  ///    to manage dependency values.
+  @protected
+  void removeDependencies(Element dependent) {
+    _dependents.remove(dependent);
   }
 
   /// Called by [notifyClients] for each dependent.
