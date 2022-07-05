@@ -64,6 +64,7 @@ class ExpansionTile extends StatefulWidget {
     this.childrenPadding,
     this.backgroundColor,
     this.collapsedBackgroundColor,
+    this.backgroundBlendMode,
     this.textColor,
     this.collapsedTextColor,
     this.iconColor,
@@ -128,6 +129,15 @@ class ExpansionTile extends StatefulWidget {
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
   final Color? collapsedBackgroundColor;
+
+  /// The blend mode applied to the [backgroundColor] or [collapsedBackgroundColor].
+  ///
+  /// If no [backgroundBlendMode] is provided then the default painting blend
+  /// mode is used.
+  ///
+  /// If no [backgroundColor] or [collapsedBackgroundColor] is provided then the blend mode
+  /// has no impact.
+  final BlendMode? backgroundBlendMode;
 
   /// A widget to display after the title.
   ///
@@ -366,6 +376,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     return Container(
       decoration: BoxDecoration(
         color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
+        backgroundBlendMode: widget.backgroundBlendMode,
         border: Border(
           top: BorderSide(color: borderSideColor),
           bottom: BorderSide(color: borderSideColor),

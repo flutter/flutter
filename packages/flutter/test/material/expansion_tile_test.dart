@@ -614,4 +614,93 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
   });
+
+  testWidgets('ExpansionTile respects backgroundBlendMode', (WidgetTester tester) async {
+    final Key topKey = UniqueKey();
+    const Key expandedKey = PageStorageKey<String>('expanded');
+    const Key collapsedKey = PageStorageKey<String>('collapsed');
+    const Key defaultKey = PageStorageKey<String>('default');
+
+    final Key tileKey = UniqueKey();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        dividerColor: dividerColor,
+      ),
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ListTile(title: const Text('Top'), key: topKey),
+              ExpansionTile(
+                key: expandedKey,
+                initiallyExpanded: true,
+                title: const Text('Expanded'),
+                backgroundColor: Colors.red,
+                backgroundBlendMode: BlendMode.srcOver,
+                children: <Widget>[
+                  ListTile(
+                    key: tileKey,
+                    title: const Text('0'),
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                key: collapsedKey,
+                title: const Text('Collapsed'),
+                backgroundBlendMode: BlendMode.srcOver,
+                children: <Widget>[
+                  ListTile(
+                    key: tileKey,
+                    title: const Text('0'),
+                  ),
+                ],
+              ),
+              const ExpansionTile(
+                key: defaultKey,
+                title: Text('Default'),
+                backgroundBlendMode: BlendMode.srcOver,
+                children: <Widget>[
+                  ListTile(title: Text('0')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    Container getContainer(Key key) => tester.firstWidget(find.descendant(
+      of: find.byKey(key),
+      matching: find.byType(Container),
+    ));
+
+    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
+    expect(expandedContainerDecoration.backgroundBlendMode, BlendMode.srcOver);
+
+    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
+    expect(collapsedContainerDecoration.backgroundBlendMode, BlendMode.srcOver);
+
+    await tester.tap(find.text('Expanded'));
+    await tester.tap(find.text('Collapsed'));
+    await tester.tap(find.text('Default'));
+
+    await tester.pump();
+
+    // Pump to the middle of the animation for expansion.
+    await tester.pump(const Duration(milliseconds: 100));
+    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
+    expect(collapsingContainerDecoration.backgroundBlendMode, BlendMode.srcOver);
+
+    // Pump all the way to the end now.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Expanded should be collapsed now.
+    expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
+    expect(expandedContainerDecoration.backgroundBlendMode, BlendMode.srcOver);
+
+    // Collapsed should be expanded now.
+    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
+    expect(collapsedContainerDecoration.backgroundBlendMode, BlendMode.srcOver);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }
