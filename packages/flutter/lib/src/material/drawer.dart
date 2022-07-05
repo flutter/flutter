@@ -42,7 +42,6 @@ enum DrawerAlignment {
 // Maximum width for a left nav is 400dp.
 // The right nav can vary depending on content.
 
-const double _kWidth = 304.0;
 const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
@@ -214,7 +213,7 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
-    final DrawerThemeData defaults = theme.useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2();
+    final DrawerThemeData defaults = theme.useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     String? label = semanticLabel;
     switch (Theme.of(context).platform) {
@@ -233,10 +232,10 @@ class Drawer extends StatelessWidget {
       explicitChildNodes: true,
       label: label,
       child: ConstrainedBox(
-        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? defaults.width ?? _kWidth),
+        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? defaults.width),
         child: Material(
           color: backgroundColor ?? drawerTheme.backgroundColor ?? defaults.backgroundColor,
-          elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation ?? 16.0,
+          elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
           shape: shape ?? drawerTheme.shape ?? defaults.shape,
           surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           child: child,
@@ -412,6 +411,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
+  DrawerThemeData get _defaults {
+    if (Theme.of(context).useMaterial3) {
+      return _TokenDefaultsM3(context);
+    }
+    return _DefaultsM2(context);
+  }
+
   void _animationChanged() {
     setState(() {
       // The animation controller's state is our build state, and it changed already.
@@ -478,7 +484,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (box != null) {
       return box.size.width;
     }
-    return _kWidth; // drawer not being shown currently
+    return _defaults.width!; // drawer not being shown currently
   }
 
   bool _previouslyOpened = false;
@@ -558,9 +564,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   ColorTween _buildScrimColorTween() {
     return ColorTween(
       begin: Colors.transparent,
-      end: widget.scrimColor
-          ?? DrawerTheme.of(context).scrimColor
-          ?? Colors.black54,
+      end: widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? _defaults.scrimColor,
     );
   }
 
@@ -718,7 +722,21 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 }
 
-class _DefaultsM2 extends DrawerThemeData {}
+class _DefaultsM2 extends DrawerThemeData {
+  const _DefaultsM2(this.context)
+    : super(
+      elevation: 16.0,
+      width: 304.0,
+    );
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+
+  @override
+  Color? get scrimColor => Colors.black54;
+}
 
 // BEGIN GENERATED TOKEN PROPERTIES
 
@@ -735,12 +753,15 @@ class _TokenDefaultsM3 extends DrawerThemeData {
     );
 
   final BuildContext context;
-  
+
   @override
   Color? get backgroundColor => Theme.of(context).colorScheme.surface;
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get scrimColor => Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.onSurface.withOpacity(0.68) : Colors.black54;
 
   @override
   ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)));

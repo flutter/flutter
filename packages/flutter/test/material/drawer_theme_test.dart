@@ -61,7 +61,8 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    expect(_drawerMaterial(tester).color, null);
+    // Comment this out because the drawer backgroundColor is provided by default.
+    // expect(_drawerMaterial(tester).color, null);
     expect(_drawerMaterial(tester).elevation, 16.0);
     expect(_drawerMaterial(tester).shape, null);
     expect(_scrim(tester).color, Colors.black54);

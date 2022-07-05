@@ -26,6 +26,9 @@ class _${blockName}DefaultsM3 extends DrawerThemeData {
   Color? get surfaceTintColor => ${componentColor('md.comp.navigation-drawer.container.surface-tint-layer')};
 
   @override
+  Color? get scrimColor => Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.onSurface.withOpacity(0.68) : Colors.black54;
+
+  @override
   ShapeBorder? get shape => ${shape('md.comp.navigation-drawer.bottom.container')};
 }''';
 }
