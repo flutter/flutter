@@ -36,6 +36,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
+    this.defineConfigJsonMap,
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
@@ -128,6 +129,17 @@ class BuildInfo {
   /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String? performanceMeasurementFile;
+
+  /// Configure a constant pool file.
+  /// Additional constant values to be made available in the Dart program.
+  ///
+  /// These values can be used with the const `fromEnvironment` constructors of
+  ///  [String],the key is json field,the value is
+  /// json value
+  ///
+  /// An additional field `defineConfigJsonRawValue` is provided to represent the native JSON value of the configuration file
+  ///
+  final Map<String,dynamic>? defineConfigJsonMap;
 
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
@@ -246,12 +258,23 @@ class BuildInfo {
     };
   }
 
+  Map<String, dynamic>? defineConfigJsonRawMap() {
+    if (defineConfigJsonMap != null) {
+      return defineConfigJsonMap;
+    }
+    return <String, String>{};
+  }
+
   /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
-    return <String, String>{
+    final Map<String, String> map = <String, String>{};
+    defineConfigJsonRawMap()!.forEach((String key, dynamic value) {
+      map[key]='$value';
+    });
+    map.addAll(<String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
@@ -274,14 +297,19 @@ class BuildInfo {
         'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
-    };
+    });
+    return map;
   }
 
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
+    final List<String> result = <String>[];
+    defineConfigJsonRawMap()?.forEach((String key,dynamic value) {
+      result.add('-P$key=$value');
+    });
     // PACKAGE_CONFIG not currently supported.
-    return <String>[
+    result.addAll(<String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       if (dartObfuscation != null)
@@ -304,7 +332,8 @@ class BuildInfo {
         '-Pcode-size-directory=$codeSizeDirectory',
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
-    ];
+    ]);
+    return result;
   }
 }
 
