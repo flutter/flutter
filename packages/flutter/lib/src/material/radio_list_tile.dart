@@ -40,6 +40,31 @@ import 'theme_data.dart';
 /// [secondary] widget is placed on the opposite side. This maps to the
 /// [ListTile.leading] and [ListTile.trailing] properties of [ListTile].
 ///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [RadioListTile] itself but by the [Material] widget ancestor. An opaque
+/// widget, like `Container(color: Colors.white)`, is included in between
+/// the [RadioListTile] and its [Material] ancestor,then the opaque widget
+/// will obscure the [Material] widget and [RadioListTile] background
+/// [tileColor], etc. In this case, one can wrap a [Material] widget around
+/// the [RadioListTile], e.g.:
+///
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: RadioListTile<Meridiem>(
+///       tileColor: Colors.red,
+///       title: const Text('AM'),
+///       groupValue: Meridiem.am,
+///       value: Meridiem.am,
+///       onChanged:(Meridiem? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+///
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///

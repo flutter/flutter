@@ -47,6 +47,30 @@ enum _SwitchListTileType { material, adaptive }
 /// in the [ListTile.trailing] slot) which can be changed using [controlAffinity].
 /// The [secondary] widget is placed in the [ListTile.leading] slot.
 ///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [SwitchListTile] itself but by the [Material] widget ancestor. An opaque
+/// widget, like `Container(color: Colors.white)`, is included in between
+/// the [SwitchListTile] and its [Material] ancestor,then the opaque widget
+/// will obscure the [Material] widget and [SwitchListTile] background
+/// [tileColor], etc. In this case, one can wrap a [Material] widget around
+/// the [SwitchListTile], e.g.:
+///
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: SwitchListTile(
+///       tileColor: Colors.red,
+///       title: const Text('SwitchListTile with red background'),
+///       value: true,
+///       onChanged:(bool? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+///
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///

@@ -87,16 +87,15 @@ enum ListTileControlAffinity {
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
-/// One ancestor must be a [Material] widget and typically this is
-/// provided by the app's [Scaffold]. The [tileColor],
-/// [selectedTileColor], [focusColor], and [hoverColor] are not
-/// painted by the list tile itself but by the material widget
-/// ancestor. This generally has no effect. However, if an opaque
-/// widget, like `Container(color: Colors.white)`, is included in
-/// between the [ListTile] and its [Material] ancestor, then the
-/// opaque widget will obscure the material widget and its background
-/// [tileColor], etc. If this a problem, one can wrap a [Material]
-/// widget around the list tile, e.g.:
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], [selectedTileColor], [focusColor], and [hoverColor]
+/// are not painted by the [ListTile] itself but by the [Material] widget
+/// ancestor. An opaque widget, like `Container(color: Colors.white)`,
+/// is included in between the [ListTile] and its [Material] ancestor,
+/// then the opaque widget will obscure the [Material] widget and [ListTile]
+/// background [tileColor], etc. In this case, one can wrap a [Material]
+/// widget around the [ListTile], e.g.:
 ///
 /// ```dart
 /// Container(

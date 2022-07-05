@@ -39,6 +39,30 @@ import 'theme_data.dart';
 /// [secondary] widget is placed on the opposite side. This maps to the
 /// [ListTile.leading] and [ListTile.trailing] properties of [ListTile].
 ///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [CheckboxListTile] itself but by the [Material] widget ancestor. An opaque
+/// widget, like `Container(color: Colors.white)`, is included in between
+/// the [CheckboxListTile] and its [Material] ancestor,then the opaque widget
+/// will obscure the [Material] widget and [CheckboxListTile] background
+/// [tileColor], etc. In this case, one can wrap a [Material] widget around
+/// the [CheckboxListTile], e.g.:
+///
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: CheckboxListTile(
+///       tileColor: Colors.red,
+///       title: const Text('CheckboxListTile with red background'),
+///       value: true,
+///       onChanged:(bool? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+///
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
