@@ -546,10 +546,12 @@ void main() {
 
     final TestGesture pointer2 = await tester.startGesture(tester.getCenter(find.text('Index 1')));
     // Add overscroll from an additional pointer
+    // Here are two pointers, so when pointer2 moved, the gesture will wait (pointer1's move) or (pointer2's move).
     await pointer2.moveBy(const Offset(0.0, 105.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, lastStretchedLocation);
+    // Now pointer2 moved again, the gesture will update.
     await pointer2.moveBy(const Offset(0.0, 105.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
@@ -558,10 +560,13 @@ void main() {
 
     final TestGesture pointer3 = await tester.startGesture(tester.getCenter(find.text('Index 1')));
     // Add overscroll from an additional pointer, exceeding the max stretch (600)
+    // Here are three pointers, so when pointer3 moved, the gesture will wait (pointer3's move) or
+    // (both pointer1'move and pointer2's move).
     await pointer3.moveBy(const Offset(0.0, 105.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, lastStretchedLocation);
+    // Now pointer3 moved again, it is the time for gesture to update.
     await pointer3.moveBy(const Offset(0.0, 105.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
