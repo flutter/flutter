@@ -8,8 +8,11 @@ import 'dart:math' as math;
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 
-import 'text_editing.dart';
 import 'text_input.dart';
+
+export 'package:flutter/foundation.dart' show TargetPlatform;
+
+export 'text_input.dart' show TextEditingValue;
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus
