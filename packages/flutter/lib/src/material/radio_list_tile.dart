@@ -65,7 +65,7 @@ import 'theme_data.dart';
 /// )
 /// ```
 ///
-/// ## Performance considerations when wrapping [Material] to [RadioListTile]
+/// ## Performance considerations when wrapping [Material] with [RadioListTile]
 ///
 /// Wrapping a large number of [RadioListTile]s individually with [Material]s
 /// is expensive. Consider only wrapping the [RadioListTile]s that require it

@@ -63,7 +63,7 @@ import 'theme_data.dart';
 /// )
 /// ```
 ///
-/// ## Performance considerations when wrapping [Material] to [CheckboxListTile]
+/// ## Performance considerations when wrapping [Material] with [CheckboxListTile]
 ///
 /// Wrapping a large number of [CheckboxListTile]s individually with [Material]s
 /// is expensive. Consider only wrapping the [CheckboxListTile]s that require it

@@ -70,7 +70,7 @@ enum _SwitchListTileType { material, adaptive }
 ///   ),
 /// )
 /// ```
-/// ## Performance considerations when wrapping [Material] to [SwitchListTile]
+/// ## Performance considerations when wrapping [Material] with [SwitchListTile]
 ///
 /// Wrapping a large number of [SwitchListTile]s individually with [Material]s
 /// is expensive. Consider only wrapping the [SwitchListTile]s that require it
