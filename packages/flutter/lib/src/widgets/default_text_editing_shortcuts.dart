@@ -541,7 +541,7 @@ Intent? intentForMacOSSelector(String selectorName) {
 
     // Escape key when there's no IME selection popup.
     'cancelOperation:': DismissIntent(),
-    // Tab when there's no IME selection
+    // Tab when there's no IME selection.
     'insertTab:': NextFocusIntent(),
     'insertBacktab:': PreviousFocusIntent(),
   };
