@@ -293,14 +293,14 @@ class _HelperError extends StatefulWidget {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines, 
-    this.errorWidget,
+    this.errorBuilder,
   });
 
   final TextAlign? textAlign;
   final String? helperText;
   final TextStyle? helperStyle;
   final int? helperMaxLines;
-  final Widget? errorWidget;
+  final Widget Function(String? errorMessage)? errorBuilder;
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
@@ -325,7 +325,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       duration: _kTransitionDuration,
       vsync: this,
     );
-    if (widget.errorText != null || widget.errorWidget != null) {
+    
+    if (widget.errorText != null) {
       _error = _buildError();
       _controller.value = 1.0;
     } else if (widget.helperText != null) {
@@ -388,25 +389,30 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     );
   }
 
+  Widget _buildErrorBuilder(){
+    assert(widget.errorBuilder != null);
+    return Semantics(
+      container: true,
+      child: widget.errorBuilder!(widget.errorText),
+    );
+  }
+
   Widget _buildError() {
-    assert(widget.errorText != null || widget.errorWidget != null);
+    assert(widget.errorText != null);
     return Semantics(
       container: true,
       liveRegion: true,
-      child: FadeTransition(
-        opacity: _controller,
-        child: FractionalTranslation(
-          translation: Tween<Offset>(
-            begin: const Offset(0.0, -0.25),
-            end: Offset.zero,
-          ).evaluate(_controller.view),
-          child: widget.errorWidget ?? Text(
-            widget.errorText!,
-            style: widget.errorStyle,
-            textAlign: widget.textAlign,
-            overflow: TextOverflow.ellipsis,
-            maxLines: widget.errorMaxLines,
-          ),
+      child: FractionalTranslation(
+        translation: Tween<Offset>(
+          begin: const Offset(0.0, -0.25),
+          end: Offset.zero,
+        ).evaluate(_controller.view),
+        child: Text(
+          widget.errorText!,
+          style: widget.errorStyle,
+          textAlign: widget.textAlign,
+          overflow: TextOverflow.ellipsis,
+          maxLines: widget.errorMaxLines,
         ),
       ),
     );
@@ -414,13 +420,12 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    if(widget.errorWidget != null) {
-      return _error = _buildError();
-    }
 
     if (_controller.isDismissed) {
       _error = null;
-      if (widget.helperText != null) {
+      if(widget.errorBuilder != null){
+        return _buildErrorBuilder();
+      } else if (widget.helperText != null) {
         return _helper = _buildHelper();
       } else {
         _helper = null;
@@ -430,7 +435,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     if (_controller.isCompleted) {
       _helper = null;
-      if (widget.errorText != null) {
+      if(widget.errorBuilder != null){
+        return _buildErrorBuilder();
+      } else if (widget.errorText != null) {
         return _error = _buildError();
       } else {
         _error = null;
@@ -439,7 +446,12 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     }
 
     if (_helper == null && widget.errorText != null)
-      return _buildError();
+      if(widget.errorBuilder != null){
+        return _buildErrorBuilder();
+      }else{
+        return _buildError();
+      }
+      
 
     if (_error == null && widget.helperText != null)
       return _buildHelper();
@@ -467,6 +479,10 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         ],
       );
     }
+
+    if(widget.errorBuilder != null){
+      return _buildErrorBuilder();
+    } 
 
     return empty;
   }
@@ -2256,7 +2272,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperText: decoration!.helperText,
       helperStyle: _getHelperStyle(themeData),
       helperMaxLines: decoration!.helperMaxLines,
-      errorWidget: decoration!.errorWidget,
+      errorBuilder: decoration!.errorBuilder,
       errorText: decoration!.errorText,
       errorStyle: _getErrorStyle(themeData),
       errorMaxLines: decoration!.errorMaxLines,
@@ -2454,7 +2470,7 @@ class InputDecoration {
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
-    this.errorWidget,
+    this.errorBuilder,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -2494,7 +2510,6 @@ class InputDecoration {
     this.constraints,
   }) : assert(enabled != null),
        assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
-       assert(!(errorText != null && errorWidget != null), 'Declaring both error and errorWidget is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
@@ -2526,7 +2541,7 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
-       errorWidget = null,
+       errorBuilder = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2753,8 +2768,9 @@ class InputDecoration {
   /// If non-null, the border's color animates to red and the [helperText] is
   /// not shown.
   ///
-  /// Only one of [errorText] and [errorWidget] can be specified.
-  final Widget? errorWidget;
+  /// If both [errorText] and [errorBuilder] are specified, the [errorMessage]
+  /// is equal to the [errorText] and never null.
+  final Widget Function(String? errorMessage)? errorBuilder;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
   /// The style to use for the [InputDecoration.errorText].
@@ -3394,7 +3410,7 @@ class InputDecoration {
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
     int? hintMaxLines,
-    Widget? errorWidget,
+    Widget Function(String? errorMessage)? errorBuilder,
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
@@ -3447,7 +3463,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
-      errorWidget: errorWidget ?? this.errorWidget,
+      errorBuilder: errorBuilder ?? this.errorBuilder,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3545,7 +3561,7 @@ class InputDecoration {
         && other.hintStyle == hintStyle
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
-        && other.errorWidget == errorWidget
+        && other.errorBuilder == errorBuilder
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
@@ -3654,7 +3670,7 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
-      if (errorWidget != null) 'errorWidget: "$errorWidget"',
+      if (errorBuilder != null) 'errorBuilder: "$errorBuilder"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',

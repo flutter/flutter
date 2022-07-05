@@ -1945,24 +1945,24 @@ void main() {
   testWidgets('ErrorWidget', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
-        decoration: const InputDecoration(
-          errorWidget: Text('errorWidget'),
+        decoration: InputDecoration(
+          errorBuilder: (String? errorMessage) => Text('$errorMessage'),
         )
       )
     );
 
-    /// Check that errorWidget is displayed under the border
+    /// When errorText and errorBuilder is defined,
+    ///  the errorMessage will never be null.
 
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: InputDecoration(
-          errorWidget: const Text('errorWidget'),
+          errorBuilder: (String? errorMessage) => Text(errorMessage!),
           errorText: 'errorText'
         )
       )
     );
 
-    /// Check that we can't define both errorWidget and errorText
 
   });
 
