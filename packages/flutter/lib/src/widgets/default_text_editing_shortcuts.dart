@@ -484,8 +484,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   }
 }
 
-/// Returns editing intent for selector from NSStandardKeyBindingResponding
-/// if the selector is recognized.
+/// Maps the selector from NSStandardKeyBindingResponding to the Intent if the
+/// selector is recognized.
 Intent? intentForMacOSSelector(String selectorName) {
   const Map<String, Intent> selectorToIntent = <String, Intent>{
     'deleteBackward:': DeleteCharacterIntent(forward: false),
