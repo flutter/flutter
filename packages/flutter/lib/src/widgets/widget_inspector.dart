@@ -749,7 +749,7 @@ mixin WidgetInspectorService {
   int _nextId = 0;
 
   /// the pubRootDirectories that are currently configured for the widget inspector.
-  /// 
+  ///
   /// This is for testing use only.
   @visibleForTesting
   @protected
@@ -1420,7 +1420,7 @@ mixin WidgetInspectorService {
 
   /// Remove a list of directories that should no longer be considered part
   /// of the local project.
-  /// 
+  ///
   /// The local project directories are used to distinguish widgets created by
   /// the local project from widgets created from inside the framework
   /// or other packages.
