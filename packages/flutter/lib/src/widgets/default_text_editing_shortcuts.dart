@@ -539,7 +539,7 @@ Intent? intentForMacOSSelector(String selectorName) {
     'pageUpAndModifySelection': ExpandSelectionToDocumentBoundaryIntent(forward: false),
     'pageDownAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
-    // Escape when there's no IME selection
+    // Escape key when there's no IME selection popup.
     'cancelOperation:': DismissIntent(),
     // Tab when there's no IME selection
     'insertTab:': NextFocusIntent(),
