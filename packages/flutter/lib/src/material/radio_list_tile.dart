@@ -65,6 +65,12 @@ import 'theme_data.dart';
 /// )
 /// ```
 ///
+/// ## Performance considerations when wrapping [Material] to [RadioListTile]
+///
+/// Wrapping a large number of [RadioListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [RadioListTile]s that require it
+/// or include a common [Material] ancestor where possible.
+///
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///

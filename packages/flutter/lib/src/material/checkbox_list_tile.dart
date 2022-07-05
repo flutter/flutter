@@ -63,6 +63,12 @@ import 'theme_data.dart';
 /// )
 /// ```
 ///
+/// ## Performance considerations when wrapping [Material] to [CheckboxListTile]
+///
+/// Wrapping a large number of [CheckboxListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [CheckboxListTile]s that require it
+/// or include a common [Material] ancestor where possible.
+///
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///

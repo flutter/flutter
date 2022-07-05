@@ -109,6 +109,12 @@ enum ListTileControlAffinity {
 /// )
 /// ```
 ///
+/// ## Performance considerations when wrapping [Material] to [ListTile]
+///
+/// Wrapping a large number of [ListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [ListTile]s that require it
+/// or include a common [Material] ancestor where possible.
+///
 /// {@tool snippet}
 ///
 /// This example uses a [ListView] to demonstrate different configurations of

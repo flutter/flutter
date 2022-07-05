@@ -70,6 +70,11 @@ enum _SwitchListTileType { material, adaptive }
 ///   ),
 /// )
 /// ```
+/// ## Performance considerations when wrapping [Material] to [SwitchListTile]
+///
+/// Wrapping a large number of [SwitchListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [SwitchListTile]s that require it
+/// or include a common [Material] ancestor where possible.
 ///
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
