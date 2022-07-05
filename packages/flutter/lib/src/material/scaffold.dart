@@ -2626,6 +2626,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
   }
 
+  double get _drawerBorderRadius {
+    if (Theme.of(context).useMaterial3) {
+      return widget.drawerBorderRadius ?? 16.0;
+    }
+    return widget.drawerBorderRadius ?? 0.0;
+  }
+
   void _buildEndDrawer(List<LayoutId> children, TextDirection textDirection) {
     if (widget.endDrawer != null) {
       assert(hasEndDrawer);
@@ -2640,11 +2647,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
           isDrawerOpen: _endDrawerOpened.value,
-          borderRadius: widget.drawerBorderRadius != null ?
-            BorderRadiusDirectional.only(
-              topStart: Radius.circular(widget.drawerBorderRadius!),
-              bottomStart: Radius.circular(widget.drawerBorderRadius!),
-            ) : null,
+          borderRadius: BorderRadiusDirectional.only(
+            topStart: Radius.circular(_drawerBorderRadius),
+            bottomStart: Radius.circular(_drawerBorderRadius),
+          ),
           child: widget.endDrawer!,
         ),
         _ScaffoldSlot.endDrawer,
@@ -2671,11 +2677,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
           isDrawerOpen: _drawerOpened.value,
-          borderRadius: widget.drawerBorderRadius != null ?
-            BorderRadiusDirectional.only(
-              topEnd: Radius.circular(widget.drawerBorderRadius!),
-              bottomEnd: Radius.circular(widget.drawerBorderRadius!),
-            ) : null,
+          borderRadius: BorderRadiusDirectional.only(
+            topEnd: Radius.circular(_drawerBorderRadius),
+            bottomEnd: Radius.circular(_drawerBorderRadius),
+          ),
           child: widget.drawer!,
         ),
         _ScaffoldSlot.drawer,
