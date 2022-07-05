@@ -109,7 +109,18 @@ class SymbolizeCommand extends FlutterCommand {
       input = _stdio.stdin;
     }
 
-    final Uint8List symbols = _fileSystem.file(stringArgDeprecated('debug-info')).readAsBytesSync();
+    String debugInfoPath = stringArgDeprecated('debug-info')!;
+    if (debugInfoPath.endsWith('.dSYM')) {
+      debugInfoPath = path.join(
+        debugInfoPath,
+        'Contents',
+        'Resources',
+        'DWARF/',
+        path.basenameWithoutExtension(debugInfoPath)
+      );
+    }
+
+    final Uint8List symbols = _fileSystem.file(debugInfoPath).readAsBytesSync();
     await _dwarfSymbolizationService.decode(
       input: input,
       output: output,
