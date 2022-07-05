@@ -2143,7 +2143,11 @@ abstract class BuildContext {
   ///
   /// All of the qualifications about when [dependOnInheritedWidgetOfExactType] can
   /// be called apply to this method as well.
-  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect });
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object aspect,
+    bool clearDependencyOnRebuild = false,
+  });
 
   /// Obtains the nearest widget of the given type `T`, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
@@ -2184,7 +2188,10 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
+    Object? aspect,
+    bool clearDependencyOnRebuild = false,
+  });
 
   /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -4249,7 +4256,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _dependencies != null && _dependencies!.contains(ancestor);
 
   @override
-  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object? aspect,
+    bool clearDependencyOnRebuild = false,
+  }) {
     assert(ancestor != null);
     _dependencies ??= HashSet<InheritedElement>();
     _dependencies!.add(ancestor);
@@ -4258,11 +4269,18 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
+    Object? aspect,
+    bool clearDependencyOnRebuild = false,
+  }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     if (ancestor != null) {
-      return dependOnInheritedElement(ancestor, aspect: aspect) as T;
+      return dependOnInheritedElement(
+        ancestor,
+        aspect: aspect,
+        clearDependencyOnRebuild: clearDependencyOnRebuild,
+      ) as T;
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -5109,7 +5127,11 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget dependOnInheritedElement(Element ancestor, { Object? aspect }) {
+  InheritedWidget dependOnInheritedElement(
+    Element ancestor, {
+    Object? aspect,
+    bool clearDependencyOnRebuild = false,
+  }) {
     assert(ancestor != null);
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
@@ -5158,7 +5180,11 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.dependOnInheritedElement(ancestor as InheritedElement, aspect: aspect);
+    return super.dependOnInheritedElement(
+      ancestor as InheritedElement,
+      aspect: aspect,
+      clearDependencyOnRebuild: clearDependencyOnRebuild,
+    );
   }
 
   /// This controls whether we should call [State.didChangeDependencies] from
