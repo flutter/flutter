@@ -4220,7 +4220,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// A cache of whether this [Element] depends on an [InheritedElement] with
   /// [InheritedElement.clearDependencyOnRebuild] as true.
-  /// 
+  ///
   /// This avoids having to iterate over the list of all dependencies whenever
   /// the widget rebuilds.
   /// This only works if we assume that [InheritedElement.clearDependencyOnRebuild]
@@ -5331,7 +5331,7 @@ class InheritedElement extends ProxyElement {
   ///
   /// This defaults to false as a performance optimization, since few widgets
   /// conditionally depend on an [InheritedElement].
-  /// 
+  ///
   /// This value should never change for the lifetime of the element.
   bool get clearDependencyOnRebuild => false;
 
@@ -5440,7 +5440,7 @@ class InheritedElement extends ProxyElement {
   }
 
   /// Called by dependent widgets when they stop listening to this [InheritedElement].
-  /// 
+  ///
   /// This either happens when the dependent is unmounted, or, if
   /// [clearDependencyOnRebuild] is true, before the dependent rebuilds.
   ///

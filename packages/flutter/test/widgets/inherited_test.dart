@@ -68,7 +68,7 @@ class RemoveDependencySpy<T> extends InheritedWidget {
 
   @override
   RemoveDependencySpyElement createElement() => RemoveDependencySpyElement(this);
-  
+
   @override
   bool updateShouldNotify(covariant RemoveDependencySpy oldWidget) {
     assert(clearDependencyOnRebuild == oldWidget.clearDependencyOnRebuild);
@@ -81,7 +81,7 @@ class RemoveDependencySpyElement extends InheritedElement {
 
   @override
   bool get clearDependencyOnRebuild => (widget as RemoveDependencySpy).clearDependencyOnRebuild;
-  
+
   @override
   void removeDependencies(Element dependent) {
     final RemoveDependencySpy widget = this.widget as RemoveDependencySpy;
