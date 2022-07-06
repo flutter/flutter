@@ -365,9 +365,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       if (_pointerMoveAccept) {
         final List<int> pointers = _velocityTrackers.keys.toList();
-        for (int pointer in pointers) {
-          _giveUpPointer(pointer);
-        }
+        pointers.forEach(_giveUpPointer);
         _multiPointerMoveTrackers.clear();
         _pointerMoveAccept = false;
       } else {
