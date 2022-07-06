@@ -1334,11 +1334,11 @@ class CompileTest {
         ...compileSecondDebug,
       };
 
-      final mainDart = File(testDirectory + "/lib/main.dart");
+      final File mainDart = File('$testDirectory/lib/main.dart');
       if (mainDart.existsSync()) {
-        final bytes = mainDart.readAsBytesSync();
+        final List<int> bytes = mainDart.readAsBytesSync();
         // "Touch" the file
-        mainDart.writeAsStringSync(" ", mode: FileMode.append, flush: true);
+        mainDart.writeAsStringSync(' ', mode: FileMode.append, flush: true);
         // Build after "edit" without clean should be faster than first build
         final Map<String, dynamic> compileAfterEditDebug = await _compileDebug(
           clean: false,
@@ -1347,7 +1347,7 @@ class CompileTest {
         metrics.addAll(compileAfterEditDebug);
         // Revert the changes
         mainDart.writeAsBytesSync(bytes, flush: true);
-      };
+      }
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
