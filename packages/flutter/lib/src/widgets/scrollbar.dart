@@ -279,6 +279,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _shape = value;
     notifyListeners();
   }
+
   /// The amount of space by which to inset the scrollbar's start and end, as
   /// well as its side to the nearest edge, in logical pixels.
   ///
@@ -299,7 +300,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _padding = value;
     notifyListeners();
   }
-
 
   /// The preferred smallest size the scrollbar thumb can shrink to when the total
   /// scrollable extent is large, the current visible viewport is small, and the
@@ -387,32 +387,132 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  // - Scrollbar Details
+
+  Rect? _trackRect;
+  double get _trackExtent => _lastMetrics!.viewportDimension - _totalMainAxisInsets;
+
+  Rect? _thumbRect;
+  late double _thumbOffset;
+  late double _thumbExtent;
+  void _setThumbExtent() {
+    // Thumb extent reflects fraction of content visible, as long as this
+    // isn't less than the absolute minimum size.
+    // extentInside <= viewportDimension and used for appropriate scaling
+    // accounting for insets & padding.
+    final double fractionVisible = clampDouble(
+      _lastMetrics!.extentInside / _totalContentExtent,
+      0.0,
+      1.0,
+    );
+
+    final double thumbExtent = math.max(
+      math.min(_trackExtent, minOverscrollLength),
+      _trackExtent * fractionVisible,
+    );
+
+    final double fractionOverscrolled = 1.0 - _lastMetrics!.extentInside / _lastMetrics!.viewportDimension;
+    final double safeMinLength = math.min(minLength, _trackExtent);
+    final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
+    // Thumb extent is no smaller than minLength if scrolling normally.
+        ? safeMinLength
+    // User is overscrolling. Thumb extent can be less than minLength
+    // but no smaller than minOverscrollLength. We can't use the
+    // fractionVisible to produce intermediate values between minLength and
+    // minOverscrollLength when the user is transitioning from regular
+    // scrolling to overscrolling, so we instead use the percentage of the
+    // content that is still in the viewport to determine the size of the
+    // thumb. iOS behavior appears to have the thumb reach its minimum size
+    // with ~20% of overscroll. We map the percentage of minLength from
+    // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
+    // values for the thumb that range between minLength and the smallest
+    // possible value, minOverscrollLength.
+        : safeMinLength * (1.0 - clampDouble(fractionOverscrolled, 0.0, 0.2) / 0.2);
+
+    // The `thumbExtent` should be no greater than `trackSize`, otherwise
+    // the scrollbar may scroll towards the wrong direction.
+    _thumbExtent = clampDouble(thumbExtent, newMinLength, _trackExtent);
+  }
+
+  // - Scrollable Details
+
+  ScrollMetrics? _lastMetrics;
+  bool get _lastMetricsAreScrollable => _lastMetrics!.minScrollExtent != _lastMetrics!.maxScrollExtent;
+  AxisDirection? _lastAxisDirection;
+
+  bool get _isVertical => _lastAxisDirection == AxisDirection.down || _lastAxisDirection == AxisDirection.up;
+  bool get _isReversed => _lastAxisDirection == AxisDirection.up || _lastAxisDirection == AxisDirection.left;
+  // The amount of scroll distance before and after the current position.
+  double get _beforeExtent => _isReversed ? _lastMetrics!.extentAfter : _lastMetrics!.extentBefore;
+  double get _afterExtent => _isReversed ? _lastMetrics!.extentBefore : _lastMetrics!.extentAfter;
+  // Main axis insets of the scrollbar track.
+  double get _totalMainAxisInsets => _leadingMainAxisInset + _trailingMainAxisInset;
+  // If the reported scroll insets are greater than the padding, the padding
+  // was consumed by the content creating scroll insets.
+  double get _leadingMainAxisInset {
+    switch(_resolvedOrientation) {
+      case ScrollbarOrientation.left:
+      case ScrollbarOrientation.right:
+        return padding.top + mainAxisMargin;
+      case ScrollbarOrientation.top:
+      case ScrollbarOrientation.bottom:
+        return padding.left + mainAxisMargin;
+    }
+  }
+  double get _trailingMainAxisInset {
+    switch(_resolvedOrientation) {
+      case ScrollbarOrientation.left:
+      case ScrollbarOrientation.right:
+        return padding.bottom + mainAxisMargin;
+      case ScrollbarOrientation.top:
+      case ScrollbarOrientation.bottom:
+        return padding.right + mainAxisMargin;
+    }
+  }
+  // The total size of the scrollable content.
+  double get _totalContentExtent {
+    return _lastMetrics!.maxScrollExtent
+        - _lastMetrics!.minScrollExtent
+        + _lastMetrics!.viewportDimension;
+  }
+
+  ScrollbarOrientation get _resolvedOrientation {
+    if (scrollbarOrientation == null) {
+      if (_isVertical) {
+        return textDirection == TextDirection.ltr
+            ? ScrollbarOrientation.right
+            : ScrollbarOrientation.left;
+      } else {
+        return ScrollbarOrientation.bottom;
+      }
+    }
+    else {
+      return scrollbarOrientation!;
+    }
+  }
+
   void _debugAssertIsValidOrientation(ScrollbarOrientation orientation) {
+    bool isVerticalOrientation(ScrollbarOrientation orientation) =>
+        orientation == ScrollbarOrientation.left
+            || orientation == ScrollbarOrientation.right;
     assert(
-    (_isVertical && _isVerticalOrientation(orientation)) || (!_isVertical && !_isVerticalOrientation(orientation)),
-    'The given ScrollbarOrientation: $orientation is incompatible with the current AxisDirection: $_lastAxisDirection.'
+    (_isVertical && isVerticalOrientation(orientation))
+        || (!_isVertical && !isVerticalOrientation(orientation)),
+    'The given ScrollbarOrientation: $orientation is incompatible with the '
+        'current AxisDirection: $_lastAxisDirection.'
     );
   }
 
-  /// Check whether given scrollbar orientation is vertical
-  bool _isVerticalOrientation(ScrollbarOrientation orientation) =>
-    orientation == ScrollbarOrientation.left
-    || orientation == ScrollbarOrientation.right;
-
-  ScrollMetrics? _lastMetrics;
-  AxisDirection? _lastAxisDirection;
-  Rect? _thumbRect;
-  Rect? _trackRect;
-  late double _thumbOffset;
+  // - Updating
 
   /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
   /// show and redraw itself based on these new metrics.
   ///
   /// The scrollbar will remain on screen.
   void update(
-    ScrollMetrics metrics,
-    AxisDirection axisDirection,
-  ) {
+      ScrollMetrics metrics,
+      AxisDirection axisDirection,
+      ) {
     if (_lastMetrics != null &&
         _lastMetrics!.extentBefore == metrics.extentBefore &&
         _lastMetrics!.extentInside == metrics.extentInside &&
@@ -429,7 +529,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (!needPaint(oldMetrics) && !needPaint(metrics)) {
       return;
     }
-
     notifyListeners();
   }
 
@@ -438,6 +537,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     thickness = nextThickness;
     radius = nextRadius;
   }
+
+  // - Painting
 
   Paint get _paintThumb {
     return Paint()
@@ -455,67 +556,50 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       ..color = trackColor.withOpacity(trackColor.opacity * fadeoutOpacityAnimation.value);
   }
 
-  void _paintScrollbar(Canvas canvas, Size size, double thumbExtent, AxisDirection direction) {
+  void _paintScrollbar(Canvas canvas, Size size) {
     assert(
       textDirection != null,
       'A TextDirection must be provided before a Scrollbar can be painted.',
     );
 
-    final ScrollbarOrientation resolvedOrientation;
-
-    if (scrollbarOrientation == null) {
-      if (_isVertical) {
-        resolvedOrientation = textDirection == TextDirection.ltr
-          ? ScrollbarOrientation.right
-          : ScrollbarOrientation.left;
-      } else {
-        resolvedOrientation = ScrollbarOrientation.bottom;
-      }
-    }
-    else {
-      resolvedOrientation = scrollbarOrientation!;
-    }
-
     final double x, y;
     final Size thumbSize, trackSize;
     final Offset trackOffset, borderStart, borderEnd;
-
-    _debugAssertIsValidOrientation(resolvedOrientation);
-
-    switch(resolvedOrientation) {
+    _debugAssertIsValidOrientation(_resolvedOrientation);
+    switch(_resolvedOrientation) {
       case ScrollbarOrientation.left:
-        thumbSize = Size(thickness, thumbExtent);
+        thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = crossAxisMargin + padding.left;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+        trackOffset = Offset(x - crossAxisMargin, _leadingMainAxisInset);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
         borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
         break;
       case ScrollbarOrientation.right:
-        thumbSize = Size(thickness, thumbExtent);
+        thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+        trackOffset = Offset(x - crossAxisMargin, _leadingMainAxisInset);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
         break;
       case ScrollbarOrientation.top:
-        thumbSize = Size(thumbExtent, thickness);
+        thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = crossAxisMargin + padding.top;
-        trackOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+        trackOffset = Offset(_leadingMainAxisInset, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
         break;
       case ScrollbarOrientation.bottom:
-        thumbSize = Size(thumbExtent, thickness);
+        thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+        trackOffset = Offset(_leadingMainAxisInset, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
         break;
@@ -553,66 +637,32 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
   }
 
-  double _thumbExtent() {
-    // Thumb extent reflects fraction of content visible, as long as this
-    // isn't less than the absolute minimum size.
-    // _totalContentExtent >= viewportDimension, so (_totalContentExtent - _mainAxisPadding) > 0
-    final double fractionVisible = clampDouble(
-        (_lastMetrics!.extentInside - _mainAxisPadding) /
-            (_totalContentExtent - _mainAxisPadding),
-        0.0,
-        1.0);
-
-    final double thumbExtent = math.max(
-      math.min(_trackExtent, minOverscrollLength),
-      _trackExtent * fractionVisible,
-    );
-
-    final double fractionOverscrolled = 1.0 - _lastMetrics!.extentInside / _lastMetrics!.viewportDimension;
-    final double safeMinLength = math.min(minLength, _trackExtent);
-    final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
-      // Thumb extent is no smaller than minLength if scrolling normally.
-      ? safeMinLength
-      // User is overscrolling. Thumb extent can be less than minLength
-      // but no smaller than minOverscrollLength. We can't use the
-      // fractionVisible to produce intermediate values between minLength and
-      // minOverscrollLength when the user is transitioning from regular
-      // scrolling to overscrolling, so we instead use the percentage of the
-      // content that is still in the viewport to determine the size of the
-      // thumb. iOS behavior appears to have the thumb reach its minimum size
-      // with ~20% of overscroll. We map the percentage of minLength from
-      // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
-      // values for the thumb that range between minLength and the smallest
-      // possible value, minOverscrollLength.
-      : safeMinLength * (1.0 - clampDouble(fractionOverscrolled, 0.0, 0.2) / 0.2);
-
-    // The `thumbExtent` should be no greater than `trackSize`, otherwise
-    // the scrollbar may scroll towards the wrong direction.
-    return clampDouble(thumbExtent, newMinLength, _trackExtent);
-  }
-
   @override
-  void dispose() {
-    fadeoutOpacityAnimation.removeListener(notifyListeners);
-    super.dispose();
+  void paint(Canvas canvas, Size size) {
+    if (_lastAxisDirection == null
+        || _lastMetrics == null
+        || _lastMetrics!.maxScrollExtent <= _lastMetrics!.minScrollExtent) {
+      return;
+    }
+    // Skip painting if there's not enough space.
+    if (_lastMetrics!.viewportDimension <= _totalMainAxisInsets || _trackExtent <= 0) {
+      return;
+    }
+    // Do not paint a scrollbar if the scroll view is infinitely long.
+    // TODO(Piinks): Special handling for infinite scroll views,
+    //  https://github.com/flutter/flutter/issues/41434
+    if (_lastMetrics!.maxScrollExtent.isInfinite) {
+      return;
+    }
+
+    _setThumbExtent();
+    final double thumbPositionOffset = _getScrollToTrack(_lastMetrics!, _thumbExtent);
+    _thumbOffset = thumbPositionOffset + _leadingMainAxisInset;
+
+    return _paintScrollbar(canvas, size);
   }
 
-  bool get _isVertical => _lastAxisDirection == AxisDirection.down || _lastAxisDirection == AxisDirection.up;
-  bool get _isReversed => _lastAxisDirection == AxisDirection.up || _lastAxisDirection == AxisDirection.left;
-  // The amount of scroll distance before and after the current position.
-  double get _beforeExtent => _isReversed ? _lastMetrics!.extentAfter : _lastMetrics!.extentBefore;
-  double get _afterExtent => _isReversed ? _lastMetrics!.extentBefore : _lastMetrics!.extentAfter;
-  // Padding of the thumb track.
-  double get _mainAxisPadding => _isVertical ? padding.vertical : padding.horizontal;
-  // The size of the thumb track.
-  double get _trackExtent => _lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding;
-
-  // The total size of the scrollable content.
-  double get _totalContentExtent {
-    return _lastMetrics!.maxScrollExtent
-      - _lastMetrics!.minScrollExtent
-      + _lastMetrics!.viewportDimension;
-  }
+  // - Scroll Position Conversion
 
   /// Convert between a thumb track position and the corresponding scroll
   /// position.
@@ -621,7 +671,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double getTrackToScroll(double thumbOffsetLocal) {
     assert(thumbOffsetLocal != null);
     final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
-    final double thumbMovableExtent = _trackExtent - _thumbExtent();
+    final double thumbMovableExtent = _trackExtent - _thumbExtent;
 
     return scrollableExtent * thumbOffsetLocal / thumbMovableExtent;
   }
@@ -638,34 +688,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);
   }
 
+  // - Hit Testing
+
   @override
-  void paint(Canvas canvas, Size size) {
-    if (_lastAxisDirection == null
-        || _lastMetrics == null
-        || _lastMetrics!.maxScrollExtent <= _lastMetrics!.minScrollExtent) {
-      return;
+  bool? hitTest(Offset? position) {
+    // There is nothing painted to hit.
+    if (_thumbRect == null) {
+      return null;
+    }
+    // Interaction disabled.
+    if (ignorePointer
+     // The thumb is not able to be hit when transparent.
+     || fadeoutOpacityAnimation.value == 0.0
+     // Not scrollable
+     || !_lastMetricsAreScrollable) {
+      return false;
     }
 
-    // Skip painting if there's not enough space.
-    if (_lastMetrics!.viewportDimension <= _mainAxisPadding || _trackExtent <= 0) {
-      return;
-    }
-
-    final double beforePadding = _isVertical ? padding.top : padding.left;
-    final double thumbExtent = _thumbExtent();
-    final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
-    _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
-
-    // Do not paint a scrollbar if the scroll view is infinitely long.
-    // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
-    if (_lastMetrics!.maxScrollExtent.isInfinite) {
-      return;
-    }
-
-    return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
+    return _trackRect!.contains(position!);
   }
-
-  bool get _lastMetricsAreScrollable => _lastMetrics!.minScrollExtent != _lastMetrics!.maxScrollExtent;
 
   /// Same as hitTest, but includes some padding when the [PointerEvent] is
   /// caused by [PointerDeviceKind.touch] to make sure that the region
@@ -749,28 +790,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
   }
 
-  // Scrollbars are interactive.
-  @override
-  bool? hitTest(Offset? position) {
-    if (_thumbRect == null) {
-      return null;
-    }
-    if (ignorePointer) {
-      return false;
-    }
-
-    // The thumb is not able to be hit when transparent.
-    if (fadeoutOpacityAnimation.value == 0.0) {
-      return false;
-    }
-
-    if (!_lastMetricsAreScrollable) {
-      return false;
-    }
-
-    return _trackRect!.contains(position!);
-  }
-
   @override
   bool shouldRepaint(ScrollbarPainter oldDelegate) {
     // Should repaint if any properties changed.
@@ -800,6 +819,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   String toString() => describeIdentity(this);
+
+  @override
+  void dispose() {
+    fadeoutOpacityAnimation.removeListener(notifyListeners);
+    super.dispose();
+  }
 }
 
 /// An extendable base class for building scrollbars that fade in and out.
@@ -1645,7 +1670,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         case TargetPlatform.iOS:
         case TargetPlatform.android:
           // We can only drag the scrollbar into overscroll on mobile
-          // platforms, and only if the physics allow it.
+          // platforms, and only then if the physics allow it.
           break;
       }
       position.jumpTo(newPosition);
@@ -1884,7 +1909,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         () => _ThumbPressGestureRecognizer(
           debugOwner: this,
           customPaintKey: _scrollbarPainterKey,
-          pressDuration: widget.pressDuration,
+          duration: widget.pressDuration,
         ),
         (_ThumbPressGestureRecognizer instance) {
           instance.onLongPress = handleThumbPress;
@@ -1918,7 +1943,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestInteractive(localOffset, kind)
-      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
+        && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].
@@ -2050,11 +2075,8 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
   _ThumbPressGestureRecognizer({
     required Object super.debugOwner,
     required GlobalKey customPaintKey,
-    required Duration pressDuration,
-  }) : _customPaintKey = customPaintKey,
-       super(
-         duration: pressDuration,
-       );
+    required super.duration,
+  }) : _customPaintKey = customPaintKey;
 
   final GlobalKey _customPaintKey;
 
@@ -2081,10 +2103,9 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
 // track and ignores everything else, including the thumb.
 class _TrackTapGestureRecognizer extends TapGestureRecognizer {
   _TrackTapGestureRecognizer({
-    required Object debugOwner,
+    required super.debugOwner,
     required GlobalKey customPaintKey,
-  }) : _customPaintKey = customPaintKey,
-       super(debugOwner: debugOwner);
+  }) : _customPaintKey = customPaintKey;
 
   final GlobalKey _customPaintKey;
 
