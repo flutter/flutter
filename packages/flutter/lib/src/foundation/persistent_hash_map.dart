@@ -9,19 +9,21 @@
 /// key/value pair does not modify an existing instance but instead creates a
 /// new instance.
 ///
-/// Note: unlike [Map] this class does not support `null` as a key value and
+/// Unlike [Map] this class does not support `null` as a key value and
 /// implements only a functionality needed for a specific use case at the
 /// core of the framework.
 ///
 /// Underlying implementation uses a variation of *hash array mapped trie*
 /// data structure with compressed (bitmap indexed) nodes.
 ///
-/// See:
+/// See also:
+///
 ///  * [Bagwell, Phil. Ideal hash trees.](https://infoscience.epfl.ch/record/64398);
 ///  * [Steindorfer, Michael J., and Jurgen J. Vinju. "Optimizing hash-array mapped tries for fast and lean immutable JVM collections."](https://dl.acm.org/doi/abs/10.1145/2814270.2814312);
 ///  * [Clojure's `PersistentHashMap`](https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/PersistentHashMap.java).
+///
 class PersistentHashMap<K extends Object, V> {
-  /// An an empty dictionary.
+  /// An an empty hash map.
   const PersistentHashMap.empty() : this._(null);
 
   const PersistentHashMap._(this._root);
@@ -41,14 +43,15 @@ class PersistentHashMap<K extends Object, V> {
 
   /// Returns value associated with the given [key] or `null` if [key]
   /// is not in the map.
+  @pragma('dart2js:as:trust')
   V? lookup(K key) {
     if (_root == null) {
       return null;
     }
 
-    // This is an implicit downcast to allow dart2js to omit it.
-    // ignore: return_of_invalid_type
-    return _root!.lookup(0, key, key.hashCode) as dynamic;
+    // Unfortunately can't use unsafeCast<V?>(...) here because it leads
+    // to worse code generation on VM.
+    return _root!.lookup(0, key, key.hashCode) as V?;
   }
 }
 
@@ -85,9 +88,7 @@ class _FullNode extends _TrieNode {
   @override
   _TrieNode copyWith(int bitIndex, Object key, int keyHash, Object? value) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
-    // This is an implicit downcast to allow dart2js to omit it.
-    // ignore: invalid_assignment
-    final _TrieNode node = (descendants[index] ?? _CompressedNode.empty) as dynamic;
+    final _TrieNode node = _unsafeCast<_TrieNode?>(descendants[index]) ?? _CompressedNode.empty;
     final _TrieNode newNode = node.copyWith(
         bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
     return identical(newNode, node)
@@ -99,9 +100,7 @@ class _FullNode extends _TrieNode {
   Object? lookup(int bitIndex, Object key, int keyHash) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
 
-    // This is an implicit downcast to allow dart2js to omit it.
-    // ignore: invalid_assignment
-    final _TrieNode? node = descendants[index] as dynamic;
+    final _TrieNode? node = _unsafeCast<_TrieNode?>(descendants[index]);
     return node?.lookup(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
   }
 }
@@ -156,10 +155,7 @@ class _CompressedNode extends _TrieNode {
 
       // Is this a (null, trieNode) pair?
       if (identical(keyOrNull, null)) {
-        // This is an implicit downcast to allow dart2js to omit it.
-        // ignore: invalid_assignment
-        final _TrieNode node = valueOrNode as dynamic;
-        final _TrieNode newNode = node.copyWith(
+        final _TrieNode newNode = _unsafeCast<_TrieNode>(valueOrNode).copyWith(
             bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
         if (newNode == valueOrNode) {
           return this;
@@ -229,15 +225,13 @@ class _CompressedNode extends _TrieNode {
     }
     final int index = _compressedIndex(bit);
     final Object? keyOrNull = keyValuePairs[2 * index];
-    final Object? valOrNode = keyValuePairs[2 * index + 1];
+    final Object? valueOrNode = keyValuePairs[2 * index + 1];
     if (keyOrNull == null) {
-      // This is an implicit downcast to allow dart2js to omit it.
-      // ignore: invalid_assignment
-      final _TrieNode node = valOrNode as dynamic;
+      final _TrieNode node = _unsafeCast<_TrieNode>(valueOrNode);
       return node.lookup(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
     }
     if (key == keyOrNull) {
-      return valOrNode;
+      return valueOrNode;
     }
     return null;
   }
@@ -352,6 +346,7 @@ class _HashCollisionNode extends _TrieNode {
 @pragma('vm:prefer-inline')
 @pragma('dart2js:tryInline')
 int _bitCount(int n) {
+  assert((n & 0xFFFFFFFF) == n);
   n = n - ((n >> 1) & 0x55555555);
   n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
   n = (n + (n >> 4)) & 0x0F0F0F0F;
@@ -385,4 +380,13 @@ List<Object?> _copy(List<Object?> array) {
 @pragma('dart2js:tryInline')
 List<Object?> _makeArray(int length) {
   return List<Object?>.filled(length, null);
+}
+
+/// This helper method becomes an noop when compiled with dart2js on
+/// with high level of optimizations enabled.
+@pragma('dart2js:tryInline')
+@pragma('dart2js:as:trust')
+@pragma('vm:prefer-inline')
+T _unsafeCast<T>(Object? o) {
+  return o as T;
 }
