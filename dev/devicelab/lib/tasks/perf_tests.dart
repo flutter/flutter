@@ -1328,6 +1328,7 @@ class CompileTest {
         clean: false,
         metricKey: 'debug_second_compile_millis',
       );
+
       final Map<String, dynamic> metrics = <String, dynamic>{
         ...compileRelease,
         ...compileDebug,
