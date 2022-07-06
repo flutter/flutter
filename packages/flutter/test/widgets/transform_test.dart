@@ -338,6 +338,42 @@ void main() {
     ]);
   });
 
+  testWidgets('Transform with nan value short-circuits rendering', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform(
+        transform: Matrix4.identity()
+          ..storage[0] = double.nan,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+  });
+
+  testWidgets('Transform with inf value short-circuits rendering', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform(
+        transform: Matrix4.identity()
+          ..storage[0] = double.infinity,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+  });
+
+  testWidgets('Transform with -inf value short-circuits rendering', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform(
+        transform: Matrix4.identity()
+          ..storage[0] = double.negativeInfinity,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+  });
+
   testWidgets('Transform.rotate does not remove layers due to singular short-circuit', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
