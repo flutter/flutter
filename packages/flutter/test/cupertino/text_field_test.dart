@@ -2455,7 +2455,11 @@ void main() {
       await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.byType(CupertinoButton), findsNWidgets(isTargetPlatformMobile ? 2 : 1));
+      if (kIsWeb) {
+        expect(find.byType(CupertinoButton), findsNothing);
+      } else {
+        expect(find.byType(CupertinoButton), findsNWidgets(isTargetPlatformMobile ? 2 : 1));
+      }
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, 6);
 
