@@ -10,7 +10,37 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-/// A widget that replaces its child with a rasterized version of said child.
+/// Whether or not the application is currently using a hardware accelerated
+/// backend.
+bool isHardwareAccelerated() {
+  final ui.SceneBuilder builder = ui.SceneBuilder();
+  final ui.Scene scene = builder.build();
+  late ui.Image image;
+  try {
+    image = scene.toGpuImage(1, 1);
+  } on UnsupportedError {
+    // Flutter Web HTML backend.
+    return false;
+  }
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  try {
+    canvas.drawImage(image, Offset.zero, Paint());
+  } on ui.PictureRasterizationException {
+    // Software rendering backend on iOS, flutter_tester, or Android software rendering.
+    return false;
+  }
+  image.dispose();
+  return true;
+}
+
+/// A widget that replaces its child with a rasterized version of the child.
+///
+/// Not all backends support this rendering strategy, specifically the html backend of
+/// flutter on the web, android emulators with --enable-software-rendering, and iOS
+/// while backgrounded. If this widget is used in these cases, it will simply paint its
+/// child as is. Whether or not this widget is supported can be detected at runtime with
+/// [isHardwareAccelerated].
 class RasterWidget extends SingleChildRenderObjectWidget {
   /// Create a new [RasterWidget].
   const RasterWidget({
@@ -159,7 +189,7 @@ class RenderRasterWidget extends RenderProxyBox {
     try {
       delegate.paint(context, offset & size, _childRaster!, devicePixelRatio);
     } on ui.PictureRasterizationException {
-      // TODO(jonahwilliams): handle software backend.
+      super.paint(context, offset);
     }
   }
 }

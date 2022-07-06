@@ -317,7 +317,7 @@ mixin _ZoomTransitionBase {
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
   @override
-  bool get allowRasterization => !kIsWeb && widget.preferRasterization;
+  bool get allowRasterization => widget.preferRasterization && isHardwareAccelerated();
 
   late _ZoomEnterTransitionDelegate delegate;
 
@@ -516,7 +516,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   late _ZoomExitTransitionDelegate delegate;
 
   @override
-  bool get allowRasterization => !kIsWeb && widget.preferRasterization;
+  bool get allowRasterization => widget.preferRasterization && isHardwareAccelerated();
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -762,7 +762,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      preferRasterization: false,
+      preferRasterization: route?.preferRasterization ?? true,
       child: child,
     );
   }
