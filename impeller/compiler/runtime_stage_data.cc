@@ -4,6 +4,7 @@
 
 #include "impeller/compiler/runtime_stage_data.h"
 
+#include <array>
 #include <optional>
 
 #include "impeller/base/validation.h"
