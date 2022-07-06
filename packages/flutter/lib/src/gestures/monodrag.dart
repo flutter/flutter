@@ -331,14 +331,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       if (_state == _DragState.accepted) {
         _pointerMoveAccept = true;
-        bool eventExists = false;
-        _multiPointerMoveTrackers.any((PointerEvent element) {
-          if (element.pointer == event.pointer) {
-            eventExists = true;
-            return true;
-          }
-          return false;
-        });
+        final bool eventExists = _multiPointerMoveTrackers.any((PointerEvent element) => element.pointer == event.pointer);
         if(eventExists) {
           _checkMultiPointerUpdate();
           _multiPointerMoveTrackers.clear();
@@ -372,8 +365,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       if (_pointerMoveAccept) {
         final List<int> pointers = _velocityTrackers.keys.toList();
-        for(int i = 0; i < pointers.length; i++) {
-          final int pointer = pointers[i];
+        for (int pointer in pointers) {
           _giveUpPointer(pointer);
         }
         _multiPointerMoveTrackers.clear();
