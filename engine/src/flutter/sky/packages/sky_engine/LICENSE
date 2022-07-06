@@ -13620,7 +13620,6 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   defined by the Mozilla Public License, v. 2.0.
 --------------------------------------------------------------------------------
 skcms
-skia
 vulkan
 
 Copyright (c) 2018 Google Inc. All rights reserved.
@@ -13652,7 +13651,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 skcms
-skia
 vulkanmemoryallocator
 
 Copyright 2018 Google Inc.
