@@ -907,6 +907,7 @@ void main() {
     refreshCalled = false;
     bool glowAccepted = true;
     ScrollNotification? lastNotification;
+
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
