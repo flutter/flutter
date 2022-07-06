@@ -2605,7 +2605,7 @@ class RenderTransform extends RenderProxyBox {
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
-          // if the matrix is singualr the children would be compressed to a line or
+          // if the matrix is singular the children would be compressed to a line or
           // single point, instead short-circuit and paint nothing.
           if (transform.determinant() == 0) {
             layer = null;
