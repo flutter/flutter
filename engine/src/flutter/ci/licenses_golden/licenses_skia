@@ -1,4 +1,4 @@
-Signature: c03a238670b21702eabfdc91bb9df9f7
+Signature: 7b2d909212a26c658a3a67de5c654b22
 
 UNUSED LICENSES:
 
@@ -529,14 +529,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
-LIBRARY: skia
 LIBRARY: vulkan
 ORIGIN: ../../../third_party/skia/include/third_party/skcms/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/third_party/skcms/BUILD.bazel
 FILE: ../../../third_party/skia/include/third_party/vulkan/BUILD.bazel
-FILE: ../../../third_party/skia/modules/skcms/BUILD.bazel
-FILE: ../../../third_party/skia/modules/skcms/version.sha1
 FILE: ../../../third_party/skia/third_party/skcms/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/skcms/version.sha1
 ----------------------------------------------------------------------------------------------------
@@ -571,15 +568,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
-LIBRARY: skia
 LIBRARY: vulkanmemoryallocator
 ORIGIN: ../../../third_party/skia/include/third_party/skcms/skcms.h + ../../../third_party/skia/include/third_party/skcms/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/third_party/skcms/skcms.h
-FILE: ../../../third_party/skia/modules/skcms/skcms.cc
-FILE: ../../../third_party/skia/modules/skcms/skcms.h
-FILE: ../../../third_party/skia/modules/skcms/skcms_internal.h
-FILE: ../../../third_party/skia/modules/skcms/src/Transform_inl.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
 FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
@@ -1165,6 +1157,8 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/effects.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/path.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
+FILE: ../../../third_party/skia/modules/skcms/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skcms/version.sha1
 FILE: ../../../third_party/skia/modules/skottie/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skottie/fuzz/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skottie/gm/BUILD.bazel
@@ -3528,6 +3522,10 @@ FILE: ../../../third_party/skia/include/private/SkTo.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkAnimCodecPlayer.h
 FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
+FILE: ../../../third_party/skia/modules/skcms/skcms.cc
+FILE: ../../../third_party/skia/modules/skcms/skcms.h
+FILE: ../../../third_party/skia/modules/skcms/skcms_internal.h
+FILE: ../../../third_party/skia/modules/skcms/src/Transform_inl.h
 FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
@@ -6164,8 +6162,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnProgramDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnRenderTarget.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnRingBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnRingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnTexture.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnTextureRenderTarget.cpp
