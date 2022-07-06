@@ -52,22 +52,22 @@ class AdaptiveLayout extends StatefulWidget {
   /// The slot that fills the rest of the space in the center.
   final SlotLayout? body;
 
-  /// A supporting slot for body. Has a sliding entrance animation by default.
-  /// The default ratio for the split between body and secondaryBody is so that
-  /// the split axis is in the center of the screen.
+  /// A supporting slot for [body]. Has a sliding entrance animation by default.
+  /// The default ratio for the split between [body] and [secondaryBody] is so
+  /// that the split axis is in the center of the screen.
   final SlotLayout? secondaryBody;
 
-  /// Defines the fractional ratio of body to body left.
+  /// Defines the fractional ratio of [body] to the [secondaryBody].
   ///
-  /// For example 1 / 3 would mean body takes up 1/3 of the available space and
-  /// secondaryBody takes up the rest.
+  /// For example 1 / 3 would mean [body] takes up 1/3 of the available space and
+  /// [secondaryBody] takes up the rest.
   ///
   /// If this value is null, the ratio is defined so that the split axis is in
   /// the center of the screen.
   final double? bodyRatio;
 
   /// Whether or not the developer wants the smooth entering slide transition on
-  /// secondaryBody.
+  /// [secondaryBody].
   ///
   /// Defaults to true.
   final bool bodyAnimated;

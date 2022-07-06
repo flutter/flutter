@@ -83,9 +83,9 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
 
       transitionBuilder: (Widget child, Animation<double> animation){
         if(child.key == chosenWidget?.key){
-          return (chosenWidget?.inAnimation!=null)? chosenWidget?.inAnimation!(_controller, child)?? child : child;
+          return (chosenWidget?.inAnimation!=null)? chosenWidget?.inAnimation!(child, _controller)?? child : child;
         }else{
-          return (chosenWidget?.overtakeAnimation!=null)? chosenWidget?.overtakeAnimation!(_controller, child)?? child : child;
+          return (chosenWidget?.overtakeAnimation!=null)? chosenWidget?.overtakeAnimation!(child, _controller)?? child : child;
         }
       },
       child:chosenWidget ?? const SlotLayoutConfig(key: Key(''), child: SizedBox(width: 0, height: 0)),

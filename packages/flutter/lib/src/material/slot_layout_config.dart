@@ -32,7 +32,7 @@ class SlotLayoutConfig extends StatefulWidget {
   ///
   /// While it is not enforced, the recommended usage for this property is to
   /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget]
-  final Widget Function(AnimationController?, Widget)? inAnimation;
+  final Widget Function(Widget, AnimationController)? inAnimation;
 
   /// A function that takes an [AnimationController] and a [Widget] and returns
   /// a [Widget].
@@ -42,7 +42,7 @@ class SlotLayoutConfig extends StatefulWidget {
   ///
   /// While it is not enforced, the recommended usage for this property is to
   /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget]
-  final Widget Function(AnimationController?, Widget)? overtakeAnimation;
+  final Widget Function(Widget, AnimationController)? overtakeAnimation;
 
   @override
   State<SlotLayoutConfig> createState() => _SlotLayoutConfigState();
