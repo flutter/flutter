@@ -27,6 +27,7 @@ declare_args() {
 }
 
 _fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
+_fuchsia_tools_path = "${_fuchsia_sdk_path}/tools/${host_cpu}"
 
 template("_fuchsia_sysroot") {
   assert(defined(invoker.meta), "The meta.json file path must be specified.")
@@ -104,7 +105,7 @@ template("_fuchsia_fidl_library") {
 
     args = [
       "--fidlc-bin",
-      rebase_path("$_fuchsia_sdk_path/tools/$host_cpu/fidlc"),
+      rebase_path("${_fuchsia_tools_path}/fidlc"),
       "--sdk-base",
       rebase_path(_fuchsia_sdk_path),
       "--root",
@@ -131,7 +132,7 @@ template("_fuchsia_fidl_library") {
 
       args += [
         "--fidlgen-bin",
-        rebase_path("$_fuchsia_sdk_path/tools/fidlgen"),
+        rebase_path("${_fuchsia_tools_path}/fidlgen"),
         "--fidlgen-output-root",
         rebase_path("$target_gen_dir"),
       ]
@@ -299,7 +300,7 @@ template("fuchsia_repo") {
   action(target_name) {
     script = "//flutter/tools/fuchsia/gen_repo.py"
 
-    pm_binary = rebase_path("$_fuchsia_sdk_path/tools/pm")
+    pm_binary = rebase_path("${_fuchsia_tools_path}/pm")
     repo_directory = invoker.repo
 
     inputs = [ pm_binary ]
