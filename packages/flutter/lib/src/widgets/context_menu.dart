@@ -242,7 +242,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   }
 
   /// Returns true if the given [EditableTextState] supports paste.
-  static bool canPaste(EditableTextState editableTextState, ClipboardStatus clipboardStatus) {
+  static bool canPaste(EditableTextState editableTextState, ClipboardStatus? clipboardStatus) {
     return !editableTextState.widget.readOnly
         && clipboardStatus == ClipboardStatus.pasteable;
   }

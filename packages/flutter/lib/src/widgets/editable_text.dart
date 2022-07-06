@@ -1970,7 +1970,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
-        ? TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus!.value)
+        ? TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus?.value)
         : widget.selectionControls?.canPaste(this) ?? false;
     if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
       clipboardStatus!.update();
