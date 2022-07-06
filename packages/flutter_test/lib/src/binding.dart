@@ -157,12 +157,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  void handleBeginFrame(Duration? rawTimeStamp) {
-    _window.incrementFrameNumber();
-    super.handleBeginFrame(rawTimeStamp);
-  }
-
-  @override
   TestWindow get window => _window;
   final TestWindow _window;
 
@@ -1054,6 +1048,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
       _phase = newPhase;
       if (hasScheduledFrame) {
+        addTime(const Duration(milliseconds: 500));
         _currentFakeAsync!.flushMicrotasks();
         handleBeginFrame(Duration(
           milliseconds: _clock!.now().millisecondsSinceEpoch,
@@ -1097,6 +1092,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         },
       ),
     );
+
+    addTime(additionalTime);
 
     return realAsyncZone.run<Future<T?>>(() async {
       _pendingAsyncTasks = Completer<void>();
