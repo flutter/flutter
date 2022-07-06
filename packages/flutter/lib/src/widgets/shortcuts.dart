@@ -446,8 +446,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) control keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all control keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Control keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Control keys must be pressed.
   ///
   /// See also:
   ///
@@ -457,8 +458,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) shift keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all shift keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Shift keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Shift keys must be pressed.
   ///
   /// See also:
   ///
@@ -468,8 +470,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) alt keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all alt keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Alt keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Alt keys must be pressed.
   ///
   /// See also:
   ///
@@ -479,8 +482,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) meta keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all meta keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Meta keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Meta keys must be pressed.
   ///
   /// See also:
   ///
@@ -582,45 +586,48 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   ///
   /// The [control] and [meta] flags represent whether the respect modifier
   /// keys should be held (true) or released (false). They default to false.
-  /// [CharacterActivator] can not check Shift keys or Alt keys yet, because
-  /// they might modify the character.
+  /// [CharacterActivator] can not check Shift keys or Alt keys yet, and will
+  /// accept whether they are pressed or not.
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
-  /// the [character]. If `includeRepeats` is false, only the [trigger] key
-  /// events with a false [RawKeyDownEvent.repeat] attribute will be considered.
+  /// the [character]. If `includeRepeats` is false, only the [character]
+  /// events with a false [RawKeyDownEvent.repeat] attribute will be
+  /// considered.
   const CharacterActivator(this.character, {
     this.control = false,
     this.meta = false,
     this.includeRepeats = true,
   });
 
-  /// Whether either (or both) control keys should be held for [trigger] to
-  /// activate the shortcut.
+  /// Whether either (or both) control keys should be held for the [character]
+  /// to activate the shortcut.
   ///
-  /// If false, then all control keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Control keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Control keys must be pressed.
   ///
   /// See also:
   ///
   ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
   final bool control;
 
-  /// Whether either (or both) meta keys should be held for [trigger] to
+  /// Whether either (or both) meta keys should be held for the [character] to
   /// activate the shortcut.
   ///
-  /// If false, then all meta keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Meta keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Meta keys must be pressed.
   ///
   /// See also:
   ///
   ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
   final bool meta;
 
-  /// Whether this activator accepts repeat events of the [trigger] key.
+  /// Whether this activator accepts repeat events of the [character].
   ///
   /// If [includeRepeats] is true, the activator is checked on all
-  /// [RawKeyDownEvent] events for the [trigger] key. If `includeRepeats` is
-  /// false, only the [trigger] key events with a false [RawKeyDownEvent.repeat]
+  /// [RawKeyDownEvent] events for the [character]. If `includeRepeats` is
+  /// false, only the [character] events with a false [RawKeyDownEvent.repeat]
   /// attribute will be considered.
   final bool includeRepeats;
 
