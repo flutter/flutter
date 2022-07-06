@@ -17,9 +17,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import io.flutter.Log;
 import io.flutter.view.TextureRegistry;
-import java.util.Locale;
 
 @TargetApi(20)
 class VirtualDisplayController {
@@ -36,52 +34,29 @@ class VirtualDisplayController {
       Object createParams,
       OnFocusChangeListener focusChangeListener) {
 
-    int selectedWidth = width;
-    int selectedHeight = height;
-
     DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-    if (selectedWidth == 0 || selectedHeight == 0) {
+    if (width == 0 || height == 0) {
       return null;
     }
-    // Prevent https://github.com/flutter/flutter/issues/2897.
-    if (selectedWidth > metrics.widthPixels || selectedHeight > metrics.heightPixels) {
-      float aspectRatio = (float) selectedWidth / (float) selectedHeight;
-      int maybeWidth = (int) (metrics.heightPixels * aspectRatio);
-      int maybeHeight = (int) (metrics.widthPixels / aspectRatio);
 
-      if (maybeHeight <= metrics.heightPixels) {
-        selectedWidth = metrics.widthPixels;
-        selectedHeight = maybeHeight;
-      } else if (maybeWidth <= metrics.widthPixels) {
-        selectedHeight = metrics.heightPixels;
-        selectedWidth = maybeWidth;
-      } else {
-        return null;
-      }
-
-      String message =
-          String.format(
-              Locale.US,
-              "Resizing virtual display of size: [%d, %d] to size [%d, %d] "
-                  + "since it's larger than the device display size [%d, %d].",
-              width,
-              height,
-              selectedWidth,
-              selectedHeight,
-              metrics.widthPixels,
-              metrics.heightPixels);
-      Log.w(TAG, message);
-    }
-
-    textureEntry.surfaceTexture().setDefaultBufferSize(selectedWidth, selectedHeight);
+    // Virtual Display crashes for some PlatformViews if the width or height is bigger
+    // than the physical screen size. We have tried to clamp or scale down the size to prevent
+    // the crash, but both solutions lead to unwanted behavior because the
+    // AndroidPlatformView(https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/widgets/platform_view.dart#L677) widget doesn't
+    // scale or clamp, which leads to a mismatch between the size of the widget and the size of
+    // virtual display.
+    // This mismatch leads to some test failures: https://github.com/flutter/flutter/issues/106750
+    // TODO(cyanglaz): find a way to prevent the crash without introducing size mistach betewen
+    // virtual display and AndroidPlatformView widget.
+    // https://github.com/flutter/flutter/issues/93115
+    textureEntry.surfaceTexture().setDefaultBufferSize(width, height);
     Surface surface = new Surface(textureEntry.surfaceTexture());
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
 
     int densityDpi = context.getResources().getDisplayMetrics().densityDpi;
     VirtualDisplay virtualDisplay =
-        displayManager.createVirtualDisplay(
-            "flutter-vd", selectedWidth, selectedHeight, densityDpi, surface, 0);
+        displayManager.createVirtualDisplay("flutter-vd", width, height, densityDpi, surface, 0);
 
     if (virtualDisplay == null) {
       return null;
@@ -97,8 +72,8 @@ class VirtualDisplayController {
             focusChangeListener,
             viewId,
             createParams);
-    controller.bufferWidth = selectedWidth;
-    controller.bufferHeight = selectedHeight;
+    controller.bufferWidth = width;
+    controller.bufferHeight = height;
     return controller;
   }
 
