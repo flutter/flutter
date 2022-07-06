@@ -1331,7 +1331,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           indexToLayoutOffset[index] = childParentData.layoutOffset!;
         }
 
-        if (newIndex != null && newIndex != index) {
+        if (newIndex != null && newIndex != index && newIndex >= 0) {
           // The layout offset of the child being moved is no longer accurate.
           if (childParentData != null) {
             childParentData.layoutOffset = null;
