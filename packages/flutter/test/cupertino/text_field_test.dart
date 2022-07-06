@@ -2461,7 +2461,7 @@ void main() {
 
       // Tap in a slightly different position to avoid hitting the context menu
       // on desktop.
-      await tester.tapAt(ePos + Offset(-1.0, 0.0));
+      await tester.tapAt(ePos + const Offset(-1.0, 0.0));
       await tester.pump();
 
       // We ended up moving the cursor to the edge of the same word and
