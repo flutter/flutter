@@ -2455,11 +2455,17 @@ void main() {
       await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(ePos);
+      expect(find.byType(CupertinoButton), findsNWidgets(isTargetPlatformMobile ? 2 : 1));
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 6);
+
+      // Tap in a slightly different position to avoid hitting the context menu
+      // on desktop.
+      await tester.tapAt(ePos + Offset(-1.0, 0.0));
       await tester.pump();
 
-      // We ended up moving the cursor to the edge of the same word and dismissed
-      // the toolbar.
+      // We ended up moving the cursor to the edge of the same word and
+      // dismissed the toolbar.
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
 
@@ -2698,17 +2704,30 @@ void main() {
         ),
       );
 
-      final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
+      // Use a position higher than wPos to avoid tapping the context menu on
+      // desktop.
+      final Offset pPos = textOffsetToPosition(tester, 9) + const Offset(0.0, -20.0); // Index of 'P|eel'
       final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'
 
       await tester.longPressAt(wPos);
       await tester.pump(const Duration(milliseconds: 50));
 
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 3);
+      if (isContextMenuProvidedByPlatform) {
+        expect(find.byType(CupertinoButton), findsNothing);
+      } else {
+        expect(find.byType(CupertinoButton), isTargetPlatformMobile ? findsNWidgets(2) : findsNWidgets(1));
+      }
+
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
+
       // First tap moved the cursor.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
 
