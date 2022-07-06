@@ -1399,7 +1399,6 @@ targets:
   - name: Linux_android raster_cache_use_memory_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
