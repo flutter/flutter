@@ -504,7 +504,7 @@ class TextStyle with Diagnosticable {
   /// style (e.g., in a [TextSpan] tree).
   ///
   /// If this is false, properties that don't have explicit values will revert
-  /// to the defaults: white in color, a font size of 10 pixels, in a sans-serif
+  /// to the defaults: white in color, a font size of 14 pixels, in a sans-serif
   /// font face.
   final bool inherit;
 
