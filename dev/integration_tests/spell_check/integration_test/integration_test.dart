@@ -11,8 +11,6 @@ import 'package:spell_check/main.dart';
 
 late DefaultSpellCheckService defaultSpellCheckService;
 late Locale locale;
-late String text;
-late List<SuggestionSpan>? spellCheckSuggestionSpans;
 
 /// Copy from flutter/test/widgets/editable_text_utils.dart.
 RenderEditable findRenderEditable(WidgetTester tester, Type type) {
@@ -40,51 +38,59 @@ Future<void> main() async {
     locale = const Locale('en', 'us');
   });
 
-  testWidgets(
+  test(
       'fetchSpellCheckSuggestions returns null with no misspelled words',
-      (WidgetTester tester) async {
-    text = 'Hello, world!';
+      () async {
+    String text = 'Hello, world!';
 
-    spellCheckSuggestionSpans =
+    List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans!.length, equals(0));
     expect(defaultSpellCheckService.lastSavedText, equals(text));
-    expect(defaultSpellCheckService.lastSavedSpans,
-        equals(spellCheckSuggestionSpans));
+    expect(
+      defaultSpellCheckService.lastSavedSpans,
+      equals(spellCheckSuggestionSpans)
+    );
   });
 
-  testWidgets(
+  test(
       'fetchSpellCheckSuggestions returns correct ranges with misspelled words',
-      (WidgetTester tester) async {
-    text = 'Hlelo, world! Yuou are magnificente';
+      () async {
+    String text = 'Hlelo, world! Yuou are magnificente';
     const List<TextRange> misspelledWordRanges = <TextRange>[
       TextRange(start: 0, end: 5),
       TextRange(start: 14, end: 18),
       TextRange(start: 23, end: 35)
     ];
 
-    spellCheckSuggestionSpans =
+    List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(
-        spellCheckSuggestionSpans!.length, equals(misspelledWordRanges.length));
+        spellCheckSuggestionSpans!.length, 
+        equals(misspelledWordRanges.length)
+        );
 
     for (int i = 0; i < misspelledWordRanges.length; i += 1) {
       expect(
-          spellCheckSuggestionSpans![i].range, equals(misspelledWordRanges[i]));
+          spellCheckSuggestionSpans![i].range, 
+          equals(misspelledWordRanges[i])
+        );
     }
 
     expect(defaultSpellCheckService.lastSavedText, equals(text));
-    expect(defaultSpellCheckService.lastSavedSpans,
-        equals(spellCheckSuggestionSpans));
+    expect(
+      defaultSpellCheckService.lastSavedSpans,
+      equals(spellCheckSuggestionSpans)
+    );
   });
 
-  testWidgets(
+  test(
       'fetchSpellCheckSuggestions does not correct results when Gboard not ignoring composing region',
-      (WidgetTester tester) async {
-    text = 'Wwow, whaaett a beautiful day it is!';
+      () async {
+    String text = 'Wwow, whaaett a beautiful day it is!';
 
     final List<SuggestionSpan>? spellCheckSpansWithComposingRegion =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
@@ -92,17 +98,19 @@ Future<void> main() async {
     expect(spellCheckSpansWithComposingRegion, isNotNull);
     expect(spellCheckSpansWithComposingRegion!.length, equals(2));
 
-    spellCheckSuggestionSpans =
+    List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(
-        spellCheckSuggestionSpans, equals(spellCheckSpansWithComposingRegion));
+        spellCheckSuggestionSpans, 
+        equals(spellCheckSpansWithComposingRegion)
+      );
   });
 
   testWidgets(
       'fetchSpellCheckSuggestions merges results when Gboard ignoring composing region',
       (WidgetTester tester) async {
-    text = 'Wooahha it is an amazzinng dayyebf!';
+    String text = 'Wooahha it is an amazzinng dayyebf!';
 
     final List<SuggestionSpan>? modifiedSpellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
@@ -111,17 +119,20 @@ Future<void> main() async {
     expect(modifiedSpellCheckSuggestionSpans, isNotNull);
     expect(modifiedSpellCheckSuggestionSpans.length, equals(3));
 
-    /// Remove one span to simulate Gboard attempting to un-ignore the composing region, after tapping away from "Yuou".
+    // Remove one span to simulate Gboard attempting to un-ignore the composing region, after tapping away from "Yuou".
     modifiedSpellCheckSuggestionSpans.removeAt(1);
 
     defaultSpellCheckService.lastSavedSpans = modifiedSpellCheckSuggestionSpans;
     defaultSpellCheckService.lastSavedText = text;
 
-    spellCheckSuggestionSpans =
+    List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans, isNotNull);
-    expect(spellCheckSuggestionSpans, equals(expectedSpellCheckSuggestionSpans));
+    expect(
+      spellCheckSuggestionSpans, 
+      equals(expectedSpellCheckSuggestionSpans)
+    );
   });
 
   testWidgets('EditableText spell checks when text is entered and spell check enabled', (WidgetTester tester) async {
@@ -164,10 +175,10 @@ Future<void> main() async {
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
 
-  testWidgets(
+  test(
       'fetchSpellCheckSuggestions returns null when there is a pending request',
-      (WidgetTester tester) async {
-    text =
+      () async {
+    String text =
         'neaf niofenaifn iofn iefnaoeifn ifneoa finoiafn inf ionfieaon ienf ifn ieonfaiofneionf oieafn oifnaioe nioenfio nefaion oifan' *
             10;
 
@@ -175,7 +186,7 @@ Future<void> main() async {
 
     final String modifiedText = text.substring(5);
 
-    spellCheckSuggestionSpans =
+    List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(
             locale, modifiedText);
 

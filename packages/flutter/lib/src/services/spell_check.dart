@@ -129,7 +129,7 @@ class DefaultSpellCheckService implements SpellCheckService {
   /// Used in cases where the text has not changed, but the spell check results
   /// received from the shell side have. This case is caused by IMEs (GBoard,
   /// for instance) that ignore the composing region when spell checking text.
-  List<SuggestionSpan> mergeResults(
+  static List<SuggestionSpan> mergeResults(
       List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
     final List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
 

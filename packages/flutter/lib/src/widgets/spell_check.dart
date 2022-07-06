@@ -16,8 +16,8 @@ import 'package:flutter/services.dart'
 class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
-  SpellCheckConfiguration(
-    {this.spellCheckService, this.spellCheckSuggestionsHandler
+  SpellCheckConfiguration({
+    this.spellCheckService, this.spellCheckSuggestionsHandler
   });
 
   /// The service used to fetch spell check results for text input.
@@ -89,7 +89,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   late final TextStyle misspelledTextStyle;
 
   /// The style used to indicate misspelled words on Android.
-  final TextStyle materialMisspelledTextStyle = const TextStyle(
+  static final TextStyle materialMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: ColorSwatch<int>(
         0xFFF44336,
@@ -106,13 +106,15 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           900: Color(0xFFB71C1C),
         },
       ),
-      decorationStyle: TextDecorationStyle.wavy);
+      decorationStyle: TextDecorationStyle.wavy
+  );
 
   /// The style used to indicate misspelled words on iOS and macOS.
-  final TextStyle cupertinoMisspelledTextStyle = const TextStyle(
+  static final TextStyle cupertinoMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: Color.fromARGB(255, 255, 59, 48),
-      decorationStyle: TextDecorationStyle.dotted);
+      decorationStyle: TextDecorationStyle.dotted
+  );
 
   /// Adjusts spell check results to correspond to [newText] if the only results
   /// that the handler has access to are the [results] corresponding to
@@ -120,7 +122,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   ///
   /// Used in the case where the request for the spell check results of the
   /// [newText] is lagging in order to avoid display of incorrect results.
-  List<SuggestionSpan> correctSpellCheckResults(
+  static List<SuggestionSpan> correctSpellCheckResults(
       String newText, String resultsText, List<SuggestionSpan> results) {
     final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
 
@@ -154,7 +156,8 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           adjustedSpan = SuggestionSpan(
               TextRange(
                   start: currentSpan.range.start + offset, end: searchStart),
-              currentSpan.suggestions);
+              currentSpan.suggestions
+          );
           correctedSpellCheckResults.add(adjustedSpan);
         }
       } catch (e) {
@@ -171,7 +174,8 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           searchStart = foundIndex + spanLength;
           adjustedSpan = SuggestionSpan(
               TextRange(start: foundIndex, end: searchStart),
-              currentSpan.suggestions);
+              currentSpan.suggestions
+          );
           offset = foundIndex - currentSpan.range.start;
 
           correctedSpellCheckResults.add(adjustedSpan);
@@ -209,7 +213,9 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
             value,
             style,
             misspelledTextStyle,
-            composingWithinCurrentTextRange));
+            composingWithinCurrentTextRange
+        )
+      );
   }
 
   /// Builds [TextSpan] subtree for text with misspelled words.
@@ -250,14 +256,21 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
                 !composingWithinCurrentTextRange;
 
         if (textPointerWithinComposingRegion) {
-          addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
+          _addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
               composingRegion, style, composingTextStyle);
-          tsTreeChildren.add(TextSpan(
+          tsTreeChildren.add(
+            TextSpan(
               style: style,
-              text: text.substring(composingRegion.end, endIndex)));
+              text: text.substring(composingRegion.end, endIndex)
+            )
+          );
         } else {
-          tsTreeChildren.add(TextSpan(
-              style: style, text: text.substring(textPointer, endIndex)));
+          tsTreeChildren.add(
+            TextSpan(
+              style: style,
+              text: text.substring(textPointer, endIndex)
+            )
+          );
         }
 
         textPointer = endIndex;
@@ -267,11 +280,14 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         currSpanIsComposingRegion = textPointer >= composingRegion.start &&
             endIndex <= composingRegion.end &&
             !composingWithinCurrentTextRange;
-        tsTreeChildren.add(TextSpan(
+        tsTreeChildren.add(
+          TextSpan(
             style: currSpanIsComposingRegion
                 ? composingTextStyle
                 : misspelledJointStyle,
-            text: text.substring(currSpan.range.start, endIndex)));
+            text: text.substring(currSpan.range.start, endIndex)
+          )
+        );
 
         textPointer = endIndex;
         currSpanPointer++;
@@ -281,17 +297,23 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     if (textPointer < text.length) {
       if (textPointer < composingRegion.start &&
           !composingWithinCurrentTextRange) {
-        addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
+        _addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
             composingRegion, style, composingTextStyle);
 
         if (composingRegion.end != text.length) {
-          tsTreeChildren.add(TextSpan(
+          tsTreeChildren.add(
+            TextSpan(
               style: style,
-              text: text.substring(composingRegion.end, text.length)));
+              text: text.substring(composingRegion.end, text.length)
+            )
+          );
         }
       } else {
-        tsTreeChildren.add(TextSpan(
-            style: style, text: text.substring(textPointer, text.length)));
+        tsTreeChildren.add(
+          TextSpan(
+            style: style, text: text.substring(textPointer, text.length)
+          )
+        );
       }
     }
 
@@ -300,17 +322,24 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
 
   /// Helper method to create [TextSpan] tree children for specified range of
   /// text up to and including the composing region.
-  void addComposingRegionTextSpans(
+  static void _addComposingRegionTextSpans(
       List<TextSpan> treeChildren,
       String text,
       int start,
       TextRange composingRegion,
       TextStyle? style,
       TextStyle composingTextStyle) {
-    treeChildren.add(TextSpan(
-        style: style, text: text.substring(start, composingRegion.start)));
-    treeChildren.add(TextSpan(
+    treeChildren.add(
+      TextSpan(
+        style: style,
+        text: text.substring(start, composingRegion.start)
+      )
+    );
+    treeChildren.add(
+      TextSpan(
         style: composingTextStyle,
-        text: text.substring(composingRegion.start, composingRegion.end)));
+        text: text.substring(composingRegion.start, composingRegion.end)
+      )
+    );
   }
 }

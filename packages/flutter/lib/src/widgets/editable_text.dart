@@ -644,7 +644,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckEnabled = false,
+    bool? spellCheckEnabled,
     this.spellCheckService,
     this.spellCheckSuggestionsHandler,
   }) : assert(controller != null),
@@ -709,6 +709,7 @@ class EditableText extends StatefulWidget {
                      ))),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
+       spellCheckEnabled = spellCheckEnabled ?? (spellCheckService != null || spellCheckSuggestionsHandler != null),       
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1742,10 +1743,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late SpellCheckConfiguration? _spellCheckConfiguration;
   SpellCheckConfiguration? get spellCheckConfiguration => _spellCheckConfiguration;
 
-  bool? _spellCheckEnabled;
+  late bool _spellCheckEnabled;
 
   /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
-  bool? get spellCheckEnabled => _spellCheckEnabled;
+  @visibleForTesting
+  bool get spellCheckEnabled => _spellCheckEnabled;
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.
