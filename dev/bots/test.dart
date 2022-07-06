@@ -100,9 +100,6 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     // VM-specific functionality.
     'test/services/message_codecs_vm_test.dart',
     'test/examples/sector_layout_test.dart',
-
-    // This test uses the part of trick
-    'test/widgets/animated_raster_test.dart',
   ],
   'canvaskit': <String>[
     // These tests are not compilable on the web due to dependencies on
@@ -137,9 +134,6 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     'test/cupertino/scaffold_test.dart',
     'test/rendering/platform_view_test.dart',
     'test/cupertino/context_menu_action_test.dart',
-
-    // This test uses the part of trick
-    'test/widgets/animated_raster_test.dart',
   ],
 };
 
