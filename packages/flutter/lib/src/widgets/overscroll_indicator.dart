@@ -653,9 +653,11 @@ class StretchingOverscrollIndicator extends StatefulWidget {
     super.key,
     required this.axisDirection,
     this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.clipBehavior = Clip.hardEdge,
     this.child,
   }) : assert(axisDirection != null),
-       assert(notificationPredicate != null);
+       assert(notificationPredicate != null),
+       assert(clipBehavior != null);
 
   /// {@macro flutter.overscroll.axisDirection}
   final AxisDirection axisDirection;
@@ -665,6 +667,11 @@ class StretchingOverscrollIndicator extends StatefulWidget {
 
   /// {@macro flutter.overscroll.notificationPredicate}
   final ScrollNotificationPredicate notificationPredicate;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   /// The widget below this widget in the tree.
   ///
@@ -809,7 +816,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           // screen, overflow from transforming the viewport is irrelevant.
           return ClipRect(
             clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
-              ? Clip.hardEdge : Clip.none,
+              ? widget.clipBehavior
+              : Clip.none,
             child: transform,
           );
         },

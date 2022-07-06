@@ -745,6 +745,63 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Transitioning between scrollable children sharing a scroll controller will not throw', (WidgetTester tester) async {
+    int s = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: DraggableScrollableSheet(
+              initialChildSize: 0.25,
+              snap: true,
+              snapSizes: const <double>[0.25, 0.5, 1.0],
+              builder: (BuildContext context, ScrollController scrollController) {
+                return PrimaryScrollController(
+                  controller: scrollController,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: (s.isEven)
+                      ? ListView(
+                        children: <Widget>[
+                          ElevatedButton(
+                            onPressed: () => setState(() => ++s),
+                            child: const Text('Switch to 2'),
+                          ),
+                          Container(
+                            height: 400,
+                            color: Colors.blue,
+                          ),
+                        ],
+                      )
+                      : SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () => setState(() => ++s),
+                              child: const Text('Switch to 1'),
+                            ),
+                            Container(
+                              height: 400,
+                              color: Colors.blue,
+                            ),
+                          ],
+                        )
+                      ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    ));
+
+    // Trigger the AnimatedSwitcher between ListViews
+    await tester.tap(find.text('Switch to 2'));
+    await tester.pump();
+    // Completes without throwing
+  });
+
   testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
     await tester.pumpWidget(boilerplateWidget(

@@ -569,7 +569,7 @@ class LogicalKeyEntry {
 
   /// A string indicating the letter on the keycap of a letter key.
   ///
-  /// This is only used to generate the key label mapping in keyboard_map.dart.
+  /// This is only used to generate the key label mapping in keyboard_maps.g.dart.
   /// [LogicalKeyboardKey.keyLabel] uses a different definition and is generated
   /// differently.
   final String? keyLabel;
@@ -607,7 +607,7 @@ class LogicalKeyEntry {
   }
 
   /// Gets the named used for the key constant in the definitions in
-  /// keyboard_key.dart.
+  /// keyboard_key.g.dart.
   ///
   /// If set by the constructor, returns the name set, but otherwise constructs
   /// the name from the various different names available, making sure that the

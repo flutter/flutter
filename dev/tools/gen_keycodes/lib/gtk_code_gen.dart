@@ -129,7 +129,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'linux', 'key_mapping.cc');
+      'shell', 'platform', 'linux', 'key_mapping.g.cc');
 
   @override
   Map<String, String> mappings() {

@@ -23,11 +23,16 @@ class VisualStudio {
     required Logger logger,
   }) : _platform = platform,
        _fileSystem = fileSystem,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final ProcessUtils _processUtils;
+  final Logger _logger;
+
+  /// Matches the description property from the vswhere.exe JSON output.
+  final RegExp _vswhereDescriptionProperty = RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
 
   /// True if Visual Studio installation was found.
   ///
@@ -294,9 +299,8 @@ class VisualStudio {
         ...requirementArguments,
       ], encoding: encoding);
       if (whereResult.exitCode == 0) {
-        final List<Map<String, dynamic>> installations =
-            (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
-        if (installations.isNotEmpty) {
+        final List<Map<String, dynamic>>? installations = _tryDecodeVswhereJson(whereResult.stdout);
+        if (installations != null && installations.isNotEmpty) {
           return VswhereDetails.fromJson(validateRequirements, installations[0]);
         }
       }
@@ -304,10 +308,39 @@ class VisualStudio {
       // Thrown if vswhere doesn't exist; ignore and return null below.
     } on ProcessException {
       // Ignored, return null below.
-    } on FormatException {
-      // may be thrown if invalid JSON is returned.
     }
     return null;
+  }
+
+  List<Map<String, dynamic>>? _tryDecodeVswhereJson(String vswhereJson) {
+    List<dynamic>? result;
+    FormatException? originalError;
+    try {
+      // Some versions of vswhere.exe are known to encode their output incorrectly,
+      // resulting in invalid JSON in the 'description' property when interpreted
+      // as UTF-8. First, try to decode without any pre-processing.
+      try {
+        result = json.decode(vswhereJson) as List<dynamic>;
+      } on FormatException catch (error) {
+        // If that fails, remove the 'description' property and try again.
+        // See: https://github.com/flutter/flutter/issues/106601
+        vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
+
+        _logger.printTrace('Failed to decode vswhere.exe JSON output. $error'
+          'Retrying after removing the unused description property:\n$vswhereJson');
+
+        originalError = error;
+        result = json.decode(vswhereJson) as List<dynamic>;
+      }
+    } on FormatException {
+      // Removing the description property didn't help.
+      // Report the original decoding error on the unprocessed JSON.
+      _logger.printWarning('Warning: Unexpected vswhere.exe JSON output. $originalError'
+        'To see the full JSON, run flutter doctor -vv.');
+      return null;
+    }
+
+    return result.cast<Map<String, dynamic>>();
   }
 
   /// Returns the details of the best available version of Visual Studio.
