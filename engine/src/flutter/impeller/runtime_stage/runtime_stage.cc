@@ -4,6 +4,8 @@
 
 #include "impeller/runtime_stage/runtime_stage.h"
 
+#include <array>
+
 #include "impeller/base/validation.h"
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
 
