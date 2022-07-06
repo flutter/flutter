@@ -61,6 +61,8 @@ typedef BottomSheetDragEndHandler = void Function(
 ///    non-modal "persistent" bottom sheets.
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
+///  * [BottomSheetThemeData], which can be used to customize the default
+///    bottom sheet property values.
 ///  * <https://material.io/design/components/sheets-bottom.html>
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.

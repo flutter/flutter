@@ -674,7 +674,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = widget.style;
     if (effectiveTextStyle == null || effectiveTextStyle.inherit) {
-      effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+      effectiveTextStyle = defaultTextStyle.style.merge(widget.style ?? _controller._textSpan.style);
     }
     if (MediaQuery.boldTextOverride(context)) {
       effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
