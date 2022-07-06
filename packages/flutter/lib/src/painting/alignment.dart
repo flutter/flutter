@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' show Offset, Rect, Size, TextDirection;
 
 import 'package:flutter/foundation.dart';
-
-import 'basic_types.dart';
 
 export 'dart:ui' show Offset, Rect, Size, TextDirection;
 

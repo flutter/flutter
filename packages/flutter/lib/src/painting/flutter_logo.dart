@@ -4,11 +4,11 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
+import 'dart:ui' show ColorFilter, BlendMode;
 
 import 'package:flutter/foundation.dart';
 
 import 'alignment.dart';
-import 'basic_types.dart';
 import 'box_fit.dart';
 import 'colors.dart';
 import 'decoration.dart';

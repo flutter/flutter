@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show Offset, Size;
 
 import 'package:flutter/foundation.dart' show clampDouble;
-import 'basic_types.dart';
 
 export 'dart:ui' show Offset, Size;
 

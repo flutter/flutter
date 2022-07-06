@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, FontVariation, TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' show Paint, TextDecoration, TextDecorationStyle;
 
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
 import 'text_painter.dart';

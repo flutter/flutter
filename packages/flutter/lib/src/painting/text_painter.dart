@@ -4,11 +4,11 @@
 
 import 'dart:math' show min, max;
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, TextStyle, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' show Canvas, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'basic_types.dart';
 import 'placeholder_span.dart';
 import 'strut_style.dart';
 import 'text_span.dart';

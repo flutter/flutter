@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Canvas, Path;
+
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'edge_insets.dart';
 import 'image_provider.dart';
 

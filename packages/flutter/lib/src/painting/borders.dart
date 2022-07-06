@@ -4,10 +4,10 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' show Canvas, Color, Paint, PaintingStyle, Path;
 
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'edge_insets.dart';
 
 export 'dart:ui' show Canvas, Color, Paint, Path, Rect, TextDirection;

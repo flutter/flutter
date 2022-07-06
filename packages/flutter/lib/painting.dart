@@ -17,7 +17,53 @@
 ///    painting boxes.
 library painting;
 
-export 'dart:ui' show Shadow, PlaceholderAlignment, TextHeightBehavior, TextLeadingDistribution;
+export 'dart:ui' show
+  BlendMode,
+  BlurStyle,
+  Canvas,
+  Clip,
+  Color,
+  ColorFilter,
+  FilterQuality,
+  FontStyle,
+  FontWeight,
+  ImageShader,
+  Locale,
+  MaskFilter,
+  Offset,
+  Paint,
+  PaintingStyle,
+  Path,
+  PathFillType,
+  PathOperation,
+  PlaceholderAlignment,
+  Radius,
+  RRect,
+  RSTransform,
+  Rect,
+  Shader,
+  Shadow,
+  Size,
+  StrokeCap,
+  StrokeJoin,
+  TextAffinity,
+  TextAlign,
+  TextBaseline,
+  TextBox,
+  TextDecoration,
+  TextDecorationStyle,
+  TextDirection,
+  TextHeightBehavior,
+  TextLeadingDistribution,
+  TextPosition,
+  TileMode,
+  VertexMode,
+  // TODO(werainkhatri): remove these after their deprecation period in engine
+  // https://github.com/flutter/flutter/pull/99505
+  hashValues, // ignore: deprecated_member_use
+  hashList; // ignore: deprecated_member_use
+
+export 'package:flutter/foundation.dart' show VoidCallback;
 
 export 'src/painting/alignment.dart';
 export 'src/painting/basic_types.dart';

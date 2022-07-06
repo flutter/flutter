@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-
-import 'basic_types.dart';
+import 'dart:ui' show Canvas, Offset, Paint, Path;
 
 export 'dart:ui' show Canvas, Offset, Paint;
 

@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show Size;
 
 import 'package:flutter/foundation.dart';
-
-import 'basic_types.dart';
 
 export 'dart:ui' show Size;
 

@@ -6,7 +6,6 @@ import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
 
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
 

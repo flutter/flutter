@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show Offset, PathOperation, Radius;
 
-import 'basic_types.dart';
 import 'borders.dart';
 
 export 'dart:ui' show Path, Rect;

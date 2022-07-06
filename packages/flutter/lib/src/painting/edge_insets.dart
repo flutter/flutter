@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show lerpDouble, WindowPadding;
+import 'dart:ui' show Offset, Rect, Size;
 
 import 'package:flutter/foundation.dart';
 

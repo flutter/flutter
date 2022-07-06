@@ -5,12 +5,12 @@
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, lerpDouble;
+import 'dart:ui' show Color, Rect, Shader, TextDirection, TileMode;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'alignment.dart';
-import 'basic_types.dart';
 
 export 'dart:ui' show Color, Rect, Shader, TextDirection, TileMode;
 

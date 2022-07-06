@@ -4,10 +4,10 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show Shadow, lerpDouble;
+import 'dart:ui' show BlurStyle, Color, Offset, MaskFilter, Paint;
 
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'debug.dart';
 
 export 'dart:ui' show BlurStyle, Color, Offset, Paint;

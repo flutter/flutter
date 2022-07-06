@@ -6,8 +6,6 @@ import 'dart:ui' show TextDirection;
 
 export 'dart:ui' show TextDirection;
 
-export '_basic_types_extra_exports.dart';
-
 // Intentionally not exported:
 //  - Image, instantiateImageCodec, decodeImageFromList:
 //      We use ui.* to make it very explicit that these are low-level image APIs.
