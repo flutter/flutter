@@ -510,9 +510,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// The scrollbar will remain on screen.
   void update(
-      ScrollMetrics metrics,
-      AxisDirection axisDirection,
-      ) {
+    ScrollMetrics metrics,
+    AxisDirection axisDirection,
+    ) {
     if (_lastMetrics != null &&
         _lastMetrics!.extentBefore == metrics.extentBefore &&
         _lastMetrics!.extentInside == metrics.extentInside &&
@@ -1943,7 +1943,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestInteractive(localOffset, kind)
-        && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
+      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].
