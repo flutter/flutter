@@ -36,7 +36,46 @@ class LoupeController {
   final StreamController<AnimationStatus> _animationStatus =
       StreamController<AnimationStatus>.broadcast();
 
-  OverlayEntry? _loupeEntry;
+  /// The loupe's [OverlayEntry], if currently visible.
+  /// 
+  /// This is public in case other overlay entries need to be positioned
+  /// above or below this [overlayEntry]. Anything in the paint order after
+  /// the [Loupe] will not be displaued in the loupe; this means that if it 
+  /// is desired for an overlay entry to be displayed in the loupe, 
+  /// it _must_ be positioned below the loupe.
+  /// 
+  /// {@tool snippet}
+  /// ```dart
+  ///  final myLoupeController = LoupeController();
+  /// 
+  /// // Placed below the loupe, so it will show.
+  /// Overlay.of(context).insert(
+  ///   OverlayEntry(builder: (context) => Text('I WILL display in the loupe'))
+  /// );
+  /// 
+  /// /// Will display in the loupe, since this entry was passed to [show].
+  /// final displayInLoupeEvenThoughPlacedBeforeChronologically = OverlayEntry(builer: (context) => Text('I WILL display in the loupe');
+  /// Overlay.of(context).insert(displayInLoupeEvenThoughPlacedBeforeChronologically);
+  /// 
+  /// myLoupeController.show(
+  ///   context, 
+  ///   below: displayInLoupeEvenThoughPlacedBeforeChronologically,
+  ///   builder: (context) => Loupe(...)
+  /// );
+  /// 
+  /// // By default, new entries will be placed over the top entry.
+  /// Overlay.of(context).insert(
+  ///   OverlayEntry(builer: (context) => Text('I WILL NOT display in the loupe'))
+  /// );
+  /// 
+  /// 
+  /// Overlay.of(context).insert(
+  ///   below: myLoupeController.overlayEntry, // Explicitly placed below the loupe.
+  ///   OverlayEntry(builer: (context) => Text('I WILL display in the loupe'))
+  /// );
+  /// ```
+  /// {@end-tool}
+  OverlayEntry? overlayEntry;
 
   /// The current status of the loupe.
   ///
@@ -84,11 +123,15 @@ class LoupeController {
   /// Shows the [Loupe] that this controller controlls.
   /// Returns a future that completes when the loupe is fully shown, i.e. done
   /// with it's entry animation.
+  /// 
+  /// To control what overlays are shown in the loupe, utilize [below]. See
+  /// [overlayEntry] for more details on how to utilize [below].
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
     Widget? debugRequiredFor,
     Offset initalPosition = Offset.zero,
+    OverlayEntry? below,
   }) async {
     _forceHide();
     final OverlayState? overlayState = Overlay.of(
@@ -104,10 +147,12 @@ class LoupeController {
       to: Navigator.maybeOf(context)?.context,
     );
 
-    _loupeEntry = OverlayEntry(
+    overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
-    overlayState!.insert(_loupeEntry!);
+    overlayState!.insert(
+      below: below,
+      overlayEntry!);
 
     // Schedule the animation to begin in the next frame, since
     // we need the the loupe to begin listening to the status stream.
@@ -116,7 +161,7 @@ class LoupeController {
       // If the loupe was force removed between this and last frame,
       // we shouldn't attempt to get an acknowledgement, since the future
       // will wait forever.
-      if (_loupeEntry == null) {
+      if (overlayEntry == null) {
         didRecieveAck.complete();
         return;
       }
@@ -132,7 +177,7 @@ class LoupeController {
 
   /// hide does not immediately remove the loupe, since it's possible that
   Future<void> hide() async {
-    if (_loupeEntry == null) {
+    if (overlayEntry == null) {
       return;
     }
 
@@ -145,13 +190,13 @@ class LoupeController {
 
   /// Immediately hide the loupe, ignoring any exit animation.
   void _forceHide() {
-    _loupeEntry?.remove();
-    _loupeEntry = null;
+    overlayEntry?.remove();
+    overlayEntry = null;
   }
 
   Future<AnimationStatus> _sendAnimationStatudAndAwaitAcknowledgement(
       AnimationStatus message, AnimationStatus ack) async {
-    assert(_loupeEntry != null,
+    assert(overlayEntry != null,
         'attempted to update animation status with no loupe.');
 
     // Setup a future that waits for the acknowledgement. Skip the first message,
