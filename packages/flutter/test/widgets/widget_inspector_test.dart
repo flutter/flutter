@@ -1875,7 +1875,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       service.resetPubRootDirectories();
-      service.addPubRootDirectories(<String>[pubRootTest]);
+      await service.testExtension('addPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       rootJson = (await service.testExtension('getRootWidgetSummaryTree', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
       childrenJson = rootJson['children']! as List<Object?>;
@@ -1960,7 +1960,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       service.resetPubRootDirectories();
-      service.addPubRootDirectories(<String>[pubRootTest]);
+      await service.testExtension('addPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       summarySelection = (await service.testExtension('getSelectedSummaryWidget', <String, String>{'objectGroup': group}))! as Map<String, Object?>;
       expect(summarySelection['valueId'], isNotNull);
@@ -2531,7 +2531,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       service.resetPubRootDirectories();
-      service.addPubRootDirectories(<String>[pubRootTest]);
+      await service.testExtension('addPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       final List<Map<Object, Object?>> rebuildEvents =
           service.getEventsDispatched('Flutter.RebuiltWidgets');
@@ -2742,7 +2742,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // directory.
       final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
       service.resetPubRootDirectories();
-      service.addPubRootDirectories(<String>[pubRootTest]);
+      await service.testExtension('addPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       final List<Map<Object, Object?>> repaintEvents =
           service.getEventsDispatched('Flutter.RepaintWidgets');
