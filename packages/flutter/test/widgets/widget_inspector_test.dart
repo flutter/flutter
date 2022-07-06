@@ -2255,7 +2255,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     group(
-      'ext.flutter.inspector.addPubRootDirectories',
+      'ext.flutter.inspector.addPubRootDirectories group',
       () {
         late final String pubRootTest;
 
