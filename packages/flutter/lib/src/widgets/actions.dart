@@ -1531,6 +1531,64 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   }
 }
 
+/// An [Intent] that evaluates a series of specified [intents] for
+/// execution.
+///
+/// The intents are invoked in order.
+abstract class ListedIntents extends Intent {
+  /// Creates an intent that is used with [ListedAction] to specify a list
+  /// of intents, which will be executed in order.
+  const ListedIntents({
+    required this.intents,
+  })  : assert(intents != null);
+
+  /// List of intents to be evaluated in order for execution. When an
+  /// [Action.isEnabled] returns false, the action will not be invoked and
+  /// progression through the ordered intents stops.
+  final List<Intent> intents;
+}
+
+/// An [Action] that iterates through a list of [Intent]s, invoking them all
+/// in order.
+class ListedAction<T extends ListedIntents> extends ContextAction<T> {
+
+  /// Returns false if any of the given [ListedIntents] mapped [Action]s, [Action.isEnabled]
+  /// return false. 
+  @override
+  bool isEnabled(T intent) {
+    final FocusNode? focus = primaryFocus;
+    bool isEnabled = false;
+    if  (focus == null || focus.context == null) {
+      return false;
+    }
+    for (final Intent candidateIntent in (intent as ListedIntents).intents) {
+      final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
+        focus.context!,
+        intent: candidateIntent,
+      );
+      if (candidateAction != null && candidateAction.isEnabled(candidateIntent)) {
+        isEnabled = true;
+      } else {
+        return false;
+      }
+    }
+    return isEnabled;
+  }
+
+  @override
+  void invoke(T intent, [BuildContext? context]) {
+    for (final Intent currentIntent in (intent as ListedIntents).intents) {
+      final Action<Intent>? currentAction = Actions.maybeFind<Intent>(
+        context!,
+        intent: currentIntent,
+      );
+      if (currentAction != null && currentAction.isEnabled(currentIntent)) {
+        currentAction.invoke(currentIntent);
+      }
+    }
+  }
+}
+
 mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   // When debugAssertMutuallyRecursive is true, this action will throw an
   // assertion error when the override calls this action's "invoke" method and

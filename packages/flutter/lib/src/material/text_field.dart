@@ -1227,6 +1227,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
+      SecondaryTapUpIntent : _makeOverridable(ListedAction<SecondaryTapUpIntent>()),
+      SecondaryTapIntent : _makeOverridable(ListedAction<SecondaryTapIntent>()),
+      SecondaryTapDownIntent : _makeOverridable(ListedAction<SecondaryTapDownIntent>()),
+      ShiftTapDownIntent : _makeOverridable(ListedAction<ShiftTapDownIntent>()),
+      TapDownIntent : _makeOverridable(ListedAction<TapDownIntent>()),
+      DoubleTapDownIntent : _makeOverridable(ListedAction<DoubleTapDownIntent>()),
+      TapUpIntent : _makeOverridable(ListedAction<TapUpIntent>()),
+      TapCancelIntent : _makeOverridable(ListedAction<TapUpIntent>()),
+      DragTapDownIntent : _makeOverridable(ListedAction<DragTapDownIntent>()),
+      DragStartIntent : _makeOverridable(ListedAction<DragStartIntent>()),
+      DragUpdateIntent : _makeOverridable(ListedAction<DragUpdateIntent>()),
+      DragEndIntent : _makeOverridable(ListedAction<DragEndIntent>()),
+      LongPressStartIntent : _makeOverridable(ListedAction<LongPressStartIntent>()),
+      LongPressMoveUpdateIntent : _makeOverridable(ListedAction<LongPressMoveUpdateIntent>()),
+      LongPressEndIntent : _makeOverridable(ListedAction<LongPressEndIntent>()),
+      ForcePressStartIntent : _makeOverridable(ListedAction<ForcePressStartIntent>()),
+      ForcePressEndIntent : _makeOverridable(ListedAction<ForcePressEndIntent>()),
+
       ExpandSelectionToPositionIntent : SelectionGestureCallbackAction<ExpandSelectionToPositionIntent>(
           onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.expandSelection(intent),
           enabledPredicate: (ExpandSelectionToPositionIntent intent) {

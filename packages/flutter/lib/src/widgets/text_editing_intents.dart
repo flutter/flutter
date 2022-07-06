@@ -339,6 +339,78 @@ class TransposeCharactersIntent extends Intent {
 }
 
 // ---------- Selection Gesture Intents ----------
+class SecondaryTapUpIntent extends ListedIntents {
+  const SecondaryTapUpIntent({required super.intents});
+}
+
+class SecondaryTapIntent extends ListedIntents {
+  const SecondaryTapIntent({required super.intents});
+}
+
+class SecondaryTapDownIntent extends ListedIntents {
+  const SecondaryTapDownIntent({required super.intents});
+}
+
+class ShiftTapDownIntent extends ListedIntents {
+  const ShiftTapDownIntent({required super.intents});
+}
+
+class TapDownIntent extends ListedIntents {
+  const TapDownIntent({required super.intents});
+}
+
+class DoubleTapDownIntent extends ListedIntents {
+  const DoubleTapDownIntent({required super.intents});
+}
+
+class TapUpIntent extends ListedIntents {
+  const TapUpIntent({required super.intents});
+}
+
+class ShiftTapUpIntent extends ListedIntents {
+  const ShiftTapUpIntent({required super.intents});
+}
+
+class TapCancelIntent extends ListedIntents {
+  const TapCancelIntent({required super.intents});
+}
+
+class DragTapDownIntent extends ListedIntents {
+  const DragTapDownIntent({required super.intents});
+}
+
+class DragStartIntent extends ListedIntents {
+  const DragStartIntent({required super.intents});
+}
+
+class DragUpdateIntent extends ListedIntents {
+  const DragUpdateIntent({required super.intents});
+}
+
+class DragEndIntent extends ListedIntents {
+  const DragEndIntent({required super.intents});
+}
+
+class LongPressStartIntent extends ListedIntents {
+  const LongPressStartIntent({required super.intents});
+}
+
+class LongPressMoveUpdateIntent extends ListedIntents {
+  const LongPressMoveUpdateIntent({required super.intents});
+}
+
+class LongPressEndIntent extends ListedIntents {
+  const LongPressEndIntent({required super.intents});
+}
+
+class ForcePressStartIntent extends ListedIntents {
+  const ForcePressStartIntent({required super.intents});
+}
+
+class ForcePressEndIntent extends ListedIntents {
+  const ForcePressEndIntent({required super.intents});
+}
+
 /// An [Intent] that requests the selection in an input field be expanded from
 /// either the [TextSelection.baseOffset] or [TextSelection.extentOffset] to the
 /// given [position], whichever is closest.

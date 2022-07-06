@@ -46,9 +46,14 @@ class DefaultSelectionGestures extends StatelessWidget {
             instance
               ..onSecondaryTapUp = (TapUpDetails details) {
                 print('onSecondaryTapUp');
-                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition)); //if !lastSecondaryTapWasOnSelection || !renderEditable.hasFocus
-                Actions.invoke(context, SelectionToolbarControlIntent.hide); //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
-                Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition)); //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
+                Actions.invoke(context, SecondaryTapUpIntent(
+                    intents: <Intent>[
+                      SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition), //if !lastSecondaryTapWasOnSelection || !renderEditable.hasFocus
+                      SelectionToolbarControlIntent.hide, //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
+                      SelectionToolbarControlIntent.show(position: details.globalPosition), //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
+                    ],
+                  ),
+                );
               }
               ..onSecondaryTap = () {
                 print('onSecondaryTap');
@@ -62,18 +67,22 @@ class DefaultSelectionGestures extends StatelessWidget {
 
                 if (defaultTargetPlatform == TargetPlatform.macOS) {
                   if (_isShiftPressed) {
-                    Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                    Actions.invoke(context, ShiftTapDownIntent(intents: <Intent>[ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
                   } else {
-                    Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                    Actions.invoke(context, TapDownIntent(intents: <Intent>[ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
                   }
                 }
 
                 if (tapCount == 2) {
                   print('onDoubleTapDown');
-                  Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-                  if (details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus) {
-                    Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
-                  }
+                  final bool showToolbar = details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus;
+                  Actions.invoke(context, DoubleTapDownIntent(
+                      intents: <Intent>[
+                        SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                        if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
+                      ],
+                    ),
+                  );
                 }
               }
               ..onTapUp = (TapUpDetails details, int tapCount) {
@@ -85,7 +94,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                 Actions.invoke(context, SelectionToolbarControlIntent.hide);
                 if (defaultTargetPlatform != TargetPlatform.macOS) {
                   if (_isShiftPressed){
-                    Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                    Actions.invoke(context, ShiftTapUpIntent(intents: <Intent>[ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
                   } else {
                     switch (details.kind) {
                       case PointerDeviceKind.mouse:
@@ -166,15 +175,15 @@ class DefaultSelectionGestures extends StatelessWidget {
             instance
               ..onLongPressStart = (LongPressStartDetails details) {
                 print('onLongPressStart');
-                Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+                Actions.invoke(context, LongPressStartIntent(intents: <Intent>[SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition)]));
               }
               ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
                 print('onLongPressMoveUpdate');
-                Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+                Actions.invoke(context, LongPressMoveUpdateIntent(intents: <Intent>[SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition)]));
               }
               ..onLongPressEnd = (LongPressEndDetails details) {
                 print('onLongPressEnd');
-                Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+                Actions.invoke(context, LongPressEndIntent(intents: <Intent>[SelectionToolbarControlIntent.show(position: details.globalPosition)]));
               };
           }
   );
@@ -185,12 +194,18 @@ class DefaultSelectionGestures extends StatelessWidget {
             instance
               ..onStart = (ForcePressDetails details) {
                 print('onStartForcePress');
-                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
+                Actions.invoke(context, ForcePressStartIntent(intents: <Intent>[SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition)]));
               }
               ..onEnd = (ForcePressDetails details) {
                 print('onEndForcePress');
-                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
-                Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+                Actions.invoke(context, ForcePressEndIntent(
+                  intents:
+                    <Intent>[
+                      SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition),
+                      SelectionToolbarControlIntent.show(position: details.globalPosition),
+                    ],
+                  ),
+                );
               };
           }
   );
@@ -202,8 +217,13 @@ class DefaultSelectionGestures extends StatelessWidget {
               instance
                 ..onSecondaryTapUp = (TapUpDetails details) {
                   print('onSecondaryTapUp');
-                  Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));//if renderEditable doesnt have focus
-                  Actions.invoke(context, SelectionToolbarControlIntent.toggle(position: details.globalPosition));
+                  Actions.invoke(context, SecondaryTapUpIntent(
+                      intents: <Intent>[
+                        SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                        SelectionToolbarControlIntent.toggle(position: details.globalPosition),
+                      ],
+                    ),
+                  );
                 }
                 ..onSecondaryTap = () {
                   print('onSecondaryTap');
@@ -224,19 +244,23 @@ class DefaultSelectionGestures extends StatelessWidget {
                     case TargetPlatform.linux:
                     case TargetPlatform.windows:
                       if (_isShiftPressed) {
-                        Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                        Actions.invoke(context, ShiftTapDownIntent(intents: <Intent>[ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
                       } else {
-                        Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                        Actions.invoke(context, TapDownIntent(intents: <Intent>[SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition)]));
                       }
                       break;
                   }
 
                   if (tapCount == 2) {
                     print('onDoubleTapDown');
-                    Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-                    if (details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus) {
-                      Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
-                    }
+                    final bool showToolbar = details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus;
+                    Actions.invoke(context, DoubleTapDownIntent(
+                        intents: <Intent>[
+                          SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                          if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
+                        ],
+                      ),
+                    );
                   }
                 }
                 ..onTapUp = (TapUpDetails details, int tapCount) {
@@ -276,16 +300,18 @@ class DefaultSelectionGestures extends StatelessWidget {
               instance
                 ..onLongPressStart = (LongPressStartDetails details) {
                   print('onLongPressStart');
-                  Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
-                  Actions.invoke(context, const FeedbackRequestIntent());
+                  Actions.invoke(context, LongPressStartIntent(intents: <Intent>[
+                    SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                    const FeedbackRequestIntent(),
+                  ]));
                 }
                 ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
                   print('onLongPressMoveUpdate');
-                  Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition));
+                  Actions.invoke(context, LongPressMoveUpdateIntent(intents: <Intent>[SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition)]));
                 }
                 ..onLongPressEnd = (LongPressEndDetails details) {
                   print('onLongPressEnd');
-                  Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+                  Actions.invoke(context, LongPressEndIntent(intents: <Intent>[SelectionToolbarControlIntent.show(position: details.globalPosition)]));
                 };
             }
     ),
