@@ -42,7 +42,13 @@ class PersistentHashMap<K extends Object, V> {
   /// Returns value associated with the given [key] or `null` if [key]
   /// is not in the map.
   V? lookup(K key) {
-    return _root != null ? _root!.lookup(0, key, key.hashCode) as V? : null;
+    if (_root == null) {
+      return null;
+    }
+
+    // This is an implicit downcast to allow dart2js to omit it.
+    // ignore: return_of_invalid_type
+    return _root!.lookup(0, key, key.hashCode) as dynamic;
   }
 }
 
@@ -70,13 +76,18 @@ class _FullNode extends _TrieNode {
 
   static const int numElements = 1 << _TrieNode.hashBitsPerLevel;
 
+  // Caveat: this array is actually List<_TrieNode?> but typing it like that
+  // will introduce a type check when copying this array. For performance
+  // reasons we instead omit the type and use (implicit) casts when accessing
+  // it instead.
   final List<Object?> descendants;
 
   @override
   _TrieNode copyWith(int bitIndex, Object key, int keyHash, Object? value) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
-    final _TrieNode node =
-        (descendants[index] as _TrieNode?) ?? _CompressedNode.empty;
+    // This is an implicit downcast to allow dart2js to omit it.
+    // ignore: invalid_assignment
+    final _TrieNode node = (descendants[index] ?? _CompressedNode.empty) as dynamic;
     final _TrieNode newNode = node.copyWith(
         bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
     return identical(newNode, node)
@@ -87,7 +98,10 @@ class _FullNode extends _TrieNode {
   @override
   Object? lookup(int bitIndex, Object key, int keyHash) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
-    final _TrieNode? node = descendants[index] as _TrieNode?;
+
+    // This is an implicit downcast to allow dart2js to omit it.
+    // ignore: invalid_assignment
+    final _TrieNode? node = descendants[index] as dynamic;
     return node?.lookup(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
   }
 }
@@ -102,6 +116,10 @@ class _FullNode extends _TrieNode {
 ///     representing an actual key/value mapping or a `(null, trieNode)` pair
 ///     representing a descendant node.
 ///
+/// Keys and values are stored together in a single array (instead of two
+/// parallel arrays) for performance reasons: this improves memory access
+/// locality and reduces memory usage (two arrays of length N take slightly
+/// more space than one array of length 2*N).
 class _CompressedNode extends _TrieNode {
   _CompressedNode(this.occupiedIndices, this.keyValuePairs);
   _CompressedNode._empty() : this(0, _emptyArray);
@@ -109,14 +127,20 @@ class _CompressedNode extends _TrieNode {
   factory _CompressedNode.single(int bitIndex, int keyHash, _TrieNode node) {
     final int bit = 1 << _TrieNode.trieIndex(keyHash, bitIndex);
     // A single (null, node) pair.
-    final List<Object?> keyValuePairs = List<Object?>.filled(2, null)
+    final List<Object?> keyValuePairs = _makeArray(2)
       ..[1] = node;
     return _CompressedNode(bit, keyValuePairs);
   }
 
   static final _CompressedNode empty = _CompressedNode._empty();
-  static final List<Object?> _emptyArray = List<Object?>.filled(0, null);
 
+  // Caveat: do not replace with <Object?>[] or const <Object?>[] this will
+  // introduce polymorphism in the _keyValuePairs field and significantly
+  // degrade performance on the VM because it will no longer be able to
+  // devirtualize keyValuePairs[i].
+  static final List<Object?> _emptyArray = _makeArray(0);
+
+  // This bitmap only uses 32bits due to [_TrieNode.hashBitsPerLevel] being `5`.
   final int occupiedIndices;
   final List<Object?> keyValuePairs;
 
@@ -132,8 +156,10 @@ class _CompressedNode extends _TrieNode {
 
       // Is this a (null, trieNode) pair?
       if (identical(keyOrNull, null)) {
-        // ignore: cast_nullable_to_non_nullable
-        final _TrieNode newNode = (valueOrNode as _TrieNode).copyWith(
+        // This is an implicit downcast to allow dart2js to omit it.
+        // ignore: invalid_assignment
+        final _TrieNode node = valueOrNode as dynamic;
+        final _TrieNode newNode = node.copyWith(
             bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
         if (newNode == valueOrNode) {
           return this;
@@ -179,17 +205,16 @@ class _CompressedNode extends _TrieNode {
         // index.
         final int prefixLength = 2 * index;
         final int totalLength = 2 * occupiedCount;
-        final List<Object?> newKeyValuePairs =
-            List<Object?>.filled(totalLength + 2, null);
-        for (int i = 0; i < prefixLength; i++) {
-          newKeyValuePairs[i] = keyValuePairs[i];
+        final List<Object?> newKeyValuePairs = _makeArray(totalLength + 2);
+        for (int srcIndex = 0; srcIndex < prefixLength; srcIndex++) {
+          newKeyValuePairs[srcIndex] = keyValuePairs[srcIndex];
         }
         newKeyValuePairs[prefixLength] = key;
         newKeyValuePairs[prefixLength + 1] = value;
-        for (int i = prefixLength, j = prefixLength + 2;
-            i < totalLength;
-            i++, j++) {
-          newKeyValuePairs[j] = keyValuePairs[i];
+        for (int srcIndex = prefixLength, dstIndex = prefixLength + 2;
+            srcIndex < totalLength;
+            srcIndex++, dstIndex++) {
+          newKeyValuePairs[dstIndex] = keyValuePairs[srcIndex];
         }
         return _CompressedNode(occupiedIndices | bit, newKeyValuePairs);
       }
@@ -202,13 +227,14 @@ class _CompressedNode extends _TrieNode {
     if ((occupiedIndices & bit) == 0) {
       return null;
     }
-    final int idx = _compressedIndex(bit);
-    final Object? keyOrNull = keyValuePairs[2 * idx];
-    final Object? valOrNode = keyValuePairs[2 * idx + 1];
+    final int index = _compressedIndex(bit);
+    final Object? keyOrNull = keyValuePairs[2 * index];
+    final Object? valOrNode = keyValuePairs[2 * index + 1];
     if (keyOrNull == null) {
-      // ignore: cast_nullable_to_non_nullable
-      return (valOrNode as _TrieNode)
-          .lookup(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
+      // This is an implicit downcast to allow dart2js to omit it.
+      // ignore: invalid_assignment
+      final _TrieNode node = valOrNode as dynamic;
+      return node.lookup(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
     }
     if (key == keyOrNull) {
       return valOrNode;
@@ -218,22 +244,21 @@ class _CompressedNode extends _TrieNode {
 
   /// Convert this node into an equivalent [_FullNode].
   _FullNode _inflate(int bitIndex) {
-    final List<Object?> nodes =
-        List<Object?>.filled(_FullNode.numElements, null);
-    int j = 0;
-    for (int i = 0; i < 32; i++) {
-      if (((occupiedIndices >>> i) & 1) != 0) {
-        final Object? keyOrNull = keyValuePairs[j];
+    final List<Object?> nodes = _makeArray(_FullNode.numElements);
+    int srcIndex = 0;
+    for (int dstIndex = 0; dstIndex < _FullNode.numElements; dstIndex++) {
+      if (((occupiedIndices >>> dstIndex) & 1) != 0) {
+        final Object? keyOrNull = keyValuePairs[srcIndex];
         if (keyOrNull == null) {
-          nodes[i] = keyValuePairs[j + 1];
+          nodes[dstIndex] = keyValuePairs[srcIndex + 1];
         } else {
-          nodes[i] = _CompressedNode.empty.copyWith(
+          nodes[dstIndex] = _CompressedNode.empty.copyWith(
               bitIndex + _TrieNode.hashBitsPerLevel,
               keyOrNull,
-              keyValuePairs[j].hashCode,
-              keyValuePairs[j + 1]);
+              keyValuePairs[srcIndex].hashCode,
+              keyValuePairs[srcIndex + 1]);
         }
-        j += 2;
+        srcIndex += 2;
       }
     }
     return _FullNode(nodes);
@@ -266,7 +291,7 @@ class _HashCollisionNode extends _TrieNode {
 
   factory _HashCollisionNode.fromCollision(
       int keyHash, Object keyA, Object? valueA, Object keyB, Object? valueB) {
-    final List<Object?> list = List<Object?>.filled(4, null);
+    final List<Object?> list = _makeArray(4);
     list[0] = keyA;
     list[1] = valueA;
     list[2] = keyB;
@@ -289,7 +314,7 @@ class _HashCollisionNode extends _TrieNode {
                 keyHash, _copy(keyValuePairs)..[index + 1] = val);
       }
       final int length = keyValuePairs.length;
-      final List<Object?> newArray = List<Object?>.filled(length + 2, null);
+      final List<Object?> newArray = _makeArray(length + 2);
       for (int i = 0; i < length; i++) {
         newArray[i] = keyValuePairs[i];
       }
@@ -321,20 +346,43 @@ class _HashCollisionNode extends _TrieNode {
   }
 }
 
+/// Returns number of bits set in a 32bit integer.
+///
+/// dart2js safe because we work with 32bit integers.
 @pragma('vm:prefer-inline')
+@pragma('dart2js:tryInline')
 int _bitCount(int n) {
   n = n - ((n >> 1) & 0x55555555);
-  n = (n & 0x33333333) + ((n >> 2) & 0x33333333);
+  n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
   n = (n + (n >> 4)) & 0x0F0F0F0F;
   n = n + (n >> 8);
   n = n + (n >> 16);
   return n & 0x0000003F;
 }
 
+/// Create a copy of the given array.
+///
+/// Caveat: do not replace with List.of or similar methods. They are
+/// considerably slower.
+@pragma('vm:prefer-inline')
+@pragma('dart2js:tryInline')
 List<Object?> _copy(List<Object?> array) {
-  final List<Object?> clone = List<Object?>.filled(array.length, null);
+  final List<Object?> clone = _makeArray(array.length);
   for (int j = 0; j < array.length; j++) {
     clone[j] = array[j];
   }
   return clone;
+}
+
+/// Create a fixed-length array of the given length filled with `null`.
+///
+/// We are using fixed length arrays because they are smaller and
+/// faster to access on VM. Growable arrays are represented by 2 objects
+/// (growable array instance pointing to a fixed array instance) and
+/// consequently fixed length arrays are faster to allocated, require less
+/// memory and are faster to access (less indirections).
+@pragma('vm:prefer-inline')
+@pragma('dart2js:tryInline')
+List<Object?> _makeArray(int length) {
+  return List<Object?>.filled(length, null);
 }
