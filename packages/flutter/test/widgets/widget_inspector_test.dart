@@ -1448,6 +1448,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               json.decode(service.getSelectedWidget(null, 'my-group')),
               contains('createdByLocalProject'),
             );
+
+            service.removePubRootDirectories(<String>[
+              '/invalid/$pubRootTest',
+            ]);
+            expect(
+              json.decode(service.getSelectedWidget(null, 'my-group')),
+              contains('createdByLocalProject'),
+            );
           },
         );
 
@@ -2187,6 +2195,17 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             ),
             contains('createdByLocalProject'),
           );
+
+          service.testExtension('removePubRootDirectories', <String, String>{
+            'arg0': '/invalid/$pubRootTest',
+          });
+          expect(
+            await service.testExtension(
+              'getSelectedWidget',
+              <String, String>{'objectGroup': 'my-group'},
+            ),
+            contains('createdByLocalProject'),
+          );
         },
       );
 
@@ -2457,6 +2476,18 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           service.testExtension('addPubRootDirectories', <String, String>{
             'arg0': pubRootTest,
             'arg1': '/invalid/$pubRootTest',
+            'isolateId': '34',
+          });
+          expect(
+            await service.testExtension(
+              'getSelectedWidget',
+              <String, String>{'objectGroup': 'my-group', 'isolateId': '34',},
+            ),
+            contains('createdByLocalProject'),
+          );
+
+          service.testExtension('removePubRootDirectories', <String, String>{
+            'arg0': '/invalid/$pubRootTest',
             'isolateId': '34',
           });
           expect(
