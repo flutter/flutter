@@ -241,7 +241,30 @@ class FlutterVersion {
   ///
   /// This function must run while [Cache.lock] is acquired because it reads and
   /// writes shared cache files.
-  Future<void> checkFlutterVersionFreshness() async {
+  ///
+  /// Based on the passed arguments, the method decides whether to perform
+  /// the version check or not.
+  ///
+  /// - [isUpgradeCommand]: whether the called command is the upgrade command
+  /// - [versionCheckEnvironment]: the environment variable about the version
+  ///                              check
+  /// - [versionCheckFlag]: whether the version check flag is explicitly passed
+  /// - [isMachine]: whether the tool runs in a machine-only environment like CI
+  Future<void> checkFlutterVersionFreshness({
+    bool isUpgradeCommand = false,
+    bool versionCheckEnvironment = true,
+    bool versionCheckFlag = false,
+    bool isMachine = false,
+  }) async {
+    // Don't perform update check in case it is disabled by environment
+    // unless it is explicitly overwritten
+    if (!versionCheckEnvironment && !versionCheckFlag) {
+      return;
+    }
+    // Only perform check if sub-command is 'upgrade'
+    if (!isUpgradeCommand) {
+      return;
+    }
     // Don't perform update checks if we're not on an official channel.
     if (!kOfficialChannels.contains(channel)) {
       return;

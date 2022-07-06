@@ -379,7 +379,12 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  Future<void> checkFlutterVersionFreshness() async {
+  Future<void> checkFlutterVersionFreshness({
+    bool isUpgradeCommand = false,
+    bool versionCheckEnvironment = true,
+    bool versionCheckFlag = false,
+    bool isMachine = false,
+  }) async {
     _didCheckFlutterVersionFreshness = true;
   }
 

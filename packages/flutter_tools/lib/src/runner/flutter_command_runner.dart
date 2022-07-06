@@ -19,6 +19,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
 import '../web/web_device.dart';
+import 'environment_variables.dart';
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({ bool verboseHelp = false }) : super(
@@ -74,7 +75,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('version-check',
         defaultsTo: true,
         hide: !verboseHelp,
-        help: 'Allow Flutter to check for updates when this command runs.');
+        help: 'Allow Flutter to check for updates when this command runs. '
+            'Can be set by $kFlutterVersionCheckName environment variable.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
@@ -254,13 +256,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool redirectedCompletion = !globals.stdio.hasTerminal &&
             (topLevelResults.command?.name ?? '').endsWith('-completion');
         final bool isMachine = machineFlag || ci || redirectedCompletion;
+        final bool versionCheckEnvironment =
+            globals.platform.environment[kFlutterVersionCheckName] != 'false';
         final bool versionCheckFlag = topLevelResults['version-check'] as bool? ?? false;
         final bool explicitVersionCheckPassed = topLevelResults.wasParsed('version-check') && versionCheckFlag;
 
-        if (topLevelResults.command?.name != 'upgrade' &&
-            (explicitVersionCheckPassed || (versionCheckFlag && !isMachine))) {
-          await globals.flutterVersion.checkFlutterVersionFreshness();
-        }
+        await globals.flutterVersion.checkFlutterVersionFreshness(
+          isUpgradeCommand: topLevelResults.command?.name == 'upgrade',
+          versionCheckEnvironment: versionCheckEnvironment,
+          versionCheckFlag: explicitVersionCheckPassed,
+          isMachine: isMachine,
+        );
 
         // See if the user specified a specific device.
         final String? specifiedDeviceId = topLevelResults['device-id'] as String?;

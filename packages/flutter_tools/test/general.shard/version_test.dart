@@ -75,17 +75,6 @@ void main() {
             command: <String>['git', 'ls-remote', '--get-url', 'origin'],
             stdout: flutterUpstreamUrl,
           ),
-          FakeCommand(
-            command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
-            stdout: getChannelUpToDateVersion().toString(),
-          ),
-          const FakeCommand(
-            command: <String>['git', 'fetch', '--tags'],
-          ),
-          FakeCommand(
-            command: const <String>['git', '-c', 'log.showSignature=false', 'log', '@{upstream}', '-n', '1', '--pretty=format:%ad', '--date=iso'],
-            stdout: getChannelOutOfDateVersion().toString(),
-          ),
           const FakeCommand(
             command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ar'],
             stdout: '1 second ago',
@@ -101,7 +90,7 @@ void main() {
         ]);
 
         final FlutterVersion flutterVersion = globals.flutterVersion;
-        await flutterVersion.checkFlutterVersionFreshness();
+        await flutterVersion.checkFlutterVersionFreshness(versionCheckEnvironment: false);
         expect(flutterVersion.channel, channel);
         expect(flutterVersion.repositoryUrl, flutterUpstreamUrl);
         expect(flutterVersion.frameworkRevision, '1234abcd');
