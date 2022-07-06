@@ -585,7 +585,7 @@ void main() {
                   key: ValueKey<String>(item),
                   value: item,
                   child: Text(item, key: ValueKey<String>('${item}Text'),
-                      textScaleFactor: 3.0, style: const(TextStyle(fontSize: 20.0))),
+                      textScaleFactor: 3.0, style: const TextStyle(fontSize: 20.0)),
                 );
               }).toList(),
             ),
