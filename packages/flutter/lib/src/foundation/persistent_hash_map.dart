@@ -13,8 +13,8 @@
 /// implements only a functionality needed for a specific use case at the
 /// core of the framework.
 ///
-/// Underlying implemenation uses a variation of *hash array mapped trie* (HAMT)
-/// datastructure with compressed (bitmap indexed) nodes.
+/// Underlying implementation uses a variation of *hash array mapped trie*
+/// data structure with compressed (bitmap indexed) nodes.
 ///
 /// See:
 ///  * [Bagwell, Phil. Ideal hash trees.](https://infoscience.epfl.ch/record/64398);
@@ -31,12 +31,12 @@ class PersistentHashMap<K extends Object, V> {
   /// Create a copy of this map extended with the given [key] to [value]
   /// mapping.
   PersistentHashMap<K, V> copyWith(K key, V value) {
-    final _TrieNode newroot =
+    final _TrieNode newRoot =
         (_root ?? _CompressedNode.empty).copyWith(0, key, key.hashCode, value);
-    if (newroot == _root) {
+    if (newRoot == _root) {
       return this;
     }
-    return PersistentHashMap<K, V>._(newroot);
+    return PersistentHashMap<K, V>._(newRoot);
   }
 
   /// Returns value associated with the given [key] or `null` if [key]
@@ -135,9 +135,9 @@ class _CompressedNode extends _TrieNode {
   static final _CompressedNode empty = _CompressedNode._empty();
 
   // Caveat: do not replace with <Object?>[] or const <Object?>[] this will
-  // introduce polymorphism in the _keyValuePairs field and significantly
+  // introduce polymorphism in the keyValuePairs field and significantly
   // degrade performance on the VM because it will no longer be able to
-  // devirtualize keyValuePairs[i].
+  // devirtualize method calls on keyValuePairs.
   static final List<Object?> _emptyArray = _makeArray(0);
 
   // This bitmap only uses 32bits due to [_TrieNode.hashBitsPerLevel] being `5`.
