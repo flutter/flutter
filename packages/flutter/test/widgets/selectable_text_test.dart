@@ -3254,6 +3254,12 @@ void main() {
       await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
 
+      // Hide the toolbar so it doesn't interfere with taps on the text.
+      final EditableTextState editableTextState =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      editableTextState.hideToolbar();
+      await tester.pumpAndSettle();
+
       await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump();
 
@@ -3640,6 +3646,12 @@ void main() {
       await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
 
+      // Hide the toolbar so it doesn't interfere with taps on the text.
+      final EditableTextState editableTextState =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      editableTextState.hideToolbar();
+      await tester.pumpAndSettle();
+
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
 
@@ -3711,6 +3723,12 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
+
+      // Hide the toolbar so it doesn't interfere with taps on the text.
+      final EditableTextState editableTextState =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      editableTextState.hideToolbar();
+      await tester.pumpAndSettle();
 
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -4222,7 +4240,7 @@ void main() {
     );
 
     final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+        tester.state<EditableTextState>(find.byType(EditableText));
     final RenderEditable renderEditable = state.renderEditable;
 
     await tester.tapAt(const Offset(20, 10));
@@ -4782,7 +4800,11 @@ void main() {
     expect(selection!.baseOffset, 5);
     expect(selection!.extentOffset, 6);
 
-    // Put the cursor at the end of the field.
+    // Tap at the beginning of the text to hide the toolbar, then at the end to
+    // move the cursor to the end. On some platforms, the context menu would
+    // otherwise block a tap on the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
     await tester.tapAt(textOffsetToPosition(tester, 10));
     expect(selection, isNotNull);
     expect(selection!.baseOffset, 10);

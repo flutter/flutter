@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
+import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'input_decorator.dart';
@@ -288,7 +289,11 @@ class TextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
+    this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -329,6 +334,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -366,30 +372,7 @@ class TextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
-           (obscureText
-               ? (readOnly
-                   // No point in even offering "Select All" in a read-only obscured
-                   // field.
-                   ? const ToolbarOptions()
-                   // Writable, but obscured.
-                   : const ToolbarOptions(
-                       selectAll: true,
-                       paste: true,
-                     ))
-               : (readOnly
-                   // Read-only, not obscured.
-                   ? const ToolbarOptions(
-                       selectAll: true,
-                       copy: true,
-                     )
-                   // Writable, not obscured.
-                   : const ToolbarOptions(
-                       copy: true,
-                       cut: true,
-                       selectAll: true,
-                       paste: true,
-                     )));
+       assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.');
 
   /// Controls the text being edited.
   ///
@@ -518,7 +501,11 @@ class TextField extends StatefulWidget {
   /// If not set, select all and paste will default to be enabled. Copy and cut
   /// will be disabled if [obscureText] is true. If [readOnly] is true,
   /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
+  final ToolbarOptions? toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool? showCursor;
@@ -765,6 +752,15 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
+
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultTextSelectionToolbar], which is built by default.
+  final EditableTextToolbarBuilder? buildContextMenu;
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -1153,7 +1149,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.iOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
-        textSelectionControls ??= cupertinoTextSelectionControls;
+        textSelectionControls ??= cupertinoTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
@@ -1166,7 +1162,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = false;
-        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
@@ -1184,7 +1180,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         forcePressEnabled = false;
-        textSelectionControls ??= materialTextSelectionControls;
+        textSelectionControls ??= materialTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
@@ -1193,7 +1189,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
       case TargetPlatform.linux:
         forcePressEnabled = false;
-        textSelectionControls ??= desktopTextSelectionControls;
+        textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
@@ -1202,7 +1198,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
       case TargetPlatform.windows:
         forcePressEnabled = false;
-        textSelectionControls ??= desktopTextSelectionControls;
+        textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
@@ -1222,7 +1218,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         child: EditableText(
           key: editableTextKey,
           readOnly: widget.readOnly || !_isEnabled,
-          toolbarOptions: widget.toolbarOptions,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
           controller: controller,
@@ -1278,6 +1273,17 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          buildContextMenu: widget.buildContextMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+            return DefaultTextSelectionToolbar(
+              primaryAnchor: primaryAnchor,
+              secondaryAnchor: secondaryAnchor,
+              editableTextState: editableTextState,
+              buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+                widget.toolbarOptions,
+                editableTextState,
+              ),
+            );
+          },
         ),
       ),
     );

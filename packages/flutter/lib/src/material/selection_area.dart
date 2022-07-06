@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
+import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -34,6 +35,7 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
+    this.buildContextMenu,
     required this.child,
   });
 
@@ -44,6 +46,15 @@ class SelectionArea extends StatefulWidget {
   ///
   /// If it is null, the platform specific selection control is used.
   final TextSelectionControls? selectionControls;
+
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultTextSelectionToolbar], which is built by default.
+  final WidgetBuilder? buildContextMenu;
 
   /// The child widget this selection area applies to.
   ///
@@ -89,9 +100,20 @@ class _SelectionAreaState extends State<SelectionArea> {
         controls ??= cupertinoDesktopTextSelectionControls;
         break;
     }
+
     return SelectableRegion(
-      focusNode: _effectiveFocusNode,
       selectionControls: controls,
+      focusNode: _effectiveFocusNode,
+      buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+        if (widget.buildContextMenu != null) {
+          return widget.buildContextMenu!(context);
+        }
+        return DefaultTextSelectionToolbar(
+          primaryAnchor: primaryAnchor,
+          secondaryAnchor: secondaryAnchor,
+          buttonDatas: buttonDatas,
+        );
+      },
       child: widget.child,
     );
   }

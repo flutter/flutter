@@ -110,6 +110,10 @@ class TextFormField extends FormField<String> {
     TextAlignVertical? textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
     ToolbarOptions? toolbarOptions,
     bool? showCursor,
     String obscuringCharacter = '•',
@@ -147,6 +151,7 @@ class TextFormField extends FormField<String> {
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
+    EditableTextToolbarBuilder? buildContextMenu,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -170,6 +175,7 @@ class TextFormField extends FormField<String> {
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        assert(enableIMEPersonalizedLearning != null),
+       assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
        super(
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          enabled: enabled ?? decoration?.enabled ?? true,
@@ -234,6 +240,7 @@ class TextFormField extends FormField<String> {
                scrollController: scrollController,
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
                mouseCursor: mouseCursor,
+               buildContextMenu: buildContextMenu,
              ),
            );
          },

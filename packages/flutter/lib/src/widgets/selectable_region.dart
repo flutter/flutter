@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'context_menu.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -27,6 +28,21 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.stylus,
   PointerDeviceKind.invertedStylus,
 };
+
+/// A builder specifically for the SelectableRegion context menu.
+///
+/// Includes the buttonDatas that SelectableRegion would normally build in its
+/// context menu.
+///
+/// See also:
+///
+///  * [ContextMenuBuilder], which doesn't include the buttonDatas.
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  List<ContextMenuButtonData> buttonDatas,
+  Offset primaryAnchor,
+  [Offset secondaryAnchor]
+);
 
 /// A widget that introduces an area for user selections.
 ///
@@ -175,6 +191,7 @@ class SelectableRegion extends StatefulWidget {
   /// toolbar for mobile devices.
   const SelectableRegion({
     super.key,
+    this.buildContextMenu,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
@@ -187,6 +204,9 @@ class SelectableRegion extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  final SelectableRegionContextMenuBuilder? buildContextMenu;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -581,6 +601,14 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   bool _showToolbar({Offset? location}) {
+    /*
+    if (widget.buildContextMenu == null) {
+      return false;
+    }
+
+    ContextMenuController.hide();
+    */
+
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
     }
@@ -592,6 +620,43 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (kIsWeb) {
       return false;
     }
+
+    /*
+    // TODO(justinmc): What's that about calculating the location in the docs above?
+    if (location == null) {
+      return false;
+    }
+
+    // TODO(justinmc): Is there ever a reason to use a secondary anchor?
+    ContextMenuController.show(
+      context: context,
+      buildContextMenu: (BuildContext context) {
+        final String? selectedText =
+            _selectable?.getSelectedContent()?.plainText;
+        return widget.buildContextMenu!(
+          context,
+          <ContextMenuButtonData>[
+            if (selectedText != null && selectedText != '')
+              ContextMenuButtonData(
+                onPressed: () {
+                  copySelection(SelectionChangedCause.toolbar);
+                  ContextMenuController.hide();
+                },
+                type: ContextMenuButtonType.copy,
+              ),
+            ContextMenuButtonData(
+              onPressed: () {
+                selectAll(SelectionChangedCause.toolbar);
+                ContextMenuController.hide();
+              },
+              type: ContextMenuButtonType.selectAll,
+            ),
+          ],
+          location,
+        );
+      },
+    );
+    */
 
     if (_selectionOverlay == null) {
       _createSelectionOverlay();
@@ -735,6 +800,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (hideHandles) {
       _selectionOverlay?.hideHandles();
     }
+    // TODO(justinmc): What of the above is still needed?
+    ContextMenuController.hide();
   }
 
   @override
@@ -799,6 +866,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionDelegate.dispose();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
+    ContextMenuController.hide();
     super.dispose();
   }
 

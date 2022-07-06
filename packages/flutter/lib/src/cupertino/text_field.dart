@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'text_selection.dart';
@@ -234,7 +235,11 @@ class CupertinoTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
+    this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -272,6 +277,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -309,32 +315,9 @@ class CupertinoTextField extends StatefulWidget {
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
        assert(enableIMEPersonalizedLearning != null),
+       assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
-           (obscureText
-               ? (readOnly
-                   // No point in even offering "Select All" in a read-only obscured
-                   // field.
-                   ? const ToolbarOptions()
-                   // Writable, but obscured.
-                   : const ToolbarOptions(
-                       selectAll: true,
-                       paste: true,
-                     ))
-               : (readOnly
-                   // Read-only, not obscured.
-                   ? const ToolbarOptions(
-                       selectAll: true,
-                       copy: true,
-                     )
-                   // Writable, not obscured.
-                   : const ToolbarOptions(
-                       copy: true,
-                       cut: true,
-                       selectAll: true,
-                       paste: true,
-                     )));
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -394,7 +377,11 @@ class CupertinoTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `buildContextMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
+    this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -432,6 +419,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -470,32 +458,9 @@ class CupertinoTextField extends StatefulWidget {
        ),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
+       assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
-           (obscureText
-               ? (readOnly
-                   // No point in even offering "Select All" in a read-only obscured
-                   // field.
-                   ? const ToolbarOptions()
-                   // Writable, but obscured.
-                   : const ToolbarOptions(
-                       selectAll: true,
-                       paste: true,
-                     ))
-               : (readOnly
-                   // Read-only, not obscured.
-                   ? const ToolbarOptions(
-                       selectAll: true,
-                       copy: true,
-                     )
-                   // Writable, not obscured.
-                   : const ToolbarOptions(
-                       copy: true,
-                       cut: true,
-                       selectAll: true,
-                       paste: true,
-                     )));
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Controls the text being edited.
   ///
@@ -599,7 +564,11 @@ class CupertinoTextField extends StatefulWidget {
   /// If not set, select all and paste will default to be enabled. Copy and cut
   /// will be disabled if [obscureText] is true. If [readOnly] is true,
   /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
+  final ToolbarOptions? toolbarOptions;
 
   /// {@macro flutter.material.InputDecorator.textAlignVertical}
   final TextAlignVertical? textAlignVertical;
@@ -778,6 +747,15 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultCupertinoTextSelectionToolbar], which is built by default.
+  final EditableTextToolbarBuilder? buildContextMenu;
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -839,6 +817,28 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   bool _showSelectionHandles = false;
 
   late _CupertinoTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+
+  /// The platform that the current `defaultTargetPlatform` will be treated as.
+  ///
+  /// The Cupertino library has no access to Material, so it cannot build things
+  /// like the Material text selection toolbars on the platforms that use them.
+  /// Instead it will treat those non-Cupertino platforms as if they are the
+  /// platform returned here.
+  ///
+  /// For example, using a CupertionTextField on an Android device will show the
+  /// iOS text selection toolbar.
+  static TargetPlatform get _cupertinoPlatform {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return TargetPlatform.iOS;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        return TargetPlatform.macOS;
+    }
+  }
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
@@ -1146,12 +1146,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-        textSelectionControls ??= cupertinoTextSelectionControls;
+        textSelectionControls ??= cupertinoTextSelectionHandleControls;
         break;
 
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
@@ -1234,7 +1234,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             key: editableTextKey,
             controller: controller,
             readOnly: widget.readOnly,
-            toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,
             focusNode: _effectiveFocusNode,
@@ -1287,6 +1286,19 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            buildContextMenu: widget.buildContextMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+              return DefaultCupertinoTextSelectionToolbar(
+                primaryAnchor: primaryAnchor,
+                secondaryAnchor: secondaryAnchor,
+                editableTextState: editableTextState,
+                targetPlatform: _cupertinoPlatform,
+                buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+                  widget.toolbarOptions,
+                  editableTextState,
+                  _cupertinoPlatform,
+                ),
+              );
+            },
           ),
         ),
       ),

@@ -2688,6 +2688,7 @@ void main() {
     await tester.pump();
 
     // Toolbar should fade in. Starting at 0% opacity.
+    expect(find.text('Select all'), findsOneWidget);
     final Element target = tester.element(find.text('Select all'));
     final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>()!;
     expect(opacity.opacity.value, equals(0.0));
@@ -7854,7 +7855,11 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -7919,7 +7924,9 @@ void main() {
       await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(ePos);
+      // Tap slightly behind the previous tap to avoid tapping the context menu
+      // on desktop.
+      await tester.tapAt(ePos + const Offset(-1.0, 0.0));
       await tester.pump();
 
       // We ended up moving the cursor to the edge of the same word and dismissed
@@ -7996,7 +8003,11 @@ void main() {
         const TextSelection.collapsed(offset: 9),
       );
       // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -8071,7 +8082,11 @@ void main() {
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
     );
     // The toolbar now shows up.
-    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+    final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+    expect(
+      find.byType(CupertinoButton),
+      isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+    );
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 66), // Last character's position.
@@ -8500,7 +8515,11 @@ void main() {
       );
 
       // Long press toolbar.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int buttons = defaultTargetPlatform == TargetPlatform.iOS ? 2 : 1;
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(buttons),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -8526,7 +8545,9 @@ void main() {
         ),
       );
 
-      final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
+      // The second tap is slightly higher to avoid tapping the context menu on
+      // desktop.
+      final Offset pPos = textOffsetToPosition(tester, 9) + const Offset(0.0, -20.0); // Index of 'P|eel'
       final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'
 
       await tester.longPressAt(wPos);
@@ -8877,8 +8898,10 @@ void main() {
     expect(controller.value.selection.baseOffset, 5);
     expect(controller.value.selection.extentOffset, 6);
 
-    // Put the cursor at the end of the field.
-    await tester.tapAt(textOffsetToPosition(tester, 10));
+    // Tap at the end of the text to move the selection to the end. On some
+    // platforms, the context menu "Cut" button blocks this tap, so move it out
+    // of the way by an Offset.
+    await tester.tapAt(textOffsetToPosition(tester, 10) + const Offset(200.0, 0.0));
     expect(controller.value.selection, isNotNull);
     expect(controller.value.selection.baseOffset, 10);
     expect(controller.value.selection.extentOffset, 10);
@@ -10532,7 +10555,8 @@ void main() {
     expect(find.text(selectAll), findsNothing);
     expect(find.text('Copy'), findsNothing);
   },
-    variant: TargetPlatformVariant.desktop(),
+    // All desktop platforms except MacOS, which has no select all button.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 

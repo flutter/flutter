@@ -3220,7 +3220,7 @@ void main() {
     );
 
     controller.selection =
-        TextSelection.collapsed(offset:controller.text.length);
+        TextSelection.collapsed(offset: controller.text.length);
     await tester.pumpAndSettle();
 
     // At end, can only go backwards.
@@ -5054,7 +5054,7 @@ void main() {
 
     // Find the toolbar fade transition while the toolbar is still visible.
     final List<FadeTransition> transitionsBefore = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarWrapper'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
 
@@ -5070,7 +5070,7 @@ void main() {
 
     // Find the toolbar fade transition after the toolbar has been hidden.
     final List<FadeTransition> transitionsAfter = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarWrapper'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
 
