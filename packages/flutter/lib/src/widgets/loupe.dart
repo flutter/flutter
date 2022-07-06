@@ -6,16 +6,26 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
+/// {@template flutter.widgets.loupe.loupeControllerWidgetBuilder}
 /// A builder that builds a Widget with a [LoupeController].
-///
-/// Used in contexts where a loupe may or may not display, since a [Loupe] requires a
-/// [LoupeController].
+/// 
+/// the [controller] should be passed into [Loupe.controller].
+/// {@endtemplate}
 typedef LoupeControllerWidgetBuilder = Widget Function(
     BuildContext context, LoupeController controller);
 
-/// Controls an instance of a [Loupe].
+/// Controls an instance of a [Loupe], if this [LoupeController] is passed to [Loupe.controller].
+/// If unattached to any [Loupe] (i.e., not passed to a [Loupe]), does nothing.
+///
+/// [LoupeController] handles driving [Loupe.transitionAnimationController]'s in / out animation
+/// based on calls to show / hide, respectively.
+///
+/// [LoupeController] may also handles positioning a [Loupe], through [requestedPosition]. A
+/// consumer may request a loupe repositions through setting [requestedPosition.value],
+/// although a loupe is free to ignore, or adjust the position as seen fit. [Loupe] does not
+/// position itself, and leaves the positioning up to the consumer - thus, [LoupeController.requestedPosition]
+/// is a convienence to facilitate getting a position to the loupe through [requestedPosition.value].
 class LoupeController {
   /// This stream is used to tell the loupe that it should begin it's enter / hide animation.
   /// The [LoupeController] sends its loupe true or false for show / hide respectively,
@@ -28,15 +38,50 @@ class LoupeController {
 
   OverlayEntry? _loupeEntry;
 
-  /// If the loupe managed by this controller is shown or not.
+  /// The current status of the loupe.
   ///
-  /// If the loupe is mid out animation, this will be true until the loupe is done animating out.
+  /// If the loupe is not shown (i.e. the default, or if  [hide] was called recently) [status]
+  /// will be  [AnimationStatus.dismissed].  If the loupe is shown, [status] will be
+  /// [AnimationStatus.completed]. If the loupe is transitioning from [AnimationStatus.dismissed]
+  /// to [AnimationStatus.completed] or visa versa, [status] will be [AnimationStatus.completed] and
+  /// [AnimationStatus.reverse], respectively.
   ValueNotifier<AnimationStatus> status =
       ValueNotifier<AnimationStatus>(AnimationStatus.dismissed);
 
+  /// A convinence for a consumer to request a [Loupe] to position itself.
+  ///
+  /// [Loupe] itself does not respond to to requested position: this responsibility
+  /// is the consumers. This is to facilitate transitions, animations, and repositions.
+  ///
+  /// {@tool snippet}
+  /// For example, a custom loupe that responds directly to [requestedPosition]:
+  ///
+  /// ```dart
+  /// Widget _buildLoupe(BuildContext context) {
+  ///   return ValueListenableBuilder(
+  ///     // Elsewhere, a widget is positioning this controller through setting requestedPosition.
+  ///     valueListenable: controller.requestedPosition,
+  ///     builder: (BuildContext context, Offset requestedPosition, _) =>
+  ///       Positioned(
+  ///      left: requestedPosition.dx,
+  ///      top: requestedPosition.dy,
+  ///      child: Loupe(
+  ///        controller: controller,
+  ///        magnificationScale: 2,
+  ///        size: const Size(100, 100),
+  ///        child: const Center(
+  ///          child: Text('look at me! \n Im in a loupe'),
+  ///        ),
+  ///      ),
+  ///    ),
+  ///  );
+  //}
+  /// ```
+  /// {@end-tool}
   final ValueNotifier<Offset> requestedPosition =
       ValueNotifier<Offset>(Offset.zero);
 
+  /// Shows the [Loupe] that this controller controlls.
   /// Returns a future that completes when the loupe is fully shown, i.e. done
   /// with it's entry animation.
   Future<void> show({
@@ -98,7 +143,7 @@ class LoupeController {
     _forceHide();
   }
 
-  /// Immediately hide the loupe, not executing any exit animation.
+  /// Immediately hide the loupe, ignoring any exit animation.
   void _forceHide() {
     _loupeEntry?.remove();
     _loupeEntry = null;
@@ -171,24 +216,64 @@ class LoupeController {
   }
 }
 
-/*
+/// A decoration for a [Loupe].
+///
+/// [LoupeDecoration] does not expose [ShapeDecoration.color], [ShapeDecoration.image],
+/// or [ShapeDecoration.gradient], since they will be covered by the [Loupe]'s lense.
+///
+/// Also takes an [opacity].
+/// {@template flutter.widgets.loupe.opacity.reason}
+/// This is because [Loupe]'s lens is backed by [BackdropFilter],
+/// which, to have any opacity, must be the first decendant of [Opacity].
+/// (see https://github.com/flutter/engine/pull/34435)
+/// {@endtemplate}
 class LoupeDecoration extends ShapeDecoration {
-  final ShapeBorder shape;
-  final Border? border;
-  final BoxShadow? shadow;
+  /// Constructs a [LoupeDecoration].
+  ///
+  /// By default, is a rectangular loupe with no shadows, and fully opaque.
+  const LoupeDecoration({
+    this.opacity = 1,
+    super.shadows,
+    super.shape = const RoundedRectangleBorder(),
+  });
 
-  const LoupeDecoration(
-      {this.shape = const RoundedRectangleBorder(), this.border, this.shadow});
+  /// The loupe's opacity.
+  ///
+  /// {@macro flutter.widgets.loupe.opacity.reason}
+  final double opacity;
+
+  @override
+  bool operator ==(Object other) =>
+      super == other && other is LoupeDecoration && other.opacity == opacity;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, opacity);
 }
-*/
 
-/// A common building base for Loupes, that is managed nby a
+/// A common building base for [Loupe]s.
+///
+/// A loupe can be convienently managed by [LoupeController], which handles
+/// showing and hiding the loupe, with an optional entry / exit animation.
+///
+/// {@tool snippet}
+/// A custom loupe over an image of dash, with an entry and exit animation:
+///
+/// {@endtool snippet}
 ///
 /// See:
-/// * [LoupeController], a convienence class to handle loupes in an overlay.
+/// * [LoupeController], a controller to handle loupes in an overlay.
 /// * [AndroidLoupe], the Android-style consumer of [Loupe].
 /// * [CupertinoLoupe], the iOS-style consumer of [Loupe].
 class Loupe extends StatefulWidget {
+  /// Constructs a [Loupe].
+  /// 
+  /// {@template flutter.widgets.loupe.loupe.invisibility_warning}
+  /// By default, this loupe uses the default [LoupeDecoration],
+  /// the focal point is directly under the loupe, and there is no magnification:
+  /// This means that a default loupe will be entirely invisible to the user, 
+  /// since it is painting exactly what is under it, exactly where it was painted
+  /// orignally. 
+  /// {@endtemplate}
   const Loupe(
       {super.key,
       required this.controller,
@@ -196,21 +281,37 @@ class Loupe extends StatefulWidget {
       required this.size,
       this.focalPoint = Offset.zero,
       this.child,
-      this.decoration = const ShapeDecoration(shape: RoundedRectangleBorder()),
+      this.decoration = const LoupeDecoration(),
       this.transitionAnimationController})
       : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
+  /// The animation controller that controls this loupes IO animations.
+  /// 
+  /// If no [transitionAnimationController] is passed, no animations will be played
+  /// and [LoupeController.show] and [LoupeController.hide] will be effectively synchronous.
+  /// 
+  /// This animation controller will be driven forward and backwards depending
+  /// on [LoupeController.show] and [LoupeController.hide]. If manually stopped 
+  /// during a transition, the [Loupe] will wait for the transition to complete 
+  /// to signal to the controller that it can be safely removed.
   final AnimationController? transitionAnimationController;
 
-  final ShapeDecoration decoration;
+  /// This loupe's decoration.
+  /// 
+  /// {@macro flutter.widgets.loupe.loupe.invisibility_warning}
+  final LoupeDecoration decoration;
 
+  /// The [LoupeController] for this loupe. 
+  /// 
+  /// This [Loupe] will show / hide itself based on the controller's show / hide calls.
+  /// This [Loupe]'s status is always in sync with [controller.status].
   final LoupeController controller;
 
   /// The size of the loupe.
   ///
   /// This does not include added border; it only includes
-  /// the size of the underlying [_Magnifier].
+  /// the size of the magnifier.
   final Size size;
 
   /// The offset of the loupe from the widget's origin.
@@ -218,27 +319,22 @@ class Loupe extends StatefulWidget {
   /// If [offset] is [Offset.zero], the loupe will be positioned
   /// with it's center directly on the the top-left corner of the draw
   /// position. The focal point will always be exactly on the draw position.
-  ///
-  /// Since the loupe is never displayed out of bounds, this offset will be shrunk
-  /// in the case that the offset
   final Offset focalPoint;
 
-  /// An optional widget to posiiton inside the len of the [_Magnifier].
+  /// An optional widget to posiiton inside the len of the [Loupe].
   ///
-  /// This is positioned over the [_Magnifier] - it may be useful for tinting the
-  /// [_Magnifier], or drawing a crosshair like UI.
+  /// This is positioned over the [Loupe] - it may be useful for tinting the
+  /// [Loupe], or drawing a crosshair like UI.
   final Widget? child;
 
   /// How "zoomed in" the magnification subject is in the lens.
-  ///
-  /// this is a pass-through paramater for [_Magnifier.magnificationScale].
   final double magnificationScale;
 
   @override
   State<Loupe> createState() => _LoupeState();
 }
 
-class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
+class _LoupeState extends State<Loupe> {
   late StreamSubscription<AnimationStatus> _animationRequestsSubscription;
 
   @override
@@ -343,21 +439,27 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
       children: <Widget>[
         ClipPath.shape(
           shape: widget.decoration.shape,
-          child: BackdropFilter(
-            filter: _createMagnificationFilter(),
-            child: SizedBox.fromSize(size: widget.size, child: widget.child),
+          child: Opacity(
+            opacity: widget.decoration.opacity,
+            child: BackdropFilter(
+              filter: _magnificationFilter,
+              child: SizedBox.fromSize(size: widget.size, child: widget.child),
+            ),
           ),
         ),
-        _LoupeStyle(
-          widget.decoration,
-          size: widget.size,
+        Opacity(
+          opacity: widget.decoration.opacity,
+          child: _LoupeStyle(
+            widget.decoration,
+            size: widget.size,
+          ),
         )
       ],
     );
   }
 
-  ImageFilter _createMagnificationFilter() {
-    final magnifierMatrix = Matrix4.identity()
+  ImageFilter get _magnificationFilter {
+    final Matrix4 magnifierMatrix = Matrix4.identity()
       ..translate(widget.focalPoint.dx * widget.magnificationScale,
           widget.focalPoint.dy * widget.magnificationScale)
       ..scale(widget.magnificationScale, widget.magnificationScale);
@@ -369,7 +471,7 @@ class _LoupeState extends State<Loupe> with SingleTickerProviderStateMixin {
 class _LoupeStyle extends StatelessWidget {
   const _LoupeStyle(this.decoration, {required this.size});
 
-  final ShapeDecoration decoration;
+  final LoupeDecoration decoration;
   final Size size;
 
   @override
