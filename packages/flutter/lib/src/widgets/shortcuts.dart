@@ -393,12 +393,13 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 class SingleActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
-  /// The `trigger` should be the non-modifier key that is pressed after all the
+  /// The [trigger] should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
   /// a modifier key (sided or unsided).
   ///
-  /// The `control`, `shift`, `alt`, and `meta` flags represent whether
-  /// the respect modifier keys should be held (true) or released (false)
+  /// The [control], [shift], [alt], and [meta] flags represent whether
+  /// the respect modifier keys should be held (true) or released (false).
+  /// They default to false.
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
   /// the [trigger] key. If `includeRepeats` is false, only the [trigger] key
@@ -577,8 +578,51 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 ///  * [SingleActivator], an activator that represents a single key combined
 ///    with modifiers, such as `Ctrl+C`.
 class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
-  /// Create a [CharacterActivator] from the triggering character.
-  const CharacterActivator(this.character);
+  /// Triggered when the key event yields the given character.
+  ///
+  /// The [control] and [meta] flags represent whether the respect modifier
+  /// keys should be held (true) or released (false). They default to false.
+  /// [CharacterActivator] can not check Shift keys or Alt keys yet, because
+  /// they might modify the character.
+  ///
+  /// By default, the activator is checked on all [RawKeyDownEvent] events for
+  /// the [character]. If `includeRepeats` is false, only the [trigger] key
+  /// events with a false [RawKeyDownEvent.repeat] attribute will be considered.
+  const CharacterActivator(this.character, {
+    this.control = false,
+    this.meta = false,
+    this.includeRepeats = true,
+  });
+
+  /// Whether either (or both) control keys should be held for [trigger] to
+  /// activate the shortcut.
+  ///
+  /// If false, then all control keys must be released when the event is received
+  /// in order to activate the shortcut.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
+  final bool control;
+
+  /// Whether either (or both) meta keys should be held for [trigger] to
+  /// activate the shortcut.
+  ///
+  /// If false, then all meta keys must be released when the event is received
+  /// in order to activate the shortcut.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
+  final bool meta;
+
+  /// Whether this activator accepts repeat events of the [trigger] key.
+  ///
+  /// If [includeRepeats] is true, the activator is checked on all
+  /// [RawKeyDownEvent] events for the [trigger] key. If `includeRepeats` is
+  /// false, only the [trigger] key events with a false [RawKeyDownEvent.repeat]
+  /// attribute will be considered.
+  final bool includeRepeats;
 
   /// The character of the triggering event.
   ///
@@ -598,15 +642,24 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
+    final Set<LogicalKeyboardKey> pressed = state.keysPressed;
     return event is RawKeyDownEvent
-        && event.character == character;
+      && event.character == character
+      && (includeRepeats || !event.repeat)
+      && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
+      && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
   @override
   String debugDescribeKeys() {
     String result = '';
     assert(() {
-      result = "'$character'";
+      final List<String> keys = <String>[
+        if (control) 'Control',
+        if (meta) 'Meta',
+        "'$character'",
+      ];
+      result = keys.join(' + ');
       return true;
     }());
     return result;
@@ -621,6 +674,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('character', character));
+    properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
 
