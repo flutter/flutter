@@ -584,7 +584,8 @@ void main() {
                   return DropdownMenuItem<String>(
                     key: ValueKey<String>(item),
                     value: item,
-                    child: Text(item, key: ValueKey<String>('${item}Text'), textScaleFactor: 3.0, fontSize: 20.0),
+                    child: Text(item, key: ValueKey<String>('${item}Text'),
+                        textScaleFactor: 3.0, style: TextStyle(fontSize: 20.0)),
                   );
                 }).toList(),
               ),
