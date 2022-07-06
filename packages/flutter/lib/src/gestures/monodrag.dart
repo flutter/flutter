@@ -242,8 +242,21 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
-  final List<PointerEvent> _multiPointerMoveTrackers = <PointerEvent>[];
+
+  /// Record the pointers which down. The [Set] will clear when any pointer up.
+  /// See also:
+  /// [handleEvent]
   final Set<int> _multiPointerStartTrackers = HashSet<int>();
+
+  /// Record the pointers which move. The [List] will clear when a batch of [PointerMoveEvent]s comes.
+  /// See also:
+  /// [handleEvent]
+  final List<PointerEvent> _multiPointerMoveTrackers = <PointerEvent>[];
+
+  /// Record the pointer accept or not. If the pointer up which is accepted,
+  /// all pointers are considered as up.
+  /// See also:
+  /// [handleEvent]
   bool _pointerMoveAccept = false;
 
   @override
@@ -306,6 +319,54 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _addPointer(event);
   }
 
+  /// When multiple pointers down and move, there may be the following situations
+  /// by different platforms:
+  ///   1) They both move:
+  ///   The gesture will move until all the pointers' [PointerMoveEvent] or [PointerPanZoomUpdateEvent] come individually.
+  ///   The gesture will move delta(combined) = max(delta[i] which are positive) + min(delta[i] which are negative),
+  ///   The drag location will be the average of all pointers.
+  ///   Logic:
+  ///     When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes, add the [PointerEvent] in
+  ///     the [_multiPointerMoveTrackers]. When all the pointers' [PointerMoveEvent] come individually,
+  ///     they are considered a batch, the gesture will update by the rules above.
+  ///   Example:
+  ///     When two pointers (p1 and p2) down, the sequence of [PointerMoveEvent]s is : p1 down, p2 down, p1 move +50, p2 move +10,
+  ///     p1 move +30, p2 move -10 , p1 up and p2 up.
+  ///     The [handleEvent] process will be:
+  ///       p1 down ([_multiPointerStartTrackers.add]),
+  ///       p2 down([_multiPointerStartTrackers.add]),
+  ///       p1 move +50 ([_multiPointerMoveTrackers.add] and the gesture wait),
+  ///       p2 move +10 ([_multiPointerMoveTrackers.add], the gesture update +50, and [_multiPointerMoveTrackers.clear]),
+  ///       p1 move +30 ([_multiPointerMoveTrackers.add] and the gesture wait),
+  ///       p2 move -10 ([_multiPointerMoveTrackers.add], the gesture update +20, and [_multiPointerMoveTrackers.clear]),
+  ///       p1 up ([_multiPointerStartTrackers.clear]),
+  ///       p2 up.
+  ///
+  ///   2) Only some of pointers moves (it means the pointers' [PointerMoveEvent] or [PointerPanZoomUpdateEvent]
+  ///   that are not moving do not come instead of [Offset] zero:
+  ///   The gesture will move if two [PointerMoveEvent] or [PointerPanZoomUpdateEvent]s of the same pointer come.
+  ///   The gesture will move delta(combined) = max(delta[i] which are positive) + min(delta[i] which are negative)
+  ///   The drag location will be the average of these moved pointers.
+  ///   Logic:
+  ///     When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes, add the [PointerEvent] in
+  ///     the [_multiPointerMoveTrackers]. When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes which pointer has been in
+  ///     the [_multiPointerMoveTrackers], the gesture will update immediately then add this [PointerEvent] in the [_multiPointerMoveTrackers].
+  ///   Example:
+  ///     When two pointers (p1 and p2) down, the sequence of [PointerMoveEvent]s is : p1 down, p2 down, p1 move +50, p1 move +10,
+  ///     p1 move +30, p1 move -10 , p1 up and p2 up.
+  ///     The [handleEvent] process will be:
+  ///       p1 down ([_multiPointerStartTrackers.add]),
+  ///       p2 down([_multiPointerStartTrackers.add]),
+  ///       p1 move +50 ([_multiPointerMoveTrackers.add] and the gesture wait),
+  ///       p1 move +10 ([_multiPointerMoveTrackers.clear], the gesture update +50, and [_multiPointerMoveTrackers.add],),
+  ///       p1 move +30 ([_multiPointerMoveTrackers.clear], the gesture update +10, and [_multiPointerMoveTrackers.add],),
+  ///       p1 move -10 ([_multiPointerMoveTrackers.clear], the gesture update +30, and [_multiPointerMoveTrackers.add],),
+  ///       p1 up ([_multiPointerStartTrackers.clear]),
+  ///       p2 up.
+  ///       It means the last [PointerEvent] will be lost, this is acceptable. If the gesture update the last [PointerEvent]
+  ///       in the pointer up stage, it may cause flickering.
+  ///
+  /// When any pointer up which is accepted, the another pointers are given up.
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
@@ -331,12 +392,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       if (_state == _DragState.accepted) {
         _pointerMoveAccept = true;
+        // When some pointers come again, update immediately and add this event.
         final bool eventExists = _multiPointerMoveTrackers.any((PointerEvent element) => element.pointer == event.pointer);
         if(eventExists) {
           _checkMultiPointerUpdate();
           _multiPointerMoveTrackers.clear();
           _multiPointerMoveTrackers.add(event);
         } else {
+          // When pointers come individually, wait until they both come.
           _multiPointerMoveTrackers.add(event);
           if (_multiPointerMoveTrackers.length >= _multiPointerStartTrackers.length) {
             _checkMultiPointerUpdate();
@@ -364,8 +427,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       if (_pointerMoveAccept) {
-        final List<int> pointers = _velocityTrackers.keys.toList();
-        pointers.forEach(_giveUpPointer);
+        _velocityTrackers.keys.toList().forEach(_giveUpPointer);
         _multiPointerMoveTrackers.clear();
         _pointerMoveAccept = false;
       } else {
@@ -553,8 +615,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     double positiveLocalDeltaY = 0.0;
     double negativeLocalDeltaX = 0.0;
     double negativeLocalDeltaY = 0.0;
-    for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-      final PointerEvent event = _multiPointerMoveTrackers[i];
+    for (final PointerEvent event in _multiPointerMoveTrackers) {
       final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
       if (localDelta.dx > 0) {
         positiveLocalDeltaX = max(localDelta.dx, positiveLocalDeltaX);
@@ -572,8 +633,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _getMultiPointerPosition() {
     Offset sumPosition = Offset.zero;
-    for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-      final PointerEvent event = _multiPointerMoveTrackers[i];
+    for (final PointerEvent event in _multiPointerMoveTrackers) {
       sumPosition = sumPosition + ((event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan));
     }
     return sumPosition / _multiPointerMoveTrackers.length.toDouble();
@@ -581,8 +641,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _getMultiPointerLocalPosition() {
     Offset sumLocalPosition = Offset.zero;
-    for (int i = 0; i < _multiPointerMoveTrackers.length; i++) {
-      final PointerEvent event = _multiPointerMoveTrackers[i];
+    for (final PointerEvent event in _multiPointerMoveTrackers) {
       sumLocalPosition = sumLocalPosition + ((event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan));
     }
     return sumLocalPosition / _multiPointerMoveTrackers.length.toDouble();
@@ -593,7 +652,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final Offset position = _getMultiPointerPosition();
     final Offset localPosition = _getMultiPointerLocalPosition();
     _checkUpdate(
-      sourceTimeStamp: _multiPointerMoveTrackers[_multiPointerMoveTrackers.length-1].timeStamp,
+      sourceTimeStamp: _multiPointerMoveTrackers.last.timeStamp,
       delta: _getDeltaForDetails(localDelta),
       primaryDelta: _getPrimaryValueFromOffset(localDelta),
       globalPosition: position,
