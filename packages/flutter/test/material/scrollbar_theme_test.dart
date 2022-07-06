@@ -179,19 +179,19 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(770.0, 10.0, 800.0, 590.0),
+          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 600.0),
           color: const Color(0xff000000),
         )
         ..line(
-          p1: const Offset(770.0, 10.0),
-          p2: const Offset(770.0, 590.0),
+          p1: const Offset(770.0, 00.0),
+          p2: const Offset(770.0, 600.0),
           strokeWidth: 1.0,
           color: const Color(0xffffeb3b),
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
             // Scrollbar thumb is larger
-            const Rect.fromLTRB(775.0, 20.0, 795.0, 107.0),
+            const Rect.fromLTRB(775.0, 19.6101, 795.0, 106.6101),
             const Radius.circular(6.0),
           ),
           // Hover color
