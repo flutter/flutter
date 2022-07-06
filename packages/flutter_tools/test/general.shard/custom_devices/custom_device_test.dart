@@ -106,6 +106,7 @@ void main() {
     installCommand: const <String>['testinstall'],
     uninstallCommand: const <String>['testuninstall'],
     runDebugCommand: const <String>['testrundebug'],
+    runProfileCommand: const <String>['testrunprofile'],
     forwardPortCommand: const <String>['testforwardport'],
     forwardPortSuccessRegex: RegExp('testforwardportsuccess'),
     screenshotCommand: const <String>['testscreenshot']
@@ -144,7 +145,7 @@ void main() {
       expect(device.category, Category.mobile);
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
-      expect(device.supportsRuntimeMode(BuildMode.profile), false);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
       expect(device.supportsRuntimeMode(BuildMode.release), false);
       expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     },
@@ -501,7 +502,7 @@ void main() {
       final LaunchResult result = await device.startApp(
         app,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        bundleBuilder: FakeBundleBuilder()
+        //bundleBuilder: FakeBundleBuilder()
       );
       expect(result.started, true);
       expect(result.hasObservatory, true);

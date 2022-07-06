@@ -41,6 +41,7 @@ const String defaultConfigLinux1 = r'''
       "label": "Raspberry Pi",
       "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
       "platform": "linux-arm64",
+      "flutterEngineLibraryFileName": "libflutter_engine.so",
       "enabled": false,
       "ping": [
         "ping",
@@ -73,6 +74,13 @@ const String defaultConfigLinux1 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "flutter-pi \"/tmp/${appName}\""
+      ],
+      "runProfile": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "flutter-pi --release \"/tmp/${appName}\""
       ],
       "forwardPort": [
         "ssh",
@@ -105,6 +113,7 @@ const String defaultConfigLinux2 = r'''
       "label": "Raspberry Pi",
       "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
       "platform": "linux-arm64",
+      "flutterEngineLibraryFileName": "libflutter_engine.so",
       "enabled": false,
       "ping": [
         "ping",
@@ -137,6 +146,13 @@ const String defaultConfigLinux2 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "flutter-pi \"/tmp/${appName}\""
+      ],
+      "runProfile": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "flutter-pi --release \"/tmp/${appName}\""
       ],
       "forwardPort": [
         "ssh",
@@ -387,6 +403,7 @@ FakeTerminal createFakeTerminalForAddingSshDevice({
   @required String hostname,
   @required String username,
   @required String runDebug,
+  @required String runProfile,
   @required String usePortForwarding,
   @required String screenshot,
   @required String apply
@@ -399,6 +416,7 @@ FakeTerminal createFakeTerminalForAddingSshDevice({
     ..simulateStdin(hostname)
     ..simulateStdin(username)
     ..simulateStdin(runDebug)
+    ..simulateStdin(runProfile)
     ..simulateStdin(usePortForwarding)
     ..simulateStdin(screenshot)
     ..simulateStdin(apply);
@@ -520,6 +538,7 @@ void main() {
             hostname: 'testhostname',
             username: 'testuser',
             runDebug: 'testrundebug',
+            runProfile: 'testrunprofile',
             usePortForwarding: 'y',
             screenshot: 'testscreenshot',
             apply: 'y'
@@ -574,6 +593,12 @@ void main() {
                 'testuser@testhostname',
                 'testrundebug'
               ],
+              runProfileCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrunprofile'
+              ],
               forwardPortCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
@@ -610,6 +635,7 @@ void main() {
             hostname: '192.168.178.1',
             username: 'testuser',
             runDebug: 'testrundebug',
+            runProfile: 'testrunprofile',
             usePortForwarding: 'y',
             screenshot: 'testscreenshot',
             apply: 'y',
@@ -664,6 +690,12 @@ void main() {
                 'testuser@192.168.178.1',
                 'testrundebug'
               ],
+              runProfileCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@192.168.178.1',
+                'testrunprofile'
+              ],
               forwardPortCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
@@ -700,6 +732,7 @@ void main() {
             hostname: '::1',
             username: 'testuser',
             runDebug: 'testrundebug',
+            runProfile: 'testrunprofile',
             usePortForwarding: 'y',
             screenshot: 'testscreenshot',
             apply: 'y',
@@ -757,6 +790,13 @@ void main() {
                 'testuser@[::1]',
                 'testrundebug'
               ],
+              runProfileCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-6',
+                'testuser@[::1]',
+                'testrunprofile'
+              ],
               forwardPortCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
@@ -795,6 +835,7 @@ void main() {
             hostname: 'testhostname',
             username: 'testuser',
             runDebug: 'testrundebug',
+            runProfile: 'testrunprofile',
             usePortForwarding: 'n',
             screenshot: 'testscreenshot',
             apply: 'y',
@@ -848,6 +889,12 @@ void main() {
                 'testuser@testhostname',
                 'testrundebug'
               ],
+              runProfileCommand: <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrunprofile'
+              ],
               screenshotCommand: <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
@@ -875,6 +922,7 @@ void main() {
             hostname: 'testhostname',
             username: 'testuser',
             runDebug: 'testrundebug',
+            runProfile: 'testrunprofile',
             usePortForwarding: 'y',
             screenshot: '',
             apply: 'y',
@@ -927,6 +975,12 @@ void main() {
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
                 'testrundebug'
+              ],
+              runProfileCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrunprofile'
               ],
               forwardPortCommand: const <String>[
                 'ssh',
@@ -1198,6 +1252,7 @@ void main() {
             hostname: 'testhostname',
             username: 'testuser',
             runDebug: 'testrundebug',
+            runProfile: 'testrunprofile',
             usePortForwarding: 'y',
             screenshot: 'testscreenshot',
             apply: 'y',
@@ -1252,6 +1307,12 @@ void main() {
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
                 'testrundebug'
+              ],
+              runProfileCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrunprofile'
               ],
               forwardPortCommand: const <String>[
                 'ssh',

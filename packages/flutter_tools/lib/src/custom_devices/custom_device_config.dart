@@ -85,6 +85,7 @@ class CustomDeviceConfig {
     required this.label,
     required this.sdkNameAndVersion,
     this.platform,
+    this.flutterEngineLibraryFileName,
     required this.enabled,
     required this.pingCommand,
     this.pingSuccessRegex,
@@ -92,6 +93,7 @@ class CustomDeviceConfig {
     required this.installCommand,
     required this.uninstallCommand,
     required this.runDebugCommand,
+    required this.runProfileCommand,
     this.forwardPortCommand,
     this.forwardPortSuccessRegex,
     this.screenshotCommand
@@ -164,6 +166,7 @@ class CustomDeviceConfig {
       label: _castString(typedMap[_kLabel], _kLabel, 'a string'),
       sdkNameAndVersion: _castString(typedMap[_kSdkNameAndVersion], _kSdkNameAndVersion, 'a string'),
       platform: platform,
+      flutterEngineLibraryFileName: _castStringOrNull(typedMap[_kflutterEngineLibraryFileName], _kflutterEngineLibraryFileName, 'a string'),
       enabled: _castBool(typedMap[_kEnabled], _kEnabled, 'a boolean'),
       pingCommand: _castStringList(
         typedMap[_kPingCommand],
@@ -196,6 +199,11 @@ class CustomDeviceConfig {
         'array of strings with at least one element',
         minLength: 1
       ),
+      runProfileCommand: _castStringList(
+        typedMap[_kRunProfileCommand],
+        _kRunProfileCommand,
+        'array of strings with at least one element',
+        minLength: 1),
       forwardPortCommand: forwardPortCommand,
       forwardPortSuccessRegex: forwardPortSuccessRegex,
       screenshotCommand: _castStringListOrNull(
@@ -211,6 +219,7 @@ class CustomDeviceConfig {
   static const String _kLabel = 'label';
   static const String _kSdkNameAndVersion = 'sdkNameAndVersion';
   static const String _kPlatform = 'platform';
+  static const String _kflutterEngineLibraryFileName = 'flutterEngineLibraryFileName';
   static const String _kEnabled = 'enabled';
   static const String _kPingCommand = 'ping';
   static const String _kPingSuccessRegex = 'pingSuccessRegex';
@@ -218,6 +227,7 @@ class CustomDeviceConfig {
   static const String _kInstallCommand = 'install';
   static const String _kUninstallCommand = 'uninstall';
   static const String _kRunDebugCommand = 'runDebug';
+  static const String _kRunProfileCommand = 'runProfile';
   static const String _kForwardPortCommand = 'forwardPort';
   static const String _kForwardPortSuccessRegex = 'forwardPortSuccessRegex';
   static const String _kScreenshotCommand = 'screenshot';
@@ -230,6 +240,7 @@ class CustomDeviceConfig {
     label: 'Raspberry Pi',
     sdkNameAndVersion: 'Raspberry Pi 4 Model B+',
     platform: TargetPlatform.linux_arm64,
+    flutterEngineLibraryFileName: 'libflutter_engine.so',
     enabled: false,
     pingCommand: const <String>[
       'ping',
@@ -258,6 +269,11 @@ class CustomDeviceConfig {
       'pi@raspberrypi',
       r'flutter-pi "/tmp/${appName}"',
     ],
+    runProfileCommand: const <String>[
+      'ssh',
+      '-o', 'BatchMode=yes',
+      'pi@raspberrypi',
+      r'flutter-pi --release "/tmp/${appName}"'],
     forwardPortCommand: const <String>[
       'ssh',
       '-o', 'BatchMode=yes',
@@ -285,7 +301,7 @@ class CustomDeviceConfig {
       '-c', '1',
       'raspberrypi'
     ],
-    explicitPingSuccessRegex: true
+    explicitPingSuccessRegex: true,
   );
 
   /// Returns an example custom device config that works on the given host platform.
@@ -307,6 +323,7 @@ class CustomDeviceConfig {
   final String label;
   final String sdkNameAndVersion;
   final TargetPlatform? platform;
+  final String? flutterEngineLibraryFileName;
   final bool enabled;
   final List<String> pingCommand;
   final RegExp? pingSuccessRegex;
@@ -314,6 +331,7 @@ class CustomDeviceConfig {
   final List<String> installCommand;
   final List<String> uninstallCommand;
   final List<String> runDebugCommand;
+  final List<String> runProfileCommand;
   final List<String>? forwardPortCommand;
   final RegExp? forwardPortSuccessRegex;
   final List<String>? screenshotCommand;
@@ -470,6 +488,7 @@ class CustomDeviceConfig {
       _kLabel: label,
       _kSdkNameAndVersion: sdkNameAndVersion,
       _kPlatform: platform == null ? null : getNameForTargetPlatform(platform!),
+      _kflutterEngineLibraryFileName: flutterEngineLibraryFileName,
       _kEnabled: enabled,
       _kPingCommand: pingCommand,
       _kPingSuccessRegex: pingSuccessRegex?.pattern,
@@ -477,6 +496,7 @@ class CustomDeviceConfig {
       _kInstallCommand: installCommand,
       _kUninstallCommand: uninstallCommand,
       _kRunDebugCommand: runDebugCommand,
+      _kRunProfileCommand: runProfileCommand,
       _kForwardPortCommand: forwardPortCommand,
       _kForwardPortSuccessRegex: forwardPortSuccessRegex?.pattern,
       _kScreenshotCommand: screenshotCommand,
@@ -489,6 +509,8 @@ class CustomDeviceConfig {
     String? sdkNameAndVersion,
     bool explicitPlatform = false,
     TargetPlatform? platform,
+    bool explicitFlutterEngineLibraryFileName = false,
+    String? flutterEngineLibraryFileName,
     bool? enabled,
     List<String>? pingCommand,
     bool explicitPingSuccessRegex = false,
@@ -498,6 +520,7 @@ class CustomDeviceConfig {
     List<String>? installCommand,
     List<String>? uninstallCommand,
     List<String>? runDebugCommand,
+    List<String>? runProfileCommand,
     bool explicitForwardPortCommand = false,
     List<String>? forwardPortCommand,
     bool explicitForwardPortSuccessRegex = false,
@@ -510,6 +533,7 @@ class CustomDeviceConfig {
       label: label ?? this.label,
       sdkNameAndVersion: sdkNameAndVersion ?? this.sdkNameAndVersion,
       platform: explicitPlatform ? platform : (platform ?? this.platform),
+      flutterEngineLibraryFileName: explicitFlutterEngineLibraryFileName ? flutterEngineLibraryFileName : (flutterEngineLibraryFileName ?? this.flutterEngineLibraryFileName ),
       enabled: enabled ?? this.enabled,
       pingCommand: pingCommand ?? this.pingCommand,
       pingSuccessRegex: explicitPingSuccessRegex ? pingSuccessRegex : (pingSuccessRegex ?? this.pingSuccessRegex),
@@ -517,6 +541,7 @@ class CustomDeviceConfig {
       installCommand: installCommand ?? this.installCommand,
       uninstallCommand: uninstallCommand ?? this.uninstallCommand,
       runDebugCommand: runDebugCommand ?? this.runDebugCommand,
+      runProfileCommand: runProfileCommand ?? this.runProfileCommand,
       forwardPortCommand: explicitForwardPortCommand ? forwardPortCommand : (forwardPortCommand ?? this.forwardPortCommand),
       forwardPortSuccessRegex: explicitForwardPortSuccessRegex ? forwardPortSuccessRegex : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
       screenshotCommand: explicitScreenshotCommand ? screenshotCommand : (screenshotCommand ?? this.screenshotCommand),
@@ -530,6 +555,7 @@ class CustomDeviceConfig {
       && other.label == label
       && other.sdkNameAndVersion == sdkNameAndVersion
       && other.platform == platform
+      && other.flutterEngineLibraryFileName == flutterEngineLibraryFileName
       && other.enabled == enabled
       && _listsEqual(other.pingCommand, pingCommand)
       && _regexesEqual(other.pingSuccessRegex, pingSuccessRegex)
@@ -537,6 +563,7 @@ class CustomDeviceConfig {
       && _listsEqual(other.installCommand, installCommand)
       && _listsEqual(other.uninstallCommand, uninstallCommand)
       && _listsEqual(other.runDebugCommand, runDebugCommand)
+      && _listsEqual(other.runProfileCommand, runProfileCommand)
       && _listsEqual(other.forwardPortCommand, forwardPortCommand)
       && _regexesEqual(other.forwardPortSuccessRegex, forwardPortSuccessRegex)
       && _listsEqual(other.screenshotCommand, screenshotCommand);
@@ -548,6 +575,7 @@ class CustomDeviceConfig {
       ^ label.hashCode
       ^ sdkNameAndVersion.hashCode
       ^ platform.hashCode
+      ^ flutterEngineLibraryFileName.hashCode
       ^ enabled.hashCode
       ^ pingCommand.hashCode
       ^ (pingSuccessRegex?.pattern).hashCode
@@ -555,6 +583,7 @@ class CustomDeviceConfig {
       ^ installCommand.hashCode
       ^ uninstallCommand.hashCode
       ^ runDebugCommand.hashCode
+      ^ runProfileCommand.hashCode
       ^ forwardPortCommand.hashCode
       ^ (forwardPortSuccessRegex?.pattern).hashCode
       ^ screenshotCommand.hashCode;
@@ -567,6 +596,7 @@ class CustomDeviceConfig {
       'label: $label, '
       'sdkNameAndVersion: $sdkNameAndVersion, '
       'platform: $platform, '
+      'flutterEngineLibraryFileName: $flutterEngineLibraryFileName'
       'enabled: $enabled, '
       'pingCommand: $pingCommand, '
       'pingSuccessRegex: $pingSuccessRegex, '
@@ -574,6 +604,7 @@ class CustomDeviceConfig {
       'installCommand: $installCommand, '
       'uninstallCommand: $uninstallCommand, '
       'runDebugCommand: $runDebugCommand, '
+      'runProfileCommand: $runProfileCommand, '
       'forwardPortCommand: $forwardPortCommand, '
       'forwardPortSuccessRegex: $forwardPortSuccessRegex, '
       'screenshotCommand: $screenshotCommand)';

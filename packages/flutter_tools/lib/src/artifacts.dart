@@ -17,6 +17,8 @@ import 'globals.dart' as globals;
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
   genSnapshot,
+  /// The flutter engine binary.
+  flutterEngineLibrary,
   /// The flutter tester binary.
   flutterTester,
   flutterFramework,
@@ -157,11 +159,44 @@ bool _isWindows(TargetPlatform? platform) {
   }
 }
 
+String _flutterEngineLibraryFileName(TargetPlatform? platform) {
+  const Artifact artifact = Artifact.flutterEngineLibrary;
+  switch (platform) {
+    case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_uwp_x64:
+      return 'flutter_engine.dll';
+    case TargetPlatform.android:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+      throw StateError(
+          'Artifact $artifact not available for platform $platform.');
+    case TargetPlatform.darwin:
+      return 'libflutter_engine.dylib';
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.ios:
+      throw StateError(
+          'Artifact $artifact not available for platform $platform.');
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+      return 'libflutter_engine.so';
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case null:
+      throw StateError(
+          'Artifact $artifact not available for platform $platform.');
+  }
+}
+
 String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, BuildMode? mode ]) {
   final String exe = _isWindows(platform) ? '.exe' : '';
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
+    case Artifact.flutterEngineLibrary:
+      return _flutterEngineLibraryFileName(platform);
     case Artifact.flutterTester:
       return 'flutter_tester$exe';
     case Artifact.flutterFramework:
@@ -478,6 +513,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaKernelCompiler:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
+      case Artifact.flutterEngineLibrary:
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.platformKernelDill:
@@ -516,6 +552,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.isolateSnapshotData:
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
+      case Artifact.flutterEngineLibrary:
       case Artifact.platformKernelDill:
       case Artifact.platformLibrariesJson:
       case Artifact.skyEnginePath:
@@ -563,6 +600,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
+      case Artifact.flutterEngineLibrary:
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.platformLibrariesJson:
@@ -616,6 +654,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterMacOSPodspec:
+      case Artifact.flutterEngineLibrary:
       case Artifact.linuxHeaders:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
@@ -869,6 +908,8 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
     switch (artifact) {
       case Artifact.genSnapshot:
         return _genSnapshotPath();
+      case Artifact.flutterEngineLibrary:
+        return _flutterEngineLibraryPath(artifactFileName!);
       case Artifact.flutterTester:
         return _flutterTesterPath(platform!);
       case Artifact.isolateSnapshotData:
@@ -945,7 +986,10 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   }
 
   String _genSnapshotPath() {
-    const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386', 'clang_arm64'];
+    // Does this  new implementation break anything ?
+    // Can we work TargetPlatform and EnvironmentType into this conditionally somehow ?
+    // Will the follwoing break anything: return the gen_snapshot inside clang_x64 directory if targetPlatform == linux_arm64
+    const List<String> clangDirs = <String>['clang_x64', 'clang_x86', 'clang_i386', 'clang_arm64','.'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot)!;
     for (final String clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(engineOutPath, clangDir, genSnapshotName);
@@ -954,6 +998,14 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       }
     }
     throw Exception('Unable to find $genSnapshotName');
+  }
+
+  String _flutterEngineLibraryPath(String artifactFileName) {
+    final String flutterEngineLibraryPath = _fileSystem.path.join(engineOutPath, artifactFileName);
+      if (_fileSystem.file(flutterEngineLibraryPath).existsSync()) {
+        return flutterEngineLibraryPath;
+      }
+    throw Exception('Unable to find $artifactFileName');
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
@@ -984,6 +1036,7 @@ class OverrideArtifacts implements Artifacts {
     this.engineDartBinary,
     this.platformKernelDill,
     this.flutterPatchedSdk,
+    this.flutterEngineLibrary,
   }) : assert(parent != null);
 
   final Artifacts parent;
@@ -991,6 +1044,7 @@ class OverrideArtifacts implements Artifacts {
   final File? engineDartBinary;
   final File? platformKernelDill;
   final File? flutterPatchedSdk;
+  final File? flutterEngineLibrary;
 
   @override
   String getArtifactPath(
@@ -1007,6 +1061,9 @@ class OverrideArtifacts implements Artifacts {
     }
     if (artifact == Artifact.flutterPatchedSdkPath && flutterPatchedSdk != null) {
       return flutterPatchedSdk!.path;
+    }
+    if (artifact == Artifact.flutterEngineLibrary && flutterEngineLibrary != null) {
+      return flutterEngineLibrary!.path;
     }
     return parent.getArtifactPath(
       artifact,

@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -15,12 +16,14 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart';
-import '../bundle_builder.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/custom_device.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'custom_device_config.dart';
@@ -384,13 +387,17 @@ class CustomDeviceAppSession {
     bool ipv6 = false,
     String? userIdentifier
   }) async {
+
+    final List<String> runCommand = debuggingOptions.buildInfo.mode == BuildMode.profile ? _device._config.runProfileCommand : _device._config.runDebugCommand;
+
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
+
     final String? packageName = _appPackage.name;
     if (packageName == null) {
       throw ToolExit('Could not start app, name for $_appPackage is unknown.');
     }
     final List<String> interpolated = interpolateCommand(
-      _device._config.runDebugCommand,
+      runCommand,
       <String, String>{
         'remotePath': '/tmp/',
         'appName': packageName,
@@ -759,7 +766,7 @@ class CustomDevice extends Device {
 
   @override
   FutureOr<bool> supportsRuntimeMode(BuildMode buildMode) {
-    return buildMode == BuildMode.debug;
+    return buildMode == BuildMode.debug || buildMode == BuildMode.profile;
   }
 
   @override
@@ -769,7 +776,7 @@ class CustomDevice extends Device {
   Future<String> get sdkNameAndVersion => Future<String>.value(_config.sdkNameAndVersion);
 
   @override
-  Future<LaunchResult> startApp(
+    Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
     String? mainPath,
     String? route,
@@ -778,21 +785,56 @@ class CustomDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String? userIdentifier,
-    BundleBuilder? bundleBuilder,
   }) async {
     if (!prebuiltApplication) {
-      final String assetBundleDir = getAssetBuildDirectory();
 
-      bundleBuilder ??= BundleBuilder();
+      final FlutterProject project = FlutterProject.current();
 
-      // this just builds the asset bundle, it's the same as `flutter build bundle`
-      await bundleBuilder.build(
-        platform: await targetPlatform,
-        buildInfo: debuggingOptions.buildInfo,
-        mainPath: mainPath,
-        depfilePath: defaultDepfilePath,
-        assetDirPath: assetBundleDir,
+      late Artifacts? artifacts = globals.artifacts;
+
+      if (flutterEngineLibraryFileName != null) {
+        if (globals.artifacts is LocalEngineArtifacts ) {
+          final LocalEngineArtifacts localArtifacts = globals.artifacts! as LocalEngineArtifacts;
+          final String flutterEngineLibraryPath = globals.fs.path.join(localArtifacts.engineOutPath,flutterEngineLibraryFileName);
+          if (globals.fs.file(flutterEngineLibraryPath).existsSync()) {
+            artifacts = OverrideArtifacts(parent: localArtifacts ,flutterEngineLibrary: globals.fs.file(flutterEngineLibraryPath));
+          }
+          else {
+            throw Exception('Unable to find flutter engine library as defined in custom_devices.json');
+          }
+        }
+        else {
+          throw StateError('Custom flutter engine library file names are only supported with local engines.');
+        }
+      }
+
+      final Environment environment = Environment(
+        projectDir: project.directory,
+        outputDir: project.directory.childDirectory('build').childDirectory('flutter_assets'),
+        buildDir: project.dartTool.childDirectory('flutter_build'),
+        cacheDir: globals.cache.getRoot(),
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        engineVersion: globals.flutterVersion.engineRevision,
+        defines: <String, String>{
+        // used by the KernelSnapshot target
+          kTargetPlatform: getNameForTargetPlatform(await targetPlatform),
+          kTargetFile: mainPath ?? 'lib/main.dart',
+          kDeferredComponents: 'false',
+          ...debuggingOptions.buildInfo.toBuildSystemEnvironment(),
+        },
+        artifacts: artifacts!,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        generateDartPluginRegistry: true,
       );
+
+      await globals.buildSystem.build(
+        BundleCustomDeviceAssets.forBuildMode(debuggingOptions.buildInfo.mode,await targetPlatform),
+        environment
+      );
+      }
 
       // if we have a post build step (needed for some embedders), execute it
       if (_config.postBuildCommand != null) {
@@ -800,12 +842,12 @@ class CustomDevice extends Device {
         if (packageName == null) {
           throw ToolExit('Could not start app, name for $package is unknown.');
         }
+        final String assetBundleDir = getAssetBuildDirectory();
         await _tryPostBuild(
           appName: packageName,
           localPath: assetBundleDir,
         );
       }
-    }
 
     // install the app on the device
     // (will invoke the uninstall and then the install command internally)
@@ -839,6 +881,9 @@ class CustomDevice extends Device {
     }
     return tryUninstall(appName: appName);
   }
+
+    ///Returns the file name of the flutterEngineLibrary
+  String? get flutterEngineLibraryFileName => _config.flutterEngineLibraryFileName;
 }
 
 /// A [PollingDeviceDiscovery] that'll try to ping all enabled devices in the argument

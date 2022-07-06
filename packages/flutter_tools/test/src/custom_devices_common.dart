@@ -34,6 +34,7 @@ final CustomDeviceConfig testConfig = CustomDeviceConfig(
   installCommand: const <String>['testinstall'],
   uninstallCommand: const <String>['testuninstall'],
   runDebugCommand: const <String>['testrundebug'],
+  runProfileCommand: const <String>['testrunprofile'],
   forwardPortCommand: const <String>['testforwardport'],
   forwardPortSuccessRegex: RegExp('testforwardportsuccess')
 );
@@ -57,6 +58,7 @@ const Map<String, dynamic> testConfigJson = <String, dynamic>{
   'install': <String>['testinstall'],
   'uninstall': <String>['testuninstall'],
   'runDebug': <String>['testrundebug'],
+  'runProfile': <String>['testrunprofile'],
   'forwardPort': <String>['testforwardport'],
   'forwardPortSuccessRegex': 'testforwardportsuccess'
 };
