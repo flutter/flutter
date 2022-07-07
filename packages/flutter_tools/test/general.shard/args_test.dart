@@ -85,6 +85,10 @@ void verifyCommandRunner(CommandRunner<Object> runner) {
 void verifyCommand(Command<Object> runner) {
   expect(runner.argParser, isNotNull, reason: 'command ${runner.name} has no argParser');
   verifyOptions(runner.name, runner.argParser.options.values);
+
+  final String firstDescriptionLine = runner.description.split('\n').first;
+  expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected period that a full sentence should end with");
+
   if (runner.hidden == false && runner.parent == null) {
     expect(
       runner.category,
