@@ -5,7 +5,6 @@
 // flutter_ignore_for_file: golden_tag (see analyze.dart)
 
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';

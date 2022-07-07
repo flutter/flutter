@@ -97,6 +97,7 @@ abstract class DriverService {
     String? browserName,
     bool? androidEmulator,
     int? driverPort,
+    List<String> webBrowserFlags,
     List<String>? browserDimension,
     String? profileMemory,
   });
@@ -254,6 +255,7 @@ class FlutterDriverService extends DriverService {
     String? browserName,
     bool? androidEmulator,
     int? driverPort,
+    List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
     String? profileMemory,
   }) async {

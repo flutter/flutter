@@ -14,7 +14,7 @@ import 'debug.dart';
 import 'priority.dart';
 
 export 'dart:developer' show Flow;
-export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback, VoidCallback;
+export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback;
 
 export 'priority.dart' show Priority;
 
