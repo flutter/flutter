@@ -7,7 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
-import 'tolerance.dart';
+
+export 'tolerance.dart' show Tolerance;
 
 /// A simulation that applies a drag to slow a particle down.
 ///

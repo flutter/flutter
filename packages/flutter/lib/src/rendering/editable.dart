@@ -108,14 +108,14 @@ class TextSelectionPoint {
 /// false. Similarly the [moveNext] method moves the caret to the next line, and
 /// returns false if the caret is already on the last line.
 ///
-/// The [moveByOffset] takes a pixel offset from the current position to move
+/// The [moveByOffset] method takes a pixel offset from the current position to move
 /// the caret up or down.
 ///
 /// If the underlying paragraph's layout changes, [isValid] becomes false and
 /// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
 /// be checked before calling [movePrevious], [moveNext] and [moveByOffset],
 /// or accessing [current].
-class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
+class VerticalCaretMovementRun extends Iterator<TextPosition> {
   VerticalCaretMovementRun._(
     this._editable,
     this._lineMetrics,
@@ -189,7 +189,9 @@ class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
     return true;
   }
 
-  @override
+  /// Move back to the previous element.
+  ///
+  /// Returns true and updates [current] if successful.
   bool movePrevious() {
     assert(isValid);
     if (_currentLine <= 0) {

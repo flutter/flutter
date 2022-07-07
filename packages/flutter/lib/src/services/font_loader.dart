@@ -6,6 +6,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+export 'dart:typed_data' show ByteData;
+
 /// A class that enables the dynamic loading of fonts at runtime.
 ///
 /// The [FontLoader] class provides a builder pattern, where the caller builds
