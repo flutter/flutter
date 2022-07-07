@@ -682,6 +682,28 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('Flutter run catches StdinException while setting terminal singleCharMode to false', () async {
+      fakeTerminal.hasStdin = false;
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+        ]);
+      } catch (err) { // ignore: avoid_catches_without_on_clauses
+        fail('Expected no error, got $err');
+      }
+      expect(fakeTerminal.setSingleCharModeHistory, isEmpty);
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => fakeTerminal,
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   testUsingContext('Flutter run catches service has disappear errors and throws a tool exit', () async {
@@ -1050,6 +1072,9 @@ class CapturingAppDomain extends AppDomain {
 }
 
 class FakeAnsiTerminal extends Fake implements AnsiTerminal {
+  /// Setting to false will cause operations to Stdin to throw a [StdinException].
+  bool hasStdin = true;
+
   @override
   bool usesTerminalUi = false;
 
@@ -1057,7 +1082,12 @@ class FakeAnsiTerminal extends Fake implements AnsiTerminal {
   List<bool> setSingleCharModeHistory = <bool>[];
 
   @override
-  set singleCharMode(bool value) => setSingleCharModeHistory.add(value);
+  set singleCharMode(bool value) {
+    if (!hasStdin) {
+      throw const StdinException('Error setting terminal line mode', OSError('The handle is invalid', 6));
+    }
+    setSingleCharModeHistory.add(value);
+  }
 
   @override
   bool get singleCharMode => setSingleCharModeHistory.last;
