@@ -51,7 +51,7 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
     if (layer_raster_cache_item_->IsCacheChildren()) {
       cache_paint.setColorFilter(filter_);
     }
-    if (layer_raster_cache_item_->Draw(context, cache_paint.paint())) {
+    if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
       return;
     }
   }
@@ -59,7 +59,7 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
   cache_paint.setColorFilter(filter_);
 
   Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
-      context, paint_bounds(), cache_paint.paint());
+      context, paint_bounds(), cache_paint.sk_paint());
 
   PaintChildren(context);
 }

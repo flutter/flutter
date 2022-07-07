@@ -61,7 +61,7 @@ void TextureLayer::Paint(PaintContext& context) const {
   }
   AutoCachePaint cache_paint(context);
   texture->Paint(*context.leaf_nodes_canvas, paint_bounds(), freeze_,
-                 context.gr_context, ToSk(sampling_), cache_paint.paint());
+                 context.gr_context, ToSk(sampling_), cache_paint.sk_paint());
 }
 
 }  // namespace flutter

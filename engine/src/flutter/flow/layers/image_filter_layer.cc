@@ -87,7 +87,7 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   if (layer_raster_cache_item_->IsCacheChildren()) {
     cache_paint.setImageFilter(transformed_filter_);
   }
-  if (layer_raster_cache_item_->Draw(context, cache_paint.paint())) {
+  if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
     return;
   }
 
@@ -98,7 +98,7 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   // so we use the bounds of the child container which do not include any
   // modifications that the filter might apply.
   Layer::AutoSaveLayer save_layer = Layer::AutoSaveLayer::Create(
-      context, child_paint_bounds(), cache_paint.paint());
+      context, child_paint_bounds(), cache_paint.sk_paint());
   PaintChildren(context);
 }
 
