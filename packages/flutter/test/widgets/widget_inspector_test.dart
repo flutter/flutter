@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(CoderDake): Clean up pubRootDirectory tests https://github.com/flutter/flutter/issues/107186
-
 // no-shuffle:
 //   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
 //   dependencies have been fixed.
@@ -1205,6 +1203,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[3].runtimeType, StringProperty);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());  // [intended] Test requires --track-widget-creation flag.
 
+    // TODO(CoderDake): Clean up pubRootDirectory tests https://github.com/flutter/flutter/issues/107186
     group('pubRootDirectory', () {
       const String directoryA = '/a/b/c';
       const String directoryB = '/d/e/f';
