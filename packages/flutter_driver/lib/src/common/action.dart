@@ -34,8 +34,9 @@ class ReceiveAction extends Command {
 
 /// An action the user has requested the text input control to perform.
 ///
-/// [DriverTextInputAction] is cloned from [TextInputAction](https://api.flutter.dev/flutter/services/TextInputAction.html),
-///  because compile error for sever side when import it
+/// This class is identical to [TextInputAction](https://api.flutter.dev/flutter/services/TextInputAction.html).
+// This class is cloned from `TextInputAction` and must be kept in sync. The cloning is needed 
+// because importing is not allowed directly.
 enum DriverTextInputAction {
   /// Logical meaning: There is no relevant input action for the current input
   /// source, e.g., [TextField].
