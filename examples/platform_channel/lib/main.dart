@@ -28,8 +28,12 @@ class _PlatformChannelState extends State<PlatformChannel> {
     try {
       final int? result = await methodChannel.invokeMethod('getBatteryLevel');
       batteryLevel = 'Battery level: $result%.';
-    } on PlatformException {
-      batteryLevel = 'Failed to get battery level.';
+    } on PlatformException catch (e) {
+      if (e.code == 'NO_BATTERY') {
+        batteryLevel = 'No battery.';
+      } else {
+        batteryLevel = 'Failed to get battery level.';
+      }
     }
     setState(() {
       _batteryLevel = batteryLevel;

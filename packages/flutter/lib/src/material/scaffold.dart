@@ -1736,6 +1736,8 @@ class Scaffold extends StatefulWidget {
   ///  * [showBottomSheet], which displays a bottom sheet as a route that can
   ///    be dismissed with the scaffold's back button.
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
+  ///  * [BottomSheetThemeData], which can be used to customize the default
+  ///    bottom sheet property values when using a [BottomSheet].
   final Widget? bottomSheet;
 
   /// If true the [body] and the scaffold's floating widgets should size
