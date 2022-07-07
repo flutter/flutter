@@ -191,7 +191,7 @@ void main() {
         ..rrect(
           rrect: RRect.fromRectAndRadius(
             // Scrollbar thumb is larger
-            const Rect.fromLTRB(775.0, 19.6101, 795.0, 106.6101),
+            const Rect.fromLTRB(775.0, 20.0, 795.0, 107.0),
             const Radius.circular(6.0),
           ),
           // Hover color

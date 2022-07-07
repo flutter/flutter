@@ -1144,7 +1144,7 @@ void main() {
       find.byType(CupertinoScrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(789.0, 12.8825, 797.0, 101.9825),
+          const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
           const Radius.circular(4.0),
         ),
         color: _kScrollbarColor.color,
@@ -1164,7 +1164,7 @@ void main() {
       find.byType(CupertinoScrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(789.0, 12.8825, 797.0, 101.9825),
+          const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
           const Radius.circular(4.0),
         ),
         color: _kScrollbarColor.color,
