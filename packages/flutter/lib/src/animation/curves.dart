@@ -8,6 +8,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+export 'dart:ui' show Offset;
+
 /// An abstract class providing an interface for evaluating a parametric curve.
 ///
 /// A parametric curve transforms a parameter (hence the name) `t` along a curve
