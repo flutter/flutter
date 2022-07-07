@@ -2641,28 +2641,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
-  Future<void> _performSpellCheck(final String text) async {
-    try {
-      final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-      final List<SuggestionSpan>? spellCheckResults = await
-        _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, text);
-
-      if (spellCheckResults == null) {
-        return;
-      }
-
-      _spellCheckConfiguration!.spellCheckResults = SpellCheckResults(text, spellCheckResults);
-      renderEditable.text = buildTextSpan();
-    } catch (exception, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'widgets',
-        context: ErrorDescription('while performing spell check'),
-      ));
-    }
-  }
-
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
@@ -2816,6 +2794,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
+  }
+
+  Future<void> _performSpellCheck(final String text) async {
+    try {
+      final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+      final List<SuggestionSpan>? spellCheckResults = await
+        _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, text);
+
+      if (spellCheckResults == null) {
+        return;
+      }
+
+      _spellCheckConfiguration!.spellCheckResults = SpellCheckResults(text, spellCheckResults);
+      renderEditable.text = buildTextSpan();
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while performing spell check'),
+      ));
+    }
   }
 
   @pragma('vm:notify-debugger-on-exception')
