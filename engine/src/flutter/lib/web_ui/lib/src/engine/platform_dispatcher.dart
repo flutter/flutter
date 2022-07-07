@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -47,14 +46,16 @@ class HighContrastSupport {
   final List<HighContrastListener> _listeners = <HighContrastListener>[];
 
   /// Reference to css media query that indicates whether high contrast is on.
-  final html.MediaQueryList _highContrastMediaQuery = html.window.matchMedia(_highContrastMediaQueryString);
+  final DomMediaQueryList _highContrastMediaQuery = domWindow.matchMedia(_highContrastMediaQueryString);
+  late final DomEventListener _onHighContrastChangeListener =
+      allowInterop(_onHighContrastChange);
 
   bool get isHighContrastEnabled => _highContrastMediaQuery.matches;
 
   /// Adds function to the list of listeners on high contrast changes
   void addListener(HighContrastListener listener) {
     if (_listeners.isEmpty) {
-      _highContrastMediaQuery.addListener(_onHighContrastChange);
+      _highContrastMediaQuery.addListener(_onHighContrastChangeListener);
     }
     _listeners.add(listener);
   }
@@ -63,12 +64,12 @@ class HighContrastSupport {
   void removeListener(HighContrastListener listener) {
     _listeners.remove(listener);
     if (_listeners.isEmpty) {
-      _highContrastMediaQuery.removeListener(_onHighContrastChange);
+      _highContrastMediaQuery.removeListener(_onHighContrastChangeListener);
     }
   }
 
-  void _onHighContrastChange(html.Event event) {
-    final html.MediaQueryListEvent mqEvent = event as html.MediaQueryListEvent;
+  void _onHighContrastChange(DomEvent event) {
+    final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
     final bool isHighContrastEnabled = mqEvent.matches!;
     for (final HighContrastListener listener in _listeners) {
       listener(isHighContrastEnabled);
@@ -542,7 +543,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         _platformViewMessageHandler ??= PlatformViewMessageHandler(
           contentManager: platformViewManager,
           contentHandler: (DomElement content) {
-            // Remove cast to [html.Element] after migration.
             flutterViewEmbedder.glassPaneElement!.append(content);
           },
         );
