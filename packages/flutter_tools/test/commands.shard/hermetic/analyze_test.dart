@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
+import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -70,6 +71,7 @@ void main() {
         platform: platform,
         processManager: processManager,
         terminal: terminal,
+        allProjectValidators: <ProjectValidator>[],
       );
       runner = createTestCommandRunner(command);
 

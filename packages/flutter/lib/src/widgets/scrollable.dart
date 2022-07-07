@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -97,6 +96,7 @@ class Scrollable extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
     this.scrollBehavior,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -260,6 +260,15 @@ class Scrollable extends StatefulWidget {
   /// followed by [scrollBehavior], and then the inherited ancestor
   /// [ScrollBehavior].
   final ScrollBehavior? scrollBehavior;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  ///
+  /// This is passed to decorators in [ScrollableDetails], and does not directly affect
+  /// clipping of the [Scrollable]. This reflects the same [Clip] that is provided
+  /// to [ScrollView.clipBehavior] and is supplied to the [Viewport].
+  final Clip clipBehavior;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -797,6 +806,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
+      clipBehavior: widget.clipBehavior,
     );
 
     result = _configuration.buildScrollbar(
@@ -812,7 +822,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         state: this,
         position: position,
         registrar: registrar,
-        child: result
+        child: result,
       );
     }
 
@@ -1313,6 +1323,7 @@ class ScrollableDetails {
   const ScrollableDetails({
     required this.direction,
     required this.controller,
+    this.clipBehavior,
   });
 
   /// The direction in which this widget scrolls.
@@ -1326,6 +1337,13 @@ class ScrollableDetails {
   /// This can be used by [ScrollBehavior] to apply a [Scrollbar] to the associated
   /// [Scrollable].
   final ScrollController controller;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// This can be used by [MaterialScrollBehavior] to clip [StretchingOverscrollIndicator].
+  ///
+  /// Defaults to null.
+  final Clip? clipBehavior;
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be
