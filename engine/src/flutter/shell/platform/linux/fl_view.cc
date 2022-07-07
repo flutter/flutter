@@ -63,6 +63,7 @@ struct _FlView {
   /* FlKeyboardViewDelegate related properties */
   KeyboardLayoutNotifier keyboard_layout_notifier;
   GdkKeymap* keymap;
+  gulong keymap_keys_changed_cb_id;  // Signal connection ID.
 };
 
 typedef struct _FlViewChild {
@@ -301,6 +302,7 @@ static void fl_view_keyboard_delegate_iface_init(
   iface->lookup_key = [](FlKeyboardViewDelegate* view_delegate,
                          const GdkKeymapKey* key) -> guint {
     FlView* self = FL_VIEW(view_delegate);
+    g_return_val_if_fail(self->keymap != nullptr, 0);
     return gdk_keymap_lookup_key(self->keymap, key);
   };
 }
@@ -509,8 +511,8 @@ static void fl_view_constructed(GObject* object) {
                    G_CALLBACK(enter_notify_event_cb), self);
   g_signal_connect(self->event_box, "leave-notify-event",
                    G_CALLBACK(leave_notify_event_cb), self);
-  g_signal_connect(self->keymap, "keys-changed",
-                   G_CALLBACK(keymap_keys_changed_cb), self);
+  self->keymap_keys_changed_cb_id = g_signal_connect(
+      self->keymap, "keys-changed", G_CALLBACK(keymap_keys_changed_cb), self);
   GtkGesture* zoom = gtk_gesture_zoom_new(self->event_box);
   g_signal_connect(zoom, "begin", G_CALLBACK(gesture_zoom_begin_cb), self);
   g_signal_connect(zoom, "scale-changed", G_CALLBACK(gesture_zoom_update_cb),
@@ -584,6 +586,7 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->engine);
   g_clear_object(&self->accessibility_plugin);
   g_clear_object(&self->keyboard_manager);
+  g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
   g_clear_object(&self->mouse_cursor_plugin);
   g_clear_object(&self->platform_plugin);
   g_list_free_full(self->gl_area_list, g_object_unref);
