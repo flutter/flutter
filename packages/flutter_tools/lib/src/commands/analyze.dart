@@ -139,8 +139,8 @@ class AnalyzeCommand extends FlutterCommand {
       if (workingDirectory == null) {
         final Set<String> items = findDirectories(argResults!, _fileSystem);
         if (items.isEmpty) { // user did not specify any path
-          _logger.printStatus('Showing suggestions for current directory');
           directoryPath = _fileSystem.currentDirectory.path;
+          _logger.printTrace('Showing suggestions for current directory: $directoryPath');
         } else if (items.length > 1) { // if the user sends more than one path
           throwToolExit('The suggestions flag can process only one directory path');
         } else {

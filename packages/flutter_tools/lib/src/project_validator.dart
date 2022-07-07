@@ -134,7 +134,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
         processResult.stdout.toString()
       ) as LinkedHashMap<String, dynamic>;
     } on FormatException{
-      result.add(_createProjectValidatorError(name, processResult.stdout.toString()));
+      result.add(_createProjectValidatorError(name, processResult.stderr.toString()));
       return result;
     }
 
@@ -142,7 +142,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
     final List <String> dependencies = <String>[];
     final Set<String> hostedDependencies = {'hosted', 'root'};
 
-    for (final Package package in dartPubJson.packages) {
+    for (final DartDependencyPackage package in dartPubJson.packages) {
       if (!hostedDependencies.contains(package.source)) {
         dependencies.addAll(package.dependencies);
       }
