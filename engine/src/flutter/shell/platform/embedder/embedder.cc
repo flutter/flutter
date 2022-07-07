@@ -1006,44 +1006,7 @@ FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data) {
   return kSuccess;
 }
 
-// Constructs appropriate mapping callbacks if JIT snapshot locations have been
-// explictly specified.
-void PopulateJITSnapshotMappingCallbacks(const FlutterProjectArgs* args,
-                                         flutter::Settings& settings) {
-  auto make_mapping_callback = [](const char* path, bool executable) {
-    return [path, executable]() {
-      if (executable) {
-        return fml::FileMapping::CreateReadExecute(path);
-      } else {
-        return fml::FileMapping::CreateReadOnly(path);
-      }
-    };
-  };
-
-  // Users are allowed to specify only certain snapshots if they so desire.
-  if (SAFE_ACCESS(args, vm_snapshot_data, nullptr) != nullptr) {
-    settings.vm_snapshot_data = make_mapping_callback(
-        reinterpret_cast<const char*>(args->vm_snapshot_data), false);
-  }
-
-  if (SAFE_ACCESS(args, vm_snapshot_instructions, nullptr) != nullptr) {
-    settings.vm_snapshot_instr = make_mapping_callback(
-        reinterpret_cast<const char*>(args->vm_snapshot_instructions), true);
-  }
-
-  if (SAFE_ACCESS(args, isolate_snapshot_data, nullptr) != nullptr) {
-    settings.isolate_snapshot_data = make_mapping_callback(
-        reinterpret_cast<const char*>(args->isolate_snapshot_data), false);
-  }
-
-  if (SAFE_ACCESS(args, isolate_snapshot_instructions, nullptr) != nullptr) {
-    settings.isolate_snapshot_instr = make_mapping_callback(
-        reinterpret_cast<const char*>(args->isolate_snapshot_instructions),
-        true);
-  }
-}
-
-void PopulateAOTSnapshotMappingCallbacks(
+void PopulateSnapshotMappingCallbacks(
     const FlutterProjectArgs* args,
     flutter::Settings& settings) {  // NOLINT(google-runtime-references)
   // There are no ownership concerns here as all mappings are owned by the
@@ -1054,41 +1017,43 @@ void PopulateAOTSnapshotMappingCallbacks(
     };
   };
 
-  if (SAFE_ACCESS(args, aot_data, nullptr) != nullptr) {
-    settings.vm_snapshot_data =
-        make_mapping_callback(args->aot_data->vm_snapshot_data, 0);
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+    if (SAFE_ACCESS(args, aot_data, nullptr) != nullptr) {
+      settings.vm_snapshot_data =
+          make_mapping_callback(args->aot_data->vm_snapshot_data, 0);
 
-    settings.vm_snapshot_instr =
-        make_mapping_callback(args->aot_data->vm_snapshot_instrs, 0);
+      settings.vm_snapshot_instr =
+          make_mapping_callback(args->aot_data->vm_snapshot_instrs, 0);
 
-    settings.isolate_snapshot_data =
-        make_mapping_callback(args->aot_data->vm_isolate_data, 0);
+      settings.isolate_snapshot_data =
+          make_mapping_callback(args->aot_data->vm_isolate_data, 0);
 
-    settings.isolate_snapshot_instr =
-        make_mapping_callback(args->aot_data->vm_isolate_instrs, 0);
-  }
+      settings.isolate_snapshot_instr =
+          make_mapping_callback(args->aot_data->vm_isolate_instrs, 0);
+    }
 
-  if (SAFE_ACCESS(args, vm_snapshot_data, nullptr) != nullptr) {
-    settings.vm_snapshot_data = make_mapping_callback(
-        args->vm_snapshot_data, SAFE_ACCESS(args, vm_snapshot_data_size, 0));
-  }
+    if (SAFE_ACCESS(args, vm_snapshot_data, nullptr) != nullptr) {
+      settings.vm_snapshot_data = make_mapping_callback(
+          args->vm_snapshot_data, SAFE_ACCESS(args, vm_snapshot_data_size, 0));
+    }
 
-  if (SAFE_ACCESS(args, vm_snapshot_instructions, nullptr) != nullptr) {
-    settings.vm_snapshot_instr = make_mapping_callback(
-        args->vm_snapshot_instructions,
-        SAFE_ACCESS(args, vm_snapshot_instructions_size, 0));
-  }
+    if (SAFE_ACCESS(args, vm_snapshot_instructions, nullptr) != nullptr) {
+      settings.vm_snapshot_instr = make_mapping_callback(
+          args->vm_snapshot_instructions,
+          SAFE_ACCESS(args, vm_snapshot_instructions_size, 0));
+    }
 
-  if (SAFE_ACCESS(args, isolate_snapshot_data, nullptr) != nullptr) {
-    settings.isolate_snapshot_data =
-        make_mapping_callback(args->isolate_snapshot_data,
-                              SAFE_ACCESS(args, isolate_snapshot_data_size, 0));
-  }
+    if (SAFE_ACCESS(args, isolate_snapshot_data, nullptr) != nullptr) {
+      settings.isolate_snapshot_data = make_mapping_callback(
+          args->isolate_snapshot_data,
+          SAFE_ACCESS(args, isolate_snapshot_data_size, 0));
+    }
 
-  if (SAFE_ACCESS(args, isolate_snapshot_instructions, nullptr) != nullptr) {
-    settings.isolate_snapshot_instr = make_mapping_callback(
-        args->isolate_snapshot_instructions,
-        SAFE_ACCESS(args, isolate_snapshot_instructions_size, 0));
+    if (SAFE_ACCESS(args, isolate_snapshot_instructions, nullptr) != nullptr) {
+      settings.isolate_snapshot_instr = make_mapping_callback(
+          args->isolate_snapshot_instructions,
+          SAFE_ACCESS(args, isolate_snapshot_instructions_size, 0));
+    }
   }
 
 #if !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
@@ -1196,11 +1161,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     }
   }
 
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    PopulateAOTSnapshotMappingCallbacks(args, settings);
-  } else {
-    PopulateJITSnapshotMappingCallbacks(args, settings);
-  }
+  PopulateSnapshotMappingCallbacks(args, settings);
 
   settings.icu_data_path = icu_data_path;
   settings.assets_path = args->assets_path;
