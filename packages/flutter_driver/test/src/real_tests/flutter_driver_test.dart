@@ -353,7 +353,7 @@ void main() {
     });
 
     group('sendTextInputAction', () {
-      test('sends the sendTextInputAction command with action done', () async {
+      test('sends the SendTextInputAction command with action done', () async {
         fakeClient.responses['send_text_input_action'] = makeFakeResponse(<String, dynamic>{});
         await driver.sendTextInputAction(TextInputAction.done, timeout: _kTestTimeout);
         expect(fakeClient.commandLog, <String>[
