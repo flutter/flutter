@@ -12553,6 +12553,51 @@ void main() {
       });
 
     testWidgets(
+        'Error thrown when spell check disabled by default incorrectly',
+          (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        false;
+
+      await tester.pumpWidget(
+          EditableText(
+              autofocus: false,
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckSuggestionsHandler: DefaultSpellCheckSuggestionsHandler(
+                  TargetPlatform.android)
+          ));
+
+      expect(tester.takeException(), isA<AssertionError>());
+    });
+
+    test(
+        'Error thrown when spell check disabled manually incorrectly',
+          () {
+          expect(() {
+                EditableText(
+                  autofocus: false,
+                  controller: TextEditingController(text: 'A'),
+                  focusNode: FocusNode(),
+                  style: const TextStyle(),
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  cursorOpacityAnimates: true,
+                  autofillHints: null,
+                  spellCheckEnabled: false,
+                  spellCheckService: DefaultSpellCheckService(),
+                  spellCheckSuggestionsHandler: DefaultSpellCheckSuggestionsHandler(TargetPlatform.android),
+              );
+            },
+            throwsAssertionError,
+          );
+      });
+
+    testWidgets(
         'Spell check configured properly when spell check enabled without specified spell check service and handler',
             (WidgetTester tester) async {
           tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
@@ -12591,7 +12636,8 @@ void main() {
         'Spell check configured properly with specified spell check service and handler',
             (WidgetTester tester) async {
           DefaultSpellCheckService fakeSpellCheckService = DefaultSpellCheckService();
-          DefaultSpellCheckSuggestionsHandler fakeSpellCheckSuggestionsHandler = DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
+          DefaultSpellCheckSuggestionsHandler fakeSpellCheckSuggestionsHandler =
+            DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
 
           await tester.pumpWidget(
             MaterialApp(
@@ -12623,6 +12669,31 @@ void main() {
           );
       });
     });
+
+    testWidgets(
+        'Error thrown when spell check enabled but no default spell check service available',
+          (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        false;
+
+      await tester.pumpWidget(
+          EditableText(
+              autofocus: false,
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckEnabled: true,
+              spellCheckSuggestionsHandler: DefaultSpellCheckSuggestionsHandler(
+                  TargetPlatform.android)
+          ));
+
+      expect(tester.takeException(), isA<AssertionError>());
+    });
+
 }
 
 class UnsettableController extends TextEditingController {

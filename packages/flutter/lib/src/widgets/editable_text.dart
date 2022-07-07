@@ -710,7 +710,7 @@ class EditableText extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        assert(
-          spellCheckEnabled! != false
+          spellCheckEnabled != false
           || spellCheckService == null
           && spellCheckSuggestionsHandler == null,
           'spellCheckEnabled must not be false if spellCheckService or spellCheckSuggestionsHandler specified'
@@ -1945,12 +1945,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                     || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
 
     assert(
-      widget.spellCheckEnabled! != true || spellCheckServiceDefined,
+      widget.spellCheckEnabled != true || spellCheckServiceDefined,
       'spellCheckService must be specified for this platform because no default service available'
     );
     assert(
       widget.spellCheckEnabled != null
-      || widget.spellCheckSuggestionsHandler == null
+      || widget.spellCheckSuggestionsHandler == null && widget.spellCheckService == null
       || spellCheckServiceDefined,
       'spellCheckService must be specified for this platform because no default service available or spellCheckSuggestionsHandler must be null'
     );
@@ -2641,19 +2641,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
-  void _performSpellCheck(String text) {
-    final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-    final Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, text);
-    final String resultsText = text;
+  Future<void> _performSpellCheck(final String text) async {
+    try {
+      final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+      final List<SuggestionSpan>? spellCheckResults = await
+        _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, text);
 
-    spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
-      if (spans == null) {
+      if (spellCheckResults == null) {
         return;
       }
-      final SpellCheckResults results = SpellCheckResults(resultsText, spans);
-      _spellCheckConfiguration!.spellCheckResults = results;
+
+      _spellCheckConfiguration!.spellCheckResults = SpellCheckResults(text, spellCheckResults);
       renderEditable.text = buildTextSpan();
-    });
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while performing spell check'),
+      ));
+    }
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -2719,10 +2726,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_cursorTimer != null) {
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
-    }
-
-    if (_spellCheckEnabled! && _value.text.isNotEmpty && cause! == SelectionChangedCause.tap) {
-      _performSpellCheck(_value.text);
     }
   }
 
