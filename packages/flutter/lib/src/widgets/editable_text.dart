@@ -1940,7 +1940,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(_updateSelectionOverlayForScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
 
-    // Spell check setup  
+    // Spell check setup
     bool spellCheckServiceDefined = widget.spellCheckService != null
                                     || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
 
@@ -1955,7 +1955,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       'spellCheckService must be specified for this platform because no default service available or spellCheckSuggestionsHandler must be null'
     );
 
-    _spellCheckEnabled = widget.spellCheckEnabled ?? 
+    _spellCheckEnabled = widget.spellCheckEnabled ??
       widget.spellCheckService != null || widget.spellCheckSuggestionsHandler != null;
 
     if (_spellCheckEnabled!) {

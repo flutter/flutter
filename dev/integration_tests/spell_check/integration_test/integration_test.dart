@@ -69,13 +69,13 @@ Future<void> main() async {
 
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(
-        spellCheckSuggestionSpans!.length, 
+        spellCheckSuggestionSpans!.length,
         equals(misspelledWordRanges.length)
         );
 
     for (int i = 0; i < misspelledWordRanges.length; i += 1) {
       expect(
-          spellCheckSuggestionSpans![i].range, 
+          spellCheckSuggestionSpans![i].range,
           equals(misspelledWordRanges[i])
         );
     }
@@ -102,7 +102,7 @@ Future<void> main() async {
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(
-        spellCheckSuggestionSpans, 
+        spellCheckSuggestionSpans,
         equals(spellCheckSpansWithComposingRegion)
       );
   });
@@ -130,7 +130,7 @@ Future<void> main() async {
 
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(
-      spellCheckSuggestionSpans, 
+      spellCheckSuggestionSpans,
       equals(expectedSpellCheckSuggestionSpans)
     );
   });
