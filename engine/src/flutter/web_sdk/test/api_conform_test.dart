@@ -42,13 +42,23 @@ void main() {
   final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
   final Map<String, ClassDeclaration> webClasses = <String, ClassDeclaration>{};
 
+  final Map<String, GenericTypeAlias> uiTypeDefs = <String, GenericTypeAlias>{};
+  final Map<String, GenericTypeAlias> webTypeDefs = <String, GenericTypeAlias>{};
+
   // Gather all public classes from each library. For now we are skipping
   // other top level members.
   _collectPublicClasses(uiUnit, uiClasses, '$flutterDir/lib/ui/');
   _collectPublicClasses(webUnit, webClasses, '$flutterDir/lib/web_ui/lib/');
 
+  _collectPublicTypeDefs(uiUnit, uiTypeDefs, '$flutterDir/lib/ui/');
+  _collectPublicTypeDefs(webUnit, webTypeDefs, '$flutterDir/lib/web_ui/lib/');
+
   if (uiClasses.isEmpty || webClasses.isEmpty) {
     print('Warning: did not resolve any classes.');
+  }
+
+  if (uiTypeDefs.isEmpty || webTypeDefs.isEmpty) {
+    print('Warning: did not resolve any typedefs.');
   }
 
   bool failed = false;
@@ -177,6 +187,17 @@ void main() {
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
               '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
         }
+        // check nullability
+        if (uiParam is SimpleFormalParameter &&
+            webParam is SimpleFormalParameter) {
+          bool isUiNullable = uiParam.type?.question != null;
+          bool isWebNullable = webParam.type?.question != null;
+          if (isUiNullable != isWebNullable) {
+            failed = true;
+            print('Warning: lib/ui/ui.dart $className.$methodName parameter $i '
+                '${uiParam.identifier} has a different nullability than in lib/web_ui/ui.dart.');
+          }
+        }
       }
       // check return type.
       if (uiMethod.returnType?.toString() != webMethod.returnType?.toString()) {
@@ -188,6 +209,81 @@ void main() {
             '  lib/ui/ui.dart     : ${uiMethod.returnType?.toSource()}\n'
             '  lib/web_ui/ui.dart : ${webMethod.returnType?.toSource()}');
         }
+      }
+    }
+  }
+  print('Checking ${uiTypeDefs.length} typedefs.');
+  for (final String typeDefName in uiTypeDefs.keys) {
+    final GenericTypeAlias uiTypeDef = uiTypeDefs[typeDefName]!;
+    final GenericTypeAlias? webTypeDef = webTypeDefs[typeDefName];
+    // If the web typedef is missing there isn't much left to do here. Print a
+    // warning and move along.
+    if (webTypeDef == null) {
+      failed = true;
+      print('Warning: lib/ui/ui.dart contained typedef $typeDefName, but '
+          'this was missing from lib/web_ui/ui.dart.');
+      continue;
+    }
+
+    // uiTypeDef.functionType.parameters
+    if (uiTypeDef.functionType?.parameters.parameters == null ||
+        webTypeDef.functionType?.parameters.parameters == null) {
+      continue;
+    }
+    if (uiTypeDef.functionType?.parameters.parameters.length !=
+        webTypeDef.functionType?.parameters.parameters.length) {
+      failed = true;
+      print('Warning: lib/ui/ui.dart $typeDefName has a different parameter '
+          'length than in lib/web_ui/ui.dart.');
+    }
+    // Technically you could re-order named parameters and still be valid,
+    // but we enforce that they are identical.
+
+    for (int i = 0;
+        i < uiTypeDef.functionType!.parameters.parameters.length &&
+            i < webTypeDef.functionType!.parameters.parameters.length;
+        i++) {
+      final SimpleFormalParameter uiParam =
+          (uiTypeDef.type as GenericFunctionType).parameters.parameters[i]
+              as SimpleFormalParameter;
+      final SimpleFormalParameter webParam =
+          (webTypeDef.type as GenericFunctionType).parameters.parameters[i]
+              as SimpleFormalParameter;
+
+      if (webParam.identifier!.name != uiParam.identifier!.name) {
+        failed = true;
+        print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
+            '${uiParam.identifier!.name} has a different name in lib/web_ui/ui.dart.');
+      }
+      if (uiParam.isPositional != webParam.isPositional) {
+        failed = true;
+        print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
+            '${uiParam.identifier!.name} is positional, but not in lib/web_ui/ui.dart.');
+      }
+      if (uiParam.isNamed != webParam.isNamed) {
+        failed = true;
+        print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
+            '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
+      }
+
+      bool isUiNullable = uiParam.type?.question != null;
+      bool isWebNullable = webParam.type?.question != null;
+      if (isUiNullable != isWebNullable) {
+        failed = true;
+        print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
+            '${uiParam.identifier} has a different nullability than in lib/web_ui/ui.dart.');
+      }
+    }
+
+    // check return type.
+    if (uiTypeDef.functionType?.returnType?.toString() !=
+        webTypeDef.functionType?.returnType?.toString()) {
+      // allow dynamic in web implementation.
+      if (webTypeDef.functionType?.returnType?.toString() != 'dynamic') {
+        failed = true;
+        print('Warning: $typeDefName return type mismatch:\n'
+            '  lib/ui/ui.dart     : ${uiTypeDef.functionType?.returnType?.toSource()}\n'
+            '  lib/web_ui/ui.dart : ${webTypeDef.functionType?.returnType?.toSource()}');
       }
     }
   }
@@ -250,5 +346,28 @@ void _collectPublicMethods(ClassDeclaration classDeclaration,
       continue;
     }
     destination[member.name.name] = member;
+  }
+}
+
+void _collectPublicTypeDefs(CompilationUnit unit,
+    Map<String, GenericTypeAlias> destination, String root) {
+  for (final Directive directive in unit.directives) {
+    if (directive is! PartDirective) {
+      continue;
+    }
+    final PartDirective partDirective = directive;
+    final String literalUri = partDirective.uri.toString();
+    final CompilationUnit subUnit = _parseAndCheckDart(
+        '$root${literalUri.substring(1, literalUri.length - 1)}');
+    for (final CompilationUnitMember member in subUnit.declarations) {
+      if (member is! GenericTypeAlias) {
+        continue;
+      }
+      final GenericTypeAlias typeDeclaration = member;
+      if (typeDeclaration.name.name.startsWith('_')) {
+        continue;
+      }
+      destination[typeDeclaration.name.name] = typeDeclaration;
+    }
   }
 }
