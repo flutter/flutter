@@ -290,7 +290,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
 
   @override
   String get description {
-    return '$_description.\n'
+    return '$_description\n'
            'This runs the "pub" tool in a Flutter context.';
   }
 
