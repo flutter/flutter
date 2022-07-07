@@ -8,7 +8,7 @@ import 'message.dart';
 EnumIndex<DriverTextInputAction> _textInputActionIndex =
     EnumIndex<DriverTextInputAction>(DriverTextInputAction.values);
 
-/// A Flutter Driver command that send the [DriverTextInputAction]
+/// A Flutter Driver command that send a text input action.
 class ReceiveAction extends Command {
   /// Creates a command that enters text into the currently focused widget.
   const ReceiveAction(this.textInputAction, {super.timeout});
