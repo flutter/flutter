@@ -15,7 +15,7 @@
   * When running with Impeller, Flutter does not create a Skia graphics context.
   * However, while Impeller still performs text rendering, text layout and
     shaping needs to be done by a separate component. This component happens to
-    the SkParagraph which is part of Skia.
+    be SkParagraph which is part of Skia.
   * Similarly, Impeller does not perform image decompression. Flutter uses a
     standard set of codecs wrapped by Skia before querying the system supplied
     image formats.
