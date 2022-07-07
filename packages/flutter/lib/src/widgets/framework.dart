@@ -4260,7 +4260,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets!.lookup(T);
+    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4271,7 +4271,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets!.lookup(T);
+    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     return ancestor;
   }
 
@@ -5308,7 +5308,7 @@ class InheritedElement extends ProxyElement {
     assert(_lifecycleState == _ElementLifecycle.active);
     final PersistentHashMap<Type, InheritedElement> incomingWidgets =
         _parent?._inheritedWidgets ?? const PersistentHashMap<Type, InheritedElement>.empty();
-    _inheritedWidgets = incomingWidgets.copyWith(widget.runtimeType, this);
+    _inheritedWidgets = incomingWidgets.put(widget.runtimeType, this);
   }
 
   @override

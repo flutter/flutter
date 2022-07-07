@@ -30,11 +30,13 @@ class PersistentHashMap<K extends Object, V> {
 
   final _TrieNode? _root;
 
-  /// Create a copy of this map extended with the given [key] to [value]
+  /// If this map does not already contain the given [key] to [value]
+  /// mapping then create a new version of the map which contains
+  /// all mappings from the current one plus the given [key] to [value]
   /// mapping.
-  PersistentHashMap<K, V> copyWith(K key, V value) {
+  PersistentHashMap<K, V> put(K key, V value) {
     final _TrieNode newRoot =
-        (_root ?? _CompressedNode.empty).copyWith(0, key, key.hashCode, value);
+        (_root ?? _CompressedNode.empty).put(0, key, key.hashCode, value);
     if (newRoot == _root) {
       return this;
     }
@@ -44,18 +46,21 @@ class PersistentHashMap<K extends Object, V> {
   /// Returns value associated with the given [key] or `null` if [key]
   /// is not in the map.
   @pragma('dart2js:as:trust')
-  V? lookup(K key) {
+  V? operator[](K key) {
     if (_root == null) {
       return null;
     }
 
-    // Unfortunately can't use unsafeCast<V?>(...) here because it leads
+    // Unfortunately can not use unsafeCast<V?>(...) here because it leads
     // to worse code generation on VM.
-    return _root!.lookup(0, key, key.hashCode) as V?;
+    return _root!.get(0, key, key.hashCode) as V?;
   }
 }
 
 /// Base class for nodes in a hash trie.
+///
+/// This trie is keyed by hash code bits using [hashBitsPerLevel] bits
+/// at each level.
 abstract class _TrieNode {
   static const int hashBitsPerLevel = 5;
   static const int hashBitsPerLevelMask = (1 << hashBitsPerLevel) - 1;
@@ -65,9 +70,13 @@ abstract class _TrieNode {
     return (hash >>> bitIndex) & hashBitsPerLevelMask;
   }
 
-  _TrieNode copyWith(int bitIndex, Object key, int keyHash, Object? value);
+  /// Insert [key] to [value] mapping into the trie using bits from [keyHash]
+  /// starting at [bitIndex].
+  _TrieNode put(int bitIndex, Object key, int keyHash, Object? value);
 
-  Object? lookup(int bitIndex, Object key, int keyHash);
+  /// Lookup a value associated with the given [key] using bits from [keyHash]
+  /// starting at [bitIndex].
+  Object? get(int bitIndex, Object key, int keyHash);
 }
 
 /// A full (uncompressed) node in the trie.
@@ -86,10 +95,10 @@ class _FullNode extends _TrieNode {
   final List<Object?> descendants;
 
   @override
-  _TrieNode copyWith(int bitIndex, Object key, int keyHash, Object? value) {
+  _TrieNode put(int bitIndex, Object key, int keyHash, Object? value) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
     final _TrieNode node = _unsafeCast<_TrieNode?>(descendants[index]) ?? _CompressedNode.empty;
-    final _TrieNode newNode = node.copyWith(
+    final _TrieNode newNode = node.put(
         bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
     return identical(newNode, node)
         ? this
@@ -97,11 +106,11 @@ class _FullNode extends _TrieNode {
   }
 
   @override
-  Object? lookup(int bitIndex, Object key, int keyHash) {
+  Object? get(int bitIndex, Object key, int keyHash) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
 
     final _TrieNode? node = _unsafeCast<_TrieNode?>(descendants[index]);
-    return node?.lookup(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
+    return node?.get(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
   }
 }
 
@@ -144,7 +153,7 @@ class _CompressedNode extends _TrieNode {
   final List<Object?> keyValuePairs;
 
   @override
-  _TrieNode copyWith(int bitIndex, Object key, int keyHash, Object? value) {
+  _TrieNode put(int bitIndex, Object key, int keyHash, Object? value) {
     final int bit = 1 << _TrieNode.trieIndex(keyHash, bitIndex);
     final int index = _compressedIndex(bit);
 
@@ -155,7 +164,7 @@ class _CompressedNode extends _TrieNode {
 
       // Is this a (null, trieNode) pair?
       if (identical(keyOrNull, null)) {
-        final _TrieNode newNode = _unsafeCast<_TrieNode>(valueOrNode).copyWith(
+        final _TrieNode newNode = _unsafeCast<_TrieNode>(valueOrNode).put(
             bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
         if (newNode == valueOrNode) {
           return this;
@@ -194,7 +203,7 @@ class _CompressedNode extends _TrieNode {
         // update descendant at the corresponding index.
         return _inflate(bitIndex)
           ..descendants[_TrieNode.trieIndex(keyHash, bitIndex)] =
-              _CompressedNode.empty.copyWith(
+              _CompressedNode.empty.put(
                   bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
       } else {
         // Grow keyValuePairs by inserting key/value pair at the given
@@ -218,7 +227,7 @@ class _CompressedNode extends _TrieNode {
   }
 
   @override
-  Object? lookup(int bitIndex, Object key, int keyHash) {
+  Object? get(int bitIndex, Object key, int keyHash) {
     final int bit = 1 << _TrieNode.trieIndex(keyHash, bitIndex);
     if ((occupiedIndices & bit) == 0) {
       return null;
@@ -228,7 +237,7 @@ class _CompressedNode extends _TrieNode {
     final Object? valueOrNode = keyValuePairs[2 * index + 1];
     if (keyOrNull == null) {
       final _TrieNode node = _unsafeCast<_TrieNode>(valueOrNode);
-      return node.lookup(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
+      return node.get(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash);
     }
     if (key == keyOrNull) {
       return valueOrNode;
@@ -246,7 +255,7 @@ class _CompressedNode extends _TrieNode {
         if (keyOrNull == null) {
           nodes[dstIndex] = keyValuePairs[srcIndex + 1];
         } else {
-          nodes[dstIndex] = _CompressedNode.empty.copyWith(
+          nodes[dstIndex] = _CompressedNode.empty.put(
               bitIndex + _TrieNode.hashBitsPerLevel,
               keyOrNull,
               keyValuePairs[srcIndex].hashCode,
@@ -264,16 +273,16 @@ class _CompressedNode extends _TrieNode {
   }
 
   static _TrieNode _resolveCollision(int bitIndex, Object existingKey,
-      Object? existingValue, Object key, int hash, Object? value) {
+      Object? existingValue, Object key, int keyHash, Object? value) {
     final int existingKeyHash = existingKey.hashCode;
     // Check if this is a full hash collision and use _HashCollisionNode
     // in this case.
-    return (existingKeyHash == hash)
+    return (existingKeyHash == keyHash)
         ? _HashCollisionNode.fromCollision(
-            hash, existingKey, existingValue, key, value)
+            keyHash, existingKey, existingValue, key, value)
         : _CompressedNode.empty
-            .copyWith(bitIndex, existingKey, existingKeyHash, existingValue)
-            .copyWith(bitIndex, key, hash, value);
+            .put(bitIndex, existingKey, existingKeyHash, existingValue)
+            .put(bitIndex, key, keyHash, value);
   }
 }
 
@@ -297,7 +306,7 @@ class _HashCollisionNode extends _TrieNode {
   final List<Object?> keyValuePairs;
 
   @override
-  _TrieNode copyWith(int bitIndex, Object key, int keyHash, Object? val) {
+  _TrieNode put(int bitIndex, Object key, int keyHash, Object? val) {
     // Is this another full hash collision?
     if (keyHash == hash) {
       final int index = _indexOf(key);
@@ -320,11 +329,11 @@ class _HashCollisionNode extends _TrieNode {
     // Not a full hash collision, need to introduce a _CompressedNode which
     // uses previously unused bits.
     return _CompressedNode.single(bitIndex, hash, this)
-        .copyWith(bitIndex, key, keyHash, val);
+        .put(bitIndex, key, keyHash, val);
   }
 
   @override
-  Object? lookup(int bitIndex, Object key, int keyHash) {
+  Object? get(int bitIndex, Object key, int keyHash) {
     final int index = _indexOf(key);
     return index < 0 ? null : keyValuePairs[index + 1];
   }

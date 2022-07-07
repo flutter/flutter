@@ -25,12 +25,12 @@ void main() {
         <PersistentHashMap<String, int>>[];
     maps.add(const PersistentHashMap<String, int>.empty());
     for (int i = 0; i < 50; i++) {
-      maps.add(maps.last.copyWith('key:$i', i));
+      maps.add(maps.last.put('key:$i', i));
     }
     for (int i = 1; i < maps.length; i++) {
       final PersistentHashMap<String, int> m = maps[i];
       for (int j = 0; j < i; j++) {
-        expect(m.lookup('key:$j'), equals(j));
+        expect(m['key:$j'], equals(j));
       }
     }
   });
@@ -43,26 +43,26 @@ void main() {
 
     final PersistentHashMap<_MockKey, String> map =
         const PersistentHashMap<_MockKey, String>.empty()
-            .copyWith(key1, 'a')
-            .copyWith(key2, 'b')
-            .copyWith(key3, 'c');
+            .put(key1, 'a')
+            .put(key2, 'b')
+            .put(key3, 'c');
 
-    expect(map.lookup(key1), equals('a'));
-    expect(map.lookup(key2), equals('b'));
-    expect(map.lookup(key3), equals('c'));
+    expect(map[key1], equals('a'));
+    expect(map[key2], equals('b'));
+    expect(map[key3], equals('c'));
 
-    final PersistentHashMap<_MockKey, String> map2 = map.copyWith(key4, 'd');
-    expect(map2.lookup(key4), equals('d'));
+    final PersistentHashMap<_MockKey, String> map2 = map.put(key4, 'd');
+    expect(map2[key4], equals('d'));
 
     final PersistentHashMap<_MockKey, String> map3 = map2
-        .copyWith(key1, 'updated(a)')
-        .copyWith(key2, 'updated(b)')
-        .copyWith(key3, 'updated(c)')
-        .copyWith(key4, 'updated(d)');
-    expect(map3.lookup(key1), equals('updated(a)'));
-    expect(map3.lookup(key2), equals('updated(b)'));
-    expect(map3.lookup(key3), equals('updated(c)'));
-    expect(map3.lookup(key4), equals('updated(d)'));
+        .put(key1, 'updated(a)')
+        .put(key2, 'updated(b)')
+        .put(key3, 'updated(c)')
+        .put(key4, 'updated(d)');
+    expect(map3[key1], equals('updated(a)'));
+    expect(map3[key2], equals('updated(b)'));
+    expect(map3[key3], equals('updated(c)'));
+    expect(map3[key4], equals('updated(d)'));
   });
 
   test('PersistentHashMap - inflation of nodes', () {
@@ -70,12 +70,12 @@ void main() {
         <PersistentHashMap<_MockKey, int>>[];
     maps.add(const PersistentHashMap<_MockKey, int>.empty());
     for (int i = 0; i < 32 * 32; i++) {
-      maps.add(maps.last.copyWith(_MockKey(hashCode: i, payload: '$i'), i));
+      maps.add(maps.last.put(_MockKey(hashCode: i, payload: '$i'), i));
     }
     for (int i = 1; i < maps.length; i++) {
       final PersistentHashMap<_MockKey, int> m = maps[i];
       for (int j = 0; j < i; j++) {
-        expect(m.lookup(_MockKey(hashCode: j, payload: '$j')), equals(j));
+        expect(m[_MockKey(hashCode: j, payload: '$j')], equals(j));
       }
     }
   });
