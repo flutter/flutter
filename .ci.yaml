@@ -85,7 +85,7 @@ platform_properties:
         []
       os: Mac-12
       device_type: none
-      cpu: x86
+      mac_model: Macmini8,1
       xcode: 13a233
   mac_android:
     properties:
@@ -106,7 +106,6 @@ platform_properties:
           {"dependency": "open_jdk", "version": "11"}
         ]
       os: Mac-12
-      cpu: x86
       device_os: N
   mac_ios:
     properties:
@@ -128,7 +127,6 @@ platform_properties:
           {"dependency": "ios_signing"}
         ]
       os: Mac-12
-      cpu: x86
       device_os: iOS-15.1
       xcode: 13a233
   windows:
