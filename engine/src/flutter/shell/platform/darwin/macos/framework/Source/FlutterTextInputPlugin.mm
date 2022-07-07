@@ -76,6 +76,35 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
   return flutter::TextRange([base unsignedLongValue], [extent unsignedLongValue]);
 }
 
+@interface NSEvent (KeyEquivalentMarker)
+
+// Internally marks that the event was received through performKeyEquivalent:.
+// When text editing is active, keyboard events that have modifier keys pressed
+// are received through performKeyEquivalent: instead of keyDown:. If such event
+// is passed to TextInputContext but doesn't result in a text editing action it
+// needs to be forwarded by FlutterKeyboardManager to the next responder.
+- (void)markAsKeyEquivalent;
+
+// Returns YES if the event is marked as a key equivalent.
+- (BOOL)isKeyEquivalent;
+
+@end
+
+@implementation NSEvent (KeyEquivalentMarker)
+
+// This field doesn't need a value because only its address is used as a unique identifier.
+static char markerKey;
+
+- (void)markAsKeyEquivalent {
+  objc_setAssociatedObject(self, &markerKey, @true, OBJC_ASSOCIATION_RETAIN);
+}
+
+- (BOOL)isKeyEquivalent {
+  return [objc_getAssociatedObject(self, &markerKey) boolValue] == YES;
+}
+
+@end
+
 /**
  * Private properties of FlutterTextInputPlugin.
  */
@@ -129,6 +158,13 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
  * https://api.flutter.dev/flutter/services/TextInputAction-class.html
  */
 @property(nonatomic, nonnull) NSString* inputAction;
+
+/**
+ * Set to true if the last event fed to the input context produced a text editing command
+ * or text output. It is reset to false at the beginning of every key event, and is only
+ * used while processing this event.
+ */
+@property(nonatomic) BOOL eventProducedOutput;
 
 /**
  * Whether to enable the sending of text input updates from the engine to the
@@ -482,7 +518,17 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     return NO;
   }
 
-  return [_textInputContext handleEvent:event];
+  _eventProducedOutput = NO;
+  BOOL res = [_textInputContext handleEvent:event];
+  // NSTextInputContext#handleEvent returns YES if the context handles the event. One of the reasons
+  // the event is handled is because it's a key equivalent. But a key equivalent might produce a
+  // text command (indicated by calling doCommandBySelector) or might not (for example, Cmd+Q). In
+  // the latter case, this command somehow has not been executed yet and Flutter must dispatch it to
+  // the next responder. See https://github.com/flutter/flutter/issues/106354 .
+  if (event.isKeyEquivalent && !_eventProducedOutput) {
+    return NO;
+  }
+  return res;
 }
 
 #pragma mark -
@@ -509,6 +555,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     // send the event back to [keyboardManager handleEvent:].
     return NO;
   }
+  [event markAsKeyEquivalent];
   [self.flutterViewController keyDown:event];
   return YES;
 }
@@ -573,6 +620,8 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     return;
   }
 
+  _eventProducedOutput |= true;
+
   if (range.location != NSNotFound) {
     // The selected range can actually have negative numbers, since it can start
     // at the end of the range if the user selected the text going backwards.
@@ -612,6 +661,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 }
 
 - (void)doCommandBySelector:(SEL)selector {
+  _eventProducedOutput |= selector != NSSelectorFromString(@"noop:");
   if ([self respondsToSelector:selector]) {
     // Note: The more obvious [self performSelector...] doesn't give ARC enough information to
     // handle retain semantics properly. See https://stackoverflow.com/questions/7017281/ for more
