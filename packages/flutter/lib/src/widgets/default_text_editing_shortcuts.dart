@@ -304,11 +304,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
-
     const SingleActivator(LogicalKeyboardKey.keyT, control: true): const TransposeCharactersIntent(),
 
     const SingleActivator(LogicalKeyboardKey.home): const ScrollToDocumentBoundaryIntent(forward: false),
