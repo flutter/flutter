@@ -56,9 +56,6 @@ def get_out_dir(args):
   if args.target_os == 'fuchsia' and args.fuchsia_cpu is not None:
     target_dir.append(args.fuchsia_cpu)
 
-  if args.support_fractional_translation:
-    target_dir.append('fractional')
-
   # This exists for backwards compatibility of tests that are being run
   # on LUCI. This can be removed in coordination with a LUCI change:
   # https://github.com/flutter/flutter/issues/76547
@@ -346,10 +343,6 @@ def to_gn_args(args):
 
   if args.allow_deprecated_api_calls:
     gn_args['allow_deprecated_api_calls'] = args.allow_deprecated_api_calls
-
-  if args.support_fractional_translation:
-    gn_args['support_fractional_translation'
-           ] = args.support_fractional_translation
 
   # DBC is not supported anymore.
   if args.interpreter:
@@ -831,15 +824,6 @@ def parse_args(args):
 
   parser.add_argument(
       '--fuchsia-target-api-level', dest='fuchsia_target_api_level'
-  )
-
-  parser.add_argument(
-      '--support-fractional-translation',
-      dest='support_fractional_translation',
-      default=False,
-      action='store_true',
-      help='Whether to allow layers to render at fraction pixel '
-      'boundaries.'
   )
 
   # Flags for Dart features.
