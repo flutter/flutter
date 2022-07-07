@@ -470,7 +470,32 @@ void main() {
 
       semantics.dispose();
     });
+
+    testWidgets('Drag to dismiss ModalBarrier', (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => const FirstWidget(),
+        '/modal': (BuildContext context) => const SecondWidget(),
+      };
+
+      await tester.pumpWidget(MaterialApp(routes: routes));
+
+      // Initially the barrier is not visible
+      expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey<String>('barrier')), findsOneWidget);
+
+      // Drag the mouse to the top of the screen.
+      await tester.dragFrom(const Offset(10.0, 10.0), const Offset(200.0, 200.0), touchSlopY: 0);
+      await tester.pumpAndSettle();
+
+      // The barrier should be dismissed.
+      expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+    });
   });
+
   group('AnimatedModalBarrier', () {
     testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {
       final Widget subject = Stack(

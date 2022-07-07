@@ -312,6 +312,17 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
       _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
+      // Should dismiss the barrier when the user perform some drag.
+      VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+        () => VerticalDragGestureRecognizer(debugOwner: this),
+        (VerticalDragGestureRecognizer instance) {
+          instance.onUpdate = (DragUpdateDetails details) {
+            if (details.primaryDelta !> 0) {
+              onDismiss();
+            }
+          };
+        },
+      ),
     };
 
     return RawGestureDetector(
