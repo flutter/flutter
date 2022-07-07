@@ -218,6 +218,31 @@ class OverlayEntry implements Listenable {
   String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
 }
 
+class _OverlayInfoWidget extends InheritedWidget {
+  const _OverlayInfoWidget({
+    required this.state,
+    required super.child,
+  });
+
+  final _OverlayEntryWidgetState state;
+
+  @override
+  bool updateShouldNotify(_OverlayInfoWidget oldWidget) => oldWidget.state != state;
+}
+
+/// A location in a particular [Overlay].
+abstract class OverlayInfo {
+  _RenderTheatre get _overlayRenderObject;
+
+  /// The closest [OverlayInfo] that encloses the given context.
+  ///
+  /// This method returns null when no enclosing [Overlay] can be found in the
+  /// given [context].
+  static OverlayInfo? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_OverlayInfoWidget>()?.state;
+  }
+}
+
 class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
     required Key key,
@@ -235,12 +260,15 @@ class _OverlayEntryWidget extends StatefulWidget {
   _OverlayEntryWidgetState createState() => _OverlayEntryWidgetState();
 }
 
-class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
+class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> implements OverlayInfo {
   @override
   void initState() {
     super.initState();
     widget.entry._overlayStateMounted.value = true;
   }
+
+  @override
+  _RenderTheatre get _overlayRenderObject => context.findAncestorRenderObjectOfType<_RenderTheatre>()!;
 
   @override
   void dispose() {
@@ -253,7 +281,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   Widget build(BuildContext context) {
     return TickerMode(
       enabled: widget.tickerEnabled,
-      child: widget.entry.builder(context),
+      child: _OverlayInfoWidget(
+        state: this,
+        child: Builder(builder: widget.entry.builder),
+      ),
     );
   }
 
@@ -666,17 +697,11 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
   }
 
-  Alignment? _resolvedAlignment;
-
-  void _resolve() {
-    if (_resolvedAlignment != null) {
-      return;
-    }
-    _resolvedAlignment = AlignmentDirectional.topStart.resolve(textDirection);
-  }
+  Alignment? _alignmentCache;
+  Alignment get _resolvedAlignment => _alignmentCache ??= AlignmentDirectional.topStart.resolve(textDirection);
 
   void _markNeedResolution() {
-    _resolvedAlignment = null;
+    _alignmentCache = null;
     markNeedsLayout();
   }
 
@@ -712,6 +737,14 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
+  }
+
+  void addDeferredChild(_RenderDeferredLayoutBox child) {
+    add(child);
+  }
+
+  void removeDeferredChild(_RenderDeferredLayoutBox child) {
+    remove(child);
   }
 
   RenderBox? get _firstOnstageChild {
@@ -790,9 +823,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       return;
     }
 
-    _resolve();
-    assert(_resolvedAlignment != null);
-
     // Same BoxConstraints as used by RenderStack for StackFit.expand.
     final BoxConstraints nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
 
@@ -802,9 +832,10 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
       if (!childParentData.isPositioned) {
         child.layout(nonPositionedConstraints, parentUsesSize: true);
-        childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
+        childParentData.offset = _resolvedAlignment.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
+        assert(child is! _RenderDeferredLayoutBox);
+        _hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment) || _hasVisualOverflow;
       }
 
       assert(child.parentData == childParentData);
@@ -943,5 +974,431 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
           style: DiagnosticsTreeStyle.offstage,
         ),
     ];
+  }
+}
+
+/// A widget that renders its [overlayChild] on the [Overlay] specified by
+/// [overlayInfo].
+///
+/// The [overlayChild] will be rendered on the [Overlay] as if it was inserted
+/// using an [OverlayEntry], while it can depend on the same set of
+/// [InheritedWidget]s (such as [Theme]) that this widget can depend on.
+///
+/// This widget must be placed below the [Overlay] [overlayInfo] points to, and
+/// [overlayInfo] must not be null when [overlayChild] is not null.
+///
+/// {@tool dartpad}
+/// This example uses an [OverlayPortal] to build a tooltip that becomes visible
+/// when the user taps on the [child] widget. There's a [DefaultTextStyle] above
+/// the [OverlayPortal] controlling the [TextStyle] of both the [child] widget
+/// and the [overlayChild] widget, which isn't otherwise doable if the tooltip
+/// was added as an [OverlayEntry].
+///
+/// ** See code in examples/api/lib/widgets/overlay/overlay_portal.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [OverlayEntry], the imperative API for inserting a widget to an [Overlay].
+class OverlayPortal extends RenderObjectWidget {
+
+  /// Creates a widget that renders the given `overlayChild` on the [Overlay]
+  /// specified by `overlayChild`.
+  const OverlayPortal({
+    super.key,
+    required this.overlayInfo,
+    required this.overlayChild,
+    required this.child,
+  }) : assert(overlayChild == null || overlayInfo != null);
+
+  /// A widget below this widget in the tree, but renders on the [Overlay]
+  /// given by [overlayInfo].
+  ///
+  /// The [overlayChild] widget, if not null, is placed below this widget in
+  /// the widget tree, allowing it to depend on [InheritedWidget] above it, and
+  /// be notified when the [InheritedWidget] changes.
+  ///
+  /// Unlike [child], [overlayChild] can visually extend outside the bounds
+  /// of this widget without being clipped, and receive hit-test events outside
+  /// of this widget's bounds, as long as it does not extend outside of the
+  /// [Overlay] it renders on.
+  final Widget? overlayChild;
+
+  /// A widget below this widget in the tree.
+  final Widget? child;
+
+  /// A location in a particular [Overlay].
+  ///
+  /// An [OverlayInfo] on the enclosing [Overlay] widget can be aquired using
+  /// [OverlayInfo.of].
+  ///
+  /// This parameter must not be null when [overlayChild] is not null.
+  final OverlayInfo? overlayInfo;
+
+  @override
+  RenderObjectElement createElement() => _OverlayPortalElement(this);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderLayoutSurrogateProxyBox();
+}
+
+class _OverlayPortalElement extends RenderObjectElement {
+  _OverlayPortalElement(OverlayPortal super.widget);
+
+  @override
+  OverlayPortal get widget => super.widget as OverlayPortal;
+
+  @override
+  _RenderLayoutSurrogateProxyBox get renderObject => super.renderObject as _RenderLayoutSurrogateProxyBox;
+
+  Element? _overlayChild;
+  Element? _child;
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    _child = updateChild(_child, widget.child, null);
+    final Widget? overlayChild = widget.overlayChild;
+    _overlayChild = updateChild(
+      _overlayChild,
+      overlayChild == null ? null : _DeferredLayout(layoutSurrogate: renderObject, child: overlayChild),
+      widget.overlayInfo,
+    );
+  }
+
+  @override
+  void update(OverlayPortal newWidget) {
+    super.update(newWidget);
+
+    _child = updateChild(_child, newWidget.child, null);
+    final Widget? remoteChild = newWidget.overlayChild;
+    final Widget? wrappedRemoteChild = remoteChild == null
+      ? null
+      : _DeferredLayout(layoutSurrogate: renderObject, child: remoteChild);
+    _overlayChild = updateChild(_overlayChild, wrappedRemoteChild, newWidget.overlayInfo);
+  }
+
+  @override
+  void forgetChild(Element child) {
+    assert(child == _child);
+    // The _overlayChild Element does not have a key.
+    _child = null;
+    super.forgetChild(child);
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    final Element? child = _child;
+    final Element? overlayChild = _overlayChild;
+    if (child != null) {
+      visitor(child);
+    }
+    if (overlayChild != null) {
+      visitor(overlayChild);
+    }
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    final RenderBox? box = _overlayChild?.renderObject as RenderBox?;
+    if (box != null) {
+      assert(!box.attached);
+      insertRenderObjectChild(box, widget.overlayInfo);
+    }
+  }
+
+  @override
+  void deactivate() {
+    final RenderBox? box = _overlayChild?.renderObject as RenderBox?;
+    // Instead of just detaching the render objects, removing them from the
+    // render subtree entirely such that if the widget gets reparented to a
+    // different overlay entry, the overlay child is inserted in the right
+    // position in the overlay's child list.
+    if (box != null && box.attached) {
+      removeRenderObjectChild(box, widget.overlayInfo);
+    }
+    super.deactivate();
+  }
+
+  @override
+  void insertRenderObjectChild(RenderBox child, OverlayInfo? slot) {
+    assert(child.parent == null);
+    if (slot != null) {
+      renderObject._deferredLayoutChild = child as _RenderDeferredLayoutBox;
+      slot._overlayRenderObject.addDeferredChild(child);
+    } else {
+      renderObject.child = child;
+    }
+  }
+
+  @override
+  void moveRenderObjectChild(RenderBox child, OverlayInfo? oldSlot, OverlayInfo? newSlot) {
+    assert(oldSlot != null || newSlot != null, '$this: $child changing slot: $oldSlot => $newSlot');
+    if (child.attached) {
+      oldSlot?._overlayRenderObject.removeDeferredChild(child as _RenderDeferredLayoutBox);
+    }
+    insertRenderObjectChild(child, newSlot);
+  }
+
+  @override
+  void removeRenderObjectChild(RenderBox child, OverlayInfo? slot) {
+    if (slot == null) {
+      renderObject.child = null;
+      return;
+    }
+    assert(renderObject._deferredLayoutChild == child);
+    renderObject._deferredLayoutChild = null;
+    if (child.attached) {
+      slot._overlayRenderObject.removeDeferredChild(child as _RenderDeferredLayoutBox);
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Element>('child', _child, defaultValue: null));
+    properties.add(DiagnosticsProperty<Element>('overlayChild', _overlayChild, defaultValue: null));
+  }
+}
+
+class _DeferredLayout extends SingleChildRenderObjectWidget {
+  const _DeferredLayout({
+    required this.layoutSurrogate,
+    required super.child,
+  });
+
+  final _RenderLayoutSurrogateProxyBox layoutSurrogate;
+
+  @override
+  _RenderDeferredLayoutBox createRenderObject(BuildContext context) {
+    final _RenderDeferredLayoutBox renderObject = _RenderDeferredLayoutBox(layoutSurrogate);
+    layoutSurrogate._deferredLayoutChild = renderObject;
+    return renderObject;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderDeferredLayoutBox renderObject) {
+    assert(renderObject._layoutParent == layoutSurrogate);
+    layoutSurrogate._deferredLayoutChild = renderObject;
+  }
+}
+
+// A RenderProxyBox that defers its layout until its `_layoutParent` is laid out.
+//
+// This RenderObject is a child RenderObject of a _RenderTheatre. It guarantees
+// that:
+//
+// 1. It's a relayout boundary. And it never dirties its parent _RenderTheatre
+//    or its _layoutParent.
+//
+// 2. Its `layout` implementation has been overridden such that `performLayout`
+//    does not do anything when its called from `layout`, preventing the parent
+//    `_RenderTheatre` from laying out this subtree prematurely (but this
+//    RenderObject may still be resized). Instead, `markNeedsLayout` will be
+//    called from within `layout` to schedule a layout update for this relayout
+//    boundary when needed.
+//
+// 3. When invoked from `PipelineOwner.flushLayout`, or
+//    _layoutParent.performLayout, this RenderObject behaves like a mini Overlay
+//    that has only one entry.
+class _RenderDeferredLayoutBox extends RenderProxyBox {
+  _RenderDeferredLayoutBox(this._layoutParent);
+
+  final _RenderLayoutSurrogateProxyBox _layoutParent;
+
+  @override
+  _RenderTheatre? get parent => super.parent as _RenderTheatre?;
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! StackParentData) {
+      child.parentData = StackParentData();
+    }
+  }
+
+  @override
+  void redepthChildren() {
+    _layoutParent.redepthChild(this);
+    super.redepthChildren();
+  }
+
+  bool _callingMarkParentNeedsLayout = false;
+  @override
+  void markParentNeedsLayout() {
+    // No re-entrant calls.
+    if (_callingMarkParentNeedsLayout) {
+      return;
+    }
+    _callingMarkParentNeedsLayout = true;
+    markNeedsLayout();
+    _layoutParent.markNeedsLayout();
+    _callingMarkParentNeedsLayout = false;
+  }
+
+  bool _needsLayout = true;
+  @override
+  void markNeedsLayout() {
+    _needsLayout = true;
+    super.markNeedsLayout();
+  }
+
+  @override
+  RenderObject? get debugLayoutParent => _layoutParent;
+
+  @override
+  bool get sizedByParent => true;
+
+  void layoutByLayoutParent() {
+    assert(!_parentDoingLayout);
+    final _RenderTheatre? theatre = parent;
+    if (theatre == null || !attached) {
+      assert(false, '$this is not attached to parent');
+      return;
+    }
+    super.layout(BoxConstraints.tight(theatre.constraints.biggest));
+  }
+
+  bool _parentDoingLayout = false;
+  @override
+  void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    assert(_needsLayout == debugNeedsLayout);
+    final bool scheduleDeferredLayout = _needsLayout || this.constraints != constraints;
+    assert(!_parentDoingLayout);
+    _parentDoingLayout = true;
+    super.layout(constraints, parentUsesSize: parentUsesSize);
+    assert(_parentDoingLayout);
+    _parentDoingLayout = false;
+    _needsLayout = false;
+    assert(!debugNeedsLayout);
+    if (scheduleDeferredLayout) {
+      // Invoking markNeedsLayout as a layout callback allows this node to be
+      // merged back to the `PipelineOwner` if it's not already dirty. Otherwise
+      // this may cause some dirty descendants to performLayout a second time.
+      parent?.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
+    }
+  }
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  bool _debugMutationsLocked = false;
+  @override
+  void performLayout() {
+    assert(!_debugMutationsLocked);
+    if (_parentDoingLayout) {
+      _needsLayout = false;
+      return;
+    }
+    assert(() {
+      _debugMutationsLocked = true;
+      return true;
+    }());
+    // This method is directly being invoked from PipelineOwner.flushLayout, or
+    // from `_layoutParent`'s performLayout.
+    final _RenderTheatre? parent = this.parent;
+    final RenderBox? child = this.child;
+    if (parent == null || child == null) {
+      assert(parent != null);
+      _needsLayout = false;
+      return;
+    }
+
+    final Alignment alignment = parent._resolvedAlignment;
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    if (!childParentData.isPositioned) {
+      child.layout(constraints, parentUsesSize: true);
+      childParentData.offset = alignment.alongOffset(size - child.size as Offset);
+    } else {
+      parent._hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, alignment) || parent._hasVisualOverflow;
+    }
+    assert(child.parentData == childParentData);
+    assert(() {
+      _debugMutationsLocked = false;
+      return true;
+    }());
+    _needsLayout = false;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return false;
+    }
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    return result.addWithPaintOffset(
+      offset: childParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - childParentData.offset);
+        return child.hitTest(result, position: transformed);
+      },
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
+    final _RenderTheatre? parent = this.parent;
+    if (child == null || parent == null) {
+      return;
+    }
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    if (parent._hasVisualOverflow && parent.clipBehavior != Clip.none) {
+      parent._clipRectLayer.layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        (PaintingContext context, Offset offset) { context.paintChild(child, offset + childParentData.offset); },
+      );
+    } else {
+      context.paintChild(child, offset + childParentData.offset);
+    }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final Offset offset = childParentData.offset;
+    transform.translate(offset.dx, offset.dy);
+  }
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    return parent!._hasVisualOverflow && parent!.clipBehavior != Clip.none
+      ? Offset.zero & size
+      : null;
+  }
+}
+
+// A RenderProxyBox that makes sure its `deferredLayoutChild` has a greater
+// depth than itself.
+//
+// Its `_deferredLayoutChild` is guaranteed to have a greater depth than this
+// RenderObject itself. As a result PipelineOwner will never layout relayout
+// boundaries from `deferredLayoutChild`'s subtree before this render object,
+// if `_deferredLayoutChild` is marked dirty.
+class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
+  _RenderDeferredLayoutBox? _deferredLayoutChild;
+
+  @override
+  void redepthChildren() {
+    super.redepthChildren();
+    final _RenderDeferredLayoutBox? child = _deferredLayoutChild;
+    // If child is not attached, this method will be invoked by child's real
+    // parent.
+    if (child != null && child.attached) {
+      assert(child.attached);
+      redepthChild(child);
+    }
+  }
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _deferredLayoutChild?.layoutByLayoutParent();
   }
 }

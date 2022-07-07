@@ -4590,6 +4590,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }());
     performRebuild();
     assert(() {
+      owner!._debugElementWasRebuilt(this);
       assert(owner!._debugCurrentBuildTarget == this);
       owner!._debugCurrentBuildTarget = debugPreviousBuildTarget;
       return true;

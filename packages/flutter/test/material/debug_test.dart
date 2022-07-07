@@ -150,6 +150,8 @@ void main() {
       '     AnimatedBuilder\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
       '     Semantics\n'
+      '     Builder\n'
+      '     _OverlayInfoWidget\n'
       '     _EffectiveTickerMode\n'
       '     TickerMode\n'
       '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'

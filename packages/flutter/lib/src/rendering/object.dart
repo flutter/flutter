@@ -1613,7 +1613,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         }
 
         if (!activeLayoutRoot._debugMutationsLocked) {
-          final AbstractNode? p = activeLayoutRoot.parent;
+          final AbstractNode? p = activeLayoutRoot.debugLayoutParent;
           activeLayoutRoot = p is RenderObject ? p : null;
         } else {
           // activeLayoutRoot found.
@@ -1690,6 +1690,28 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       ]);
     }());
     return result;
+  }
+
+  /// The [RenderObject] that's expected to call [layout] on this [RenderObject]
+  /// in its [performLayout] implementation.
+  ///
+  /// This method is used to implement an assert that ensures the render subtree
+  /// actively performing layout can not get accidently mutated. It's only
+  /// implemented in debug mode and always returns nil in release mode.
+  ///
+  /// Typically this returns [parent]. A [RenderObject] subclass that expects
+  /// its [RenderObject.performLayout] to be called from a different
+  /// [RenderObject] that's not its [parent] should override this property to
+  /// return the actual layout parent.
+  @protected
+  RenderObject? get debugLayoutParent {
+    RenderObject? layoutParent;
+    assert(() {
+      final AbstractNode? parent = this.parent;
+      layoutParent = parent is RenderObject? ? parent : null;
+      return true;
+    }());
+    return layoutParent;
   }
 
   @override
@@ -3545,17 +3567,13 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_child != null) {
-      _child!.attach(owner);
-    }
+    _child?.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    if (_child != null) {
-      _child!.detach();
-    }
+    _child?.detach();
   }
 
   @override
