@@ -204,6 +204,11 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
     return true;
   }
 
+  /// Move forward or backward by a number of elements determined
+  /// by pixel [offset].
+  ///
+  /// If [offset] is negative, move backward; otherwise move forward.
+  /// Returns true and updates [current] if successful.
   bool moveByOffset(double offset) {
     final Offset initialOffset = _currentOffset;
     if (offset >= 0.0) {
