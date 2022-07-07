@@ -515,9 +515,9 @@ abstract class FlutterDriver {
 
   /// Simulates the user pressing one of the [DriverTextInputAction] buttons.
   /// Does not check that the [DriverTextInputAction] performed is an acceptable one
-  /// based on the `inputAction` [setClientArgs].
+  /// based on the `inputAction` [TestTextInput.setClientArgs]
   ///
-  /// This can be called even if the [TestTextInput] has not been [register]ed.
+  /// This can be called even if the [TestTextInput] has not been [TestTextInput.register]ed.
   ///
   /// Example:
   ///
