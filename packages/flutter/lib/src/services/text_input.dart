@@ -256,7 +256,7 @@ class TextInputType {
 ///
 /// This class has been cloned to `flutter_driver/lib/src/common/action.dart` as `DriverTextInputAction`,
 /// and must be kept in sync.
-/// 
+///
 /// See also:
 ///
 ///  * [TextInput], which configures the platform's keyboard setup.
