@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 /// {@template flutter.widgets.loupe.loupeControllerWidgetBuilder}
 /// A builder that builds a Widget with a [LoupeController].
-/// 
+///
 /// the [controller] should be passed into [Loupe.controller]. The third paramater
 /// is any additional info passed to the loupe, if desired.
 /// {@endtemplate}
@@ -32,38 +32,38 @@ class LoupeController {
       StreamController<AnimationStatus>.broadcast();
 
   /// The loupe's [OverlayEntry], if currently visible.
-  /// 
+  ///
   /// This is public in case other overlay entries need to be positioned
   /// above or below this [overlayEntry]. Anything in the paint order after
-  /// the [Loupe] will not be displaued in the loupe; this means that if it 
-  /// is desired for an overlay entry to be displayed in the loupe, 
+  /// the [Loupe] will not be displaued in the loupe; this means that if it
+  /// is desired for an overlay entry to be displayed in the loupe,
   /// it _must_ be positioned below the loupe.
-  /// 
+  ///
   /// {@tool snippet}
   /// ```dart
   ///  final myLoupeController = LoupeController();
-  /// 
+  ///
   /// // Placed below the loupe, so it will show.
   /// Overlay.of(context).insert(
   ///   OverlayEntry(builder: (context) => Text('I WILL display in the loupe'))
   /// );
-  /// 
+  ///
   /// /// Will display in the loupe, since this entry was passed to [show].
   /// final displayInLoupeEvenThoughPlacedBeforeChronologically = OverlayEntry(builer: (context) => Text('I WILL display in the loupe');
   /// Overlay.of(context).insert(displayInLoupeEvenThoughPlacedBeforeChronologically);
-  /// 
+  ///
   /// myLoupeController.show(
-  ///   context, 
+  ///   context,
   ///   below: displayInLoupeEvenThoughPlacedBeforeChronologically,
   ///   builder: (context) => Loupe(...)
   /// );
-  /// 
+  ///
   /// // By default, new entries will be placed over the top entry.
   /// Overlay.of(context).insert(
   ///   OverlayEntry(builer: (context) => Text('I WILL NOT display in the loupe'))
   /// );
-  /// 
-  /// 
+  ///
+  ///
   /// Overlay.of(context).insert(
   ///   below: myLoupeController.overlayEntry, // Explicitly placed below the loupe.
   ///   OverlayEntry(builer: (context) => Text('I WILL display in the loupe'))
@@ -85,7 +85,7 @@ class LoupeController {
   /// Shows the [Loupe] that this controller controlls.
   /// Returns a future that completes when the loupe is fully shown, i.e. done
   /// with it's entry animation.
-  /// 
+  ///
   /// To control what overlays are shown in the loupe, utilize [below]. See
   /// [overlayEntry] for more details on how to utilize [below].
   Future<void> show({
@@ -93,7 +93,7 @@ class LoupeController {
     required WidgetBuilder builder,
     Widget? debugRequiredFor,
     OverlayEntry? below,
-  }) async {
+  }) {
     _forceHide();
     final OverlayState? overlayState = Overlay.of(
       context,
@@ -109,9 +109,18 @@ class LoupeController {
     overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
-    overlayState!.insert(
-      below: below,
-      overlayEntry!);
+    overlayState!.insert(below: below, overlayEntry!);
+
+    return signalShow();
+  }
+
+  /// If there is a loupe in the overlay, but it is not shown (i.e. [hide] was called with
+  /// removeFromOverlay = false), then we should reshow it. Otherwise, do nothing.
+  Future<void> signalShow() async {
+    if (status.value == AnimationStatus.completed ||
+        status.value == AnimationStatus.forward) {
+      return;
+    }
 
     // Schedule the animation to begin in the next frame, since
     // we need the the loupe to begin listening to the status stream.
@@ -134,8 +143,8 @@ class LoupeController {
     return didRecieveAck.future;
   }
 
-  /// hide does not immediately remove the loupe, since it's possible that
-  Future<void> hide() async {
+  /// hide does not immediately remove the loupe.
+  Future<void> hide({bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;
     }
@@ -144,7 +153,10 @@ class LoupeController {
       AnimationStatus.reverse,
       AnimationStatus.dismissed,
     );
-    _forceHide();
+
+    if (removeFromOverlay) {
+      _forceHide();
+    }
   }
 
   /// Immediately hide the loupe, ignoring any exit animation.
@@ -270,13 +282,13 @@ class LoupeDecoration extends ShapeDecoration {
 /// * [CupertinoLoupe], the iOS-style consumer of [Loupe].
 class Loupe extends StatefulWidget {
   /// Constructs a [Loupe].
-  /// 
+  ///
   /// {@template flutter.widgets.loupe.loupe.invisibility_warning}
   /// By default, this loupe uses the default [LoupeDecoration],
   /// the focal point is directly under the loupe, and there is no magnification:
-  /// This means that a default loupe will be entirely invisible to the user, 
+  /// This means that a default loupe will be entirely invisible to the user,
   /// since it is painting exactly what is under it, exactly where it was painted
-  /// orignally. 
+  /// orignally.
   /// {@endtemplate}
   const Loupe(
       {super.key,
@@ -291,23 +303,23 @@ class Loupe extends StatefulWidget {
             'Magnification scale of 0 results in undefined behavior.');
 
   /// The animation controller that controls this loupes IO animations.
-  /// 
+  ///
   /// If no [transitionAnimationController] is passed, no animations will be played
   /// and [LoupeController.show] and [LoupeController.hide] will be effectively synchronous.
-  /// 
+  ///
   /// This animation controller will be driven forward and backwards depending
-  /// on [LoupeController.show] and [LoupeController.hide]. If manually stopped 
-  /// during a transition, the [Loupe] will wait for the transition to complete 
+  /// on [LoupeController.show] and [LoupeController.hide]. If manually stopped
+  /// during a transition, the [Loupe] will wait for the transition to complete
   /// to signal to the controller that it can be safely removed.
   final AnimationController? transitionAnimationController;
 
   /// This loupe's decoration.
-  /// 
+  ///
   /// {@macro flutter.widgets.loupe.loupe.invisibility_warning}
   final LoupeDecoration decoration;
 
-  /// The [LoupeController] for this loupe. 
-  /// 
+  /// The [LoupeController] for this loupe.
+  ///
   /// This [Loupe] will show / hide itself based on the controller's show / hide calls.
   /// This [Loupe]'s status is always in sync with [controller.status].
   final LoupeController controller;

@@ -77,30 +77,43 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 @immutable
 class LoupeSelectionOverlayInfoBearer {
   const LoupeSelectionOverlayInfoBearer({
-    required this.globalGesturePosition
+    required this.globalGesturePosition,
+    required this.localGesturePosition,
+    required this.handlePosition,
   });
 
-  const LoupeSelectionOverlayInfoBearer.empty() : globalGesturePosition = Offset.zero;
+  const LoupeSelectionOverlayInfoBearer.empty() : 
+    globalGesturePosition = Offset.zero, 
+    handlePosition = Offset.zero,
+    localGesturePosition = Offset.zero;
 
   LoupeSelectionOverlayInfoBearer copyWith({
-    Offset? globalGesturePosition,
+    Offset? globalGesturePosition, 
+    Offset? handlePosition,
+    Offset? localGesturePosition,
   }) => LoupeSelectionOverlayInfoBearer(
     globalGesturePosition: globalGesturePosition ?? this.globalGesturePosition,
+    handlePosition: handlePosition ?? this.handlePosition,
+    localGesturePosition: localGesturePosition ?? this.localGesturePosition
   );
 
 
   final Offset globalGesturePosition;
-  //final double handleHeight;
+  final Offset handlePosition;
+  final Offset localGesturePosition;
 
   @override
   bool operator ==(Object other) =>
     other is LoupeSelectionOverlayInfoBearer &&
-    other.globalGesturePosition == globalGesturePosition;
+    other.globalGesturePosition == globalGesturePosition &&
+    other.localGesturePosition == localGesturePosition &&
+    other.handlePosition == handlePosition;
 
   @override
   int get hashCode => Object.hash(
     globalGesturePosition,
-    null
+    localGesturePosition,
+    handlePosition
   );
 }
 
@@ -510,9 +523,14 @@ class TextSelectionOverlay {
   late Offset _dragEndPosition;
 
 
-  // Shows the loupe, and hides the toolbar if it was showing when _showLoupe
-  // was called. This is safe to call on platforms not mobile, since 
-  // a loupeBuilder will not be provided on platforms not mobile. 
+  /// Shows the loupe, and hides the toolbar if it was showing when _showLoupe
+  /// was called. This is safe to call on platforms not mobile, since 
+  /// a loupeBuilder will not be provided on platforms not mobile. 
+  ///
+  /// This is NOT the souce of truth for if the loupe is up or not,
+  /// since, for example, the [CupertinoLoupe] is able to hide itself
+  /// if the user drags too far away. If this info is needed, check 
+  /// [LoupeController.manuallyHidden].
   void _showLoupe(LoupeSelectionOverlayInfoBearer initalInfoBearer) {
   if (_loupeController == null) {
     return;
@@ -551,7 +569,11 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
-    _showLoupe(LoupeSelectionOverlayInfoBearer(globalGesturePosition: details.globalPosition));
+    _showLoupe(LoupeSelectionOverlayInfoBearer(
+      globalGesturePosition: details.globalPosition,
+      localGesturePosition: details.localPosition,
+      handlePosition: _selectionOverlay.selectionEndPoints.last.point,
+      ));
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {    
@@ -562,6 +584,8 @@ class TextSelectionOverlay {
 
     _loupeSelectionOverlayInfoBearer.value = _loupeSelectionOverlayInfoBearer.value.copyWith(
         globalGesturePosition: details.globalPosition,      
+        localGesturePosition: details.localPosition,
+        handlePosition: _selectionOverlay.selectionEndPoints.last.point,
     );
 
     if (_selection.isCollapsed) {
@@ -606,7 +630,12 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
-    _showLoupe(LoupeSelectionOverlayInfoBearer(globalGesturePosition: details.globalPosition));
+
+    _showLoupe(LoupeSelectionOverlayInfoBearer(
+      globalGesturePosition: details.globalPosition,
+      localGesturePosition: details.localPosition,
+      handlePosition: _selectionOverlay.selectionEndPoints.first.point
+    ));
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -616,7 +645,8 @@ class TextSelectionOverlay {
 
     _loupeSelectionOverlayInfoBearer.value = _loupeSelectionOverlayInfoBearer.value.copyWith(
       globalGesturePosition: details.globalPosition,
-      //handleRect: renderObject.size (position) 
+      localGesturePosition: details.localPosition,
+      handlePosition: _selectionOverlay.selectionEndPoints.first.point,
     );
 
     if (_selection.isCollapsed) {
