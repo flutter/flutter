@@ -184,6 +184,7 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
   }
 
   void _moveChild(RenderBox child, S slot, S oldSlot) {
+    assert(slot != oldSlot);
     final RenderBox? oldChild = _slotToChild[oldSlot];
     if (oldChild == child) {
       _setChild(null, oldSlot);
@@ -243,39 +244,36 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     final Map<Key, S> oldKeyedSlots = _keyToSlot;
     _keyToSlot = <Key, S>{};
 
-    // New slots for children that are moved to a different slot by key
-    // reparenting. It shouldn't be updated in place because two children could
-    // swap slots.
+    // New slots for keyed children. It shouldn't be updated in place because
+    // two children could swap slots.
     final Map<S, Element> slotToKeyedChild = <S, Element>{};
+    final List<MapEntry<S, Widget?>> unkeyedWidgets = <MapEntry<S, Widget?>>[];
 
-    // Process children that need to be moved to new slots because of key
-    // reparenting first.
     for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
       final Widget? widget = slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot);
       final Key? newWidgetKey = widget?.key;
-      if (widget != null && newWidgetKey != null) {
-        final S? oldSlot = oldKeyedSlots[newWidgetKey];
+      if (newWidgetKey != null) {
+        assert(!_keyToSlot.containsKey(newWidgetKey));
         _keyToSlot[newWidgetKey] = slot;
-        if (oldSlot != null && oldSlot != slot) {
-          slotToKeyedChild[slot] = _updateSlotForKeyedChild(widget, oldSlot, slot);
-        }
+        final S oldSlot = oldKeyedSlots[newWidgetKey] ?? slot;
+        final Element? oldChild = _slotToChild.remove(oldSlot);
+        final Element newChild = updateChild(oldChild, widget, slot)!;
+        assert(!slotToKeyedChild.containsKey(slot));
+        assert(!_slotToChild.containsKey(slot));
+        slotToKeyedChild[slot] = newChild;
+      } else {
+        // A unkeyed new widget shouldn't be used to update the child element
+        // yet, as a keyed widget that appears later in the iteration could
+        // claim that element.
+        unkeyedWidgets.add(MapEntry<S, Widget?>(slot, widget));
       }
     }
 
     _slotToChild.addAll(slotToKeyedChild);
-    for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
-      if (!slotToKeyedChild.containsKey(slot)) {
-        final Widget? widget = slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot);
-        _updateChild(widget, slot);
-      }
+    for (final MapEntry<S, Widget?> unkeyedWidget in unkeyedWidgets) {
+      assert(!slotToKeyedChild.containsKey(unkeyedWidget.key));
+      _updateChild(unkeyedWidget.value, unkeyedWidget.key);
     }
-  }
-
-  Element _updateSlotForKeyedChild(Widget widget, S oldSlot, S newSlot) {
-    final Element? oldChild = _slotToChild.remove(oldSlot);
-    final Element? newChild = updateChild(oldChild, widget, newSlot);
-    assert(newChild != null);
-    return newChild!;
   }
 
   void _updateChild(Widget? widget, S slot) {
