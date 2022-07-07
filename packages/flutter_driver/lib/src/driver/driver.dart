@@ -515,8 +515,8 @@ abstract class FlutterDriver {
 
   /// Simulate the user posting a text input action.
   ///
-  /// The available action types can be found in [DriverTextInputAction]. The [sendTextInputAction]
-  /// does not check whether the [DriverTextInputAction] performed is acceptable
+  /// The available action types can be found in [TextInputAction]. The [sendTextInputAction]
+  /// does not check whether the [TextInputAction] performed is acceptable
   /// based on the client arguments of the text input.
   ///
   /// This can be called even if the [TestTextInput] has not been [TestTextInput.register]ed.
@@ -529,10 +529,10 @@ abstract class FlutterDriver {
   ///   await driver.tap(textField);  // acquire focus
   ///   await driver.enterText('Hello!');  // enter text
   ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
-  ///   await driver.sendTextInputAction(DriverTextInputAction.done);  // submit text
+  ///   await driver.sendTextInputAction(TextInputAction.done);  // submit text
   /// });
   /// ```
-  Future<void> sendTextInputAction(DriverTextInputAction action,
+  Future<void> sendTextInputAction(TextInputAction action,
       {Duration? timeout}) async {
     assert(action != null);
     await sendCommand(SendTextInputAction(action, timeout: timeout));

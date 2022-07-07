@@ -5,8 +5,8 @@
 import 'enum_util.dart';
 import 'message.dart';
 
-EnumIndex<DriverTextInputAction> _textInputActionIndex =
-    EnumIndex<DriverTextInputAction>(DriverTextInputAction.values);
+EnumIndex<TextInputAction> _textInputActionIndex =
+    EnumIndex<TextInputAction>(TextInputAction.values);
 
 /// A Flutter Driver command that send a text input action.
 class SendTextInputAction extends Command {
@@ -19,8 +19,8 @@ class SendTextInputAction extends Command {
             _textInputActionIndex.lookupBySimpleName(json['action']!),
         super.deserialize();
 
-  /// The [DriverTextInputAction]
-  final DriverTextInputAction textInputAction;
+  /// The [TextInputAction]
+  final TextInputAction textInputAction;
 
   @override
   String get kind => 'send_text_input_action';
@@ -37,7 +37,7 @@ class SendTextInputAction extends Command {
 /// This class is identical to [TextInputAction](https://api.flutter.dev/flutter/services/TextInputAction.html).
 // This class is cloned from `TextInputAction` and must be kept in sync. The cloning is needed
 // because importing is not allowed directly.
-enum DriverTextInputAction {
+enum TextInputAction {
   /// Logical meaning: There is no relevant input action for the current input
   /// source, e.g., [TextField].
   ///
@@ -45,7 +45,7 @@ enum DriverTextInputAction {
   /// is decided by the OS. The keyboard will likely show a return key.
   ///
   /// iOS: iOS does not have a keyboard return type of "none." It is
-  /// inappropriate to choose this [DriverTextInputAction] when running on iOS.
+  /// inappropriate to choose this [TextInputAction] when running on iOS.
   none,
 
   /// Logical meaning: Let the OS decide which action is most appropriate.
@@ -120,7 +120,7 @@ enum DriverTextInputAction {
   /// button that represents moving backward, e.g., a left-facing arrow button.
   ///
   /// iOS: iOS does not have a keyboard return type of "previous." It is
-  /// inappropriate to choose this [DriverTextInputAction] when running on iOS.
+  /// inappropriate to choose this [TextInputAction] when running on iOS.
   previous,
 
   /// Logical meaning: In iOS apps, it is common for a "Back" button and
@@ -129,11 +129,11 @@ enum DriverTextInputAction {
   /// the purpose of the "Continue" return key on iOS is to make the "Continue"
   /// button available when the user is entering text.
   ///
-  /// Historical context aside, [DriverTextInputAction.continueAction] can be used any
+  /// Historical context aside, [TextInputAction.continueAction] can be used any
   /// time that the term "Continue" seems most appropriate for the given action.
   ///
   /// Android: Android does not have an IME input type of "continue." It is
-  /// inappropriate to choose this [DriverTextInputAction] when running on Android.
+  /// inappropriate to choose this [TextInputAction] when running on Android.
   ///
   /// iOS: Corresponds to iOS's "UIReturnKeyContinue". The title displayed in the
   /// action button is "Continue". This action is only available on iOS 9.0+.
@@ -146,7 +146,7 @@ enum DriverTextInputAction {
   /// network.
   ///
   /// Android: Android does not have an IME input type of "join." It is
-  /// inappropriate to choose this [DriverTextInputAction] when running on Android.
+  /// inappropriate to choose this [TextInputAction] when running on Android.
   ///
   /// iOS: Corresponds to iOS's "UIReturnKeyJoin". The title displayed in the
   /// action button is "Join".
@@ -155,7 +155,7 @@ enum DriverTextInputAction {
   /// Logical meaning: The user wants routing options, e.g., driving directions.
   ///
   /// Android: Android does not have an IME input type of "route." It is
-  /// inappropriate to choose this [DriverTextInputAction] when running on Android.
+  /// inappropriate to choose this [TextInputAction] when running on Android.
   ///
   /// iOS: Corresponds to iOS's "UIReturnKeyRoute". The title displayed in the
   /// action button is "Route".
@@ -164,7 +164,7 @@ enum DriverTextInputAction {
   /// Logical meaning: Initiate a call to emergency services.
   ///
   /// Android: Android does not have an IME input type of "emergencyCall." It is
-  /// inappropriate to choose this [DriverTextInputAction] when running on Android.
+  /// inappropriate to choose this [TextInputAction] when running on Android.
   ///
   /// iOS: Corresponds to iOS's "UIReturnKeyEmergencyCall". The title displayed
   /// in the action button is "Emergency Call".
@@ -179,11 +179,11 @@ enum DriverTextInputAction {
   /// iOS: Corresponds to iOS's "UIReturnKeyDefault". The title displayed in the
   /// action button is "return".
   ///
-  /// The term [DriverTextInputAction.newline] exists in Flutter but not in Android
+  /// The term [TextInputAction.newline] exists in Flutter but not in Android
   /// or iOS. The reason for introducing this term is so that developers can
   /// achieve the common result of inserting new lines without needing to
   /// understand the various IME actions on Android and return keys on iOS.
-  /// Thus, [DriverTextInputAction.newline] is a convenience term that alleviates the
+  /// Thus, [TextInputAction.newline] is a convenience term that alleviates the
   /// need to understand the underlying platforms to achieve this common behavior.
   newline,
 }

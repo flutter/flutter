@@ -254,6 +254,9 @@ class TextInputType {
 /// the inappropriate value, Android will use "unspecified" on the platform
 /// side and iOS will use "default" on the platform side.
 ///
+/// This class has been cloned to `flutter_driver/lib/src/common/action.dart` as `DriverTextInputAction`,
+/// and must be kept in sync.
+/// 
 /// See also:
 ///
 ///  * [TextInput], which configures the platform's keyboard setup.

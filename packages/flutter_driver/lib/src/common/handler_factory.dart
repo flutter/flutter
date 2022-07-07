@@ -26,7 +26,7 @@ import 'render_tree.dart';
 import 'request_data.dart';
 import 'semantics.dart';
 import 'text.dart';
-import 'text_input_action.dart';
+import 'text_input_action.dart' show SendTextInputAction;
 import 'wait.dart';
 
 /// A factory which creates [Finder]s from [SerializableFinder]s.

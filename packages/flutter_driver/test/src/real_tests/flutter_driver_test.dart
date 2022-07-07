@@ -354,10 +354,10 @@ void main() {
 
     group('sendTextInputAction', () {
       test('sends the sendTextInputAction command with action done', () async {
-        fakeClient.responses['receive_action'] = makeFakeResponse(<String, dynamic>{});
-        await driver.sendTextInputAction(DriverTextInputAction.done, timeout: _kTestTimeout);
+        fakeClient.responses['send_text_input_action'] = makeFakeResponse(<String, dynamic>{});
+        await driver.sendTextInputAction(TextInputAction.done, timeout: _kTestTimeout);
         expect(fakeClient.commandLog, <String>[
-          'ext.flutter.driver {command: receive_action, timeout: $_kSerializedTestTimeout, action: done}',
+          'ext.flutter.driver {command: send_text_input_action, timeout: $_kSerializedTestTimeout, action: done}',
         ]);
       });
     });
