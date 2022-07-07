@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -24,7 +26,7 @@ const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
 
 void main() {
 
-  Future<void> _dragSlider(WidgetTester tester, Key sliderKey) {
+  Future<void> dragSlider(WidgetTester tester, Key sliderKey) {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
@@ -134,7 +136,7 @@ void main() {
       ),
     );
 
-    await _dragSlider(tester, sliderKey);
+    await dragSlider(tester, sliderKey);
 
     expect(numberOfTimesOnChangeStartIsCalled, equals(1));
 
@@ -175,7 +177,7 @@ void main() {
       ),
     );
 
-    await _dragSlider(tester, sliderKey);
+    await dragSlider(tester, sliderKey);
 
     expect(numberOfTimesOnChangeEndIsCalled, equals(1));
 
@@ -611,6 +613,48 @@ void main() {
           ..rrect()
           ..rrect()
           ..rrect(color: CupertinoColors.activeOrange.color),
+    );
+  });
+
+  testWidgets('Hovering over Cupertino slider thumb updates cursor to clickable on Web', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: CupertinoSlider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() { value = newValue; });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
+    await gesture.moveTo(topLeft + const Offset(15, 0));
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 }

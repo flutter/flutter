@@ -36,7 +36,7 @@ void main() {
     expect(result.stderr, contains(exitMessageContains));
   }
 
-  void _createDotPackages(String projectPath, [bool nullSafe = false]) {
+  void createDotPackages(String projectPath, [bool nullSafe = false]) {
     final StringBuffer flutterRootUri = StringBuffer('file://');
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(getFlutterRoot());
     if (platform.isWindows) {
@@ -84,7 +84,7 @@ void main() {
     fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'))
         ..createSync(recursive: true)
         ..writeAsStringSync(pubspecYamlSrc);
-    _createDotPackages(projectPath);
+    createDotPackages(projectPath);
     libMain = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'main.dart'))
         ..createSync(recursive: true)
         ..writeAsStringSync(mainDartSrc);
@@ -119,7 +119,7 @@ void main() {
           'Analyzing error.dart',
           "error $analyzerSeparator Target of URI doesn't exist",
           "error $analyzerSeparator Expected to find ';'",
-          'error $analyzerSeparator Unterminated string literal'
+          'error $analyzerSeparator Unterminated string literal',
         ],
         exitMessageContains: '3 issues found',
         exitCode: 1
@@ -133,7 +133,7 @@ void main() {
           'Analyzing 2 items',
           "error $analyzerSeparator Target of URI doesn't exist",
           "error $analyzerSeparator Expected to find ';'",
-          'error $analyzerSeparator Unterminated string literal'
+          'error $analyzerSeparator Unterminated string literal',
         ],
         exitMessageContains: '3 issues found',
         exitCode: 1
@@ -160,7 +160,7 @@ void main() {
   testWithoutContext('file not found', () async {
     await runCommand(
         arguments: <String>['analyze', '--no-pub', 'not_found.abc'],
-        exitMessageContains: "not_found.abc' does not exist",
+        exitMessageContains: "not_found.abc', however it does not exist on disk",
         exitCode: 1
     );
   });

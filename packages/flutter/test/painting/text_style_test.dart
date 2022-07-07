@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
+import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, FontVariation, Shadow;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -38,6 +38,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('foreground', textStyle.foreground),
     _propertyToString('shadows', textStyle.shadows),
     _propertyToString('fontFeatures', textStyle.fontFeatures),
+    _propertyToString('fontVariations', textStyle.fontVariations),
   ];
 
   static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
@@ -50,8 +51,9 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     final String description = item.toString();
     const String prefix = 'TextStyle(';
     const String suffix = ')';
-    if (!description.startsWith(prefix) || !description.endsWith(suffix))
+    if (!description.startsWith(prefix) || !description.endsWith(suffix)) {
       return false;
+    }
 
     final String propertyDescription = description.substring(
       prefix.length,
@@ -354,8 +356,18 @@ void main() {
   });
 
   test('TextStyle.hashCode', () {
-    const TextStyle a = TextStyle(fontFamilyFallback: <String>['Roboto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
-    const TextStyle b = TextStyle(fontFamilyFallback: <String>['Noto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
+    const TextStyle a = TextStyle(
+        fontFamilyFallback: <String>['Roboto'],
+        shadows: <ui.Shadow>[ui.Shadow()],
+        fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
+        fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 123.0)],
+    );
+    const TextStyle b = TextStyle(
+        fontFamilyFallback: <String>['Noto'],
+        shadows: <ui.Shadow>[ui.Shadow()],
+        fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
+        fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 123.0)],
+    );
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
 
@@ -476,6 +488,7 @@ void main() {
       shadows: <ui.Shadow>[],
       fontStyle: FontStyle.normal,
       fontFeatures: <ui.FontFeature>[],
+      fontVariations: <ui.FontVariation>[],
       textBaseline: TextBaseline.alphabetic,
       leadingDistribution: TextLeadingDistribution.even,
     );
@@ -487,6 +500,8 @@ void main() {
     expect(style.apply(locale: const Locale.fromSubtags(languageCode: 'es')).locale, const Locale.fromSubtags(languageCode: 'es'));
     expect(style.apply().fontFeatures, const <ui.FontFeature>[]);
     expect(style.apply(fontFeatures: const <ui.FontFeature>[ui.FontFeature.enable('test')]).fontFeatures, const <ui.FontFeature>[ui.FontFeature.enable('test')]);
+    expect(style.apply().fontVariations, const <ui.FontVariation>[]);
+    expect(style.apply(fontVariations: const <ui.FontVariation>[ui.FontVariation('test', 100.0)]).fontVariations, const <ui.FontVariation>[ui.FontVariation('test', 100.0)]);
     expect(style.apply().textBaseline, TextBaseline.alphabetic);
     expect(style.apply(textBaseline: TextBaseline.ideographic).textBaseline, TextBaseline.ideographic);
     expect(style.apply().leadingDistribution, TextLeadingDistribution.even);

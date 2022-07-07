@@ -46,6 +46,13 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of [NavigationRail] widget used within a Scaffold with 3
+/// [NavigationRailDestination]s, as described in: https://m3.material.io/components/navigation-rail/overview
+///
+/// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], which can display the navigation rail within a [Row] of the
@@ -54,11 +61,12 @@ import 'theme.dart';
 ///    destinations in the navigation rail.
 ///  * [BottomNavigationBar], which is a similar navigation widget that's laid
 ///     out horizontally.
-///  * https://material.io/components/navigation-rail/
+///  * <https://material.io/components/navigation-rail/>
+///  * <https://m3.material.io/components/navigation-rail>
 class NavigationRail extends StatefulWidget {
-  /// Creates a material design navigation rail.
+  /// Creates a Material Design navigation rail.
   ///
-  /// The value of [destinations] must be a list of one or more
+  /// The value of [destinations] must be a list of two or more
   /// [NavigationRailDestination] values.
   ///
   /// If [elevation] is specified, it must be non-negative.
@@ -79,7 +87,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// Typically used within a [Row] that defines the [Scaffold.body] property.
   const NavigationRail({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.extended = false,
     this.leading,
@@ -105,8 +113,7 @@ class NavigationRail extends StatefulWidget {
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
         assert(extended != null),
-        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
-        super(key: key);
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -430,8 +437,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           useIndicator: useIndicator,
                           indicatorColor: useIndicator ? indicatorColor : null,
                           onTap: () {
-                            if (widget.onDestinationSelected != null)
+                            if (widget.onDestinationSelected != null) {
                               widget.onDestinationSelected!(i);
+                            }
                           },
                           indexLabel: localizations.tabLabel(
                             tabIndex: i + 1,
@@ -753,13 +761,12 @@ class _RailDestination extends StatelessWidget {
 /// indicator will be a stadium shape.
 class _AddIndicator extends StatelessWidget {
   const _AddIndicator({
-    Key? key,
     required this.addIndicator,
     required this.isCircular,
     required this.indicatorColor,
     required this.indicatorAnimation,
     required this.child,
-  }) : super(key: key);
+  });
 
   final bool addIndicator;
   final bool isCircular;
@@ -882,11 +889,9 @@ class NavigationRailDestination {
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
   const _ExtendedNavigationRailAnimation({
-    Key? key,
     required this.animation,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(child != null);
 
   final Animation<double> animation;
 
@@ -952,7 +957,7 @@ class _DefaultsM2 extends NavigationRailThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_101
 class _TokenDefaultsM3 extends NavigationRailThemeData {
   _TokenDefaultsM3(this.context)
       : super(

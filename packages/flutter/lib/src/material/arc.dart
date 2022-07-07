@@ -7,7 +7,6 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 // How close the begin and end points must be to an axis to be considered
 // vertical or horizontal.
@@ -17,7 +16,7 @@ const double _kOnAxisDelta = 2.0;
 ///
 /// This class specializes the interpolation of [Tween<Offset>] so that instead
 /// of a straight line, the intermediate points follow the arc of a circle in a
-/// manner consistent with material design principles.
+/// manner consistent with Material Design principles.
 ///
 /// The arc's radius is related to the bounding box that contains the [begin]
 /// and [end] points. If the bounding box is taller than it is wide, then the
@@ -36,9 +35,9 @@ class MaterialPointArcTween extends Tween<Offset> {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialPointArcTween({
-    Offset? begin,
-    Offset? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 
@@ -92,10 +91,12 @@ class MaterialPointArcTween extends Tween<Offset> {
   /// The center of the circular arc, null if [begin] and [end] are horizontally or
   /// vertically aligned, or if either is null.
   Offset? get center {
-    if (begin == null || end == null)
+    if (begin == null || end == null) {
       return null;
-    if (_dirty)
+    }
+    if (_dirty) {
       _initialize();
+    }
     return _center;
   }
   Offset? _center;
@@ -103,10 +104,12 @@ class MaterialPointArcTween extends Tween<Offset> {
   /// The radius of the circular arc, null if [begin] and [end] are horizontally or
   /// vertically aligned, or if either is null.
   double? get radius {
-    if (begin == null || end == null)
+    if (begin == null || end == null) {
       return null;
-    if (_dirty)
+    }
+    if (_dirty) {
       _initialize();
+    }
     return _radius;
   }
   double? _radius;
@@ -117,10 +120,12 @@ class MaterialPointArcTween extends Tween<Offset> {
   /// This will be null if [begin] and [end] are horizontally or vertically
   /// aligned, or if either is null.
   double? get beginAngle {
-    if (begin == null || end == null)
+    if (begin == null || end == null) {
       return null;
-    if (_dirty)
+    }
+    if (_dirty) {
       _initialize();
+    }
     return _beginAngle;
   }
   double? _beginAngle;
@@ -131,10 +136,12 @@ class MaterialPointArcTween extends Tween<Offset> {
   /// This will be null if [begin] and [end] are horizontally or vertically
   /// aligned, or if either is null.
   double? get endAngle {
-    if (begin == null || end == null)
+    if (begin == null || end == null) {
       return null;
-    if (_dirty)
+    }
+    if (_dirty) {
       _initialize();
+    }
     return _beginAngle;
   }
   double? _endAngle;
@@ -157,14 +164,18 @@ class MaterialPointArcTween extends Tween<Offset> {
 
   @override
   Offset lerp(double t) {
-    if (_dirty)
+    if (_dirty) {
       _initialize();
-    if (t == 0.0)
+    }
+    if (t == 0.0) {
       return begin!;
-    if (t == 1.0)
+    }
+    if (t == 1.0) {
       return end!;
-    if (_beginAngle == null || _endAngle == null)
+    }
+    if (_beginAngle == null || _endAngle == null) {
       return Offset.lerp(begin, end, t)!;
+    }
     final double angle = lerpDouble(_beginAngle, _endAngle, t)!;
     final double x = math.cos(angle) * _radius!;
     final double y = math.sin(angle) * _radius!;
@@ -218,7 +229,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 ///
 /// This class specializes the interpolation of [Tween<Rect>] so that instead of
 /// growing or shrinking linearly, opposite corners of the rectangle follow arcs
-/// in a manner consistent with material design principles.
+/// in a manner consistent with Material Design principles.
 ///
 /// Specifically, the rectangle corners whose diagonals are closest to the overall
 /// direction of the animation follow arcs defined with [MaterialPointArcTween].
@@ -239,9 +250,9 @@ class MaterialRectArcTween extends RectTween {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialRectArcTween({
-    Rect? begin,
-    Rect? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 
@@ -279,10 +290,12 @@ class MaterialRectArcTween extends RectTween {
   /// The path of the corresponding [begin], [end] rectangle corners that lead
   /// the animation.
   MaterialPointArcTween? get beginArc {
-    if (begin == null)
+    if (begin == null) {
       return null;
-    if (_dirty)
+    }
+    if (_dirty) {
       _initialize();
+    }
     return _beginArc;
   }
   late MaterialPointArcTween _beginArc;
@@ -290,10 +303,12 @@ class MaterialRectArcTween extends RectTween {
   /// The path of the corresponding [begin], [end] rectangle corners that trail
   /// the animation.
   MaterialPointArcTween? get endArc {
-    if (end == null)
+    if (end == null) {
       return null;
-    if (_dirty)
+    }
+    if (_dirty) {
       _initialize();
+    }
     return _endArc;
   }
   late MaterialPointArcTween _endArc;
@@ -316,12 +331,15 @@ class MaterialRectArcTween extends RectTween {
 
   @override
   Rect lerp(double t) {
-    if (_dirty)
+    if (_dirty) {
       _initialize();
-    if (t == 0.0)
+    }
+    if (t == 0.0) {
       return begin!;
-    if (t == 1.0)
+    }
+    if (t == 1.0) {
       return end!;
+    }
     return Rect.fromPoints(_beginArc.lerp(t), _endArc.lerp(t));
   }
 
@@ -354,9 +372,9 @@ class MaterialRectCenterArcTween extends RectTween {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialRectCenterArcTween({
-    Rect? begin,
-    Rect? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 
@@ -373,10 +391,12 @@ class MaterialRectCenterArcTween extends RectTween {
   /// If [begin] and [end] are non-null, returns a tween that interpolates along
   /// a circular arc between [begin]'s [Rect.center] and [end]'s [Rect.center].
   MaterialPointArcTween? get centerArc {
-    if (begin == null || end == null)
+    if (begin == null || end == null) {
       return null;
-    if (_dirty)
+    }
+    if (_dirty) {
       _initialize();
+    }
     return _centerArc;
   }
   late MaterialPointArcTween _centerArc;
@@ -399,12 +419,15 @@ class MaterialRectCenterArcTween extends RectTween {
 
   @override
   Rect lerp(double t) {
-    if (_dirty)
+    if (_dirty) {
       _initialize();
-    if (t == 0.0)
+    }
+    if (t == 0.0) {
       return begin!;
-    if (t == 1.0)
+    }
+    if (t == 1.0) {
       return end!;
+    }
     final Offset center = _centerArc.lerp(t);
     final double width = lerpDouble(begin!.width, end!.width, t)!;
     final double height = lerpDouble(begin!.height, end!.height, t)!;

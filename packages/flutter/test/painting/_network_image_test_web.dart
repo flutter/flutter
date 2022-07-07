@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +32,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{
       'flutter': 'flutter',
-      'second': 'second'
+      'second': 'second',
     };
 
     final Image image = Image.network(
@@ -60,7 +59,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{
       'flutter': 'flutter',
-      'second': 'second'
+      'second': 'second',
     };
 
     final Image image = Image.network(
@@ -87,7 +86,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{
       'flutter': 'flutter',
-      'second': 'second'
+      'second': 'second',
     };
 
     final Image image = Image.network(

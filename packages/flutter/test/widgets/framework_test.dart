@@ -18,7 +18,7 @@ class TestState extends State<StatefulWidget> {
 
 @optionalTypeArgs
 class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
-  const _MyGlobalObjectKey(Object value) : super(value);
+  const _MyGlobalObjectKey(super.value);
 }
 
 void main() {
@@ -1558,6 +1558,50 @@ void main() {
     expect(builder.properties.any((DiagnosticsNode property) => property.name == 'renderObject' && property.value == null), isTrue);
   });
 
+  testWidgets('debugFillProperties sorts dependencies in alphabetical order', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final TestRenderObjectElement element = TestRenderObjectElement();
+
+    final _TestInheritedElement focusTraversalOrder =
+    _TestInheritedElement(const FocusTraversalOrder(
+      order: LexicalFocusOrder(''),
+      child: Placeholder(),
+    ));
+    final _TestInheritedElement directionality =
+        _TestInheritedElement(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Placeholder(),
+    ));
+    final _TestInheritedElement buttonBarTheme =
+        _TestInheritedElement(const ButtonBarTheme(
+        data: ButtonBarThemeData(
+          alignment: MainAxisAlignment.center,
+        ),
+      child: Placeholder(),
+    ));
+
+    // Dependencies are added out of alphabetical order.
+    element
+      ..dependOnInheritedElement(focusTraversalOrder)
+      ..dependOnInheritedElement(directionality)
+      ..dependOnInheritedElement(buttonBarTheme);
+
+    // Dependencies will be sorted by [debugFillProperties].
+    element.debugFillProperties(builder);
+
+    expect(
+      builder.properties.any((DiagnosticsNode property) => property.name == 'dependencies' && property.value != null),
+      isTrue,
+    );
+    final DiagnosticsProperty<List<DiagnosticsNode>> dependenciesProperty =
+        builder.properties.firstWhere((DiagnosticsNode property) => property.name == 'dependencies') as DiagnosticsProperty<List<DiagnosticsNode>>;
+    expect(dependenciesProperty, isNotNull);
+
+    final List<DiagnosticsNode> dependencies = dependenciesProperty.value!;
+    expect(dependencies.length, equals(3));
+    expect(dependencies.toString(), '[ButtonBarTheme, Directionality, FocusTraversalOrder]');
+  });
+
   testWidgets('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
     final int initialCount = tester.binding.buildOwner!.globalKeyCount;
     final GlobalKey key1 = GlobalKey();
@@ -1694,11 +1738,34 @@ The findRenderObject() method was called for the following element:
 
     expect(inheritedElement.hashCode, identityHashCode(inheritedElement));
   });
+
+  testWidgets('doesDependOnInheritedElement', (WidgetTester tester) async {
+    final _TestInheritedElement ancestor =
+        _TestInheritedElement(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Placeholder(),
+    ));
+    final _TestInheritedElement child =
+        _TestInheritedElement(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Placeholder(),
+    ));
+    expect(child.doesDependOnInheritedElement(ancestor), isFalse);
+    child.dependOnInheritedElement(ancestor);
+    expect(child.doesDependOnInheritedElement(ancestor), isTrue);
+  });
+}
+
+class _TestInheritedElement extends InheritedElement {
+  _TestInheritedElement(super.widget);
+  @override
+  bool doesDependOnInheritedElement(InheritedElement element) {
+    return super.doesDependOnInheritedElement(element);
+  }
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
-  const _WidgetWithNoVisitChildren(this.child, { Key? key }) :
-    super(key: key);
+  const _WidgetWithNoVisitChildren(this.child);
 
   final Widget child;
 
@@ -1710,7 +1777,7 @@ class _WidgetWithNoVisitChildren extends StatelessWidget {
 }
 
 class _WidgetWithNoVisitChildrenElement extends StatelessElement {
-  _WidgetWithNoVisitChildrenElement(_WidgetWithNoVisitChildren widget): super(widget);
+  _WidgetWithNoVisitChildrenElement(_WidgetWithNoVisitChildren super.widget);
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -1722,7 +1789,7 @@ class _WidgetWithNoVisitChildrenElement extends StatelessElement {
 }
 
 class _StatefulLeaf extends StatefulWidget {
-  const _StatefulLeaf({ Key? key }) : super(key: key);
+  const _StatefulLeaf({ super.key });
 
   @override
   State<_StatefulLeaf> createState() => _StatefulLeafState();
@@ -1741,13 +1808,12 @@ class _StatefulLeafState extends State<_StatefulLeaf> {
 
 class Decorate extends StatefulWidget {
   const Decorate({
-    Key? key,
+    super.key,
     required this.didChangeDependencies,
     required this.build,
   }) :
     assert(didChangeDependencies != null),
-    assert(build != null),
-    super(key: key);
+    assert(build != null);
 
   final void Function(bool isInBuild) didChangeDependencies;
   final void Function(bool isInBuild) build;
@@ -1760,7 +1826,7 @@ class Decorate extends StatefulWidget {
 }
 
 class DecorateElement extends StatefulElement {
-  DecorateElement(Decorate widget): super(widget);
+  DecorateElement(Decorate super.widget);
 
   bool isDecorated = false;
 
@@ -1790,8 +1856,8 @@ class _DecorateState extends State<Decorate> {
 }
 
 class DirtyElementWithCustomBuildOwner extends Element {
-  DirtyElementWithCustomBuildOwner(BuildOwner buildOwner, Widget widget)
-    : _owner = buildOwner, super(widget);
+  DirtyElementWithCustomBuildOwner(BuildOwner buildOwner, super.widget)
+    : _owner = buildOwner;
 
   final BuildOwner _owner;
 
@@ -1809,7 +1875,7 @@ class DirtyElementWithCustomBuildOwner extends Element {
 }
 
 class Inherited extends InheritedWidget {
-  const Inherited(this.value, {Key? key, required Widget child}) : super(key: key, child: child);
+  const Inherited(this.value, {super.key, required super.child});
 
   final int? value;
 
@@ -1818,7 +1884,7 @@ class Inherited extends InheritedWidget {
 }
 
 class DependentStatefulWidget extends StatefulWidget {
-  const DependentStatefulWidget({Key? key}) : super(key: key);
+  const DependentStatefulWidget({super.key});
 
   @override
   State<StatefulWidget> createState() => DependentState();
@@ -1848,7 +1914,7 @@ class DependentState extends State<DependentStatefulWidget> {
 }
 
 class SwapKeyWidget extends StatefulWidget {
-  const SwapKeyWidget({Key? key, this.childKey}): super(key: key);
+  const SwapKeyWidget({super.key, this.childKey});
 
   final Key? childKey;
   @override
@@ -1877,7 +1943,7 @@ class SwapKeyWidgetState extends State<SwapKeyWidget> {
 }
 
 class _Stateful extends StatefulWidget {
-  const _Stateful({Key? key, required this.child, this.onElementRebuild}) : super(key: key);
+  const _Stateful({required this.child, this.onElementRebuild});
   final Text child;
   final ElementRebuildCallback? onElementRebuild;
   @override
@@ -1897,7 +1963,7 @@ class _StatefulState extends State<_Stateful> {
 }
 
 class StatefulElementSpy extends StatefulElement {
-  StatefulElementSpy(StatefulWidget widget) : super(widget);
+  StatefulElementSpy(super.widget);
 
   _Stateful get _statefulWidget => widget as _Stateful;
 
@@ -1910,10 +1976,9 @@ class StatefulElementSpy extends StatefulElement {
 
 class StatelessWidgetSpy extends StatelessWidget {
   const StatelessWidgetSpy({
-    Key? key,
+    super.key,
     required this.onBuild,
-  })  : assert(onBuild != null),
-        super(key: key);
+  })  : assert(onBuild != null);
 
   final void Function(BuildContext) onBuild;
 
@@ -1926,7 +1991,7 @@ class StatelessWidgetSpy extends StatelessWidget {
 
 class StatefulWidgetSpy extends StatefulWidget {
   const StatefulWidgetSpy({
-    Key? key,
+    super.key,
     this.onBuild,
     this.onInitState,
     this.onDidChangeDependencies,
@@ -1934,7 +1999,7 @@ class StatefulWidgetSpy extends StatefulWidget {
     this.onDeactivate,
     this.onActivate,
     this.onDidUpdateWidget,
-  })  : super(key: key);
+  });
 
   final void Function(BuildContext)? onBuild;
   final void Function(BuildContext)? onInitState;
@@ -1994,11 +2059,11 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
 
 class RenderObjectWidgetSpy extends LeafRenderObjectWidget {
   const RenderObjectWidgetSpy({
-    Key? key,
+    super.key,
     this.onCreateRenderObject,
     this.onUpdateRenderObject,
     this.onDidUnmountRenderObject,
-  })  : super(key: key);
+  });
 
   final void Function(BuildContext)? onCreateRenderObject;
   final void Function(BuildContext)? onUpdateRenderObject;
@@ -2039,14 +2104,14 @@ class TestRenderObjectElement extends RenderObjectElement {
 }
 
 class _EmptyWidget extends Widget {
-  const _EmptyWidget({Key? key}) : super(key: key);
+  const _EmptyWidget();
 
   @override
   Element createElement() => _EmptyElement(this);
 }
 
 class _EmptyElement extends Element {
-  _EmptyElement(_EmptyWidget widget) : super(widget);
+  _EmptyElement(_EmptyWidget super.widget);
 
   @override
   bool get debugDoingBuild => false;
@@ -2057,10 +2122,9 @@ class _EmptyElement extends Element {
 
 class _TestLeaderLayerWidget extends SingleChildRenderObjectWidget {
   const _TestLeaderLayerWidget({
-    Key? key,
     this.link,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
   final LayerLink? link;
 
   @override

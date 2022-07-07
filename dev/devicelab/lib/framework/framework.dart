@@ -136,14 +136,12 @@ class _TaskRunner {
       }
 
       if (runFlutterConfig) {
-        print('Enabling configs for macOS, Linux, Windows, and Web...');
+        print('Enabling configs for macOS and Linux...');
         final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
           'config',
           '-v',
           '--enable-macos-desktop',
-          '--enable-windows-desktop',
           '--enable-linux-desktop',
-          '--enable-web',
           if (localEngine != null) ...<String>['--local-engine', localEngine],
         ], canFail: true);
         if (configResult != 0) {

@@ -338,7 +338,7 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: globals.fs);
   }
 
@@ -473,7 +473,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
-        if (route != null) '--route=$route'
+        if (route != null) '--route=$route',
       ],
     ];
 

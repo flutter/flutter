@@ -554,8 +554,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text hintText = tester.widget(find.text(searchHintText));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
     expect(hintText.style?.color, delegate.searchFieldStyle?.color);
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+    expect(textField.style?.color, delegate.searchFieldStyle?.color);
+    expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
@@ -616,7 +621,7 @@ void main() {
                               SemanticsFlag.isFocusable,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Back',
+                            tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
                           TestSemantics(
@@ -878,17 +883,53 @@ void main() {
     expect(rootObserver.pushCount, 1);
     expect(localObserver.pushCount, 1);
   });
+
+  testWidgets('Query text field shows toolbar initially', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/95588
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // Open search.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.controller!.text.length, 0);
+
+    mockClipboard.handleMethodCall(const MethodCall(
+      'Clipboard.setData',
+      <String, dynamic>{
+        'text': 'pasteablestring',
+      },
+    ));
+
+    // Long press shows toolbar.
+    await tester.longPress(textFieldFinder);
+    await tester.pump();
+    expect(find.text('Paste'), findsOneWidget);
+
+    await tester.tap(find.text('Paste'));
+    await tester.pump();
+    expect(textField.controller!.text.length, 15);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
-    Key? key,
+    super.key,
     this.results,
     required this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
     this.themeData,
-  }) : super(key: key);
+  });
 
   final List<String?>? results;
   final SearchDelegate<String> delegate;
@@ -940,15 +981,12 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.result = 'Result',
     this.actions = const <Widget>[],
     this.defaultAppBarTheme = false,
-    InputDecorationTheme? searchFieldDecorationTheme,
-    TextStyle? searchFieldStyle,
+    super.searchFieldDecorationTheme,
+    super.searchFieldStyle,
     String? searchHint,
-    TextInputAction textInputAction = TextInputAction.search,
+    super.textInputAction,
   }) : super(
           searchFieldLabel: searchHint,
-          textInputAction: textInputAction,
-          searchFieldStyle: searchFieldStyle,
-          searchFieldDecorationTheme: searchFieldDecorationTheme,
         );
 
   final bool defaultAppBarTheme;

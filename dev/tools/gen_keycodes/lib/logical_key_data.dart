@@ -53,8 +53,7 @@ class LogicalKeyData {
     String glfwNameMap,
     PhysicalKeyData physicalKeyData,
   ) {
-    final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
-    _readKeyEntries(data, chromiumKeys);
+    final Map<String, LogicalKeyEntry> data = _readKeyEntries(chromiumKeys);
     _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
     _readGtkKeyCodes(data, gtkKeyCodeHeader, parseMapOfListOfString(gtkNameMap));
     _readAndroidKeyCodes(data, androidKeyCodeHeader, parseMapOfListOfString(androidNameMap));
@@ -130,7 +129,8 @@ class LogicalKeyData {
   /// The following format should be mapped to the Flutter plane.
   ///                 Key       Enum       Character
   /// FLUTTER_KEY_MAP("Lang4",  LANG4,     0x00013),
-  static void _readKeyEntries(Map<String, LogicalKeyEntry> data, String input) {
+  static Map<String, LogicalKeyEntry> _readKeyEntries(String input) {
+    final Map<int, LogicalKeyEntry> dataByValue = <int, LogicalKeyEntry>{};
     final RegExp domKeyRegExp = RegExp(
       r'(?<source>DOM|FLUTTER)_KEY_(?<kind>UNI|MAP)\s*\(\s*'
       r'"(?<name>[^\s]+?)",\s*'
@@ -162,17 +162,23 @@ class LogicalKeyData {
       }
 
       final bool isPrintable = keyLabel != null;
-      data.putIfAbsent(name, () {
-        final LogicalKeyEntry entry = LogicalKeyEntry.fromName(
-          value: toPlane(value, _sourceToPlane(source, isPrintable)),
+      final int entryValue = toPlane(value, _sourceToPlane(source, isPrintable));
+      final LogicalKeyEntry entry = dataByValue.putIfAbsent(entryValue, () =>
+        LogicalKeyEntry.fromName(
+          value: entryValue,
           name: name,
           keyLabel: keyLabel,
-        );
-        if (source == 'DOM' && !isPrintable)
-          entry.webNames.add(webName);
-        return entry;
-      });
+        ),
+      );
+      if (source == 'DOM' && !isPrintable) {
+        entry.webNames.add(webName);
+      }
     }
+    return Map<String, LogicalKeyEntry>.fromEntries(
+      dataByValue.values.map((LogicalKeyEntry entry) =>
+        MapEntry<String, LogicalKeyEntry>(entry.name, entry),
+      ),
+    );
   }
 
   static void _readMacOsKeyCodes(
@@ -372,6 +378,9 @@ class LogicalKeyData {
 
     glfwNameToKeyCode.forEach((String glfwName, int value) {
       final String? name = nameToFlutterName[glfwName];
+      if (name == null) {
+        return;
+      }
       final LogicalKeyEntry? entry = data[nameToFlutterName[glfwName]];
       if (entry == null) {
         print('Invalid logical entry by name $name (from GLFW $glfwName)');
@@ -560,7 +569,7 @@ class LogicalKeyEntry {
 
   /// A string indicating the letter on the keycap of a letter key.
   ///
-  /// This is only used to generate the key label mapping in keyboard_map.dart.
+  /// This is only used to generate the key label mapping in keyboard_maps.g.dart.
   /// [LogicalKeyboardKey.keyLabel] uses a different definition and is generated
   /// differently.
   final String? keyLabel;
@@ -598,7 +607,7 @@ class LogicalKeyEntry {
   }
 
   /// Gets the named used for the key constant in the definitions in
-  /// keyboard_key.dart.
+  /// keyboard_key.g.dart.
   ///
   /// If set by the constructor, returns the name set, but otherwise constructs
   /// the name from the various different names available, making sure that the

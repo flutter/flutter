@@ -95,6 +95,8 @@ bool androidManifestHasNameVariable(final Directory projectDir) {
     document = XmlDocument.parse(manifestFile.readAsStringSync());
   } on XmlParserException {
     return false;
+  } on XmlTagException {
+    return false;
   } on FileSystemException {
     return false;
   }

@@ -140,7 +140,7 @@ class CustomDeviceConfig {
       platform = archString == null
         ? null
         : getTargetPlatformForName(archString);
-    } on FallThroughError {
+    } on UnsupportedError {
       throw const CustomDeviceRevivalException.fromDescriptions(
         _kPlatform,
         'null or one of linux-arm64, linux-x64'
@@ -299,7 +299,7 @@ class CustomDeviceConfig {
       'ping',
       '-w', '1',
       '-c', '1',
-      'raspberrypi'
+      'raspberrypi',
     ],
     explicitPingSuccessRegex: true,
   );
@@ -316,7 +316,7 @@ class CustomDeviceConfig {
     if (platform.isLinux || platform.isMacOS) {
       return exampleUnix;
     }
-    throw FallThroughError();
+    throw UnsupportedError('Unsupported operating system');
   }
 
   final String id;

@@ -9,7 +9,6 @@ import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 
-import '../common.dart';
 import 'utils.dart';
 
 const String DeviceIdEnvName = 'FLUTTER_DEVICELAB_DEVICEID';

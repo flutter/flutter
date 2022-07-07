@@ -17,6 +17,16 @@ body:
       description: What is the shortened commit hash that has been merged to master/main?
     validations:
       required: true
+  - type: dropdown
+    id: Target
+    attributes:
+      label: Target
+      description: Should this be cherry-picked to beta or stable?
+      options:
+        - stable
+        - beta
+    validations:
+      required: true
   - type: input
     id: impacted_users
     attributes:

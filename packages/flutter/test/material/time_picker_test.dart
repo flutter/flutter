@@ -18,11 +18,10 @@ final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${wi
 
 class _TimePickerLauncher extends StatefulWidget {
   const _TimePickerLauncher({
-    Key? key,
     required this.onChanged,
     this.entryMode = TimePickerEntryMode.dial,
     this.restorationId,
-  }) : super(key: key);
+  });
 
   final ValueChanged<TimeOfDay?> onChanged;
   final TimePickerEntryMode entryMode;
@@ -1008,11 +1007,30 @@ void _testsInput() {
     expect(find.text(errorInvalidText), findsOneWidget);
   });
 
-  testWidgets('Can toggle to dial entry mode', (WidgetTester tester) async {
+  testWidgets('Can switch from input to dial entry mode', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input);
     await tester.tap(find.byIcon(Icons.access_time));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('Can switch from dial to input entry mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true);
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsWidgets);
+  });
+
+  testWidgets('Can not switch out of inputOnly mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.inputOnly);
+    expect(find.byType(TextField), findsWidgets);
+    expect(find.byIcon(Icons.access_time), findsNothing);
+  });
+
+  testWidgets('Can not switch out of dialOnly mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dialOnly);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byIcon(Icons.keyboard), findsNothing);
   });
 
   testWidgets('Switching to dial entry mode triggers entry callback', (WidgetTester tester) async {

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() { runApp(const CardExamplesApp()); }
 
 class CardExamplesApp extends StatelessWidget {
-  const CardExamplesApp({Key? key}) : super(key: key);
+  const CardExamplesApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class CardExamplesApp extends StatelessWidget {
 ///
 /// https://m3.material.io/components/cards/specs#a012d40d-7a5c-4b07-8740-491dec79d58b
 class ElevatedCardExample extends StatelessWidget {
-  const ElevatedCardExample({ Key? key }) : super(key: key);
+  const ElevatedCardExample({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,7 @@ class ElevatedCardExample extends StatelessWidget {
 ///
 /// https://m3.material.io/components/cards/specs#0f55bf62-edf2-4619-b00d-b9ed462f2c5a
 class FilledCardExample extends StatelessWidget {
-  const FilledCardExample({ Key? key }) : super(key: key);
+  const FilledCardExample({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +86,7 @@ class FilledCardExample extends StatelessWidget {
 ///
 /// https://m3.material.io/components/cards/specs#0f55bf62-edf2-4619-b00d-b9ed462f2c5a
 class OutlinedCardExample extends StatelessWidget {
-  const OutlinedCardExample({ Key? key }) : super(key: key);
+  const OutlinedCardExample({ super.key });
 
   @override
   Widget build(BuildContext context) {

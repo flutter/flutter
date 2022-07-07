@@ -27,11 +27,11 @@ enum _TextSelectionToolbarItemPosition {
 class TextSelectionToolbarTextButton extends StatelessWidget {
   /// Creates an instance of TextSelectionToolbarTextButton.
   const TextSelectionToolbarTextButton({
-    Key? key,
+    super.key,
     required this.child,
     required this.padding,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   // These values were eyeballed to match the native text selection menu on a
   // Pixel 2 running Android 10.

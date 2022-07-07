@@ -159,7 +159,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
       _forwardPortCommand,
       <String, String>{
         'devicePort': '$devicePort',
-        'hostPort': '$hostPort'
+        'hostPort': '$hostPort',
       },
       additionalReplacementValues: _additionalReplacementValues
     );
@@ -401,7 +401,7 @@ class CustomDeviceAppSession {
       <String, String>{
         'remotePath': '/tmp/',
         'appName': packageName,
-        'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route)
+        'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route),
       }
     );
 
@@ -594,7 +594,7 @@ class CustomDevice extends Device {
       _config.postBuildCommand!,
       <String, String>{
         'appName': appName,
-        'localPath': localPath
+        'localPath': localPath,
       },
       additionalReplacementValues: additionalReplacementValues
     );
@@ -628,7 +628,7 @@ class CustomDevice extends Device {
     final List<String> interpolated = interpolateCommand(
       _config.uninstallCommand,
       <String, String>{
-        'appName': appName
+        'appName': appName,
       },
       additionalReplacementValues: additionalReplacementValues
     );
@@ -664,7 +664,7 @@ class CustomDevice extends Device {
       _config.installCommand,
       <String, String>{
         'localPath': localPath,
-        'appName': appName
+        'appName': appName,
       },
       additionalReplacementValues: additionalReplacementValues
     );

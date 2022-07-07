@@ -587,7 +587,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -647,15 +647,15 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
           'success': false,
           'notices': <Object>[
             <String, Object>{
-              'message': 'Failed to hot reload'
-            }
+              'message': 'Failed to hot reload',
+            },
           ],
           'details': <String, Object>{},
         },
@@ -711,7 +711,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -846,6 +846,95 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   }));
 
+  testUsingContext('ResidentRunner reports hot reload time details', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVM.toJson(),
+      ),
+      listViews,
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: fakeVM.toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'reloadSources',
+        args: <String, Object>{
+          'isolateId': '1',
+          'pause': false,
+          'rootLibUri': 'main.dart.incremental.dill',
+        },
+        jsonResponse: <String, Object>{
+          'type': 'ReloadReport',
+          'success': true,
+          'details': <String, Object>{
+            'loadedLibraryCount': 1,
+            'finalLibraryCount': 42,
+          },
+        },
+      ),
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.fastReassemble',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+          'className': 'FOO',
+        },
+      ),
+    ]);
+    final FakeDelegateFlutterDevice flutterDevice = FakeDelegateFlutterDevice(
+      device,
+      BuildInfo.debug,
+      FakeResidentCompiler(),
+      devFS,
+    )..vmService = fakeVmServiceHost.vmService;
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+    devFS.nextUpdateReport = UpdateFSReport(
+      success: true,
+      fastReassembleClassName: 'FOO',
+      invalidatedSourcesCount: 1,
+    );
+
+    final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> futureAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: futureAppStart,
+      connectionInfoCompleter: futureConnectionInfo,
+      enableDevTools: true,
+    ));
+
+    await futureAppStart.future;
+    await residentRunner.restart();
+
+    // The actual test: Expect to have compile, reload and reassemble times.
+    expect(
+        testLogger.statusText,
+        contains(RegExp(r'Reloaded 1 of 42 libraries in \d+ms '
+            r'\(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    Platform: () => FakePlatform(),
+    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
+    Usage: () => TestUsage(),
+    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
+  }));
+
   testUsingContext('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -883,7 +972,7 @@ void main() {
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
         )
-      )
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -962,8 +1051,8 @@ void main() {
         event: vm_service.Event(
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
-        )
-      )
+        ),
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -1084,7 +1173,7 @@ void main() {
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
         ),
-      )
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -1330,6 +1419,7 @@ flutter:
           commandHelp.a,
           commandHelp.M,
           commandHelp.g,
+          commandHelp.j,
           commandHelp.hWithDetails,
           commandHelp.c,
           commandHelp.q,
@@ -1403,7 +1493,7 @@ flutter:
           commandHelp.hWithDetails,
           commandHelp.c,
           commandHelp.q,
-          ''
+          '',
         ].join('\n')
     ));
   }));
@@ -1436,7 +1526,7 @@ flutter:
           commandHelp.hWithoutDetails,
           commandHelp.c,
           commandHelp.q,
-          ''
+          '',
         ].join('\n')
     ));
   }));
@@ -1450,7 +1540,7 @@ flutter:
           'viewId': fakeFlutterView.id,
         },
         jsonResponse: <String, Object>{
-          'SkSLs': <String, Object>{}
+          'SkSLs': <String, Object>{},
         }
       ),
     ]);
@@ -1471,9 +1561,9 @@ flutter:
         jsonResponse: <String, Object>{
           'SkSLs': <String, Object>{
             'A': 'B',
-          }
-        }
-      )
+          },
+        },
+      ),
     ]);
     await residentRunner.writeSkSL();
 
@@ -1483,7 +1573,7 @@ flutter:
       'platform': 'android',
       'name': 'FakeDevice',
       'engineRevision': 'abcdefg',
-      'data': <String, Object>{'A': 'B'}
+      'data': <String, Object>{'A': 'B'},
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -1491,7 +1581,7 @@ flutter:
       fileSystem: globals.fs,
       platform: globals.platform,
     ),
-    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg')
+    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg'),
   }));
 
   testUsingContext('ResidentRunner ignores DevtoolsLauncher when attaching with enableDevTools: false - cold mode', () => testbed.run(() async {
@@ -1570,7 +1660,13 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false,
+        )
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1639,6 +1735,29 @@ flutter:
 
     expect(await globals.fs.file(globals.fs.path.join(
       'build', 'cache.dill')).readAsString(), 'ABC');
+  }));
+
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup with track-widget-creation', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ], wsAddress: testUri);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+    await residentRunner.run(enableDevTools: true);
+
+    expect(await globals.fs.file(globals.fs.path.join(
+      'build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }));
 
   testUsingContext('HotRunner does not copy app.dill if a dillOutputPath is given', () => testbed.run(() async {
@@ -1838,7 +1957,7 @@ flutter:
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
+    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   });
 
    testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag', () async {

@@ -7,11 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 class TestWidget extends StatefulWidget {
   const TestWidget({
-    Key? key,
+    super.key,
     required this.child,
     required this.persistentState,
     required this.syncedState,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final int persistentState;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -49,10 +49,10 @@ import 'run.dart';
 class DriveCommand extends RunCommandBase {
   DriveCommand({
     bool verboseHelp = false,
-    @visibleForTesting FlutterDriverFactory flutterDriverFactory,
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
+    @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
+    required FileSystem fileSystem,
+    required Logger? logger,
+    required Platform platform,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -92,7 +92,7 @@ class DriveCommand extends RunCommandBase {
       )
       ..addFlag('build',
         defaultsTo: true,
-        help: '(deprecated) Build the app before running. To use an existing app, pass the "--use-application-binary" '
+        help: '(deprecated) Build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
               'flag with an existing APK.',
       )
       ..addOption('screenshot',
@@ -156,15 +156,15 @@ class DriveCommand extends RunCommandBase {
   // specified not to.
   @override
   bool get shouldRunPub {
-    if (argResults.wasParsed('pub') && !boolArg('pub')) {
+    if (argResults!.wasParsed('pub') && !boolArgDeprecated('pub')) {
       return false;
     }
     return true;
   }
 
-  FlutterDriverFactory _flutterDriverFactory;
+  FlutterDriverFactory? _flutterDriverFactory;
   final FileSystem _fileSystem;
-  final Logger _logger;
+  final Logger? _logger;
   final FileSystemUtils _fsUtils;
 
   @override
@@ -179,9 +179,9 @@ class DriveCommand extends RunCommandBase {
   @override
   final List<String> aliases = <String>['driver'];
 
-  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
 
-  String get screenshot => stringArg('screenshot');
+  String? get screenshot => stringArgDeprecated('screenshot');
 
   @override
   bool get startPausedDefault => true;
@@ -192,7 +192,7 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
-      final Device device = await findTargetDevice();
+      final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
@@ -202,49 +202,50 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String testFile = _getTestFile();
+    final String testFile = _getTestFile()!;
     if (testFile == null) {
       throwToolExit(null);
     }
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final Device device = await findTargetDevice(includeUnsupportedDevices: stringArg('use-application-binary') == null);
+    final String? applicationBinaryPath = stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+    final Device? device = await findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
     if (device == null) {
       throwToolExit(null);
     }
     if (screenshot != null && !device.supportsScreenshot) {
-      _logger.printError('Screenshot not supported for ${device.name}.');
+      _logger!.printError('Screenshot not supported for ${device.name}.');
     }
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
     _flutterDriverFactory ??= FlutterDriverFactory(
-      applicationPackageFactory: ApplicationPackageFactory.instance,
-      logger: _logger,
+      applicationPackageFactory: ApplicationPackageFactory.instance!,
+      logger: _logger!,
       processUtils: globals.processUtils,
-      dartSdkPath: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
-      devtoolsLauncher: DevtoolsLauncher.instance,
+      dartSdkPath: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+      devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file('.packages'),
-      logger: _logger,
+      logger: _logger!,
       throwOnError: false,
-    ) ?? PackageConfig.empty;
-    final DriverService driverService = _flutterDriverFactory.createDriverService(web);
+    );
+    final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
-    final File applicationBinary = stringArg('use-application-binary') == null
+    final File? applicationBinary = applicationBinaryPath == null
       ? null
-      : _fileSystem.file(stringArg('use-application-binary'));
+      : _fileSystem.file(applicationBinaryPath);
 
     bool screenshotTaken = false;
     try {
-      if (stringArg('use-existing-app') == null) {
+      if (stringArgDeprecated('use-existing-app') == null) {
         await driverService.start(
           buildInfo,
           device,
           debuggingOptions,
-          ipv6,
+          ipv6 ?? false,
           applicationBinary: applicationBinary,
           route: route,
           userIdentifier: userIdentifier,
@@ -254,20 +255,20 @@ class DriveCommand extends RunCommandBase {
               'trace-startup': traceStartup,
             if (web)
               '--no-launch-chrome': true,
-            if (boolArg('multidex'))
+            if (boolArgDeprecated('multidex'))
               'multidex': true,
           }
         );
       } else {
-        final Uri uri = Uri.tryParse(stringArg('use-existing-app'));
+        final Uri? uri = Uri.tryParse(stringArgDeprecated('use-existing-app')!);
         if (uri == null) {
-          throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
+          throwToolExit('Invalid VM Service URI: ${stringArgDeprecated('use-existing-app')}');
         }
         await driverService.reuseApplication(
           uri,
           device,
           debuggingOptions,
-          ipv6,
+          ipv6 ?? false,
         );
       }
 
@@ -276,15 +277,16 @@ class DriveCommand extends RunCommandBase {
         stringsArg('test-arguments'),
         <String, String>{},
         packageConfig,
-        chromeBinary: stringArg('chrome-binary'),
-        headless: boolArg('headless'),
-        browserDimension: stringArg('browser-dimension').split(','),
-        browserName: stringArg('browser-name'),
-        driverPort: stringArg('driver-port') != null
-          ? int.tryParse(stringArg('driver-port'))
+        chromeBinary: stringArgDeprecated('chrome-binary'),
+        headless: boolArgDeprecated('headless'),
+        webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
+        browserDimension: stringArgDeprecated('browser-dimension')!.split(','),
+        browserName: stringArgDeprecated('browser-name'),
+        driverPort: stringArgDeprecated('driver-port') != null
+          ? int.tryParse(stringArgDeprecated('driver-port')!)
           : null,
-        androidEmulator: boolArg('android-emulator'),
-        profileMemory: stringArg('profile-memory'),
+        androidEmulator: boolArgDeprecated('android-emulator'),
+        profileMemory: stringArgDeprecated('profile-memory'),
       );
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
@@ -292,11 +294,11 @@ class DriveCommand extends RunCommandBase {
         screenshotTaken = true;
       }
 
-      if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
-        _logger.printStatus('Leaving the application running.');
+      if (boolArgDeprecated('keep-app-running')) {
+        _logger!.printStatus('Leaving the application running.');
       } else {
-        final File skslFile = stringArg('write-sksl-on-exit') != null
-          ? _fileSystem.file(stringArg('write-sksl-on-exit'))
+        final File? skslFile = stringArgDeprecated('write-sksl-on-exit') != null
+          ? _fileSystem.file(stringArgDeprecated('write-sksl-on-exit'))
           : null;
         await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
       }
@@ -315,9 +317,9 @@ class DriveCommand extends RunCommandBase {
     return FlutterCommandResult.success();
   }
 
-  String _getTestFile() {
-    if (argResults['driver'] != null) {
-      return stringArg('driver');
+  String? _getTestFile() {
+    if (argResults!['driver'] != null) {
+      return stringArgDeprecated('driver');
     }
 
     // If the --driver argument wasn't provided, then derive the value from
@@ -331,7 +333,7 @@ class DriveCommand extends RunCommandBase {
     // for the corresponding test file relative to it.
     if (!_fileSystem.path.isRelative(appFile)) {
       if (!_fileSystem.path.isWithin(packageDir, appFile)) {
-        _logger.printError(
+        _logger!.printError(
           'Application file $appFile is outside the package directory $packageDir'
         );
         return null;
@@ -343,7 +345,7 @@ class DriveCommand extends RunCommandBase {
     final List<String> parts = _fileSystem.path.split(appFile);
 
     if (parts.length < 2) {
-      _logger.printError(
+      _logger!.printError(
         'Application file $appFile must reside in one of the sub-directories '
         'of the package structure, not in the root directory.'
       );
@@ -371,9 +373,9 @@ class DriveCommand extends RunCommandBase {
         'png',
       );
       await device.takeScreenshot(outputFile);
-      _logger.printStatus('Screenshot written to ${outputFile.path}');
+      _logger!.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
-      _logger.printError('Error taking screenshot: $error');
+      _logger!.printError('Error taking screenshot: $error');
     }
   }
 }

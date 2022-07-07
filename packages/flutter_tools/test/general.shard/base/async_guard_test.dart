@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
-import 'package:flutter_tools/src/base/common.dart';
 
 import '../../src/common.dart';
 

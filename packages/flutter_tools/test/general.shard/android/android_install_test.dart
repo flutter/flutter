@@ -31,7 +31,7 @@ const FakeCommand kInstallCommand = FakeCommand(
     '-r',
     '--user',
     '10',
-    'app.apk'
+    'app.apk',
   ],
 );
 const FakeCommand kStoreShaCommand = FakeCommand(
@@ -182,7 +182,7 @@ void main() {
           '-r',
           '--user',
           'jane',
-          'app.apk'
+          'app.apk',
         ],
         exitCode: 1,
         stderr: 'Exception occurred while executing: java.lang.IllegalArgumentException: Bad user number: jane',

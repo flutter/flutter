@@ -79,8 +79,9 @@ class DrawerThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static DrawerThemeData? lerp(DrawerThemeData? a, DrawerThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return DrawerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       scrimColor: Color.lerp(a?.scrimColor, b?.scrimColor, t),
@@ -101,10 +102,12 @@ class DrawerThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DrawerThemeData
         && other.backgroundColor == backgroundColor
         && other.scrimColor == scrimColor
@@ -135,10 +138,10 @@ class DrawerTheme extends InheritedTheme {
   /// Creates a theme that defines the [DrawerThemeData] properties for a
   /// [Drawer].
   const DrawerTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the background color, scrim color, elevation, and shape for
   /// descendant [Drawer] widgets.

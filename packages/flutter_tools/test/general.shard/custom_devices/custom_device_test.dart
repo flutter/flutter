@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -36,7 +34,7 @@ void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> confi
   final File file = dir.childFile('.flutter_custom_devices.json');
   file.writeAsStringSync(jsonEncode(
     <String, dynamic>{
-      'custom-devices': configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
+      'custom-devices': configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList(),
     }
   ));
 }
@@ -56,11 +54,11 @@ void main() {
         <String>['scp', r'${localPath}', r'/tmp/${appName}', 'pi@raspberrypi'],
         <String, String>{
           'localPath': 'build/flutter_assets',
-          'appName': 'hello_world'
-        }
+          'appName': 'hello_world',
+        },
       ),
       <String>[
-        'scp', 'build/flutter_assets', '/tmp/hello_world', 'pi@raspberrypi'
+        'scp', 'build/flutter_assets', '/tmp/hello_world', 'pi@raspberrypi',
       ]
     );
 
@@ -69,11 +67,11 @@ void main() {
         <String>[r'${test1}', r' ${test2}', r'${test3}'],
         <String, String>{
           'test1': '_test1',
-          'test2': '_test2'
-        }
+          'test2': '_test2',
+        },
       ),
       <String>[
-        '_test1', ' _test2', r''
+        '_test1', ' _test2', r'',
       ]
     );
 
@@ -82,15 +80,15 @@ void main() {
         <String>[r'${test1}', r' ${test2}', r'${test3}'],
         <String, String>{
           'test1': '_test1',
-          'test2': '_test2'
+          'test2': '_test2',
         },
         additionalReplacementValues: <String, String>{
           'test2': '_nottest2',
-          'test3': '_test3'
+          'test3': '_test3',
         }
       ),
       <String>[
-        '_test1', ' _test2', r'_test3'
+        '_test1', ' _test2', r'_test3',
       ]
     );
   });
@@ -109,7 +107,7 @@ void main() {
     runProfileCommand: const <String>['testrunprofile'],
     forwardPortCommand: const <String>['testforwardport'],
     forwardPortSuccessRegex: RegExp('testforwardportsuccess'),
-    screenshotCommand: const <String>['testscreenshot']
+    screenshotCommand: const <String>['testscreenshot'],
   );
 
   const String testConfigPingSuccessOutput = 'testpingsuccess\n';
@@ -117,9 +115,7 @@ void main() {
   final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(enabled: false);
   final CustomDeviceConfig testConfigNonForwarding = testConfig.copyWith(
     explicitForwardPortCommand: true,
-    forwardPortCommand: null,
     explicitForwardPortSuccessRegex: true,
-    forwardPortSuccessRegex: null,
   );
 
   testUsingContext('CustomDevice defaults',
@@ -151,7 +147,7 @@ void main() {
     },
     overrides: <Type, dynamic Function()>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any()
+      ProcessManager: () => FakeProcessManager.any(),
     }
   );
 
@@ -322,7 +318,7 @@ void main() {
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
             FakeCommand(command: testConfig.uninstallCommand),
-            FakeCommand(command: testConfig.installCommand, onRun: () => bothCommandsWereExecuted = true)
+            FakeCommand(command: testConfig.installCommand, onRun: () => bothCommandsWereExecuted = true),
           ])
       );
 
@@ -331,7 +327,7 @@ void main() {
     },
     overrides: <Type, dynamic Function()>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any()
+      ProcessManager: () => FakeProcessManager.any(),
     }
   );
 
@@ -340,15 +336,15 @@ void main() {
 
     final CustomDevicePortForwarder forwarder = CustomDevicePortForwarder(
       deviceName: 'testdevicename',
-      forwardPortCommand: testConfig.forwardPortCommand,
-      forwardPortSuccessRegex: testConfig.forwardPortSuccessRegex,
+      forwardPortCommand: testConfig.forwardPortCommand!,
+      forwardPortSuccessRegex: testConfig.forwardPortSuccessRegex!,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: testConfig.forwardPortCommand,
+          command: testConfig.forwardPortCommand!,
           stdout: testConfigForwardPortSuccessOutput,
-          completer: forwardPortCommandCompleter
-        )
+          completer: forwardPortCommandCompleter,
+        ),
       ])
     );
 
@@ -374,10 +370,10 @@ void main() {
         stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
       ),
       FakeCommand(
-        command: testConfig.forwardPortCommand,
+        command: testConfig.forwardPortCommand!,
         completer: forwardPortCompleter,
         stdout: testConfigForwardPortSuccessOutput,
-      )
+      ),
     ]);
 
     final CustomDeviceAppSession appSession = CustomDeviceAppSession(
@@ -451,7 +447,7 @@ void main() {
             command: testConfig.pingCommand,
             stdout: testConfigPingSuccessOutput
           ),
-          FakeCommand(command: testConfig.postBuildCommand),
+          FakeCommand(command: testConfig.postBuildCommand!),
           FakeCommand(command: testConfig.uninstallCommand),
           FakeCommand(command: testConfig.installCommand),
           FakeCommand(
@@ -460,10 +456,10 @@ void main() {
             stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
           ),
           FakeCommand(
-            command: testConfig.forwardPortCommand,
+            command: testConfig.forwardPortCommand!,
             completer: forwardPortCompleter,
-            stdout: testConfigForwardPortSuccessOutput
-          )
+            stdout: testConfigForwardPortSuccessOutput,
+          ),
         ]
       );
 
@@ -516,7 +512,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any()
+      ProcessManager: () => FakeProcessManager.any(),
     }
   );
 
@@ -525,9 +521,9 @@ void main() {
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-        command: testConfig.screenshotCommand,
+        command: testConfig.screenshotCommand!,
         onRun: () => screenshotCommandWasExecuted = true,
-      )
+      ),
     ]);
 
     final MemoryFileSystem fs = MemoryFileSystem.test();
@@ -551,9 +547,9 @@ void main() {
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-        command: testConfig.screenshotCommand,
+        command: testConfig.screenshotCommand!,
         onRun: () => screenshotCommandWasExecuted = true,
-      )
+      ),
     ]);
 
     final MemoryFileSystem fs = MemoryFileSystem.test();
@@ -561,8 +557,7 @@ void main() {
 
     final CustomDevice device = CustomDevice(
         config: testConfig.copyWith(
-          explicitScreenshotCommand: true,
-          screenshotCommand: null
+          explicitScreenshotCommand: true
         ),
         logger: BufferLogger.test(),
         processManager: processManager
@@ -641,14 +636,14 @@ class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> 
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   @override
   Future<void> build({
-    TargetPlatform platform,
-    BuildInfo buildInfo,
-    FlutterProject project,
-    String mainPath,
+    TargetPlatform? platform,
+    BuildInfo? buildInfo,
+    FlutterProject? project,
+    String? mainPath,
     String manifestPath = defaultManifestPath,
-    String applicationKernelFilePath,
-    String depfilePath,
-    String assetDirPath,
-    @visibleForTesting BuildSystem buildSystem
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    @visibleForTesting BuildSystem? buildSystem
   }) async {}
 }

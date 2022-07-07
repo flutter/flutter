@@ -7,6 +7,63 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('SliverReorderableList works well when having gestureSettings', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103404
+    const int itemCount = 5;
+    int onReorderCallCount = 0;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorder(int fromIndex, int toIndex) {
+      onReorderCallCount += 1;
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+    // The list has five elements of height 100
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: itemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorder: handleReorder,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Start gesture on first item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag a little bit to make `ImmediateMultiDragGestureRecognizer` compete with `VerticalDragGestureRecognizer`
+    await drag.moveBy(const Offset(0, 10));
+    await tester.pump();
+    // Drag enough to move down the first item
+    await drag.moveBy(const Offset(0, 40));
+    await tester.pump();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 1);
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('SliverReorderableList.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
@@ -948,11 +1005,78 @@ void main() {
       expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
     });
   });
+
+  testWidgets('SliverReorderableList properly disposes items', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/105010
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          drawer: Drawer(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverReorderableList(
+                            itemCount: itemCount,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Material(
+                                key: ValueKey<String>('item-$index'),
+                                child: ReorderableDragStartListener(
+                                  index: index,
+                                  child: ListTile(
+                                    title: Text('item ${items[index]}'),
+                                  ),
+                                ),
+                              );
+                            },
+                            onReorder: (int oldIndex, int newIndex) {},
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Scaffold.of(context).closeDrawer();
+                      },
+                      child: const Text('Close drawer'),
+                    ),
+                  ],
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+
+    final Finder item0 = find.text('item 0');
+    expect(item0, findsOneWidget);
+
+    // Start gesture on first item without drag up event.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await drag.moveBy(const Offset(0, 200));
+    await tester.pump();
+
+    await tester.tap(find.text('Close drawer'));
+    await tester.pumpAndSettle();
+
+    expect(item0, findsNothing);
+  });
 }
 
 class TestList extends StatefulWidget {
   const TestList({
-    Key? key,
+    super.key,
     this.textColor,
     this.iconColor,
     this.proxyDecorator,
@@ -960,7 +1084,7 @@ class TestList extends StatefulWidget {
     this.reverse = false,
     this.onReorderStart,
     this.onReorderEnd,
-  }) : super(key: key);
+  });
 
   final List<int> items;
   final Color? textColor;

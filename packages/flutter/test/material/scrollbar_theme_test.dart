@@ -81,7 +81,6 @@ void main() {
     // Hover scrollbar behavior
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
@@ -173,7 +172,6 @@ void main() {
     // Hover scrollbar behavior
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 15.0));
     await tester.pumpAndSettle();
 
@@ -371,7 +369,6 @@ void main() {
     // Hover scrollbar behavior
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
@@ -576,14 +573,14 @@ void main() {
 
   testWidgets('ScrollbarThemeData.trackVisibility test', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    bool? _getTrackVisibility(Set<MaterialState> states) {
+    bool? getTrackVisibility(Set<MaterialState> states) {
       return true;
     }
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData().copyWith(
           scrollbarTheme: _scrollbarTheme(
-            trackVisibility: MaterialStateProperty.resolveWith(_getTrackVisibility),
+            trackVisibility: MaterialStateProperty.resolveWith(getTrackVisibility),
           ),
         ),
         home: ScrollConfiguration(
@@ -662,7 +659,7 @@ void main() {
       "trackBorderColor: Instance of '_MaterialStatePropertyWith<Color?>'",
       'crossAxisMargin: 3.0',
       'mainAxisMargin: 6.0',
-      'minThumbLength: 120.0'
+      'minThumbLength: 120.0',
     ]);
 
     // On the web, Dart doubles and ints are backed by the same kind of object because
@@ -709,29 +706,34 @@ ScrollbarThemeData _scrollbarTheme({
 }
 
 double? _getThickness(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return 20.0;
+  }
   return 10.0;
 }
 
 bool? _getThumbVisibility(Set<MaterialState> states) => true;
 
 Color? _getThumbColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.dragged))
+  if (states.contains(MaterialState.dragged)) {
     return Colors.red;
-  if (states.contains(MaterialState.hovered))
+  }
+  if (states.contains(MaterialState.hovered)) {
     return Colors.blue;
+  }
   return Colors.green;
 }
 
 Color? _getTrackColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return Colors.black;
+  }
   return null;
 }
 
 Color? _getTrackBorderColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return Colors.yellow;
+  }
   return null;
 }

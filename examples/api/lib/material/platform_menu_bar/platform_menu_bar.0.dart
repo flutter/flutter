@@ -8,7 +8,6 @@
 // THIS SAMPLE ONLY WORKS ON MACOS.
 ////////////////////////////////////
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -20,7 +19,7 @@ enum MenuSelection {
 }
 
 class SampleApp extends StatelessWidget {
-  const SampleApp({Key? key}) : super(key: key);
+  const SampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,7 @@ class SampleApp extends StatelessWidget {
 }
 
 class MyMenuBarApp extends StatefulWidget {
-  const MyMenuBarApp({Key? key}) : super(key: key);
+  const MyMenuBarApp({super.key});
 
   @override
   State<MyMenuBarApp> createState() => _MyMenuBarAppState();
@@ -85,7 +84,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                   onSelected: () {
                     _handleMenuSelection(MenuSelection.about);
                   },
-                )
+                ),
               ],
             ),
             PlatformMenuItemGroup(
@@ -119,7 +118,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                       },
                     ),
                   ],
-                )
+                ),
               ],
             ),
             if (PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit))
@@ -127,7 +126,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           ],
         ),
       ],
-      body: Center(
+      child: Center(
         child: Text(_showMessage
             ? _message
             : 'This space intentionally left blank.\n'

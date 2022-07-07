@@ -71,12 +71,12 @@ class GenerateLocalizationsTarget extends Target {
         configFile,
         if (inputs != null)
           for (Object inputFile in inputs.whereType<Object>())
-            environment.fileSystem.file(inputFile)
+            environment.fileSystem.file(inputFile),
       ],
       <File>[
         if (outputs != null)
           for (Object outputFile in outputs.whereType<Object>())
-            environment.fileSystem.file(outputFile)
+            environment.fileSystem.file(outputFile),
       ],
     );
     depfileService.writeToFile(
