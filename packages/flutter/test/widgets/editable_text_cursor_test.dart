@@ -701,6 +701,84 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+
+    // Check that the cursor visibility toggles after each blink interval.
+    Future<void> checkCursorBinking() async {
+      final bool initialShowCursor = editableText.cursorCurrentlyVisible;
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+    }
+
+    // Check that the cursor no blinking.
+    Future<void> checkCursorNoBlinking() async {
+      const bool initialShowCursor = true;
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+    }
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(EditableText));
+
+    await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+    await tester.pumpAndSettle();
+
+    // Before dragging, the cursor should blink.
+    await checkCursorBinking();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+
+    // When drag cursor, the cursor shouldn't blink.
+    await checkCursorNoBlinking();
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    await tester.pumpAndSettle();
+
+    // After dragging, the cursor should blink.
+    await checkCursorBinking();
+  });
+
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -835,13 +913,6 @@ void main() {
     expect(editable, paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
-          const Radius.circular(2.0),
-        ),
-        color: const Color(0xff999999),
-      )
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
           const Rect.fromLTRB(463.8333435058594, -0.916666666666668, 466.8333435058594, 19.083333969116211),
           const Radius.circular(1.0),
         ),
@@ -858,13 +929,6 @@ void main() {
     );
 
     expect(find.byType(EditableText), paints
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
-          const Radius.circular(2.0),
-        ),
-        color: const Color(0xff999999),
-      )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
           const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),

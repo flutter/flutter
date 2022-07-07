@@ -11179,7 +11179,7 @@ void main() {
     // Start the floating cursor reset animation controller.
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
 
-    expect(tester.binding.transientCallbackCount, 2);
+    expect(tester.binding.transientCallbackCount, 1);
 
     await tester.pumpWidget(const SizedBox());
     expect(tester.hasRunningAnimations, isFalse);
