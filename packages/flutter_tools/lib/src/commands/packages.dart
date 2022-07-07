@@ -21,22 +21,22 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
-    addSubcommand(PackagesInteractiveGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions"));
-    addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml'));
-    addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package'));
+    addSubcommand(PackagesInteractiveGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions."));
+    addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
+    addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies')); // path to package can be specified with --directory argument
-    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
-    addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
-    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
-    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev'));
-    addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev'));
-    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
-    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('token', 'Manage authentication tokens for hosted pub repositories'));
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies.')); // path to package can be specified with --directory argument
+    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache.'));
+    addSubcommand(PackagesForwardCommand('version', 'Print Pub version.'));
+    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev.'));
+    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.'));
+    addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev.'));
+    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages.'));
+    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('token', 'Manage authentication tokens for hosted pub repositories.'));
     addSubcommand(PackagesPassthroughCommand());
   }
 
@@ -233,7 +233,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   String get description {
-    return '$_description.\n'
+    return '$_description\n'
            'This runs the "pub" tool in a Flutter context.';
   }
 
