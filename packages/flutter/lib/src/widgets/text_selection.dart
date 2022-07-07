@@ -70,6 +70,40 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
 }
 
+
+/// A data class that allows the SelectionOverlay to delegate
+/// the loupe's positioning to the loupe itself, based on the
+/// info in [LoupeSelectionOverlayInfoBearer].
+@immutable
+class LoupeSelectionOverlayInfoBearer {
+  const LoupeSelectionOverlayInfoBearer({
+    required this.globalGesturePosition
+  });
+
+  const LoupeSelectionOverlayInfoBearer.empty() : globalGesturePosition = Offset.zero;
+
+  LoupeSelectionOverlayInfoBearer copyWith({
+    Offset? globalGesturePosition,
+  }) => LoupeSelectionOverlayInfoBearer(
+    globalGesturePosition: globalGesturePosition ?? this.globalGesturePosition,
+  );
+
+
+  final Offset globalGesturePosition;
+  //final double handleHeight;
+
+  @override
+  bool operator ==(Object other) =>
+    other is LoupeSelectionOverlayInfoBearer &&
+    other.globalGesturePosition == globalGesturePosition;
+
+  @override
+  int get hashCode => Object.hash(
+    globalGesturePosition,
+    null
+  );
+}
+
 /// An interface for building the selection UI, to be provided by the
 /// implementer of the toolbar widget.
 ///
@@ -236,7 +270,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    LoupeControllerWidgetBuilder? loupeBuilder,
+    LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -317,6 +351,9 @@ class TextSelectionOverlay {
   /// {@endtemplate}
   final BuildContext context;
   
+  final ValueNotifier<LoupeSelectionOverlayInfoBearer> _loupeSelectionOverlayInfoBearer = 
+          ValueNotifier<LoupeSelectionOverlayInfoBearer>(const LoupeSelectionOverlayInfoBearer.empty());
+  
 
   /// The loupe and toolbar cannot be shown at the same time, and [loupeController] is 
   /// dominant over [_effectiveToolbarVisibility]. `_effectiveToolbarVisibility.value == true && 
@@ -328,7 +365,7 @@ class TextSelectionOverlay {
   ///  call [_showLoupe] or [_hideLoupe]. This is because the loupe needs to orchestrate
   /// with other properties in [TextSelectionOverlay].
   final LoupeController? _loupeController;
-  final LoupeControllerWidgetBuilder? _loupeBuilder;
+  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? _loupeBuilder;
 
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
@@ -476,7 +513,7 @@ class TextSelectionOverlay {
   // Shows the loupe, and hides the toolbar if it was showing when _showLoupe
   // was called. This is safe to call on platforms not mobile, since 
   // a loupeBuilder will not be provided on platforms not mobile. 
-  void _showLoupe(Offset showLoupeAt) {
+  void _showLoupe(LoupeSelectionOverlayInfoBearer initalInfoBearer) {
   if (_loupeController == null) {
     return;
   }
@@ -485,11 +522,16 @@ class TextSelectionOverlay {
     hideToolbar();
   }
 
+  // Start from empty, so we don't utilize any rememnant values
+  _loupeSelectionOverlayInfoBearer.value = initalInfoBearer;
+
   _loupeController!.show(
     context: context, 
-    initalPosition: showLoupeAt, 
-    builder: (BuildContext context) => _loupeBuilder!(context, _loupeController!
-  ));
+    builder: (BuildContext context) => _loupeBuilder!(
+      context, 
+      _loupeController!, 
+      _loupeSelectionOverlayInfoBearer
+    ));
   }
 
   void _hideLoupe() {
@@ -509,24 +551,21 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
-    _showLoupe(Offset(details.globalPosition.dx, (details.globalPosition - details.localPosition).dy + (handleSize.height / 2)));
+    _showLoupe(LoupeSelectionOverlayInfoBearer(globalGesturePosition: details.globalPosition));
   }
 
-  void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
-    // Set the loupe at the details X position, but the Y should point at the handles midpoint.
-    final Offset topLeftCorner = details.globalPosition - details.localPosition;
-    final double handleHeight = selectionControls!.getHandleSize(
-      renderObject.preferredLineHeight,
-    ).height;
-    _loupeController?.requestedPosition.value = Offset(details.globalPosition.dx, topLeftCorner.dy + (handleHeight / 2));
-    
-    
+  void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {    
     _dragEndPosition += details.delta;
 
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
+    final TextSelection currentSelection = TextSelection.fromPosition(position);
+
+    _loupeSelectionOverlayInfoBearer.value = _loupeSelectionOverlayInfoBearer.value.copyWith(
+        globalGesturePosition: details.globalPosition,      
+    );
 
     if (_selection.isCollapsed) {
-      _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: true);
+      _handleSelectionHandleChanged(currentSelection, isEnd: true);
       return;
     }
 
@@ -567,18 +606,18 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
-    _showLoupe(Offset(details.globalPosition.dx, (details.globalPosition - details.localPosition).dy + (handleSize.height)));
+    _showLoupe(LoupeSelectionOverlayInfoBearer(globalGesturePosition: details.globalPosition));
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
-    final Offset topLeftCorner = details.globalPosition - details.localPosition;
-    final double handleHeight = selectionControls!.getHandleSize(
-      renderObject.preferredLineHeight,
-    ).height;
-    _loupeController?.requestedPosition.value = Offset(details.globalPosition.dx, topLeftCorner.dy + handleHeight);
-
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
+
+
+    _loupeSelectionOverlayInfoBearer.value = _loupeSelectionOverlayInfoBearer.value.copyWith(
+      globalGesturePosition: details.globalPosition,
+      //handleRect: renderObject.size (position) 
+    );
 
     if (_selection.isCollapsed) {
       _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: false);
@@ -937,7 +976,6 @@ class SelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
   void showToolbar() {
-    return;
     if (_toolbar != null) {
       return;
     }

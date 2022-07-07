@@ -10,22 +10,17 @@ import 'package:flutter/material.dart';
 /// {@template flutter.widgets.loupe.loupeControllerWidgetBuilder}
 /// A builder that builds a Widget with a [LoupeController].
 /// 
-/// the [controller] should be passed into [Loupe.controller].
+/// the [controller] should be passed into [Loupe.controller]. The third paramater
+/// is any additional info passed to the loupe, if desired.
 /// {@endtemplate}
-typedef LoupeControllerWidgetBuilder = Widget Function(
-    BuildContext context, LoupeController controller);
+typedef LoupeControllerWidgetBuilder<T> = Widget Function(
+    BuildContext context, LoupeController controller, T data);
 
 /// Controls an instance of a [Loupe], if this [LoupeController] is passed to [Loupe.controller].
 /// If unattached to any [Loupe] (i.e., not passed to a [Loupe]), does nothing.
 ///
 /// [LoupeController] handles driving [Loupe.transitionAnimationController]'s in / out animation
 /// based on calls to show / hide, respectively.
-///
-/// [LoupeController] may also handles positioning a [Loupe], through [requestedPosition]. A
-/// consumer may request a loupe repositions through setting [requestedPosition.value],
-/// although a loupe is free to ignore, or adjust the position as seen fit. [Loupe] does not
-/// position itself, and leaves the positioning up to the consumer - thus, [LoupeController.requestedPosition]
-/// is a convienence to facilitate getting a position to the loupe through [requestedPosition.value].
 class LoupeController {
   /// This stream is used to tell the loupe that it should begin it's enter / hide animation.
   /// The [LoupeController] sends its loupe true or false for show / hide respectively,
@@ -87,39 +82,6 @@ class LoupeController {
   ValueNotifier<AnimationStatus> status =
       ValueNotifier<AnimationStatus>(AnimationStatus.dismissed);
 
-  /// A convinence for a consumer to request a [Loupe] to position itself.
-  ///
-  /// [Loupe] itself does not respond to to requested position: this responsibility
-  /// is the consumers. This is to facilitate transitions, animations, and repositions.
-  ///
-  /// {@tool snippet}
-  /// For example, a custom loupe that responds directly to [requestedPosition]:
-  ///
-  /// ```dart
-  /// Widget _buildLoupe(BuildContext context) {
-  ///   return ValueListenableBuilder(
-  ///     // Elsewhere, a widget is positioning this controller through setting requestedPosition.
-  ///     valueListenable: controller.requestedPosition,
-  ///     builder: (BuildContext context, Offset requestedPosition, _) =>
-  ///       Positioned(
-  ///      left: requestedPosition.dx,
-  ///      top: requestedPosition.dy,
-  ///      child: Loupe(
-  ///        controller: controller,
-  ///        magnificationScale: 2,
-  ///        size: const Size(100, 100),
-  ///        child: const Center(
-  ///          child: Text('look at me! \n Im in a loupe'),
-  ///        ),
-  ///      ),
-  ///    ),
-  ///  );
-  //}
-  /// ```
-  /// {@end-tool}
-  final ValueNotifier<Offset> requestedPosition =
-      ValueNotifier<Offset>(Offset.zero);
-
   /// Shows the [Loupe] that this controller controlls.
   /// Returns a future that completes when the loupe is fully shown, i.e. done
   /// with it's entry animation.
@@ -130,7 +92,6 @@ class LoupeController {
     required BuildContext context,
     required WidgetBuilder builder,
     Widget? debugRequiredFor,
-    Offset initalPosition = Offset.zero,
     OverlayEntry? below,
   }) async {
     _forceHide();
@@ -139,8 +100,6 @@ class LoupeController {
       rootOverlay: true,
       debugRequiredFor: debugRequiredFor,
     );
-
-    requestedPosition.value = initalPosition;
 
     final CapturedThemes capturedThemes = InheritedTheme.capture(
       from: context,
