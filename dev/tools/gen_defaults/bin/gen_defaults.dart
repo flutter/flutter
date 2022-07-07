@@ -17,7 +17,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:gen_defaults/app_bar_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/dialog_template.dart';

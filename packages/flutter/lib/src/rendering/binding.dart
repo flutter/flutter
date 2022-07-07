@@ -235,13 +235,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// See [dart:ui.PlatformDispatcher.onMetricsChanged].
   @protected
-  @visibleForTesting
   void handleMetricsChanged() {
     assert(renderView != null);
     renderView.configuration = createViewConfiguration();
-    if (renderView.child != null) {
-      scheduleForcedFrame();
-    }
+    scheduleForcedFrame();
   }
 
   /// Called when the platform text scale factor changes.
