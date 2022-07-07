@@ -654,13 +654,13 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       example: r'flutter-pi /tmp/${appName}'
     ) as FutureOr<String>);
 
-    final String remoteProfileCommand = await askForString(
+    final String remoteRunProfileCommand = await (askForString(
       'run command',
       description:
         'Please enter the command executed on the remote device for starting '
-        r'the app. "/tmp/${appName}" is the path to the asset bundle.',
+        r'the app in profiling mode. "/tmp/${appName}" is the path to the asset bundle.',
       example: r'flutter-pi /tmp/${appName}'
-    );
+    )as FutureOr<String>);
 
     final bool usePortForwarding = await askForBool(
       'use port forwarding',
@@ -730,7 +730,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         '-o', 'BatchMode=yes',
         if (ipv6) '-6',
         sshTarget,
-        remoteProfileCommand
+        remoteRunProfileCommand
       ],
 
       forwardPortCommand: usePortForwarding
