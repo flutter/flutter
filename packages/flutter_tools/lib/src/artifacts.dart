@@ -159,7 +159,6 @@ String _flutterEngineLibraryFileName(TargetPlatform? platform) {
   const Artifact artifact = Artifact.flutterEngineLibrary;
   switch (platform) {
     case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_uwp_x64:
       return 'flutter_engine.dll';
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
