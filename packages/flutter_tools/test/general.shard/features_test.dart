@@ -398,24 +398,5 @@ void main() {
 
       expect(featureFlags.isWindowsUwpEnabled, false);
     });
-
-    for (final Feature feature in <Feature>[
-      flutterWindowsDesktopFeature,
-      flutterMacOSDesktopFeature,
-      flutterLinuxDesktopFeature,
-    ]) {
-      test('${feature.name} available and enabled by default on master', () {
-        expect(feature.master.enabledByDefault, true);
-        expect(feature.master.available, true);
-      });
-      test('${feature.name} available and enabled by default on beta', () {
-        expect(feature.beta.enabledByDefault, true);
-        expect(feature.beta.available, true);
-      });
-      test('${feature.name} available and enabled by default on stable', () {
-        expect(feature.stable.enabledByDefault, true);
-        expect(feature.stable.available, true);
-      });
-    }
   });
 }

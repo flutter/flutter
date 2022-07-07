@@ -97,15 +97,12 @@ const Feature flutterMacOSDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
 );
 
@@ -117,15 +114,12 @@ const Feature flutterLinuxDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
 );
 
