@@ -1385,6 +1385,7 @@ class Transform extends SingleChildRenderObjectWidget {
   // Computes a rotation matrix for an angle in radians, attempting to keep rotations
   // at integral values for angles of 0, π/2, π, 3π/2.
   static Matrix4 _computeRotation(double radians) {
+    assert(radians.isFinite, 'Cannot compute the rotation matrix for a non-finite angle: $radians');
     if (radians == 0.0) {
       return Matrix4.identity();
     }
@@ -1392,29 +1393,24 @@ class Transform extends SingleChildRenderObjectWidget {
     if (sin == 1.0) {
       return _createZRotation(1.0, 0.0);
     }
-    if (sin == - 1.0) {
+    if (sin == -1.0) {
       return _createZRotation(-1.0, 0.0);
     }
-    if (math.cos(radians) == -1.0) {
+    final double cos = math.cos(radians);
+    if (cos == -1.0) {
       return _createZRotation(0.0, -1.0);
     }
-    return Matrix4.rotationZ(radians);
+    return _createZRotation(sin, cos);
   }
 
   static Matrix4 _createZRotation(double sin, double cos) {
-    final Matrix4 result = Matrix4.identity();
+    final Matrix4 result = Matrix4.zero();
     result.storage[0] = cos;
     result.storage[1] = sin;
-    result.storage[2] = 0.0;
     result.storage[4] = -sin;
     result.storage[5] = cos;
-    result.storage[6] = 0.0;
-    result.storage[8] = 0.0;
-    result.storage[9] = 0.0;
     result.storage[10] = 1.0;
-    result.storage[3] = 0.0;
-    result.storage[7] = 0.0;
-    result.storage[11] = 0.0;
+    result.storage[15] = 1.0;
     return result;
   }
 
