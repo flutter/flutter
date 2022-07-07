@@ -11,6 +11,7 @@
 #include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/test/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
+#include <lib/async/cpp/executor.h>
 #include <lib/async/cpp/wait.h>
 #include <lib/fdio/namespace.h>
 #include <lib/sys/cpp/component_context.h>
@@ -66,9 +67,8 @@ class DartTestComponentControllerV2
   }
 
  private:
-  /// Helper for actually running the Dart main. Returns true if successful,
-  /// false otherwise.
-  bool RunDartMain();
+  /// Helper for actually running the Dart main. Returns Returns a promise.
+  fpromise::promise<> RunDartMain();
 
   /// Creates and binds the namespace for this component. Returns true if
   /// successful, false otherwise.
@@ -126,6 +126,7 @@ class DartTestComponentControllerV2
   // The loop must be the first declared member so that it gets destroyed after
   // binding_ which expects the existence of a loop.
   std::unique_ptr<async::Loop> loop_;
+  async::Executor executor_;
 
   std::string label_;
   std::string url_;
@@ -137,6 +138,7 @@ class DartTestComponentControllerV2
   fidl::Binding<fuchsia::component::runner::ComponentController> binding_;
   DoneCallback done_callback_;
 
+  zx::socket out_, err_, out_client_, err_client_;
   fdio_ns_t* namespace_ = nullptr;
   int stdout_fd_ = -1;
   int stderr_fd_ = -1;
