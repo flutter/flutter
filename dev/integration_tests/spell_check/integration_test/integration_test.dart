@@ -107,9 +107,9 @@ Future<void> main() async {
       );
   });
 
-  testWidgets(
+  test(
       'fetchSpellCheckSuggestions merges results when Gboard ignoring composing region',
-      (WidgetTester tester) async {
+      () async {
     String text = 'Wooahha it is an amazzinng dayyebf!';
 
     final List<SuggestionSpan>? modifiedSpellCheckSuggestionSpans =
@@ -192,7 +192,7 @@ Future<void> main() async {
 
     expect(spellCheckSuggestionSpans, isNull);
 
-    /// The first request has still not completed, so no text should be saved as of now.
+    // The first request has still not completed, so no text should be saved as of now.
     expect(defaultSpellCheckService.lastSavedText, null);
   });
 }

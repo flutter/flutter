@@ -329,7 +329,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    bool? spellCheckEnabled,
+    this.spellCheckEnabled,
     this.spellCheckService,
     this.spellCheckSuggestionsHandler,
   }) : assert(textAlign != null),
@@ -367,7 +367,6 @@ class TextField extends StatefulWidget {
        ),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
-       spellCheckEnabled = spellCheckEnabled ?? (spellCheckService != null || spellCheckSuggestionsHandler != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        toolbarOptions = toolbarOptions ??
@@ -771,7 +770,7 @@ class TextField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
-  final bool spellCheckEnabled;
+  final bool? spellCheckEnabled;
 
   /// {@macro flutter.widgets.EditableText.spellCheckService}
   final SpellCheckService? spellCheckService;

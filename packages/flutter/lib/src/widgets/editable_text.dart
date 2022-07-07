@@ -644,7 +644,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    bool? spellCheckEnabled,
+    this.spellCheckEnabled,
     this.spellCheckService,
     this.spellCheckSuggestionsHandler,
   }) : assert(controller != null),
@@ -709,7 +709,12 @@ class EditableText extends StatefulWidget {
                      ))),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
-       spellCheckEnabled = spellCheckEnabled ?? (spellCheckService != null || spellCheckSuggestionsHandler != null),       
+       assert(
+          spellCheckEnabled! != false
+          || spellCheckService == null
+          && spellCheckSuggestionsHandler == null,
+          'spellCheckEnabled must not be false if spellCheckService or spellCheckSuggestionsHandler specified'
+       ),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1513,7 +1518,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.EditableText.spellCheckEnabled}
   /// Whether or not spell check is enabled.
   /// {@endtemplate}
-  final bool spellCheckEnabled;
+  final bool? spellCheckEnabled;
 
   /// {@template flutter.widgets.EditableText.spellCheckService}
   /// Service used to fetch spell check results if spell check is enabled.
@@ -1934,6 +1939,36 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_updateSelectionOverlayForScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
+
+    // Spell check setup  
+    bool spellCheckServiceDefined = widget.spellCheckService != null
+                                    || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+
+    assert(
+      widget.spellCheckEnabled! != true || spellCheckServiceDefined,
+      'spellCheckService must be specified for this platform because no default service available'
+    );
+    assert(
+      widget.spellCheckEnabled != null
+      || widget.spellCheckSuggestionsHandler == null
+      || spellCheckServiceDefined,
+      'spellCheckService must be specified for this platform because no default service available or spellCheckSuggestionsHandler must be null'
+    );
+
+    _spellCheckEnabled = widget.spellCheckEnabled ?? 
+      widget.spellCheckService != null || widget.spellCheckSuggestionsHandler != null;
+
+    if (_spellCheckEnabled!) {
+      final SpellCheckService spellCheckService = widget.spellCheckService ?? DefaultSpellCheckService();
+      final SpellCheckSuggestionsHandler spellCheckSuggestionsHandler =
+        widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);
+
+      _spellCheckConfiguration = SpellCheckConfiguration(
+          spellCheckService: spellCheckService,
+          spellCheckSuggestionsHandler: spellCheckSuggestionsHandler);
+    } else {
+      _spellCheckConfiguration = SpellCheckConfiguration.disabled;
+    }
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -1958,20 +1993,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           FocusScope.of(context).autofocus(widget.focusNode);
         }
       });
-    }
-
-    _spellCheckEnabled = widget.spellCheckEnabled == true && widget.spellCheckService == null
-                          ? WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined
-                          : widget.spellCheckEnabled;
-    if (_spellCheckEnabled!) {
-      final SpellCheckService spellCheckService = widget.spellCheckService ?? DefaultSpellCheckService();
-      final SpellCheckSuggestionsHandler spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);
-
-      _spellCheckConfiguration = SpellCheckConfiguration(
-          spellCheckService: spellCheckService,
-          spellCheckSuggestionsHandler: spellCheckSuggestionsHandler);
-    } else {
-      _spellCheckConfiguration = SpellCheckConfiguration.disabled;
     }
 
     // Restart or stop the blinking cursor when TickerMode changes.
@@ -2620,6 +2641,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
+  void _performSpellCheck(String text) {
+    final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+    final Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, text);
+    final String resultsText = text;
+
+    spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
+      if (spans == null) {
+        return;
+      }
+      final SpellCheckResults results = SpellCheckResults(resultsText, spans);
+      _spellCheckConfiguration!.spellCheckResults = results;
+      renderEditable.text = buildTextSpan();
+    });
+  }
+
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
@@ -2686,18 +2722,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (_spellCheckEnabled! && _value.text.isNotEmpty && cause! == SelectionChangedCause.tap) {
-      final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-      final Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
-      final String resultsText = _value.text;
-
-      spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
-        if (spans == null) {
-          return;
-        }
-       final SpellCheckResults results = SpellCheckResults(resultsText, spans);
-       _spellCheckConfiguration!.spellCheckResults = results;
-        renderEditable.text = buildTextSpan();
-      });
+      _performSpellCheck(_value.text);
     }
   }
 
@@ -2812,18 +2837,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) ?? value;
 
         if (_spellCheckEnabled! && value.text.isNotEmpty && _value.text != value.text) {
-          final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          final Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
-          final String resultsText = value.text;
-
-          spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
-            if (spans == null) {
-              return;
-            }
-            final SpellCheckResults results = SpellCheckResults(resultsText, spans);
-            _spellCheckConfiguration!.spellCheckResults = results;
-            renderEditable.text = buildTextSpan();
-          });
+          _performSpellCheck(value.text);
         }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(

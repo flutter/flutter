@@ -219,11 +219,11 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   }
 
   /// Builds [TextSpan] subtree for text with misspelled words.
-  List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(
+  static List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(
       List<SuggestionSpan>? spellCheckSuggestions,
       TextEditingValue value,
       TextStyle? style,
-      TextStyle misspelledTextStyle,
+      TextStyle misspelledStyle,
       bool composingWithinCurrentTextRange) {
     final List<TextSpan> tsTreeChildren = <TextSpan>[];
 
@@ -237,7 +237,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
             const TextStyle(decoration: TextDecoration.underline);
     final TextStyle misspelledJointStyle =
-        style?.merge(misspelledTextStyle) ?? misspelledTextStyle;
+        style?.merge(misspelledStyle) ?? misspelledStyle;
     bool textPointerWithinComposingRegion = false;
     bool currSpanIsComposingRegion = false;
 
