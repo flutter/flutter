@@ -333,13 +333,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///     When two pointers (p1 and p2) down, the sequence of [PointerMoveEvent]s is : p1 down, p2 down, p1 move +50, p2 move +10,
   ///     p1 move +30, p2 move -10 , p1 up and p2 up.
   ///     The [handleEvent] process will be:
-  ///       p1 down ([_multiPointerStartTrackers.add]),
-  ///       p2 down([_multiPointerStartTrackers.add]),
-  ///       p1 move +50 ([_multiPointerMoveTrackers.add] and the gesture wait),
-  ///       p2 move +10 ([_multiPointerMoveTrackers.add], the gesture update +50, and [_multiPointerMoveTrackers.clear]),
-  ///       p1 move +30 ([_multiPointerMoveTrackers.add] and the gesture wait),
-  ///       p2 move -10 ([_multiPointerMoveTrackers.add], the gesture update +20, and [_multiPointerMoveTrackers.clear]),
-  ///       p1 up ([_multiPointerStartTrackers.clear]),
+  ///       p1 down ([_multiPointerStartTrackers].add),
+  ///       p2 down([_multiPointerStartTrackers].add),
+  ///       p1 move +50 ([_multiPointerMoveTrackers].add and the gesture wait),
+  ///       p2 move +10 ([_multiPointerMoveTrackers].add, the gesture update +50, and [_multiPointerMoveTrackers].clear),
+  ///       p1 move +30 ([_multiPointerMoveTrackers].add and the gesture wait),
+  ///       p2 move -10 ([_multiPointerMoveTrackers].add, the gesture update +20, and [_multiPointerMoveTrackers].clear),
+  ///       p1 up ([_multiPointerStartTrackers].clear),
   ///       p2 up.
   ///
   ///   2) Only some of pointers moves (it means the pointers' [PointerMoveEvent] or [PointerPanZoomUpdateEvent]
@@ -355,13 +355,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///     When two pointers (p1 and p2) down, the sequence of [PointerMoveEvent]s is : p1 down, p2 down, p1 move +50, p1 move +10,
   ///     p1 move +30, p1 move -10 , p1 up and p2 up.
   ///     The [handleEvent] process will be:
-  ///       p1 down ([_multiPointerStartTrackers.add]),
-  ///       p2 down([_multiPointerStartTrackers.add]),
-  ///       p1 move +50 ([_multiPointerMoveTrackers.add] and the gesture wait),
-  ///       p1 move +10 ([_multiPointerMoveTrackers.clear], the gesture update +50, and [_multiPointerMoveTrackers.add],),
-  ///       p1 move +30 ([_multiPointerMoveTrackers.clear], the gesture update +10, and [_multiPointerMoveTrackers.add],),
-  ///       p1 move -10 ([_multiPointerMoveTrackers.clear], the gesture update +30, and [_multiPointerMoveTrackers.add],),
-  ///       p1 up ([_multiPointerStartTrackers.clear]),
+  ///       p1 down ([_multiPointerStartTrackers].add),
+  ///       p2 down ([_multiPointerStartTrackers].add),
+  ///       p1 move +50 ([_multiPointerMoveTrackers].add and the gesture wait),
+  ///       p1 move +10 ([_multiPointerMoveTrackers].clear, the gesture update +50, and [_multiPointerMoveTrackers].add,),
+  ///       p1 move +30 ([_multiPointerMoveTrackers].clear, the gesture update +10, and [_multiPointerMoveTrackers].add,),
+  ///       p1 move -10 ([_multiPointerMoveTrackers].clear, the gesture update +30, and [_multiPointerMoveTrackers].add,),
+  ///       p1 up ([_multiPointerStartTrackers].clear),
   ///       p2 up.
   ///       It means the last [PointerEvent] will be lost, this is acceptable. If the gesture update the last [PointerEvent]
   ///       in the pointer up stage, it may cause flickering.
