@@ -32,7 +32,7 @@ void main() {
       final List<ProjectValidatorResult> result = await validator.start(
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)
       );
-      const String expected = 'All dependencies are hosted';
+      const String expected = 'All pub dependencies are hosted in https://pub.dartlang.org';
       expect(result.length, 1);
       expect(result[0].value, expected);
       expect(result[0].status, StatusProjectValidator.success);

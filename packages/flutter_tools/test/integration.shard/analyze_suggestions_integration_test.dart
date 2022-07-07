@@ -79,10 +79,10 @@ void main() {
       ]);
 
       const String expected = '\n'
-        '┌────────────────────────────────────────────────────┐\n'
-        '│ Pub dependencies                                   │\n'
-        '│ [✓] Dart dependencies: All dependencies are hosted │\n'
-        '└────────────────────────────────────────────────────┘\n';
+        '┌────────────────────────────────────────────────────────────────────────────────────┐\n'
+        '│ Pub dependencies                                                                   │\n'
+        '│ [✓] Dart dependencies: All pub dependencies are hosted in https://pub.dartlang.org │\n'
+        '└────────────────────────────────────────────────────────────────────────────────────┘\n';
       expect(loggerTest.statusText, contains(expected));
     });
   });

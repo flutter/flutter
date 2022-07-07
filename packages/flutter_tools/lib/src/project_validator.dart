@@ -140,6 +140,10 @@ class PubDependenciesProjectValidator extends ProjectValidator {
 
     final DartPubJson dartPubJson = DartPubJson(jsonResult);
     final List <String> dependencies = <String>[];
+
+    // Information retrieved from the pubspeck.lock file if a dependency comes from
+    // the hosted url https://pub.dartlang.org we ignore it or if the package
+    // is the current directory being analyzed (root).
     final Set<String> hostedDependencies = {'hosted', 'root'};
 
     for (final DartDependencyPackage package in dartPubJson.packages) {
@@ -161,7 +165,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
       result.add(
         const ProjectValidatorResult(
           name: name,
-          value: 'All dependencies are hosted',
+          value: 'All pub dependencies are hosted in https://pub.dartlang.org',
           status: StatusProjectValidator.success,
         )
       );
