@@ -14,6 +14,7 @@
 #include <lib/fdio/fd.h>
 #include <lib/fdio/namespace.h>
 #include <lib/fidl/cpp/string.h>
+#include <lib/fpromise/promise.h>
 #include <lib/sys/cpp/service_directory.h>
 #include <lib/syslog/global.h>
 #include <lib/zx/clock.h>
@@ -52,6 +53,8 @@ constexpr char kTmpPath[] = "/tmp";
 constexpr zx::duration kIdleWaitDuration = zx::sec(2);
 constexpr zx::duration kIdleNotifyDuration = zx::msec(500);
 constexpr zx::duration kIdleSlack = zx::sec(1);
+
+constexpr zx::duration kTestTimeout = zx::sec(60);
 
 void AfterTask(async_loop_t*, void*) {
   tonic::DartMicrotaskQueue* queue =
@@ -105,6 +108,7 @@ DartTestComponentControllerV2::DartTestComponentControllerV2(
         controller,
     DoneCallback done_callback)
     : loop_(new async::Loop(&kLoopConfig)),
+      executor_(loop_->dispatcher()),
       label_(GetLabelFromUrl(start_info.resolved_url())),
       url_(std::move(start_info.resolved_url())),
       runner_incoming_services_(runner_incoming_services),
@@ -427,8 +431,6 @@ void DartTestComponentControllerV2::Run(
     std::vector<fuchsia::test::Invocation> tests,
     fuchsia::test::RunOptions options,
     fidl::InterfaceHandle<fuchsia::test::RunListener> listener) {
-  RunDartMain();
-
   std::vector<std::string> args;
   if (options.has_arguments()) {
     args = std::move(*options.mutable_arguments());
@@ -436,6 +438,10 @@ void DartTestComponentControllerV2::Run(
 
   auto listener_proxy = listener.Bind();
 
+  // We expect 1 test that will run all other tests in the test suite (i.e. a
+  // single main.dart that calls out to all of the dart tests). If the dart
+  // implementation in-tree changes, iterating over the invocations like so
+  // will be able to handle that.
   for (auto it = tests.begin(); it != tests.end(); it++) {
     auto invocation = std::move(*it);
     std::string test_case_name;
@@ -443,28 +449,54 @@ void DartTestComponentControllerV2::Run(
       test_case_name = invocation.name();
     }
 
-    zx::socket out, err, out_client, err_client;
-    auto status = zx::socket::create(0, &out, &out_client);
+    // Create and out/err sockets and pass file descriptor for each to the
+    // dart process so that logging can be forwarded to the test_manager.
+    auto status = zx::socket::create(0, &out_, &out_client_);
     if (status != ZX_OK) {
       FML_LOG(FATAL) << "cannot create out socket: "
                      << zx_status_get_string(status);
     }
-    status = zx::socket::create(0, &err, &err_client);
+
+    status = fdio_fd_create(out_.release(), &stdout_fd_);
+    if (status != ZX_OK) {
+      FML_LOG(FATAL) << "failed to extract output fd: "
+                     << zx_status_get_string(status);
+    }
+
+    status = zx::socket::create(0, &err_, &err_client_);
     if (status != ZX_OK) {
       FML_LOG(FATAL) << "cannot create error socket: "
                      << zx_status_get_string(status);
     }
 
+    status = fdio_fd_create(err_.release(), &stderr_fd_);
+    if (status != ZX_OK) {
+      FML_LOG(FATAL) << "failed to extract error fd: "
+                     << zx_status_get_string(status);
+    }
+
+    // Pass client end of out and err socket for test_manager to stream logs to
+    // current terminal, via |fuchsia::test::StdHandles|.
     fuchsia::test::StdHandles std_handles;
-    std_handles.set_err(std::move(err_client));
-    std_handles.set_out(std::move(out_client));
+    std_handles.set_out(std::move(out_client_));
+    std_handles.set_err(std::move(err_client_));
 
     listener_proxy->OnTestCaseStarted(std::move(invocation),
                                       std::move(std_handles),
                                       case_listener_.NewRequest());
-  }
 
-  listener_proxy->OnFinished();
+    // Run dart main and wait until exit code has been set before notifying of
+    // test completion.
+    auto dart_main_promise = fpromise::make_promise([&] { RunDartMain(); });
+    auto dart_state = tonic::DartState::Current();
+    executor_.schedule_task(std::move(dart_main_promise));
+    while (!dart_state->has_set_return_code()) {
+      loop_->Run(zx::deadline_after(kTestTimeout), true);
+    }
+
+    // Notify the test_manager that the test has completed.
+    listener_proxy->OnFinished();
+  }
 
   if (binding_.is_bound()) {
     // From the documentation for ComponentController, ZX_OK should be sent when
@@ -480,21 +512,16 @@ void DartTestComponentControllerV2::Run(
       binding_.Close(zx_status_t(fuchsia::component::Error::INTERNAL));
     }
   }
+
+  // Stop and kill the test component.
+  Stop();
 }
 
-bool DartTestComponentControllerV2::RunDartMain() {
+fpromise::promise<> DartTestComponentControllerV2::RunDartMain() {
   FML_CHECK(namespace_ != nullptr);
   Dart_EnterScope();
 
   tonic::DartMicrotaskQueue::StartForCurrentThread();
-
-  // TODO(fxb/88384): Create a file descriptor for each component that is
-  // launched and listen for anything that is written to the component. When
-  // something is written to the component, forward that message along to the
-  // Fuchsia logger and decorate it with the tag that it came from the
-  // component.
-  stdout_fd_ = fileno(stdout);
-  stderr_fd_ = fileno(stderr);
 
   fidl::InterfaceRequest<fuchsia::io::Directory> outgoing_dir =
       std::move(*start_info_.mutable_outgoing_dir());
@@ -510,7 +537,7 @@ bool DartTestComponentControllerV2::RunDartMain() {
     Dart_ShutdownIsolate();
     FX_LOGF(ERROR, LOG_TAG, "Unable to make isolate runnable: %s", error);
     free(error);
-    return false;
+    return fpromise::make_error_promise();
   }
   Dart_EnterIsolate(isolate_);
   Dart_EnterScope();
@@ -526,7 +553,7 @@ bool DartTestComponentControllerV2::RunDartMain() {
     FX_LOGF(ERROR, LOG_TAG, "Failed to allocate Dart arguments list: %s",
             Dart_GetError(dart_arguments));
     Dart_ExitScope();
-    return false;
+    return fpromise::make_error_promise();
   }
 
   Dart_Handle user_main = Dart_GetField(Dart_RootLibrary(), ToDart("main"));
@@ -536,7 +563,7 @@ bool DartTestComponentControllerV2::RunDartMain() {
             "Failed to locate user_main in the root library: %s",
             Dart_GetError(user_main));
     Dart_ExitScope();
-    return false;
+    return fpromise::make_error_promise();
   }
 
   Dart_Handle fuchsia_lib = Dart_LookupLibrary(tonic::ToDart("dart:fuchsia"));
@@ -545,7 +572,7 @@ bool DartTestComponentControllerV2::RunDartMain() {
     FX_LOGF(ERROR, LOG_TAG, "Failed to locate dart:fuchsia: %s",
             Dart_GetError(fuchsia_lib));
     Dart_ExitScope();
-    return false;
+    return fpromise::make_error_promise();
   }
 
   Dart_Handle main_result = tonic::DartInvokeField(
@@ -562,14 +589,17 @@ bool DartTestComponentControllerV2::RunDartMain() {
                                     main_result);
     }
     Dart_ExitScope();
-    return false;
+    return fpromise::make_error_promise();
   }
+
   Dart_ExitScope();
-  return true;
+  return fpromise::make_ok_promise();
 }
 
 void DartTestComponentControllerV2::Kill() {
   done_callback_(this);
+  close(stdout_fd_);
+  close(stderr_fd_);
   suite_bindings_.CloseAll();
   if (Dart_CurrentIsolate()) {
     tonic::DartMicrotaskQueue* queue =
