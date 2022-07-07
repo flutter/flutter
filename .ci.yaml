@@ -8,6 +8,7 @@
 enabled_branches:
   - main
   - flutter-\d+\.\d+-candidate\.\d+
+  - fuchsia_r\d+
 
 platform_properties:
   linux:
