@@ -83,7 +83,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'windows', 'flutter_key_map.cc');
+      'shell', 'platform', 'windows', 'flutter_key_map.g.cc');
 
   @override
   Map<String, String> mappings() {
