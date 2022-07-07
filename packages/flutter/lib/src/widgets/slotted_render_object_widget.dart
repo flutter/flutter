@@ -255,11 +255,10 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
       if (newWidgetKey != null) {
         assert(!_keyToSlot.containsKey(newWidgetKey));
         _keyToSlot[newWidgetKey] = slot;
-        final S oldSlot = oldKeyedSlots[newWidgetKey] ?? slot;
-        final Element? oldChild = _slotToChild.remove(oldSlot);
-        final Element newChild = updateChild(oldChild, widget, slot)!;
+        final S fromSlot = oldKeyedSlots[newWidgetKey] ?? slot;
+        final Element newChild = updateChild(_slotToChild.remove(fromSlot), widget, slot)!;
+        assert(!_slotToChild.containsKey(fromSlot));
         assert(!slotToKeyedChild.containsKey(slot));
-        assert(!_slotToChild.containsKey(slot));
         slotToKeyedChild[slot] = newChild;
       } else {
         // A unkeyed new widget shouldn't be used to update the child element
