@@ -114,7 +114,8 @@ void DisplayListLayer::Paint(PaintContext& context) const {
 
   if (context.raster_cache && display_list_raster_cache_item_) {
     AutoCachePaint cache_paint(context);
-    if (display_list_raster_cache_item_->Draw(context, cache_paint.paint())) {
+    if (display_list_raster_cache_item_->Draw(context,
+                                              cache_paint.sk_paint())) {
       TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
       return;
     }
@@ -151,9 +152,9 @@ void DisplayListLayer::Paint(PaintContext& context) const {
   if (context.leaf_nodes_builder) {
     AutoCachePaint save_paint(context);
     int restore_count = context.leaf_nodes_builder->getSaveCount();
-    if (save_paint.paint() != nullptr) {
-      DlPaint paint = DlPaint().setAlpha(save_paint.paint()->getAlpha());
-      context.leaf_nodes_builder->saveLayer(&paint_bounds(), &paint);
+    if (save_paint.dl_paint() != nullptr) {
+      context.leaf_nodes_builder->saveLayer(&paint_bounds(),
+                                            save_paint.dl_paint());
     }
     context.leaf_nodes_builder->drawDisplayList(display_list_.skia_object());
     context.leaf_nodes_builder->restoreToCount(restore_count);
