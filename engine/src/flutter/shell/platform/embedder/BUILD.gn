@@ -233,6 +233,25 @@ if (enable_unittests) {
       "//third_party/skia",
     ]
 
+    _lib_snapshot_label = "//flutter/lib/snapshot:vm_isolate_snapshot.bin"
+    _lib_snapshot_gen_dir =
+        get_label_info(_lib_snapshot_label, "target_gen_dir")
+
+    _isolate_snapshot_data = "${_lib_snapshot_gen_dir}/isolate_snapshot.bin"
+    _isolate_snapshot_instructions =
+        "${_lib_snapshot_gen_dir}/isolate_snapshot_instructions.bin"
+    _vm_snapshot_data = "${_lib_snapshot_gen_dir}/vm_isolate_snapshot.bin"
+    _vm_snapshot_instructions =
+        "${_lib_snapshot_gen_dir}/vm_snapshot_instructions.bin"
+
+    # For testing JIT snapshot setup.
+    defines = [
+      "TEST_ISOLATE_SNAPSHOT_DATA=\"${_isolate_snapshot_data}\"",
+      "TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS=\"${_isolate_snapshot_instructions}\"",
+      "TEST_VM_SNAPSHOT_DATA=\"${_vm_snapshot_data}\"",
+      "TEST_VM_SNAPSHOT_INSTRUCTIONS=\"${_vm_snapshot_instructions}\"",
+    ]
+
     if (test_enable_gl) {
       sources += [
         "tests/embedder_test_compositor_gl.cc",
