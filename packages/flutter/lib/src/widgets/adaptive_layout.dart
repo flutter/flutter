@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'basic.dart';
+import 'framework.dart';
 import 'slot_layout.dart';
 import 'slot_layout_config.dart';
+import 'ticker_provider.dart';
 
 /// A parent Widget takes in multiple [SlotLayout] components and places them
 /// into their appropriate positions on the screen.
@@ -136,7 +138,7 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
     final List<Widget> entries = slots.entries
         .map((MapEntry<String, SlotLayout?> entry) {
           if (entry.value != null) {
-            return LayoutId(id: entry.key, child: entry.value ?? Container());
+            return LayoutId(id: entry.key, child: entry.value ?? const SizedBox());
           }
         })
         .whereType<Widget>()

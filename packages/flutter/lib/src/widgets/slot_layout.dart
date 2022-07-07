@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'animated_switcher.dart';
+import 'basic.dart';
+import 'framework.dart';
+import 'media_query.dart';
 import 'slot_layout_config.dart';
+import 'ticker_provider.dart';
 
 /// A Widget that takes a mapping of [SlotLayoutConfig]s to breakpoints and returns a chosen
 /// Widget based on the current screen size.
@@ -19,9 +23,9 @@ class SlotLayout extends StatefulWidget {
 
   /// Given a context and a config, it returns the [SlotLayoutConfig] that will
   /// be chosen from the config under the context's conditions
-  static SlotLayoutConfig? pickWidget (BuildContext context,  Map<int, SlotLayoutConfig> config){
+  static SlotLayoutConfig? pickWidget (BuildContext context,  Map<int, SlotLayoutConfig?> config){
     SlotLayoutConfig? chosenWidget;
-    config.forEach((int key, SlotLayoutConfig value) {
+    config.forEach((int key, SlotLayoutConfig? value) {
       if(MediaQuery.of(context).size.width > key){
         chosenWidget = value;
       }
@@ -32,7 +36,7 @@ class SlotLayout extends StatefulWidget {
   /// The mapping that is used to determine what Widget to display at what point.
   ///
   /// The int represents screen width.
-  final Map<int, SlotLayoutConfig> config;
+  final Map<int, SlotLayoutConfig?> config;
   @override
   State<SlotLayout> createState() => _SlotLayoutState();
 }

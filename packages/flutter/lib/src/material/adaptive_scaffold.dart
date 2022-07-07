@@ -3,13 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'adaptive_layout.dart';
 import 'bottom_navigation_bar.dart';
 import 'colors.dart';
 import 'navigation_bar.dart';
 import 'navigation_rail.dart';
-import 'slot_layout.dart';
-import 'slot_layout_config.dart';
 
 /// [AdaptiveScaffold] is an abstraction that passes properties to
 /// [AdaptiveLayout] and reduces repetition and a burden on the developer.
@@ -18,13 +15,18 @@ class AdaptiveScaffold extends StatefulWidget {
   /// [AdaptiveLayout].
   const AdaptiveScaffold({
     this.destinations,
-    this.selectedIndex,
-    this.bodyList,
-    this.secondaryBodyList,
+    this.selectedIndex = 0,
+    this.smallBody = const SizedBox(key: Key('')),
+    this.body,
+    this.largeBody = const SizedBox(key: Key('')),
+    this.smallSecondaryBody = const SizedBox(key: Key('')),
+    this.secondaryBody,
+    this.largeSecondaryBody = const SizedBox(key: Key('')),
     this.bodyRatio,
     this.breakpoints = const <int>[0, 480, 1024],
     this.displayAnimations = true,
     this.bodyAnimated = true,
+    this.horizontalBody = true,
     super.key,
   });
 
@@ -37,13 +39,45 @@ class AdaptiveScaffold extends StatefulWidget {
   /// The index to be used by the [NavigationRail] if applicable.
   final int? selectedIndex;
 
-  /// By default the indexing of this list goes in order of what to display in
-  /// the body slot under the same indexing of the [breakpoints] list.
-  final List<Widget?>? bodyList;
+  /// Widget to be displayed in the body slot at the smallest breakpoint.
+  ///
+  /// If nothing is entered for this property, then the default [body] is
+  /// displayed in the slot. If null is entered for this slot, the slot stays
+  /// empty.
+  final Widget? smallBody;
 
-  /// By default the indexing of this list goes in order of what to display in
-  /// the secondaryBody slot under the same indexing of the [breakpoints] list.
-  final List<Widget?>? secondaryBodyList;
+  /// Widget to be displayed in the body slot at the middle breakpoint.
+  ///
+  /// The default displayed body.
+  final Widget? body;
+
+  /// Widget to be displayed in the body slot at the largest breakpoint.
+  ///
+  /// If nothing is entered for this property, then the default [body] is
+  /// displayed in the slot. If null is entered for this slot, the slot stays
+  /// empty.
+  final Widget? largeBody;
+
+  /// Widget to be displayed in the secondaryBody slot at the smallest
+  /// breakpoint.
+  ///
+  /// If nothing is entered for this property, then the default [secondaryBody]
+  /// is displayed in the slot. If null is entered for this slot, the slot stays
+  /// empty.
+  final Widget? smallSecondaryBody;
+
+  /// Widget to be displayed in the secondaryBody slot at the middle breakpoint.
+  ///
+  /// The default displayed secondaryBody.
+  final Widget? secondaryBody;
+
+  /// Widget to be displayed in the seconaryBody slot at the smallest
+  /// breakpoint.
+  ///
+  /// If nothing is entered for this property, then the default [secondaryBody]
+  /// is displayed in the slot. If null is entered for this slot, the slot stays
+  /// empty.
+  final Widget? largeSecondaryBody;
 
   /// Defines the fractional ratio of body to the secondaryBody.
   ///
@@ -54,8 +88,9 @@ class AdaptiveScaffold extends StatefulWidget {
   /// the center of the screen.
   final double? bodyRatio;
 
-  /// The list defining breakpoints for the [AdaptiveLayout] the breakpoint is
-  /// active from the value at the index up until the value at the next index.
+  /// Must be of length 3. The list defining breakpoints for the
+  /// [AdaptiveLayout] the breakpoint is active from the value at the index up
+  /// until the value at the next index.
   ///
   /// Defaults to [0, 480, 1024].
   final List<int> breakpoints;
@@ -70,6 +105,12 @@ class AdaptiveScaffold extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool bodyAnimated;
+
+  /// Whether to orient the body and secondaryBody in horizontal order (true) or
+  /// in vertical order (false).
+  ///
+  /// Defaults to true.
+  final bool horizontalBody;
 
   @override
   State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
@@ -133,15 +174,32 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       child: child,
     );
   }
+
+  Widget fadeOut(Widget child, AnimationController animation) {
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: ReverseAnimation(animation), curve: Curves.easeInCubic),
+      child: child,
+    );
+  }
   @override
   Widget build(BuildContext context) {
-    final Widget Function(Widget, AnimationController)? inAnimation0 = (widget.secondaryBodyList == null || widget.secondaryBodyList![0] == null && widget.displayAnimations) ? fadeIn : null;
-    final Widget Function(Widget, AnimationController)? inAnimation1 = (widget.secondaryBodyList == null || widget.secondaryBodyList![1] == null && widget.displayAnimations) ? fadeIn : null;
-    final Widget Function(Widget, AnimationController)? inAnimation2 = (widget.secondaryBodyList == null || widget.secondaryBodyList![2] == null && widget.displayAnimations) ? fadeIn : null;
+    Widget? defaultWidget(Widget? primary, Widget? secondary) {
+      return primary?.key == const Key('') ? secondary : primary;
+    }
+
+    List<Widget?>? bodyList = <Widget?>[defaultWidget(widget.smallBody, widget.body), widget.body, defaultWidget(widget.largeBody, widget.body)];
+    List<Widget?>? secondaryBodyList = <Widget?>[defaultWidget(widget.smallSecondaryBody, widget.secondaryBody), widget.secondaryBody, defaultWidget(widget.largeSecondaryBody, widget.secondaryBody)];
+    if(bodyList.every((Widget? e) => e==null)) {
+      bodyList = null;
+      }
+    if(secondaryBodyList.every((Widget? e) => e==null)) {
+      secondaryBodyList = null;
+      }
 
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AdaptiveLayout(
+        horizontalBody: widget.horizontalBody,
         bodyRatio: widget.bodyRatio,
         bodyAnimated: widget.bodyAnimated && widget.displayAnimations,
         primaryNavigation: widget.destinations != null && widget.selectedIndex != null
@@ -203,26 +261,29 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                 },
               )
             : null,
-        body: widget.bodyList != null
-            ? SlotLayout(
-                config: <int, SlotLayoutConfig>{
-                  if (widget.bodyList![0] != null) widget.breakpoints[0]: SlotLayoutConfig(inAnimation: inAnimation0, key: const Key('body0'), child: widget.bodyList![0]!),
-                  if (widget.bodyList![1] != null) widget.breakpoints[1]: SlotLayoutConfig(inAnimation: inAnimation1, key: const Key('body1'), child: widget.bodyList![1]!),
-                  if (widget.bodyList![2] != null) widget.breakpoints[2]: SlotLayoutConfig(inAnimation: inAnimation2, key: const Key('body2'), child: widget.bodyList![2]!),
-                },
-              )
-            : null,
-        secondaryBody: widget.secondaryBodyList != null
-            ? SlotLayout(
-                config: <int, SlotLayoutConfig>{
-                  if (widget.secondaryBodyList![0] != null) widget.breakpoints[0]: SlotLayoutConfig(key: const Key('sbody0'), child: widget.secondaryBodyList![0]!),
-                  if (widget.secondaryBodyList![1] != null) widget.breakpoints[1]: SlotLayoutConfig(key: const Key('sbody1'), child: widget.secondaryBodyList![1]!),
-                  if (widget.secondaryBodyList![2] != null) widget.breakpoints[2]: SlotLayoutConfig(key: const Key('sbody2'), child: widget.secondaryBodyList![2]!),
-                },
-              )
-            : null,
+        body: _createSlotFromProperties(bodyList, 'body'),
+        secondaryBody: _createSlotFromProperties(secondaryBodyList, 'secondaryBody'),
       ),
     );
+  }
+
+  SlotLayout? _createSlotFromProperties(List<Widget?>? list, String name) {
+    return list != null
+        ? SlotLayout(
+            config: <int, SlotLayoutConfig?>{
+              for (MapEntry<int, Widget?> entry in list.asMap().entries)
+                if (entry.key == 0 || list[entry.key] != list[entry.key - 1])
+                  widget.breakpoints[entry.key]: (entry.value != null)
+                      ? SlotLayoutConfig(
+                          key: Key('$name${entry.key}'),
+                          inAnimation: fadeIn,
+                          overtakeAnimation: fadeOut,
+                          child: entry.value,
+                        )
+                      : null
+            },
+          )
+        : null;
   }
 }
 

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'basic.dart';
+import 'framework.dart';
 
 /// A Widget that takes a child and a Function that returns an animated Widget
 /// then displays the child with this animation.
@@ -23,7 +24,7 @@ class SlotLayoutConfig extends StatefulWidget {
   });
 
   /// The child Widget that the parent eventually returns with an animation.
-  final Widget child;
+  final Widget? child;
 
   /// A function that takes an [AnimationController] and a [Widget] and returns
   /// a [Widget].
@@ -51,6 +52,6 @@ class SlotLayoutConfig extends StatefulWidget {
 class _SlotLayoutConfigState extends State<SlotLayoutConfig> {
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return widget.child ?? const SizedBox(key:Key(''), width: 0, height: 0,);
   }
 }
