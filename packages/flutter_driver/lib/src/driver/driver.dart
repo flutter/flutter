@@ -513,9 +513,11 @@ abstract class FlutterDriver {
     await sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
   }
 
-  /// Simulates the user pressing one of the [DriverTextInputAction] buttons.
-  /// Does not check that the [DriverTextInputAction] performed is an acceptable one
-  /// based on the `inputAction` [TestTextInput.setClientArgs]
+  /// Simulate the user posting a text input action.
+  ///
+  /// The available action types can be found in [DriverTextInputAction]. The [receiveAction]
+  /// does not check whether the [DriverTextInputAction] performed is acceptable
+  /// based on the client arguments of the text input.
   ///
   /// This can be called even if the [TestTextInput] has not been [TestTextInput.register]ed.
   ///
