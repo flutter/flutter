@@ -209,34 +209,46 @@ class Layer {
     explicit AutoCachePaint(PaintContext& context) : context_(context) {
       needs_paint_ = context.inherited_opacity < SK_Scalar1;
       if (needs_paint_) {
-        paint_.setAlphaf(context.inherited_opacity);
+        sk_paint_.setAlphaf(context.inherited_opacity);
+        dl_paint_.setAlpha(SkScalarRoundToInt(context.inherited_opacity * 255));
         context.inherited_opacity = SK_Scalar1;
       }
     }
 
-    ~AutoCachePaint() { context_.inherited_opacity = paint_.getAlphaf(); }
+    ~AutoCachePaint() { context_.inherited_opacity = sk_paint_.getAlphaf(); }
 
     void setImageFilter(sk_sp<SkImageFilter> filter) {
-      paint_.setImageFilter(filter);
+      sk_paint_.setImageFilter(filter);
+      dl_paint_.setImageFilter(DlImageFilter::From(filter));
       update_needs_paint();
     }
 
     void setColorFilter(sk_sp<SkColorFilter> filter) {
-      paint_.setColorFilter(filter);
+      sk_paint_.setColorFilter(filter);
+      dl_paint_.setColorFilter(DlColorFilter::From(filter));
       update_needs_paint();
     }
 
-    const SkPaint* paint() { return needs_paint_ ? &paint_ : nullptr; }
+    void setBlendMode(DlBlendMode mode) {
+      sk_paint_.setBlendMode(ToSk(mode));
+      dl_paint_.setBlendMode(mode);
+      update_needs_paint();
+    }
+
+    const SkPaint* sk_paint() { return needs_paint_ ? &sk_paint_ : nullptr; }
+    const DlPaint* dl_paint() { return needs_paint_ ? &dl_paint_ : nullptr; }
 
    private:
     PaintContext& context_;
-    SkPaint paint_;
+    SkPaint sk_paint_;
+    DlPaint dl_paint_;
     bool needs_paint_;
 
     void update_needs_paint() {
-      needs_paint_ = paint_.getImageFilter() != nullptr ||
-                     paint_.getColorFilter() != nullptr ||
-                     paint_.getAlphaf() < SK_Scalar1;
+      needs_paint_ = sk_paint_.getImageFilter() != nullptr ||
+                     sk_paint_.getColorFilter() != nullptr ||
+                     !sk_paint_.isSrcOver() ||
+                     sk_paint_.getAlphaf() < SK_Scalar1;
     }
   };
 

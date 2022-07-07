@@ -277,6 +277,52 @@ TEST_F(BackdropFilterLayerTest, Readback) {
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
+TEST_F(BackdropFilterLayerTest, OpacityInheritance) {
+  auto backdrop_filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
+  const SkPath mock_path = SkPath().addRect(SkRect::MakeLTRB(0, 0, 10, 10));
+  const SkPaint mock_paint = SkPaint(SkColors::kRed);
+  const SkRect clip_rect = SkRect::MakeLTRB(0, 0, 100, 100);
+
+  auto clip = std::make_shared<ClipRectLayer>(clip_rect, Clip::hardEdge);
+  auto parent = std::make_shared<OpacityLayer>(128, SkPoint::Make(0, 0));
+  auto layer = std::make_shared<BackdropFilterLayer>(backdrop_filter.shared(),
+                                                     DlBlendMode::kSrcOver);
+  auto child = std::make_shared<MockLayer>(mock_path, mock_paint);
+  layer->Add(child);
+  parent->Add(layer);
+  clip->Add(parent);
+
+  clip->Preroll(preroll_context(), SkMatrix::I());
+
+  clip->Paint(display_list_paint_context());
+
+  DisplayListBuilder expected_builder(clip_rect);
+  /* ClipRectLayer::Paint */ {
+    expected_builder.save();
+    {
+      expected_builder.clipRect(clip_rect, SkClipOp::kIntersect, false);
+      /* OpacityLayer::Paint */ {
+        // NOP - it hands opacity down to BackdropFilterLayer
+        /* BackdropFilterLayer::Paint */ {
+          DlPaint save_paint;
+          save_paint.setAlpha(128);
+          expected_builder.saveLayer(&clip_rect, &save_paint, &backdrop_filter);
+          {
+            /* MockLayer::Paint */ {
+              DlPaint child_paint;
+              child_paint.setColor(DlColor::kRed());
+              expected_builder.drawPath(mock_path, child_paint);
+            }
+          }
+          expected_builder.restore();
+        }
+      }
+    }
+    expected_builder.restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+}
+
 using BackdropLayerDiffTest = DiffContextTest;
 
 TEST_F(BackdropLayerDiffTest, BackdropLayer) {
