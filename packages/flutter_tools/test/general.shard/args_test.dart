@@ -87,7 +87,7 @@ void verifyCommand(Command<Object> runner) {
   verifyOptions(runner.name, runner.argParser.options.values);
 
   final String firstDescriptionLine = runner.description.split('\n').first;
-  expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected period that a full sentence should end with");
+  expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected single period that a full sentence should end with");
 
   if (runner.hidden == false && runner.parent == null) {
     expect(
@@ -111,7 +111,7 @@ final RegExp _bannedArgumentNamePattern = RegExp(r'-uri$');
 
 // Patterns for help messages.
 final RegExp _bannedLeadingPatterns = RegExp(r'^[-a-z]', multiLine: true);
-final RegExp _allowedTrailingPatterns = RegExp(r'([^ ][.!:]\)?|: https?://[^ ]+[^.]|^)$');
+final RegExp _allowedTrailingPatterns = RegExp(r'([^ ]([^.^!^:][.!:])\)?|: https?://[^ ]+[^.]|^)$');
 final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
 final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
 final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
