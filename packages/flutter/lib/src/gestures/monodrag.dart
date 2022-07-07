@@ -323,7 +323,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// by different platforms:
   ///   1) They both move:
   ///   The gesture will move until all the pointers' [PointerMoveEvent] or [PointerPanZoomUpdateEvent] come individually.
-  ///   The gesture will move delta(combined) = max(delta[i] which are positive) + min(delta[i] which are negative),
+  ///   The gesture will move delta(combined) = max(delta(i) which are positive) + min(delta(i) which are negative),
   ///   The drag location will be the average of all pointers.
   ///   Logic:
   ///     When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes, add the [PointerEvent] in
@@ -345,7 +345,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///   2) Only some of pointers moves (it means the pointers' [PointerMoveEvent] or [PointerPanZoomUpdateEvent]
   ///   that are not moving do not come instead of [Offset] zero:
   ///   The gesture will move if two [PointerMoveEvent] or [PointerPanZoomUpdateEvent]s of the same pointer come.
-  ///   The gesture will move delta(combined) = max(delta[i] which are positive) + min(delta[i] which are negative)
+  ///   The gesture will move delta(combined) = max(delta(i) which are positive) + min(delta(i) which are negative)
   ///   The drag location will be the average of these moved pointers.
   ///   Logic:
   ///     When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes, add the [PointerEvent] in
