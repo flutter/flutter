@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:collection';
 
 /// Parsing the output of "dart pub deps --json"
@@ -10,12 +14,8 @@ class DartDependencyPackage {
     required this.source,
     required this.dependencies,
   });
-  final String name;
-  final String version;
-  final String source;
-  final List<String> dependencies;
 
-  static DartDependencyPackage fromHashMap(dynamic packageInfo) {
+  factory DartDependencyPackage.fromHashMap(dynamic packageInfo) {
     String name = '';
     String version = '';
     String source = '';
@@ -43,6 +43,11 @@ class DartDependencyPackage {
       dependencies: dependencies.map((e) => e.toString()).toList(),
     );
   }
+
+  final String name;
+  final String version;
+  final String source;
+  final List<String> dependencies;
 
 }
 
