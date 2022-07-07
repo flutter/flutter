@@ -75,6 +75,64 @@ void runSemanticsTests() {
   group('platform view', () {
     _testPlatformView();
   });
+  group('accessibility builder', () {
+    _testEngineAccessibilityBuilder();
+  });
+}
+
+void _testEngineAccessibilityBuilder() {
+  final EngineAccessibilityFeaturesBuilder builder =
+      EngineAccessibilityFeaturesBuilder(0);
+  EngineAccessibilityFeatures features = builder.build();
+
+  test('accessible navigation', () {
+    expect(features.accessibleNavigation, isFalse);
+    builder.accessibleNavigation = true;
+    features = builder.build();
+    expect(features.accessibleNavigation, isTrue);
+  });
+
+  test('bold text', () {
+    expect(features.boldText, isFalse);
+    builder.boldText = true;
+    features = builder.build();
+    expect(features.boldText, isTrue);
+  });
+
+  test('disable animations', () {
+    expect(features.disableAnimations, isFalse);
+    builder.disableAnimations = true;
+    features = builder.build();
+    expect(features.disableAnimations, isTrue);
+  });
+
+  test('high contrast', () {
+    expect(features.highContrast, isFalse);
+    builder.highContrast = true;
+    features = builder.build();
+    expect(features.highContrast, isTrue);
+  });
+
+  test('invert colors', () {
+    expect(features.invertColors, isFalse);
+    builder.invertColors = true;
+    features = builder.build();
+    expect(features.invertColors, isTrue);
+  });
+
+  test('on off switch labels', () {
+    expect(features.onOffSwitchLabels, isFalse);
+    builder.onOffSwitchLabels = true;
+    features = builder.build();
+    expect(features.onOffSwitchLabels, isTrue);
+  });
+
+  test('reduce motion', () {
+    expect(features.reduceMotion, isFalse);
+    builder.reduceMotion = true;
+    features = builder.build();
+    expect(features.reduceMotion, isTrue);
+  });
 }
 
 void _testEngineSemanticsOwner() {

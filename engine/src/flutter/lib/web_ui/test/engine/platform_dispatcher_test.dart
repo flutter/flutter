@@ -17,6 +17,21 @@ void main() {
 
 void testMain() {
   group('PlatformDispatcher', () {
+    test('high contrast in accessibilityFeatures has the correct value', () {
+      final MockHighContrastSupport mockHighContrast =
+          MockHighContrastSupport();
+      HighContrastSupport.instance = mockHighContrast;
+      final EnginePlatformDispatcher engineDispatcher =
+          EnginePlatformDispatcher();
+
+      expect(engineDispatcher.accessibilityFeatures.highContrast, isTrue);
+      mockHighContrast.isEnabled = false;
+      mockHighContrast.invokeListeners(mockHighContrast.isEnabled);
+      expect(engineDispatcher.accessibilityFeatures.highContrast, isFalse);
+
+      engineDispatcher.dispose();
+    });
+
     test('responds to flutter/skia Skia.setResourceCacheMaxBytes', () async {
       const MethodCodec codec = JSONMethodCodec();
       final Completer<ByteData?> completer = Completer<ByteData?>();
@@ -145,4 +160,30 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
     });
   });
+}
+
+class MockHighContrastSupport implements HighContrastSupport {
+  bool isEnabled = true;
+
+  final List<HighContrastListener> _listeners = <HighContrastListener>[];
+
+  @override
+  bool get isHighContrastEnabled => isEnabled;
+
+
+  void invokeListeners(bool val) {
+    for (final HighContrastListener listener in _listeners) {
+      listener(val);
+    }
+  }
+
+  @override
+  void addListener(HighContrastListener listener) {
+    _listeners.add(listener);
+  }
+
+  @override
+  void removeListener(HighContrastListener listener) {
+    _listeners.remove(listener);
+  }
 }
