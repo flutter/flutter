@@ -550,7 +550,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('keys', debugDescribeKeys()));
+    properties.add(MessageProperty('keys', debugDescribeKeys()));
     properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
@@ -680,7 +680,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('character', character));
+    properties.add(MessageProperty('character', debugDescribeKeys()));
     properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }

@@ -1222,7 +1222,7 @@ void main() {
         }).map((DiagnosticsNode node) => node.toString()).toList();
 
         expect(description.length, equals(1));
-        expect(description[0], equals('character: "A"'));
+        expect(description[0], equals("character: 'A'"));
       });
 
       test('no repeats', () {
@@ -1236,7 +1236,7 @@ void main() {
         }).map((DiagnosticsNode node) => node.toString()).toList();
 
         expect(description.length, equals(2));
-        expect(description[0], equals('character: "A"'));
+        expect(description[0], equals("character: 'A'"));
         expect(description[1], equals('excluding repeats'));
       });
 
@@ -1253,7 +1253,7 @@ void main() {
         }).map((DiagnosticsNode node) => node.toString()).toList();
 
         expect(description.length, equals(1));
-        expect(description[0], equals('character: Control + Meta + "A"'));
+        expect(description[0], equals("character: Control + Meta + 'A'"));
       });
     });
   });
