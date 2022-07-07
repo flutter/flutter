@@ -1224,25 +1224,21 @@ class ThemeData with Diagnosticable {
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
-  /// A temporary flag used to opt-in to Material 3 features.
+  /// A temporary flag used to opt-in to new Material 3 features.
   ///
   /// If true, then components that have been migrated to Material 3 will
-  /// use new colors, typography and other features of Material 3.
+  /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
   /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
   /// some properties will get special defaults. However, just copying a [ThemeData]
   /// with [useMaterial3] set to true will not change any of these properties in the
   /// resulting [ThemeData]. These properties are:
-  /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
-  ///
-  /// | Property        | Material 3 default           | Fallback default          |
-  /// | :-------------- | :--------------------------- | :------------------------ |
-  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
-  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
-  ///
-  /// \* if and only if the target platform is Android and the app is not
-  /// running on the web, otherwise it will fallback to [InkRipple].
+  /// | Property | [useMaterial3] default | fallback default |
+  /// |:---|:---|:---|
+  /// | [typography] | [Typography.material2021] | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* | [InkSplash] |
+  /// *if and only if the target platform is Android and the app is not running on the web.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
@@ -1260,15 +1256,12 @@ class ThemeData with Diagnosticable {
   ///   * [AppBar]
   ///   * [Card]
   ///   * [Dialog]
-  ///   * [ElevatedButton]
   ///   * [FloatingActionButton]
   ///   * [Material]
   ///   * [NavigationBar]
   ///   * [NavigationRail]
-  ///   * [OutlinedButton]
   ///   * [StretchingOverscrollIndicator], replacing the
   ///     [GlowingOverscrollIndicator]
-  ///   * [TextButton]
   ///
   /// See also:
   ///

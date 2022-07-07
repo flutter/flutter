@@ -825,7 +825,6 @@ mixin SchedulerBinding on BindingBase {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ensureFrameCallbacksRegistered();
     platformDispatcher.scheduleFrame();
     _hasScheduledFrame = true;
   }

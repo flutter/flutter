@@ -28,7 +28,9 @@ import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
-  return jsonDecode(File('dev/tools/gen_defaults/data/$fileName').readAsStringSync()) as Map<String, dynamic>;
+  return jsonDecode(
+          File('dev/tools/gen_defaults/data/$fileName').readAsStringSync())
+      as Map<String, dynamic>;
 }
 
 Future<void> main(List<String> args) async {
@@ -80,14 +82,22 @@ Future<void> main(List<String> args) async {
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
   AppBarTemplate('$materialLib/app_bar.dart', tokens).updateFile();
-  ButtonTemplate('md.comp.elevated-button', '$materialLib/elevated_button.dart', tokens).updateFile();
-  ButtonTemplate('md.comp.outlined-button', '$materialLib/outlined_button.dart', tokens).updateFile();
-  ButtonTemplate('md.comp.text-button', '$materialLib/text_button.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.elevated-button', '$materialLib/elevated_button.dart',
+          tokens)
+      .updateFile();
+  ButtonTemplate('md.comp.outlined-button', '$materialLib/outlined_button.dart',
+          tokens)
+      .updateFile();
+  ButtonTemplate('md.comp.text-button', '$materialLib/text_button.dart', tokens)
+      .updateFile();
   CardTemplate('$materialLib/card.dart', tokens).updateFile();
   DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
-  NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens).updateFile();
-  NavigationRailTemplate('$materialLib/navigation_rail.dart', tokens).updateFile();
-  SurfaceTintTemplate('$materialLib/elevation_overlay.dart', tokens).updateFile();
+  NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens)
+      .updateFile();
+  NavigationRailTemplate('$materialLib/navigation_rail.dart', tokens)
+      .updateFile();
+  SurfaceTintTemplate('$materialLib/elevation_overlay.dart', tokens)
+      .updateFile();
   TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();
 }

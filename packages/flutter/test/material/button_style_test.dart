@@ -20,8 +20,6 @@ void main() {
     expect(style.backgroundColor, null);
     expect(style.foregroundColor, null);
     expect(style.overlayColor, null);
-    expect(style.shadowColor, null);
-    expect(style.surfaceTintColor, null);
     expect(style.elevation, null);
     expect(style.padding, null);
     expect(style.minimumSize, null);
@@ -55,12 +53,10 @@ void main() {
       backgroundColor: MaterialStateProperty.all<Color>(const Color(0xfffffff1)),
       foregroundColor: MaterialStateProperty.all<Color>(const Color(0xfffffff2)),
       overlayColor: MaterialStateProperty.all<Color>(const Color(0xfffffff3)),
-      shadowColor: MaterialStateProperty.all<Color>(const Color(0xfffffff4)),
-      surfaceTintColor: MaterialStateProperty.all<Color>(const Color(0xfffffff5)),
       elevation: MaterialStateProperty.all<double>(1.5),
       padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1.0)),
       minimumSize: MaterialStateProperty.all<Size>(const Size(1.0, 2.0)),
-      side: MaterialStateProperty.all<BorderSide>(const BorderSide(width: 4.0, color: Color(0xfffffff6))),
+      side: MaterialStateProperty.all<BorderSide>(const BorderSide(width: 4.0, color: Color(0xfffffff4))),
       maximumSize: MaterialStateProperty.all<Size>(const Size(100.0, 200.0)),
       shape: MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder()),
       mouseCursor: MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden),
@@ -79,13 +75,11 @@ void main() {
       'backgroundColor: MaterialStateProperty.all(Color(0xfffffff1))',
       'foregroundColor: MaterialStateProperty.all(Color(0xfffffff2))',
       'overlayColor: MaterialStateProperty.all(Color(0xfffffff3))',
-      'shadowColor: MaterialStateProperty.all(Color(0xfffffff4))',
-      'surfaceTintColor: MaterialStateProperty.all(Color(0xfffffff5))',
       'elevation: MaterialStateProperty.all(1.5)',
       'padding: MaterialStateProperty.all(EdgeInsets.all(1.0))',
       'minimumSize: MaterialStateProperty.all(Size(1.0, 2.0))',
       'maximumSize: MaterialStateProperty.all(Size(100.0, 200.0))',
-      'side: MaterialStateProperty.all(BorderSide(Color(0xfffffff6), 4.0, BorderStyle.solid))',
+      'side: MaterialStateProperty.all(BorderSide(Color(0xfffffff4), 4.0, BorderStyle.solid))',
       'shape: MaterialStateProperty.all(StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none)))',
       'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(forbidden))',
       'tapTargetSize: shrinkWrap',
@@ -99,8 +93,6 @@ void main() {
     final MaterialStateProperty<Color> backgroundColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff1));
     final MaterialStateProperty<Color> foregroundColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff2));
     final MaterialStateProperty<Color> overlayColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff3));
-    final MaterialStateProperty<Color> shadowColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff4));
-    final MaterialStateProperty<Color> surfaceTintColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff5));
     final MaterialStateProperty<double> elevation =  MaterialStateProperty.all<double>(1);
     final MaterialStateProperty<EdgeInsets> padding = MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1));
     final MaterialStateProperty<Size> minimumSize = MaterialStateProperty.all<Size>(const Size(1, 2));
@@ -119,8 +111,6 @@ void main() {
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       overlayColor: overlayColor,
-      shadowColor: shadowColor,
-      surfaceTintColor: surfaceTintColor,
       elevation: elevation,
       padding: padding,
       minimumSize: minimumSize,
@@ -142,8 +132,6 @@ void main() {
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
         overlayColor: overlayColor,
-        shadowColor: shadowColor,
-        surfaceTintColor: surfaceTintColor,
         elevation: elevation,
         padding: padding,
         minimumSize: minimumSize,

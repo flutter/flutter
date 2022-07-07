@@ -14,13 +14,11 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('ElevatedButton, ElevatedButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
-    final bool material3 = theme.useMaterial3;
 
     // Enabled ElevatedButton
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Center(
           child: ElevatedButton(
             onPressed: () { },
@@ -41,13 +39,11 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, material3 ? colorScheme.onPrimary : colorScheme.primary);
-    expect(material.elevation, material3 ? 1: 2);
+    expect(material.color, colorScheme.primary);
+    expect(material.elevation, 2);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
-    expect(material.textStyle!.color, material3 ? colorScheme.primary : colorScheme.onPrimary);
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -60,13 +56,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
-
-    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
-    // the effect with paint methods.
-    if (!material3) {
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-      expect(inkFeatures, paints..circle(color: colorScheme.onPrimary.withOpacity(0.24)));
-    }
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(color: colorScheme.onPrimary.withAlpha(0x3d))); // splash color is onPrimary(0.24)
 
     // Only elevation changes when enabled and pressed.
     material = tester.widget<Material>(buttonMaterial);
@@ -74,13 +65,11 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, material3 ? colorScheme.onPrimary : colorScheme.primary);
-    expect(material.elevation, material3 ? 1 : 8);
+    expect(material.color, colorScheme.primary);
+    expect(material.elevation, 8);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
-    expect(material.textStyle!.color, material3 ? colorScheme.primary : colorScheme.onPrimary);
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -93,7 +82,7 @@ void main() {
     final Key iconButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Center(
           child: ElevatedButton.icon(
             key: iconButtonKey,
@@ -115,13 +104,11 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, material3 ? colorScheme.onPrimary : colorScheme.primary);
-    expect(material.elevation, material3? 1 : 2);
+    expect(material.color, colorScheme.primary);
+    expect(material.elevation, 2);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
-    expect(material.textStyle!.color, material3 ? colorScheme.primary : colorScheme.onPrimary);
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -130,7 +117,7 @@ void main() {
     // Disabled ElevatedButton
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: const Center(
           child: ElevatedButton(
             onPressed: null,
@@ -151,9 +138,7 @@ void main() {
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -785,9 +770,6 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
-          // Test was setup using fonts from Material 2, so make sure we always
-          // test against englishLike2014.
-          theme: ThemeData(textTheme: Typography.englishLike2014),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(
@@ -979,15 +961,7 @@ void main() {
           testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(
-                theme: ThemeData(
-                  colorScheme: const ColorScheme.light(),
-                  // Force Material 2 defaults for the typography and size
-                  // default values as the test was designed against these settings.
-                  textTheme: Typography.englishLike2014,
-                  elevatedButtonTheme: ElevatedButtonThemeData(
-                    style: ElevatedButton.styleFrom(minimumSize: const Size(64, 36)),
-                  ),
-                ),
+                theme: ThemeData.from(colorScheme: const ColorScheme.light()),
                 home: Builder(
                   builder: (BuildContext context) {
                     return MediaQuery(
@@ -1163,7 +1137,7 @@ void main() {
 
     Widget buildFrame({ required bool enabled }) {
       return MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: false),
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Center(
           child: ElevatedButton(
             onPressed: enabled ? () { } : null,
@@ -1207,29 +1181,23 @@ void main() {
     const Color borderColor = Color(0xff4caf50);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(colorScheme: const ColorScheme.light(), textTheme: Typography.englishLike2014, useMaterial3: false),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Center(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16)),
-                side: BorderSide(width: 10, color: borderColor),
+                side: BorderSide(width: 4, color: borderColor),
               ),
-              minimumSize: const Size(64, 36),
             ),
-            onPressed: () {},
+            onPressed: () { },
             child: const Text('button'),
           ),
         ),
       ),
     );
 
-    expect(find.byType(ElevatedButton), paints ..drrect(
-      // Outer and inner rect that give the outline a width of 10.
-      outer: RRect.fromLTRBR(0.0, 0.0, 116.0, 36.0, const Radius.circular(16)),
-      inner: RRect.fromLTRBR(10.0, 10.0, 106.0, 26.0, const Radius.circular(16 - 10)),
-      color: borderColor)
-    );
+    expect(find.byType(ElevatedButton), paints ..path(strokeWidth: 4) ..drrect(color: borderColor));
   });
 
   testWidgets('Fixed size ElevatedButtons', (WidgetTester tester) async {
@@ -1293,8 +1261,8 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // InkRipple.splashFactory, one splash circle drawn.
-    await tester.pumpWidget(buildFrame(splashFactory: InkRipple.splashFactory));
+    // Default splashFactory (from Theme.of().splashFactory), one splash circle drawn.
+    await tester.pumpWidget(buildFrame());
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
       final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
@@ -1418,7 +1386,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(textTheme: Typography.englishLike2014),
         home: Scaffold(
           body: Center(
             child: Column(

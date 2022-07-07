@@ -14,13 +14,11 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('TextButton, TextButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
-    final bool material3 = theme.useMaterial3;
 
     // Enabled TextButton
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Center(
           child: TextButton(
             onPressed: () { },
@@ -42,10 +40,8 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -59,13 +55,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
-
-    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
-    // the effect with paint methods.
-    if (!material3) {
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-      expect(inkFeatures, paints..circle(color: colorScheme.primary.withOpacity(0.12)));
-    }
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(color: colorScheme.primary.withAlpha(0x1f))); // splash color is primary(0.12)
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -77,10 +68,8 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -91,7 +80,7 @@ void main() {
     final Key iconButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Center(
           child: TextButton.icon(
             key: iconButtonKey,
@@ -115,10 +104,8 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -128,7 +115,7 @@ void main() {
     // Disabled TextButton
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: const Center(
           child: TextButton(
             onPressed: null,
@@ -145,10 +132,8 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
-    expect(material.shape, material3
-      ? const StadiumBorder()
-      : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -532,18 +517,14 @@ void main() {
 
   testWidgets('Does TextButton scale with font scale changes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Theme(
-        // Force Material 2 typography.
-        data: ThemeData(textTheme: Typography.englishLike2014),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Center(
-              child: TextButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Center(
+            child: TextButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -555,18 +536,14 @@ void main() {
 
     // textScaleFactor expands text, but not button.
     await tester.pumpWidget(
-      Theme(
-        // Force Material 2 typography.
-        data: ThemeData(textTheme: Typography.englishLike2014),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.3),
-            child: Center(
-              child: TextButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 1.3),
+          child: Center(
+            child: TextButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -582,18 +559,14 @@ void main() {
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
-      Theme(
-        // Force Material 2 typography.
-        data: ThemeData(textTheme: Typography.englishLike2014),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 3.0),
-            child: Center(
-              child: TextButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 3.0),
+          child: Center(
+            child: TextButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -608,6 +581,7 @@ void main() {
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
 
+
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return Theme(
@@ -617,7 +591,6 @@ void main() {
           child: Center(
             child: TextButton(
               key: key,
-              style: TextButton.styleFrom(minimumSize: const Size(64, 36)),
               child: const SizedBox(width: 50.0, height: 8.0),
               onPressed: () { },
             ),
@@ -882,7 +855,6 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, { bool useText = false }) async {
       return tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(textTheme: Typography.englishLike2014),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(
@@ -1021,15 +993,7 @@ void main() {
           testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(
-                theme: ThemeData(
-                  colorScheme: const ColorScheme.light(),
-                  // Force Material 2 defaults for the typography and size
-                  // default values as the test was designed against these settings.
-                  textTheme: Typography.englishLike2014,
-                  textButtonTheme: TextButtonThemeData(
-                    style: TextButton.styleFrom(minimumSize: const Size(64, 36)),
-                  ),
-                ),
+                theme: ThemeData.from(colorScheme: const ColorScheme.light()),
                 home: Builder(
                   builder: (BuildContext context) {
                     return MediaQuery(
@@ -1263,8 +1227,8 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // InkRipple.splashFactory, one splash circle drawn.
-    await tester.pumpWidget(buildFrame(splashFactory: InkRipple.splashFactory));
+    // Default splashFactory (from Theme.of().splashFactory), one splash circle drawn.
+    await tester.pumpWidget(buildFrame());
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
       final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
@@ -1388,7 +1352,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(textTheme: Typography.englishLike2014),
         home: Scaffold(
           body: Center(
             child: Column(
