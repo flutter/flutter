@@ -184,8 +184,11 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-    Offset bodyOffsetLT = Offset.zero;
-    Offset bodyOffsetRB = Offset.zero;
+
+    double leftMargin = 0;
+    double topMargin = 0;
+    double rightMargin = 0;
+    double bottomMargin = 0;
 
     double animatedSize(double begin, double end) {
       return bodyAnimated
@@ -195,132 +198,138 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
           : end;
     }
 
+    if (hasChild('topNavigation')) {
+      final Size currentSize = layoutChild('topNavigation', BoxConstraints.loose(size));
+      positionChild('topNavigation', Offset.zero);
+      topMargin += currentSize.height;
+    }
+    if (hasChild('bottomNavigation')) {
+      final Size currentSize = layoutChild('bottomNavigation', BoxConstraints.loose(size));
+      positionChild('bottomNavigation', Offset(0, size.height - currentSize.height));
+      bottomMargin += currentSize.height;
+    }
     if (hasChild('primaryNavigation')) {
       final Size currentSize = layoutChild('primaryNavigation', BoxConstraints.loose(size));
       if (textDirection) {
-        positionChild('primaryNavigation', Offset.zero);
-        bodyOffsetLT += Offset(currentSize.width, 0);
+        positionChild('primaryNavigation', Offset(leftMargin, topMargin));
+        leftMargin += currentSize.width;
       } else {
-        positionChild('primaryNavigation', Offset(size.width - currentSize.width, 0));
-        bodyOffsetRB += Offset(currentSize.width, 0);
+        positionChild('primaryNavigation', Offset(size.width - currentSize.width, topMargin));
+        rightMargin += currentSize.width;
       }
     }
     if (hasChild('secondaryNavigation')) {
       final Size currentSize = layoutChild('secondaryNavigation', BoxConstraints.loose(size));
       if (textDirection) {
-        positionChild('secondaryNavigation', Offset(size.width - currentSize.width, 0));
-        bodyOffsetRB += Offset(currentSize.width, 0);
+        positionChild('secondaryNavigation', Offset(size.width - currentSize.width, topMargin));
+        rightMargin += currentSize.width;
       } else {
-        positionChild('secondaryNavigation', Offset.zero);
-        bodyOffsetLT += Offset(currentSize.width, 0);
+        positionChild('secondaryNavigation', Offset(0, topMargin));
+        leftMargin += currentSize.width;
       }
     }
-    if (hasChild('topNavigation')) {
-      final Size currentSize = layoutChild('topNavigation', BoxConstraints.loose(size));
-      positionChild('topNavigation', Offset.zero);
-      bodyOffsetLT += Offset(0, currentSize.height);
-    }
-    if (hasChild('bottomNavigation')) {
-      final Size currentSize = layoutChild('bottomNavigation', BoxConstraints.loose(size));
-      positionChild('bottomNavigation', Offset(0, size.height - currentSize.height));
-      bodyOffsetRB += Offset(0, currentSize.height);
-    }
+
+    final double remainingWidth = size.width - rightMargin - leftMargin;
+    final double remainingHeight = size.height - bottomMargin - topMargin;
+    final double halfWidth = size.width / 2;
+    final double halfHeight = size.height / 2;
 
     if (hasChild('body') && hasChild('secondaryBody')) {
       Size currentSize;
       if (chosenWidgets['secondaryBody'] == null) {
-        currentSize = layoutChild(
-            'body',
-            BoxConstraints.tight(
-                Size(size.width - bodyOffsetRB.dx - bodyOffsetLT.dx, size.height - bodyOffsetRB.dy - bodyOffsetLT.dy)));
+        currentSize = layoutChild('body', BoxConstraints.tight(Size(remainingWidth, remainingHeight)));
         layoutChild('secondaryBody', BoxConstraints.loose(size));
       } else {
         if (horizontalBody) {
+          // If body and secondaryBody laid out horizontally
           if (textDirection) {
+            // If textDirection is LTR
             currentSize = layoutChild(
               'body',
               BoxConstraints.tight(
                 Size(
                   animatedSize(
-                      size.width - bodyOffsetRB.dx - bodyOffsetLT.dx,
-                      bodyRatio == null
-                          ? size.width / 2 - bodyOffsetRB.dx - bodyOffsetLT.dx
-                          : (size.width - bodyOffsetRB.dx - bodyOffsetLT.dx) * bodyRatio!),
-                  size.height - bodyOffsetRB.dy - bodyOffsetLT.dy,
+                    remainingWidth,
+                    bodyRatio == null ? halfWidth - rightMargin + leftMargin : remainingWidth * bodyRatio!,
+                  ),
+                  remainingHeight,
                 ),
               ),
             );
             layoutChild(
-                'secondaryBody',
-                BoxConstraints.tight(Size(
-                    bodyRatio == null
-                        ? size.width / 2
-                        : (size.width - bodyOffsetRB.dx - bodyOffsetLT.dx) * (1 - bodyRatio!),
-                    size.height - bodyOffsetRB.dy - bodyOffsetLT.dy)));
+              'secondaryBody',
+              BoxConstraints.tight(
+                Size(
+                  bodyRatio == null ? halfWidth - rightMargin : remainingWidth * (1 - bodyRatio!),
+                  remainingHeight,
+                ),
+              ),
+            );
           } else {
-            // RTL
+            // If textDirection is RTL
             currentSize = layoutChild(
               'secondaryBody',
               BoxConstraints.tight(
                 Size(
                   animatedSize(
-                      0,
-                      bodyRatio == null
-                          ? size.width / 2
-                          : size.width * (1 - bodyRatio!) - bodyOffsetRB.dx - bodyOffsetLT.dx),
-                  size.height - bodyOffsetRB.dy - bodyOffsetLT.dy,
+                    0,
+                    bodyRatio == null ? halfWidth + rightMargin - leftMargin : remainingWidth * (1 - bodyRatio!),
+                  ),
+                  remainingHeight,
                 ),
               ),
             );
             layoutChild(
-                'body',
-                BoxConstraints.tight(Size(
-                    bodyRatio == null ? size.width / 2 - bodyOffsetRB.dx - bodyOffsetLT.dx : size.width * bodyRatio!,
-                    size.height - bodyOffsetRB.dy - bodyOffsetLT.dy)));
+              'body',
+              BoxConstraints.tight(
+                Size(
+                  bodyRatio == null ? halfWidth - leftMargin : remainingWidth * bodyRatio!,
+                  remainingHeight,
+                ),
+              ),
+            );
           }
         } else {
+          // If body and secondaryBody laid out vertically
           currentSize = layoutChild(
-              'body',
-              BoxConstraints.tight(Size(
-                size.width - bodyOffsetRB.dx - bodyOffsetLT.dx,
+            'body',
+            BoxConstraints.tight(
+              Size(
+                remainingWidth,
                 animatedSize(
-                    size.height - bodyOffsetRB.dy - bodyOffsetLT.dy,
-                    bodyRatio == null
-                        ? size.height / 2
-                        : (size.height - bodyOffsetRB.dy - bodyOffsetLT.dy) * bodyRatio!),
-              )));
+                  remainingHeight,
+                  bodyRatio == null ? halfHeight - topMargin : remainingHeight * bodyRatio!,
+                ),
+              ),
+            ),
+          );
           layoutChild(
-              'secondaryBody',
-              BoxConstraints.tight(bodyRatio == null
-                  ? Size(size.width - bodyOffsetRB.dx - bodyOffsetLT.dx, size.height / 2)
-                  : Size((size.width - bodyOffsetRB.dx - bodyOffsetLT.dx) * (1 - bodyRatio!),
-                      size.height - bodyOffsetRB.dy - bodyOffsetLT.dy)));
+            'secondaryBody',
+            BoxConstraints.tight(
+              Size(
+                remainingWidth,
+                bodyRatio == null ? halfHeight - bottomMargin : remainingHeight * (1 - bodyRatio!),
+              ),
+            ),
+          );
         }
       }
       if (horizontalBody && !textDirection && chosenWidgets['secondaryBody'] != null) {
-        positionChild('body', Offset(bodyOffsetLT.dx + currentSize.width, bodyOffsetLT.dy));
-        positionChild('secondaryBody', bodyOffsetLT);
+        positionChild('body', Offset(leftMargin + currentSize.width, topMargin));
+        positionChild('secondaryBody', Offset(leftMargin, topMargin));
       } else {
-        positionChild('body', bodyOffsetLT);
+        positionChild('body', Offset(leftMargin, topMargin));
         if (horizontalBody) {
-          positionChild('secondaryBody', Offset(bodyOffsetLT.dx + currentSize.width, bodyOffsetLT.dy));
+          positionChild('secondaryBody', Offset(leftMargin + currentSize.width, topMargin));
         } else {
-          positionChild('secondaryBody', Offset(bodyOffsetLT.dx, bodyOffsetLT.dy + currentSize.height));
+          positionChild('secondaryBody', Offset(leftMargin, topMargin + currentSize.height));
         }
       }
     } else if (hasChild('body')) {
-      layoutChild(
-        'body',
-        BoxConstraints.tight(
-            Size(size.width - bodyOffsetRB.dx - bodyOffsetLT.dx, size.height - bodyOffsetRB.dy - bodyOffsetLT.dy)),
-      );
-      positionChild('body', bodyOffsetLT);
+      layoutChild('body', BoxConstraints.tight(Size(remainingWidth, remainingHeight)));
+      positionChild('body', Offset(leftMargin, topMargin));
     } else if (hasChild('secondaryBody')) {
-      layoutChild(
-        'secondaryBody',
-        BoxConstraints.tight(
-            Size(size.width - bodyOffsetRB.dx - bodyOffsetLT.dx, size.height - bodyOffsetRB.dy - bodyOffsetLT.dy)),
-      );
+      layoutChild('secondaryBody', BoxConstraints.tight(Size(remainingWidth, remainingHeight)));
     }
   }
 
