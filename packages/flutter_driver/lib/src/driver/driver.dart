@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 
-import '../common/action.dart';
 import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
@@ -22,6 +21,7 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/text_input_action.dart';
 import '../common/wait.dart';
 import 'timeline.dart';
 import 'vmservice_driver.dart';
@@ -515,7 +515,7 @@ abstract class FlutterDriver {
 
   /// Simulate the user posting a text input action.
   ///
-  /// The available action types can be found in [DriverTextInputAction]. The [receiveAction]
+  /// The available action types can be found in [DriverTextInputAction]. The [sendTextInputAction]
   /// does not check whether the [DriverTextInputAction] performed is acceptable
   /// based on the client arguments of the text input.
   ///
@@ -529,13 +529,13 @@ abstract class FlutterDriver {
   ///   await driver.tap(textField);  // acquire focus
   ///   await driver.enterText('Hello!');  // enter text
   ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
-  ///   await driver.receiveAction(DriverTextInputAction.done);  // submit text
+  ///   await driver.sendTextInputAction(DriverTextInputAction.done);  // submit text
   /// });
   /// ```
-  Future<void> receiveAction(DriverTextInputAction action,
+  Future<void> sendTextInputAction(DriverTextInputAction action,
       {Duration? timeout}) async {
     assert(action != null);
-    await sendCommand(ReceiveAction(action, timeout: timeout));
+    await sendCommand(SendTextInputAction(action, timeout: timeout));
   }
 
   /// Sends a string and returns a string.

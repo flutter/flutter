@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../driver_extension.dart';
 import '../extension/wait_conditions.dart';
-import 'action.dart';
 import 'diagnostics_tree.dart';
 import 'error.dart';
 import 'find.dart';
@@ -27,6 +26,7 @@ import 'render_tree.dart';
 import 'request_data.dart';
 import 'semantics.dart';
 import 'text.dart';
+import 'text_input_action.dart';
 import 'wait.dart';
 
 /// A factory which creates [Finder]s from [SerializableFinder]s.
@@ -160,7 +160,7 @@ mixin CommandHandlerFactory {
       case 'get_layer_tree': return _getLayerTree(command);
       case 'get_render_tree': return _getRenderTree(command);
       case 'enter_text': return _enterText(command);
-      case 'receive_action': return _receiveAction(command);
+      case 'send_text_input_action': return _sendTextInputAction(command);
       case 'get_text': return _getText(command, finderFactory);
       case 'request_data': return _requestData(command);
       case 'scroll': return _scroll(command, prober, finderFactory);
@@ -206,13 +206,13 @@ mixin CommandHandlerFactory {
     return Result.empty;
   }
 
-  Future<Result> _receiveAction(Command command) async {
+  Future<Result> _sendTextInputAction(Command command) async {
     if (!_testTextInput.isRegistered) {
-      throw StateError('Unable to fulfill `FlutterDriver.receiveAction`. Text emulation is '
+      throw StateError('Unable to fulfill `FlutterDriver.sendTextInputAction`. Text emulation is '
             'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.');
     }
-    final ReceiveAction receiveActionCommand = command as ReceiveAction;
-    _testTextInput.receiveAction(TextInputAction.values[receiveActionCommand.textInputAction.index]);
+    final SendTextInputAction sendTextInputAction = command as SendTextInputAction;
+    _testTextInput.receiveAction(TextInputAction.values[sendTextInputAction.textInputAction.index]);
     return Result.empty;
   }
 

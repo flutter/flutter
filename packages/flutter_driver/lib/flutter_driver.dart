@@ -11,7 +11,7 @@
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).
 library flutter_driver;
 
-export 'src/common/action.dart';
+export 'src/common/text_input_action.dart';
 export 'src/common/deserialization_factory.dart';
 export 'src/common/diagnostics_tree.dart';
 export 'src/common/enum_util.dart';

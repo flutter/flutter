@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter_driver/src/common/action.dart';
+import 'package:flutter_driver/src/common/text_input_action.dart';
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
@@ -352,10 +352,10 @@ void main() {
       });
     });
 
-    group('receiveAction', () {
-      test('sends the receiveAction command with action done', () async {
-                fakeClient.responses['receive_action'] = makeFakeResponse(<String, dynamic>{});
-        await driver.receiveAction(DriverTextInputAction.done, timeout: _kTestTimeout);
+    group('sendTextInputAction', () {
+      test('sends the sendTextInputAction command with action done', () async {
+        fakeClient.responses['receive_action'] = makeFakeResponse(<String, dynamic>{});
+        await driver.sendTextInputAction(DriverTextInputAction.done, timeout: _kTestTimeout);
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: receive_action, timeout: $_kSerializedTestTimeout, action: done}',
         ]);
