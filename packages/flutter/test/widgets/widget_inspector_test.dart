@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(CoderDake): Clean up pubRootDirectory tests https://github.com/flutter/flutter/issues/107186
+
 // no-shuffle:
 //   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
 //   dependencies have been fixed.
@@ -1249,6 +1251,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       group('removePubRootDirectories', () {
         setUp(() {
+          service.resetPubRootDirectories();
           service.addPubRootDirectories(<String>[directoryA, directoryB, directoryC]);
         });
 
@@ -2708,7 +2711,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
-
+    
     Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
       final Map<Object, Object?> event = events.removeLast();
       // Verify that the event is json encodable.

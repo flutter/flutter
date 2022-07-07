@@ -1410,7 +1410,7 @@ mixin WidgetInspectorService {
     pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
     final Set<String> directorySet = Set<String>.from(pubRootDirectories);
-    if(_pubRootDirectories != null){
+    if(_pubRootDirectories != null) {
       directorySet.addAll(_pubRootDirectories!);
     }
 
