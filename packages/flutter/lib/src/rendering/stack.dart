@@ -56,6 +56,37 @@ class RelativeRect {
     );
   }
 
+  /// Creates a RelativeRect from horizontal position using `start` and `end`
+  /// rather than `left` and `right`.
+  ///
+  /// If `textDirection` is [TextDirection.rtl], then the `start` argument is
+  /// used for the [right] property and the `end` argument is used for the
+  /// [left] property. Otherwise, if `textDirection` is [TextDirection.ltr],
+  /// then the `start` argument is used for the [left] property and the `end`
+  /// argument is used for the [right] property.
+  factory RelativeRect.fromDirectional({
+    required TextDirection textDirection,
+    required double start,
+    required double top,
+    required double end,
+    required double bottom,
+  }) {
+    double left;
+    double right;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        left = end;
+        right = start;
+        break;
+      case TextDirection.ltr:
+        left = start;
+        right = end;
+        break;
+    }
+
+    return RelativeRect.fromLTRB(left, top, right, bottom);
+  }
+
   /// A rect that covers the entire container.
   static const RelativeRect fill = RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0);
 
