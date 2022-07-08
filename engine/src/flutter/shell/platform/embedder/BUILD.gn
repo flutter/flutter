@@ -29,6 +29,26 @@ config("embedder_header_config") {
   include_dirs = [ "." ]
 }
 
+config("embedder_jit_snapshot_setup") {
+  _lib_snapshot_label = "//flutter/lib/snapshot:vm_isolate_snapshot.bin"
+  _lib_snapshot_gen_dir = get_label_info(_lib_snapshot_label, "target_gen_dir")
+
+  _isolate_snapshot_data = "${_lib_snapshot_gen_dir}/isolate_snapshot.bin"
+  _isolate_snapshot_instructions =
+      "${_lib_snapshot_gen_dir}/isolate_snapshot_instructions.bin"
+  _vm_snapshot_data = "${_lib_snapshot_gen_dir}/vm_isolate_snapshot.bin"
+  _vm_snapshot_instructions =
+      "${_lib_snapshot_gen_dir}/vm_snapshot_instructions.bin"
+
+  # For testing JIT snapshot setup.
+  defines = [
+    "TEST_ISOLATE_SNAPSHOT_DATA=\"${_isolate_snapshot_data}\"",
+    "TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS=\"${_isolate_snapshot_instructions}\"",
+    "TEST_VM_SNAPSHOT_DATA=\"${_vm_snapshot_data}\"",
+    "TEST_VM_SNAPSHOT_INSTRUCTIONS=\"${_vm_snapshot_instructions}\"",
+  ]
+}
+
 # Template for the embedder build. Used to allow building it multiple times with
 # different flags.
 template("embedder_source_set") {
@@ -277,6 +297,7 @@ if (enable_unittests) {
     testonly = true
 
     configs += [
+      ":embedder_jit_snapshot_setup",
       ":embedder_gpu_configuration_config",
       "//flutter:export_dynamic_symbols",
     ]
