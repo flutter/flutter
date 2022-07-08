@@ -1356,6 +1356,7 @@ FILE: ../../../flutter/shell/platform/android/android_surface_software.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_software.h
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.cc
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
+FILE: ../../../flutter/shell/platform/android/apk_asset_provider_unittests.cc
 FILE: ../../../flutter/shell/platform/android/context/android_context.cc
 FILE: ../../../flutter/shell/platform/android/context/android_context.h
 FILE: ../../../flutter/shell/platform/android/external_view_embedder/external_view_embedder.cc
