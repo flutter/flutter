@@ -56,7 +56,10 @@ FlutterUIPressProxy* keyDownEvent(UIKeyboardHIDUsage keyCode,
 
 FlutterUIPressProxy* keyUpEvent(UIKeyboardHIDUsage keyCode,
                                 UIKeyModifierFlags modifierFlags = 0x0,
-                                NSTimeInterval timestamp = 0.0f) API_AVAILABLE(ios(13.4));
+                                NSTimeInterval timestamp = 0.0f,
+                                const char* characters = "",
+                                const char* charactersIgnoringModifiers = "")
+    API_AVAILABLE(ios(13.4));
 
 FlutterUIPressProxy* keyEventWithPhase(UIPressPhase phase,
                                        UIKeyboardHIDUsage keyCode,

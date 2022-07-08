@@ -146,10 +146,17 @@ static const char* getEventCharacters(NSString* characters, UIKeyboardHIDUsage k
 /**
  * Returns the logical key of a KeyUp or KeyDown event.
  *
+ * The `maybeSpecialKey` is a nullable integer, and if not nil, indicates
+ * that the event key is a special key as defined by `specialKeyMapping`,
+ * and is the corresponding logical key.
+ *
  * For modifier keys, use GetLogicalKeyForModifier.
  */
-static uint64_t GetLogicalKeyForEvent(FlutterUIPressProxy* press, uint64_t physicalKey)
+static uint64_t GetLogicalKeyForEvent(FlutterUIPressProxy* press, NSNumber* maybeSpecialKey)
     API_AVAILABLE(ios(13.4)) {
+  if (maybeSpecialKey != nil) {
+    return [maybeSpecialKey unsignedLongLongValue];
+  }
   // Look to see if the keyCode can be mapped from keycode.
   auto fromKeyCode = keyCodeToLogicalKey.find(press.key.keyCode);
   if (fromKeyCode != keyCodeToLogicalKey.end()) {
@@ -670,7 +677,11 @@ void HandleResponse(bool handled, void* user_data);
     return;
   }
   uint64_t physicalKey = GetPhysicalKeyForKeyCode(press.key.keyCode);
-  uint64_t logicalKey = GetLogicalKeyForEvent(press, physicalKey);
+  // Some unprintable keys on iOS have literal names on their key label, such as
+  // @"UIKeyInputEscape". They are called the "special keys" and have predefined
+  // logical keys and empty characters.
+  NSNumber* specialKey = [specialKeyMapping objectForKey:press.key.charactersIgnoringModifiers];
+  uint64_t logicalKey = GetLogicalKeyForEvent(press, specialKey);
   [self synchronizeModifiers:press];
 
   NSNumber* pressedLogicalKey = nil;
@@ -697,7 +708,8 @@ void HandleResponse(bool handled, void* user_data);
       .type = kFlutterKeyEventTypeDown,
       .physical = physicalKey,
       .logical = pressedLogicalKey == nil ? logicalKey : [pressedLogicalKey unsignedLongLongValue],
-      .character = getEventCharacters(press.key.characters, press.key.keyCode),
+      .character =
+          specialKey != nil ? nil : getEventCharacters(press.key.characters, press.key.keyCode),
       .synthesized = false,
   };
   [self sendPrimaryFlutterEvent:flutterEvent callback:callback];
