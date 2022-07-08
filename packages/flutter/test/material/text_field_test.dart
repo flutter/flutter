@@ -131,6 +131,15 @@ double getOpacity(WidgetTester tester, Finder finder) {
   ).opacity.value;
 }
 
+double getStaticOpacity(WidgetTester tester, Finder finder) {
+  return tester.widget<Opacity>(
+    find.ancestor(
+      of: finder,
+      matching: find.byType(Opacity),
+    ).first,
+  ).opacity;
+}
+
 class TestFormatter extends TextInputFormatter {
   TestFormatter(this.onFormatEditUpdate);
   FormatEditUpdateCallback onFormatEditUpdate;
@@ -3708,7 +3717,7 @@ void main() {
     // Neither the prefix or the suffix should initially be visible, only the hint.
     expect(getOpacity(tester, find.text('Prefix')), 0.0);
     expect(getOpacity(tester, find.text('Suffix')), 0.0);
-    expect(getOpacity(tester, find.text('Hint')), 1.0);
+    expect(getStaticOpacity(tester, find.text('Hint')), 1.0);
 
     await tester.tap(find.byKey(secondKey));
     await tester.pumpAndSettle();
@@ -3716,7 +3725,7 @@ void main() {
     // Focus the Input. The hint, prefix, and suffix should appear
     expect(getOpacity(tester, find.text('Prefix')), 1.0);
     expect(getOpacity(tester, find.text('Suffix')), 1.0);
-    expect(getOpacity(tester, find.text('Hint')), 1.0);
+    expect(getStaticOpacity(tester, find.text('Hint')), 1.0);
 
     // Enter some text, and the hint should disappear and the prefix and suffix
     // should continue to be visible
@@ -3725,7 +3734,7 @@ void main() {
 
     expect(getOpacity(tester, find.text('Prefix')), 1.0);
     expect(getOpacity(tester, find.text('Suffix')), 1.0);
-    expect(getOpacity(tester, find.text('Hint')), 0.0);
+    expect(getStaticOpacity(tester, find.text('Hint')), 0.0);
 
     // Check and make sure that the right styles were applied.
     final Text prefixText = tester.widget(find.text('Prefix'));
