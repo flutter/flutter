@@ -43,12 +43,8 @@ import 'theme_data.dart';
 /// This widget requires a [Material] widget ancestor in the tree to paint
 /// itself on, which is typically provided by the app's [Scaffold].
 /// The [tileColor], and [selectedTileColor] are not painted by the
-/// [RadioListTile] itself but by the [Material] widget ancestor. An opaque
-/// widget, like `Container(color: Colors.white)`, is included in between
-/// the [RadioListTile] and its [Material] ancestor,then the opaque widget
-/// will obscure the [Material] widget and [RadioListTile] background
-/// [tileColor], etc. In this case, one can wrap a [Material] widget around
-/// the [RadioListTile], e.g.:
+/// [RadioListTile] itself but by the [Material] widget ancestor. In this
+/// case, one can wrap a [Material] widget around the [RadioListTile], e.g.:
 ///
 /// ```dart
 /// Container(
@@ -65,7 +61,7 @@ import 'theme_data.dart';
 /// )
 /// ```
 ///
-/// ## Performance considerations when wrapping [Material] with [RadioListTile]
+/// ## Performance considerations when wrapping [RadioListTile] with [Material]
 ///
 /// Wrapping a large number of [RadioListTile]s individually with [Material]s
 /// is expensive. Consider only wrapping the [RadioListTile]s that require it

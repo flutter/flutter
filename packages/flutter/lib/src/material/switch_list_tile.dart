@@ -50,12 +50,8 @@ enum _SwitchListTileType { material, adaptive }
 /// This widget requires a [Material] widget ancestor in the tree to paint
 /// itself on, which is typically provided by the app's [Scaffold].
 /// The [tileColor], and [selectedTileColor] are not painted by the
-/// [SwitchListTile] itself but by the [Material] widget ancestor. An opaque
-/// widget, like `Container(color: Colors.white)`, is included in between
-/// the [SwitchListTile] and its [Material] ancestor,then the opaque widget
-/// will obscure the [Material] widget and [SwitchListTile] background
-/// [tileColor], etc. In this case, one can wrap a [Material] widget around
-/// the [SwitchListTile], e.g.:
+/// [SwitchListTile] itself but by the [Material] widget ancestor. In this
+/// case, one can wrap a [Material] widget around the [SwitchListTile], e.g.:
 ///
 /// ```dart
 /// Container(
@@ -70,7 +66,8 @@ enum _SwitchListTileType { material, adaptive }
 ///   ),
 /// )
 /// ```
-/// ## Performance considerations when wrapping [Material] with [SwitchListTile]
+///
+/// ## Performance considerations when wrapping [SwitchListTile] with [Material]
 ///
 /// Wrapping a large number of [SwitchListTile]s individually with [Material]s
 /// is expensive. Consider only wrapping the [SwitchListTile]s that require it

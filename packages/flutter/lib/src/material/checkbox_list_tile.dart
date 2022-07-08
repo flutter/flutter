@@ -42,12 +42,9 @@ import 'theme_data.dart';
 /// This widget requires a [Material] widget ancestor in the tree to paint
 /// itself on, which is typically provided by the app's [Scaffold].
 /// The [tileColor], and [selectedTileColor] are not painted by the
-/// [CheckboxListTile] itself but by the [Material] widget ancestor. An opaque
-/// widget, like `Container(color: Colors.white)`, is included in between
-/// the [CheckboxListTile] and its [Material] ancestor,then the opaque widget
-/// will obscure the [Material] widget and [CheckboxListTile] background
-/// [tileColor], etc. In this case, one can wrap a [Material] widget around
-/// the [CheckboxListTile], e.g.:
+/// [CheckboxListTile] itself but by the [Material] widget ancestor.
+/// In this case, one can wrap a [Material] widget around the [CheckboxListTile],
+/// e.g.:
 ///
 /// ```dart
 /// Container(
@@ -63,7 +60,7 @@ import 'theme_data.dart';
 /// )
 /// ```
 ///
-/// ## Performance considerations when wrapping [Material] with [CheckboxListTile]
+/// ## Performance considerations when wrapping [CheckboxListTile] with [Material]
 ///
 /// Wrapping a large number of [CheckboxListTile]s individually with [Material]s
 /// is expensive. Consider only wrapping the [CheckboxListTile]s that require it

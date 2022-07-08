@@ -91,11 +91,8 @@ enum ListTileControlAffinity {
 /// itself on, which is typically provided by the app's [Scaffold].
 /// The [tileColor], [selectedTileColor], [focusColor], and [hoverColor]
 /// are not painted by the [ListTile] itself but by the [Material] widget
-/// ancestor. An opaque widget, like `Container(color: Colors.white)`,
-/// is included in between the [ListTile] and its [Material] ancestor,
-/// then the opaque widget will obscure the [Material] widget and [ListTile]
-/// background [tileColor], etc. In this case, one can wrap a [Material]
-/// widget around the [ListTile], e.g.:
+/// ancestor. In this case, one can wrap a [Material] widget around the
+/// [ListTile], e.g.:
 ///
 /// ```dart
 /// Container(
@@ -109,7 +106,7 @@ enum ListTileControlAffinity {
 /// )
 /// ```
 ///
-/// ## Performance considerations when wrapping [Material] with [ListTile]
+/// ## Performance considerations when wrapping [ListTile] with [Material]
 ///
 /// Wrapping a large number of [ListTile]s individually with [Material]s
 /// is expensive. Consider only wrapping the [ListTile]s that require it
