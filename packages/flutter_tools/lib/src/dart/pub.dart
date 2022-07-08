@@ -412,12 +412,8 @@ class _DefaultPub implements Pub {
     final bool showTraceForErrors = await _botDetector.isRunningOnBot;
 
     String lastPubMessage = 'no message';
-    bool versionSolvingFailed = false;
     String? filterWrapper(String line) {
       lastPubMessage = line;
-      if (line.contains('version solving failed')) {
-        versionSolvingFailed = true;
-      }
       if (filter == null) {
         return line;
       }
@@ -435,9 +431,7 @@ class _DefaultPub implements Pub {
       );
 
     String result = 'success';
-    if (versionSolvingFailed) {
-      result = 'version-solving-failed';
-    } else if (code != 0) {
+    if (code != 0) {
       result = 'failure';
     }
     PubResultEvent(
