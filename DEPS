@@ -141,7 +141,7 @@ deps = {
    Var('chromium_git') + '/vulkan-deps' + '@' + '23b710f1a0b3c44d51035c6400a554415f95d9c6',
 
   'src/third_party/flatbuffers':
-   Var('github_git') + '/google/flatbuffers.git' + '@' + '967df08b1dbddc62f867464c2e0d58d8027438ad',
+   Var('github_git') + '/google/flatbuffers.git' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '12de966fcbe1d1a48dba310aee63807856ffeee8',
