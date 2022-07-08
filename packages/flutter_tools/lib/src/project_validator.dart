@@ -144,7 +144,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
     // Information retrieved from the pubspeck.lock file if a dependency comes from
     // the hosted url https://pub.dartlang.org we ignore it or if the package
     // is the current directory being analyzed (root).
-    final Set<String> hostedDependencies = {'hosted', 'root'};
+    final Set<String> hostedDependencies = <String>{'hosted', 'root'};
 
     for (final DartDependencyPackage package in dartPubJson.packages) {
       if (!hostedDependencies.contains(package.source)) {

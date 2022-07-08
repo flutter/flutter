@@ -40,7 +40,7 @@ class DartDependencyPackage {
       name: name,
       version: version,
       source: source,
-      dependencies: dependencies.map((e) => e.toString()).toList(),
+      dependencies: dependencies.map((dynamic e) => e.toString()).toList(),
     );
   }
 
