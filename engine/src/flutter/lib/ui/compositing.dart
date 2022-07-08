@@ -21,22 +21,22 @@ class Scene extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   Scene._();
 
-  /// Creates a GPU resident image from this scene.
+  /// Synchronously creates a handle to an image from this scene.
   ///
-  /// {@macro dart.ui.painting.Picture.toGpuImage}
-  Image toGpuImage(int width, int height) {
+  /// {@macro dart.ui.painting.Picture.toImageSync}
+  Image toImageSync(int width, int height) {
     if (width <= 0 || height <= 0) {
       throw Exception('Invalid image dimensions.');
     }
 
     final _Image image = _Image._();
-    final String? result =  _toGpuImage(width, height, image);
+    final String? result =  _toImageSync(width, height, image);
     if (result != null) {
       throw PictureRasterizationException._(result);
     }
     return Image._(image, image.width, image.height);
   }
-  String? _toGpuImage(int width, int height, _Image outImage) native 'Scene_toGpuImage';
+  String? _toImageSync(int width, int height, _Image outImage) native 'Scene_toImageSync';
 
   /// Creates a raster image representation of the current state of the scene.
   /// This is a slow operation that is performed on a background thread.

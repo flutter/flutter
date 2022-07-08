@@ -3754,7 +3754,7 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-TEST_F(ShellTest, PictureToGpuImage) {
+TEST_F(ShellTest, PictureToImageSync) {
 #if !SHELL_ENABLE_GL
   // GL emulation does not exist on Fuchsia.
   GTEST_SKIP();
@@ -3778,7 +3778,7 @@ TEST_F(ShellTest, PictureToGpuImage) {
   ASSERT_TRUE(shell->IsSetup());
   auto configuration = RunConfiguration::InferFromSettings(settings);
   PlatformViewNotifyCreated(shell.get());
-  configuration.SetEntrypoint("toGpuImage");
+  configuration.SetEntrypoint("toImageSync");
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
 

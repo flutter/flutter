@@ -6,7 +6,7 @@ part of ui;
 
 abstract class Scene {
   Future<Image> toImage(int width, int height);
-  Image toGpuImage(int width, int height);
+  Image toImageSync(int width, int height);
   void dispose();
 }
 

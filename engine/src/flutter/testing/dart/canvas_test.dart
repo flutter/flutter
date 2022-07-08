@@ -410,12 +410,12 @@ void main() {
     expect(areEqual, true);
   }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
 
-  test('toGpuImage - too big', () async {
+  test('toImageSync - too big', () async {
     PictureRecorder recorder = PictureRecorder();
     Canvas canvas = Canvas(recorder);
     canvas.drawPaint(Paint()..color = const Color(0xFF123456));
     final Picture picture = recorder.endRecording();
-    final Image image = picture.toGpuImage(300000, 4000000);
+    final Image image = picture.toImageSync(300000, 4000000);
     picture.dispose();
 
     expect(image.width, 300000);
@@ -454,12 +454,12 @@ void main() {
     );
   });
 
-  test('toGpuImage - succeeds', () async {
+  test('toImageSync - succeeds', () async {
     PictureRecorder recorder = PictureRecorder();
     Canvas canvas = Canvas(recorder);
     canvas.drawPaint(Paint()..color = const Color(0xFF123456));
     final Picture picture = recorder.endRecording();
-    final Image image = picture.toGpuImage(30, 40);
+    final Image image = picture.toImageSync(30, 40);
     picture.dispose();
 
     expect(image.width, 30);
@@ -485,36 +485,26 @@ void main() {
     );
   });
 
-  test('toGpuImage - toByteData', () async {
+  test('toImageSync - toByteData', () async {
     const Color color = Color(0xFF123456);
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     canvas.drawPaint(Paint()..color = color);
     final Picture picture = recorder.endRecording();
-    final Image image = picture.toGpuImage(6, 8);
+    final Image image = picture.toImageSync(6, 8);
     picture.dispose();
 
     expect(image.width, 6);
     expect(image.height, 8);
 
-    final ByteData? data = await image.toByteData();
+    final ByteData? data = await image.toByteData(format: ImageByteFormat.rawRgba);
 
     expect(data, isNotNull);
     expect(data!.lengthInBytes, 6 * 8 * 4);
-    final Uint32List bytes = data.buffer.asUint32List();
-    // Draws a checkerboard due to flutter_tester not having a GPU context.
-    const int white = 0xFFFFFFFF;
-    const int grey  = 0xFFCCCCCC;
-    expect(bytes, const <int>[
-      white, white, white, grey,  grey,  grey, //
-      white, white, white, grey,  grey,  grey,
-      white, white, white, grey,  grey,  grey,
-      white, white, white, grey,  grey,  grey,
-      grey,  grey,  grey,  white, white, white,
-      grey,  grey,  grey,  white, white, white,
-      grey,  grey,  grey,  white, white, white,
-      grey,  grey,  grey,  white, white, white,
-    ]);
+    expect(data.buffer.asUint8List()[0], 0x12);
+    expect(data.buffer.asUint8List()[1], 0x34);
+    expect(data.buffer.asUint8List()[2], 0x56);
+    expect(data.buffer.asUint8List()[3], 0xFF);
   });
 
   test('Canvas.drawParagraph throws when Paragraph.layout was not called', () async {
