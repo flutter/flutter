@@ -149,7 +149,7 @@ void main() {
       )
     ));
 
-    expect(find.byKey(backgroundKey), matchesGoldenFile('decorated_sliver.moon.background.png'));
+    await expectLater(find.byKey(backgroundKey), matchesGoldenFile('decorated_sliver.moon.background.png'));
 
     final Key foregroundKey = UniqueKey();
     await tester.pumpWidget(MaterialApp(
@@ -173,7 +173,7 @@ void main() {
       )
     ));
 
-    expect(find.byKey(foregroundKey), matchesGoldenFile('decorated_sliver.moon.foreground.png'));
+    await expectLater(find.byKey(foregroundKey), matchesGoldenFile('decorated_sliver.moon.foreground.png'));
   });
 }
 
