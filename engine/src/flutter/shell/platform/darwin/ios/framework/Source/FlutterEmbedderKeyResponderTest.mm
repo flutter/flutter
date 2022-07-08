@@ -75,6 +75,8 @@ constexpr UIKeyboardHIDUsage kKeyCodeUndefined = (UIKeyboardHIDUsage)0x03;
 API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeKeyA = (UIKeyboardHIDUsage)0x04;
 API_AVAILABLE(ios(13.4))
+constexpr UIKeyboardHIDUsage kKeyCodePeriod = (UIKeyboardHIDUsage)0x37;
+API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeKeyW = (UIKeyboardHIDUsage)0x1a;
 API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeShiftLeft = (UIKeyboardHIDUsage)0xe1;
@@ -86,6 +88,8 @@ API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeCapsLock = (UIKeyboardHIDUsage)0x39;
 API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeF1 = (UIKeyboardHIDUsage)0x3a;
+API_AVAILABLE(ios(13.4))
+constexpr UIKeyboardHIDUsage kKeyCodeCommandLeft = (UIKeyboardHIDUsage)0xe3;
 API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeAltRight = (UIKeyboardHIDUsage)0xe6;
 API_AVAILABLE(ios(13.4))
@@ -938,6 +942,71 @@ typedef void (^ResponseCallback)(bool handled);
   [[events lastObject] respond:TRUE];
   XCTAssertEqual(last_handled, TRUE);
 
+  [events removeAllObjects];
+}
+
+// Press Cmd-. should correctly result in an Escape event.
+- (void)testCommandPeriodKey API_AVAILABLE(ios(13.4)) {
+  __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
+  id keyEventCallback = ^(BOOL handled) {
+  };
+  FlutterKeyEvent* event;
+
+  FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
+      initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
+                          _Nullable _VoidPtr user_data) {
+        [events addObject:[[TestKeyEvent alloc] initWithEvent:&event callback:nil userData:nil]];
+        callback(true, user_data);
+      }];
+
+  // MetaLeft down.
+  [responder handlePress:keyDownEvent(kKeyCodeCommandLeft, kModifierFlagMetaAny, 123.0f, "", "")
+                callback:keyEventCallback];
+  XCTAssertEqual([events count], 1u);
+  event = events[0].data;
+  XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
+  XCTAssertEqual(event->physical, kPhysicalMetaLeft);
+  XCTAssertEqual(event->logical, kLogicalMetaLeft);
+  XCTAssertEqual(event->character, nullptr);
+  XCTAssertEqual(event->synthesized, false);
+  [events removeAllObjects];
+
+  // Period down, which is logically Escape.
+  [responder handlePress:keyDownEvent(kKeyCodePeriod, kModifierFlagMetaAny, 123.0f,
+                                      "UIKeyInputEscape", "UIKeyInputEscape")
+                callback:keyEventCallback];
+  XCTAssertEqual([events count], 1u);
+  event = events[0].data;
+  XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
+  XCTAssertEqual(event->physical, kPhysicalPeriod);
+  XCTAssertEqual(event->logical, kLogicalEscape);
+  XCTAssertEqual(event->character, nullptr);
+  XCTAssertEqual(event->synthesized, false);
+  [events removeAllObjects];
+
+  // Period up, which unconventionally has characters.
+  [responder handlePress:keyUpEvent(kKeyCodePeriod, kModifierFlagMetaAny, 123.0f,
+                                    "UIKeyInputEscape", "UIKeyInputEscape")
+                callback:keyEventCallback];
+  XCTAssertEqual([events count], 1u);
+  event = events[0].data;
+  XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
+  XCTAssertEqual(event->physical, kPhysicalPeriod);
+  XCTAssertEqual(event->logical, kLogicalEscape);
+  XCTAssertEqual(event->character, nullptr);
+  XCTAssertEqual(event->synthesized, false);
+  [events removeAllObjects];
+
+  // MetaLeft up.
+  [responder handlePress:keyUpEvent(kKeyCodeCommandLeft, kModifierFlagMetaAny, 123.0f, "", "")
+                callback:keyEventCallback];
+  XCTAssertEqual([events count], 1u);
+  event = events[0].data;
+  XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
+  XCTAssertEqual(event->physical, kPhysicalMetaLeft);
+  XCTAssertEqual(event->logical, kLogicalMetaLeft);
+  XCTAssertEqual(event->character, nullptr);
+  XCTAssertEqual(event->synthesized, false);
   [events removeAllObjects];
 }
 
