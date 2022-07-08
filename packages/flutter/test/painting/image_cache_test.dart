@@ -179,6 +179,10 @@ void main() {
       return completer1;
     })! as TestImageStreamCompleter;
 
+    // Make the image seem live.
+    final ImageStreamListener listener = ImageStreamListener((_, __) {});
+    completer1.addListener(listener);
+
     expect(imageCache.statusForKey(testImage).pending, true);
     expect(imageCache.statusForKey(testImage).live, true);
     imageCache.clear();
@@ -346,10 +350,10 @@ void main() {
 
     imageCache.clear();
     expect(imageCache.statusForKey(testImage1).pending, false);
-    expect(imageCache.statusForKey(testImage1).live, true);
+    expect(imageCache.statusForKey(testImage1).live, false);
 
     completer1.testSetImage(testImage1);
-    expect(imageCache.statusForKey(testImage1).keepAlive, true);
+    expect(imageCache.statusForKey(testImage1).keepAlive, false);
     expect(imageCache.statusForKey(testImage1).live, false);
 
     imageCache.putIfAbsent(testImage2, () => completer2);
