@@ -10,14 +10,12 @@ import 'desktop_text_selection.dart';
 import 'localizations.dart';
 import 'text_selection_toolbar_button.dart';
 
-// TODO(justinmc): Rename to text_selection_toolbar_button_builder? (and material)
-
 /// A Function that builds a context menu given a list of its children Widgets.
 ///
 /// See also:
 ///
-///   * [CupertinoTextSelectionToolbarButtonsBuilder], which receives this as a
-///     parameter.
+///   * [CupertinoTextSelectionToolbarButtonsBuilder], which receives an
+///     instance of this as a parameter.
 typedef ContextMenuFromChildrenBuilder = Widget Function(
   BuildContext context,
   List<Widget> children,
