@@ -252,7 +252,7 @@ void testFontVariation() {
     ));
     baseBuilder.addText('Hello');
     final Paragraph baseParagraph = baseBuilder.build();
-    baseParagraph.layout(ParagraphConstraints(width: double.infinity));
+    baseParagraph.layout(const ParagraphConstraints(width: double.infinity));
     final double baseWidth = baseParagraph.minIntrinsicWidth;
 
     final ParagraphBuilder wideBuilder = ParagraphBuilder(ParagraphStyle(
@@ -262,11 +262,11 @@ void testFontVariation() {
     wideBuilder.pushStyle(TextStyle(
       fontFamily: 'RobotoSerif',
       fontSize: 40.0,
-      fontVariations: <FontVariation>[FontVariation('wght', 900.0)]
+      fontVariations: <FontVariation>[const FontVariation('wght', 900.0)],
     ));
     wideBuilder.addText('Hello');
     final Paragraph wideParagraph = wideBuilder.build();
-    wideParagraph.layout(ParagraphConstraints(width: double.infinity));
+    wideParagraph.layout(const ParagraphConstraints(width: double.infinity));
     final double wideWidth = wideParagraph.minIntrinsicWidth;
 
     expect(wideWidth, greaterThan(baseWidth));
