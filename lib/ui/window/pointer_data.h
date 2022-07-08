@@ -60,6 +60,7 @@ struct alignas(8) PointerData {
   enum class SignalKind : int64_t {
     kNone,
     kScroll,
+    kScrollInertiaCancel,
   };
 
   int64_t embedder_id;
