@@ -241,20 +241,17 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                             jstring jLibraryUrl,
                                             jobject jAssetManager,
                                             jobject jEntrypointArgs) {
-  auto asset_manager = std::make_shared<flutter::AssetManager>();
-
-  asset_manager->PushBack(std::make_unique<flutter::APKAssetProvider>(
-      env,                                             // jni environment
-      jAssetManager,                                   // asset manager
-      fml::jni::JavaStringToString(env, jBundlePath))  // apk asset dir
+  auto apk_asset_provider = std::make_unique<flutter::APKAssetProvider>(
+      env,                                            // jni environment
+      jAssetManager,                                  // asset manager
+      fml::jni::JavaStringToString(env, jBundlePath)  // apk asset dir
   );
-
   auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
   auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);
   auto entrypoint_args = fml::jni::StringListToVector(env, jEntrypointArgs);
 
-  ANDROID_SHELL_HOLDER->Launch(asset_manager, entrypoint, libraryUrl,
-                               entrypoint_args);
+  ANDROID_SHELL_HOLDER->Launch(std::move(apk_asset_provider), entrypoint,
+                               libraryUrl, entrypoint_args);
 }
 
 static jobject LookupCallbackInformation(JNIEnv* env,
