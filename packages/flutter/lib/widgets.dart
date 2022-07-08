@@ -35,6 +35,7 @@ export 'src/widgets/bottom_navigation_bar_item.dart';
 export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
+export 'src/widgets/decorated_sliver.dart';
 export 'src/widgets/default_selection_style.dart';
 export 'src/widgets/default_text_editing_shortcuts.dart';
 export 'src/widgets/desktop_text_selection_toolbar_layout_delegate.dart';
