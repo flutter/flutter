@@ -14,13 +14,13 @@ class PopupRouteApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: PopupRoutExample(),
+      home: PopupRouteExample(),
     );
   }
 }
 
-class PopupRoutExample extends StatelessWidget {
-  const PopupRoutExample({super.key});
+class PopupRouteExample extends StatelessWidget {
+  const PopupRouteExample({super.key});
 
   @override
   Widget build(BuildContext context) {

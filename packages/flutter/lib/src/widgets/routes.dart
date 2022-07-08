@@ -1210,10 +1210,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
   ///
-  /// If [barrierDismissible] is true, then tapping this barrier will cause the
-  /// current route to be popped (see [Navigator.pop]) with null as the value.
+  /// {@template flutter.widgets.ModalRoute.barrierDismissible.popRoute}
+  /// If [barrierDismissible] is true, then tapping this barrier, pressing
+  /// the escape key on the keyboard, or calling route popping functions
+  /// such as [Navigator.pop] will cause the current route to be popped
+  /// with null as the value.
   ///
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different value,
   /// either [changedInternalState] or [changedExternalState] should
@@ -1226,6 +1230,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
+  ///  * [Navigator.pop], which is used to dismiss the route.
   ///  * [barrierColor], which controls the color of the scrim for this route.
   ///  * [ModalBarrier], the widget that implements this feature.
   /// {@endtemplate}
@@ -1692,11 +1697,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
 /// A modal route that overlays a widget over the current route.
 ///
-/// When [barrierDismissible] is true, the user can dismiss the route by tapping
-/// the modal barrier or pressing the escape key on the keyboard.
-///
-/// When [barrierDismissible] is false, the user can dismiss the route only by calling
-/// route popping functions such as [Navigator.pop].
+/// {@macro flutter.widgets.ModalRoute.barrierDismissible.popRoute}
 ///
 /// {@tool dartpad}
 /// This example shows how to create a dialog box that is dismissible.
@@ -1706,7 +1707,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 ///
 /// See also:
 /// * [ModalRoute], which is the base class for this class.
-/// * [Navigator.pop] to pop a route off the navigator.
+/// * [Navigator.pop], which is used to dismiss the route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
