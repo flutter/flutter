@@ -339,76 +339,138 @@ class TransposeCharactersIntent extends Intent {
 }
 
 // ---------- Selection Gesture Intents ----------
+
+/// An [Intent] that represents a gesture interaction when the secondary button is released.
 class SecondaryTapUpIntent extends ListedIntents {
-  const SecondaryTapUpIntent({required super.intents});
+  /// Creates a [SecondaryTapUpIntent].
+  const SecondaryTapUpIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction that is triggered when the secondary button
+/// is released similar to [SecondaryTapUpIntent].
 class SecondaryTapIntent extends ListedIntents {
-  const SecondaryTapIntent({required super.intents});
+  /// Creates a [SecondaryTapIntent].
+  const SecondaryTapIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the secondary button is pressed down.
 class SecondaryTapDownIntent extends ListedIntents {
-  const SecondaryTapDownIntent({required super.intents});
+  /// Creates a [SecondaryTapDownIntent].
+  const SecondaryTapDownIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button is pressed down
+/// while the shift key is pressed down.
 class ShiftTapDownIntent extends ListedIntents {
-  const ShiftTapDownIntent({required super.intents});
+  /// Creates a [ShiftTapDownIntent].
+  const ShiftTapDownIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button is pressed down.
 class TapDownIntent extends ListedIntents {
-  const TapDownIntent({required super.intents});
+  /// Creates a [TapDownIntent].
+  const TapDownIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button is pressed down twice.
 class DoubleTapDownIntent extends ListedIntents {
-  const DoubleTapDownIntent({required super.intents});
+  /// Creates a [DoubleTapDownIntent].
+  const DoubleTapDownIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button is released.
 class TapUpIntent extends ListedIntents {
-  const TapUpIntent({required super.intents});
+  /// Creates a [TapUpIntent].
+  const TapUpIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button is released while
+/// the shift key is pressed down.
 class ShiftTapUpIntent extends ListedIntents {
-  const ShiftTapUpIntent({required super.intents});
+  /// Creates a [ShiftTapUpIntent].
+  const ShiftTapUpIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button press is interrupted.
 class TapCancelIntent extends ListedIntents {
-  const TapCancelIntent({required super.intents});
+  /// Creates a [TapCancelIntent].
+  const TapCancelIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button is pressed down
+/// to potentially initiate a drag.
 class DragTapDownIntent extends ListedIntents {
-  const DragTapDownIntent({required super.intents});
+  /// Creates a [DragTapDownIntent].
+  const DragTapDownIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a drag is initiated.
 class DragStartIntent extends ListedIntents {
-  const DragStartIntent({required super.intents});
+  /// Creates a [DragStartIntent].
+  const DragStartIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a drag is initiated and the shift key
+/// has been tapped at anytime during the drag.
+class ShiftTappingOnDragStartIntent extends ListedIntents {
+  /// Creates a [ShiftTappingOnDragStartIntent].
+  const ShiftTappingOnDragStartIntent({required super.intents, required super.enabledContext});
+}
+
+/// An [Intent] that represents a gesture interaction when a drag is being updated.
 class DragUpdateIntent extends ListedIntents {
-  const DragUpdateIntent({required super.intents});
+  /// Creates a [DragUpdateIntent].
+  const DragUpdateIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a drag is being updated and the shift key
+/// has been tapped at anytime during the drag.
+class ShiftTappingOnDragUpdateIntent extends ListedIntents {
+  /// Creates a [ShiftTappingOnDragUpdateIntent].
+  const ShiftTappingOnDragUpdateIntent({required super.intents, required super.enabledContext});
+}
+
+/// An [Intent] that represents a gesture interaction when a drag has ended.
 class DragEndIntent extends ListedIntents {
-  const DragEndIntent({required super.intents});
+  /// Creates a [DragEndIntent].
+  const DragEndIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a drag has ended and the shift key
+/// has been tapped at anytime during the drag.
+class ShiftTappingOnDragEndIntent extends ListedIntents {
+  /// Creates a [ShiftTappingOnDragEndIntent].
+  const ShiftTappingOnDragEndIntent({required super.intents, required super.enabledContext});
+}
+
+/// An [Intent] that represents a gesture interaction when a long press is initiated.
 class LongPressStartIntent extends ListedIntents {
-  const LongPressStartIntent({required super.intents});
+  /// Create a [LongPressStartIntent].
+  const LongPressStartIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a long press is being updated.
 class LongPressMoveUpdateIntent extends ListedIntents {
-  const LongPressMoveUpdateIntent({required super.intents});
+  /// Creates a [LongPressMoveUpdateIntent].
+  const LongPressMoveUpdateIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a long press has ended.
 class LongPressEndIntent extends ListedIntents {
-  const LongPressEndIntent({required super.intents});
+  /// Creates a [LongPressEndIntent].
+  const LongPressEndIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a force press is initiated.
 class ForcePressStartIntent extends ListedIntents {
-  const ForcePressStartIntent({required super.intents});
+  /// Creates a [ForcePressStartIntent].
+  const ForcePressStartIntent({required super.intents, required super.enabledContext});
 }
 
+/// An [Intent] that represents a gesture interaction when a force press has ended.
 class ForcePressEndIntent extends ListedIntents {
-  const ForcePressEndIntent({required super.intents});
+  /// Creates a [ForcePressEndIntent].
+  const ForcePressEndIntent({required super.intents, required super.enabledContext});
 }
 
 /// An [Intent] that requests the selection in an input field be expanded from

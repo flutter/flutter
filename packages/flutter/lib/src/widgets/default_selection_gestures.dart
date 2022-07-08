@@ -46,12 +46,15 @@ class DefaultSelectionGestures extends StatelessWidget {
             instance
               ..onSecondaryTapUp = (TapUpDetails details) {
                 print('onSecondaryTapUp');
-                Actions.invoke(context, SecondaryTapUpIntent(
+                Actions.invoke(
+                  context, 
+                  SecondaryTapUpIntent(
                     intents: <Intent>[
                       SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition), //if !lastSecondaryTapWasOnSelection || !renderEditable.hasFocus
                       SelectionToolbarControlIntent.hide, //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
                       SelectionToolbarControlIntent.show(position: details.globalPosition), //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
                     ],
+                    enabledContext: context,
                   ),
                 );
               }
@@ -67,20 +70,43 @@ class DefaultSelectionGestures extends StatelessWidget {
 
                 if (defaultTargetPlatform == TargetPlatform.macOS) {
                   if (_isShiftPressed) {
-                    Actions.invoke(context, ShiftTapDownIntent(intents: <Intent>[ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
+                    Actions.invoke(
+                      context, 
+                      ShiftTapDownIntent(
+                        intents: <Intent>[
+                          ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition),
+                          if (tapCount < 2) const KeyboardRequestIntent(),
+                          if (tapCount < 2) const UserOnTapCallbackIntent(),
+                        ],
+                        enabledContext: context,
+                      ),
+                    );
                   } else {
-                    Actions.invoke(context, TapDownIntent(intents: <Intent>[ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
+                    Actions.invoke(
+                      context, 
+                      TapDownIntent(
+                        intents: <Intent>[
+                          SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                          if (tapCount < 2) const KeyboardRequestIntent(),
+                          if (tapCount < 2) const UserOnTapCallbackIntent(),
+                        ], 
+                        enabledContext: context,
+                      ),
+                    );
                   }
                 }
 
                 if (tapCount == 2) {
                   print('onDoubleTapDown');
                   final bool showToolbar = details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus;
-                  Actions.invoke(context, DoubleTapDownIntent(
+                  Actions.invoke(
+                    context, 
+                    DoubleTapDownIntent(
                       intents: <Intent>[
                         SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
                         if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
                       ],
+                      enabledContext: context,
                     ),
                   );
                 }
@@ -94,28 +120,47 @@ class DefaultSelectionGestures extends StatelessWidget {
                 Actions.invoke(context, SelectionToolbarControlIntent.hide);
                 if (defaultTargetPlatform != TargetPlatform.macOS) {
                   if (_isShiftPressed){
-                    Actions.invoke(context, ShiftTapUpIntent(intents: <Intent>[ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
+                    Actions.invoke(
+                      context, 
+                      ShiftTapUpIntent(
+                        intents: <Intent>[
+                          ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition),
+                          const KeyboardRequestIntent(),
+                          const UserOnTapCallbackIntent(),
+                        ], 
+                        enabledContext: context,
+                      ),
+                    );
                   } else {
+                    late final Intent selectionUpdateIntent;
                     switch (details.kind) {
                       case PointerDeviceKind.mouse:
                       case PointerDeviceKind.stylus:
                       case PointerDeviceKind.invertedStylus:
                       // Precise devices should place the cursor at a precise position.
-                        Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                        selectionUpdateIntent = SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition);
                         break;
                       case PointerDeviceKind.touch:
                       case PointerDeviceKind.unknown:
                       default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
                       // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
-                      // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-                      // of the word.
-                        Actions.invoke(context, SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                      // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
+                        selectionUpdateIntent = SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition);
                         break;
                     }
+                    Actions.invoke(
+                      context,
+                      TapUpIntent(
+                        intents: <Intent>[
+                          selectionUpdateIntent,
+                          const KeyboardRequestIntent(),
+                          const UserOnTapCallbackIntent(),
+                        ],
+                        enabledContext: context,
+                      ),
+                    );
                   }
                 }
-                Actions.invoke(context, const KeyboardRequestIntent());
-                Actions.invoke(context, const UserOnTapCallbackIntent());
               }
               ..onTapCancel = () {
                 print('onTapCancel');
@@ -136,24 +181,57 @@ class DefaultSelectionGestures extends StatelessWidget {
                 print('onDragStart');
                 print('isShiftTapping: $isShiftTapping');
                 if (isShiftTapping) {
-                  Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
-                  // Save shiftTapDragSelection to TextField/EditableText through an intent -> action?
-                  Actions.invoke(context, SelectionOnDragStartControlIntent.save);
+                  Actions.invoke(
+                    context,
+                    ShiftTappingOnDragStartIntent(
+                      intents: <Intent>[
+                        ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition),
+                        SelectionOnDragStartControlIntent.save,
+                        ViewportOffsetOnDragStartControlIntent.save,
+                      ],
+                      enabledContext: context,
+                    ),
+                  );
                 } else {
-                  Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition));
+                  Actions.invoke(
+                    context,
+                    DragStartIntent(
+                      intents: <Intent>[
+                        SelectPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition),
+                        ViewportOffsetOnDragStartControlIntent.save,
+                      ],
+                      enabledContext: context,
+                    ),
+                  );
                 }
-                Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.save);
-                // Save dragStartViewportOffset to TextField/EditableText through an intent -> action?
               }
               ..onUpdate = (DragUpdateDetails updateDetails, DragStartDetails startDetails, bool isShiftTapping) {
                 print('onDragUpdate');
                 print('isShiftTapping: $isShiftTapping');
                 if (!isShiftTapping) {
-                  Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectPositionIntent, could also use SelectPositionIntent and in selectPosition check if _dragStartViewportOffset is null
+                  Actions.invoke(
+                    context,
+                    ShiftTappingOnDragUpdateIntent(
+                      intents: <Intent>[
+                        SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition),
+                      ],
+                      enabledContext: context,
+                    ),
+                  );
+                  // Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectPositionIntent, could also use SelectPositionIntent and in selectPosition check if _dragStartViewportOffset is null
                   // Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.drag, from: updateDetails));
                   return;
                 }
-                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition)); // remove? or ExtentSelectionToDragPositionIntent?
+                Actions.invoke(
+                  context,
+                  DragUpdateIntent(
+                    intents: <Intent>[
+                      ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition),
+                    ],
+                    enabledContext: context,
+                  ),
+                );
+                //Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition)); // remove? or ExtentSelectionToDragPositionIntent?
                 // ExpandSelectionToPositionConsideringInversionIntent?
 
               }
@@ -162,9 +240,27 @@ class DefaultSelectionGestures extends StatelessWidget {
                 // set shiftTapDragSelection to null in TextField/EditableText through an intent -> action.
                 // set dragStartViewportOffset to 0.0 in TextField/EditableText through intent -> action.
                 if (isShiftTapping) {
-                  Actions.invoke(context, SelectionOnDragStartControlIntent.clear);
+                  Actions.invoke(
+                    context,
+                    ShiftTappingOnDragEndIntent(
+                      intents: <Intent>[
+                        SelectionOnDragStartControlIntent.clear,
+                        ViewportOffsetOnDragStartControlIntent.clear,
+                      ],
+                      enabledContext: context,
+                    ),
+                  );
+                  return;
                 }
-                Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.clear);
+                Actions.invoke(
+                  context,
+                  DragEndIntent(
+                    intents: <Intent>[
+                      ViewportOffsetOnDragStartControlIntent.clear,
+                    ],
+                    enabledContext: context,
+                  ),
+                );
               };
           }
   );
@@ -175,15 +271,39 @@ class DefaultSelectionGestures extends StatelessWidget {
             instance
               ..onLongPressStart = (LongPressStartDetails details) {
                 print('onLongPressStart');
-                Actions.invoke(context, LongPressStartIntent(intents: <Intent>[SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition)]));
+                Actions.invoke(
+                  context, 
+                  LongPressStartIntent(
+                    intents: <Intent>[
+                      SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                    ], 
+                    enabledContext: context,
+                  ),
+                );
               }
               ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
                 print('onLongPressMoveUpdate');
-                Actions.invoke(context, LongPressMoveUpdateIntent(intents: <Intent>[SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition)]));
+                Actions.invoke(
+                  context, 
+                  LongPressMoveUpdateIntent(
+                    intents: <Intent>[
+                      SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                    ], 
+                    enabledContext: context,
+                  ),
+                );
               }
               ..onLongPressEnd = (LongPressEndDetails details) {
                 print('onLongPressEnd');
-                Actions.invoke(context, LongPressEndIntent(intents: <Intent>[SelectionToolbarControlIntent.show(position: details.globalPosition)]));
+                Actions.invoke(
+                  context, 
+                  LongPressEndIntent(
+                    intents: <Intent>[
+                      SelectionToolbarControlIntent.show(position: details.globalPosition),
+                    ], 
+                    enabledContext: context,
+                  ),
+                );
               };
           }
   );
@@ -194,7 +314,15 @@ class DefaultSelectionGestures extends StatelessWidget {
             instance
               ..onStart = (ForcePressDetails details) {
                 print('onStartForcePress');
-                Actions.invoke(context, ForcePressStartIntent(intents: <Intent>[SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition)]));
+                Actions.invoke(
+                  context, 
+                  ForcePressStartIntent(
+                    intents: <Intent>[
+                      SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition),
+                    ], 
+                    enabledContext: context,
+                  ),
+                );
               }
               ..onEnd = (ForcePressDetails details) {
                 print('onEndForcePress');
@@ -204,6 +332,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition),
                       SelectionToolbarControlIntent.show(position: details.globalPosition),
                     ],
+                    enabledContext: context,
                   ),
                 );
               };
@@ -217,11 +346,14 @@ class DefaultSelectionGestures extends StatelessWidget {
               instance
                 ..onSecondaryTapUp = (TapUpDetails details) {
                   print('onSecondaryTapUp');
-                  Actions.invoke(context, SecondaryTapUpIntent(
+                  Actions.invoke(
+                    context, 
+                    SecondaryTapUpIntent(
                       intents: <Intent>[
                         SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
                         SelectionToolbarControlIntent.toggle(position: details.globalPosition),
                       ],
+                      enabledContext: context,
                     ),
                   );
                 }
@@ -244,9 +376,29 @@ class DefaultSelectionGestures extends StatelessWidget {
                     case TargetPlatform.linux:
                     case TargetPlatform.windows:
                       if (_isShiftPressed) {
-                        Actions.invoke(context, ShiftTapDownIntent(intents: <Intent>[ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition)]));
+                        Actions.invoke(
+                          context, 
+                          ShiftTapDownIntent(
+                            intents: <Intent>[
+                              ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition),
+                              if (tapCount < 2) const KeyboardRequestIntent(),
+                              if (tapCount < 2) const UserOnTapCallbackIntent(),
+                            ], 
+                            enabledContext: context,
+                          ),
+                        );
                       } else {
-                        Actions.invoke(context, TapDownIntent(intents: <Intent>[SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition)]));
+                        Actions.invoke(
+                          context, 
+                          TapDownIntent(
+                            intents: <Intent>[
+                              SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                              if (tapCount < 2) const KeyboardRequestIntent(),
+                              if (tapCount < 2) const UserOnTapCallbackIntent(),
+                            ], 
+                            enabledContext: context,
+                          ),
+                        );
                       }
                       break;
                   }
@@ -254,11 +406,14 @@ class DefaultSelectionGestures extends StatelessWidget {
                   if (tapCount == 2) {
                     print('onDoubleTapDown');
                     final bool showToolbar = details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus;
-                    Actions.invoke(context, DoubleTapDownIntent(
+                    Actions.invoke(
+                      context, 
+                      DoubleTapDownIntent(
                         intents: <Intent>[
                           SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
                           if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
                         ],
+                        enabledContext: context,
                       ),
                     );
                   }
@@ -270,24 +425,40 @@ class DefaultSelectionGestures extends StatelessWidget {
                   }
                   Actions.invoke(context, SelectionToolbarControlIntent.hide);
                   switch (defaultTargetPlatform) {
-                    case TargetPlatform.macOS:
-                    case TargetPlatform.iOS:
-                    // Not for these platforms.
-                      break;
                     case TargetPlatform.android:
                     case TargetPlatform.fuchsia:
                       if (_isShiftPressed) {
-                        Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                        Actions.invoke(
+                          context,
+                          ShiftTapUpIntent(
+                            intents: <Intent>[
+                              ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition),
+                              const KeyboardRequestIntent(),
+                              const UserOnTapCallbackIntent(),
+                            ],
+                            enabledContext: context,
+                          ),
+                        );
                       } else {
-                        Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                        Actions.invoke(
+                          context,
+                          TapUpIntent(
+                            intents: <Intent>[
+                              SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                              const KeyboardRequestIntent(),
+                              const UserOnTapCallbackIntent(),
+                            ],
+                            enabledContext: context,
+                          ),
+                        );
                       }
                       break;
+                    case TargetPlatform.iOS:
                     case TargetPlatform.linux:
+                    case TargetPlatform.macOS:
                     case TargetPlatform.windows:
                       break;
                   }
-                  Actions.invoke(context, const KeyboardRequestIntent());
-                  Actions.invoke(context, const UserOnTapCallbackIntent());
                 }
                 ..onTapCancel = () {
                   print('onTapCancel');
@@ -300,18 +471,40 @@ class DefaultSelectionGestures extends StatelessWidget {
               instance
                 ..onLongPressStart = (LongPressStartDetails details) {
                   print('onLongPressStart');
-                  Actions.invoke(context, LongPressStartIntent(intents: <Intent>[
-                    SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
-                    const FeedbackRequestIntent(),
-                  ]));
+                  Actions.invoke(
+                    context, 
+                    LongPressStartIntent(
+                      intents: <Intent>[
+                        SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                        const FeedbackRequestIntent(),
+                      ], 
+                      enabledContext: context,
+                    ),
+                  );
                 }
                 ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
                   print('onLongPressMoveUpdate');
-                  Actions.invoke(context, LongPressMoveUpdateIntent(intents: <Intent>[SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition)]));
+                  Actions.invoke(
+                    context, 
+                    LongPressMoveUpdateIntent(
+                      intents: <Intent>[
+                        SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
+                      ], 
+                      enabledContext: context,
+                    ),
+                  );
                 }
                 ..onLongPressEnd = (LongPressEndDetails details) {
                   print('onLongPressEnd');
-                  Actions.invoke(context, LongPressEndIntent(intents: <Intent>[SelectionToolbarControlIntent.show(position: details.globalPosition)]));
+                  Actions.invoke(
+                    context, 
+                    LongPressEndIntent(
+                      intents: <Intent>[
+                        SelectionToolbarControlIntent.show(position: details.globalPosition),
+                      ], 
+                      enabledContext: context,
+                    ),
+                  );
                 };
             }
     ),
@@ -328,33 +521,83 @@ class DefaultSelectionGestures extends StatelessWidget {
               print('onDragStart');
               print('isShiftTapping: $isShiftTapping');
               if (isShiftTapping) {
-                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
-                // Save shiftTapDragSelection to TextField/EditableText through an intent -> action?
-                Actions.invoke(context, SelectionOnDragStartControlIntent.save);
+                Actions.invoke(
+                  context,
+                  ShiftTappingOnDragStartIntent(
+                    intents: <Intent>[
+                      ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition),
+                      SelectionOnDragStartControlIntent.save,
+                      ViewportOffsetOnDragStartControlIntent.save,
+                    ],
+                    enabledContext: context,
+                  ),
+                );
               } else {
-                Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition));
+                Actions.invoke(
+                  context,
+                  DragStartIntent(
+                    intents: <Intent>[
+                      SelectPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition),
+                      ViewportOffsetOnDragStartControlIntent.save,
+                    ],
+                    enabledContext: context,
+                  ),
+                );
               }
-              Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.save);
-              // Save dragStartViewportOffset to TextField/EditableText through an intent -> action?
             }
             ..onUpdate = (DragUpdateDetails updateDetails, DragStartDetails startDetails, bool isShiftTapping) {
               print('onDragUpdate');
               print('isShiftTapping: $isShiftTapping');
               if (!isShiftTapping) {
-                Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectPositionIntent, could also use SelectPositionIntent and in selectPosition check if _dragStartViewportOffset is null
+                Actions.invoke(
+                  context,
+                  ShiftTappingOnDragUpdateIntent(
+                    intents: <Intent>[
+                      SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition),
+                    ],
+                    enabledContext: context,
+                  ),
+                );
+                // Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectPositionIntent, could also use SelectPositionIntent and in selectPosition check if _dragStartViewportOffset is null
                 // Actions.invoke(context, SelectPositionIntent(cause: SelectionChangedCause.drag, from: updateDetails));
                 return;
               }
-              Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition));
+              Actions.invoke(
+                context,
+                DragUpdateIntent(
+                  intents: <Intent>[
+                    ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition),
+                  ],
+                  enabledContext: context,
+                ),
+              );
             }
             ..onEnd = (DragEndDetails details, bool isShiftTapping) {
               print('onDragEnd');
               // set shiftTapDragSelection to null in TextField/EditableText through an intent -> action.
               // set dragStartViewportOffset to 0.0 in TextField/EditableText through intent -> action.
               if (isShiftTapping) {
-                Actions.invoke(context, SelectionOnDragStartControlIntent.clear);
+                Actions.invoke(
+                  context,
+                  ShiftTappingOnDragEndIntent(
+                    intents: <Intent>[
+                      SelectionOnDragStartControlIntent.clear,
+                      ViewportOffsetOnDragStartControlIntent.clear,
+                    ],
+                    enabledContext: context,
+                  ),
+                );
+                return;
               }
-              Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.clear);
+              Actions.invoke(
+                context,
+                DragEndIntent(
+                  intents: <Intent>[
+                    ViewportOffsetOnDragStartControlIntent.clear,
+                  ],
+                  enabledContext: context,
+                ),
+              );
             };
         }
     ),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show LinkedHashMap;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -1540,7 +1542,11 @@ abstract class ListedIntents extends Intent {
   /// of intents, which will be executed in order.
   const ListedIntents({
     required this.intents,
-  })  : assert(intents != null);
+    required this.enabledContext,
+  })  : assert(intents != null),
+        assert(enabledContext != null);
+
+  final BuildContext enabledContext;
 
   /// List of intents to be evaluated in order for execution. When an
   /// [Action.isEnabled] returns false, the action will not be invoked and
@@ -1550,25 +1556,30 @@ abstract class ListedIntents extends Intent {
 
 /// An [Action] that iterates through a list of [Intent]s, invoking them all
 /// in order.
-class ListedAction<T extends ListedIntents> extends ContextAction<T> {
+class ListedAction<T extends ListedIntents> extends Action<T> {
+
+  /// The [Action]s overridden by this [Action].
+  LinkedHashMap<Intent, Action>? get callingMap => _intentActionPairing;
+
+  late LinkedHashMap<Intent, Action>? _intentActionPairing;
 
   /// Returns false if any of the given [ListedIntents] mapped [Action]s, [Action.isEnabled]
   /// return false. 
   @override
   bool isEnabled(T intent) {
-    final FocusNode? focus = primaryFocus;
     bool isEnabled = false;
-    if  (focus == null || focus.context == null) {
-      return false;
-    }
+    _intentActionPairing = LinkedHashMap<Intent,Action>();
     for (final Intent candidateIntent in (intent as ListedIntents).intents) {
       final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
-        focus.context!,
+        (intent as ListedIntents).enabledContext,
         intent: candidateIntent,
       );
       if (candidateAction != null && candidateAction.isEnabled(candidateIntent)) {
         isEnabled = true;
+        _intentActionPairing![candidateIntent] = candidateAction;
       } else {
+        _intentActionPairing!.clear();
+        _intentActionPairing = null;
         return false;
       }
     }
@@ -1577,14 +1588,10 @@ class ListedAction<T extends ListedIntents> extends ContextAction<T> {
 
   @override
   void invoke(T intent, [BuildContext? context]) {
-    for (final Intent currentIntent in (intent as ListedIntents).intents) {
-      final Action<Intent>? currentAction = Actions.maybeFind<Intent>(
-        context!,
-        intent: currentIntent,
-      );
-      if (currentAction != null && currentAction.isEnabled(currentIntent)) {
-        currentAction.invoke(currentIntent);
-      }
+    for (final MapEntry<Intent,Action> intentActionPair in _intentActionPairing!.entries) {
+      final Action currentAction = intentActionPair.value;
+      final Intent currentIntent = intentActionPair.key;
+      currentAction.invoke(currentIntent);
     }
   }
 }
