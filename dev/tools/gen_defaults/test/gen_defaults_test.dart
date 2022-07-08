@@ -107,7 +107,7 @@ static final String tokenBar = 'bar';
     }
   });
 
-  test('Multiple templates can modify different code chunks in the same file', () {
+  test('Multiple templates can modify different code blocks in the same file', () {
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
     try {
       // Create a temporary file with some content.
@@ -119,17 +119,17 @@ static final String tokenBar = 'bar';
 // the template.
 ''');
 
-      // Update file with a template for 'Chunk 1'
+      // Update file with a template for 'Block 1'
       {
         final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'foo', 'bar': 'bar'};
-        TestTemplate('Chunk 1', tempFile.path, tokens).updateFile();
+        TestTemplate('Block 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
 // This is a file with stuff in it.
 // This part shouldn't be changed by
 // the template.
 
-// BEGIN GENERATED TOKEN PROPERTIES - Chunk 1
+// BEGIN GENERATED TOKEN PROPERTIES - Block 1
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -141,21 +141,21 @@ static final String tokenBar = 'bar';
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
 
-// END GENERATED TOKEN PROPERTIES - Chunk 1
+// END GENERATED TOKEN PROPERTIES - Block 1
 ''');
 
-      // Update file with a template for 'Chunk 2', which should append but not
-      // disturb the code in 'Chunk 1'.
+      // Update file with a template for 'Block 2', which should append but not
+      // disturb the code in 'Block 1'.
       {
         final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'bar', 'bar': 'foo'};
-        TestTemplate('Chunk 2', tempFile.path, tokens).updateFile();
+        TestTemplate('Block 2', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
 // This is a file with stuff in it.
 // This part shouldn't be changed by
 // the template.
 
-// BEGIN GENERATED TOKEN PROPERTIES - Chunk 1
+// BEGIN GENERATED TOKEN PROPERTIES - Block 1
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -167,9 +167,9 @@ static final String tokenBar = 'bar';
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
 
-// END GENERATED TOKEN PROPERTIES - Chunk 1
+// END GENERATED TOKEN PROPERTIES - Block 1
 
-// BEGIN GENERATED TOKEN PROPERTIES - Chunk 2
+// BEGIN GENERATED TOKEN PROPERTIES - Block 2
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -181,21 +181,21 @@ static final String tokenBar = 'bar';
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
 
-// END GENERATED TOKEN PROPERTIES - Chunk 2
+// END GENERATED TOKEN PROPERTIES - Block 2
 ''');
 
-      // Update 'Chunk 1' again which should just update that chunk,
-      // leaving 'Chunk 2' undisturbed.
+      // Update 'Block 1' again which should just update that block,
+      // leaving 'Block 2' undisturbed.
       {
         final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'FOO', 'bar': 'BAR'};
-        TestTemplate('Chunk 1', tempFile.path, tokens).updateFile();
+        TestTemplate('Block 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
 // This is a file with stuff in it.
 // This part shouldn't be changed by
 // the template.
 
-// BEGIN GENERATED TOKEN PROPERTIES - Chunk 1
+// BEGIN GENERATED TOKEN PROPERTIES - Block 1
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -207,9 +207,9 @@ static final String tokenBar = 'foo';
 static final String tokenFoo = 'FOO';
 static final String tokenBar = 'BAR';
 
-// END GENERATED TOKEN PROPERTIES - Chunk 1
+// END GENERATED TOKEN PROPERTIES - Block 1
 
-// BEGIN GENERATED TOKEN PROPERTIES - Chunk 2
+// BEGIN GENERATED TOKEN PROPERTIES - Block 2
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -221,7 +221,7 @@ static final String tokenBar = 'BAR';
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
 
-// END GENERATED TOKEN PROPERTIES - Chunk 2
+// END GENERATED TOKEN PROPERTIES - Block 2
 ''');
 
     } finally {
@@ -251,7 +251,7 @@ static final String tokenBar = 'foo';
 }
 
 class TestTemplate extends TokenTemplate {
-  TestTemplate(super.chunkTag, super.fileName, super.tokens);
+  TestTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
   String generate() => '''

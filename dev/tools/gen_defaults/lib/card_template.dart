@@ -5,7 +5,7 @@
 import 'template.dart';
 
 class CardTemplate extends TokenTemplate {
-  const CardTemplate(super.chunkName, super.fileName, super.tokens);
+  const CardTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
   String generate() => '''
