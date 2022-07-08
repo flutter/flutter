@@ -61,14 +61,10 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
   void _determineLoupePositionAndFocalPoint() {
     final LoupeSelectionOverlayInfoBearer textEditingContext =
         widget.loupeSelectionOverlayInfoBearer.value;
-
-    final Offset editableTopLeftCorner =
-        textEditingContext.globalGesturePosition -
-            textEditingContext.localGesturePosition;
+            
 
     // The exact Y of the center of the current line.
-    final double verticalCenterOfCurrentLine =
-        editableTopLeftCorner.dy + textEditingContext.handlePosition.dy;
+    final double verticalCenterOfCurrentLine = textEditingContext.handleCenter.dy;
 
     // If the loupe is currently showing, but we have dragged out of threshold,
     // we should hide it.
