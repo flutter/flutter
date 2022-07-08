@@ -113,22 +113,17 @@ class TextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
         _kToolbarScreenPadding,
       ),
-      // TODO(justinmc): Is this Stack unnecessary?
-      child: Stack(
-        children: <Widget>[
-          CustomSingleChildLayout(
-            delegate: TextSelectionToolbarLayoutDelegate(
-              anchorAbove: anchorAbovePadded - localAdjustment,
-              anchorBelow: anchorBelowPadded - localAdjustment,
-              fitsAbove: fitsAbove,
-            ),
-            child: _TextSelectionToolbarOverflowable(
-              isAbove: fitsAbove,
-              toolbarBuilder: toolbarBuilder,
-              children: children,
-            ),
-          ),
-        ],
+      child: CustomSingleChildLayout(
+        delegate: TextSelectionToolbarLayoutDelegate(
+          anchorAbove: anchorAbovePadded - localAdjustment,
+          anchorBelow: anchorBelowPadded - localAdjustment,
+          fitsAbove: fitsAbove,
+        ),
+        child: _TextSelectionToolbarOverflowable(
+          isAbove: fitsAbove,
+          toolbarBuilder: toolbarBuilder,
+          children: children,
+        ),
       ),
     );
   }
