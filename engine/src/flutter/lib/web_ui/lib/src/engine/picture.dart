@@ -89,8 +89,8 @@ class EnginePicture implements ui.Picture {
   }
 
   @override
-  ui.Image toGpuImage(int width, int height) {
-    throw UnsupportedError('toGpuImage is not supported on the HTML backend. Use drawPicture instead, or toImage.');
+  ui.Image toImageSync(int width, int height) {
+    throw UnsupportedError('toImageSync is not supported on the HTML backend. Use drawPicture instead, or toImage.');
   }
 
   bool _disposed = false;
