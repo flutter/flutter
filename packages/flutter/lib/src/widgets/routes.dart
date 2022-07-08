@@ -1704,8 +1704,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 /// {@end-tool}
 ///
 /// See also:
-/// * [ModalRoute], which is the base class for this class.
-/// * [Navigator.pop], which is used to dismiss the route.
+///
+///   * [ModalRoute], which is the base class for this class.
+///   * [Navigator.pop], which is used to dismiss the route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
