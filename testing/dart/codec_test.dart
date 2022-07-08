@@ -87,7 +87,7 @@ void main() {
   });
 
   test('disposed decoded image', () async {
-    Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
+    final Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     final ui.FrameInfo frameInfo = await codec.getNextFrame();
     expect(frameInfo.image, isNotNull);

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show Float64List, Uint32List, ByteData;
+import 'dart:typed_data' show Float64List, ByteData;
 import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
