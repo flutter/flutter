@@ -36,7 +36,7 @@ const int _kPubExitCodeUnavailable = 69;
 typedef MessageFilter = String? Function(String message);
 
 /// globalCachePath is the directory in which the content of the localCachePath will be moved in
-void joinCaches({
+String? joinCaches({
   required FileSystem fileSystem,
   required String globalCachePath,
   required String localCachePath,
@@ -47,19 +47,34 @@ void joinCaches({
   for (final FileSystemEntity entity in localDirectory.listSync()) {
     final String newPath = fileSystem.path.join(globalDirectory.path, entity.basename);
     if (entity is File) {
-      entity.copySync(newPath);
+      try {
+        entity.copySync(newPath);
+      }
+      on FileSystemException {
+        return globalDirectory.path;
+      }
     } else if (entity is Directory) {
       if (!globalDirectory.childDirectory(entity.basename).existsSync()) {
         final Directory newDirectory = globalDirectory.childDirectory(entity.basename);
-        newDirectory.createSync();
-        joinCaches(
+        try {
+          newDirectory.createSync();
+        }
+        on FileSystemException {
+          return globalDirectory.path;
+        }
+        final String? failedDirectory = joinCaches(
           fileSystem: fileSystem,
           globalCachePath: newDirectory.path,
           localCachePath: entity.path,
         );
+        if (failedDirectory != null) {
+          return globalDirectory.path;
+        }
       }
     }
   }
+
+  return null;
 }
 
 /// When local cache (flutter_root/.pub-cache) and global cache (HOME/.pub-cache) are present a
@@ -574,12 +589,18 @@ class _DefaultPub implements Pub {
       final Directory globalDirectoryPub = _fileSystem.directory(
         _fileSystem.path.join(globalDirectory!.path, 'hosted', 'pub.dartlang.org')
       );
-      joinCaches(
+      final String? failedDirectory = joinCaches(
         fileSystem: _fileSystem,
         globalCachePath: globalDirectoryPub.path,
         localCachePath: localDirectoryPub.path,
       );
-      _fileSystem.directory(localCachePath).deleteSync(recursive: true);
+      if (failedDirectory != null) {
+        _logger.printTrace('The join of pub-caches failed');
+        _fileSystem.directory(failedDirectory).deleteSync(recursive: true);
+      }
+      else {
+        _fileSystem.directory(localCachePath).deleteSync(recursive: true);
+      }
       return globalDirectory.path;
     } else if (globalDirectory != null && globalDirectory.existsSync()) {
       return globalDirectory.path;
