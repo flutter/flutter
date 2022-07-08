@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/material/loupe.dart';
 
 import 'debug.dart';
 import 'desktop_text_selection.dart';
@@ -1192,7 +1193,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         if (theme.platform == TargetPlatform.android) {
-          //loupeBuilder = (BuildContext context, LoupeController controller) => CupertinoLoupe(controller: controller);
+          loupeBuilder = (
+            BuildContext context,
+            LoupeController controller, 
+            ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeSelectionOverlayInfoBearer  
+          ) => MaterialTextEditingLoupe(
+            controller: controller, 
+            loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer,
+          );
         }
 
         forcePressEnabled = false;

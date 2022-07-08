@@ -168,7 +168,7 @@ class CupertinoLoupe extends StatefulWidget {
     this.additionalFocalPointOffset = Offset.zero,
   });
   // These constants were eyeballed on an iPhone XR iOS v15.5.
-  static const double _kVerticalFocalPointOffset = -20;
+  static const double _kVerticalFocalPointOffset = -25;
   static const Size _kLoupeSize = Size(82.5, 45);
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
   static const Duration _kIoAnimationDuration = Duration(milliseconds: 150);

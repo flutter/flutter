@@ -79,16 +79,20 @@ class LoupeSelectionOverlayInfoBearer {
   const LoupeSelectionOverlayInfoBearer({
     required this.globalGesturePosition,
     required this.handleCenter,
+    required this.fieldBounds,
   });
 
   const LoupeSelectionOverlayInfoBearer.empty() : 
     globalGesturePosition = Offset.zero, 
-    handleCenter = Offset.zero;
+    handleCenter = Offset.zero,
+    fieldBounds = Rect.zero;
 
   LoupeSelectionOverlayInfoBearer copyWith({
     Offset? globalGesturePosition, 
     Offset? handleCenter,
+    Rect? fieldBounds,
   }) => LoupeSelectionOverlayInfoBearer(
+    fieldBounds: fieldBounds ?? this.fieldBounds,
     globalGesturePosition: globalGesturePosition ?? this.globalGesturePosition,
     handleCenter: handleCenter ?? this.handleCenter
   );
@@ -96,6 +100,7 @@ class LoupeSelectionOverlayInfoBearer {
 
   final Offset globalGesturePosition;
   final Offset handleCenter;
+  final Rect fieldBounds;
 
   @override
   bool operator ==(Object other) =>
@@ -552,8 +557,6 @@ class TextSelectionOverlay {
 
    _loupeController!.hide();
     
-    // Any time a loupe is hidden, we should show the toolbar.
-    // this behavior is consistent on all mobile platforms.
     if (!_selection.isCollapsed) {
       showToolbar();
     }
@@ -568,6 +571,7 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition); 
 
     _showLoupe(LoupeSelectionOverlayInfoBearer(
+      fieldBounds: renderObject.localToGlobal(Offset.zero) & renderObject.size,
       globalGesturePosition: details.globalPosition,
       handleCenter: renderObject.localToGlobal(renderObject.getLocalRectForCaret(position).center)
     ));
@@ -626,9 +630,10 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
-    final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition); 
+    final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition); 
 
     _showLoupe(LoupeSelectionOverlayInfoBearer(
+      fieldBounds: renderObject.localToGlobal(Offset.zero) & renderObject.size,
       globalGesturePosition: details.globalPosition,
       handleCenter: renderObject.localToGlobal(renderObject.getLocalRectForCaret(position).center),  
     ));
@@ -637,7 +642,6 @@ class TextSelectionOverlay {
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
-
 
     _loupeSelectionOverlayInfoBearer.value = _loupeSelectionOverlayInfoBearer.value.copyWith(
       globalGesturePosition: details.globalPosition,
