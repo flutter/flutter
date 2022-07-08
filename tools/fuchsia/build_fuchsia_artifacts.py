@@ -48,8 +48,20 @@ def GetFuchsiaSDKPath():
   return os.path.join(_src_root_dir, 'fuchsia', 'sdk', host_os)
 
 
+def GetHostArchFromPlatform():
+  host_arch = platform.machine()
+  # platform.machine() returns AMD64 on 64-bit Windows.
+  if host_arch in ['x86_64', 'AMD64']:
+    return 'x64'
+  elif host_arch == 'aarch64':
+    return 'arm64'
+  raise Exception('Unsupported host architecture: %s' % host_arch)
+
+
 def GetPMBinPath():
-  return os.path.join(GetFuchsiaSDKPath(), 'tools', 'pm')
+  return os.path.join(
+      GetFuchsiaSDKPath(), 'tools', GetHostArchFromPlatform(), 'pm'
+  )
 
 
 def RunExecutable(command):
