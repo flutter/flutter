@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -125,44 +128,52 @@ void main() {
       ),
     );
 
+    final Key backgroundKey = UniqueKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: CustomScrollView(
-          slivers: <Widget>[
-            DecoratedSliver(
-              decoration: decoration,
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  const Text('Goodnight Moon'),
-                ]),
+        body: RepaintBoundary(
+          key: backgroundKey,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              DecoratedSliver(
+                decoration: decoration,
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(<Widget>[
+                    const Text('Goodnight Moon'),
+                  ]),
+                ),
               ),
-            ),
-          ],
-        )
+            ],
+          )
+        ),
       )
     ));
 
-    expect(tester, matchesGoldenFile('decorated_sliver.moon.background.png'));
+    expect(find.byKey(backgroundKey), matchesGoldenFile('decorated_sliver.moon.background.png'));
 
+    final Key foregroundKey = UniqueKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: CustomScrollView(
-          slivers: <Widget>[
-            DecoratedSliver(
-              decoration: decoration,
-              position: DecorationPosition.foreground,
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  const Text('Goodnight Moon'),
-                ]),
+        body: RepaintBoundary(
+          key: foregroundKey,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              DecoratedSliver(
+                decoration: decoration,
+                position: DecorationPosition.foreground,
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(<Widget>[
+                    const Text('Goodnight Moon'),
+                  ]),
+                ),
               ),
-            ),
-          ],
-        )
+            ],
+          )
+        ),
       )
     ));
 
-    expect(tester, matchesGoldenFile('decorated_sliver.moon.foreground.png'));
+    expect(find.byKey(foregroundKey), matchesGoldenFile('decorated_sliver.moon.foreground.png'));
   });
 }
 
