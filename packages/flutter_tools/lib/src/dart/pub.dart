@@ -118,9 +118,8 @@ abstract class Pub {
   /// the corresponding stream of this process, optionally applying filtering.
   /// The pub process will not receive anything on its stdin stream.
   ///
-  /// The `--trace` argument is passed to `pub` (by mutating the provided
-  /// `arguments` list) when `showTraceForErrors` is true, and when `showTraceForErrors`
-  /// is null/unset, and `isRunningOnBot` is true.
+  /// The `--trace` argument is passed to `pub` when `showTraceForErrors`
+  /// `isRunningOnBot` is true.
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
@@ -285,6 +284,14 @@ class _DefaultPub implements Pub {
     }
   }
 
+  /// Runs pub with [arguments].
+  ///
+  /// Retries the command as long as the exit code is
+  /// `_kPubExitCodeUnavailable`.
+  ///
+  /// Prints the stderr and stdout of the last run.
+  ///
+  /// Sends an analytics event
   Future<void> _runWithRetries(
     List<String> arguments, {
     required String command,
