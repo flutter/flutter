@@ -774,7 +774,7 @@ class ListTile extends StatelessWidget {
         enabled: enabled,
         child: Ink(
           decoration: ShapeDecoration(
-            shape: shape ?? tileTheme.shape ?? theme.listTileTheme.shape ?? const Border(),
+            shape: shape ?? tileTheme.shape ?? const Border(),
             color: _tileBackgroundColor(theme, tileTheme),
           ),
           child: SafeArea(
