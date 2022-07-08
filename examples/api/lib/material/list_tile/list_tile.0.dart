@@ -42,6 +42,7 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
 
   @override
   void initState() {
+    super.initState();
     _fadeController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -61,7 +62,6 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
       parent: _sizeController,
       curve: Curves.easeOut,
     );
-    super.initState();
   }
 
   @override
@@ -78,8 +78,8 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
       children: <Widget>[
         Hero(
           tag: 'ListTile-Hero',
-          // Wrap the ListTile in a Material widget to animate
-          // the list tile colors during the hero transition.
+          // Wrap the ListTile in a Material widget so the ListTile has someplace
+          // to draw the animated colors during the hero transition.
           child: Material(
             child: ListTile(
               title: const Text('ListTile with Hero'),
@@ -114,8 +114,8 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
         ),
         FadeTransition(
           opacity: _fadeAnimation,
-          // Wrap the ListTile in a Material widget to animate
-          // the list tile colors during the fade transition.
+          // Wrap the ListTile in a Material widget so the ListTile has someplace
+          // to draw the animated colors during the fade transition.
           child: const Material(
             child: ListTile(
               title: Text('ListTile with FadeTransition'),
@@ -131,8 +131,8 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
             child: SizeTransition(
               sizeFactor: _sizeAnimation,
               axisAlignment: -1.0,
-              // Wrap the ListTile in a Material widget to animate
-              // the list tile colors during the size transition.
+              // Wrap the ListTile in a Material widget so the ListTile has someplace
+              // to draw the animated colors during the size transition.
               child: const Material(
                 child: ListTile(
                   title: Text('ListTile with SizeTransition'),
