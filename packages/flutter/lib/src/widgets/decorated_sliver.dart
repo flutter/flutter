@@ -11,8 +11,10 @@ import 'image.dart';
 /// A sliver widget that paints a [Decoration] either before or after its child
 /// paints.
 ///
-/// [Container] insets its child by the widths of the borders; this widget does
-/// not.
+/// Unlike [DecoratedBox], this widget expects its child to be a sliver, and
+/// must be placed in a widget that expects a sliver. This can allow decorating the
+/// background of a [SliverList] without resorting to a shrink-wrapped list view or
+/// column layout.
 ///
 /// Commonly used with [BoxDecoration].
 ///
@@ -36,18 +38,20 @@ import 'image.dart';
 ///       stops: <double>[0.9, 1.0],
 ///     ),
 ///   ),
+///   sliver: SliverList(
+///     delegate: SliverChildListDelegate([
+///        Text('Goodnight Moon'),
+///     ]),
+///   ),
 /// )
 /// ```
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [Ink], which paints a [Decoration] on a [Material], allowing
-///    [InkResponse] and [InkWell] splashes to paint over them.
-///  * [DecoratedBoxTransition], the version of this class that animates on the
-///    [decoration] property.
+///  * [DecoratedBox], the version of this class that works with regular widgets.
 ///  * [Decoration], which you can extend to provide other effects with
-///    [DecoratedBox].
+///    [DecoratedSliver].
 ///  * [CustomPaint], another way to draw custom effects from the widget layer.
 class DecoratedSliver extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
@@ -103,9 +107,15 @@ class DecoratedSliver extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Renders a [BoxDecoration] around a child sliver.
-class RenderDecoratedSliver extends RenderSliverEdgeInsetsPadding {
-  /// Create a new [RenderDecoratedSliver].
+/// Paints a [Decoration] either before or after its child paints.
+class RenderDecoratedSliver extends RenderProxySliver {
+  /// Creates a decorated box.
+  ///
+  /// The [decoration], [position], and [configuration] arguments must not be
+  /// null. By default the decoration paints behind the child.
+  ///
+  /// The [ImageConfiguration] will be passed to the decoration (with the size
+  /// filled in) to let it resolve images.
   RenderDecoratedSliver({
     required Decoration decoration,
     DecorationPosition position = DecorationPosition.background,
@@ -123,7 +133,7 @@ class RenderDecoratedSliver extends RenderSliverEdgeInsetsPadding {
     if (value == decoration) {
       return;
     }
-    _decoration = decoration;
+    _decoration = value;
     _painter?.dispose();
     _painter = decoration.createBoxPainter(markNeedsPaint);
     markNeedsPaint();
@@ -157,9 +167,6 @@ class RenderDecoratedSliver extends RenderSliverEdgeInsetsPadding {
   }
 
   BoxPainter? _painter;
-
-  @override
-  EdgeInsets? get resolvedPadding => EdgeInsets.zero;
 
   @override
   void attach(covariant PipelineOwner owner) {
