@@ -89,7 +89,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   late final TextStyle misspelledTextStyle;
 
   /// The style used to indicate misspelled words on Android.
-  static final TextStyle materialMisspelledTextStyle = const TextStyle(
+  static const TextStyle materialMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: ColorSwatch<int>(
         0xFFF44336,
@@ -110,7 +110,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   );
 
   /// The style used to indicate misspelled words on iOS and macOS.
-  static final TextStyle cupertinoMisspelledTextStyle = const TextStyle(
+  static const TextStyle cupertinoMisspelledTextStyle = const TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: Color.fromARGB(255, 255, 59, 48),
       decorationStyle: TextDecorationStyle.dotted

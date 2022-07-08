@@ -12540,7 +12540,6 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: EditableText(
-              autofocus: false,
               controller: TextEditingController(text: 'A'),
               focusNode: FocusNode(),
               style: const TextStyle(),
@@ -12555,7 +12554,7 @@ void main() {
         final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
         expect(state.spellCheckEnabled, isFalse);
-        expect(state.spellCheckConfiguration!,
+        expect(state.spellCheckConfiguration,
                equals(SpellCheckConfiguration.disabled)
         );
     });
@@ -12566,7 +12565,6 @@ void main() {
           await tester.pumpWidget(
             MaterialApp(
               home: EditableText(
-                autofocus: false,
                 controller: TextEditingController(text: 'A'),
                 focusNode: FocusNode(),
                 style: const TextStyle(),
@@ -12583,7 +12581,7 @@ void main() {
             tester.state<EditableTextState>(find.byType(EditableText));
           expect(state.spellCheckEnabled, isFalse);
           expect(
-            state.spellCheckConfiguration!,
+            state.spellCheckConfigurationå,
             equals(SpellCheckConfiguration.disabled)
           );
       });
@@ -12596,7 +12594,6 @@ void main() {
 
       await tester.pumpWidget(
           EditableText(
-              autofocus: false,
               controller: TextEditingController(text: 'A'),
               focusNode: FocusNode(),
               style: const TextStyle(),
@@ -12616,7 +12613,6 @@ void main() {
           () {
           expect(() {
                 EditableText(
-                  autofocus: false,
                   controller: TextEditingController(text: 'A'),
                   focusNode: FocusNode(),
                   style: const TextStyle(),
@@ -12642,7 +12638,6 @@ void main() {
           await tester.pumpWidget(
             MaterialApp(
               home: EditableText(
-                autofocus: false,
                 controller: TextEditingController(text: 'A'),
                 focusNode: FocusNode(),
                 style: const TextStyle(),
@@ -12671,14 +12666,13 @@ void main() {
     testWidgets(
         'Spell check configured properly with specified spell check service and handler',
             (WidgetTester tester) async {
-          DefaultSpellCheckService fakeSpellCheckService = DefaultSpellCheckService();
-          DefaultSpellCheckSuggestionsHandler fakeSpellCheckSuggestionsHandler =
+          final DefaultSpellCheckService fakeSpellCheckService = DefaultSpellCheckService();
+          final DefaultSpellCheckSuggestionsHandler fakeSpellCheckSuggestionsHandler =
             DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
 
           await tester.pumpWidget(
             MaterialApp(
               home: EditableText(
-                autofocus: false,
                 controller: TextEditingController(text: 'A'),
                 focusNode: FocusNode(),
                 style: const TextStyle(),
@@ -12714,7 +12708,6 @@ void main() {
 
       await tester.pumpWidget(
           EditableText(
-              autofocus: false,
               controller: TextEditingController(text: 'A'),
               focusNode: FocusNode(),
               style: const TextStyle(),

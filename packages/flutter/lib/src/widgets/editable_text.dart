@@ -629,7 +629,7 @@ class EditableText extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        assert(
-          spellCheckEnabled != false
+          spellCheckEnabled ?? true
           || spellCheckService == null
           && spellCheckSuggestionsHandler == null,
           'spellCheckEnabled must not be false if spellCheckService or spellCheckSuggestionsHandler specified'
@@ -1669,6 +1669,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
 
   late SpellCheckConfiguration? _spellCheckConfiguration;
+
+  /// Configuration that determins how spell check will be performed.
   SpellCheckConfiguration? get spellCheckConfiguration => _spellCheckConfiguration;
 
   late bool _spellCheckEnabled;
@@ -1872,7 +1874,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
 
     // Spell check setup
-    bool spellCheckServiceDefined = widget.spellCheckService != null
+    final bool spellCheckServiceDefined = widget.spellCheckService != null
                                     || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
 
     assert(
@@ -1889,7 +1891,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _spellCheckEnabled = widget.spellCheckEnabled ??
       widget.spellCheckService != null || widget.spellCheckSuggestionsHandler != null;
 
-    if (_spellCheckEnabled!) {
+    if (_spellCheckEnabled) {
       final SpellCheckService spellCheckService = widget.spellCheckService ?? DefaultSpellCheckService();
       final SpellCheckSuggestionsHandler spellCheckSuggestionsHandler =
         widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);
@@ -2770,7 +2772,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
 
-        if (_spellCheckEnabled! && value.text.isNotEmpty && _value.text != value.text) {
+        if (_spellCheckEnabled && value.text.isNotEmpty && _value.text != value.text) {
           _performSpellCheck(value.text);
         }
       } catch (exception, stack) {

@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'platform_channel.dart';
 import 'system_channels.dart';
 
 /// A data structure representing a range of misspelled text and the suggested

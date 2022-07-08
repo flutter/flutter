@@ -41,9 +41,9 @@ Future<void> main() async {
   test(
       'fetchSpellCheckSuggestions returns null with no misspelled words',
       () async {
-    String text = 'Hello, world!';
+    final String text = 'Hello, world!';
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans!.length, equals(0));
@@ -57,19 +57,19 @@ Future<void> main() async {
   test(
       'fetchSpellCheckSuggestions returns correct ranges with misspelled words',
       () async {
-    String text = 'Hlelo, world! Yuou are magnificente';
+    final String text = 'Hlelo, world! Yuou are magnificente';
     const List<TextRange> misspelledWordRanges = <TextRange>[
       TextRange(start: 0, end: 5),
       TextRange(start: 14, end: 18),
       TextRange(start: 23, end: 35)
     ];
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(
-        spellCheckSuggestionSpans!.length,
+        spellCheckSuggestionSpans.length,
         equals(misspelledWordRanges.length)
         );
 
@@ -90,7 +90,7 @@ Future<void> main() async {
   test(
       'fetchSpellCheckSuggestions does not correct results when Gboard not ignoring composing region',
       () async {
-    String text = 'Wwow, whaaett a beautiful day it is!';
+    final String text = 'Wwow, whaaett a beautiful day it is!';
 
     final List<SuggestionSpan>? spellCheckSpansWithComposingRegion =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
@@ -98,7 +98,7 @@ Future<void> main() async {
     expect(spellCheckSpansWithComposingRegion, isNotNull);
     expect(spellCheckSpansWithComposingRegion!.length, equals(2));
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(
@@ -110,7 +110,7 @@ Future<void> main() async {
   test(
       'fetchSpellCheckSuggestions merges results when Gboard ignoring composing region',
       () async {
-    String text = 'Wooahha it is an amazzinng dayyebf!';
+    final String text = 'Wooahha it is an amazzinng dayyebf!';
 
     final List<SuggestionSpan>? modifiedSpellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
@@ -125,7 +125,7 @@ Future<void> main() async {
     defaultSpellCheckService.lastSavedSpans = modifiedSpellCheckSuggestionSpans;
     defaultSpellCheckService.lastSavedText = text;
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans, isNotNull);
@@ -178,7 +178,7 @@ Future<void> main() async {
   test(
       'fetchSpellCheckSuggestions returns null when there is a pending request',
       () async {
-    String text =
+    final String text =
         'neaf niofenaifn iofn iefnaoeifn ifneoa finoiafn inf ionfieaon ienf ifn ieonfaiofneionf oieafn oifnaioe nioenfio nefaion oifan' *
             10;
 
@@ -186,7 +186,7 @@ Future<void> main() async {
 
     final String modifiedText = text.substring(5);
 
-    List<SuggestionSpan>? spellCheckSuggestionSpans =
+    final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(
             locale, modifiedText);
 
