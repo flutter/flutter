@@ -14,6 +14,7 @@ import 'project.dart';
 import 'project_validator_result.dart';
 
 abstract class ProjectValidator {
+  const ProjectValidator();
   String get title;
   bool supportsProject(FlutterProject project);
   /// Can return more than one result in case a file/command have a lot of info to share to the user
@@ -114,7 +115,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
 }
 
 class PubDependenciesProjectValidator extends ProjectValidator {
-  PubDependenciesProjectValidator(this._processManager);
+  const PubDependenciesProjectValidator(this._processManager);
   final ProcessManager _processManager;
 
   @override
@@ -141,7 +142,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
     final DartPubJson dartPubJson = DartPubJson(jsonResult);
     final List <String> dependencies = <String>[];
 
-    // Information retrieved from the pubspeck.lock file if a dependency comes from
+    // Information retrieved from the pubspec.lock file if a dependency comes from
     // the hosted url https://pub.dartlang.org we ignore it or if the package
     // is the current directory being analyzed (root).
     final Set<String> hostedDependencies = <String>{'hosted', 'root'};
