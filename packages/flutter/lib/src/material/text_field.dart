@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'default_text_selection_toolbar.dart';
-import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'input_decorator.dart';
 import 'material.dart';
