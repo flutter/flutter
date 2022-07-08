@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
 import 'constants.dart';
+import 'data.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -107,7 +108,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   String get _specialKeyMapping {
     final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
-    kSpecialLogicalKeys.forEach((String key, String logicalName) {
+    kIosSpecialKeyMapping.forEach((String key, String logicalName) {
       final int value = logicalData.entryByName(logicalName).value;
       lines.add(value, '  @"$key" : @(${toHex(value)}),');
     });
