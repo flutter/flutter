@@ -25,6 +25,18 @@ extern const std::map<uint32_t, uint64_t> keyCodeToPhysicalKey;
  */
 extern const std::map<uint32_t, uint64_t> keyCodeToLogicalKey;
 
+/**
+ * Maps iOS specific string values of nonvisible keys to logical keys.
+ *
+ * TODO(dkwingsmt): Change this getter function to a global variable. I tried to
+ * do this but the unit test on CI threw errors saying "message sent to
+ * deallocated instance" on the NSDictionary.
+ *
+ * See:
+ * https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
+ */
+extern NSDictionary<NSString*, NSNumber*>* specialKeyMapping;
+
 // Several mask constants. See KeyCodeMap.g.mm for their descriptions.
 
 extern const uint64_t kValueMask;
@@ -70,17 +82,16 @@ typedef enum {
  * not whether it is the left or right modifier.
  */
 constexpr uint32_t kModifierFlagAnyMask =
-    kModifierFlagShiftAny | kModifierFlagControlAny | kModifierFlagAltAny |
-    kModifierFlagMetaAny;
+    kModifierFlagShiftAny | kModifierFlagControlAny | kModifierFlagAltAny | kModifierFlagMetaAny;
 
 /**
  * A mask of the modifier flags that represent only left or right modifier
  * keys, and not the generic "Any" mask.
  */
-constexpr uint32_t kModifierFlagSidedMask =
-    kModifierFlagControlLeft | kModifierFlagShiftLeft |
-    kModifierFlagShiftRight | kModifierFlagMetaLeft | kModifierFlagMetaRight |
-    kModifierFlagAltLeft | kModifierFlagAltRight | kModifierFlagControlRight;
+constexpr uint32_t kModifierFlagSidedMask = kModifierFlagControlLeft | kModifierFlagShiftLeft |
+                                            kModifierFlagShiftRight | kModifierFlagMetaLeft |
+                                            kModifierFlagMetaRight | kModifierFlagAltLeft |
+                                            kModifierFlagAltRight | kModifierFlagControlRight;
 
 /**
  * Map |UIKey.keyCode| to the matching sided modifier in UIEventModifierFlags.

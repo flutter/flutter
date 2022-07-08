@@ -328,5 +328,30 @@ const std::set<uint32_t> functionKeyCodes = {
     0x00000073,  // f24
 };
 
+API_AVAILABLE(ios(13.4))
+NSDictionary<NSString*, NSNumber*>* specialKeyMapping = [[NSDictionary alloc] initWithDictionary:@{
+  @"UIKeyInputEscape" : @(0x10000001b),
+  @"UIKeyInputF1" : @(0x100000801),
+  @"UIKeyInputF2" : @(0x100000802),
+  @"UIKeyInputF3" : @(0x100000803),
+  @"UIKeyInputF4" : @(0x100000804),
+  @"UIKeyInputF5" : @(0x100000805),
+  @"UIKeyInputF6" : @(0x100000806),
+  @"UIKeyInputF7" : @(0x100000807),
+  @"UIKeyInputF8" : @(0x100000808),
+  @"UIKeyInputF9" : @(0x100000809),
+  @"UIKeyInputF10" : @(0x10000080a),
+  @"UIKeyInputF11" : @(0x10000080b),
+  @"UIKeyInputF12" : @(0x10000080c),
+  @"UIKeyInputUpArrow" : @(0x100000304),
+  @"UIKeyInputDownArrow" : @(0x100000301),
+  @"UIKeyInputLeftArrow" : @(0x100000302),
+  @"UIKeyInputRightArrow" : @(0x100000303),
+  @"UIKeyInputHome" : @(0x100000306),
+  @"UIKeyInputEnd" : @(0x10000000d),
+  @"UIKeyInputPageUp" : @(0x100000308),
+  @"UIKeyInputPageDown" : @(0x100000307),
+}];
+
 const uint64_t kCapsLockPhysicalKey = 0x00070039;
 const uint64_t kCapsLockLogicalKey = 0x100000104;
