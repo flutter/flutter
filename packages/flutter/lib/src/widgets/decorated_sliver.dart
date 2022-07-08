@@ -27,7 +27,7 @@ import 'image.dart';
 ///
 /// ```dart
 /// DecoratedSliver(
-///   decoration: BoxDecoration(
+///   decoration: const BoxDecoration(
 ///     gradient: RadialGradient(
 ///       center: Alignment(-0.5, -0.6),
 ///       radius: 0.15,
@@ -40,7 +40,7 @@ import 'image.dart';
 ///   ),
 ///   sliver: SliverList(
 ///     delegate: SliverChildListDelegate(<Widget>[
-///        Text('Goodnight Moon'),
+///        const Text('Goodnight Moon'),
 ///     ]),
 ///   ),
 /// )
