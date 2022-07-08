@@ -133,14 +133,12 @@ void main() {
       home: Scaffold(
         body: RepaintBoundary(
           key: backgroundKey,
-          child: CustomScrollView(
+          child: const CustomScrollView(
             slivers: <Widget>[
               DecoratedSliver(
                 decoration: decoration,
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(<Widget>[
-                    const Text('Goodnight Moon'),
-                  ]),
+                sliver: SliverToBoxAdapter(
+                  child: SizedBox(width: 200, height: 200),
                 ),
               ),
             ],
@@ -156,15 +154,13 @@ void main() {
       home: Scaffold(
         body: RepaintBoundary(
           key: foregroundKey,
-          child: CustomScrollView(
+          child: const CustomScrollView(
             slivers: <Widget>[
               DecoratedSliver(
                 decoration: decoration,
                 position: DecorationPosition.foreground,
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(<Widget>[
-                    const Text('Goodnight Moon'),
-                  ]),
+                sliver: SliverToBoxAdapter(
+                  child: SizedBox(width: 200, height: 200),
                 ),
               ),
             ],
