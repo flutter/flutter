@@ -297,7 +297,8 @@ void PointerDataPacketConverter::ConvertPointerData(
     }
   } else {
     switch (pointer_data.signal_kind) {
-      case PointerData::SignalKind::kScroll: {
+      case PointerData::SignalKind::kScroll:
+      case PointerData::SignalKind::kScrollInertiaCancel: {
         // Makes sure we have an existing pointer
         auto iter = states_.find(pointer_data.device);
         PointerState state;
