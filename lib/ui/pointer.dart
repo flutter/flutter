@@ -129,9 +129,6 @@ enum PointerSignalKind {
   /// A pointer-generated scroll (e.g., mouse wheel or trackpad scroll).
   scroll,
 
-  /// A pointer-generated scroll-inertia cancel.
-  scrollInertiaCancel,
-
   /// An unknown pointer signal kind.
   unknown
 }
