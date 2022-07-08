@@ -339,7 +339,7 @@ class ElevatedButton extends ButtonStyleButton {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Theme.of(context).useMaterial3
-      ? _TokenDefaultsM3(context)
+      ? _ElevatedButtonDefaultsM3(context)
       : styleFrom(
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
@@ -506,15 +506,17 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - ElevatedButton
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_101
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _ElevatedButtonDefaultsM3 extends ButtonStyle {
+  _ElevatedButtonDefaultsM3(this.context)
    : super(
        animationDuration: kThemeChangeDuration,
        enableFeedback: true,
@@ -626,4 +628,4 @@ class _TokenDefaultsM3 extends ButtonStyle {
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - ElevatedButton
