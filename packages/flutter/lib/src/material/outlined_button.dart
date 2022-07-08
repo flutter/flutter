@@ -60,6 +60,7 @@ import 'theme_data.dart';
 /// See also:
 ///
 ///  * [ElevatedButton], a filled Material Design button with a shadow.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
 ///  * [TextButton], a Material Design button without a shadow.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
