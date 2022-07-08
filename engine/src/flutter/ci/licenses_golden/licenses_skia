@@ -1,4 +1,4 @@
-Signature: e58e3685994e8f05f2521756010510e1
+Signature: 8c37d0674c52a821579aed3d529d07c7
 
 UNUSED LICENSES:
 
@@ -1583,8 +1583,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLTexture.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/mac/GrGLMakeNativeInterface_mac.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/win/GrGLMakeNativeInterface_win.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/glsl/GrGLSL.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/glsl/GrGLSL.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AAHairLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/DefaultPathRenderer.cpp
@@ -5564,6 +5562,7 @@ FILE: ../../../third_party/skia/src/core/SkPaintParamsKey.h
 FILE: ../../../third_party/skia/src/core/SkPipelineData.cpp
 FILE: ../../../third_party/skia/src/core/SkPipelineData.h
 FILE: ../../../third_party/skia/src/core/SkPrecompile.h
+FILE: ../../../third_party/skia/src/core/SkSLTypeShared.cpp
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.h
