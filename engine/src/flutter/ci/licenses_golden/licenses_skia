@@ -1,4 +1,4 @@
-Signature: ad2ff4c2bab78be96a0c7acaa9eed351
+Signature: a4dab2e4f7eac51c5e133189e40a7edb
 
 UNUSED LICENSES:
 
@@ -5562,6 +5562,7 @@ FILE: ../../../third_party/skia/src/core/SkPaintParamsKey.h
 FILE: ../../../third_party/skia/src/core/SkPipelineData.cpp
 FILE: ../../../third_party/skia/src/core/SkPipelineData.h
 FILE: ../../../third_party/skia/src/core/SkPrecompile.h
+FILE: ../../../third_party/skia/src/core/SkRuntimeEffectDictionary.h
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.cpp
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
