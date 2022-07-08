@@ -94,6 +94,7 @@ enum ListTileControlAffinity {
 /// ancestor. In this case, one can wrap a [Material] widget around the
 /// [ListTile], e.g.:
 ///
+/// {@tool snippet}
 /// ```dart
 /// Container(
 ///   color: Colors.green,
@@ -105,6 +106,7 @@ enum ListTileControlAffinity {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Performance considerations when wrapping [ListTile] with [Material]
 ///

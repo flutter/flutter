@@ -46,6 +46,7 @@ import 'theme_data.dart';
 /// In this case, one can wrap a [Material] widget around the [CheckboxListTile],
 /// e.g.:
 ///
+/// {@tool snippet}
 /// ```dart
 /// Container(
 ///   color: Colors.green,
@@ -59,6 +60,7 @@ import 'theme_data.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Performance considerations when wrapping [CheckboxListTile] with [Material]
 ///

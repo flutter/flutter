@@ -46,6 +46,7 @@ import 'theme_data.dart';
 /// [RadioListTile] itself but by the [Material] widget ancestor. In this
 /// case, one can wrap a [Material] widget around the [RadioListTile], e.g.:
 ///
+/// {@tool snippet}
 /// ```dart
 /// Container(
 ///   color: Colors.green,
@@ -60,6 +61,7 @@ import 'theme_data.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Performance considerations when wrapping [RadioListTile] with [Material]
 ///

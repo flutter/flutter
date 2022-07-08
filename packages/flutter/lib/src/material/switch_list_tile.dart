@@ -53,6 +53,7 @@ enum _SwitchListTileType { material, adaptive }
 /// [SwitchListTile] itself but by the [Material] widget ancestor. In this
 /// case, one can wrap a [Material] widget around the [SwitchListTile], e.g.:
 ///
+/// {@tool snippet}
 /// ```dart
 /// Container(
 ///   color: Colors.green,
@@ -66,6 +67,7 @@ enum _SwitchListTileType { material, adaptive }
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// ## Performance considerations when wrapping [SwitchListTile] with [Material]
 ///
