@@ -272,11 +272,14 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    // TODO(justinmc): Should this really be required? Possible breaking change.
-    required this.buildContextMenu,
+    this.buildContextMenu,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
+       assert(
+           selectionControls is! TextSelectionHandleControls || buildContextMenu != null,
+           'Either specify the context menu via TextSelectionControls or buildContextMenu',
+       ),
        _handlesVisible = handlesVisible,
        _value = value {
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
@@ -339,7 +342,7 @@ class TextSelectionOverlay {
   late final SelectionOverlay _selectionOverlay;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  final ContextMenuBuilder buildContextMenu;
+  final ContextMenuBuilder? buildContextMenu;
 
   /// Retrieve current value.
   @visibleForTesting
@@ -415,7 +418,7 @@ class TextSelectionOverlay {
                   renderBox.localToGlobal(Offset.zero),
                   renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
                 ).topLeft,
-                child: buildContextMenu(context, renderObject.lastSecondaryTapDownPosition!),
+                child: buildContextMenu!(context, renderObject.lastSecondaryTapDownPosition!),
               );
             },
           );
@@ -471,7 +474,7 @@ class TextSelectionOverlay {
             renderBox.localToGlobal(Offset.zero),
             renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
           ).topLeft,
-          child: buildContextMenu(context, anchorAbove, anchorBelow),
+          child: buildContextMenu!(context, anchorAbove, anchorBelow),
         );
       },
     );
