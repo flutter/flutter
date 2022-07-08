@@ -27,9 +27,9 @@ class LayerScene implements ui.Scene {
   }
 
   @override
-  ui.Image toGpuImage(int width, int height) {
+  ui.Image toImageSync(int width, int height) {
     final ui.Picture picture = layerTree.flatten();
-    return picture.toGpuImage(width, height);
+    return picture.toImageSync(width, height);
   }
 }
 

@@ -23,7 +23,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 #define FOR_EACH_BINDING(V) \
   V(Picture, toImage)       \
-  V(Picture, toGpuImage)    \
+  V(Picture, toImageSync)   \
   V(Picture, dispose)       \
   V(Picture, GetAllocationSize)
 
@@ -53,19 +53,19 @@ Dart_Handle Picture::toImage(uint32_t width,
                           raw_image_callback);
 }
 
-void Picture::toGpuImage(uint32_t width,
-                         uint32_t height,
-                         Dart_Handle raw_image_handle) {
+void Picture::toImageSync(uint32_t width,
+                          uint32_t height,
+                          Dart_Handle raw_image_handle) {
   FML_DCHECK(display_list_.skia_object());
-  RasterizeToGpuImage(display_list_.skia_object(), width, height,
-                      raw_image_handle);
+  RasterizeToImageSync(display_list_.skia_object(), width, height,
+                       raw_image_handle);
 }
 
 // static
-void Picture::RasterizeToGpuImage(sk_sp<DisplayList> display_list,
-                                  uint32_t width,
-                                  uint32_t height,
-                                  Dart_Handle raw_image_handle) {
+void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
+                                   uint32_t width,
+                                   uint32_t height,
+                                   Dart_Handle raw_image_handle) {
   auto* dart_state = UIDartState::Current();
   auto unref_queue = dart_state->GetSkiaUnrefQueue();
   auto snapshot_delegate = dart_state->GetSnapshotDelegate();

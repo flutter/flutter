@@ -324,13 +324,13 @@ void scene_with_red_box() {
 
 
 @pragma('vm:entry-point')
-Future<void> toGpuImage() async {
+Future<void> toImageSync() async {
   final PictureRecorder recorder = PictureRecorder();
   final Canvas canvas = Canvas(recorder);
   canvas.drawPaint(Paint()..color = const Color(0xFFAAAAAA));
   final Picture picture = recorder.endRecording();
 
-  final Image image = picture.toGpuImage(20, 25);
+  final Image image = picture.toImageSync(20, 25);
   void expect(Object? a, Object? b) {
     if (a != b) {
       throw 'Expected $a to == $b';

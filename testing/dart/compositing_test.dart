@@ -8,17 +8,18 @@ import 'dart:ui';
 import 'package:litetest/litetest.dart';
 
 void main() {
-  test('Scene.toGpuImage succeeds', () async {
+  test('Scene.toImageSync succeeds', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
-    canvas.drawPaint(Paint()..color = const Color(0xFF123456));
+    const Color color = Color(0xFF123456);
+    canvas.drawPaint(Paint()..color = color);
     final Picture picture = recorder.endRecording();
     final SceneBuilder builder = SceneBuilder();
     builder.pushOffset(10, 10);
     builder.addPicture(const Offset(5, 5), picture);
     final Scene scene = builder.build();
 
-    final Image image = scene.toGpuImage(6, 8);
+    final Image image = scene.toImageSync(6, 8);
     picture.dispose();
     scene.dispose();
 
@@ -29,20 +30,10 @@ void main() {
 
     expect(data, isNotNull);
     expect(data!.lengthInBytes, 6 * 8 * 4);
-    final Uint32List bytes = data.buffer.asUint32List();
-    // Draws a checkerboard due to flutter_tester not having a GPU context.
-    const int white = 0xFFFFFFFF;
-    const int grey  = 0xFFCCCCCC;
-    expect(bytes, const <int>[
-      white, white, white, grey,  grey,  grey, //
-      white, white, white, grey,  grey,  grey,
-      white, white, white, grey,  grey,  grey,
-      white, white, white, grey,  grey,  grey,
-      grey,  grey,  grey,  white, white, white,
-      grey,  grey,  grey,  white, white, white,
-      grey,  grey,  grey,  white, white, white,
-      grey,  grey,  grey,  white, white, white,
-    ]);
+    expect(data.buffer.asUint8List()[0], 0x12);
+    expect(data.buffer.asUint8List()[1], 0x34);
+    expect(data.buffer.asUint8List()[2], 0x56);
+    expect(data.buffer.asUint8List()[3], 0xFF);
   });
 
   test('addPicture with disposed picture does not crash', () {
