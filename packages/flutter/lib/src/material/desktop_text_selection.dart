@@ -223,7 +223,6 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
   }
 }
 
-// TODO(justinmc): Am I really making this public?
 /// A Material-style desktop text selection toolbar.
 ///
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
