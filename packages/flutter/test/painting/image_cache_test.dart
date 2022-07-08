@@ -602,4 +602,27 @@ void main() {
     imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('clear does not leave pending images stuck', () async {
+    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+
+    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+    imageCache.putIfAbsent(testImage, () {
+      return completer1;
+    });
+
+    expect(imageCache.statusForKey(testImage).pending, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+    imageCache.clear();
+
+    // No one else is listening to the completer. It should not be considered
+    // live anymore.
+
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, false);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
+  });
 }
