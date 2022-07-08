@@ -262,6 +262,10 @@ source_set("string_conversion") {
     "string_conversion.h",
   ]
 
+  # Current versions of libcxx have deprecated some of the UTF-16 string
+  # conversion APIs.
+  defines = [ "_LIBCPP_DISABLE_DEPRECATION_WARNINGS" ]
+
   if (is_win) {
     sources += [
       "platform/win/wstring_conversion.cc",
@@ -269,7 +273,7 @@ source_set("string_conversion") {
     ]
 
     # TODO(cbracken): https://github.com/flutter/flutter/issues/50053
-    defines = [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
+    defines += [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
   }
 
   deps = [ ":build_config" ]
