@@ -123,6 +123,12 @@ enum HeroFlightDirection {
 /// ** See code in examples/api/lib/widgets/heroes/hero.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows a hero that flies below a semi-transparent widget.
+///
+/// ** See code in examples/api/lib/widgets/heroes/hero.2.dart **
+/// {@end-tool}
+///
 /// ## Discussion
 ///
 /// Heroes and the [Navigator]'s [Overlay] [Stack] must be axis-aligned for
@@ -179,6 +185,7 @@ class Hero extends StatefulWidget {
     this.flightShuttleBuilder,
     this.placeholderBuilder,
     this.transitionOnUserGestures = false,
+    this.insertOverlayBelow,
     required this.child,
   }) : assert(tag != null),
        assert(transitionOnUserGestures != null),
@@ -263,6 +270,17 @@ class Hero extends StatefulWidget {
   ///
   /// Defaults to false and cannot be null.
   final bool transitionOnUserGestures;
+
+  /// [OverlayEntry] below which overlay of this hero's flight should be inserted.
+  ///
+  /// This is useful for situations where hero on the target route should be (partially) visually obstructed by another
+  /// widget. Without placing this widget on an overlay and specifying it here, the hero would "jump" behind
+  /// the obstructing widget at the end of its flight.
+  ///
+  /// Target [Hero]'s [insertOverlayBelow] takes precedence before source [Hero]'s [insertOverlayBelow].
+  ///
+  /// Defaults to null, which means that the overlay will be inserted at the top.
+  final OverlayEntry? insertOverlayBelow;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
   // should be considered for animation when `navigator` transitions from one
@@ -461,6 +479,8 @@ class _HeroFlightManifest {
   final bool isDiverted;
 
   Object get tag => fromHero.widget.tag;
+
+  OverlayEntry? get insertOverlayBelow => toHero.widget.insertOverlayBelow ?? fromHero.widget.insertOverlayBelow;
 
   Animation<double> get animation {
     return CurvedAnimation(
@@ -683,7 +703,7 @@ class _HeroFlight {
     heroRectTween = manifest.createHeroRectTween(begin: manifest.fromHeroLocation, end: manifest.toHeroLocation);
     manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: shouldIncludeChildInPlaceholder);
     manifest.toHero.startFlight();
-    manifest.overlay.insert(overlayEntry = OverlayEntry(builder: _buildOverlay));
+    manifest.overlay.insert(overlayEntry = OverlayEntry(builder: _buildOverlay), below: manifest.insertOverlayBelow);
     _proxyAnimation.addListener(onTick);
   }
 

@@ -159,6 +159,32 @@ class MutatingRoute extends MaterialPageRoute<void> {
   }
 }
 
+class AdditionalOverlayRoute extends PageRoute<void> with MaterialRouteTransitionMixin<void> {
+  late final OverlayEntry overlayEntry;
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  Widget buildContent(BuildContext context) {
+    return Hero(
+      tag: 'a',
+      insertOverlayBelow: overlayEntry,
+      child: const Text('AdditionalOverlayRoute'),
+    );
+  }
+
+  Widget _buildOverlay(BuildContext context) => const SizedBox();
+
+  @override
+  Iterable<OverlayEntry> createOverlayEntries() {
+    return <OverlayEntry>[
+      ...super.createOverlayEntries(),
+      overlayEntry = OverlayEntry(builder: _buildOverlay),
+    ];
+  }
+}
+
 class _SimpleStatefulWidget extends StatefulWidget {
   const _SimpleStatefulWidget({ super.key });
   @override
@@ -202,7 +228,6 @@ class FakeWindowPadding implements WindowPadding {
   final double bottom;
 }
 
-
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
   assert(testImage != null);
@@ -212,7 +237,6 @@ Future<void> main() async {
   });
 
   testWidgets('Heroes animate', (WidgetTester tester) async {
-
     await tester.pumpWidget(MaterialApp(routes: routes));
 
     // the initial setup.
@@ -3159,4 +3183,23 @@ Future<void> main() async {
       testBinding.window.clearAllTestValues();
     },
   );
+
+  testWidgets('Inserting overlay below an existing one', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Scaffold(body: Hero(tag: 'a', child: Placeholder())),
+      )
+    );
+    await tester.pumpAndSettle();
+
+    final AdditionalOverlayRoute route = AdditionalOverlayRoute();
+    navigatorKey.currentState!.push(route);
+    await tester.pump();
+
+    final OverlayState overlay = navigatorKey.currentState!.overlay!;
+    expect(overlay.entries.indexOf(route.overlayEntry), overlay.entries.length - 1);
+  });
 }
