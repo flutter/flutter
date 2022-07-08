@@ -15,9 +15,11 @@ import 'navigation_rail_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-/// A material widget that is meant to be displayed at the left or right of an
+/// A Material Design widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and
 /// five.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=y9xchtVTtqQ}
 ///
 /// The navigation rail is meant for layouts with wide viewports, such as a
 /// desktop web or tablet landscape layout. For smaller layouts, like mobile
