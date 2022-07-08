@@ -66,6 +66,7 @@ export 'src/material/date.dart';
 export 'src/material/date_picker.dart';
 export 'src/material/debug.dart';
 export 'src/material/default_text_selection_toolbar.dart';
+export 'src/material/desktop_text_selection.dart';
 export 'src/material/dialog.dart';
 export 'src/material/dialog_theme.dart';
 export 'src/material/divider.dart';
