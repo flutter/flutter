@@ -26,7 +26,7 @@ import 'image.dart';
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
 /// ```dart
-/// const DecoratedSliver(
+/// DecoratedSliver(
 ///   decoration: BoxDecoration(
 ///     gradient: RadialGradient(
 ///       center: Alignment(-0.5, -0.6),
@@ -39,7 +39,7 @@ import 'image.dart';
 ///     ),
 ///   ),
 ///   sliver: SliverList(
-///     delegate: SliverChildListDelegate([
+///     delegate: SliverChildListDelegate(<Widget>[
 ///        Text('Goodnight Moon'),
 ///     ]),
 ///   ),
