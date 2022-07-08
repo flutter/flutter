@@ -17,7 +17,9 @@ class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
   SpellCheckConfiguration({
-    this.spellCheckService, this.spellCheckSuggestionsHandler
+    this.spellCheckService,
+    this.spellCheckSuggestionsHandler,
+    required this.misspelledTextStyle,
   });
 
   /// The service used to fetch spell check results for text input.
@@ -35,9 +37,8 @@ class SpellCheckConfiguration {
   /// suggestions of misspelled words.
   SpellCheckResults? spellCheckResults;
 
-  /// Configuration that indicates that spell check should not be run on text
-  /// input and/or spell check is not implemented on the respective platform.
-  static SpellCheckConfiguration disabled = SpellCheckConfiguration();
+  /// The style of text to use to indicate misspelled text.
+  TextStyle misspelledTextStyle;
 }
 
 /// Determines how misspelled words are indicated in text input and how
@@ -49,6 +50,7 @@ mixin SpellCheckSuggestionsHandler {
     TextEditingValue value,
     bool composingWithinCurrentTextRange,
     TextStyle? style,
+    TextStyle misspelledTextStyle,
     SpellCheckResults spellCheckResults
   );
 }
@@ -69,52 +71,7 @@ mixin SpellCheckSuggestionsHandler {
 class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   /// Creates a handler to use for spell checking text input based on the
   /// provided platform.
-  DefaultSpellCheckSuggestionsHandler(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        misspelledTextStyle = cupertinoMisspelledTextStyle;
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        misspelledTextStyle = materialMisspelledTextStyle;
-        break;
-    }
-  }
-
-  /// The text style by which misspelled words will be indicated in the
-  /// [TextSpan] tree based on platform.
-  late final TextStyle misspelledTextStyle;
-
-  /// The style used to indicate misspelled words on Android.
-  static const TextStyle materialMisspelledTextStyle = const TextStyle(
-      decoration: TextDecoration.underline,
-      decorationColor: ColorSwatch<int>(
-        0xFFF44336,
-        <int, Color>{
-          50: Color(0xFFFFEBEE),
-          100: Color(0xFFFFCDD2),
-          200: Color(0xFFEF9A9A),
-          300: Color(0xFFE57373),
-          400: Color(0xFFEF5350),
-          500: Color(0xFFF44336),
-          600: Color(0xFFE53935),
-          700: Color(0xFFD32F2F),
-          800: Color(0xFFC62828),
-          900: Color(0xFFB71C1C),
-        },
-      ),
-      decorationStyle: TextDecorationStyle.wavy
-  );
-
-  /// The style used to indicate misspelled words on iOS and macOS.
-  static const TextStyle cupertinoMisspelledTextStyle = const TextStyle(
-      decoration: TextDecoration.underline,
-      decorationColor: Color.fromARGB(255, 255, 59, 48),
-      decorationStyle: TextDecorationStyle.dotted
-  );
+  DefaultSpellCheckSuggestionsHandler() {}
 
   /// Adjusts spell check results to correspond to [newText] if the only results
   /// that the handler has access to are the [results] corresponding to
@@ -192,6 +149,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       TextEditingValue value,
       bool composingWithinCurrentTextRange,
       TextStyle? style,
+      TextStyle misspelledTextStyle,
       SpellCheckResults spellCheckResults) {
     List<SuggestionSpan>? correctedSpellCheckResults;
 

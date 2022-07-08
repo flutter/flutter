@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'colors.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
@@ -330,8 +331,7 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckEnabled,
-    this.spellCheckService,
-    this.spellCheckSuggestionsHandler,
+    SpellCheckConfiguration? spellCheckConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -392,7 +392,14 @@ class TextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     )));
+                     ))),
+         spellCheckConfiguration = spellCheckConfiguration ?? 
+            (spellCheckEnabled ?? true
+                ? SpellCheckConfiguration(
+                    misspelledTextStyle: materialMisspelledTextStyle,
+                  )
+                : null
+            );
 
   /// Controls the text being edited.
   ///
@@ -769,14 +776,26 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
+  /// Whether or not to enable default spell check behavior for Material.
+  ///
+  /// This has no effect if [spellCheckConfiguration] is specified; in this case,
+  /// spell check will be enabled and that configuration will be used in place
+  /// of the default for Material.
+  ///
+  /// See also:
+  ///
+  ///  * [EditableTextState], which outlines the default behavior for spell check.
   final bool? spellCheckEnabled;
 
-  /// {@macro flutter.widgets.EditableText.spellCheckService}
-  final SpellCheckService? spellCheckService;
+  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.widgets.EditableText.spellCheckSuggestionsHandler}
-  final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
+  static const TextStyle materialMisspelledTextStyle =
+    const TextStyle(
+      decoration: TextDecoration.underline,
+      decorationColor: Colors.red,
+      decorationStyle: TextDecorationStyle.wavy
+  );
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -821,8 +840,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('spellCheckEnabled', spellCheckEnabled, defaultValue: null));
-    properties.add(DiagnosticsProperty<SpellCheckService>('spellCheckService', spellCheckService, defaultValue: null));
-    properties.add(DiagnosticsProperty<SpellCheckSuggestionsHandler>('spellCheckSuggestionsHandler', spellCheckSuggestionsHandler, defaultValue: null));
+    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
   }
 }
 
@@ -1293,9 +1311,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          spellCheckEnabled : widget.spellCheckEnabled,
-          spellCheckService : widget.spellCheckService,
-          spellCheckSuggestionsHandler : widget.spellCheckSuggestionsHandler,
+          spellCheckConfiguration: widget.spellCheckConfiguration,
         ),
       ),
     );

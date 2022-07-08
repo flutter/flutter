@@ -12555,7 +12555,7 @@ void main() {
           tester.state<EditableTextState>(find.byType(EditableText));
         expect(state.spellCheckEnabled, isFalse);
         expect(state.spellCheckConfiguration,
-               equals(SpellCheckConfiguration.disabled)
+               equals(isNull)
         );
     });
 
@@ -12581,8 +12581,8 @@ void main() {
             tester.state<EditableTextState>(find.byType(EditableText));
           expect(state.spellCheckEnabled, isFalse);
           expect(
-            state.spellCheckConfigurationå,
-            equals(SpellCheckConfiguration.disabled)
+            state.spellCheckConfiguration,
+            equals(isNull)
           );
       });
 

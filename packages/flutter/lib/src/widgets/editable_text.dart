@@ -176,7 +176,14 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
                              spellCheckConfiguration.spellCheckResults != null;
 
     if (spellCheckEnabled) {
-      return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingRegionOutOfRange, style, spellCheckConfiguration.spellCheckResults!);
+      return spellCheckConfiguration.spellCheckSuggestionsHandler!
+        .buildTextSpanWithSpellCheckSuggestions(
+          value, 
+          composingRegionOutOfRange,
+          style, 
+          spellCheckConfiguration.misspelledTextStyle, 
+          spellCheckConfiguration.spellCheckResults!
+        );
     }
 
     if (composingRegionOutOfRange) {
@@ -563,9 +570,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckEnabled,
-    this.spellCheckService,
-    this.spellCheckSuggestionsHandler,
+    this.spellCheckConfiguration,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -629,9 +634,9 @@ class EditableText extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        assert(
-          spellCheckEnabled ?? true
-          || spellCheckService == null
-          && spellCheckSuggestionsHandler == null,
+          spellCheckConfiguration == null
+          || spellCheckConfiguration.spellCheckService == null
+          && spellCheckConfiguration.spellCheckSuggestionsHandler == null,
           'spellCheckEnabled must not be false if spellCheckService or spellCheckSuggestionsHandler specified'
        ),
        _strutStyle = strutStyle,
@@ -1443,20 +1448,21 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@template flutter.widgets.EditableText.spellCheckEnabled}
-  /// Whether or not spell check is enabled.
+  /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
+  /// Configuration that details how spell check performed.
+  ///
+  /// Specifies the [SpellCheckService] used to spell check text input, the
+  /// [SpellCheckSuggestionsHandler] used to style text with misspelled words,
+  /// and the [TextStyle] that handler uses to indicate misspelled words.
   /// {@endtemplate}
-  final bool? spellCheckEnabled;
-
-  /// {@template flutter.widgets.EditableText.spellCheckService}
-  /// Service used to fetch spell check results if spell check is enabled.
-  /// {@endtemplate}
-  final SpellCheckService? spellCheckService;
-
-  /// {@template flutter.widgets.EditableText.spellCheckSuggestionsHandler}
-  /// Handler used to display spell check results if spell check is enabled.
-  /// {@endtemplate}
-  final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
+  ///
+  /// If the [SpellCheckService] is left null, the [DefaultSpellCheckService] if
+  /// used if the platform is supported. It is currently supported only on
+  /// Android. If the [SpellCheckSuggestionsHandler] is left null, the
+  /// [DefaultSpellCheckSuggestionsHandler] is used. If neither the
+  /// [SpellCheckService] nor the [SpellCheckSuggestionsHandler] is specified,
+  /// then spell check is disabled by default.
+  final SpellCheckConfiguration? spellCheckConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -1634,9 +1640,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('spellCheckEnabled', spellCheckEnabled, defaultValue: null));
-    properties.add(DiagnosticsProperty<SpellCheckService>('spellCheckService', spellCheckService, defaultValue: null));
-    properties.add(DiagnosticsProperty<SpellCheckSuggestionsHandler>('spellCheckSuggestionsHandler', spellCheckSuggestionsHandler, defaultValue: null));
+    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
   }
 }
 
@@ -1673,7 +1677,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Configuration that determins how spell check will be performed.
   SpellCheckConfiguration? get spellCheckConfiguration => _spellCheckConfiguration;
 
-  late bool _spellCheckEnabled;
+  bool _spellCheckEnabled = false;
 
   /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
   @visibleForTesting
@@ -1874,34 +1878,31 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
 
     // Spell check setup
-    final bool spellCheckServiceDefined = widget.spellCheckService != null
-                                    || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+    if (widget.spellCheckConfiguration == null) {
+      return;
+    }
+
+    _spellCheckEnabled = true;
+    SpellCheckService? spellCheckService = widget.spellCheckConfiguration!.spellCheckService;
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckConfiguration!.spellCheckSuggestionsHandler;
+    TextStyle misspelledTextStyle = widget.spellCheckConfiguration!.misspelledTextStyle;
 
     assert(
-      widget.spellCheckEnabled != true || spellCheckServiceDefined,
+      spellCheckService != null
+      || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined,
       'spellCheckService must be specified for this platform because no default service available'
     );
-    assert(
-      widget.spellCheckEnabled != null
-      || widget.spellCheckSuggestionsHandler == null && widget.spellCheckService == null
-      || spellCheckServiceDefined,
-      'spellCheckService must be specified for this platform because no default service available or spellCheckSuggestionsHandler must be null'
-    );
 
-    _spellCheckEnabled = widget.spellCheckEnabled ??
-      widget.spellCheckService != null || widget.spellCheckSuggestionsHandler != null;
+    spellCheckService = spellCheckService ?? DefaultSpellCheckService();
+    spellCheckSuggestionsHandler =
+      spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler();
 
-    if (_spellCheckEnabled) {
-      final SpellCheckService spellCheckService = widget.spellCheckService ?? DefaultSpellCheckService();
-      final SpellCheckSuggestionsHandler spellCheckSuggestionsHandler =
-        widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);
-
-      _spellCheckConfiguration = SpellCheckConfiguration(
-          spellCheckService: spellCheckService,
-          spellCheckSuggestionsHandler: spellCheckSuggestionsHandler);
-    } else {
-      _spellCheckConfiguration = SpellCheckConfiguration.disabled;
-    }
+    _spellCheckConfiguration =
+      SpellCheckConfiguration(
+        spellCheckService: spellCheckService,
+        spellCheckSuggestionsHandler: spellCheckSuggestionsHandler,
+        misspelledTextStyle: misspelledTextStyle,
+      );
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
