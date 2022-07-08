@@ -23,7 +23,7 @@ void main() {
 
       // Have a test template append new parameterized content to the end of
       // the file.
-      final Map<String, dynamic> tokens = <String, dynamic>{'foo': 'Foobar', 'bar': 'Barfoo'};
+      final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'Foobar', 'bar': 'Barfoo'};
       TestTemplate('Test', tempFile.path, tokens).updateFile();
 
       expect(tempFile.readAsStringSync(), '''
@@ -33,9 +33,12 @@ void main() {
 
 // BEGIN GENERATED TOKEN PROPERTIES - Test
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'Foobar';
 static final String tokenBar = 'Barfoo';
@@ -61,9 +64,12 @@ static final String tokenBar = 'Barfoo';
 
 // BEGIN GENERATED TOKEN PROPERTIES - Test
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'Foobar';
 static final String tokenBar = 'Barfoo';
@@ -73,7 +79,7 @@ static final String tokenBar = 'Barfoo';
 
       // Have a test template append new parameterized content to the end of
       // the file.
-      final Map<String, dynamic> tokens = <String, dynamic>{'foo': 'foo', 'bar': 'bar'};
+      final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'foo', 'bar': 'bar'};
       TestTemplate('Test', tempFile.path, tokens).updateFile();
 
       expect(tempFile.readAsStringSync(), '''
@@ -83,9 +89,12 @@ static final String tokenBar = 'Barfoo';
 
 // BEGIN GENERATED TOKEN PROPERTIES - Test
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
@@ -112,7 +121,7 @@ static final String tokenBar = 'bar';
 
       // Update file with a template for 'Chunk 1'
       {
-        final Map<String, dynamic> tokens = <String, dynamic>{'foo': 'foo', 'bar': 'bar'};
+        final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'foo', 'bar': 'bar'};
         TestTemplate('Chunk 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -122,9 +131,12 @@ static final String tokenBar = 'bar';
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chunk 1
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
@@ -135,7 +147,7 @@ static final String tokenBar = 'bar';
       // Update file with a template for 'Chunk 2', which should append but not
       // disturb the code in 'Chunk 1'.
       {
-        final Map<String, dynamic> tokens = <String, dynamic>{'foo': 'bar', 'bar': 'foo'};
+        final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'bar', 'bar': 'foo'};
         TestTemplate('Chunk 2', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -145,9 +157,12 @@ static final String tokenBar = 'bar';
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chunk 1
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
@@ -156,9 +171,12 @@ static final String tokenBar = 'bar';
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chunk 2
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
@@ -169,7 +187,7 @@ static final String tokenBar = 'foo';
       // Update 'Chunk 1' again which should just update that chunk,
       // leaving 'Chunk 2' undisturbed.
       {
-        final Map<String, dynamic> tokens = <String, dynamic>{'foo': 'FOO', 'bar': 'BAR'};
+        final Map<String, dynamic> tokens = <String, dynamic>{'version': '0.0', 'foo': 'FOO', 'bar': 'BAR'};
         TestTemplate('Chunk 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -179,9 +197,12 @@ static final String tokenBar = 'foo';
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chunk 1
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'FOO';
 static final String tokenBar = 'BAR';
@@ -190,9 +211,12 @@ static final String tokenBar = 'BAR';
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chunk 2
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: 0.0
 
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
