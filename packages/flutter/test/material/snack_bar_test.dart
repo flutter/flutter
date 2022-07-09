@@ -1801,7 +1801,14 @@ void main() {
     const Key transitionTarget = Key('transition-target');
 
     Widget buildApp() {
+      final PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          for(final TargetPlatform platform in TargetPlatform.values)
+            platform: const CupertinoPageTransitionsBuilder(),
+        },
+      );
       return MaterialApp(
+        theme: ThemeData(pageTransitionsTheme: pageTransitionTheme),
         initialRoute: '/',
         routes: <String, WidgetBuilder> {
           '/': (BuildContext context) {
@@ -1862,7 +1869,7 @@ void main() {
 
     // We should have only one SnackBar displayed on the screen.
     expect(find.text(snackBarText), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  });
 
   testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
