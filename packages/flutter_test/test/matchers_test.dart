@@ -198,10 +198,10 @@ void main() {
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
   });
 
-  test('matrixMorOrLessEqual', () {
+  test('matrixMoreOrLessEquals', () {
     expect(
       Matrix4.rotationZ(math.pi),
-      matrixMorOrLessEqual(Matrix4.fromList(<double>[
+      matrixMoreOrLessEquals(Matrix4.fromList(<double>[
        -1,  0, 0, 0,
         0, -1, 0, 0,
         0,  0, 1, 0,
@@ -211,7 +211,7 @@ void main() {
 
     expect(
       Matrix4.rotationZ(math.pi),
-      matrixMorOrLessEqual(Matrix4.fromList(<double>[
+      matrixMoreOrLessEquals(Matrix4.fromList(<double>[
        -2,  0, 0, 0,
         0, -2, 0, 0,
         0,  0, 1, 0,
@@ -221,7 +221,7 @@ void main() {
 
     expect(
       Matrix4.rotationZ(math.pi),
-      isNot(matrixMorOrLessEqual(Matrix4.fromList(<double>[
+      isNot(matrixMoreOrLessEquals(Matrix4.fromList(<double>[
        -2,  0, 0, 0,
         0, -2, 0, 0,
         0,  0, 1, 0,
