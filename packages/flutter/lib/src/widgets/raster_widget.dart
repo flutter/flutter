@@ -11,7 +11,6 @@ import 'framework.dart';
 import 'media_query.dart';
 
 /// A widget that replaces its child with a rasterized version of the child.
-///
 class RasterWidget extends SingleChildRenderObjectWidget {
   /// Create a new [RasterWidget].
   const RasterWidget({
@@ -21,8 +20,11 @@ class RasterWidget extends SingleChildRenderObjectWidget {
     required super.child
   });
 
-  /// The delegate used to draw the `ui.Image` representing the rasterized child widget.
+  /// The delegate used to draw the image representing the rasterized child widget.
   final RasterWidgetDelegate delegate;
+
+  /// Whether a rasterized version of this render objects child is drawn in
+  /// place of the child.
   final ValueNotifier<bool> rasterize;
 
   @override
@@ -101,7 +103,7 @@ class RenderRasterWidget extends RenderProxyBox {
     _currentlyRepaintBoundary = rasterize.value;
   }
 
-  /// The device pixel ratio used to create the child raster.
+  /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
   double _devicePixelRatio;
   set devicePixelRatio(double value) {
@@ -112,6 +114,8 @@ class RenderRasterWidget extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// Whether a rasterized version of this render objects child is drawn in
+  /// place of the child.
   ValueNotifier<bool> get rasterize => _rasterize;
   ValueNotifier<bool> _rasterize;
   set rasterize(ValueNotifier<bool> value) {
@@ -123,7 +127,7 @@ class RenderRasterWidget extends RenderProxyBox {
     rasterize.addListener(_onRasterValueChanged);
   }
 
-  /// The delegate used to draw the `ui.Image` representing the rasterized child widget.
+  /// The delegate used to draw the image representing the child.
   RasterWidgetDelegate get delegate => _delegate;
   RasterWidgetDelegate _delegate;
   set delegate(RasterWidgetDelegate value) {
