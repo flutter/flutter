@@ -80,10 +80,6 @@ class RasterWidget extends SingleChildRenderObjectWidget {
 }
 
 /// A delegate used to draw the image representing the rasterized child.
-///
-/// See also:
-///
-///  * [RasterDefaultDelegate], which paints the child widget as-is.
 abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// Called whenever the [image] that represents a [RasterWidget]s child should be painted.
   ///
