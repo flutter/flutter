@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'editable_text.dart';
@@ -13,7 +12,6 @@ import 'gesture_detector.dart';
 import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
-import 'selectable_region.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
@@ -28,7 +26,7 @@ typedef ContextMenuBuilder = Widget Function(
 // TODO(justinmc): Instead of 2 anchors, take a Rect? Or that's not enough
 // info because selection is not always a Rect?
 /// A function that builds a widget to use as the text selection toolbar for
-/// editable text.
+/// [EditableText].
 ///
 /// See also:
 ///
@@ -37,6 +35,17 @@ typedef ContextMenuBuilder = Widget Function(
 typedef EditableTextToolbarBuilder = Widget Function(
   BuildContext,
   EditableTextState,
+  Offset,
+  [Offset?]
+);
+
+// TODO(justinmc): This makes more sense to me if it passed the _SelectionRegionState,
+// but that is private.
+/// A function that builds a widget to use as the text selection toolbar with
+/// the given [ContextMenuButtonData]s.
+typedef ButtonDatasToolbarBuilder = Widget Function(
+  BuildContext,
+  List<ContextMenuButtonData>,
   Offset,
   [Offset?]
 );

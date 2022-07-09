@@ -31,21 +31,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
-/// A builder specifically for the SelectableRegion context menu.
-///
-/// Includes the buttonDatas that SelectableRegion would normally build in its
-/// context menu.
-///
-/// See also:
-///
-///  * [ContextMenuBuilder], which doesn't include the buttonDatas.
-typedef SelectableRegionContextMenuBuilder = Widget Function(
-  BuildContext context,
-  List<ContextMenuButtonData> buttonDatas,
-  Offset primaryAnchor,
-  [Offset secondaryAnchor]
-);
-
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. To enable selection for
@@ -208,7 +193,7 @@ class SelectableRegion extends StatefulWidget {
   final Widget child;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  final SelectableRegionContextMenuBuilder? buildContextMenu;
+  final ButtonDatasToolbarBuilder? buildContextMenu;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -603,14 +588,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   bool _showToolbar({Offset? location}) {
-    /*
-    if (widget.buildContextMenu == null) {
-      return false;
-    }
-
-    ContextMenuController.hide();
-    */
-
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
     }
@@ -623,43 +600,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return false;
     }
 
-    /*
-    // TODO(justinmc): What's that about calculating the location in the docs above?
-    if (location == null) {
-      return false;
-    }
-
-    // TODO(justinmc): Is there ever a reason to use a secondary anchor?
-    ContextMenuController.show(
-      context: context,
-      buildContextMenu: (BuildContext context) {
-        final String? selectedText =
-            _selectable?.getSelectedContent()?.plainText;
-        return widget.buildContextMenu!(
-          context,
-          <ContextMenuButtonData>[
-            if (selectedText != null && selectedText != '')
-              ContextMenuButtonData(
-                onPressed: () {
-                  copySelection(SelectionChangedCause.toolbar);
-                  ContextMenuController.hide();
-                },
-                type: ContextMenuButtonType.copy,
-              ),
-            ContextMenuButtonData(
-              onPressed: () {
-                selectAll(SelectionChangedCause.toolbar);
-                ContextMenuController.hide();
-              },
-              type: ContextMenuButtonType.selectAll,
-            ),
-          ],
-          location,
-        );
-      },
-    );
-    */
-
     if (_selectionOverlay == null) {
       _createSelectionOverlay();
     }
@@ -670,7 +610,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return true;
     }
 
-    // TODO(justinmc): What's that about calculating the location in the docs above?
+    // TODO(justinmc): Actually need to calculate the location if it's null.
+    // Similar to what happens in widgets/text_selection.dart.
     if (location == null) {
       return false;
     }
@@ -682,19 +623,19 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     ContextMenuController.show(
       context: context,
       buildContextMenu: (BuildContext context) {
-        return _SelectableRegionContextMenuButtonDatasBuilder(
-          delegate: this,
-          builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
-            final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
-            return _SelectionToolbarWrapper(
-              layerLink: _toolbarLayerLink,
-              offset: -Rect.fromPoints(
-                renderBox.localToGlobal(Offset.zero),
-                renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-              ).topLeft,
-              child: widget.buildContextMenu!(context, buttonDatas, location),
-            );
-          },
+        final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
+        return _SelectionToolbarWrapper(
+          layerLink: _toolbarLayerLink,
+          offset: -Rect.fromPoints(
+            renderBox.localToGlobal(Offset.zero),
+            renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+          ).topLeft,
+          child: _SelectableRegionContextMenuButtonDatasBuilder(
+            delegate: this,
+            builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
+              return widget.buildContextMenu!(context, buttonDatas, location);
+            },
+          ),
         );
       },
     );
@@ -1835,11 +1776,12 @@ class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
 
   void _handleCopy() {
     delegate._copy();
+    delegate.hideToolbar();
   }
 
   void _handleSelectAll() {
     delegate.selectAll();
-    //delegate.dispatchSelectionEvent(const SelectAllSelectionEvent());
+    delegate.hideToolbar();
   }
 
   @override
@@ -1904,6 +1846,7 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with
     super.initState();
 
     _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
+    _controller.forward();
   }
 
   @override

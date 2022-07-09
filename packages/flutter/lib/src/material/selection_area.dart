@@ -54,7 +54,7 @@ class SelectionArea extends StatefulWidget {
   /// See also:
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.
-  final ContextMenuBuilder? buildContextMenu;
+  final ButtonDatasToolbarBuilder? buildContextMenu;
 
   /// The child widget this selection area applies to.
   ///
@@ -87,17 +87,17 @@ class _SelectionAreaState extends State<SelectionArea> {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        controls ??= materialTextSelectionControls;
+        controls ??= materialTextSelectionHandleControls;
         break;
       case TargetPlatform.iOS:
-        controls ??= cupertinoTextSelectionControls;
+        controls ??= cupertinoTextSelectionHandleControls;
         break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        controls ??= desktopTextSelectionControls;
+        controls ??= desktopTextSelectionHandleControls;
         break;
       case TargetPlatform.macOS:
-        controls ??= cupertinoDesktopTextSelectionControls;
+        controls ??= cupertinoDesktopTextSelectionHandleControls;
         break;
     }
 
@@ -106,7 +106,12 @@ class _SelectionAreaState extends State<SelectionArea> {
       focusNode: _effectiveFocusNode,
       buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
         if (widget.buildContextMenu != null) {
-          return widget.buildContextMenu!(context, primaryAnchor, secondaryAnchor);
+          return widget.buildContextMenu!(
+            context,
+            buttonDatas,
+            primaryAnchor,
+            secondaryAnchor,
+          );
         }
         return DefaultTextSelectionToolbar(
           primaryAnchor: primaryAnchor,

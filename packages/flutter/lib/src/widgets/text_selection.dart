@@ -1100,6 +1100,7 @@ class SelectionOverlay {
     if (_toolbar == null) {
       return;
     }
+    // TODO(justinmc): Should this use ContextMenuController if applicable?
     _toolbar?.remove();
     _toolbar = null;
   }
