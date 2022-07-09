@@ -395,7 +395,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   @override
   Widget build(BuildContext context) {
     if (allowRasterization) {
-      return RasterWidget(delegate: delegate, rasterize: rasterize, child: widget.child,);
+      return RasterWidget(delegate: delegate, rasterize: rasterize, child: widget.child);
     }
     return AnimatedBuilder(
       animation: widget.animation,

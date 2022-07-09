@@ -10,17 +10,51 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
+// A delegate that paints the child widget as is.
+class _RasterDefaultDelegate implements RasterWidgetDelegate {
+  const _RasterDefaultDelegate();
+
+  @override
+  void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
+    final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final Rect dst = Rect.fromLTWH(0, 0, area.width, area.height);
+    final Paint paint = Paint()
+      ..filterQuality = FilterQuality.low;
+    context.canvas.drawImageRect(image, src, dst, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant RasterWidgetDelegate oldDelegate) => false;
+
+  @override
+  void addListener(ui.VoidCallback listener) { }
+
+  @override
+  void dispose() { }
+
+  @override
+  bool get hasListeners => false;
+
+  @override
+  void notifyListeners() { }
+
+  @override
+  void removeListener(ui.VoidCallback listener) { }
+}
+
 /// A widget that replaces its child with a rasterized version of the child.
 class RasterWidget extends SingleChildRenderObjectWidget {
   /// Create a new [RasterWidget].
   const RasterWidget({
     super.key,
-    required this.delegate,
+    this.delegate = const _RasterDefaultDelegate(),
     required this.rasterize,
     required super.child
   });
 
-  /// The delegate used to draw the image representing the rasterized child widget.
+  /// A delegate that allows customization of how the image is painted.
+  ///
+  /// If not provided, defaults to a delegate which paints the child as is.
   final RasterWidgetDelegate delegate;
 
   /// Whether a rasterized version of this render objects child is drawn in
@@ -45,7 +79,11 @@ class RasterWidget extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A delegate used to draw the `ui.Image` representing the rasterized child widget.
+/// A delegate used to draw the image representing the rasterized child.
+///
+/// See also:
+///
+///  * [RasterDefaultDelegate], which paints the child widget as-is.
 abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// Called whenever the [image] that represents a [RasterWidget]s child should be painted.
   ///
@@ -59,9 +97,11 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   ///
   /// ```dart
   /// void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
-  ///   var src = Rect.fromLTWH(0, 0, image.width, image.height);
-  ///   var dst = Rect.fromLTWH(0, 0, area.width, area.height);
-  ///   context.canvas.drawImageRect(image, src, dst);
+  ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  ///   final Rect dst = Rect.fromLTWH(0, 0, area.width, area.height);
+  ///   final Paint paint = Paint()
+  ///     ..filterQuality = FilterQuality.low;
+  ///   context.canvas.drawImageRect(image, src, dst, paint);
   /// }
   ///
   /// ```
@@ -123,21 +163,28 @@ class RenderRasterWidget extends RenderProxyBox {
       return;
     }
     rasterize.removeListener(_onRasterValueChanged);
+    final bool oldValue = rasterize.value;
     _rasterize = value;
     rasterize.addListener(_onRasterValueChanged);
+    if (oldValue != rasterize.value) {
+      _onRasterValueChanged();
+    }
   }
 
   /// The delegate used to draw the image representing the child.
   RasterWidgetDelegate get delegate => _delegate;
   RasterWidgetDelegate _delegate;
   set delegate(RasterWidgetDelegate value) {
-    if (!value.shouldRepaint(delegate)) {
+    if (value == delegate) {
       return;
     }
     delegate.removeListener(markNeedsPaint);
+    final RasterWidgetDelegate oldDelegate = _delegate;
     _delegate = value;
     delegate.addListener(markNeedsPaint);
-    markNeedsPaint();
+    if (delegate.shouldRepaint(oldDelegate)) {
+      markNeedsPaint();
+    }
   }
 
   ui.Image? _childRaster;

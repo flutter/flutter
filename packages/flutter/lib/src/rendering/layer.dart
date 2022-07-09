@@ -1428,8 +1428,9 @@ class OffsetLayer extends ContainerLayer {
 
   /// Capture an image of the current state of this layer and its children.
   ///
-  /// The returned [ui.Image] will be offset by the top-left corner of [bounds],
-  /// and have dimensions equal to the size of [bounds] multiplied by [pixelRatio].
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
+  /// by the top-left corner of [bounds], and have dimensions equal to the size
+  /// of [bounds] multiplied by [pixelRatio].
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
@@ -1440,7 +1441,7 @@ class OffsetLayer extends ContainerLayer {
   /// See also:
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
-  ///  * [dart:ui.Scene.toGpuImage] for more information about the image returned.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   ui.Image toImageSync(Rect bounds, { double pixelRatio = 1.0 }) {
     final ui.Scene scene = _createSceneForImage(bounds, pixelRatio: pixelRatio);
 
