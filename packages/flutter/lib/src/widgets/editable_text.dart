@@ -1683,15 +1683,31 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
 
   @override
+  @Deprecated(
+    'Use `TextSelectionToolbarButtonDatasBuilder.canCut` instead, or `buildContextMenu` to change the toolbar. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
 
   @override
+  @Deprecated(
+    'Use `TextSelectionToolbarButtonDatasBuilder.canCopy` instead, or `buildContextMenu` to change the toolbar. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
 
   @override
+  @Deprecated(
+    'Use `TextSelectionToolbarButtonDatasBuilder.canPaste` instead, or `buildContextMenu` to change the toolbar. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
 
   @override
+  @Deprecated(
+    'Use `TextSelectionToolbarButtonDatasBuilder.canSelectAll` instead, or `buildContextMenu` to change the toolbar. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
 
   void _onChangedClipboardStatus() {

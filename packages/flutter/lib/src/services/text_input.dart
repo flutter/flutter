@@ -1044,17 +1044,34 @@ mixin TextSelectionDelegate {
   void bringIntoView(TextPosition position);
 
   /// Whether cut is enabled, must not be null.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get cutEnabled => true;
 
   /// Whether copy is enabled, must not be null.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get copyEnabled => true;
 
   /// Whether paste is enabled, must not be null.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get pasteEnabled => true;
 
   /// Whether select all is enabled, must not be null.
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool get selectAllEnabled => true;
 
+  // TODO(justinmc): Deprecate these too?
   /// Cut current selection to [Clipboard].
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar

@@ -22,6 +22,8 @@ import 'overlay.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
+import 'ticker_provider.dart';
+import 'transitions.dart';
 
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.touch,
@@ -663,7 +665,40 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     }
 
     _selectionOverlay!.toolbarLocation = location;
-    _selectionOverlay!.showToolbar();
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      _selectionOverlay!.showToolbar();
+      return true;
+    }
+
+    // TODO(justinmc): What's that about calculating the location in the docs above?
+    if (location == null) {
+      return false;
+    }
+
+    ContextMenuController.hide();
+
+    // If right clicking on desktop, use the right click position as the only
+    /// anchor.
+    ContextMenuController.show(
+      context: context,
+      buildContextMenu: (BuildContext context) {
+        return _SelectableRegionContextMenuButtonDatasBuilder(
+          delegate: this,
+          builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
+            final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
+            return _SelectionToolbarWrapper(
+              layerLink: _toolbarLayerLink,
+              offset: -Rect.fromPoints(
+                renderBox.localToGlobal(Offset.zero),
+                renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+              ).topLeft,
+              child: widget.buildContextMenu!(context, buttonDatas, location),
+            );
+          },
+        );
+      },
+    );
+
     return true;
   }
 
@@ -1742,5 +1777,154 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       currentSelectionStartIndex = newIndex;
     }
     return finalResult!;
+  }
+}
+
+// TODO(justinmc): This should be public. Users will want to easily build menus
+// for SelectableRegions.
+// TODO(justinmc): Move to a separate file?
+/// Calls [builder] with the [ContextMenuButtonData]s representing the
+/// buttons in this platform's default text selection menu.
+///
+/// By default the [targetPlatform] will be [defaultTargetPlatform].
+///
+/// See also:
+///
+/// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
+///   given [ContextMenuButtonData]s.
+/// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
+class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
+  /// Creates an instance of [_SelectableRegionContextMenuButtonDatasBuilder].
+  const _SelectableRegionContextMenuButtonDatasBuilder({
+    TargetPlatform? targetPlatform,
+    required this.builder,
+    //required this.selectable,
+    required this.delegate,
+  }) : _targetPlatform = targetPlatform;
+
+  /// Called with a list of [ContextMenuButtonData]s so the context menu can be
+  /// built.
+  final ToolbarButtonWidgetBuilder builder;
+
+  /// The Selectable that will display the text selection toolbar.
+  //final Selectable selectable;
+
+  final _SelectableRegionState delegate;
+
+  final TargetPlatform? _targetPlatform;
+
+  /// The platform to base the button datas on.
+  TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
+
+  /// Returns true if the given [_SelectableRegionState]
+  /// supports copy.
+  static bool canCopy(_SelectableRegionState state) {
+    final String? selectedText = state._selectionDelegate.getSelectedContent()?.plainText;
+    return selectedText != null && selectedText.isNotEmpty;
+  }
+
+  /// Returns true if the given [_SelectableRegionState]
+  /// supports select all.
+  static bool canSelectAll(_SelectableRegionState state) {
+    return state._selectionDelegate.value.hasContent;
+  }
+
+  bool get _canCopy => _SelectableRegionContextMenuButtonDatasBuilder.canCopy(delegate);
+
+  bool get _canSelectAll => _SelectableRegionContextMenuButtonDatasBuilder.canSelectAll(delegate);
+
+  void _handleCopy() {
+    delegate._copy();
+  }
+
+  void _handleSelectAll() {
+    delegate.selectAll();
+    //delegate.dispatchSelectionEvent(const SelectAllSelectionEvent());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If there are no buttons to be shown, don't render anything.
+    if (!_canCopy && !_canSelectAll) {
+      return const SizedBox.shrink();
+    }
+
+    // Determine which buttons will appear so that the order and total number is
+    // known. A button's position in the menu can slightly affect its
+    // appearance.
+    final List<ContextMenuButtonData> buttonDatas = <ContextMenuButtonData>[
+      if (_canCopy)
+        ContextMenuButtonData(
+          onPressed: _handleCopy,
+          type: ContextMenuButtonType.copy,
+        ),
+      if (_canSelectAll)
+        ContextMenuButtonData(
+          onPressed: _handleSelectAll,
+          type: ContextMenuButtonType.selectAll,
+        ),
+    ];
+
+    // If there is no option available, build an empty widget.
+    if (buttonDatas.isEmpty) {
+      return const SizedBox(width: 0.0, height: 0.0);
+    }
+
+    return builder(context, buttonDatas);
+  }
+}
+
+// TODO(justinmc): This is duplicated in widgets/text_selection.dart.  Get
+// FadeTransition working there and make it public, then use here.
+// Wrap the given child in the widgets common to both buildContextMenu and
+// TextSelectionControls.buildToolbar.
+class _SelectionToolbarWrapper extends StatefulWidget {
+  const _SelectionToolbarWrapper({
+    required this.layerLink,
+    required this.offset,
+    required this.child,
+  }) : assert(layerLink != null),
+       assert(offset != null),
+       assert(child != null);
+
+  final Widget child;
+  final Offset offset;
+  final LayerLink layerLink;
+
+  @override
+  State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
+}
+
+class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  Animation<double> get _opacity => _controller.view;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: Directionality.of(this.context),
+      child: FadeTransition(
+        opacity: _opacity,
+        child: CompositedTransformFollower(
+          link: widget.layerLink,
+          showWhenUnlinked: false,
+          offset: widget.offset,
+          child: widget.child,
+        ),
+      ),
+    );
   }
 }

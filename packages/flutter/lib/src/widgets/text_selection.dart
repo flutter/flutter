@@ -398,7 +398,7 @@ class TextSelectionOverlay {
     ContextMenuController.hide();
 
     // If right clicking on desktop, use the right click position as the only
-    /// anchor.
+    // anchor.
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     if (renderObject.lastSecondaryTapDownPosition != null) {
       switch (defaultTargetPlatform) {
@@ -1209,6 +1209,7 @@ class SelectionOverlay {
   }
 }
 
+// TODO(justinmc): FadeTransition should work just based on creation/disposal?
 // Wrap the given child in the widgets common to both buildContextMenu and
 // TextSelectionControls.buildToolbar.
 class _SelectionToolbarWrapper extends StatefulWidget {

@@ -54,7 +54,7 @@ class SelectionArea extends StatefulWidget {
   /// See also:
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.
-  final WidgetBuilder? buildContextMenu;
+  final ContextMenuBuilder? buildContextMenu;
 
   /// The child widget this selection area applies to.
   ///
@@ -106,7 +106,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       focusNode: _effectiveFocusNode,
       buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
         if (widget.buildContextMenu != null) {
-          return widget.buildContextMenu!(context);
+          return widget.buildContextMenu!(context, primaryAnchor, secondaryAnchor);
         }
         return DefaultTextSelectionToolbar(
           primaryAnchor: primaryAnchor,
