@@ -8,6 +8,10 @@ import("//flutter/shell/version/version.gni")
 impeller_component("compiler_lib") {
   include_dirs = [ "//third_party/vulkan-deps/spirv-cross/src/" ]
 
+  # Current versions of libcxx have deprecated some of the UTF-16 string
+  # conversion APIs.
+  defines = [ "_LIBCPP_DISABLE_DEPRECATION_WARNINGS" ]
+
   sources = [
     "code_gen_template.h",
     "compiler.cc",
