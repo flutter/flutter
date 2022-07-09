@@ -1435,10 +1435,6 @@ class OffsetLayer extends ContainerLayer {
   /// The returned [ui.Image] will be offset by the top-left corner of [bounds],
   /// and have dimensions equal to the size of [bounds] multiplied by [pixelRatio].
   ///
-  /// Unlike [toImage], this creates a GPU-resident texture which has a backend
-  /// specific byte format. Rasterization will begin immediately on the engine
-  /// thread.
-  ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
   /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
@@ -1449,13 +1445,13 @@ class OffsetLayer extends ContainerLayer {
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toGpuImage] for more information about the image returned.
-  ui.Image toGpuImage(Rect bounds, { double pixelRatio = 1.0 }) {
+  ui.Image toImageSync(Rect bounds, { double pixelRatio = 1.0 }) {
     final ui.Scene scene = _createSceneForImage(bounds, pixelRatio: pixelRatio);
 
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off
       // anything.
-      return scene.toGpuImage(
+      return scene.toImageSync(
         (pixelRatio * bounds.width).ceil(),
         (pixelRatio * bounds.height).ceil(),
       );
