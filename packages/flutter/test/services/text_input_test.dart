@@ -4,7 +4,6 @@
 
 
 import 'dart:convert' show jsonDecode;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -701,7 +700,7 @@ void main() {
   });
 }
 
-class FakeTextInputClient implements TextInputClient {
+class FakeTextInputClient with TextInputClient {
   FakeTextInputClient(this.currentTextEditingValue);
 
   String latestMethodCall = '';

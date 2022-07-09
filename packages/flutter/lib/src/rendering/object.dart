@@ -1579,34 +1579,115 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     late bool result;
     assert(() {
       if (_debugDisposed) {
-        result = false;
-        return true;
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A disposed RenderObject was mutated.'),
+          DiagnosticsProperty<RenderObject>(
+            'The disposed RenderObject was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
       }
-      if (owner != null && !owner!.debugDoingLayout) {
+
+      final PipelineOwner? owner = this.owner;
+      // Detached nodes are allowed to mutate and the "can perform mutations"
+      // check will be performed when they re-attach. This assert is only useful
+      // during layout.
+      if (owner == null || !owner.debugDoingLayout) {
         result = true;
         return true;
       }
-      RenderObject node = this;
-      while (true) {
-        if (node._doingThisLayoutWithCallback) {
+
+      RenderObject? activeLayoutRoot = this;
+      while (activeLayoutRoot != null) {
+        final bool mutationsToDirtySubtreesAllowed = activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
+        final bool doingLayoutWithCallback = activeLayoutRoot._doingThisLayoutWithCallback;
+        // Mutations on this subtree is allowed when:
+        // - the subtree is being mutated in a layout callback.
+        // - a different part of the render tree is doing a layout callback,
+        //   and this subtree is being reparented to that subtree, as a result
+        //   of global key reparenting.
+        if (doingLayoutWithCallback || mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout) {
           result = true;
+          return true;
+        }
+
+        if (!activeLayoutRoot._debugMutationsLocked) {
+          final AbstractNode? p = activeLayoutRoot.parent;
+          activeLayoutRoot = p is RenderObject ? p : null;
+        } else {
+          // activeLayoutRoot found.
           break;
         }
-        if (owner != null && owner!._debugAllowMutationsToDirtySubtrees && node._needsLayout) {
-          result = true;
-          break;
-        }
-        if (node._debugMutationsLocked) {
-          result = false;
-          break;
-        }
-        if (node.parent is! RenderObject) {
-          result = true;
-          break;
-        }
-        node = node.parent! as RenderObject;
       }
-      return true;
+
+      final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
+      final String culpritMethodName = debugActiveLayout.debugDoingThisLayout ? 'performLayout' : 'performResize';
+      final String culpritFullMethodName = '${debugActiveLayout.runtimeType}.$culpritMethodName';
+      result = false;
+
+      if (activeLayoutRoot == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A $runtimeType was mutated in $culpritFullMethodName.'),
+          ErrorDescription(
+            'The RenderObject was mutated when none of its ancestors is actively performing layout.',
+          ),
+          DiagnosticsProperty<RenderObject>(
+            'The RenderObject being mutated was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          DiagnosticsProperty<RenderObject>(
+            'The RenderObject that was mutating the said $runtimeType was',
+            debugActiveLayout,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
+      }
+
+      if (activeLayoutRoot == this) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A $runtimeType was mutated in its own $culpritMethodName implementation.'),
+          ErrorDescription('A RenderObject must not re-dirty itself while still being laid out.'),
+          DiagnosticsProperty<RenderObject>(
+            'The RenderObject being mutated was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          ErrorHint('Consider using the LayoutBuilder widget to dynamically change a subtree during layout.'),
+        ]);
+      }
+
+      final ErrorSummary summary = ErrorSummary('A $runtimeType was mutated in $culpritFullMethodName.');
+      final bool isMutatedByAncestor = activeLayoutRoot == debugActiveLayout;
+      final String description = isMutatedByAncestor
+        ? 'A RenderObject must not mutate its descendants in its $culpritMethodName method.'
+        : 'A RenderObject must not mutate another RenderObject from a different render subtree '
+          'in its $culpritMethodName method.';
+
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        summary,
+        ErrorDescription(description),
+        DiagnosticsProperty<RenderObject>(
+          'The RenderObject being mutated was',
+          this,
+          style: DiagnosticsTreeStyle.errorProperty,
+        ),
+        DiagnosticsProperty<RenderObject>(
+          'The ${isMutatedByAncestor ? 'ancestor ' : ''}RenderObject that was mutating the said $runtimeType was',
+          debugActiveLayout,
+          style: DiagnosticsTreeStyle.errorProperty,
+        ),
+        if (!isMutatedByAncestor) DiagnosticsProperty<RenderObject>(
+          'Their common ancestor was',
+          activeLayoutRoot,
+          style: DiagnosticsTreeStyle.errorProperty,
+        ),
+        ErrorHint(
+          'Mutating the layout of another RenderObject may cause some RenderObjects in its subtree to be laid out more than once. '
+          'Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
+        ),
+      ]);
     }());
     return result;
   }
@@ -1799,6 +1880,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Only call this if [parent] is not null.
   @protected
   void markParentNeedsLayout() {
+    assert(_debugCanPerformMutations);
     _needsLayout = true;
     assert(this.parent != null);
     final RenderObject parent = this.parent! as RenderObject;
