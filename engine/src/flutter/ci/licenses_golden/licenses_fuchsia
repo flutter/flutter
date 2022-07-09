@@ -1,4 +1,4 @@
-Signature: 277cb030d95131438a0f385530b191c2
+Signature: cb9cdcb1634b5ce38b9c7e5d59f78f00
 
 UNUSED LICENSES:
 
@@ -425,7 +425,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_component_test/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
@@ -1178,7 +1177,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_component_test/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
@@ -1828,7 +1826,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_component_test/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
@@ -3233,10 +3230,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_fields.dar
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_holder.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_writer.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/testing.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/agent_interceptor.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/test_harness_fixtures.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/test_harness_spec_builder.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/test.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/src/view_token_pair.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/views.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/incoming.dart
