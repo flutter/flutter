@@ -157,6 +157,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
+/// 
+/// During page transitions, the [SnackBar] will smoothly animate to its 
+/// location on the other page. 
+/// For example if the [SnackBar.behavior] is set to [SnackBarBehavior.floating]
+/// and the next page has a floating action button, while the current one does
+/// not, the [SnackBar] will smoothly animate above the floating action button.
+/// It also works in the case of a back gesture transition.
 ///
 /// {@tool dartpad}
 /// Here is an example of a [SnackBar] with an [action] button implemented using
