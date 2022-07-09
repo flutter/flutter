@@ -274,7 +274,7 @@ Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolera
 ///
 ///  * [moreOrLessEquals], which is for [double]s.
 ///  * [offsetMoreOrLessEquals], which is for [Offset]s.
-Matcher matrixMorOrLessEqual(Matrix4 value, { double epsilon = precisionErrorTolerance }) {
+Matcher matrixMoreOrLessEquals(Matrix4 value, { double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Matrix4>(_matrixDistance, value, epsilon);
 }
 
