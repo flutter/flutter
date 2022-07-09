@@ -1,18 +1,8 @@
-# This file is automatically processed to create .DEPS.git which is the file
-# that gclient uses under git.
+# The dependencies referenced by the Flutter Engine.
 #
-# See http://code.google.com/p/chromium/wiki/UsingGit
-#
-# To test manually, run:
-#   python tools/deps2git/deps2git.py -o .DEPS.git -w <gclientdir>
-# where <gcliendir> is the absolute path to the directory containing the
-# .gclient file (the parent of 'src').
-#
-# Then commit .DEPS.git locally (gclient doesn't like dirty trees) and run
-#   gclient sync..
-# Verify the thing happened you wanted. Then revert your .DEPS.git change
-# DO NOT CHECK IN CHANGES TO .DEPS.git upstream. It will be automatically
-# updated by a bot when you modify this one.
+# This file is referenced by the .gclient file at the root of the checkout.
+# To preview changes to the dependencies, update this file and run
+# `gclient sync`.
 #
 # When adding a new dependency, please update the top-level .gitignore file
 # to list the dependency's destination directory.
