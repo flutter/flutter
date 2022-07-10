@@ -131,6 +131,15 @@ double getOpacity(WidgetTester tester, Finder finder) {
   ).opacity.value;
 }
 
+double getStaticOpacity(WidgetTester tester, Finder finder) {
+  return tester.widget<Opacity>(
+    find.ancestor(
+      of: finder,
+      matching: find.byType(Opacity),
+    ).first,
+  ).opacity;
+}
+
 class TestFormatter extends TextInputFormatter {
   TestFormatter(this.onFormatEditUpdate);
   FormatEditUpdateCallback onFormatEditUpdate;
@@ -608,42 +617,6 @@ void main() {
     expect(tester.state(find.byType(EditableText)), editableText);
     await checkCursorToggle();
   });
-
-  testWidgets('Cursor animates', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: TextField(),
-        ),
-      ),
-    );
-
-    final Finder textFinder = find.byType(TextField);
-    await tester.tap(textFinder);
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorColor!.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(renderEditable.cursorColor!.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor!.alpha, 110);
-
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor!.alpha, 16);
-    await tester.pump(const Duration(milliseconds: 50));
-
-    expect(renderEditable.cursorColor!.alpha, 0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/78918.
   testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
@@ -1331,7 +1304,7 @@ void main() {
 
     editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('desktop obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1985,7 +1958,7 @@ void main() {
 
     // Selection should stay the same since it is set on tap up for mobile platforms.
     await touchGesture.down(gPos);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
     expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
 
@@ -3708,7 +3681,7 @@ void main() {
     // Neither the prefix or the suffix should initially be visible, only the hint.
     expect(getOpacity(tester, find.text('Prefix')), 0.0);
     expect(getOpacity(tester, find.text('Suffix')), 0.0);
-    expect(getOpacity(tester, find.text('Hint')), 1.0);
+    expect(getStaticOpacity(tester, find.text('Hint')), 1.0);
 
     await tester.tap(find.byKey(secondKey));
     await tester.pumpAndSettle();
@@ -3716,7 +3689,7 @@ void main() {
     // Focus the Input. The hint, prefix, and suffix should appear
     expect(getOpacity(tester, find.text('Prefix')), 1.0);
     expect(getOpacity(tester, find.text('Suffix')), 1.0);
-    expect(getOpacity(tester, find.text('Hint')), 1.0);
+    expect(getStaticOpacity(tester, find.text('Hint')), 1.0);
 
     // Enter some text, and the hint should disappear and the prefix and suffix
     // should continue to be visible
@@ -3725,7 +3698,7 @@ void main() {
 
     expect(getOpacity(tester, find.text('Prefix')), 1.0);
     expect(getOpacity(tester, find.text('Suffix')), 1.0);
-    expect(getOpacity(tester, find.text('Hint')), 0.0);
+    expect(getStaticOpacity(tester, find.text('Hint')), 0.0);
 
     // Check and make sure that the right styles were applied.
     final Text prefixText = tester.widget(find.text('Prefix'));

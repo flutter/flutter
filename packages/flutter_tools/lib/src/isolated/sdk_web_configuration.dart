@@ -21,7 +21,7 @@ class SdkWebConfigurationProvider extends SdkConfigurationProvider {
   /// Create and validate configuration matching the default SDK layout.
   /// Create configuration matching the default SDK layout.
   @override
-  Future<SdkConfiguration?> get configuration async {
+  Future<SdkConfiguration> get configuration async {
     if (_configuration == null) {
       final String sdkDir = _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
       final String unsoundSdkSummaryPath = _artifacts.getHostArtifact(HostArtifact.webPlatformKernelDill).path;
@@ -35,7 +35,7 @@ class SdkWebConfigurationProvider extends SdkConfigurationProvider {
         librariesPath: librariesPath,
       );
     }
-    return _configuration;
+    return _configuration!;
   }
 
   /// Validate that SDK configuration exists on disk.
