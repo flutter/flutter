@@ -138,6 +138,7 @@ class Step {
     required this.content,
     this.state = StepState.indexed,
     this.isActive = false,
+    this.label,
   }) : assert(title != null),
        assert(content != null),
        assert(state != null);
@@ -162,6 +163,10 @@ class Step {
 
   /// Whether or not the step is active. The flag only influences styling.
   final bool isActive;
+
+  /// Only [StepperType.horizontal], Optional widget that appears under the [title].
+  /// By default, uses the `bodyText1` theme.
+  final Widget? label;
 }
 
 /// A material stepper widget that displays progress through a sequence of
@@ -351,6 +356,15 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   bool _isDark() {
     return Theme.of(context).brightness == Brightness.dark;
+  }
+
+  bool _isLabel() {
+    for (final Step step in widget.steps) {
+      if (step.label != null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Widget _buildLine(bool visible) {
@@ -573,6 +587,27 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
+  TextStyle _labelStyle(int index) {
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
+
+    assert(widget.steps[index].state != null);
+    switch (widget.steps[index].state) {
+      case StepState.indexed:
+      case StepState.editing:
+      case StepState.complete:
+        return textTheme.bodyText1!;
+      case StepState.disabled:
+        return textTheme.bodyText1!.copyWith(
+          color: _isDark() ? _kDisabledDark : _kDisabledLight,
+        );
+      case StepState.error:
+        return textTheme.bodyText1!.copyWith(
+          color: _isDark() ? _kErrorDark : _kErrorLight,
+        );
+    }
+  }
+
   Widget _buildHeaderText(int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -596,6 +631,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           ),
       ],
     );
+  }
+
+  Widget _buildLabelText(int index) {
+    if (widget.steps[index].label != null) {
+      return AnimatedDefaultTextStyle(
+        style: _labelStyle(index),
+        duration: kThemeAnimationDuration,
+        child: widget.steps[index].label!,
+      );
+    }
+    return const SizedBox();
   }
 
   Widget _buildVerticalHeader(int index) {
@@ -709,9 +755,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: Row(
             children: <Widget>[
               SizedBox(
-                height: 72.0,
-                child: Center(
-                  child: _buildIcon(i),
+                height: _isLabel() ? 104.0 : 72.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
+                    Center(child: _buildIcon(i)),
+                    if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
+                  ],
                 ),
               ),
               Container(

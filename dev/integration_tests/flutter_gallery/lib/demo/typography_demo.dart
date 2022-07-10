@@ -66,7 +66,12 @@ class TypographyDemo extends StatelessWidget {
       body: SafeArea(
         top: false,
         bottom: false,
-        child: Scrollbar(child: ListView(children: styleItems)),
+        child: Scrollbar(
+          child: ListView(
+            primary: true,
+            children: styleItems,
+          ),
+        ),
       ),
     );
   }

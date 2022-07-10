@@ -242,7 +242,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   // SNACKBAR API
 
-  /// Shows  a [SnackBar] across all registered [Scaffold]s.
+  /// Shows a [SnackBar] across all registered [Scaffold]s.
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
@@ -289,10 +289,43 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
-    setState(() {
-      _snackBars.addLast(controller);
-    });
-    _updateScaffolds();
+    try {
+      setState(() {
+        _snackBars.addLast(controller);
+      });
+      _updateScaffolds();
+    } catch (exception) {
+      assert (() {
+        if (exception is FlutterError) {
+          final String summary = exception.diagnostics.first.toDescription();
+          if (summary == 'setState() or markNeedsBuild() called during build.') {
+            final List<DiagnosticsNode> information = <DiagnosticsNode>[
+              ErrorSummary('The showSnackBar() method cannot be called during build.'),
+              ErrorDescription(
+                'The showSnackBar() method was called during build, which is '
+                'prohibited as showing snack bars requires updating state. Updating '
+                'state is not possible during build.',
+              ),
+              ErrorHint(
+                'Instead of calling showSnackBar() during build, call it directly '
+                'in your on tap (and related) callbacks. If you need to immediately '
+                'show a snack bar, make the call in initState() or '
+                'didChangeDependencies() instead. Otherwise, you can also schedule a '
+                'post-frame callback using SchedulerBinding.addPostFrameCallback to '
+                'show the snack bar after the current frame.',
+              ),
+              context.describeOwnershipChain(
+                'The ownership chain for the particular ScaffoldMessenger is',
+              ),
+            ];
+            throw FlutterError.fromParts(information);
+          }
+        }
+        return true;
+      }());
+      rethrow;
+    }
+
     return controller;
   }
 
@@ -1144,12 +1177,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.minInsets != minInsets
-        || oldDelegate.textDirection != textDirection
-        || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
-        || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
-        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
-        || oldDelegate.extendBody != extendBody
-        || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
+      || oldDelegate.minViewPadding != minViewPadding
+      || oldDelegate.textDirection != textDirection
+      || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
+      || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
+      || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
+      || oldDelegate.extendBody != extendBody
+      || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
   }
 }
 
@@ -1613,11 +1647,11 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeDrawer], [Navigator.pop]
+  /// or press the escape key on the keyboard.
   ///
   /// {@tool dartpad}
-  /// To disable the drawer edge swipe, set the
+  /// To disable the drawer edge swipe on mobile, set the
   /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
   /// it.
@@ -1637,8 +1671,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer], [Navigator.pop]
+  /// or press the escape key on the keyboard.
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -1702,6 +1736,8 @@ class Scaffold extends StatefulWidget {
   ///  * [showBottomSheet], which displays a bottom sheet as a route that can
   ///    be dismissed with the scaffold's back button.
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
+  ///  * [BottomSheetThemeData], which can be used to customize the default
+  ///    bottom sheet property values when using a [BottomSheet].
   final Widget? bottomSheet;
 
   /// If true the [body] and the scaffold's floating widgets should size
@@ -1739,15 +1775,19 @@ class Scaffold extends StatefulWidget {
   final double? drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag
-  /// gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool drawerEnableOpenDragGesture;
 
   /// Determines if the [Scaffold.endDrawer] can be opened with a
-  /// drag gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool endDrawerEnableOpenDragGesture;
 
   /// Restoration ID to save and restore the state of the [Scaffold].
@@ -1953,6 +1993,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   final GlobalKey<DrawerControllerState> _drawerKey = GlobalKey<DrawerControllerState>();
   final GlobalKey<DrawerControllerState> _endDrawerKey = GlobalKey<DrawerControllerState>();
 
+  final GlobalKey _bodyKey = GlobalKey();
+
   /// Whether this scaffold has a non-null [Scaffold.appBar].
   bool get hasAppBar => widget.appBar != null;
   /// Whether this scaffold has a non-null [Scaffold.drawer].
@@ -2115,6 +2157,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           ModalRoute.of(context)!.removeLocalHistoryEntry(persistentSheetHistoryEntry!);
         }
         return false;
+      }
+
+      // Stop the animation and unmount the dismissed sheets from the tree immediately,
+      // otherwise may cause duplicate GlobalKey assertion if the sheet sub-tree contains
+      // GlobalKey widgets.
+      if (_dismissedBottomSheets.isNotEmpty) {
+        final List<_StandardBottomSheet> sheets = List<_StandardBottomSheet>.of(_dismissedBottomSheets, growable: false);
+        for (final _StandardBottomSheet sheet in sheets) {
+          sheet.animationController.reset();
+        }
+        assert(_dismissedBottomSheets.isEmpty);
       }
 
       _currentBottomSheet = _buildBottomSheet<void>(
@@ -2648,7 +2701,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       widget.body == null ? null : _BodyBuilder(
         extendBody: widget.extendBody,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-        body: widget.body!,
+        body: KeyedSubtree(key: _bodyKey, child: widget.body!),
       ),
       _ScaffoldSlot.body,
       removeLeftPadding: false,
@@ -2857,7 +2910,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     // The minimum viewPadding for interactive elements positioned by the
     // Scaffold to keep within safe interactive areas.
     final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
-      bottom: _resizeToAvoidBottomInset &&  mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
+      bottom: _resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
     );
 
     // extendBody locked when keyboard is open
@@ -2870,28 +2923,50 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         child: Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-            return CustomMultiChildLayout(
-              delegate: _ScaffoldLayout(
-                extendBody: extendBody,
-                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                minInsets: minInsets,
-                minViewPadding: minViewPadding,
-                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                textDirection: textDirection,
-                isSnackBarFloating: isSnackBarFloating,
-                extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
-                snackBarWidth: snackBarWidth,
+            return Actions(
+              actions: <Type, Action<Intent>>{
+                DismissIntent: _DismissDrawerAction(context),
+              },
+              child: CustomMultiChildLayout(
+                delegate: _ScaffoldLayout(
+                  extendBody: extendBody,
+                  extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                  minInsets: minInsets,
+                  minViewPadding: minViewPadding,
+                  currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                  floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                  floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                  geometryNotifier: _geometryNotifier,
+                  previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                  textDirection: textDirection,
+                  isSnackBarFloating: isSnackBarFloating,
+                  extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+                  snackBarWidth: snackBarWidth,
+                ),
+                children: children,
               ),
-              children: children,
             );
           }),
         ),
       ),
     );
+  }
+}
+
+class _DismissDrawerAction extends DismissAction {
+  _DismissDrawerAction(this.context);
+
+  final BuildContext context;
+
+  @override
+  bool isEnabled(DismissIntent intent) {
+    return Scaffold.of(context).isDrawerOpen || Scaffold.of(context).isEndDrawerOpen;
+  }
+
+  @override
+  void invoke(DismissIntent intent) {
+    Scaffold.of(context).closeDrawer();
+    Scaffold.of(context).closeEndDrawer();
   }
 }
 
@@ -3077,17 +3152,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     return false;
   }
 
-  Widget _wrapBottomSheet(Widget bottomSheet) {
-    return Semantics(
-      container: true,
-      onDismiss: close,
-      child:  NotificationListener<DraggableScrollableNotification>(
-        onNotification: extentChanged,
-        child: bottomSheet,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -3099,19 +3163,24 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           child: child,
         );
       },
-      child: _wrapBottomSheet(
-        BottomSheet(
-          animationController: widget.animationController,
-          enableDrag: widget.enableDrag,
-          onDragStart: _handleDragStart,
-          onDragEnd: _handleDragEnd,
-          onClosing: widget.onClosing!,
-          builder: widget.builder,
-          backgroundColor: widget.backgroundColor,
-          elevation: widget.elevation,
-          shape: widget.shape,
-          clipBehavior: widget.clipBehavior,
-          constraints: widget.constraints,
+      child: Semantics(
+        container: true,
+        onDismiss: close,
+        child:  NotificationListener<DraggableScrollableNotification>(
+          onNotification: extentChanged,
+          child: BottomSheet(
+            animationController: widget.animationController,
+            enableDrag: widget.enableDrag,
+            onDragStart: _handleDragStart,
+            onDragEnd: _handleDragEnd,
+            onClosing: widget.onClosing!,
+            builder: widget.builder,
+            backgroundColor: widget.backgroundColor,
+            elevation: widget.elevation,
+            shape: widget.shape,
+            clipBehavior: widget.clipBehavior,
+            constraints: widget.constraints,
+          ),
         ),
       ),
     );

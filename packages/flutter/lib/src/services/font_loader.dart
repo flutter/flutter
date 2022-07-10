@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+
+export 'dart:typed_data' show ByteData;
 
 /// A class that enables the dynamic loading of fonts at runtime.
 ///

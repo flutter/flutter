@@ -208,7 +208,7 @@ void main() {
     Pub: () => FakePub(),
   });
 
-  testUsingContext('--enable-impeller flag propagates to debugging options', () async {
+  testUsingContext('flags propagate to debugging options', () async {
     final DriveCommand command = DriveCommand(fileSystem: fileSystem, logger: logger, platform: platform);
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -216,12 +216,32 @@ void main() {
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
+      '--start-paused',
+      '--disable-service-auth-codes',
+      '--trace-skia',
+      '--trace-systrace',
+      '--verbose-system-logs',
+      '--null-assertions',
+      '--native-null-assertions',
       '--enable-impeller',
+      '--trace-systrace',
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
 
+    expect(options.startPaused, true);
+    expect(options.disableServiceAuthCodes, true);
+    expect(options.traceSkia, true);
+    expect(options.traceSystrace, true);
+    expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
+    expect(options.nativeNullAssertions, true);
     expect(options.enableImpeller, true);
+    expect(options.traceSystrace, true);
+    expect(options.enableSoftwareRendering, true);
+    expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -334,6 +354,7 @@ class FailingFakeDriverService extends Fake implements DriverService {
       String browserName,
       bool androidEmulator,
       int driverPort,
+      List<String> webBrowserFlags,
       List<String> browserDimension,
       String profileMemory,
     }) async => 1;

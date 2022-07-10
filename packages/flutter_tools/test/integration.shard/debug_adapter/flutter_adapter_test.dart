@@ -302,6 +302,24 @@ void main() {
 
       await dap.client.terminate();
     });
+
+    testWithoutContext('provides appStarted events to the client', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to send a 'flutter.appStarted' event.
+      await Future.wait(<Future<void>>[
+        dap.client.event('flutter.appStarted'),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
+        ),
+      ], eagerError: true);
+
+      await dap.client.terminate();
+    });
   });
 
   group('attach', () {

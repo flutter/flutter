@@ -10,8 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
@@ -885,14 +883,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
-
-  @override
-  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
-    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
-    updatedLayer.alpha = _alpha;
-    return updatedLayer;
-  }
+  bool get alwaysNeedsCompositing => child != null && (_alpha > 0 && _alpha < 255);
 
   int _alpha;
 
@@ -950,19 +941,26 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
+    if (child == null) {
+      return;
     }
+    if (_alpha == 0) {
+      // No need to keep the layer. We'll create a new one if necessary.
+      layer = null;
+      return;
+    }
+    if (_alpha == 255) {
+      // No need to keep the layer. We'll create a new one if necessary.
+      layer = null;
+      return super.paint(context, offset);
+    }
+
+    assert(needsCompositing);
+    layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -1062,7 +1060,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0;
+      _currentlyIsRepaintBoundary = _alpha! > 0 && _alpha! < 255;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary) {
         markNeedsCompositingBitsUpdate();
       }
@@ -1580,8 +1578,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1687,8 +1687,10 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1773,8 +1775,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1851,8 +1855,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset);
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset);
+        }
       }
       return true;
     }());
@@ -2598,6 +2604,13 @@ class RenderTransform extends RenderProxyBox {
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
+          // if the matrix is singular the children would be compressed to a line or
+          // single point, instead short-circuit and paint nothing.
+          final double det = transform.determinant();
+          if (det == 0 || !det.isFinite) {
+            layer = null;
+            return;
+          }
           layer = context.pushTransform(
             needsCompositing,
             offset,

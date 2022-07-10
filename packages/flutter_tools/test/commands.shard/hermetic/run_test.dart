@@ -4,12 +4,6 @@
 
 // @dart = 2.8
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -23,6 +17,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -47,13 +42,13 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   group('run', () {
     FakeDeviceManager mockDeviceManager;
     FileSystem fileSystem;
-
-    setUpAll(() {
-      Cache.disableLocking();
-    });
 
     setUp(() {
       mockDeviceManager = FakeDeviceManager();
@@ -150,12 +145,14 @@ void main() {
       MemoryFileSystem fs;
       Artifacts artifacts;
       TestUsage usage;
+      FakeAnsiTerminal fakeTerminal;
 
       setUpAll(() {
         Cache.disableLocking();
       });
 
       setUp(() {
+        fakeTerminal = FakeAnsiTerminal();
         artifacts = Artifacts.test();
         usage = TestUsage();
         fs = MemoryFileSystem.test();
@@ -404,7 +401,6 @@ void main() {
         Usage: () => usage,
       });
 
-
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
@@ -430,16 +426,18 @@ void main() {
         expect(usage.commands, contains(
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
-            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'false',
+            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
             'cd56': 'false',
           })
         )));
       }, overrides: <Type, Generator>{
+        AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        Stdio: () => FakeStdio(),
         Usage: () => usage,
       });
 
@@ -657,6 +655,57 @@ void main() {
     });
   });
 
+  group('terminal', () {
+    FakeAnsiTerminal fakeTerminal;
+
+    setUp(() {
+      fakeTerminal = FakeAnsiTerminal();
+    });
+
+    testUsingContext('Flutter run sets terminal singleCharMode to false on exit', () async {
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await createTestCommandRunner(command).run(<String>[
+        'run',
+        '--no-pub',
+      ]);
+      // The sync completer where we initially set `terminal.singleCharMode` to
+      // `true` does not execute in unit tests, so explicitly check the
+      // `setSingleCharModeHistory` that the finally block ran, setting this
+      // back to `false`.
+      expect(fakeTerminal.setSingleCharModeHistory, contains(false));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => fakeTerminal,
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Flutter run catches StdinException while setting terminal singleCharMode to false', () async {
+      fakeTerminal.hasStdin = false;
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+        ]);
+      } catch (err) { // ignore: avoid_catches_without_on_clauses
+        fail('Expected no error, got $err');
+      }
+      expect(fakeTerminal.setSingleCharModeHistory, isEmpty);
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => fakeTerminal,
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
   testUsingContext('Flutter run catches service has disappear errors and throws a tool exit', () async {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
     residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
@@ -721,16 +770,38 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('--enable-impeller flag propagates to debugging options', () async {
+  testUsingContext('flags propagate to debugging options', () async {
     final RunCommand command = RunCommand();
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'run',
+      '--start-paused',
+      '--disable-service-auth-codes',
+      '--use-test-fonts',
+      '--trace-skia',
+      '--trace-systrace',
+      '--verbose-system-logs',
+      '--null-assertions',
+      '--native-null-assertions',
       '--enable-impeller',
+      '--trace-systrace',
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
 
+    expect(options.startPaused, true);
+    expect(options.disableServiceAuthCodes, true);
+    expect(options.useTestFonts, true);
+    expect(options.traceSkia, true);
+    expect(options.traceSystrace, true);
+    expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
+    expect(options.nativeNullAssertions, true);
+    expect(options.traceSystrace, true);
     expect(options.enableImpeller, true);
+    expect(options.enableSoftwareRendering, true);
+    expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -998,4 +1069,26 @@ class CapturingAppDomain extends AppDomain {
     this.multidexEnabled = multidexEnabled;
     throwToolExit('');
   }
+}
+
+class FakeAnsiTerminal extends Fake implements AnsiTerminal {
+  /// Setting to false will cause operations to Stdin to throw a [StdinException].
+  bool hasStdin = true;
+
+  @override
+  bool usesTerminalUi = false;
+
+  /// A list of all the calls to the [singleCharMode] setter.
+  List<bool> setSingleCharModeHistory = <bool>[];
+
+  @override
+  set singleCharMode(bool value) {
+    if (!hasStdin) {
+      throw const StdinException('Error setting terminal line mode', OSError('The handle is invalid', 6));
+    }
+    setSingleCharModeHistory.add(value);
+  }
+
+  @override
+  bool get singleCharMode => setSingleCharModeHistory.last;
 }

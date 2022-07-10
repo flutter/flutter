@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui hide window;
 
 import 'package:flutter/foundation.dart';

@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project_validator.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -199,6 +200,7 @@ void main() {
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
     );
 
     final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
@@ -246,6 +248,7 @@ void main() {
       platform: FakePlatform(),
       fileSystem: fileSystem,
       processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
     );
 
     await FakeAsync().run((FakeAsync time) async {
@@ -298,6 +301,7 @@ void main() {
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
     );
 
     await FakeAsync().run((FakeAsync time) async {

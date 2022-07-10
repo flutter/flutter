@@ -461,7 +461,8 @@ class _SnippetChecker {
     // Remove output from building the flutter tool.
     stderr.removeWhere((String line) {
       return line.startsWith('Building flutter tool...')
-          || line.startsWith('Waiting for another flutter command to release the startup lock...');
+          || line.startsWith('Waiting for another flutter command to release the startup lock...')
+          || line.startsWith('Flutter assets will be downloaded from ');
     });
     // Check out the stderr to see if the analyzer had it's own issues.
     if (stderr.isNotEmpty && stderr.first.contains(RegExp(r' issues? found\. \(ran in '))) {

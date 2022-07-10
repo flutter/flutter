@@ -169,10 +169,10 @@ class Dialog extends StatelessWidget {
 
 /// A Material Design alert dialog.
 ///
-/// An alert dialog informs the user about situations that require
-/// acknowledgement. An alert dialog has an optional title and an optional list
-/// of actions. The title is displayed above the content and the actions are
-/// displayed below the content.
+/// An alert dialog (also known as a basic dialog) informs the user about
+/// situations that require acknowledgement. An alert dialog has an optional
+/// title and an optional list of actions. The title is displayed above the
+/// content and the actions are displayed below the content.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
@@ -251,21 +251,25 @@ class Dialog extends StatelessWidget {
 ///  * [CupertinoAlertDialog], an iOS-styled alert dialog.
 ///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.io/design/components/dialogs.html#alert-dialog>
+///  * <https://m3.material.io/components/dialogs>
 class AlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
   ///
   /// Typically used in conjunction with [showDialog].
   ///
-  /// The [contentPadding] must not be null. The [titlePadding] defaults to
-  /// null, which implies a default that depends on the values of the other
-  /// properties. See the documentation of [titlePadding] for details.
+  /// The [titlePadding] and [contentPadding] default to null, which implies a
+  /// default that depends on the values of the other properties. See the
+  /// documentation of [titlePadding] and [contentPadding] for details.
   const AlertDialog({
     super.key,
+    this.icon,
+    this.iconPadding,
+    this.iconColor,
     this.title,
     this.titlePadding,
     this.titleTextStyle,
     this.content,
-    this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+    this.contentPadding,
     this.contentTextStyle,
     this.actions,
     this.actionsPadding,
@@ -282,11 +286,35 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
-  }) : assert(contentPadding != null),
-       assert(clipBehavior != null);
+  }) : assert(clipBehavior != null);
+
+  /// An optional icon to display at the top of the dialog.
+  ///
+  /// Typically, an [Icon] widget. Providing an icon centers the [title]'s text.
+  final Widget? icon;
+
+  /// Color for the [Icon] in the [icon] of this [AlertDialog].
+  ///
+  /// If null, [DialogTheme.iconColor] is used. If that is null, defaults to
+  /// color scheme's [ColorScheme.secondary] if [ThemeData.useMaterial3] is
+  /// true, black otherwise.
+  final Color? iconColor;
+
+  /// Padding around the [icon].
+  ///
+  /// If there is no [icon], no padding will be provided. Otherwise, this
+  /// padding is used.
+  ///
+  /// This property defaults to providing 24 pixels on the top, left, and right
+  /// of the [icon]. If [title] is _not_ null, 16 pixels of bottom padding is
+  /// added to separate the [icon] from the [title]. If the [title] is null and
+  /// [content] is _not_ null, then no bottom padding is provided (but see
+  /// [contentPadding]). In any other case 24 pixels of bottom padding is
+  /// added.
+  final EdgeInsetsGeometry? iconPadding;
 
   /// The (optional) title of the dialog is displayed in a large font at the top
-  /// of the dialog.
+  /// of the dialog, below the (optional) [icon].
   ///
   /// Typically a [Text] widget.
   final Widget? title;
@@ -320,11 +348,17 @@ class AlertDialog extends StatelessWidget {
 
   /// Padding around the content.
   ///
-  /// If there is no content, no padding will be provided. Otherwise, padding of
-  /// 20 pixels is provided above the content to separate the content from the
-  /// title, and padding of 24 pixels is provided on the left, right, and bottom
-  /// to separate the content from the other edges of the dialog.
-  final EdgeInsetsGeometry contentPadding;
+  /// If there is no [content], no padding will be provided. Otherwise, this
+  /// padding is used.
+  ///
+  /// This property defaults to providing a padding of 20 pixels above the
+  /// [content] to separate the [content] from the [title], and 24 pixels on the
+  /// left, right, and bottom to separate the [content] from the other edges of
+  /// the dialog.
+  ///
+  /// If [ThemeData.useMaterial3] is true, the top padding separating the
+  /// content from the title defaults to 16 pixels instead of 20 pixels.
+  final EdgeInsetsGeometry? contentPadding;
 
   /// Style for the text in the [content] of this [AlertDialog].
   ///
@@ -507,21 +541,55 @@ class AlertDialog extends StatelessWidget {
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
+    Widget? iconWidget;
     Widget? titleWidget;
     Widget? contentWidget;
     Widget? actionsWidget;
+
+    if (icon != null) {
+      final bool belowIsTitle = title != null;
+      final bool belowIsContent = !belowIsTitle && content != null;
+      final EdgeInsets defaultIconPadding = EdgeInsets.only(
+        left: 24.0,
+        top: 24.0,
+        right: 24.0,
+        bottom: belowIsTitle ? 16.0 : belowIsContent ? 0.0 : 24.0,
+      );
+      final EdgeInsets effectiveIconPadding = iconPadding?.resolve(textDirection) ?? defaultIconPadding;
+      iconWidget = Padding(
+        padding: EdgeInsets.only(
+          left: effectiveIconPadding.left * paddingScaleFactor,
+          right: effectiveIconPadding.right * paddingScaleFactor,
+          top: effectiveIconPadding.top * paddingScaleFactor,
+          bottom: effectiveIconPadding.bottom,
+        ),
+        child: IconTheme(
+          data: IconThemeData(
+            color: iconColor ?? dialogTheme.iconColor ?? defaults.iconColor,
+          ),
+          child: icon!,
+        ),
+      );
+    }
+
     if (title != null) {
-      final EdgeInsets defaultTitlePadding = EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
+      final EdgeInsets defaultTitlePadding = EdgeInsets.only(
+        left: 24.0,
+        top: icon == null ? 24.0 : 0.0,
+        right: 24.0,
+        bottom: content == null ? 20.0 : 0.0,
+      );
       final EdgeInsets effectiveTitlePadding = titlePadding?.resolve(textDirection) ?? defaultTitlePadding;
       titleWidget = Padding(
         padding: EdgeInsets.only(
           left: effectiveTitlePadding.left * paddingScaleFactor,
           right: effectiveTitlePadding.right * paddingScaleFactor,
-          top: effectiveTitlePadding.top * paddingScaleFactor,
+          top: icon == null ? effectiveTitlePadding.top * paddingScaleFactor : effectiveTitlePadding.top,
           bottom: effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? defaults.titleTextStyle!,
+          textAlign: icon == null ? TextAlign.start : TextAlign.center,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
@@ -534,12 +602,20 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (content != null) {
-      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
+      final EdgeInsets defaultContentPadding = EdgeInsets.only(
+        left: 24.0,
+        top: theme.useMaterial3 ? 16.0 : 20.0,
+        right: 24.0,
+        bottom: 24.0,
+      );
+      final EdgeInsets effectiveContentPadding = contentPadding?.resolve(textDirection) ?? defaultContentPadding;
       contentWidget = Padding(
         padding: EdgeInsets.only(
           left: effectiveContentPadding.left * paddingScaleFactor,
           right: effectiveContentPadding.right * paddingScaleFactor,
-          top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
+          top: title == null && icon == null
+            ? effectiveContentPadding.top * paddingScaleFactor
+            : effectiveContentPadding.top,
           bottom: effectiveContentPadding.bottom,
         ),
         child: DefaultTextStyle(
@@ -579,6 +655,7 @@ class AlertDialog extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  if (icon != null) iconWidget!,
                   if (title != null) titleWidget!,
                   if (content != null) contentWidget!,
                 ],
@@ -590,6 +667,7 @@ class AlertDialog extends StatelessWidget {
       ];
     } else {
       columnChildren = <Widget>[
+        if (icon != null) iconWidget!,
         if (title != null) titleWidget!,
         if (content != null) Flexible(child: contentWidget!),
         if (actions != null) actionsWidget!,
@@ -1059,6 +1137,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/dialogs.html>
+///  * <https://m3.material.io/components/dialogs>
 Future<T?> showDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -1074,6 +1153,7 @@ Future<T?> showDialog<T>({
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
+  assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
   final CapturedThemes themes = InheritedTheme.capture(
@@ -1095,6 +1175,23 @@ Future<T?> showDialog<T>({
     themes: themes,
     anchorPoint: anchorPoint,
   ));
+}
+
+bool _debugIsActive(BuildContext context) {
+  if (context is Element && !context.debugIsActive) {
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('This BuildContext is no longer valid.'),
+      ErrorDescription(
+        'The showDialog function context parameter is a BuildContext that is no longer valid.'
+      ),
+      ErrorHint(
+        'This can commonly occur when the showDialog function is called after awaiting a Future. '
+        'In this situation the BuildContext might refer to a widget that has already been disposed during the await. '
+        'Consider using a parent context instead.',
+      ),
+    ]);
+  }
+  return true;
 }
 
 /// A dialog route with Material entrance and exit animations,
@@ -1185,6 +1282,7 @@ double _paddingScaleFactor(double textScaleFactor) {
 class _DefaultsM2 extends DialogTheme {
   _DefaultsM2(this.context)
     : _textTheme = Theme.of(context).textTheme,
+      _iconTheme = Theme.of(context).iconTheme,
       super(
         alignment: Alignment.center,
         elevation: 24.0,
@@ -1193,6 +1291,10 @@ class _DefaultsM2 extends DialogTheme {
 
   final BuildContext context;
   final TextTheme _textTheme;
+  final IconThemeData _iconTheme;
+
+  @override
+  Color? get iconColor => _iconTheme.color;
 
   @override
   Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
@@ -1213,7 +1315,7 @@ class _DefaultsM2 extends DialogTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_101
 class _TokenDefaultsM3 extends DialogTheme {
   _TokenDefaultsM3(this.context)
     : super(
@@ -1225,6 +1327,9 @@ class _TokenDefaultsM3 extends DialogTheme {
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  Color? get iconColor => _colors.secondary;
 
   // TODO(darrenaustin): overlay should be handled by Material widget: https://github.com/flutter/flutter/issues/9160
   @override

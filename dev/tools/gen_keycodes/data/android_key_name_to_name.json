@@ -201,7 +201,6 @@
   "NavigatePrevious": ["NAVIGATE_PREVIOUS"],
   "NewKey": ["NEW"],
   "NonConvert": ["MUHENKAN"],
-  "None": ["UNKNOWN"],
   "Notification": ["NOTIFICATION"],
   "NumLock": ["NUM_LOCK"],
   "NumberSign": ["POUND"],
