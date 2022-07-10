@@ -14,7 +14,6 @@ import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 
-// TODO(plg): Update documentation about Symbols where [Icons] are mentioned
 
 /// A graphical icon widget drawn with a glyph from a font described in
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
@@ -70,8 +69,6 @@ import 'icon_theme_data.dart';
 ///  * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
 class Icon extends StatelessWidget {
   /// Creates an icon.
-  ///
-  /// The [size] and [color] default to the value given by the current [IconTheme].
   const Icon(
     this.icon, {
     super.key,
@@ -84,7 +81,9 @@ class Icon extends StatelessWidget {
     this.shadows,
     this.semanticLabel,
     this.textDirection,
-  });
+  }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
+       assert(weight == null || (0.0 < weight)),
+       assert(opticalSize == null || (0.0 < opticalSize));
 
   /// The icon to display. The available icons are described in [Icons].
   ///
@@ -104,42 +103,40 @@ class Icon extends StatelessWidget {
   /// pass down the size to the [Icon].
   final double? size;
 
-  /// [FontVariation] which specifies an icon's fill.
-  ///
-  /// TODO(guidezpl): remove Ranges from 0 for unfilled to 1 for completely filled.
-  ///
-  /// Can be used to convey a state transition for animation or interaction.
+  /// The fill for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `FILL` [FontVariation]
-  /// axis, otherwise has no effect.
+  /// axis, otherwise has no effect. Must be between 0.0 (unfilled) and 1.0
+  /// (filled), inclusive.
+  ///
+  /// Can be used to convey a state transition for animation or interaction.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.fill].
   ///
   /// See also:
-  ///  * [weight], a [FontVariation] for controlling stroke weight.
-  ///  * [grade], a [FontVariation] for controlling stroke grade.
-  ///  * [opticalSize], a [FontVariation] for controlling optical size.
+  ///  * [weight], for controlling stroke weight.
+  ///  * [grade], for controlling stroke weight in a more granular way.
+  ///  * [opticalSize], for controlling optical size.
   final double? fill;
 
-  /// [FontVariation] which specifies an icon's stroke weight.
-  ///
-  /// TODO(guidezpl): remove Ranges from 100 (thin) to 700 (bold).
+  /// The stroke weight for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `wght` [FontVariation]
-  /// axis, otherwise has no effect.
+  /// axis, otherwise has no effect. Must be greater than 0.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.weight].
   ///
   /// See also:
-  ///  * [fill], a [FontVariation] for controlling fill.
-  ///  * [grade], a [FontVariation] for controlling stroke grade.
-  ///  * [opticalSize], a [FontVariation] for controlling optical size.
+  ///  * [fill], for controlling fill.
+  ///  * [grade], for controlling stroke weight in a more granular way.
+  ///  * [opticalSize], for controlling optical size.
   ///  * https://fonts.google.com/knowledge/glossary/weight_axis
   final double? weight;
 
-  /// [FontVariation] which specifies an icon's stroke weight in a more granular way.
+  /// The grade (granular stroke weight) for drawing the icon.
   ///
-  /// TODO(guidezpl): remove => Ranges from -25 to 200.
+  /// Requires the underlying icon font to support the `GRAD` [FontVariation]
+  /// axis, otherwise has no effect. Can be negative.
   ///
   /// Grade and [weight] both affect a symbol's stroke weight (thickness), but
   /// grade has a smaller impact on the size of the symbol.
@@ -149,41 +146,31 @@ class Icon extends StatelessWidget {
   /// the text font has a -25 grade value, the symbols can match it with a
   /// suitable value, say -25.
   ///
-  /// Grade for different needs:
-  /// - Low emphasis (e.g. -25 grade): To reduce glare for a light symbol on a
-  /// dark background, use a low grade.
-  /// - High emphasis (e.g. 200 grade): To highlight a symbol, increase the
-  /// positive grade.
-  ///
-  /// Requires the underlying icon font to support the `GRAD` [FontVariation]
-  /// axis, otherwise has no effect.
-  ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.grade].
   ///
   /// See also:
-  ///  * [fill], a [FontVariation] for controlling fill.
-  ///  * [weight], a [FontVariation] for controlling stroke weight.
-  ///  * [opticalSize], a [FontVariation] for controlling optical size.
+  ///  * [fill], for controlling fill.
+  ///  * [weight], for controlling stroke weight in a less granular way.
+  ///  * [opticalSize], for controlling optical size.
   ///  * https://fonts.google.com/knowledge/glossary/grade_axis
   final double? grade;
 
-  /// [FontVariation] which specifies an icon's optical size.
-  ///
-  /// TODO(guidezpl): remove Ranges from 20dp to 48dp.
-  ///
-  /// For an icon to look the same at different sizes, the stroke weight
-  /// (thickness) must change as the icon size scales. Optical size offers a way
-  /// to automatically adjust the stroke weight as icon size changes.
+  /// The optical size for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `opsz` [FontVariation]
   /// axis, otherwise has no effect.
   ///
+  /// For an icon to look the same at different sizes, the stroke weight
+  /// (thickness) must change as the icon size scales. Optical size offers a way
+  /// to automatically adjust the stroke weight as icon size changes. Must be 
+  /// greater than 0.
+  ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.opticalSize].
   ///
   /// See also:
-  ///  * [fill], a [FontVariation] for controlling fill.
-  ///  * [weight], a [FontVariation] for controlling stroke weight.
-  ///  * [grade], a [FontVariation] for controlling stroke grade.
+  ///  * [fill], for controlling fill.
+  ///  * [weight], for controlling stroke weight.
+  ///  * [grade], for controlling stroke weight in a more granular way.
   ///  * https://fonts.google.com/knowledge/glossary/optical_size_axis
   final double? opticalSize;
 
@@ -272,7 +259,7 @@ class Icon extends StatelessWidget {
       text: TextSpan(
         text: String.fromCharCode(icon!.codePoint),
         style: TextStyle(
-          fontVariations: [
+          fontVariations: <FontVariation>[
             if (fill != null) FontVariation('FILL', fill!),
             if (weight != null) FontVariation('wght', weight!),
             if (grade != null) FontVariation('GRAD', grade!),
