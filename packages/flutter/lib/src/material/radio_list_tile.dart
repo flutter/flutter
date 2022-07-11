@@ -12,6 +12,7 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
+// enum Meridiem { am, pm }
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
