@@ -19,28 +19,6 @@ class BottomAppBarDemo extends StatefulWidget {
 }
 
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
-  late ScrollController _controller;
-
-  bool _showFab = true;
-  bool _isElevated = true;
-  bool _isVisible = true;
-
-  FloatingActionButtonLocation get _fabLocation => _isVisible
-      ? FloatingActionButtonLocation.endContained
-      : FloatingActionButtonLocation.endFloat;
-
-  void _onShowFabChanged(bool value) {
-    setState(() {
-      _showFab = value;
-    });
-  }
-
-  void _onElevatedChanged(bool value) {
-    setState(() {
-      _isElevated = value;
-    });
-  }
-
   static const List<Color> colors = <Color>[
     Colors.yellow,
     Colors.orange,
@@ -53,6 +31,15 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     colors.length,
     (int index) => Container(color: colors[index], height: 150.0),
   ).reversed.toList();
+
+  late ScrollController _controller;
+  bool _showFab = true;
+  bool _isElevated = true;
+  bool _isVisible = true;
+
+  FloatingActionButtonLocation get _fabLocation => _isVisible
+      ? FloatingActionButtonLocation.endContained
+      : FloatingActionButtonLocation.endFloat;
 
   void _listen() {
     final ScrollDirection direction = _controller.position.userScrollDirection;
@@ -75,14 +62,23 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     }
   }
 
+  void _onShowFabChanged(bool value) {
+    setState(() {
+      _showFab = value;
+    });
+  }
+
+  void _onElevatedChanged(bool value) {
+    setState(() {
+      _isElevated = value;
+    });
+  }
+
   void _addNewItem() {
     setState(() {
       items.insert(
         0,
-        Container(
-          height: 150.0,
-          color: colors[items.length % 5],
-        ),
+        Container(color: colors[items.length % 5], height: 150.0),
       );
     });
   }
@@ -109,8 +105,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         appBar: AppBar(
           title: const Text('Bottom App Bar Demo'),
         ),
-        body: ListView(
-          controller: _controller,
+        body: Column(
           children: <Widget>[
             SwitchListTile(
               title: const Text('Floating Action Button'),
@@ -122,13 +117,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
               value: _isElevated,
               onChanged: _onElevatedChanged,
             ),
-            ...items,
+            Expanded(
+              child: ListView(
+                controller: _controller,
+                children: items.toList(),
+              ),
+            ),
           ],
         ),
         floatingActionButton: _showFab
             ? FloatingActionButton(
-                onPressed: () => _addNewItem(),
-                tooltip: 'Add new item',
+                onPressed: _addNewItem,
+                tooltip: 'Add New Item',
+                elevation: _isVisible ? 0.0 : null,
                 child: const Icon(Icons.add),
               )
             : null,
