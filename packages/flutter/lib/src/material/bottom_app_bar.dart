@@ -299,7 +299,7 @@ class _TokenDefaultsM3 extends BottomAppBarTheme {
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
-  NotchedShape? get shape => const AutomaticNotchedShape(const RoundedRectangleBorder());
+  NotchedShape? get shape => const AutomaticNotchedShape(RoundedRectangleBorder());
 }
-  
+
 // END GENERATED TOKEN PROPERTIES - BottomAppBar
