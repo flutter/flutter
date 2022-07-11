@@ -103,6 +103,9 @@ group("flutter") {
         # Impeller artifacts - compiler and libtessellator
         "//flutter/impeller/compiler:impellerc",
         "//flutter/impeller/tessellator:tessellator_shared",
+
+        # path_ops
+        "//flutter/tools/path_ops",
       ]
 
       if (full_dart_sdk) {
