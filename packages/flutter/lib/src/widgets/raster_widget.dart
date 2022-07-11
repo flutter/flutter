@@ -43,6 +43,14 @@ class _RasterDefaultDelegate implements RasterWidgetDelegate {
 }
 
 /// A widget that replaces its child with a rasterized version of the child.
+///
+/// When the value of [rasterize] is true, this widget will convert the child scene into
+/// an image. This image will be drawn in place of the children until [rasterize] is false.
+///
+/// How this image is drawn can be customized by providing a new subclass of [RasterWidgetDelegate]
+/// to the [delegate] argument.
+///
+/// This widget is not supported on the HTML backend of flutter for the web.
 class RasterWidget extends SingleChildRenderObjectWidget {
   /// Create a new [RasterWidget].
   const RasterWidget({

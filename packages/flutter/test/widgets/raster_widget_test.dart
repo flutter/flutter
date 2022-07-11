@@ -8,6 +8,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,7 +30,7 @@ void main() {
     ));
 
     await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('raster_widget.yellow.png'));
-  });
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RasterWidget is a repaint boundary when rasterizing', (WidgetTester tester) async {
     final ValueNotifier<bool> notifier = ValueNotifier<bool>(true);
@@ -55,7 +56,7 @@ void main() {
 
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
-  });
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RasterWidget repaints when RasterWidgetDelegate notifies listeners', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
@@ -87,7 +88,7 @@ void main() {
     await tester.pump();
 
     expect(delegate.count, 2);
-  });
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RasterWidget can update the delegate', (WidgetTester tester) async {
     final TestDelegate delegateA = TestDelegate();
@@ -123,7 +124,7 @@ void main() {
 
     expect(delegateA.count, 1);
     expect(delegateB.count, 1);
-  });
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RasterWidget can update the ValueNotifier', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
@@ -171,7 +172,7 @@ void main() {
     notifierB.value = true;
     await tester.pump();
     expect(delegate.count, 1);
-  });
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
 class TestDelegate extends RasterWidgetDelegate {
