@@ -133,13 +133,26 @@ void main() {
       home: Scaffold(
         body: RepaintBoundary(
           key: backgroundKey,
-          child: const CustomScrollView(
+          child: CustomScrollView(
             slivers: <Widget>[
               DecoratedSliver(
                 decoration: decoration,
-                sliver: SliverToBoxAdapter(
-                  child: SizedBox(width: 200, height: 200),
-                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate.fixed(<Widget>[
+                    Container(
+                      height: 100,
+                      color: Colors.red,
+                    ),
+                    Container(
+                      height: 100,
+                      color: Colors.yellow,
+                    ),
+                    Container(
+                      height: 100,
+                      color: Colors.red,
+                    ),
+                  ]),
+                )
               ),
             ],
           )
@@ -154,14 +167,26 @@ void main() {
       home: Scaffold(
         body: RepaintBoundary(
           key: foregroundKey,
-          child: const CustomScrollView(
+          child: CustomScrollView(
             slivers: <Widget>[
               DecoratedSliver(
                 decoration: decoration,
-                position: DecorationPosition.foreground,
-                sliver: SliverToBoxAdapter(
-                  child: SizedBox(width: 200, height: 200),
-                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate.fixed(<Widget>[
+                    Container(
+                      height: 100,
+                      color: Colors.red,
+                    ),
+                    Container(
+                      height: 100,
+                      color: Colors.yellow,
+                    ),
+                    Container(
+                      height: 100,
+                      color: Colors.red,
+                    ),
+                  ]),
+                )
               ),
             ],
           )
