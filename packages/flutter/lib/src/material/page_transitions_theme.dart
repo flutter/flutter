@@ -320,8 +320,8 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
         : _scaleUpTransition
       ).animate(widget.animation);
 
-    widget.animation.addListener(_onAnimationValueChange);
-    widget.animation.addStatusListener(_onAnimationStatusChange);
+    widget.animation.addListener(onAnimationValueChange);
+    widget.animation.addStatusListener(onAnimationStatusChange);
   }
 
   @override
@@ -339,8 +339,8 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   @override
   void didUpdateWidget(covariant _ZoomEnterTransition oldWidget) {
     if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
-      oldWidget.animation.removeListener(_onAnimationValueChange);
-      oldWidget.animation.removeStatusListener(_onAnimationStatusChange);
+      oldWidget.animation.removeListener(onAnimationValueChange);
+      oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
       delegate.dispose();
       delegate = _ZoomEnterTransitionDelegate(
@@ -355,8 +355,8 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
 
   @override
   void dispose() {
-    widget.animation.removeListener(_onAnimationValueChange);
-    widget.animation.removeStatusListener(_onAnimationStatusChange);
+    widget.animation.removeListener(onAnimationValueChange);
+    widget.animation.removeStatusListener(onAnimationStatusChange);
     delegate.dispose();
     super.dispose();
   }
@@ -453,9 +453,9 @@ class _ZoomEnterTransitionDelegate extends RasterWidgetDelegate {
   @override
   bool shouldRepaint(covariant _ZoomEnterTransitionDelegate oldDelegate) {
     return oldDelegate.reverse != reverse
-      || oldDelegate.animation != animation
-      || oldDelegate.scale != scale
-      || oldDelegate.fade != fade;
+      || oldDelegate.animation.value != animation.value
+      || oldDelegate.scale.value != scale.value
+      || oldDelegate.fade.value != fade.value;
   }
 }
 
@@ -508,8 +508,8 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       : _scaleUpTransition
     ).animate(widget.animation);
 
-    widget.animation.addListener(_onAnimationValueChange);
-    widget.animation.addStatusListener(_onAnimationStatusChange);
+    widget.animation.addListener(onAnimationValueChange);
+    widget.animation.addStatusListener(onAnimationStatusChange);
   }
 
   @override
@@ -526,8 +526,8 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   @override
   void didUpdateWidget(covariant _ZoomExitTransition oldWidget) {
     if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
-      oldWidget.animation.removeListener(_onAnimationValueChange);
-      oldWidget.animation.removeStatusListener(_onAnimationStatusChange);
+      oldWidget.animation.removeListener(onAnimationValueChange);
+      oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
       delegate.dispose();
       delegate = _ZoomExitTransitionDelegate(
@@ -541,8 +541,8 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
 
   @override
   void dispose() {
-    widget.animation.removeListener(_onAnimationValueChange);
-    widget.animation.removeStatusListener(_onAnimationStatusChange);
+    widget.animation.removeListener(onAnimationValueChange);
+    widget.animation.removeStatusListener(onAnimationStatusChange);
     delegate.dispose();
     super.dispose();
   }
@@ -587,7 +587,7 @@ class _ZoomExitTransitionDelegate extends RasterWidgetDelegate {
 
   @override
   bool shouldRepaint(covariant _ZoomExitTransitionDelegate oldDelegate) {
-    return oldDelegate.reverse != reverse || oldDelegate.fade != fade || oldDelegate.scale != scale;
+    return oldDelegate.reverse != reverse || oldDelegate.fade.value != fade.value || oldDelegate.scale.value != scale.value;
   }
 
   @override
@@ -879,10 +879,9 @@ void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double
   context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
 }
 
-
 mixin _ZoomTransitionBase {
   // Don't rasterize if:
-  // 1. rasterization is disabled by the platform.
+  // 1. Rasterization is disabled by the platform.
   // 2. The animation is paused/stopped.
   // 3. The values of the scale/fade transition do not
   //    benefit from rasterization.
@@ -893,7 +892,7 @@ mixin _ZoomTransitionBase {
 
   bool get allowRasterization;
 
-  void _onAnimationValueChange() {
+  void onAnimationValueChange() {
     if ((scaleTransition.value == 1.0) &&
         (fadeTransition.value == 0.0 ||
          fadeTransition.value == 1.0)) {
@@ -903,7 +902,7 @@ mixin _ZoomTransitionBase {
       }
   }
 
-  void _onAnimationStatusChange(AnimationStatus status) {
+  void onAnimationStatusChange(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:

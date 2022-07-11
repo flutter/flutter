@@ -1407,6 +1407,9 @@ class OffsetLayer extends ContainerLayer {
   /// (the default) will give you a 1:1 mapping between logical pixels and the
   /// output pixels in the image.
   ///
+  /// This API functions like [toImageSync], except that rasterization is started
+  /// on the IO thread.
+  ///
   /// See also:
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
@@ -1437,6 +1440,9 @@ class OffsetLayer extends ContainerLayer {
   /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
   /// (the default) will give you a 1:1 mapping between logical pixels and the
   /// output pixels in the image.
+  ///
+  /// This API functions like [toImage], except that rasterization begins eagerly
+  /// on the raster thread.
   ///
   /// See also:
   ///

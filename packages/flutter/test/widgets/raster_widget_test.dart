@@ -206,12 +206,106 @@ void main() {
     await tester.pump();
     expect(delegate.count, 1);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('RenderRasterWidget correctly attaches and detaches delegate callbacks', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final RenderRasterWidget rasterWidget = RenderRasterWidget(
+      delegate: delegate,
+      controller: controller,
+      devicePixelRatio: 1.0,
+    );
+
+    expect(delegate.addedListenerCount, 0);
+    expect(delegate.removedListenerCount, 0);
+
+    final PipelineOwner owner = PipelineOwner();
+    rasterWidget.attach(owner);
+
+    expect(delegate.addedListenerCount, 1);
+    expect(delegate.removedListenerCount, 0);
+
+    rasterWidget.detach();
+
+    expect(delegate.addedListenerCount, 1);
+    expect(delegate.removedListenerCount, 1);
+
+    final TestDelegate updatedDelegate = TestDelegate();
+    rasterWidget.delegate = updatedDelegate;
+
+    // No listeners added or removed while not attached.
+    expect(updatedDelegate.addedListenerCount, 0);
+    expect(updatedDelegate.removedListenerCount, 0);
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('RenderRasterWidget correctly attaches and detaches controller callbacks', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final TestController controller = TestController();
+    final RenderRasterWidget rasterWidget = RenderRasterWidget(
+      delegate: delegate,
+      controller: controller,
+      devicePixelRatio: 1.0,
+    );
+
+    expect(controller.addedListenerCount, 0);
+    expect(controller.removedListenerCount, 0);
+
+    final PipelineOwner owner = PipelineOwner();
+    rasterWidget.attach(owner);
+
+    expect(controller.addedListenerCount, 1);
+    expect(controller.removedListenerCount, 0);
+
+    rasterWidget.detach();
+
+    expect(controller.addedListenerCount, 1);
+    expect(controller.removedListenerCount, 1);
+
+    final TestController updatedController = TestController();
+    rasterWidget.controller = updatedController;
+
+    // No listeners added or removed while not attached.
+    expect(updatedController.addedListenerCount, 0);
+    expect(updatedController.removedListenerCount, 0);
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+}
+
+class TestController extends RasterWidgetController {
+  int addedListenerCount = 0;
+  int removedListenerCount = 0;
+
+  @override
+  void addListener(ui.VoidCallback listener) {
+    addedListenerCount += 1;
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(ui.VoidCallback listener) {
+    removedListenerCount += 1;
+    super.removeListener(listener);
+  }
 }
 
 class TestDelegate extends RasterWidgetDelegate {
   int count = 0;
   bool shouldRepaintValue = false;
   ui.Image? lastImage;
+
+  int addedListenerCount = 0;
+  int removedListenerCount = 0;
+
+  @override
+  void addListener(ui.VoidCallback listener) {
+    addedListenerCount += 1;
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(ui.VoidCallback listener) {
+    removedListenerCount += 1;
+    super.removeListener(listener);
+  }
 
   void notify() {
     notifyListeners();

@@ -10,7 +10,8 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-/// A controller for the [RasterWidget].
+/// A controller for the [RasterWidget] that controls when the child image is displayed
+/// and when to regenerated the child image.
 ///
 /// When the value of [rasterize] is true, The [RasterWidget] will convert the child scene into
 /// an image. This image will be drawn in place of the children until [rasterize] is false.
@@ -47,12 +48,16 @@ class RasterWidgetController extends ChangeNotifier {
 
 /// A widget that replaces its child with a rasterized version of the child.
 ///
-/// How this image is drawn can be customized by providing a new subclass of [RasterWidgetDelegate]
-/// to the [delegate] argument.
+/// By default, the child is drawn as is. The default [delegate] simply scales
+/// down the image by the current device pixel ratio and paints it into the
+/// canvas. How this image is drawn can be customized by providing a new
+/// subclass of [RasterWidgetDelegate] to the [delegate] argument.
 ///
-/// This widget is not supported on the HTML backend of flutter for the web.
+/// This widget is not supported on the HTML backend of Flutter for the web.
 class RasterWidget extends SingleChildRenderObjectWidget {
   /// Create a new [RasterWidget].
+  ///
+  /// The [controller] and [child] arguments are required.
   const RasterWidget({
     super.key,
     this.delegate = const _RasterDefaultDelegate(),
@@ -94,9 +99,15 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// [pixelRatio] to account for device independent pixels.
   ///
   /// There is no offset given in this paint method, as the parent is an [OffsetLayer] all
-  /// offsets are `Offset.zero`.
+  /// offsets are [Offset.zero].
   ///
-  /// Example:
+  /// {@tool snippet}
+  ///
+  /// The follow method shows how the default implementation of the delegate used by the
+  /// [RasterWidget] paints the child image. This must account for the fact that the image
+  /// width and height will be given in physical pixels, while the image must be painted with
+  /// device independent pixels. That is, the width and height of the image is the widget and
+  /// height of the provided `area`, multiplied by the `pixelRatio`:
   ///
   /// ```dart
   /// void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
@@ -107,11 +118,12 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   ///   context.canvas.drawImageRect(image, src, dst, paint);
   /// }
   /// ```
+  /// {@end-tool}
   void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio);
 
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderRasterWidget] object, or any time that a new
-  /// [RasterWidgetDelegate] object is created with a new instance of the custom painter
+  /// [RasterWidgetDelegate] object is created with a new instance of the
   /// delegate class (which amounts to the same thing, because the latter is
   /// implemented in terms of the former).
   ///
@@ -127,6 +139,10 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// be repainted). It's also possible that the [paint] method will get called
   /// without [shouldRepaint] being called at all (e.g. if the box changes
   /// size).
+  ///
+  /// Changing the delegate will not cause the child image retained by the
+  /// [RenderRasterWidget] to be updated. Instead, [RasterWidgetController.clear] can
+  /// be used to force the generation of a new image.
   ///
   /// The `oldDelegate` argument will never be null.
   bool shouldRepaint(covariant RasterWidgetDelegate oldDelegate);
@@ -167,9 +183,11 @@ class RenderRasterWidget extends RenderProxyBox {
     controller.removeListener(_onRasterValueChanged);
     final bool oldValue = controller.rasterize;
     _controller = value;
-    controller.addListener(_onRasterValueChanged);
-    if (oldValue != controller.rasterize) {
-      _onRasterValueChanged();
+    if (attached) {
+      controller.addListener(_onRasterValueChanged);
+      if (oldValue != controller.rasterize) {
+        _onRasterValueChanged();
+      }
     }
   }
 
@@ -183,9 +201,11 @@ class RenderRasterWidget extends RenderProxyBox {
     delegate.removeListener(markNeedsPaint);
     final RasterWidgetDelegate oldDelegate = _delegate;
     _delegate = value;
-    delegate.addListener(markNeedsPaint);
-    if (delegate.shouldRepaint(oldDelegate)) {
-      markNeedsPaint();
+    if (attached) {
+      delegate.addListener(markNeedsPaint);
+      if (delegate.shouldRepaint(oldDelegate)) {
+        markNeedsPaint();
+      }
     }
   }
 
