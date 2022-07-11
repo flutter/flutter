@@ -14,7 +14,6 @@ import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 
-
 /// A graphical icon widget drawn with a glyph from a font described in
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
 ///
