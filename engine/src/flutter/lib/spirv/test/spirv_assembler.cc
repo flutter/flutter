@@ -41,7 +41,8 @@ int main(int argc, const char* argv[]) {
   }
 
   std::fstream output;
-  output.open(argv[2], std::fstream::out | std::fstream::trunc);
+  output.open(argv[2],
+              std::fstream::out | std::fstream::trunc | std::fstream::binary);
   if (!output.is_open()) {
     output.close();
     std::cerr << "failed to open output file" << std::endl;

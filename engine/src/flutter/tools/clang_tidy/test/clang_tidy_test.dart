@@ -98,8 +98,8 @@ Future<int> main(List<String> args) async {
 
     expect(clangTidy.options.help, isFalse);
     expect(result, equals(1));
-    expect(errBuffer.toString(), contains(
-      "ERROR: Build commands path /does/not/exist doesn't exist.",
+    expect(errBuffer.toString().split('\n')[0], hasMatch(
+      r"ERROR: Build commands path .*/does/not/exist doesn't exist.",
     ));
   });
 
@@ -121,8 +121,10 @@ Future<int> main(List<String> args) async {
 
     expect(clangTidy.options.help, isFalse);
     expect(result, equals(1));
-    expect(errBuffer.toString(), contains(
-      "ERROR: Build commands path /does/not/exist/out/ios_debug_unopt/compile_commands.json doesn't exist.",
+    expect(errBuffer.toString().split('\n')[0], hasMatch(
+      r'ERROR: Build commands path .*/does/not/exist'
+      r'[/\\]out[/\\]ios_debug_unopt[/\\]compile_commands.json'
+      r" doesn't exist.",
     ));
   });
 
@@ -187,7 +189,7 @@ Future<int> main(List<String> args) async {
     );
 
     // This file needs to exist, and be UTF8 line-parsable.
-    final String filePath = io.Platform.script.path;
+    final String filePath = io.Platform.script.toFilePath();
     final List<dynamic> buildCommandsData = <Map<String, dynamic>>[
       <String, dynamic>{
         'directory': '/unused',
@@ -204,24 +206,20 @@ Future<int> main(List<String> args) async {
     final Command command = commands.first;
     expect(command.tidyPath, contains('clang/bin/clang-tidy'));
     final WorkerJob jobNoFix = command.createLintJob(null, false);
-    expect(jobNoFix.command, <String>[
-      '../../buildtools/mac-x64/clang/bin/clang-tidy',
-      filePath,
-      '--',
-      '',
-      filePath,
-    ]);
+    expect(jobNoFix.command[0], endsWith('../../buildtools/mac-x64/clang/bin/clang-tidy'));
+    expect(jobNoFix.command[1], endsWith(filePath.replaceAll('/', io.Platform.pathSeparator)));
+    expect(jobNoFix.command[2], '--');
+    expect(jobNoFix.command[3], '');
+    expect(jobNoFix.command[4], endsWith(filePath));
 
     final WorkerJob jobWithFix = command.createLintJob(null, true);
-    expect(jobWithFix.command, <String>[
-      '../../buildtools/mac-x64/clang/bin/clang-tidy',
-      filePath,
-      '--fix',
-      '--format-style=file',
-      '--',
-      '',
-      filePath,
-    ]);
+    expect(jobWithFix.command[0], endsWith('../../buildtools/mac-x64/clang/bin/clang-tidy'));
+    expect(jobWithFix.command[1], endsWith(filePath.replaceAll('/', io.Platform.pathSeparator)));
+    expect(jobWithFix.command[2], '--fix');
+    expect(jobWithFix.command[3], '--format-style=file');
+    expect(jobWithFix.command[4], '--');
+    expect(jobWithFix.command[5], '');
+    expect(jobWithFix.command[6], endsWith(filePath));
   });
 
   test('Command getLintAction flags third_party files', () async {
