@@ -99,20 +99,20 @@ Future<void> main(List<String> args) async {
   tokens['colorsLight'] = _readTokenFile('color_light.json');
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
-  AppBarTemplate('$materialLib/app_bar.dart', tokens).updateFile();
-  ButtonTemplate('md.comp.elevated-button', '$materialLib/elevated_button.dart', tokens).updateFile();
-  ButtonTemplate('md.comp.outlined-button', '$materialLib/outlined_button.dart', tokens).updateFile();
-  ButtonTemplate('md.comp.text-button', '$materialLib/text_button.dart', tokens).updateFile();
-  CardTemplate('$materialLib/card.dart', tokens).updateFile();
-  ChipActionTemplate('$materialLib/chip_action.dart', tokens).updateFile();
-  ChipFilterTemplate('$materialLib/chip_filter.dart', tokens).updateFile();
-  ChipFilterTemplate('$materialLib/chip_choice.dart', tokens).updateFile();
-  ChipInputTemplate('$materialLib/chip_input.dart', tokens).updateFile();
-  DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
-  FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
-  IconButtonTemplate('$materialLib/icon_button.dart', tokens).updateFile();
-  NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens).updateFile();
-  NavigationRailTemplate('$materialLib/navigation_rail.dart', tokens).updateFile();
-  SurfaceTintTemplate('$materialLib/elevation_overlay.dart', tokens).updateFile();
-  TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();
+  AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.elevated-button', 'ElevatedButton', '$materialLib/elevated_button.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.outlined-button', 'OutlinedButton', '$materialLib/outlined_button.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
+  CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
+  ChipActionTemplate('ActionChip', '$materialLib/chip_action.dart', tokens).updateFile();
+  ChipFilterTemplate('FilterChip', '$materialLib/chip_filter.dart', tokens).updateFile();
+  ChipFilterTemplate('FilterChip', '$materialLib/chip_choice.dart', tokens).updateFile();
+  ChipInputTemplate('InputChip', '$materialLib/chip_input.dart', tokens).updateFile();
+  DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
+  FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
+  IconButtonTemplate('IconButton', '$materialLib/icon_button.dart', tokens).updateFile();
+  NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();
+  NavigationRailTemplate('NavigationRail', '$materialLib/navigation_rail.dart', tokens).updateFile();
+  SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
+  TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();
 }
