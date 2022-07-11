@@ -37,6 +37,16 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     super.dispose();
   }
 
+  /*
+
+  Hello monday Anthony:
+  -  How do we get so we smoothly follow the gesture, up until we hit a linebreak?
+  -  It seems our logic for adjusting the focal point is faulty, since we clip off the edge
+  of words sometimes. (Maybe this has to do with borderRadius?)
+
+
+  */
+
   @override
   void didChangeDependencies() {
     _determineLoupePositionAndFocalPoint();
@@ -48,7 +58,11 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
         widget.loupeSelectionOverlayInfoBearer.value;
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 
-    final Rect unadjustedLoupeRect = selectionInfo.handleCenter -
+    // We make the assumption that the Material handle's ball radius is it's width / 2.
+    final Rect unadjustedLoupeRect = Offset(
+                selectionInfo.globalGesturePosition.dx,
+                selectionInfo.handleRect.center.dy +
+                    selectionInfo.handleRect.width) -
             Offset(
                 MaterialLoupe._size.width / 2,
                 MaterialLoupe._size.height -
@@ -62,7 +76,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     // The insets, from either edge, that the focal point should not point
     // past lest the loupe displays something out of bounds.
     final double horizontalMaxFocalPointEdgeInsets =
-        (MaterialLoupe._size.width * MaterialLoupe._magnification) / 2;
+      MaterialLoupe._size.width / MaterialLoupe._magnification;
 
     // Adjust the focal point horizontally such that none of the loupe
     // ever points to anything out of bounds.
@@ -118,9 +132,8 @@ class MaterialLoupe extends StatelessWidget {
         spreadRadius: 0.75,
         color: Color.fromARGB(25, 0, 0, 0))
   ];
-  static const BorderRadius _borderRadius =
-      BorderRadius.all(Radius.circular(40));
-  static const double _magnification = 1.25;
+  static const double _borderRadius = 40;
+  static const double _magnification = 2;
 
   final LoupeController controller;
 
@@ -138,7 +151,8 @@ class MaterialLoupe extends StatelessWidget {
       child: Loupe(
         controller: controller,
         decoration: const LoupeDecoration(
-            shape: RoundedRectangleBorder(borderRadius: _borderRadius),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
             shadows: _shadows),
         magnificationScale: _magnification,
         focalPoint: additionalFocalPointOffset +

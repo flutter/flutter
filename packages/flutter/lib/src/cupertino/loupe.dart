@@ -64,7 +64,7 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
             
 
     // The exact Y of the center of the current line.
-    final double verticalCenterOfCurrentLine = textEditingContext.handleCenter.dy;
+    final double verticalCenterOfCurrentLine = textEditingContext.handleRect.center.dy;
 
     // If the loupe is currently showing, but we have dragged out of threshold,
     // we should hide it.
