@@ -43,7 +43,7 @@ void main() {
       opacity: 1.0,
       shadows: <Shadow>[Shadow(color: Color(0xFFFFFFFF), blurRadius: 1.0, offset: Offset(1.0, 1.0))],
     );
-   
+  
     test('with first null', () {
       final IconThemeData lerped = IconThemeData.lerp(null, data, 0.25);
 
