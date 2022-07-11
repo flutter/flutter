@@ -38,8 +38,14 @@ class CoverageCollector extends TestWatcher {
   final coverage.Resolver resolver;
   final Map<String, List<List<int>>> _ignoredLinesInFilesCache = <String, List<List<int>>>{};
 
-  static Future<coverage.Resolver> getResolver(String? packagesPath) {
-    return coverage.Resolver.create(packagesPath: packagesPath);
+  static Future<coverage.Resolver> getResolver(String? packagesPath) async {
+    try {
+      return await coverage.Resolver.create(packagesPath: packagesPath);
+    } on FileSystemException {
+      // When given a bad packages path (as for instance done in some tests)
+      // just ignore it and return one without a packages path.
+      return coverage.Resolver.create();
+    }
   }
 
   @override
