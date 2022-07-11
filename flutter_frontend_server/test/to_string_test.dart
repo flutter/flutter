@@ -19,7 +19,7 @@ Future<void> main(List<String> args) async {
   final String buildDir = args[0];
   final String frontendServer = args[1];
   final String sdkRoot = args[2];
-  final String basePath = path.canonicalize(path.join(path.dirname(Platform.script.path), '..'));
+  final String basePath = path.canonicalize(path.join(path.dirname(Platform.script.toFilePath()), '..'));
   final String fixtures = path.join(basePath, 'test', 'fixtures');
   final String mainDart = path.join(fixtures, 'lib', 'main.dart');
   final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
