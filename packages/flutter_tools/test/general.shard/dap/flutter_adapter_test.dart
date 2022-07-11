@@ -18,6 +18,8 @@ import 'mocks.dart';
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
   final FakePlatform platform = FakePlatform.fromPlatform(globals.platform);
+  final FileSystemStyle fsStyle = platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix;
+
   group('flutter adapter', () {
     final String expectedFlutterExecutable = platform.isWindows
         ? r'C:\fake\flutter\bin\flutter.bat'
@@ -31,7 +33,10 @@ void main() {
 
     group('launchRequest', () {
       test('runs "flutter run" with --machine', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -47,7 +52,10 @@ void main() {
       });
 
       test('includes env variables', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -66,7 +74,10 @@ void main() {
       });
 
       test('does not record the VMs PID for terminating', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -89,7 +100,10 @@ void main() {
 
     group('attachRequest', () {
       test('runs "flutter attach" with --machine', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
@@ -104,7 +118,10 @@ void main() {
       });
 
       test('does not record the VMs PID for terminating', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
@@ -126,7 +143,10 @@ void main() {
 
     group('--start-paused', () {
       test('is passed for debug mode', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -142,7 +162,10 @@ void main() {
       });
 
       test('is not passed for noDebug mode', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -159,7 +182,10 @@ void main() {
       });
 
       test('is not passed if toolArgs contains --profile', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -176,7 +202,10 @@ void main() {
       });
 
       test('is not passed if toolArgs contains --release', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -194,7 +223,10 @@ void main() {
     });
 
     test('includes toolArgs', () async {
-      final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+      final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+        fileSystem: MemoryFileSystem.test(style: fsStyle),
+        platform: platform,
+      );
       final Completer<void> responseCompleter = Completer<void>();
 
       final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -214,7 +246,10 @@ void main() {
 
     group('includes customTool', () {
       test('with no args replaced', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
           cwd: '/project',
           program: 'foo.dart',
@@ -233,7 +268,10 @@ void main() {
       });
 
       test('with all args replaced', () async {
-        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: MemoryFileSystem.test(), platform: platform);
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
           cwd: '/project',
           program: 'foo.dart',

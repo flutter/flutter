@@ -16,6 +16,7 @@ import 'mocks.dart';
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
   final FakePlatform platform = FakePlatform.fromPlatform(globals.platform);
+  final FileSystemStyle fsStyle = platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix;
 
   group('flutter test adapter', () {
     final String expectedFlutterExecutable = platform.isWindows
@@ -30,7 +31,7 @@ void main() {
 
     test('includes toolArgs', () async {
       final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: MemoryFileSystem.test(style: fsStyle),
         platform: platform,
       );
       final Completer<void> responseCompleter = Completer<void>();
@@ -52,7 +53,7 @@ void main() {
 
     test('includes env variables', () async {
       final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: MemoryFileSystem.test(style: fsStyle),
         platform: platform,
       );
       final Completer<void> responseCompleter = Completer<void>();
@@ -75,7 +76,7 @@ void main() {
     group('includes customTool', () {
       test('with no args replaced', () async {
         final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
-          fileSystem: MemoryFileSystem.test(),
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
           platform: platform,
         );
         final Completer<void> responseCompleter = Completer<void>();
@@ -98,7 +99,7 @@ void main() {
 
       test('with all args replaced', () async {
         final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
-          fileSystem: MemoryFileSystem.test(),
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
           platform: platform,
         );
         final Completer<void> responseCompleter = Completer<void>();
