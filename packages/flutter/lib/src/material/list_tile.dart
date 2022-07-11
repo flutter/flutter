@@ -110,13 +110,12 @@ enum ListTileControlAffinity {
 /// )
 /// ```
 ///
-/// [ListTile] may need to be wrapped in a [Material] widget to animate
-/// [tileColor], [selectedTileColor], [focusColor], and [hoverColor] as
-/// these colors are not drawn by the list tile itself but by the
-/// material widget ancestor.
+/// [ListTile] must be wrapped in a [Material] widget to animate [tileColor],
+/// [selectedTileColor], [focusColor], and [hoverColor] as these colors
+/// are not drawn by the list tile itself but by the material widget ancestor.
 ///
 /// {@tool dartpad}
-/// This example showcases how [ListTile] can be wrapped in a [Material]
+/// This example showcases how [ListTile] needs to be wrapped in a [Material]
 /// widget to animate colors.
 ///
 /// ** See code in examples/api/lib/material/list_tile/list_tile.0.dart **
