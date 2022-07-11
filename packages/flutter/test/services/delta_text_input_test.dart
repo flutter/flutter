@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'text_input_test.dart' show FakeTextInputClient;
 import 'text_input_utils.dart';
 
 void main() {
@@ -226,13 +225,66 @@ void main() {
   });
 }
 
-class FakeDeltaTextInputClient extends FakeTextInputClient with DeltaTextInputClient {
-  FakeDeltaTextInputClient(super.currentTextEditingValue);
+class FakeDeltaTextInputClient implements DeltaTextInputClient {
+  FakeDeltaTextInputClient(this.currentTextEditingValue);
+
+  String latestMethodCall = '';
+
   @override
-  TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
+  TextEditingValue currentTextEditingValue;
+
+  @override
+  AutofillScope? get currentAutofillScope => null;
+
+  @override
+  void performAction(TextInputAction action) {
+    latestMethodCall = 'performAction';
+  }
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    latestMethodCall = 'performPrivateCommand';
+  }
+
+  @override
+  void updateEditingValue(TextEditingValue value) {
+    latestMethodCall = 'updateEditingValue';
+  }
 
   @override
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
     latestMethodCall = 'updateEditingValueWithDeltas';
   }
+
+  @override
+  void updateFloatingCursor(RawFloatingCursorPoint point) {
+    latestMethodCall = 'updateFloatingCursor';
+  }
+
+  @override
+  void connectionClosed() {
+    latestMethodCall = 'connectionClosed';
+  }
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    latestMethodCall = 'showAutocorrectionPromptRect';
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
+  }
+
+  TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
 }
