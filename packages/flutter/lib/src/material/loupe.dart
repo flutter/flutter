@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/src/rendering/object.dart';
 import 'package:flutter/widgets.dart';
 
@@ -37,16 +38,6 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     super.dispose();
   }
 
-  /*
-
-  Hello monday Anthony:
-  -  How do we get so we smoothly follow the gesture, up until we hit a linebreak?
-  -  It seems our logic for adjusting the focal point is faulty, since we clip off the edge
-  of words sometimes. (Maybe this has to do with borderRadius?)
-
-
-  */
-
   @override
   void didChangeDependencies() {
     _determineLoupePositionAndFocalPoint();
@@ -58,17 +49,31 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
         widget.loupeSelectionOverlayInfoBearer.value;
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 
-    // We make the assumption that the Material handle's ball radius is it's width / 2.
-    final Rect unadjustedLoupeRect = Offset(
-                selectionInfo.globalGesturePosition.dx,
-                selectionInfo.handleRect.center.dy +
-                    selectionInfo.handleRect.width) -
-            Offset(
-                MaterialLoupe._size.width / 2,
-                MaterialLoupe._size.height -
-                    MaterialLoupe._kStandardVerticalFocalPointShift) &
-        MaterialLoupe._size;
+    // Since by default, we draw at the top left corner, this offset
+    // shifts the loupe so we draw at the center, and then also include
+    // the "above touch point" shift.
+    final Offset basicLoupeOffset = Offset(
+        MaterialLoupe._size.width / 2,
+        MaterialLoupe._size.height -
+            MaterialLoupe._kStandardVerticalFocalPointShift);
 
+    // Since the loupe should not go past the end of the line,
+    // but must track the gesture otherwise, bound the X of the loupe to be at most
+    // the end of the line. Since the center of the loupe may line up directly with
+    // the end of the line, add half the width to the globalXLineEnd, so that half
+    // the loupe may overhang the end of the text.
+    final double loupeX = selectionInfo.globalXLineEnd != null
+        ? math.min(selectionInfo.globalGesturePosition.dx,
+            selectionInfo.globalXLineEnd! + (MaterialLoupe._size.width / 2))
+        : selectionInfo.globalGesturePosition.dx;
+
+    //place the loupe at the previously calculated X, and the Y should be
+    // exactly at the center of the handle.
+    final Rect unadjustedLoupeRect =
+        Offset(loupeX, selectionInfo.handleRect.center.dy) - basicLoupeOffset &
+            MaterialLoupe._size;
+
+    // Shift the loupe so that, if we are ever out of the screen, we become in bounds.
     final Rect screenBoundsAdjustedLoupeRect =
         LoupeController.shiftWithinBounds(
             bounds: screenRect, rect: unadjustedLoupeRect);
@@ -76,7 +81,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     // The insets, from either edge, that the focal point should not point
     // past lest the loupe displays something out of bounds.
     final double horizontalMaxFocalPointEdgeInsets =
-      MaterialLoupe._size.width / MaterialLoupe._magnification;
+        (MaterialLoupe._size.width / 2) / MaterialLoupe._magnification;
 
     // Adjust the focal point horizontally such that none of the loupe
     // ever points to anything out of bounds.
@@ -86,9 +91,17 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
             selectionInfo.fieldBounds.right -
                 horizontalMaxFocalPointEdgeInsets);
 
+    // Since the previous value is now a global offset (i.e. globalFocalPoint
+    // now points directly to a part of the screen), we must subtract our global offset
+    // so that we now have the shift in the focal point required.
     final double newRelativeFocalPointX =
         screenBoundsAdjustedLoupeRect.center.dx - newGlobalFocalPointX;
 
+    // The Y component means that if we are pressed up against the top of the screen,
+    // then we should adjust the focal point such that it now points to how far we moved
+    // the loupe. screenBoundsAdjustedLoupeRect.top == unadjustedLoupeRect.top for most cases,
+    // but when pressed up agains tthe top of the screen, we adjust the focal point by 
+    // the amount that we shifted from our "natural" position.
     final Offset focalPointAdjustmentForScreenBoundsAdjustment = Offset(
         newRelativeFocalPointX,
         screenBoundsAdjustedLoupeRect.top - unadjustedLoupeRect.top);
@@ -133,7 +146,7 @@ class MaterialLoupe extends StatelessWidget {
         color: Color.fromARGB(25, 0, 0, 0))
   ];
   static const double _borderRadius = 40;
-  static const double _magnification = 2;
+  static const double _magnification = 1.25;
 
   final LoupeController controller;
 
@@ -161,7 +174,16 @@ class MaterialLoupe extends StatelessWidget {
                 _kStandardVerticalFocalPointShift -
                     MaterialLoupe._size.height / 2),
         size: _size,
-        child: Container(color: _filmColor),
+        child: Container(
+          color: _filmColor,
+          child: Center(
+              child: Container(
+            width: 2.5,
+            height: 2.5,
+            decoration:
+                BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+          )),
+        ),
       ),
     );
   }

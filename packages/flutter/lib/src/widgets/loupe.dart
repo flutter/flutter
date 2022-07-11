@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// {@template flutter.widgets.loupe.loupeControllerWidgetBuilder}
 /// A builder that builds a Widget with a [LoupeController].
@@ -222,14 +223,6 @@ class LoupeController {
 
     return rect.shift(rectShift);
   }
-
-  /// A utility for calculating a new focal point based off of an old focal point,
-  /// as well as
-  static Offset shiftFocalPoint({
-    required Offset oldFocalPoint,
-  }) {
-    return oldFocalPoint;
-  }
 }
 
 /// A decoration for a [Loupe].
@@ -406,63 +399,21 @@ class _LoupeState extends State<Loupe> {
     }
   }
 
-  /*
-  /// Adjust both the focal point and the lens position.
-  ///
-  /// The adjustments are made based on two factors:
-  /// 1. Since the Loupe should never go out of bounds, but the Y axis should show
-  void _setAdjustedFocalPointAndLensPosition() {
-    final Size screenSize = MediaQuery.of(context).size;
-
-    // The raw position that the lens would be at, prior to any adjustment.
-    final Offset unadjustedLensPosition =
-        widget.configuration._rawLoupePosition.value -
-            Alignment.bottomCenter.alongSize(widget.size) +
-            Offset(0, widget.verticalOffset);
-
-    // Adjust the lens position so that even if the offset "asks" us to draw the lens off the screen,
-    // the lens position gets adjusted so that it does not draw off the screen.
-    final Offset adjustedLensPosition = Offset(
-      unadjustedLensPosition.dx.clamp(0, screenSize.width - widget.size.width),
-      unadjustedLensPosition.dy
-          .clamp(0, screenSize.height - widget.size.height),
-    );
-
-    //how far the focal point can be away from the border before it starts to peer out
-    final double horizontalFocalPointClamp = (widget.magnificationScale - 1) *
-        (widget.size.width / (2 * widget.magnificationScale));
-
-    // Adjust the focal point so that if the lens presses up against the top of the screen and
-    // the lens stops moving, the focal point continues to track the offset. Clamped
-    // so that the lens doesn't ever point offscreen.
-    final Offset adjustedFocalPointOffsetFromCenter = Offset(
-        (adjustedLensPosition.dx - unadjustedLensPosition.dx)
-            .clamp(-horizontalFocalPointClamp, horizontalFocalPointClamp),
-        (widget.verticalOffset - Alignment.center.alongSize(widget.size).dy) +
-            (adjustedLensPosition.dy - unadjustedLensPosition.dy));
-
-    // setState not called here because parent widget calls setState when
-    // value notifier gets updated.,
-    _focalPointOffsetFromCenter = adjustedFocalPointOffsetFromCenter;
-    widget.configuration._adjustedLoupePosition.value = adjustedLensPosition;
-  }
-  */
-
   @override
   Widget build(BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        ClipPath.shape(
-          shape: widget.decoration.shape,
-          child: Opacity(
-            opacity: widget.decoration.opacity,
-            child: BackdropFilter(
-              filter: _magnificationFilter,
-              child: SizedBox.fromSize(size: widget.size, child: widget.child),
-            ),
-          ),
-        ),
+        //TODO need to take an opacity
+        // and make it private it is too powerful for the world
+        Magnifier(
+            focalPoint: widget.focalPoint,
+            shape: widget.decoration.shape,
+            magnificationScale: widget.magnificationScale,
+            child: SizedBox.fromSize(
+              size: widget.size,
+              child: widget.child,
+            )),
         Opacity(
           opacity: widget.decoration.opacity,
           child: _LoupeStyle(
@@ -472,15 +423,6 @@ class _LoupeState extends State<Loupe> {
         )
       ],
     );
-  }
-
-  ImageFilter get _magnificationFilter {
-    final Matrix4 magnifierMatrix = Matrix4.identity()
-      ..translate(widget.focalPoint.dx * widget.magnificationScale,
-          widget.focalPoint.dy * widget.magnificationScale)
-      ..scale(widget.magnificationScale, widget.magnificationScale);
-
-    return ImageFilter.matrix(magnifierMatrix.storage);
   }
 }
 
@@ -540,4 +482,150 @@ class _DonutClip extends CustomClipper<Path> {
   @override
   bool shouldReclip(_DonutClip oldClipper) =>
       oldClipper.borderRadius != borderRadius;
+}
+
+class Magnifier extends SingleChildRenderObjectWidget {
+  /// Construct a [Magnifier],
+  Magnifier(
+      {super.key,
+      super.child,
+      ShapeBorder? shape,
+      this.magnificationScale = 1,
+      this.focalPoint = Offset.zero})
+      : clip = shape != null
+            ? ShapeBorderClipper(
+                shape: shape,
+              )
+            : null;
+
+  ///  [focalPoint] of the magnifier is the area the center of the
+  /// [Magnifier] points to, relative to the center of the magnifier.
+  /// If left as [Offset.zero], the magnifier will magnify whatever is directly
+  /// below it.
+  final Offset focalPoint;
+
+  /// The scale of the magnification.
+  ///
+  /// A [magnificationScale] of 1 means that the content magi
+  final double magnificationScale;
+
+  /// The shape of the magnifier is dictated by [clip], which clips
+  /// the magnifier to the shape. If null, the shape will be rectangular.
+  final ShapeBorderClipper? clip;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderMagnification(focalPoint, magnificationScale, clip);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, covariant _RenderMagnification renderObject) {
+    renderObject
+      ..focalPoint = focalPoint
+      ..clip = clip
+      ..magnificationScale = magnificationScale;
+  }
+}
+
+class _RenderMagnification extends RenderProxyBox {
+  _RenderMagnification(
+    this._focalPoint,
+    this._magnificationScale,
+    this._clip, {
+    RenderBox? child,
+  }) : super(child);
+
+  Offset get focalPoint => _focalPoint;
+  Offset _focalPoint;
+  set focalPoint(Offset value) {
+    if (_focalPoint == value) {
+      return;
+    }
+    _focalPoint = value;
+    markNeedsLayout();
+  }
+
+  double get magnificationScale => _magnificationScale;
+  double _magnificationScale;
+  set magnificationScale(double value) {
+    if (_magnificationScale == value) {
+      return;
+    }
+    _magnificationScale = value;
+    markNeedsLayout();
+  }
+
+  CustomClipper<Path>? get clip => _clip;
+  CustomClipper<Path>? _clip;
+  set clip(CustomClipper<Path>? value) {
+    if (_clip == value) {
+      return;
+    }
+    _clip = value;
+    markNeedsLayout();
+  }
+
+  @override
+  _MagnificationLayer? get layer => super.layer as _MagnificationLayer?;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (layer == null) {
+      layer = _MagnificationLayer(
+          size: size,
+          globalPosition: offset,
+          focalPoint: focalPoint,
+          clip: clip,
+          magnificationScale: magnificationScale);
+    } else {
+      layer!
+        ..magnificationScale = magnificationScale
+        ..size = size
+        ..globalPosition = offset
+        ..focalPoint = focalPoint;
+    }
+
+    context.pushLayer(layer!, super.paint, offset);
+  }
+}
+
+class _MagnificationLayer extends ContainerLayer {
+  _MagnificationLayer(
+      {required this.size,
+      required this.globalPosition,
+      required this.clip,
+      required this.focalPoint,
+      required this.magnificationScale});
+
+  Offset globalPosition;
+  Size size;
+
+  Offset focalPoint;
+  double magnificationScale;
+
+  CustomClipper<Path>? clip;
+
+  @override
+  void addToScene(SceneBuilder builder) {
+    // If shape is null, can push the most optimized clip, a regular rectangle.
+    if (clip == null) {
+      builder.pushClipRect(globalPosition & size);
+    } else {
+      builder.pushClipPath(clip!.getClip(size).shift(globalPosition));
+    }
+
+    // Create and push transform.
+    final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(
+          magnificationScale * (focalPoint.dx - thisCenter.dx) + thisCenter.dx,
+          magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
+      ..scale(magnificationScale);
+    builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage));
+    builder.pop();
+
+    super.addToScene(builder);
+    builder.pop();
+  }
 }
