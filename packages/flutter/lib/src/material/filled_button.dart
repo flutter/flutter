@@ -20,11 +20,11 @@ import 'theme_data.dart';
 
 enum _FilledButtonVariant { filled, tonal }
 
-/// A Material Design "filled button".
+/// A Material Design filled button.
 ///
 /// Filled buttons have the most visual impact after the [FloatingActionButton],
 /// and should be used for important, final actions that complete a flow,
-/// like Save, Join now, or Confirm.
+/// like **Save**, **Join now**, or **Confirm**.
 ///
 /// A filled button is a label [child] displayed on a [Material]
 /// widget. The label's [Text] and [Icon] widgets are displayed in
@@ -45,8 +45,7 @@ enum _FilledButtonVariant { filled, tonal }
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
 ///
-/// To create a 'filled tonal' variant, use [FilledButton.tonal] which will
-/// produce a filled button with the [ColorScheme.secondaryContainer] colors.
+/// To create a 'filled tonal' buton, use [FilledButton.tonal].
 ///
 /// {@tool dartpad}
 /// This sample produces enabled and disabled filled and filled tonal
