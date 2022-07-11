@@ -111,7 +111,7 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverage(TestDevice testDevice) async {
+  Future<void> collectCoverage(TestDevice testDevice, {@visibleForTesting Future<FlutterVmService> Function(Uri?)? connector}) async {
     assert(testDevice != null);
 
     Map<String, dynamic>? data;
@@ -126,7 +126,7 @@ class CoverageCollector extends TestWatcher {
     final Future<void> collectionComplete = testDevice.observatoryUri
       .then((Uri? observatoryUri) {
         _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri, libraryNames)
+        return collect(observatoryUri, libraryNames, connector: connector ?? _defaultConnect)
           .then<void>((Map<String, dynamic> result) {
             if (result == null) {
               throw Exception('Failed to collect coverage.');
