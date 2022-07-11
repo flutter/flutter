@@ -111,15 +111,14 @@ class IconThemeData with Diagnosticable {
   ///    the color of [CupertinoIconThemeData] before returning.
   IconThemeData resolve(BuildContext context) => this;
 
-  /// Whether all the properties of this object are non-null.
+  /// Whether all the properties (except shadows) of this object are non-null.
   bool get isConcrete => size != null
     && fill != null
     && weight != null
     && grade != null
     && opticalSize != null
     && color != null
-    && opacity != null
-    && shadows != null;
+    && opacity != null;
 
   /// The default for [Icon.size].
   ///
