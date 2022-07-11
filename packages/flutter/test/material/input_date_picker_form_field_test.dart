@@ -61,12 +61,13 @@ void main() {
   }
 
   double textOpacity(WidgetTester tester, String textValue) {
-    return tester.widget<Opacity>(
+    final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(
         of: find.text(textValue),
-        matching: find.byType(Opacity),
+        matching: find.byType(FadeTransition),
       ).first,
-    ).opacity;
+    );
+    return opacityWidget.opacity.value;
   }
 
   group('InputDatePickerFormField', () {

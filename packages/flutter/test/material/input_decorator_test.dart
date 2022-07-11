@@ -144,15 +144,6 @@ double getOpacity(WidgetTester tester, String textValue) {
   return opacityWidget.opacity.value;
 }
 
-double getStaticOpacity(WidgetTester tester, String textValue) {
-  return tester.widget<Opacity>(
-    find.ancestor(
-      of: find.text(textValue),
-      matching: find.byType(Opacity),
-    ).first,
-  ).opacity;
-}
-
 void main() {
   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
     // The label appears above the input text
@@ -972,7 +963,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -988,6 +979,17 @@ void main() {
       ),
     );
 
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+    }
+
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
@@ -996,7 +998,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
-    expect(getStaticOpacity(tester, 'hint'), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
 
@@ -1010,6 +1012,17 @@ void main() {
       ),
     );
 
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+    }
+
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
@@ -1018,7 +1031,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -1058,7 +1071,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -1080,7 +1093,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 8.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
-    expect(getStaticOpacity(tester, 'hint'), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -1855,7 +1868,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -1872,6 +1885,17 @@ void main() {
       ),
     );
 
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+    }
+
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
@@ -1880,7 +1904,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 40.0);
-    expect(getStaticOpacity(tester, 'hint'), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
 
@@ -1895,6 +1919,17 @@ void main() {
       ),
     );
 
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+    }
+
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
@@ -1903,7 +1938,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 40.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -1927,7 +1962,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
     expect(tester.getTopLeft(find.text('label')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 40.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 64.0);
     expect(getBorderWeight(tester), 1.0);
 
@@ -1944,6 +1979,17 @@ void main() {
       ),
     );
 
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+    }
+
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 64.0));
     expect(tester.getTopLeft(find.text('text')).dy, 32.0);
@@ -1952,7 +1998,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 32.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 48.0);
-    expect(getStaticOpacity(tester, 'hint'), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 64.0);
     expect(getBorderWeight(tester), 2.0);
 
@@ -1967,6 +2013,17 @@ void main() {
       ),
     );
 
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+    }
+
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 64.0));
     expect(tester.getTopLeft(find.text('text')).dy, 32.0);
@@ -1975,7 +2032,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 32.0);
     expect(tester.getBottomLeft(find.text('hint')).dy, 48.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderBottom(tester), 64.0);
     expect(getBorderWeight(tester), 2.0);
   });
@@ -3213,7 +3270,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 18.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 1.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 1.0);
 
     await tester.pumpWidget(
@@ -3236,7 +3293,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 1.0);
 
     await tester.pumpWidget(
@@ -3258,7 +3315,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 16.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 0.0);
   });
 
@@ -3280,7 +3337,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);
-    expect(getStaticOpacity(tester, 'hint'), 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 0.0);
 
     // The hint should appear
@@ -5026,7 +5083,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(getStaticOpacity(tester, 'hint'), 1.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
   });
 
   testWidgets('InputDecorator floating label width scales when focused', (WidgetTester tester) async {
