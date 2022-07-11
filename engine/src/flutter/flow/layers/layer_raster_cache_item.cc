@@ -53,7 +53,7 @@ void LayerRasterCacheItem::PrerollFinalize(PrerollContext* context,
   if (num_cache_attempts_ >= layer_cached_threshold_) {
     // the layer can be cached
     cache_state_ = CacheState::kCurrent;
-    context->raster_cache->MarkSeen(key_id_, matrix_);
+    context->raster_cache->MarkSeen(key_id_, matrix_, true);
   } else {
     num_cache_attempts_++;
     // access current layer
@@ -67,7 +67,8 @@ void LayerRasterCacheItem::PrerollFinalize(PrerollContext* context,
                                    RasterCacheKeyType::kLayerChildren);
       }
       cache_state_ = CacheState::kChildren;
-      context->raster_cache->MarkSeen(layer_children_id_.value(), matrix_);
+      context->raster_cache->MarkSeen(layer_children_id_.value(), matrix_,
+                                      true);
     }
   }
 }

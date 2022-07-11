@@ -61,10 +61,10 @@ void MockRasterCache::AddMockPicture(int width, int height) {
   DisplayListRasterCacheItem display_list_item(display_list.get(), SkPoint(),
                                                true, false);
   for (int i = 0; i < access_threshold(); i++) {
-    MarkSeen(display_list_item.GetId().value(), ctm);
+    MarkSeen(display_list_item.GetId().value(), ctm, true);
     Draw(display_list_item.GetId().value(), mock_canvas_, nullptr);
   }
-  MarkSeen(display_list_item.GetId().value(), ctm);
+  MarkSeen(display_list_item.GetId().value(), ctm, true);
   RasterCache::Context r_context = {
       // clang-format off
       .gr_context         = preroll_context_.gr_context,
