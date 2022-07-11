@@ -220,6 +220,8 @@ class MaterialApp extends StatefulWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.themeMode = ThemeMode.system,
+    this.themeAnimationDuration = kThemeAnimationDuration,
+    this.themeAnimationCurve = Curves.linear,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -271,6 +273,8 @@ class MaterialApp extends StatefulWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.themeMode = ThemeMode.system,
+    this.themeAnimationDuration = kThemeAnimationDuration,
+    this.themeAnimationCurve = Curves.linear,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -471,6 +475,28 @@ class MaterialApp extends StatefulWidget {
   ///  * [ThemeData.brightness], which indicates to various parts of the
   ///    system what kind of theme is being used.
   final ThemeMode? themeMode;
+
+  /// The duration of animated theme changes.
+  ///
+  /// When the theme changes (either by the [theme], [darkTheme] or [themeMode]
+  /// parameters changing) it is animated to the new theme over time.
+  /// [themeAnimationDuration] determines how long this animation takes.
+  ///
+  /// To have the theme change immediately, you can set this to [Duration.zero].
+  ///
+  /// The default it is [kThemeAnimationDuration].
+  ///
+  /// See also:
+  ///   [themeAnimationCurve], which defines the curve used for the animation.
+  final Duration themeAnimationDuration;
+
+  /// The curve to apply when animating theme changes.
+  ///
+  /// The default it is [Curves.linear].
+  ///
+  /// See also:
+  ///   [themeAnimationDuration], which defines how long the animation is.
+  final Curve themeAnimationCurve;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color? color;
@@ -896,6 +922,8 @@ class _MaterialAppState extends State<MaterialApp> {
         cursorColor: effectiveCursorColor,
         child: AnimatedTheme(
           data: theme,
+          duration: widget.themeAnimationDuration,
+          curve: widget.themeAnimationCurve,
           child: widget.builder != null
             ? Builder(
                 builder: (BuildContext context) {
