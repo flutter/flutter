@@ -2157,8 +2157,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextBaseline textBaseline = labelStyle.textBaseline!;
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData);
-    final Widget? hint = decoration!.hintText == null ? null : Opacity(
+    final Widget? hint = decoration!.hintText == null ? null : AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
+      duration: _kTransitionDuration,
+      curve: _kTransitionCurve,
       alwaysIncludeSemantics: true,
       child: Text(
         decoration!.hintText!,
