@@ -148,7 +148,7 @@ abstract class TextEditingDelta {
         composing: newComposing,
       );
     }
-  
+
     assert(_textRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText));
 
     final String newText = _replace(oldText, replacementSource, replacementDestinationStart, replacementDestinationEnd);
