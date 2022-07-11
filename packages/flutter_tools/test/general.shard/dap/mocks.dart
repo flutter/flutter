@@ -45,7 +45,11 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   late Map<String, String>? env;
 
   @override
-  Future<void> launchAsProcess(String executable, List<String> processArgs, Map<String, String>? env) async {
+  Future<void> launchAsProcess({
+    required String executable,
+    required List<String> processArgs,
+    required Map<String, String>? env,
+  }) async {
     this.executable = executable;
     this.processArgs = processArgs;
     this.env = env;
@@ -99,7 +103,11 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   late Map<String, String>? env;
 
   @override
-  Future<void> launchAsProcess(String executable, List<String> processArgs, Map<String, String>? env) async {
+  Future<void> launchAsProcess({
+    required String executable,
+    required List<String> processArgs,
+    required Map<String, String>? env,
+  }) async {
     this.executable = executable;
     this.processArgs = processArgs;
     this.env = env;

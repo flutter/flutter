@@ -305,7 +305,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       ...?userArgs,
     ];
 
-    await launchAsProcess(executable, processArgs, args.env);
+    await launchAsProcess(
+      executable: executable,
+      processArgs: processArgs,
+      env: args.env,
+    );
 
     // Delay responding until the app is launched and (optionally) the debugger
     // is connected.
@@ -316,7 +320,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   }
 
   @visibleForOverriding
-  Future<void> launchAsProcess(String executable, List<String> processArgs, Map<String, String>? env) async {
+  Future<void> launchAsProcess({
+    required String executable,
+    required List<String> processArgs,
+    required Map<String, String>? env,
+  }) async {
     logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
       executable,
