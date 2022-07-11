@@ -39,6 +39,14 @@ def PrintDivider(char='='):
   print('\n')
 
 
+def IsAsan(build_dir):
+  with open(os.path.join(build_dir, 'args.gn')) as args:
+    if 'is_asan = true' in args.read():
+      return True
+
+  return False
+
+
 def RunCmd(cmd, forbidden_output=[], expect_failure=False, env=None, **kwargs):
   command_string = ' '.join(cmd)
 
@@ -769,6 +777,24 @@ def GatherFrontEndServerTests(build_dir):
     )
 
 
+def GatherPathOpsTests(build_dir):
+  # TODO(dnfield): https://github.com/flutter/flutter/issues/107321
+  if IsAsan(build_dir):
+    return
+
+  test_dir = os.path.join(
+      buildroot_dir, 'flutter', 'tools', 'path_ops', 'dart', 'test'
+  )
+  opts = ['--disable-dart-dev', os.path.join(test_dir, 'path_ops_test.dart')]
+  yield EngineExecutableTask(
+      build_dir,
+      os.path.join('dart-sdk', 'bin', 'dart'),
+      None,
+      flags=opts,
+      cwd=test_dir
+  )
+
+
 def GatherConstFinderTests(build_dir):
   test_dir = os.path.join(
       buildroot_dir, 'flutter', 'tools', 'const_finder', 'test'
@@ -1031,6 +1057,7 @@ def main():
     tasks += list(GatherGithooksTests(build_dir))
     tasks += list(GatherClangTidyTests(build_dir))
     tasks += list(GatherApiConsistencyTests(build_dir))
+    tasks += list(GatherPathOpsTests(build_dir))
     tasks += list(GatherConstFinderTests(build_dir))
     tasks += list(GatherFrontEndServerTests(build_dir))
     tasks += list(
