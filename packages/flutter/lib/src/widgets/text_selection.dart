@@ -86,44 +86,52 @@ class LoupeSelectionOverlayInfoBearer {
     required this.globalGesturePosition,
     required this.handleRect,
     required this.fieldBounds,
-    this.globalXLineEnd,
+    required this.currentLineBoundries,
   });
 
   factory LoupeSelectionOverlayInfoBearer._selectionControlDerrived({
     required RenderEditable renderEditable,
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
-    bool shouldCalculateLineEnd = false,
   }) {
     final Offset globalRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero);
     final Rect localCaratRect = renderEditable.getLocalRectForCaret(currentTextPosition);
 
 
-    final double? globalXLineEnd;
+    final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
+    final TextPosition positionAtEndOfLine = TextPosition(
+        offset: lineAtOffset.extentOffset,
+        affinity: TextAffinity.upstream,
+    );
 
-    if (shouldCalculateLineEnd) {
-      globalXLineEnd = renderEditable.getLocalRectForCaret(TextPosition(offset: renderEditable.getLineAtOffset(currentTextPosition).end)).right;
-    } else {
-      globalXLineEnd = null;
-    }
+    // Default affinity is downstream.
+    final TextPosition positionAtBeginningOfLine = TextPosition(
+      offset: lineAtOffset.baseOffset,
+    );
+
+    //TODO: should I write my own getLocalRectForPosition that doesn't take carat into account?
+    final Rect lineBoundries = Rect.fromPoints(
+      renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topLeft, 
+      renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomRight
+    );
     
     
     return LoupeSelectionOverlayInfoBearer(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
       handleRect: localCaratRect.shift(globalRenderEditableTopLeft),
-      globalXLineEnd: globalXLineEnd
+      currentLineBoundries: lineBoundries.shift(globalRenderEditableTopLeft)
     );
   }
 
   const LoupeSelectionOverlayInfoBearer.empty() : 
     globalGesturePosition = Offset.zero, 
     handleRect = Rect.zero,
-    globalXLineEnd = null,
+    currentLineBoundries = Rect.zero,
     fieldBounds = Rect.zero;   
 
   final Offset globalGesturePosition;
-  final double? globalXLineEnd;
+  final Rect currentLineBoundries;
   final Rect handleRect;
   final Rect fieldBounds; 
 
@@ -132,7 +140,7 @@ class LoupeSelectionOverlayInfoBearer {
     other is LoupeSelectionOverlayInfoBearer &&
     other.globalGesturePosition == globalGesturePosition &&
     other.handleRect == handleRect &&
-    other.globalXLineEnd == globalXLineEnd &&
+    other.currentLineBoundries == currentLineBoundries &&
     other.fieldBounds == fieldBounds;
 
   @override
@@ -140,7 +148,7 @@ class LoupeSelectionOverlayInfoBearer {
     globalGesturePosition,
     handleRect, 
     fieldBounds,
-    globalXLineEnd
+    currentLineBoundries
   );
 }
 
@@ -557,7 +565,7 @@ class TextSelectionOverlay {
   /// This is NOT the souce of truth for if the loupe is up or not,
   /// since, for example, the [CupertinoLoupe] is able to hide itself
   /// if the user drags too far away. If this info is needed, check 
-  /// [LoupeController.manuallyHidden].
+  /// [_loupeController.status].
   void _showLoupe(LoupeSelectionOverlayInfoBearer initalInfoBearer) {
   if (_loupeController == null) {
     return;
@@ -605,7 +613,6 @@ class TextSelectionOverlay {
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
-      shouldCalculateLineEnd: true
     ));
   }
 
@@ -615,13 +622,6 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition); 
     final TextSelection currentSelection = TextSelection.fromPosition(position);
 
-    _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
-      currentTextPosition: position,
-      globalGesturePosition: details.globalPosition,
-      renderEditable: renderObject,
-      shouldCalculateLineEnd: true
-    );
-   
     if (_selection.isCollapsed) {
       _handleSelectionHandleChanged(currentSelection, isEnd: true);
       return;
@@ -655,6 +655,12 @@ class TextSelectionOverlay {
     }
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
+
+     _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+      currentTextPosition: newSelection.extent,
+      globalGesturePosition: details.globalPosition,
+      renderEditable: renderObject,
+    );
   }
 
   late Offset _dragStartPosition;
@@ -670,7 +676,6 @@ class TextSelectionOverlay {
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
-      shouldCalculateLineEnd: _selection.isCollapsed
     ));
   }
 
@@ -678,14 +683,13 @@ class TextSelectionOverlay {
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
-    _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
-      currentTextPosition: position,
-      globalGesturePosition: details.globalPosition,
-      renderEditable: renderObject,
-      shouldCalculateLineEnd: _selection.isCollapsed
-    );
-
     if (_selection.isCollapsed) {
+      _showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+        currentTextPosition: position,
+        globalGesturePosition: details.globalPosition,
+        renderEditable: renderObject,
+      ));
+
       _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: false);
       return;
     }
@@ -716,6 +720,12 @@ class TextSelectionOverlay {
         }
         break;
     }
+
+    _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+      currentTextPosition: newSelection.base,
+      globalGesturePosition: details.globalPosition,
+      renderEditable: renderObject,
+    );
 
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }

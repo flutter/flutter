@@ -29,7 +29,11 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
   // condition becomes [loupePosition != null && last_build_y != this_build_y].
   // {@endtemplate}
   Offset? loupePosition;
+
+  // A timer that unsets itself after an animation duration. 
+  // If the timer exists, then it blah blah blah
   Timer? _positionShouldBeAnimatedTimer;
+  bool get _positionShouldBeAnimated => _positionShouldBeAnimatedTimer != null;
 
   Offset extraFocalPointOffset = Offset.zero;
 
@@ -71,16 +75,13 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
         MaterialLoupe._size.height -
             MaterialLoupe._kStandardVerticalFocalPointShift);
 
-    // Since the loupe should not go past the end of the line,
-    // but must track the gesture otherwise, bound the X of the loupe to be at most
-    // the end of the line. Since the center of the loupe may line up directly with
-    // the end of the line, add half the width to the globalXLineEnd, so that half
-    // the loupe may overhang the end of the text.
-    // TODO clamp here for RTL
-    final double loupeX = selectionInfo.globalXLineEnd != null
-        ? math.min(selectionInfo.globalGesturePosition.dx,
-            selectionInfo.globalXLineEnd! + (MaterialLoupe._size.width / 2))
-        : selectionInfo.globalGesturePosition.dx;
+    // Since the loupe should not go past the edges of the line,
+    // but must track the gesture otherwise, bound the X of the loupe
+    // to always stay between line start and end.
+    final double loupeX = selectionInfo.globalGesturePosition.dx.clamp(
+      selectionInfo.currentLineBoundries.left, 
+      selectionInfo.currentLineBoundries.right
+    );
 
     //place the loupe at the previously calculated X, and the Y should be
     // exactly at the center of the handle.
@@ -103,6 +104,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
 
     // Adjust the focal point horizontally such that none of the loupe
     // ever points to anything out of bounds.
+    //TODO this could use the line boundries
     final double newGlobalFocalPointX = screenBoundsAdjustedLoupeRect.center.dx
         .clamp(
             selectionInfo.fieldBounds.left + horizontalMaxFocalPointEdgeInsets,
@@ -157,10 +159,11 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     return AnimatedPositioned(
       top: loupePosition!.dy,
       left: loupePosition!.dx,
-      // Only animate if we should be animating.
-      duration: _positionShouldBeAnimatedTimer == null
-          ? Duration.zero
-          : MaterialLoupe._verticalAnimationDuration,
+      // Material Loupe typically does not animate, unless we jump between lines,
+      // in whichcase we animate between lines.
+      duration: _positionShouldBeAnimated
+          ? MaterialLoupe._verticalAnimationDuration
+          : Duration.zero,
       child: loupe,
     );
   }
