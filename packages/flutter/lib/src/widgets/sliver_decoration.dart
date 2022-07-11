@@ -109,7 +109,7 @@ class SliverDecoration extends SingleChildRenderObjectWidget {
 
 /// Paints a [Decoration] either before or after its child paints.
 class RenderSliverDecoration extends RenderProxySliver {
-  /// Creates a decorated box.
+  /// Creates a decorated sliver.
   ///
   /// The [decoration], [position], and [configuration] arguments must not be
   /// null. By default the decoration paints behind the child.

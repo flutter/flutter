@@ -161,7 +161,7 @@ void main() {
      await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: RepaintBoundary(
-          key: backgroundKey,
+          key: foregroundKey,
           child: CustomScrollView(
             slivers: <Widget>[
               SliverDecoration(
