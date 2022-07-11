@@ -284,6 +284,7 @@ class _ZoomEnterTransition extends StatefulWidget {
 }
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
+  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
   @override
   bool get allowRasterization => !kIsWeb && widget.preferRasterization;
 
@@ -479,6 +480,7 @@ class _ZoomExitTransition extends StatefulWidget {
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
   late _ZoomExitTransitionDelegate delegate;
 
+  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
   @override
   bool get allowRasterization => !kIsWeb && widget.preferRasterization;
 
