@@ -157,12 +157,11 @@ class Icon extends StatelessWidget {
   /// The optical size for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `opsz` [FontVariation]
-  /// axis, otherwise has no effect.
+  /// axis, otherwise has no effect. Must be greater than 0.
   ///
   /// For an icon to look the same at different sizes, the stroke weight
   /// (thickness) must change as the icon size scales. Optical size offers a way
-  /// to automatically adjust the stroke weight as icon size changes. Must be
-  /// greater than 0.
+  /// to automatically adjust the stroke weight as icon size changes.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.opticalSize].
   ///
