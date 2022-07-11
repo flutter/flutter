@@ -3117,6 +3117,12 @@ class _RouteEntry extends RouteTransitionRecord {
     _isWaitingForExitingDecision = false;
   }
 
+  void updateFocusability() {
+    for (final OverlayEntry entry in route.overlayEntries) {
+      entry.focusEnabled = route.isCurrent;
+    }
+  }
+
   bool get restorationEnabled => route.restorationScopeId.value != null;
   set restorationEnabled(bool value) {
     assert(!value || restorationId != null);
@@ -3980,6 +3986,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         overlayEntry.remove();
       }
       entry.dispose();
+    }
+    // Turn on focus for only the current route's overlays.
+    for (final _RouteEntry entry in _history) {
+      entry.updateFocusability();
     }
     if (rearrangeOverlay) {
       overlay?.rearrange(_allRouteOverlayEntries);

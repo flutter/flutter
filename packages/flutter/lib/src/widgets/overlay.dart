@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 
@@ -68,11 +69,13 @@ class OverlayEntry implements Listenable {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
+    bool focusEnabled = true,
   }) : assert(builder != null),
        assert(opaque != null),
        assert(maintainState != null),
        _opaque = opaque,
-       _maintainState = maintainState;
+       _maintainState = maintainState,
+       _focusEnabled = focusEnabled;
 
   /// This entry will include the widget built by this builder in the overlay at
   /// the entry's position.
@@ -94,7 +97,20 @@ class OverlayEntry implements Listenable {
       return;
     }
     _opaque = value;
-    _overlay?._didChangeEntryOpacity();
+    _overlay?._setStateChanged();
+  }
+
+  /// Whether focus is disabled in the widget subtree built by this overlay
+  /// entry.
+  bool get focusEnabled => _focusEnabled;
+  bool _focusEnabled;
+  set focusEnabled(bool value) {
+    assert(!_disposedByOwner);
+    if (_focusEnabled == value) {
+      return;
+    }
+    _focusEnabled = value;
+    _overlay?._setStateChanged();
   }
 
   /// Whether this entry must be included in the tree even if there is a fully
@@ -121,7 +137,7 @@ class OverlayEntry implements Listenable {
     }
     _maintainState = value;
     assert(_overlay != null);
-    _overlay!._didChangeEntryOpacity();
+    _overlay!._setStateChanged();
   }
 
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
@@ -253,7 +269,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   Widget build(BuildContext context) {
     return TickerMode(
       enabled: widget.tickerEnabled,
-      child: widget.entry.builder(context),
+      child: ExcludeFocus(
+        excluding: !widget.entry.focusEnabled,
+        child: widget.entry.builder(context),
+      ),
     );
   }
 
@@ -532,10 +551,10 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     return result;
   }
 
-  void _didChangeEntryOpacity() {
+  void _setStateChanged() {
     setState(() {
-      // We use the opacity of the entry in our build function, which means we
-      // our state has changed.
+      // We use the opacity of the entry and the focus enabled state in our
+      // build function, which means our state has changed.
     });
   }
 
