@@ -34,7 +34,7 @@ void expectInstances(dynamic value, dynamic expected) {
 }
 
 final String basePath =
-    path.canonicalize(path.join(path.dirname(Platform.script.path), '..'));
+    path.canonicalize(path.join(path.dirname(Platform.script.toFilePath()), '..'));
 final String fixtures = path.join(basePath, 'test', 'fixtures');
 final String box = path.join(fixtures, 'lib', 'box.dart');
 final String consts = path.join(fixtures, 'lib', 'consts.dart');
@@ -119,6 +119,9 @@ void _checkNonConsts() {
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'Target',
   );
+  final String fixturesUrl = Platform.isWindows
+    ? '/$fixtures'.replaceAll(Platform.pathSeparator, '/')
+    : fixtures;
 
   expectInstances(
     finder.findInstances(),
@@ -134,27 +137,27 @@ void _checkNonConsts() {
       ],
       'nonConstantLocations': <dynamic>[
         <String, dynamic>{
-          'file': 'file://$fixtures/lib/consts_and_non.dart',
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
           'line': 14,
           'column': 26,
         },
         <String, dynamic>{
-          'file': 'file://$fixtures/lib/consts_and_non.dart',
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
           'line': 16,
           'column': 26,
         },
         <String, dynamic>{
-          'file': 'file://$fixtures/lib/consts_and_non.dart',
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
           'line': 16,
           'column': 41,
         },
         <String, dynamic>{
-          'file': 'file://$fixtures/lib/consts_and_non.dart',
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
           'line': 17,
           'column': 26,
         },
         <String, dynamic>{
-          'file': 'file://$fixtures/pkg/package.dart',
+          'file': 'file://$fixturesUrl/pkg/package.dart',
           'line': 14,
           'column': 25,
         }
