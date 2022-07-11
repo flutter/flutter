@@ -699,7 +699,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   host_config.io_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
                                     flutter::ThreadHost::Type::IO, threadLabel.UTF8String),
-                                fml::Thread::ThreadPriority::BACKGROUND);
+                                fml::Thread::ThreadPriority::NORMAL);
 
   return (flutter::ThreadHost){host_config};
 }
