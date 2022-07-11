@@ -36,6 +36,7 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, "tools", "const_finder"),
     os.path.join(ENGINE_DIR, "tools", "githooks"),
     os.path.join(ENGINE_DIR, "tools", "licenses"),
+    os.path.join(ENGINE_DIR, "tools", "path_ops", "dart")
 ]
 
 
