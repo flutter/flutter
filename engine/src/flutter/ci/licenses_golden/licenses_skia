@@ -1,4 +1,4 @@
-Signature: 4dcb4dd814de0eb4ca1ffb08da9c1a4e
+Signature: 7d6b5e40991686a3867729ba300ded3f
 
 UNUSED LICENSES:
 
@@ -1610,7 +1610,6 @@ FILE: ../../../third_party/skia/src/ports/SkImageEncoder_WIC.cpp
 FILE: ../../../third_party/skia/src/ports/SkMemory_malloc.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_win_dw.cpp
 FILE: ../../../third_party/skia/src/shaders/SkBitmapProcShader.cpp
-FILE: ../../../third_party/skia/src/shaders/SkEmptyShader.h
 FILE: ../../../third_party/skia/src/utils/SkBitSet.h
 FILE: ../../../third_party/skia/src/utils/SkNWayCanvas.cpp
 FILE: ../../../third_party/skia/src/utils/SkOSPath.cpp
@@ -5636,6 +5635,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
+FILE: ../../../third_party/skia/src/shaders/SkEmptyShader.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetComputeShaderMainParams.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
@@ -6118,7 +6118,6 @@ FILE: ../../../third_party/skia/src/core/SkEnumerate.h
 FILE: ../../../third_party/skia/src/core/SkGlyphBuffer.cpp
 FILE: ../../../third_party/skia/src/core/SkGlyphBuffer.h
 FILE: ../../../third_party/skia/src/core/SkPathMakers.h
-FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.cpp
 FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.h
 FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
@@ -6756,7 +6755,6 @@ FILE: ../../../third_party/skia/src/ports/SkScalerContext_mac_ct.cpp
 FILE: ../../../third_party/skia/src/ports/SkTypeface_mac_ct.cpp
 FILE: ../../../third_party/skia/src/shaders/SkBitmapProcShader.h
 FILE: ../../../third_party/skia/src/shaders/SkComposeShader.cpp
-FILE: ../../../third_party/skia/src/shaders/SkComposeShader.h
 FILE: ../../../third_party/skia/src/shaders/SkShader.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShader.cpp
 FILE: ../../../third_party/skia/src/utils/SkBase64.cpp
@@ -6906,7 +6904,6 @@ FILE: ../../../third_party/skia/src/core/SkBitmapProcState.h
 FILE: ../../../third_party/skia/src/core/SkMask.cpp
 FILE: ../../../third_party/skia/src/core/SkPicture.cpp
 FILE: ../../../third_party/skia/src/images/SkJpegEncoder.cpp
-FILE: ../../../third_party/skia/src/shaders/SkColorShader.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2007 The Android Open Source Project
 
