@@ -4605,6 +4605,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         }
       }
 
+      _hasDependencyWhichNeedsClearingOnRebuild = false;
       dependencies.removeWhere((InheritedElement dep) => dep.clearDependencyOnRebuild);
     }
     performRebuild();
