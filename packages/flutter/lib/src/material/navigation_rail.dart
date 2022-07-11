@@ -379,7 +379,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
-    final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _NavigationRailDefaultsM3(context) : _NavigationRailDefaultsM2(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? defaults.backgroundColor!;
@@ -910,8 +910,9 @@ const Widget _verticalSpacer = SizedBox(height: 8.0);
 const double _verticalIconLabelSpacingM3 = 4.0;
 const double _verticalDestinationSpacingM3 = 12.0;
 
-class _DefaultsM2 extends NavigationRailThemeData {
-  _DefaultsM2(BuildContext context)
+// Hand coded defaults based on Material Design 2.
+class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
+  _NavigationRailDefaultsM2(BuildContext context)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(
@@ -953,15 +954,17 @@ class _DefaultsM2 extends NavigationRailThemeData {
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - NavigationRail
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_101
-class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
+  _NavigationRailDefaultsM3(this.context)
       : super(
           elevation: 0.0,
           groupAlignment: -1,
@@ -1003,4 +1006,4 @@ class _TokenDefaultsM3 extends NavigationRailThemeData {
 
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - NavigationRail
