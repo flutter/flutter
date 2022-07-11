@@ -8,13 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('IconThemeData control test', () {
     const IconThemeData data = IconThemeData(
-      size: 16.0, 
+      size: 16.0,
       fill: 0.5,
       weight: 600,
       grade: 25,
       opticalSize: 45,
-      color: Color(0xAAAAAAAA), 
-      opacity: 0.5, 
+      color: Color(0xAAAAAAAA),
+      opacity: 0.5,
       shadows: <Shadow>[Shadow(color: Color(0xAAAAAAAA), blurRadius: 1.0, offset: Offset(1.0, 1.0))],
     );
     expect(data, hasOneLineDescription);
@@ -34,16 +34,16 @@ void main() {
 
   group('IconThemeData lerp', () {
     const IconThemeData data = IconThemeData(
-      size: 16.0, 
+      size: 16.0,
       fill: 0.5,
       weight: 600,
       grade: 25,
       opticalSize: 45,
-      color: Color(0xFFFFFFFF), 
-      opacity: 1.0, 
+      color: Color(0xFFFFFFFF),
+      opacity: 1.0,
       shadows: <Shadow>[Shadow(color: Color(0xFFFFFFFF), blurRadius: 1.0, offset: Offset(1.0, 1.0))],
     );
-    
+   
     test('with first null', () {
       final IconThemeData lerped = IconThemeData.lerp(null, data, 0.25);
 

@@ -162,7 +162,7 @@ class Icon extends StatelessWidget {
   ///
   /// For an icon to look the same at different sizes, the stroke weight
   /// (thickness) must change as the icon size scales. Optical size offers a way
-  /// to automatically adjust the stroke weight as icon size changes. Must be 
+  /// to automatically adjust the stroke weight as icon size changes. Must be
   /// greater than 0.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.opticalSize].
