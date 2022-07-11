@@ -98,7 +98,7 @@ enum ListTileControlAffinity {
 /// ```dart
 /// Container(
 ///   color: Colors.green,
-///   child: Material(
+///   child: const Material(
 ///     child: ListTile(
 ///       title: const Text('ListTile with red background'),
 ///       tileColor: Colors.red,

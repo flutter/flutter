@@ -12,7 +12,7 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
-// bool _isSelected;
+// bool _isSelected = true;
 
 enum _SwitchListTileType { material, adaptive }
 
@@ -57,7 +57,7 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart
 /// Container(
 ///   color: Colors.green,
-///   child: Material(
+///   child: const Material(
 ///     child: SwitchListTile(
 ///       tileColor: Colors.red,
 ///       title: const Text('SwitchListTile with red background'),
@@ -245,6 +245,7 @@ class SwitchListTile extends StatelessWidget {
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
+  /// {@tool snippet}
   /// ```dart
   /// SwitchListTile(
   ///   value: _isSelected,
@@ -253,9 +254,10 @@ class SwitchListTile extends StatelessWidget {
   ///       _isSelected = newValue;
   ///     });
   ///   },
-  ///   title: Text('Selection'),
+  ///   title: const Text('Selection'),
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
