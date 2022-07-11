@@ -4259,6 +4259,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
     assert(ancestor != null);
+    assert(
+       !ancestor.clearDependencyOnRebuild || debugDoingBuild || !dirty,
+      'Cannot depend on an InheritedElement with clearDependencyOnRebuild: true '
+      ' in Widget life-cycles other than `build`.',
+    );
     _hasDependencyWhichNeedsClearingOnRebuild = _hasDependencyWhichNeedsClearingOnRebuild || ancestor.clearDependencyOnRebuild;
     _dependencies ??= HashSet<InheritedElement>();
     _dependencies!.add(ancestor);

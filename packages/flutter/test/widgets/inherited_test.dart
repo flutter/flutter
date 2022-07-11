@@ -99,7 +99,95 @@ class RemoveDependencySpyElement extends InheritedElement {
   }
 }
 
+class DeferredStatefulWidget extends StatefulWidget {
+  const DeferredStatefulWidget({
+    super.key,
+    required this.initState,
+    required this.didUpdateWidget,
+    required this.didChangeDependencies,
+    required this.build,
+  });
+
+  final void Function(BuildContext context) initState;
+  final void Function(BuildContext context) didUpdateWidget;
+  final void Function(BuildContext context) didChangeDependencies;
+  final Widget Function(BuildContext context) build;
+
+  @override
+  State<DeferredStatefulWidget> createState() => _DeferredStatefulWidgetState();
+}
+
+class _DeferredStatefulWidgetState extends State<DeferredStatefulWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.initState(context);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.didChangeDependencies(context);
+  }
+
+  @override
+  void didUpdateWidget(covariant DeferredStatefulWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    widget.didUpdateWidget(context);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.build(context);
+}
+
 void main() {
+  testWidgets(
+    'Widgets can only depend on InheritedElements with clearDependencyOnRebuild: true'
+    ' during/after build', (WidgetTester tester) async {
+    Widget build() {
+      return TestInherited(
+        child: RemoveDependencySpy(
+          child: DeferredStatefulWidget(
+            initState: (BuildContext context) {
+              expect(
+                () => context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>(),
+                throwsAssertionError,
+              );
+            },
+            didUpdateWidget: (BuildContext context) {
+              expect(
+                () => context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>(),
+                throwsAssertionError,
+              );
+            },
+            didChangeDependencies: (BuildContext context) {
+              // Subscribing to another InheritedWidget to trigger two didChangeDependencies
+              context.dependOnInheritedWidgetOfExactType<TestInherited>();
+              expect(
+                () => context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>(),
+                throwsAssertionError,
+              );
+            },
+            build: (BuildContext context) {
+              context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>();
+              return LayoutBuilder(
+                builder: (BuildContext _, BoxConstraints constraints) {
+                  context.dependOnInheritedWidgetOfExactType<RemoveDependencySpy>();
+                  return Container();
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    // Rebuild again to trigger didUpdateWidget and a second didChangeDependencies
+    await tester.pumpWidget(build());
+  });
+
   testWidgets('Calls removeDependency when dependents are unmounted', (WidgetTester tester) async {
     final List<Key> log = <Key>[];
 
