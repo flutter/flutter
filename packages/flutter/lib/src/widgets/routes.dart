@@ -130,7 +130,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// Whether the route transition will prefer to animate a rasterized
   /// snapshot of the entering/exiting routes.
   ///
-  /// When this value is true, certain route transitions (Such as the Android
+  /// When this value is true, certain route transitions (such as the Android
   /// zoom page transition) will rasterize the entering and exiting routes.
   /// These textures are then animated in place of the underlying widgets to
   /// improve performance of the transition.

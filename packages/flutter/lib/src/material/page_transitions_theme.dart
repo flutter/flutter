@@ -194,6 +194,11 @@ class _ZoomPageTransition extends StatelessWidget {
   ///    property when the [_ZoomPageTransition] is used as a page transition.
   final Animation<double> secondaryAnimation;
 
+  /// Whether the [RasterWidget] based-rasterized strategy for the zoom page transition
+  /// will be used.
+  ///
+  /// Notably, this improves performance by disabling animations on both the outgoing and
+  /// incoming route.
   final bool preferRasterization;
 
   /// The widget below this widget in the tree.
@@ -278,43 +283,6 @@ class _ZoomEnterTransition extends StatefulWidget {
   State<_ZoomEnterTransition> createState() => _ZoomEnterTransitionState();
 }
 
-mixin _ZoomTransitionBase {
-  // Don't rasterize if:
-  // 1. rasterization is disabled by the platform.
-  // 2. The animation is paused/stopped.
-  // 3. The values of the scale/fade transition do not
-  //    benefit from rasterization.
-  final ValueNotifier<bool> rasterize = ValueNotifier<bool>(false);
-
-  late Animation<double> fadeTransition;
-  late Animation<double> scaleTransition;
-
-  bool get allowRasterization;
-
-  void _onAnimationValueChange() {
-    if ((scaleTransition.value == 1.0) &&
-        (fadeTransition.value == 0.0 ||
-         fadeTransition.value == 1.0)) {
-        rasterize.value = false;
-      } else {
-        rasterize.value = allowRasterization;
-      }
-  }
-
-  void _onAnimationStatusChange(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        rasterize.value = false;
-        break;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        rasterize.value = allowRasterization;
-        break;
-    }
-  }
-}
-
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
   @override
   bool get allowRasterization => !kIsWeb && widget.preferRasterization;
@@ -395,7 +363,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   @override
   Widget build(BuildContext context) {
     if (allowRasterization) {
-      return RasterWidget(delegate: delegate, rasterize: rasterize, child: widget.child);
+      return RasterWidget(delegate: delegate, controller: controller, child: widget.child);
     }
     return AnimatedBuilder(
       animation: widget.animation,
@@ -582,7 +550,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
     if (allowRasterization) {
       return RasterWidget(
         delegate: delegate,
-        rasterize: rasterize,
+        controller: controller,
         child: widget.child,
       );
     }
@@ -907,4 +875,42 @@ void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double
   final double top = (logicalHeight - scaledLogicalHeight) / 2;
   final Rect dst = Rect.fromLTWH(left, top, scaledLogicalWidth, scaledLogicalHeight);
   context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
+}
+
+
+mixin _ZoomTransitionBase {
+  // Don't rasterize if:
+  // 1. rasterization is disabled by the platform.
+  // 2. The animation is paused/stopped.
+  // 3. The values of the scale/fade transition do not
+  //    benefit from rasterization.
+  final RasterWidgetController controller = RasterWidgetController();
+
+  late Animation<double> fadeTransition;
+  late Animation<double> scaleTransition;
+
+  bool get allowRasterization;
+
+  void _onAnimationValueChange() {
+    if ((scaleTransition.value == 1.0) &&
+        (fadeTransition.value == 0.0 ||
+         fadeTransition.value == 1.0)) {
+        controller.rasterize = false;
+      } else {
+        controller.rasterize = allowRasterization;
+      }
+  }
+
+  void _onAnimationStatusChange(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        controller.rasterize = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        controller.rasterize = allowRasterization;
+        break;
+    }
+  }
 }

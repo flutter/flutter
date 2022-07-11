@@ -15,11 +15,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('RasterWidget can rasterize child', (WidgetTester tester) async {
-    final ValueNotifier<bool> notifier = ValueNotifier<bool>(true);
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
         child: RasterWidget(
-          rasterize: notifier,
+          controller: controller,
           child: Container(
             width: 100,
             height: 100,
@@ -33,11 +33,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RasterWidget is a repaint boundary when rasterizing', (WidgetTester tester) async {
-    final ValueNotifier<bool> notifier = ValueNotifier<bool>(true);
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
         child: RasterWidget(
-          rasterize: notifier,
+          controller: controller,
           child: Container(
             width: 100,
             height: 100,
@@ -51,7 +51,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
     expect(tester.layers[2], isA<OffsetLayer>());
 
-    notifier.value = false;
+    controller.rasterize = false;
     await tester.pump();
 
     expect(tester.layers, hasLength(3));
@@ -60,12 +60,12 @@ void main() {
 
   testWidgets('RasterWidget repaints when RasterWidgetDelegate notifies listeners', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final ValueNotifier<bool> notifier = ValueNotifier<bool>(true);
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
         child: RasterWidget(
           delegate: delegate,
-          rasterize: notifier,
+          controller: controller,
           child: Container(
             width: 100,
             height: 100,
@@ -90,13 +90,46 @@ void main() {
     expect(delegate.count, 2);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
+  testWidgets('RasterWidget will recreate raster when controller calls clear', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    await tester.pumpWidget(RepaintBoundary(
+      child: Center(
+        child: RasterWidget(
+          delegate: delegate,
+          controller: controller,
+          child: Container(
+            width: 100,
+            height: 100,
+            color: const Color(0xFFAABB11),
+          ),
+        ),
+      ),
+    ));
+
+    expect(delegate.lastImage, isNotNull);
+    final ui.Image lastImage = delegate.lastImage!;
+
+    await tester.pump();
+
+    // Raster is re-used
+    expect(lastImage, equals(delegate.lastImage));
+
+    controller.clear();
+
+    await tester.pump();
+    // Raster is re-created.
+    expect(delegate.lastImage, isNotNull);
+    expect(lastImage, isNot(delegate.lastImage));
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
   testWidgets('RasterWidget can update the delegate', (WidgetTester tester) async {
     final TestDelegate delegateA = TestDelegate();
     final TestDelegate delegateB = TestDelegate()
       ..shouldRepaintValue = true;
     TestDelegate delegate = delegateA;
 
-    final ValueNotifier<bool> notifier = ValueNotifier<bool>(true);
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
     late void Function(void Function()) setStateFn;
     await tester.pumpWidget(StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
@@ -104,7 +137,7 @@ void main() {
         return Center(
           child: RasterWidget(
             delegate: delegate,
-            rasterize: notifier,
+            controller: controller,
             child: Container(
               width: 100,
               height: 100,
@@ -128,9 +161,9 @@ void main() {
 
   testWidgets('RasterWidget can update the ValueNotifier', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final ValueNotifier<bool> notifierA = ValueNotifier<bool>(true);
-    final ValueNotifier<bool> notifierB = ValueNotifier<bool>(false);
-    ValueNotifier<bool> notifier = notifierA;
+    final RasterWidgetController controllerA = RasterWidgetController(rasterize: true);
+    final RasterWidgetController controllerB = RasterWidgetController();
+    RasterWidgetController controller = controllerA;
     late void Function(void Function()) setStateFn;
     await tester.pumpWidget(StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
@@ -138,7 +171,7 @@ void main() {
         return Center(
           child: RasterWidget(
             delegate: delegate,
-            rasterize: notifier,
+            controller: controller,
             child: Container(
               width: 100,
               height: 100,
@@ -152,7 +185,7 @@ void main() {
     expect(delegate.count, 1);
     expect(tester.layers.last, isA<OffsetLayer>());
     setStateFn(() {
-      notifier = notifierB;
+      controller = controllerB;
     });
     await tester.pump();
 
@@ -160,7 +193,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
 
     // changes to old notifier do not impact widget.
-    notifierA.value = false;
+    controllerA.rasterize = false;
     await tester.pump();
 
     expect(delegate.count, 1);
@@ -169,7 +202,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
 
     // changes to notifier do not impact widget after disposal.
-    notifierB.value = true;
+    controllerB.rasterize = true;
     await tester.pump();
     expect(delegate.count, 1);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
@@ -178,6 +211,7 @@ void main() {
 class TestDelegate extends RasterWidgetDelegate {
   int count = 0;
   bool shouldRepaintValue = false;
+  ui.Image? lastImage;
 
   void notify() {
     notifyListeners();
@@ -186,6 +220,7 @@ class TestDelegate extends RasterWidgetDelegate {
   @override
   void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
     count += 1;
+    lastImage = image;
   }
 
   @override
