@@ -45,6 +45,28 @@ void main() {
       expect(adapter.processArgs, contains('tool_arg'));
     });
 
+    test('includes env variables', () async {
+      final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+        fileSystem: globals.fs,
+        platform: globals.platform,
+      );
+      final Completer<void> responseCompleter = Completer<void>();
+      final MockRequest request = MockRequest();
+      final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+        cwd: '/project',
+        program: 'foo.dart',
+        env: <String, String>{
+          'MY_TEST_ENV': 'MY_TEST_VALUE',
+        },
+      );
+
+      await adapter.configurationDoneRequest(request, null, () {});
+      await adapter.launchRequest(request, args, responseCompleter.complete);
+      await responseCompleter.future;
+
+      expect(adapter.env!['MY_TEST_ENV'], 'MY_TEST_VALUE');
+    });
+
     group('includes customTool', () {
       test('with no args replaced', () async {
         final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(fileSystem: globals.fs,

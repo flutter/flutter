@@ -42,11 +42,13 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   late String executable;
   late List<String> processArgs;
+  late Map<String, String>? env;
 
   @override
-  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
+  Future<void> launchAsProcess(String executable, List<String> processArgs, Map<String, String>? env) async {
     this.executable = executable;
     this.processArgs = processArgs;
+    this.env = env;
 
     // Pretend we launched the app and got the app.started event so that
     // launchRequest will complete.
@@ -94,11 +96,21 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
 
   late String executable;
   late List<String> processArgs;
+  late Map<String, String>? env;
 
   @override
-  Future<void> launchAsProcess(String executable, List<String> processArgs,) async {
+  Future<void> launchAsProcess(String executable, List<String> processArgs, Map<String, String>? env) async {
     this.executable = executable;
     this.processArgs = processArgs;
+    this.env = env;
+  }
+
+  @override
+  Future<void> get debuggerInitialized {
+    // If we were mocking debug mode, then simulate the debugger initializing.
+    return enableDebugger
+        ? Future<void>.value()
+        : throw StateError('Invalid attempt to wait for debuggerInitialized when not debugging');
   }
 }
 

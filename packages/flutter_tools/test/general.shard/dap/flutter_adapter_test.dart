@@ -25,10 +25,9 @@ void main() {
           : '/fake/flutter';
     });
 
-
-  group('launchRequest', () {
-    test('runs "flutter run" with --machine', () async {
-      final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+    group('launchRequest', () {
+      test('runs "flutter run" with --machine', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -41,6 +40,25 @@ void main() {
         await responseCompleter.future;
 
         expect(adapter.processArgs, containsAllInOrder(<String>['run', '--machine']));
+      });
+
+      test('includes env variables', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+          env: <String, String>{
+            'MY_TEST_ENV': 'MY_TEST_VALUE',
+          },
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(adapter.env!['MY_TEST_ENV'], 'MY_TEST_VALUE');
       });
 
       test('does not record the VMs PID for terminating', () async {
@@ -65,10 +83,9 @@ void main() {
       });
     });
 
-
-  group('attachRequest', () {
-    test('runs "flutter attach" with --machine', () async {
-      final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+    group('attachRequest', () {
+      test('runs "flutter attach" with --machine', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
