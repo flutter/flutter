@@ -788,6 +788,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)
     : super(
+        elevation: 6.0,
         focusElevation: 6.0,
         hoverElevation: 8.0,
         highlightElevation: 6.0,
@@ -818,7 +819,6 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
 
   bool get _isExtended => type == _FloatingActionButtonType.extended;
 
-  @override double? get elevation => Scaffold.of(context).fabIsContained ? 0.0 : 6.0;
   @override Color? get foregroundColor => _colors.onPrimaryContainer;
   @override Color? get backgroundColor => _colors.primaryContainer;
   @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.12);
