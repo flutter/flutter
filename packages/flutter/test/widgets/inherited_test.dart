@@ -59,7 +59,7 @@ class RemoveDependencySpy<T> extends InheritedWidget {
   const RemoveDependencySpy({
     super.key,
     required super.child,
-     this.onRemoveDependency,
+    this.onRemoveDependency,
     this.clearDependencyOnRebuild = true,
   });
 
@@ -83,16 +83,14 @@ class RemoveDependencySpyElement extends InheritedElement {
   bool get clearDependencyOnRebuild => (widget as RemoveDependencySpy).clearDependencyOnRebuild;
 
   @override
-  void removeDependencies(Element dependent) {
+  void removeDependent(Element dependent) {
     final RemoveDependencySpy widget = this.widget as RemoveDependencySpy;
     widget.onRemoveDependency?.call(dependent);
-    super.removeDependencies(dependent);
+    super.removeDependent(dependent);
   }
 
-  @override
-  // ignore: unnecessary_overrides, Override to remove the @protected
-  Object? getDependencies(Element dependent) {
-    return super.getDependencies(dependent);
+  Object? publicGetDependencies(Element dependent) {
+    return getDependencies(dependent);
   }
 
   @override
@@ -238,13 +236,13 @@ void main() {
     final RemoveDependencySpyElement spyElement = tester.element<RemoveDependencySpyElement>(find.byKey(secondKey));
     final Element builderElement = tester.element(find.byType(Builder));
 
-    expect(spyElement.getDependencies(builderElement), isNotNull);
-    expect(notifierElement.getDependencies(builderElement), isNotNull);
+    expect(spyElement.publicGetDependencies(builderElement), isNotNull);
+    expect(notifierElement.publicGetDependencies(builderElement), isNotNull);
 
     await tester.pumpWidget(build(isFirstBuild: false));
 
-    expect(spyElement.getDependencies(builderElement), isNull);
-    expect(notifierElement.getDependencies(builderElement), isNotNull);
+    expect(spyElement.publicGetDependencies(builderElement), isNull);
+    expect(notifierElement.publicGetDependencies(builderElement), isNotNull);
   });
 
   testWidgets(

@@ -4016,7 +4016,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(depth != null);
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       for (final InheritedElement dependency in _dependencies!) {
-        dependency.removeDependencies(this);
+        dependency.removeDependent(this);
       }
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
@@ -4598,10 +4598,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return true;
     }());
     if (_hasDependencyWhichNeedsClearingOnRebuild) {
-      final Set<InheritedElement> dependencies =  _dependencies!;
+      final Set<InheritedElement> dependencies = _dependencies!;
       for (final InheritedElement dependency in dependencies) {
         if (dependency.clearDependencyOnRebuild) {
-          dependency.removeDependencies(this);
+          dependency.removeDependent(this);
         }
       }
 
@@ -5128,11 +5128,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget dependOnInheritedElement(
-    Element ancestor, {
-    Object? aspect,
-    bool clearDependencyOnRebuild = false,
-  }) {
+  InheritedWidget dependOnInheritedElement(Element ancestor, { Object? aspect }) {
     assert(ancestor != null);
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
@@ -5332,7 +5328,7 @@ class InheritedElement extends ProxyElement {
   /// This defaults to false as a performance optimization, since few widgets
   /// conditionally depend on an [InheritedElement].
   ///
-  /// This value should never change for the lifetime of the element.
+  /// This value must never change for the lifetime of the element.
   bool get clearDependencyOnRebuild => false;
 
   @override
@@ -5454,7 +5450,7 @@ class InheritedElement extends ProxyElement {
   ///  * [InheritedModel], which is an example of a class that uses this method
   ///    to manage dependency values.
   @protected
-  void removeDependencies(Element dependent) {
+  void removeDependent(Element dependent) {
     _dependents.remove(dependent);
   }
 
