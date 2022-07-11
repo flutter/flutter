@@ -100,7 +100,7 @@ enum ListTileControlAffinity {
 ///   color: Colors.green,
 ///   child: const Material(
 ///     child: ListTile(
-///       title: const Text('ListTile with red background'),
+///       title: Text('ListTile with red background'),
 ///       tileColor: Colors.red,
 ///     ),
 ///   ),

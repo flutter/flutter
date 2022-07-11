@@ -57,7 +57,7 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart
 /// Container(
 ///   color: Colors.green,
-///   child: const Material(
+///   child: Material(
 ///     child: SwitchListTile(
 ///       tileColor: Colors.red,
 ///       title: const Text('SwitchListTile with red background'),
