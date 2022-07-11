@@ -26,7 +26,7 @@ import 'image.dart';
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
 /// ```dart
-/// DecoratedSliver(
+/// SliverDecoration(
 ///   decoration: const BoxDecoration(
 ///     gradient: RadialGradient(
 ///       center: Alignment(-0.5, -0.6),
@@ -51,14 +51,14 @@ import 'image.dart';
 ///
 ///  * [DecoratedBox], the version of this class that works with regular widgets.
 ///  * [Decoration], which you can extend to provide other effects with
-///    [DecoratedSliver].
+///    [SliverDecoration].
 ///  * [CustomPaint], another way to draw custom effects from the widget layer.
-class DecoratedSliver extends SingleChildRenderObjectWidget {
+class SliverDecoration extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
   /// The [decoration] and [position] arguments must not be null. By default the
   /// decoration paints behind the child.
-  const DecoratedSliver({
+  const SliverDecoration({
     super.key,
     required this.decoration,
     this.position = DecorationPosition.background,
@@ -74,8 +74,8 @@ class DecoratedSliver extends SingleChildRenderObjectWidget {
   final DecorationPosition position;
 
   @override
-  RenderDecoratedSliver createRenderObject(BuildContext context) {
-    return RenderDecoratedSliver(
+  RenderSliverDecoration createRenderObject(BuildContext context) {
+    return RenderSliverDecoration(
       decoration: decoration,
       position: position,
       configuration: createLocalImageConfiguration(context),
@@ -83,7 +83,7 @@ class DecoratedSliver extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderDecoratedSliver renderObject) {
+  void updateRenderObject(BuildContext context, RenderSliverDecoration renderObject) {
     renderObject
       ..decoration = decoration
       ..position = position
@@ -108,7 +108,7 @@ class DecoratedSliver extends SingleChildRenderObjectWidget {
 }
 
 /// Paints a [Decoration] either before or after its child paints.
-class RenderDecoratedSliver extends RenderProxySliver {
+class RenderSliverDecoration extends RenderProxySliver {
   /// Creates a decorated box.
   ///
   /// The [decoration], [position], and [configuration] arguments must not be
@@ -116,7 +116,7 @@ class RenderDecoratedSliver extends RenderProxySliver {
   ///
   /// The [ImageConfiguration] will be passed to the decoration (with the size
   /// filled in) to let it resolve images.
-  RenderDecoratedSliver({
+  RenderSliverDecoration({
     required Decoration decoration,
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,

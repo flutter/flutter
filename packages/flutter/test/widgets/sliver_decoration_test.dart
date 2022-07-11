@@ -9,13 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('DecoratedSliver creates, paints, and disposes BoxPainter', (WidgetTester tester) async {
+  testWidgets('SliverDecoration creates, paints, and disposes BoxPainter', (WidgetTester tester) async {
     final TestDecoration decoration = TestDecoration();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: CustomScrollView(
           slivers: <Widget>[
-            DecoratedSliver(
+            SliverDecoration(
               decoration: decoration,
               sliver: const SliverToBoxAdapter(
                 child: SizedBox(width: 100, height: 100),
@@ -37,7 +37,7 @@ void main() {
     expect(decoration.painters.last.disposed, true);
   });
 
-  testWidgets('DecoratedSliver can update box painter', (WidgetTester tester) async {
+  testWidgets('SliverDecoration can update box painter', (WidgetTester tester) async {
     final TestDecoration decorationA = TestDecoration();
     final TestDecoration decorationB = TestDecoration();
 
@@ -50,7 +50,7 @@ void main() {
             localSetState = setState;
             return CustomScrollView(
               slivers: <Widget>[
-                DecoratedSliver(
+                SliverDecoration(
                   decoration: activateDecoration,
                   sliver: const SliverToBoxAdapter(
                     child: SizedBox(width: 100, height: 100),
@@ -77,7 +77,7 @@ void main() {
     expect(decorationB.painters.last.paintCount, 1);
   });
 
-  testWidgets('DecoratedSliver can update DecorationPosition', (WidgetTester tester) async {
+  testWidgets('SliverDecoration can update DecorationPosition', (WidgetTester tester) async {
     final TestDecoration decoration = TestDecoration();
 
     DecorationPosition activePosition = DecorationPosition.foreground;
@@ -89,7 +89,7 @@ void main() {
             localSetState = setState;
             return CustomScrollView(
               slivers: <Widget>[
-                DecoratedSliver(
+                SliverDecoration(
                   decoration: decoration,
                   position: activePosition,
                   sliver: const SliverToBoxAdapter(
@@ -115,17 +115,9 @@ void main() {
     expect(decoration.painters.last.paintCount, 2);
   });
 
-  testWidgets('DecoratedSliver golden test', (WidgetTester tester) async {
+  testWidgets('SliverDecoration golden test', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(
-      gradient: RadialGradient(
-        center: Alignment(-0.5, -0.6),
-        radius: 0.15,
-        colors: <Color>[
-          Color(0xFFEEEEEE),
-          Color(0xFF111133),
-        ],
-        stops: <double>[0.9, 1.0],
-      ),
+      color: Colors.blue,
     );
 
     final Key backgroundKey = UniqueKey();
@@ -135,27 +127,30 @@ void main() {
           key: backgroundKey,
           child: CustomScrollView(
             slivers: <Widget>[
-              DecoratedSliver(
+              SliverDecoration(
                 decoration: decoration,
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate.fixed(<Widget>[
-                    Container(
-                      height: 100,
-                      color: Colors.red,
-                    ),
-                    Container(
-                      height: 100,
-                      color: Colors.yellow,
-                    ),
-                    Container(
-                      height: 100,
-                      color: Colors.red,
-                    ),
-                  ]),
-                )
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate.fixed(<Widget>[
+                      Container(
+                        height: 100,
+                        color: Colors.red,
+                      ),
+                      Container(
+                        height: 100,
+                        color: Colors.yellow,
+                      ),
+                      Container(
+                        height: 100,
+                        color: Colors.red,
+                      ),
+                    ]),
+                  ),
+                ),
               ),
             ],
-          )
+          ),
         ),
       )
     ));
@@ -163,33 +158,37 @@ void main() {
     await expectLater(find.byKey(backgroundKey), matchesGoldenFile('decorated_sliver.moon.background.png'));
 
     final Key foregroundKey = UniqueKey();
-    await tester.pumpWidget(MaterialApp(
+     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: RepaintBoundary(
-          key: foregroundKey,
+          key: backgroundKey,
           child: CustomScrollView(
             slivers: <Widget>[
-              DecoratedSliver(
+              SliverDecoration(
                 decoration: decoration,
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate.fixed(<Widget>[
-                    Container(
-                      height: 100,
-                      color: Colors.red,
-                    ),
-                    Container(
-                      height: 100,
-                      color: Colors.yellow,
-                    ),
-                    Container(
-                      height: 100,
-                      color: Colors.red,
-                    ),
-                  ]),
-                )
+                position: DecorationPosition.foreground,
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate.fixed(<Widget>[
+                      Container(
+                        height: 100,
+                        color: Colors.red,
+                      ),
+                      Container(
+                        height: 100,
+                        color: Colors.yellow,
+                      ),
+                      Container(
+                        height: 100,
+                        color: Colors.red,
+                      ),
+                    ]),
+                  ),
+                ),
               ),
             ],
-          )
+          ),
         ),
       )
     ));
