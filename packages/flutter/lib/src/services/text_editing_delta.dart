@@ -24,13 +24,26 @@ TextAffinity? _toTextAffinity(String? affinity) {
   return null;
 }
 
-/// Replaces a range of text in the original string with the text given in the
-/// replacement string.
+// Replaces a range of text in the original string with the text given in the
+// replacement string.
 String _replace(String originalText, String replacementText, int start, int end) {
+  assert(_textRangeIsValid(TextRange(start: start, end: end), originalText));
   final String textStart = originalText.substring(0, start);
   final String textEnd = originalText.substring(end, originalText.length);
   final String newText = textStart + replacementText + textEnd;
   return newText;
+}
+
+// Verify that the given range is within the text.
+bool _textRangeIsValid(TextRange range, String text) {
+  if (range.start == -1 && range.end == -1) {
+    return true;
+  }
+  assert(range.start >= 0 && range.start <= text.length,
+      'Range start ${range.start} is out of text of length ${text.length}');
+  assert(range.end >= 0 && range.end <= text.length,
+      'Range end ${range.end} is out of text of length ${text.length}');
+  return true;
 }
 
 /// A structure representing a granular change that has occurred to the editing
@@ -126,14 +139,23 @@ abstract class TextEditingDelta {
     );
 
     if (isNonTextUpdate) {
+      assert(_textRangeIsValid(newSelection, oldText));
+      assert(_textRangeIsValid(newComposing, oldText));
+
       return TextEditingDeltaNonTextUpdate(
         oldText: oldText,
         selection: newSelection,
         composing: newComposing,
       );
     }
+  
+    assert(_textRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText));
 
     final String newText = _replace(oldText, replacementSource, replacementDestinationStart, replacementDestinationEnd);
+
+    assert(_textRangeIsValid(newSelection, newText));
+    assert(_textRangeIsValid(newComposing, newText));
+
     final bool isEqual = oldText == newText;
 
     final bool isDeletionGreaterThanOne = (replacementDestinationEnd - replacementDestinationStart) - (replacementSourceEnd - replacementSourceStart) > 1;
