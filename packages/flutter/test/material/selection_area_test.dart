@@ -19,17 +19,17 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        expect(region.selectionControls, materialTextSelectionControls);
+        expect(region.selectionControls, materialTextSelectionHandleControls);
         break;
       case TargetPlatform.iOS:
-        expect(region.selectionControls, cupertinoTextSelectionControls);
+        expect(region.selectionControls, cupertinoTextSelectionHandleControls);
         break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(region.selectionControls, desktopTextSelectionControls);
+        expect(region.selectionControls, desktopTextSelectionHandleControls);
         break;
       case TargetPlatform.macOS:
-        expect(region.selectionControls, cupertinoDesktopTextSelectionControls);
+        expect(region.selectionControls, cupertinoDesktopTextSelectionHandleControls);
         break;
     }
   }, variant: TargetPlatformVariant.all());
