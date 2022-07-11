@@ -12,8 +12,8 @@ void main() {
       fill: 0.0,
       weight: 400.0,
       grade: 0.0,
-      opticalSize: 48.0, 
-      color: Color(0xAAAAAAAA), 
+      opticalSize: 48.0,
+      color: Color(0xAAAAAAAA),
       opacity: 0.5
     );
 
