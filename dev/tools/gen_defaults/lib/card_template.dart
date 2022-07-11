@@ -5,13 +5,13 @@
 import 'template.dart';
 
 class CardTemplate extends TokenTemplate {
-  const CardTemplate(super.fileName, super.tokens);
+  const CardTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
   String generate() => '''
 // Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends CardTheme {
-  const _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends CardTheme {
+  const _${blockName}DefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: ${elevation("md.comp.elevated-card.container")},

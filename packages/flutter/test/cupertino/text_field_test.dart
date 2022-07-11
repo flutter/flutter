@@ -702,40 +702,6 @@ void main() {
     expect(editableText.cursorOffset, const Offset(-2.0 / 3.0, 0));
   });
 
-  testWidgets('Cursor animates', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const CupertinoApp(
-        home: CupertinoTextField(),
-      ),
-    );
-
-    final Finder textFinder = find.byType(CupertinoTextField);
-    await tester.tap(textFinder);
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorColor!.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(renderEditable.cursorColor!.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor!.alpha, 110);
-
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor!.alpha, 16);
-    await tester.pump(const Duration(milliseconds: 50));
-
-    expect(renderEditable.cursorColor!.alpha, 0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
-
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -3046,7 +3012,7 @@ void main() {
 
     // Selection should stay the same since it is set on tap up for mobile platforms.
     await touchGesture.down(gPos);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
     expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
 
