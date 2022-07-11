@@ -161,7 +161,7 @@ class FilledButton extends ButtonStyleButton {
   /// A static convenience method that constructs a filled button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor], and [disabledForeground] colors are used to create a
+  /// The [foregroundColor], and [disabledForegroundColor] colors are used to create a
   /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value. The
   /// [backgroundColor] and [disabledBackgroundColor] are used to create a
   /// [MaterialStateProperty] [ButtonStyle.backgroundColor] value.
