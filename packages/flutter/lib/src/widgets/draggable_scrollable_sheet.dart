@@ -369,7 +369,8 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// Defines a duration for the snap animations.
   ///
   /// If it's not set, then the animation duration is the distance to the snap
-  /// target divided by the velocity of the widget.
+  /// target divided by the velocity of the widget. A negative or zero or less
+  /// than 1 millisecond duration is also considered as not set.
   final Duration? snapAnimationDuration;
 
   /// A controller that can be used to programmatically control this sheet.
@@ -1084,8 +1085,7 @@ class _SnappingSimulation extends Simulation {
   }) {
     _pixelSnapSize = _getSnapSize(initialVelocity, pixelSnapSize);
 
-    // The duration of the snap animation is defined.
-    if(snapAnimationDuration != null) {
+    if (snapAnimationDuration != null && snapAnimationDuration.inMilliseconds > 0) {
        velocity = (_pixelSnapSize - position) * 1000 / snapAnimationDuration.inMilliseconds;
     }
     // Check the direction of the target instead of the sign of the velocity because

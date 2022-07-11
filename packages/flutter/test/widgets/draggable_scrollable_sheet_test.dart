@@ -489,8 +489,9 @@ void main() {
 
   for (final Duration? snapAnimationDuration in <Duration?>[null, const Duration(seconds: 2)]) {
     testWidgets(
-        'Zero velocity drag snaps to nearest snap target with snapAnimationDuration: $snapAnimationDuration',
-        (WidgetTester tester) async {
+      'Zero velocity drag snaps to nearest snap target with '
+      'snapAnimationDuration: $snapAnimationDuration',
+      (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       await tester.pumpWidget(boilerplateWidget(null,
