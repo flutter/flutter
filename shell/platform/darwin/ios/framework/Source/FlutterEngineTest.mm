@@ -6,6 +6,8 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import <objc/runtime.h>
+
 #import "flutter/common/settings.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
@@ -259,6 +261,34 @@ FLUTTER_ASSERT_ARC
                                }];
   });
   [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
+- (void)testThreadPrioritySetCorrectly {
+  XCTestExpectation* prioritiesSet = [self expectationWithDescription:@"prioritiesSet"];
+  prioritiesSet.expectedFulfillmentCount = 3;
+
+  IMP mockSetThreadPriority =
+      imp_implementationWithBlock(^(NSThread* thread, double threadPriority) {
+        if ([thread.name hasSuffix:@".ui"]) {
+          XCTAssertEqual(threadPriority, 1.0);
+          [prioritiesSet fulfill];
+        } else if ([thread.name hasSuffix:@".raster"]) {
+          XCTAssertEqual(threadPriority, 1.0);
+          [prioritiesSet fulfill];
+        } else if ([thread.name hasSuffix:@".io"]) {
+          XCTAssertEqual(threadPriority, 0.5);
+          [prioritiesSet fulfill];
+        }
+      });
+  Method method = class_getInstanceMethod([NSThread class], @selector(setThreadPriority:));
+  IMP originalSetThreadPriority = method_getImplementation(method);
+  method_setImplementation(method, mockSetThreadPriority);
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine run];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+
+  method_setImplementation(method, originalSetThreadPriority);
 }
 
 @end
