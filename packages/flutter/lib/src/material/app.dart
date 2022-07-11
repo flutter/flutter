@@ -480,11 +480,11 @@ class MaterialApp extends StatefulWidget {
   ///
   /// When the theme changes (either by the [theme], [darkTheme] or [themeMode]
   /// parameters changing) it is animated to the new theme over time.
-  /// [themeAnimationDuration] determines how long this animation takes.
+  /// The [themeAnimationDuration] determines how long this animation takes.
   ///
   /// To have the theme change immediately, you can set this to [Duration.zero].
   ///
-  /// The default it is [kThemeAnimationDuration].
+  /// The default is [kThemeAnimationDuration].
   ///
   /// See also:
   ///   [themeAnimationCurve], which defines the curve used for the animation.
@@ -492,7 +492,9 @@ class MaterialApp extends StatefulWidget {
 
   /// The curve to apply when animating theme changes.
   ///
-  /// The default it is [Curves.linear].
+  /// The default is [Curves.linear].
+  ///
+  /// This is ignored if [themeAnimationDuration] is [Duration.zero].
   ///
   /// See also:
   ///   [themeAnimationDuration], which defines how long the animation is.
