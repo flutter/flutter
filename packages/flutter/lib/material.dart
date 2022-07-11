@@ -155,6 +155,7 @@ export 'src/material/text_form_field.dart';
 export 'src/material/text_selection.dart';
 export 'src/material/text_selection_theme.dart';
 export 'src/material/text_selection_toolbar.dart';
+export 'src/material/text_selection_toolbar_buttons_builder.dart';
 export 'src/material/text_selection_toolbar_text_button.dart';
 export 'src/material/text_theme.dart';
 export 'src/material/theme.dart';
