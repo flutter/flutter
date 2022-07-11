@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,15 @@ class MaterialTextEditingLoupe extends StatefulWidget {
 }
 
 class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
-  late Offset loupePosition;
+  // Should _only_ be null on construction. This is because of the animation logic.
+  // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
+  // animations are added when last_build_y != current_build_y, but this condition
+  // is true on the inital render. Thus, this is null for the first frame and the
+  // condition becomes [loupePosition != null && last_build_y != this_build_y].
+  // {@endtemplate}
+  Offset? loupePosition;
+  Timer? _positionShouldBeAnimatedTimer;
+
   Offset extraFocalPointOffset = Offset.zero;
 
   @override
@@ -35,6 +44,11 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
   void dispose() {
     widget.loupeSelectionOverlayInfoBearer
         .removeListener(_determineLoupePositionAndFocalPoint);
+
+    if (_positionShouldBeAnimatedTimer != null) {
+      _positionShouldBeAnimatedTimer!.cancel();
+    }
+
     super.dispose();
   }
 
@@ -62,6 +76,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     // the end of the line. Since the center of the loupe may line up directly with
     // the end of the line, add half the width to the globalXLineEnd, so that half
     // the loupe may overhang the end of the text.
+    // TODO clamp here for RTL
     final double loupeX = selectionInfo.globalXLineEnd != null
         ? math.min(selectionInfo.globalGesturePosition.dx,
             selectionInfo.globalXLineEnd! + (MaterialLoupe._size.width / 2))
@@ -77,6 +92,9 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     final Rect screenBoundsAdjustedLoupeRect =
         LoupeController.shiftWithinBounds(
             bounds: screenRect, rect: unadjustedLoupeRect);
+
+    // Done with the loupe position!
+    final Offset finalLoupePosition = screenBoundsAdjustedLoupeRect.topLeft;
 
     // The insets, from either edge, that the focal point should not point
     // past lest the loupe displays something out of bounds.
@@ -100,24 +118,50 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     // The Y component means that if we are pressed up against the top of the screen,
     // then we should adjust the focal point such that it now points to how far we moved
     // the loupe. screenBoundsAdjustedLoupeRect.top == unadjustedLoupeRect.top for most cases,
-    // but when pressed up agains tthe top of the screen, we adjust the focal point by 
+    // but when pressed up agains tthe top of the screen, we adjust the focal point by
     // the amount that we shifted from our "natural" position.
     final Offset focalPointAdjustmentForScreenBoundsAdjustment = Offset(
         newRelativeFocalPointX,
         screenBoundsAdjustedLoupeRect.top - unadjustedLoupeRect.top);
 
+    // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
+    if (loupePosition != null && finalLoupePosition.dy != loupePosition!.dy) {
+      if (_positionShouldBeAnimatedTimer != null &&
+          _positionShouldBeAnimatedTimer!.isActive) {
+        _positionShouldBeAnimatedTimer!.cancel();
+      }
+
+      _positionShouldBeAnimatedTimer = Timer(
+          MaterialLoupe._verticalAnimationDuration,
+          () => setState(() {
+                _positionShouldBeAnimatedTimer = null;
+              }));
+    }
+
     setState(() {
-      loupePosition = screenBoundsAdjustedLoupeRect.topLeft;
+      loupePosition = finalLoupePosition;
       extraFocalPointOffset = focalPointAdjustmentForScreenBoundsAdjustment;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialLoupe(
+    assert(loupePosition != null,
+        'Loupe position should only be null before the first build.');
+
+    final Widget loupe = MaterialLoupe(
       controller: widget.controller,
       additionalFocalPointOffset: extraFocalPointOffset,
-      position: loupePosition,
+    );
+
+    return AnimatedPositioned(
+      top: loupePosition!.dy,
+      left: loupePosition!.dx,
+      // Only animate if we should be animating.
+      duration: _positionShouldBeAnimatedTimer == null
+          ? Duration.zero
+          : MaterialLoupe._verticalAnimationDuration,
+      child: loupe,
     );
   }
 }
@@ -130,7 +174,6 @@ class MaterialLoupe extends StatelessWidget {
   /// Creates a [Loupe] in the Material style.
   const MaterialLoupe({
     super.key,
-    this.position = Offset.zero,
     this.additionalFocalPointOffset = Offset.zero,
     required this.controller,
   });
@@ -150,99 +193,34 @@ class MaterialLoupe extends StatelessWidget {
 
   final LoupeController controller;
 
-  final Offset position;
   final Offset additionalFocalPointOffset;
 
   static const Duration _verticalAnimationDuration = Duration(milliseconds: 70);
 
   @override
   Widget build(BuildContext context) {
-    return _VerticallyAnimatedPositioned(
-      left: position.dx,
-      top: position.dy,
-      duration: _verticalAnimationDuration,
-      child: Loupe(
-        controller: controller,
-        decoration: const LoupeDecoration(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
-            shadows: _shadows),
-        magnificationScale: _magnification,
-        focalPoint: additionalFocalPointOffset +
-            Offset(
-                0,
-                _kStandardVerticalFocalPointShift -
-                    MaterialLoupe._size.height / 2),
-        size: _size,
-        child: Container(
-          color: _filmColor,
-          child: Center(
-              child: Container(
-            width: 2.5,
-            height: 2.5,
-            decoration:
-                BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-          )),
-        ),
+    return Loupe(
+      controller: controller,
+      decoration: const LoupeDecoration(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
+          shadows: _shadows),
+      magnificationScale: _magnification,
+      focalPoint: additionalFocalPointOffset +
+          Offset(
+              0,
+              _kStandardVerticalFocalPointShift -
+                  MaterialLoupe._size.height / 2),
+      size: _size,
+      child: Container(
+        color: _filmColor,
+        child: Center(
+            child: Container(
+          width: 2.5,
+          height: 2.5,
+          decoration: BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+        )),
       ),
     );
-  }
-}
-
-class _VerticallyAnimatedPositioned extends ImplicitlyAnimatedWidget {
-  const _VerticallyAnimatedPositioned({
-    required this.child,
-    this.left,
-    this.top,
-    required super.duration,
-  }) : super(curve: Curves.linear);
-
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  /// The offset of the child's left edge from the left of the stack.
-  final double? left;
-
-  /// The offset of the child's top edge from the top of the stack.
-  final double? top;
-
-  @override
-  AnimatedWidgetBaseState<_VerticallyAnimatedPositioned> createState() =>
-      _VerticallyAnimatedPositionedState();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DoubleProperty('left', left, defaultValue: null));
-    properties.add(DoubleProperty('top', top, defaultValue: null));
-  }
-}
-
-class _VerticallyAnimatedPositionedState
-    extends AnimatedWidgetBaseState<_VerticallyAnimatedPositioned> {
-  Tween<double>? _top;
-
-  @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _top = visitor(_top, widget.top,
-            (dynamic value) => Tween<double>(begin: value as double))
-        as Tween<double>?;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: widget.left,
-      top: _top?.evaluate(animation),
-      child: widget.child,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(ObjectFlagProperty<Tween<double>>.has('top', _top));
   }
 }

@@ -74,6 +74,12 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// A data class that allows the SelectionOverlay to delegate
 /// the loupe's positioning to the loupe itself, based on the
 /// info in [LoupeSelectionOverlayInfoBearer].
+/// 
+/// 
+/// 2 Issues:
+/// - First handle attempts to go below second handle sux
+/// - globalXLineEnd sux
+/// - RTL
 @immutable
 class LoupeSelectionOverlayInfoBearer {
   const LoupeSelectionOverlayInfoBearer({
@@ -566,10 +572,12 @@ class TextSelectionOverlay {
 
   _loupeController!.show(
     context: context, 
+    // Android Loupe does not show the handles, but cupertino does.
+    below: defaultTargetPlatform == TargetPlatform.iOS ? null : _selectionOverlay._handles!.first,
     builder: (BuildContext context) => _loupeBuilder!(
       context, 
       _loupeController!, 
-      _loupeSelectionOverlayInfoBearer
+      _loupeSelectionOverlayInfoBearer,
     ));
   }
 
