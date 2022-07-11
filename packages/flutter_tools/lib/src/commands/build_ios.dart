@@ -214,7 +214,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     if (isAppStoreUpload) {
       globals.printStatus('To upload to the App Store either:');
       globals.printStatus(
-        '1. Drag and drop the "$relativeOutputPath/*.ipa" bundle into the Apple Transport macOS app https://apps.apple.com/us/app/transporter/id1450874784',
+        '1. Drag and drop the "$relativeOutputPath/*.ipa" bundle into the Apple Transporter macOS app https://apps.apple.com/us/app/transporter/id1450874784',
         indent: 4,
       );
       globals.printStatus(
