@@ -535,9 +535,18 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
-    final ValidationType valid = messages.every((ValidationMessage message) => message.isInformation)
-      ? ValidationType.installed
-      : ValidationType.partial;
+    ValidationType valid;
+    if (messages.every((ValidationMessage message) => message.isInformation)) {
+      valid = ValidationType.installed;
+    } else {
+      // The issues for this validator stem from broken git configuration of the local install;
+      // in that case, make it clear that it is fine to continue, but freshness check/upgrades
+      // won't be supported.
+      valid = ValidationType.partial;
+      messages.add(
+        ValidationMessage(_userMessages.flutterValidatorErrorIntentional),
+      );
+    }
 
     return ValidationResult(
       valid,

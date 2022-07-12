@@ -191,6 +191,10 @@ void main() {
       messages: containsAll(const <ValidationMessage>[
         ValidationMessage.hint('Upstream repository https://github.com/flutter/flutter.git is not the same as FLUTTER_GIT_URL'),
         ValidationMessage('FLUTTER_GIT_URL = https://githubmirror.com/flutter.git'),
+        ValidationMessage(
+          'It is fine to continue if the errors are intentional, however it is '
+          'recommended to use "git" directly to perform update checks and upgrades.'
+        ),
       ]),
     ));
   });
@@ -214,11 +218,17 @@ void main() {
     expect(await flutterValidator.validate(), _matchDoctorValidation(
       validationType: ValidationType.partial,
       statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
-      messages: contains( const ValidationMessage.hint(
-        'Flutter version 1.0.0 on channel unknown at sdk/flutter\n'
-        'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-        "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install."
-      )),
+      messages: containsAll(<ValidationMessage>[
+        const ValidationMessage.hint(
+          'Flutter version 1.0.0 on channel unknown at sdk/flutter\n'
+          'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
+          "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install."
+        ),
+        const ValidationMessage(
+          'It is fine to continue if the errors are intentional, however it is '
+          'recommended to use "git" directly to perform update checks and upgrades.'
+        ),
+      ]),
     ));
   });
 
@@ -241,11 +251,17 @@ void main() {
     expect(await flutterValidator.validate(), _matchDoctorValidation(
       validationType: ValidationType.partial,
       statusInfo: 'Channel beta, 0.0.0-unknown, on Linux, locale en_US.UTF-8',
-      messages: contains(const ValidationMessage.hint(
-        'Flutter version 0.0.0-unknown on channel beta at sdk/flutter\n'
-        'Cannot resolve current version, possibly due to local changes.\n'
-        'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
-      )),
+      messages: containsAll(<ValidationMessage>[
+        const ValidationMessage.hint(
+          'Flutter version 0.0.0-unknown on channel beta at sdk/flutter\n'
+          'Cannot resolve current version, possibly due to local changes.\n'
+          'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
+        ),
+        const ValidationMessage(
+          'It is fine to continue if the errors are intentional, however it is '
+          'recommended to use "git" directly to perform update checks and upgrades.'
+        ),
+      ]),
     ));
   });
 
@@ -293,13 +309,17 @@ void main() {
       expect(await flutterValidator.validate(), _matchDoctorValidation(
         validationType: ValidationType.partial,
         statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
-        messages: contains(
+        messages: containsAll(<ValidationMessage>[
           const ValidationMessage.hint(
             'Upstream repository https://githubmirror.com/flutter.git is not a standard remote.\n'
-            'If this is intentional, set environment variable "FLUTTER_GIT_URL" to '
+            'Set environment variable "FLUTTER_GIT_URL" to '
             'https://githubmirror.com/flutter.git to dismiss this error.'
-          )
-        ),
+          ),
+          const ValidationMessage(
+            'It is fine to continue if the errors are intentional, however it is '
+            'recommended to use "git" directly to perform update checks and upgrades.'
+          ),
+        ]),
       ));
     });
 
@@ -323,10 +343,16 @@ void main() {
       expect(await flutterValidator.validate(), _matchDoctorValidation(
         validationType: ValidationType.partial,
         statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
-        messages: contains(const ValidationMessage.hint(
-          'Unknown upstream repository.\n'
-          'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
-        )),
+        messages: containsAll(<ValidationMessage>[
+          const ValidationMessage.hint(
+            'Unknown upstream repository.\n'
+            'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
+          ),
+          const ValidationMessage(
+            'It is fine to continue if the errors are intentional, however it is '
+            'recommended to use "git" directly to perform update checks and upgrades.'
+          ),
+        ]),
       ));
     });
   });

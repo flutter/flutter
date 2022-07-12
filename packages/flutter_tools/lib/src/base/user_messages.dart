@@ -33,7 +33,7 @@ class UserMessages {
   String flutterUpstreamRepositoryUrlEnvMismatch(String url) => 'Upstream repository $url is not the same as FLUTTER_GIT_URL';
   String flutterUpstreamRepositoryUrlNonStandard(String url) =>
     'Upstream repository $url is not a standard remote.\n'
-    'If this is intentional, set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
+    'Set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
@@ -47,6 +47,9 @@ class UserMessages {
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
       'On Arch: pacman -S lib32-gcc-libs';
+  String get flutterValidatorErrorIntentional =>
+      'It is fine to continue if the errors are intentional, however it is '
+      'recommended to use "git" directly to perform update checks and upgrades.';
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
