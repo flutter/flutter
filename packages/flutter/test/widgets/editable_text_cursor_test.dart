@@ -729,31 +729,17 @@ void main() {
     final EditableTextState editableText = tester.state(find.byType(EditableText));
 
     // Check that the cursor visibility toggles after each blink interval.
-    Future<void> checkCursorBinking() async {
-      final bool initialShowCursor = editableText.cursorCurrentlyVisible;
+    // Or if it's not blinking at all, it stays on.
+    Future<void> checkCursorBlinking({ bool isBlinking = true }) async {
+      final bool initialShowCursor = isBlinking ? editableText.cursorCurrentlyVisible : true;
       await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
-      await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
-      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
-      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
-      await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
-      await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
-    }
-
-    // Check that the cursor no blinking.
-    Future<void> checkCursorNoBlinking() async {
-      const bool initialShowCursor = true;
-      await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval ~/ 10);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
     }
@@ -764,19 +750,19 @@ void main() {
     await tester.pumpAndSettle();
 
     // Before dragging, the cursor should blink.
-    await checkCursorBinking();
+    await checkCursorBlinking();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
 
     // When drag cursor, the cursor shouldn't blink.
-    await checkCursorNoBlinking();
+    await checkCursorBlinking(isBlinking: false);
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
 
     // After dragging, the cursor should blink.
-    await checkCursorBinking();
+    await checkCursorBlinking();
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/30475.
