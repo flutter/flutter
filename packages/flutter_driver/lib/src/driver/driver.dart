@@ -533,7 +533,7 @@ abstract class FlutterDriver {
   /// });
   /// ```
   /// {@end-tool}
-  /// 
+  ///
   Future<void> sendTextInputAction(TextInputAction action,
       {Duration? timeout}) async {
     assert(action != null);
