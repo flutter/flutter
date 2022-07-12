@@ -1038,11 +1038,27 @@ public class FlutterActivityAndFragmentDelegateTest {
     // Verify that the flutterView is visible.
     assertEquals(View.VISIBLE, delegate.flutterView.getVisibility());
     delegate.onStop();
-    // Verify that the flutterView is not visible.
+    // Verify that the flutterView is gone.
     assertEquals(View.GONE, delegate.flutterView.getVisibility());
     delegate.onStart();
     // Verify that the flutterView is visible.
     assertEquals(View.VISIBLE, delegate.flutterView.getVisibility());
+
+    delegate.flutterView.setVisibility(View.INVISIBLE);
+    delegate.onStop();
+    // Verify that the flutterView is gone.
+    assertEquals(View.GONE, delegate.flutterView.getVisibility());
+    delegate.onStart();
+    // Verify that the flutterView is invisible.
+    assertEquals(View.INVISIBLE, delegate.flutterView.getVisibility());
+
+    delegate.flutterView.setVisibility(View.GONE);
+    delegate.onStop();
+    // Verify that the flutterView is gone.
+    assertEquals(View.GONE, delegate.flutterView.getVisibility());
+    delegate.onStart();
+    // Verify that the flutterView is gone.
+    assertEquals(View.GONE, delegate.flutterView.getVisibility());
   }
 
   @Test

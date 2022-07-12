@@ -87,6 +87,7 @@ import java.util.List;
   private boolean isFlutterUiDisplayed;
   private boolean isFirstFrameRendered;
   private boolean isAttached;
+  private Integer previousVisibility;
 
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
@@ -399,7 +400,9 @@ import java.util.List;
     // screen when unlocked. We can work around this by changing the visibility of FlutterView in
     // onStart and onStop.
     // See https://github.com/flutter/flutter/issues/93276
-    flutterView.setVisibility(View.VISIBLE);
+    if (previousVisibility != null) {
+      flutterView.setVisibility(previousVisibility);
+    }
   }
 
   /**
@@ -599,6 +602,7 @@ import java.util.List;
     // screen when unlocked. We can work around this by changing the visibility of FlutterView in
     // onStart and onStop.
     // See https://github.com/flutter/flutter/issues/93276
+    previousVisibility = flutterView.getVisibility();
     flutterView.setVisibility(View.GONE);
   }
 
