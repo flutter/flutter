@@ -157,8 +157,11 @@ abstract class TokenTemplate {
     final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
+        // To avoid unnecessary const warning in the generated code,
+        // don't add a const keyword while it's possible having RoundedRectangleBorder() within another const constructor.
+        // See (BottomAppBarTemplate).
         if (shape['topLeft'] == 0 && shape['topRight'] == 0 && shape['bottomLeft'] == 0 && shape['bottomRight'] == 0) {
-          return 'const RoundedRectangleBorder()';
+          return 'RoundedRectangleBorder()';
         }
         return 'const RoundedRectangleBorder(borderRadius: '
             'BorderRadius.only('

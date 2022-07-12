@@ -105,7 +105,8 @@ class BottomAppBar extends StatefulWidget {
 
   /// The notch that is made for the floating action button.
   ///
-  /// Material 3 doesn't applies any notch, so this property has no effect on [BottomAppBar].
+  /// Material 3 doesn't support the notch, so this property has no effect on [BottomAppBar]
+  /// if [ThemeData.useMaterial3] is true.
   ///
   /// If this property is null then [BottomAppBarTheme.shape] of
   /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
@@ -159,7 +160,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final ThemeData theme = Theme.of(context);
     final bool isMaterial3 = theme.useMaterial3;
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
-    final BottomAppBarTheme defaults = isMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final BottomAppBarTheme defaults = isMaterial3 ? _BottomAppBarDefaultsM3(context) : _BottomAppBarDefaultsM2(context);
 
     final bool hasFab = Scaffold.of(context).hasFloatingActionButton;
     final NotchedShape? notchedShape = widget.shape ?? babTheme.shape ?? defaults.shape;
@@ -258,8 +259,8 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   }
 }
 
-class _DefaultsM2 extends BottomAppBarTheme {
-  const _DefaultsM2(this.context)
+class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
+  const _BottomAppBarDefaultsM2(this.context)
     : super(
       elevation: 8.0,
     );
@@ -283,8 +284,8 @@ class _DefaultsM2 extends BottomAppBarTheme {
 // Token database version: v0_101
 
 // Generated version v0_101
-class _TokenDefaultsM3 extends BottomAppBarTheme {
-  const _TokenDefaultsM3(this.context)
+class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
+  const _BottomAppBarDefaultsM3(this.context)
     : super(
       elevation: 3.0,
       height: 80.0,
