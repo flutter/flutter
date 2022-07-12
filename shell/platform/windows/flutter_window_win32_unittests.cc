@@ -120,8 +120,7 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32 {
   MOCK_METHOD4(OnPointerLeave,
                void(double, double, FlutterPointerDeviceKind, int32_t));
   MOCK_METHOD0(OnSetCursor, void());
-  MOCK_METHOD4(OnScroll,
-               void(double, double, FlutterPointerDeviceKind, int32_t));
+  MOCK_METHOD0(GetScrollOffsetMultiplier, float());
   MOCK_METHOD0(GetDpiScale, float());
   MOCK_METHOD0(IsVisible, bool());
   MOCK_METHOD1(UpdateCursorRect, void(const Rect&));
@@ -325,6 +324,26 @@ TEST(FlutterWindowWin32Test, OnPointerStarSendsDeviceType) {
                           kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                              kDefaultPointerDeviceId);
+}
+
+// Tests that calls to OnScroll in turn calls GetScrollOffsetMultiplier
+// for mapping scroll ticks to pixels.
+TEST(FlutterWindowWin32Test, OnScrollCallsGetScrollOffsetMultiplier) {
+  MockFlutterWindowWin32 win32window;
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  ON_CALL(win32window, GetScrollOffsetMultiplier())
+      .WillByDefault(Return(120.0f));
+  EXPECT_CALL(win32window, GetScrollOffsetMultiplier()).Times(1);
+
+  EXPECT_CALL(delegate,
+              OnScroll(_, _, 0, 0, 120.0f, kFlutterPointerDeviceKindMouse,
+                       kDefaultPointerDeviceId))
+      .Times(1);
+
+  win32window.OnScroll(0.0f, 0.0f, kFlutterPointerDeviceKindMouse,
+                       kDefaultPointerDeviceId);
 }
 
 }  // namespace testing
