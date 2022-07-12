@@ -684,7 +684,6 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly

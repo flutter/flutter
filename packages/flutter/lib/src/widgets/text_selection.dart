@@ -276,10 +276,6 @@ class TextSelectionOverlay {
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
-       assert(
-           selectionControls is! TextSelectionHandleControls || buildContextMenu != null,
-           'Either specify the context menu via TextSelectionControls or buildContextMenu',
-       ),
        _handlesVisible = handlesVisible,
        _value = value {
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);

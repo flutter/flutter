@@ -224,7 +224,6 @@ class SelectableText extends StatefulWidget {
           data != null,
           'A non-null String must be provided to a SelectableText widget.',
         ),
-        assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
         textSpan = null;
 
   /// Creates a selectable text widget with a [TextSpan].
@@ -280,7 +279,6 @@ class SelectableText extends StatefulWidget {
       textSpan != null,
       'A non-null TextSpan must be provided to a SelectableText.rich widget.',
     ),
-    assert(buildContextMenu == null || toolbarOptions == null, 'toolbarOptions is deprecated, use only buildContextMenu.'),
     data = null;
 
   /// The text to display.
