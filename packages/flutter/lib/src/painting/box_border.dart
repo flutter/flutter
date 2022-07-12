@@ -569,7 +569,7 @@ class Border extends BoxBorder {
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
               break;
             case BoxShape.rectangle:
-              if (borderRadius != null) {
+              if (borderRadius != null && borderRadius != BorderRadius.zero) {
                 BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
                 return;
               }
@@ -927,7 +927,7 @@ class BorderDirectional extends BoxBorder {
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
               break;
             case BoxShape.rectangle:
-              if (borderRadius != null) {
+              if (borderRadius != null && borderRadius != BorderRadius.zero) {
                 BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
                 return;
               }
