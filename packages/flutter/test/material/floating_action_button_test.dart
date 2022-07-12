@@ -141,7 +141,6 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
             tooltip: 'Add',
           ),
         ),
@@ -215,7 +214,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            
           ),
         ),
       ),
@@ -230,7 +229,6 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
             disabledElevation: 0,
           ),
         ),
@@ -245,7 +243,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            
           ),
         ),
       ),
@@ -255,7 +253,6 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
             disabledElevation: 3.0,
           ),
         ),
@@ -301,7 +298,7 @@ void main() {
         theme: material3Theme,
         home: const Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            
           ),
         ),
       ),
@@ -380,7 +377,6 @@ void main() {
             floatingActionButton: FloatingActionButton(
               key: key1,
               mini: true,
-              onPressed: null,
             ),
           ),
         ),
@@ -398,7 +394,6 @@ void main() {
             floatingActionButton: FloatingActionButton(
               key: key2,
               mini: true,
-              onPressed: null,
             ),
           ),
         ),
@@ -413,7 +408,7 @@ void main() {
       MaterialApp(
         theme: material3Theme,
         home: const Scaffold(
-          floatingActionButton: FloatingActionButton(onPressed: null),
+          floatingActionButton: FloatingActionButton(),
         ),
       ),
     );
@@ -445,7 +440,6 @@ void main() {
               child: Text('label'),
             ),
             icon: Icon(Icons.android),
-            onPressed: null,
           ),
         ),
       ),
@@ -502,7 +496,6 @@ void main() {
               width: 100.0,
               child: Text('label'),
             ),
-            onPressed: null,
           ),
         ),
       ),
@@ -541,10 +534,10 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               theContext = context;
-              return const FloatingActionButton(heroTag: 1, onPressed: null);
+              return const FloatingActionButton(heroTag: 1);
             },
           ),
-          floatingActionButton: const FloatingActionButton(heroTag: 2, onPressed: null),
+          floatingActionButton: const FloatingActionButton(heroTag: 2),
         ),
       ),
     );
@@ -564,10 +557,10 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               theContext = context;
-              return const FloatingActionButton(onPressed: null);
+              return const FloatingActionButton();
             },
           ),
-          floatingActionButton: const FloatingActionButton(onPressed: null),
+          floatingActionButton: const FloatingActionButton(),
         ),
       ),
     );
@@ -588,10 +581,10 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               theContext = context;
-              return const FloatingActionButton(heroTag: 'xyzzy', onPressed: null);
+              return const FloatingActionButton(heroTag: 'xyzzy');
             },
           ),
-          floatingActionButton: const FloatingActionButton(heroTag: 'xyzzy', onPressed: null),
+          floatingActionButton: const FloatingActionButton(heroTag: 'xyzzy'),
         ),
       ),
     );
@@ -647,7 +640,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: FloatingActionButton(
-            onPressed: null,
             child: Icon(Icons.add, semanticLabel: 'Add'),
           ),
         ),
@@ -879,7 +871,6 @@ void main() {
           body: Align(
             alignment: Alignment.topLeft,
             child: FloatingActionButton(
-              onPressed: null,
               child: Icon(Icons.add),
             ),
           ),
@@ -994,7 +985,6 @@ void main() {
           floatingActionButton: FloatingActionButton.small(
             key: key,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onPressed: null,
           ),
         ),
       ),
@@ -1010,7 +1000,6 @@ void main() {
         home: Scaffold(
           floatingActionButton: FloatingActionButton.large(
             key: key,
-            onPressed: null,
           ),
         ),
       ),
@@ -1136,7 +1125,7 @@ void main() {
           theme: material2Theme,
           home: const Scaffold(
             floatingActionButton: FloatingActionButton(
-              onPressed: null,
+              
             ),
           ),
         ),
@@ -1210,7 +1199,7 @@ void main() {
         MaterialApp(
           theme: material2Theme,
           home: const Scaffold(
-            floatingActionButton: FloatingActionButton(onPressed: null),
+            floatingActionButton: FloatingActionButton(),
           ),
         ),
       );
@@ -1240,7 +1229,6 @@ void main() {
                 child: Text('label'),
               ),
               icon: Icon(Icons.android),
-              onPressed: null,
             ),
           ),
         ),
@@ -1294,7 +1282,6 @@ void main() {
                 width: 100.0,
                 child: Text('label'),
               ),
-              onPressed: null,
             ),
           ),
         ),
