@@ -197,7 +197,7 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
   late AnimationController _ioAnimationController;
   late Animation<double> _ioAnimation;
 
-  @override 
+  @override
   void initState() {
     _ioAnimationController = AnimationController(
       value: 0,

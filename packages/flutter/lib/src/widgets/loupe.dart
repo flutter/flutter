@@ -383,7 +383,8 @@ class _LoupeState extends State<Loupe> {
 
   // Runs the animation in the desired direction, then, when the animation is
   // complete, signals to the controller that the animation is complete.
-  void _onAnimateTransitionRequest(AnimationStatus animationStatus) async {
+  Future<void> _onAnimateTransitionRequest(
+      AnimationStatus animationStatus) async {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
@@ -462,30 +463,27 @@ class _LoupeStyle extends StatelessWidget {
 /// The negative space of the donut is clipped out (the donut hole, outside the donut).
 /// Rhe donut hole is cut out exactly like the shape of the Loupe.
 class _DonutClip extends CustomClipper<Path> {
-  _DonutClip({required this.borderRadius});
+  _DonutClip({required this.shape});
 
-  /// this constant is derrived from [RenderPhysicalShape].
-  /// https://github.com/flutter/flutter/blob/ac7e29a40f9ecf701508f76f0ea91cca9ab147b0/packages/flutter/lib/src/rendering/proxy_box.dart#L2061-L2067
-  static const double _kEstimatedWidestShadowLoupeBounds = 20.0;
+  // A very large clip; will display all but the most
+  // unreasonably large shadows.
+  static const double _kEstimatedWidestShadowLoupeBounds = 90.0;
 
-  /// The border radius of the inner bounds of the shadow.
-  final Radius borderRadius;
+  final ShapeBorder shape;
 
   @override
   Path getClip(Size size) {
     final Path path = Path();
-    final RRect rect =
-        RRect.fromRectAndRadius(Offset.zero & size, borderRadius);
-    path.addRRect(rect);
+    final Rect rect = Offset.zero & size;
+
     path.fillType = PathFillType.evenOdd;
-    final RRect outerRect = rect.inflate(_kEstimatedWidestShadowLoupeBounds);
-    path.addRRect(outerRect);
+    path.addPath(shape.getOuterPath(Offset.zero & size), Offset.zero);
+    path.addRect(rect.inflate(_kEstimatedWidestShadowLoupeBounds));
     return path;
   }
 
   @override
-  bool shouldReclip(_DonutClip oldClipper) =>
-      oldClipper.borderRadius != borderRadius;
+  bool shouldReclip(_DonutClip oldClipper) => oldClipper.shape != shape;
 }
 
 class _Magnifier extends SingleChildRenderObjectWidget {

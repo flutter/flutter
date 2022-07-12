@@ -104,7 +104,6 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
 
     // Adjust the focal point horizontally such that none of the loupe
     // ever points to anything out of bounds.
-    //TODO this could use the line boundries
     final double newGlobalFocalPointX = screenBoundsAdjustedLoupeRect.center.dx
         .clamp(
             selectionInfo.fieldBounds.left + horizontalMaxFocalPointEdgeInsets,
