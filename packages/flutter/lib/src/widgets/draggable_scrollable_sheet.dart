@@ -299,6 +299,7 @@ class DraggableScrollableSheet extends StatefulWidget {
         assert(maxChildSize <= 1.0),
         assert(minChildSize <= initialChildSize),
         assert(initialChildSize <= maxChildSize),
+        assert(snapAnimationDuration == null || snapAnimationDuration > Duration.zero),
         assert(expand != null),
         assert(builder != null);
 
@@ -369,8 +370,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// Defines a duration for the snap animations.
   ///
   /// If it's not set, then the animation duration is the distance to the snap
-  /// target divided by the velocity of the widget. A negative or zero or less
-  /// than 1 millisecond duration is also considered as not set.
+  /// target divided by the velocity of the widget.
   final Duration? snapAnimationDuration;
 
   /// A controller that can be used to programmatically control this sheet.
