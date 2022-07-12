@@ -102,7 +102,7 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the selection range\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the selection range: TextSelection.collapsed\(offset: 3, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)')));
       expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: 1 of length: 1\b')));
     });
 
@@ -141,7 +141,7 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the delta range\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the delta range: TextRange\(start: 0, end: 5\)(?!\w)')));
       expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text:  of length: 0\b')));
     });
 
@@ -180,7 +180,7 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the selection range\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the selection range: TextSelection.collapsed\(offset: 6, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)')));
       expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: hello of length: 5\b')));
     });
 
@@ -219,7 +219,7 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the composing rangesss\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the composing range: TextRange\(start: 0, end: 6\)(?!\w)')));
       expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: world of length: 5\b')));
     });
   });
