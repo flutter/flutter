@@ -57,6 +57,19 @@ void main() {
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
+
+    test('Verify invalid TextEditingDeltaInsertion fails to apply', () {
+      const TextEditingDeltaInsertion delta = 
+              TextEditingDeltaInsertion(
+                oldText: 'hello worl', 
+                textInserted: 'd', 
+                insertionOffset: 11, 
+                selection: TextSelection.collapsed(offset: 11), 
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
+    });
   });
 
   group('TextEditingDeltaDeletion', () {
@@ -108,6 +121,18 @@ void main() {
       expect(delta.deletedRange, expectedDeletedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
+    });
+
+    test('Verify invalid TextEditingDeltaDeletion fails to apply', () {
+      const TextEditingDeltaDeletion delta = 
+              TextEditingDeltaDeletion(
+                oldText: 'hello world', 
+                deletedRange: TextRange(start: 5, end: 12),
+                selection: TextSelection.collapsed(offset: 5), 
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
     });
   });
 
@@ -189,6 +214,19 @@ void main() {
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
+
+    test('Verify invalid TextEditingDeltaReplacement fails to apply', () {
+      const TextEditingDeltaReplacement delta = 
+              TextEditingDeltaReplacement(
+                oldText: 'hello worl', 
+                replacementText: 'world', 
+                replacedRange: TextRange(start: 5, end: 11), 
+                selection: TextSelection.collapsed(offset: 11), 
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
+    });
   });
 
   group('TextEditingDeltaNonTextUpdate', () {
@@ -212,6 +250,17 @@ void main() {
       expect(delta.oldText, 'hello world');
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
+    });
+
+    test('Verify invalid TextEditingDeltaNonTextUpdate fails to apply', () {
+      const TextEditingDeltaNonTextUpdate delta = 
+              TextEditingDeltaNonTextUpdate(
+                oldText: 'hello world', 
+                selection: TextSelection.collapsed(offset: 12), 
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
     });
   });
 }
