@@ -5,6 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'default_text_selection_toolbar.dart';
 import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
@@ -151,7 +152,7 @@ class TextFormField extends FormField<String> {
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
-    EditableTextToolbarBuilder? buildContextMenu,
+    EditableTextToolbarBuilder? buildContextMenu = _defaultBuildContextMenu,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -250,6 +251,17 @@ class TextFormField extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
+  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return DefaultTextSelectionToolbar(
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      editableTextState: editableTextState,
+      buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+        editableTextState,
+      ),
+    );
+  }
 
   @override
   FormFieldState<String> createState() => _TextFormFieldState();

@@ -292,6 +292,9 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   )
   static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
     final ToolbarOptions toolbarOptions = editableTextState.widget.toolbarOptions;
+    if (toolbarOptions == const ToolbarOptions()) {
+      return null;
+    }
     return <ContextMenuButtonData>[
       if (toolbarOptions.cut
           && TextSelectionToolbarButtonDatasBuilder.canCut(editableTextState))
