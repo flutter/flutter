@@ -2074,6 +2074,9 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate_unittests.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/program_metadata.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
