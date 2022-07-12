@@ -37,8 +37,8 @@ bool _debugTextRangeIsValid(TextRange range, String text) {
     return true;
   }
 
-  return ((range.start >= 0 && range.start <= text.length)
-                            && (range.end >= 0 && range.end <= text.length));
+  return (range.start >= 0 && range.start <= text.length)
+                            && (range.end >= 0 && range.end <= text.length);
 }
 
 /// A structure representing a granular change that has occurred to the editing
