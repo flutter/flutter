@@ -148,7 +148,6 @@ class MigrateUtils {
         );
       }
     }
-    print(error);
     checkForErrors(result, commandDescription: cmdArgs.join(' '), silent: true);
 
     if (legacyNameParameter) {

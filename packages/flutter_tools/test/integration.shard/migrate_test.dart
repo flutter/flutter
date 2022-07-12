@@ -44,42 +44,10 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> commitChanges() async {
-    await processManager.run(<String>[
-      'git',
-      'add',
-      '.',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'commit',
-      '-m',
-      '"Initial commit"',
-    ], workingDirectory: tempDir.path);
-  }
-
-  Future<void> installProject(String verison, {bool vanilla = true, String main}) async {
-    final MigrateProject project = MigrateProject(verison, vanilla: vanilla, main: main);
-    await project.setUpIn(tempDir);
-
-    // Init a git repo to test uncommitted changes checks
-    await processManager.run(<String>[
-      'git',
-      'init',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'checkout',
-      '-b',
-      'master',
-    ], workingDirectory: tempDir.path);
-    await commitChanges();
-  }
-
   // Migrates a clean untouched app generated with flutter create
   testUsingContext('vanilla migrate process succeeds', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    await installProject('version:1.22.6_stable');
+    await MigrateProject.installProject('version:1.22.6_stable', tempDir);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     ProcessResult result = await processManager.run(<String>[
@@ -132,7 +100,7 @@ void main() {
   // Migrates a clean untouched app generated with flutter create
   testUsingContext('vanilla migrate builds', () async {
     // Flutter Stable 2.0.0 hash: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a
-    await installProject('version:2.0.0_stable', main: '''
+    await MigrateProject.installProject('version:2.0.0_stable', tempD main: '''
 import 'package:flutter/material.dart';
 
 void main() {
@@ -205,7 +173,7 @@ class MyApp extends StatelessWidget {
     expect(manifestFile.existsSync(), false);
 
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    await installProject('version:1.22.6_stable');
+    await MigrateProject.installProject('version:1.22.6_stable', tempDir);
 
     // Initialized repo fails.
     result = await processManager.run(<String>[
@@ -233,7 +201,7 @@ class MyApp extends StatelessWidget {
 
   testUsingContext('migrate compute', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    await installProject('version:1.22.6_stable');
+    await MigrateProject.installProject('version:1.22.6_stable', tempDir);
 
     final FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
     final FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
@@ -257,7 +225,7 @@ class MyApp extends StatelessWidget {
   // Migrates a user-modified app
   testUsingContext('modified migrate process succeeds', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    await installProject('version:1.22.6_stable', vanilla: false);
+    await MigrateProject.installProject('version:1.22.6_stable', tempDir, vanilla: false);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     ProcessResult result = await processManager.run(<String>[
