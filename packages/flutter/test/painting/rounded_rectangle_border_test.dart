@@ -151,7 +151,7 @@ void main() {
     expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
   });
 
-  test('RoundedRectangleBorder when borderRadius is 0 and strokeAlign is not inside', () {
+  test('RoundedRectangleBorder when borderRadius is 0 and strokeAlign is not StrokeAlign.inside', () {
     const RoundedRectangleBorder centerBorder = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center));
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
     expect(
