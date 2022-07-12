@@ -1,4 +1,4 @@
-Signature: 4d4173fffac9864e6795646152da3197
+Signature: 85881142c19a61cc418188512217af3e
 
 UNUSED LICENSES:
 
@@ -2438,7 +2438,7 @@ FILE: ../../../third_party/skia/src/sfnt/SkOTUtils.cpp
 FILE: ../../../third_party/skia/src/sfnt/SkOTUtils.h
 FILE: ../../../third_party/skia/src/sfnt/SkPanose.h
 FILE: ../../../third_party/skia/src/sfnt/SkSFNTHeader.h
-FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderPriv.h
+FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderBase.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkLinearGradient.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkLinearGradient.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkRadialGradient.cpp
@@ -5636,6 +5636,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
 FILE: ../../../third_party/skia/src/shaders/SkEmptyShader.cpp
+FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderBase.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetComputeShaderMainParams.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
@@ -6118,7 +6119,6 @@ FILE: ../../../third_party/skia/src/core/SkEnumerate.h
 FILE: ../../../third_party/skia/src/core/SkGlyphBuffer.cpp
 FILE: ../../../third_party/skia/src/core/SkGlyphBuffer.h
 FILE: ../../../third_party/skia/src/core/SkPathMakers.h
-FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.h
 FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.cpp
@@ -6181,6 +6181,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkSecondaryCBDrawContext_imp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.h
 FILE: ../../../third_party/skia/src/image/SkSurface_GpuMtl.mm
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.cpp
+FILE: ../../../third_party/skia/src/text/StrikeForGPU.h
 FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.cpp
 FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.h
 FILE: ../../../third_party/skia/src/utils/SkClipStackUtils.cpp
