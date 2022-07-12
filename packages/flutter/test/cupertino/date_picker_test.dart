@@ -1628,8 +1628,8 @@ void main() {
       ),
     );
 
+    // Drag picker minutes to min date
     await tester.drag(find.text('40'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false);
-    await tester.pump(); // Once to trigger the post frame animate call.
     await tester.pumpAndSettle();
 
     // Returns to min date.
@@ -1638,8 +1638,8 @@ void main() {
       DateTime(2022, 6, 14, 3, 35),
     );
 
+    // Drag picker minutes to max date
     await tester.drag(find.text('50'), const Offset(0.0, -64.0), touchSlopY: 0.0, warnIfMissed: false);
-    await tester.pump(); // Once to trigger the post frame animate call.
     await tester.pumpAndSettle();
 
     // Returns to max date.
