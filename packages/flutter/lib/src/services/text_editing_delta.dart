@@ -37,11 +37,8 @@ bool _debugTextRangeIsValid(TextRange range, String text) {
     return true;
   }
 
-  if ((range.start >= 0 && range.start <= text.length) && (range.end >= 0 && range.end <= text.length)) {
-    return true;
-  }
-
-  return false;
+  return ((range.start >= 0 && range.start <= text.length)
+                            && (range.end >= 0 && range.end <= text.length));
 }
 
 /// A structure representing a granular change that has occurred to the editing
@@ -137,8 +134,8 @@ abstract class TextEditingDelta {
     );
 
     if (isNonTextUpdate) {
-      assert(_debugTextRangeIsValid(newSelection, oldText), 'TextEditingDelta.fromJSON failed, the selection range: $newSelection is not within the bounds of text: $oldText of length: ${oldText.length}');
-      assert(_debugTextRangeIsValid(newComposing, oldText), 'TextEditingDelta.fromJSON failed, the composing range: $newComposing is not within the bounds of text: $oldText of length: ${oldText.length}');
+      assert(_debugTextRangeIsValid(newSelection, oldText), 'The selection range: $newSelection is not within the bounds of text: $oldText of length: ${oldText.length}');
+      assert(_debugTextRangeIsValid(newComposing, oldText), 'The composing range: $newComposing is not within the bounds of text: $oldText of length: ${oldText.length}');
 
       return TextEditingDeltaNonTextUpdate(
         oldText: oldText,
@@ -147,12 +144,12 @@ abstract class TextEditingDelta {
       );
     }
 
-    assert(_debugTextRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText), 'TextEditingDelta.fromJSON failed, the delta range: ${TextRange(start: replacementSourceStart, end: replacementSourceEnd)} is not within the bounds of text: $oldText of length: ${oldText.length}');
+    assert(_debugTextRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText), 'The delta range: ${TextRange(start: replacementSourceStart, end: replacementSourceEnd)} is not within the bounds of text: $oldText of length: ${oldText.length}');
 
     final String newText = _replace(oldText, replacementSource, TextRange(start: replacementDestinationStart, end: replacementDestinationEnd));
 
-    assert(_debugTextRangeIsValid(newSelection, newText), 'TextEditingDelta.fromJSON failed, the selection range: $newSelection is not within the bounds of text: $newText of length: ${newText.length}');
-    assert(_debugTextRangeIsValid(newComposing, newText), 'TextEditingDelta.fromJSON failed, the composing range: $newComposing is not within the bounds of text: $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(newSelection, newText), 'The selection range: $newSelection is not within the bounds of text: $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(newComposing, newText), 'The composing range: $newComposing is not within the bounds of text: $newText of length: ${newText.length}');
 
     final bool isEqual = oldText == newText;
 
