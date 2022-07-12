@@ -100,7 +100,7 @@ AndroidShellHolder::AndroidShellHolder(
   host_config.io_config = fml::Thread::ThreadConfig(
       flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
           flutter::ThreadHost::Type::IO, thread_label),
-      fml::Thread::ThreadPriority::BACKGROUND);
+      fml::Thread::ThreadPriority::NORMAL);
 
   thread_host_ = std::make_shared<ThreadHost>(host_config);
 
