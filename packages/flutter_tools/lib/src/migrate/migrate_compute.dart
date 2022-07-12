@@ -382,7 +382,7 @@ abstract class MigrateFlutterProject {
   final String iosLanguage;
   final List<SupportedPlatform>? platformWhitelist;
 
-  /// Run git diff over each matching pair of files in the base reference app and target reference app.
+  /// Run git diff over each matching pair of files in the this project and the provided target project.
   Future<Map<String, DiffResult>> diff(
     MigrateContext context,
     MigrateFlutterProject other,
