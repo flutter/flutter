@@ -404,16 +404,19 @@ class _LoupeState extends State<Loupe> {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        Opacity(
-          opacity: widget.decoration.opacity,
-          child: _Magnifier(
-              focalPoint: widget.focalPoint,
-              shape: widget.decoration.shape,
-              magnificationScale: widget.magnificationScale,
-              child: SizedBox.fromSize(
-                size: widget.size,
-                child: widget.child,
-              )),
+        ClipPath.shape(
+          shape: widget.decoration.shape,
+          child: Opacity(
+            opacity: widget.decoration.opacity,
+            child: _Magnifier(
+                focalPoint: widget.focalPoint,
+                shape: widget.decoration.shape,
+                magnificationScale: widget.magnificationScale,
+                child: SizedBox.fromSize(
+                  size: widget.size,
+                  child: widget.child,
+                )),
+          ),
         ),
         Opacity(
           opacity: widget.decoration.opacity,
@@ -567,70 +570,19 @@ class _RenderMagnification extends RenderProxyBox {
   }
 
   @override
-  _MagnificationLayer? get layer => super.layer as _MagnificationLayer?;
+  BackdropFilterLayer? get layer => super.layer as BackdropFilterLayer?;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (layer == null) {
-      layer = _MagnificationLayer(
-          size: size,
-          globalPosition: offset,
-          focalPoint: focalPoint,
-          clip: clip,
-          magnificationScale: magnificationScale);
-    } else {
-      layer!
-        ..magnificationScale = magnificationScale
-        ..size = size
-        ..globalPosition = offset
-        ..focalPoint = focalPoint;
-    }
-
-    BackdropFilterLayer()
-    context.pushLayer(layer!, super.paint, offset);
-  }
-}
-
-class _MagnificationLayer extends ContainerLayer {
-  _MagnificationLayer(
-      {required this.size,
-      required this.globalPosition,
-      required this.clip,
-      required this.focalPoint,
-      required this.magnificationScale});
-
-  Offset globalPosition;
-  Size size;
-
-  Offset focalPoint;
-  double magnificationScale;
-
-  CustomClipper<Path>? clip;
-
-  ClipPathEngineLayer? _clipPathEngineLayer;
-  BackdropFilterEngineLayer? _backdropFilterLayer;
-
-  @override
-  void addToScene(SceneBuilder builder) {
-    _clipPathEngineLayer = builder.pushClipPath(
-        clip!.getClip(size).shift(globalPosition),
-        oldLayer: _clipPathEngineLayer);
-
-    // Create and push transform.
-    final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
+    final Offset thisCenter = Alignment.center.alongSize(size) + offset;
     final Matrix4 matrix = Matrix4.identity()
       ..translate(
           magnificationScale * (focalPoint.dx - thisCenter.dx) + thisCenter.dx,
           magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
 
-    _backdropFilterLayer = builder.pushBackdropFilter(
-        ImageFilter.matrix(matrix.storage),
-        oldLayer: _backdropFilterLayer);
+    layer = BackdropFilterLayer(filter: ImageFilter.matrix(matrix.storage));
 
-    builder.pop();
-
-    super.addToScene(builder);
-    builder.pop();
+    context.pushLayer(layer!, super.paint, offset);
   }
 }

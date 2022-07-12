@@ -684,11 +684,11 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
-      _showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+      _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
-      ));
+      );
 
       _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: false);
       return;
