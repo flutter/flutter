@@ -523,7 +523,8 @@ abstract class FlutterDriver {
   ///
   /// Example:
   /// {@tool snippet}
-  /// ```
+  ///
+  /// ```dart
   /// test('submit text in a text field', () async {
   ///   var textField = find.byValueKey('enter-text-field');
   ///   await driver.tap(textField);  // acquire focus
