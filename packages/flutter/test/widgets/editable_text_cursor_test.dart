@@ -731,7 +731,10 @@ void main() {
     // Check that the cursor visibility toggles after each blink interval.
     // Or if it's not blinking at all, it stays on.
     Future<void> checkCursorBlinking({ bool isBlinking = true }) async {
-      final bool initialShowCursor = isBlinking ? editableText.cursorCurrentlyVisible : true;
+      bool initialShowCursor = true;
+      if (isBlinking) {
+        initialShowCursor = editableText.cursorCurrentlyVisible;
+      }
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval);
