@@ -26,24 +26,22 @@ TextAffinity? _toTextAffinity(String? affinity) {
 
 // Replaces a range of text in the original string with the text given in the
 // replacement string.
-String _replace(String originalText, String replacementText, int start, int end) {
-  assert(_textRangeIsValid(TextRange(start: start, end: end), originalText));
-  final String textStart = originalText.substring(0, start);
-  final String textEnd = originalText.substring(end, originalText.length);
-  final String newText = textStart + replacementText + textEnd;
-  return newText;
+String _replace(String originalText, String replacementText, TextRange replacementRange) {
+  assert(replacementRange.isValid);
+  return originalText.replaceRange(replacementRange.start, replacementRange.end, replacementText);
 }
 
 // Verify that the given range is within the text.
-bool _textRangeIsValid(TextRange range, String text) {
-  if (range.start == -1 && range.end == -1) {
+bool _debugTextRangeIsValid(TextRange range, String text) {
+  if (!range.isValid) {
     return true;
   }
-  assert(range.start >= 0 && range.start <= text.length,
-      'Range start ${range.start} is out of text of length ${text.length}');
-  assert(range.end >= 0 && range.end <= text.length,
-      'Range end ${range.end} is out of text of length ${text.length}');
-  return true;
+
+  if ((range.start >= 0 && range.start <= text.length) && (range.end >= 0 && range.end <= text.length)) {
+    return true;
+  }
+
+  return false;
 }
 
 /// A structure representing a granular change that has occurred to the editing
@@ -139,8 +137,8 @@ abstract class TextEditingDelta {
     );
 
     if (isNonTextUpdate) {
-      assert(_textRangeIsValid(newSelection, oldText));
-      assert(_textRangeIsValid(newComposing, oldText));
+      assert(_debugTextRangeIsValid(newSelection, oldText), 'TextEditingDelta.fromJSON failed, the selection range: $newSelection is not within the bounds of text: $oldText of length: ${oldText.length}');
+      assert(_debugTextRangeIsValid(newComposing, oldText), 'TextEditingDelta.fromJSON failed, the composing range: $newComposing is not within the bounds of text: $oldText of length: ${oldText.length}');
 
       return TextEditingDeltaNonTextUpdate(
         oldText: oldText,
@@ -149,12 +147,12 @@ abstract class TextEditingDelta {
       );
     }
 
-    assert(_textRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText));
+    assert(_debugTextRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText), 'TextEditingDelta.fromJSON failed, the delta range ${TextRange(start: replacementSourceStart, end: replacementSourceEnd)} is not within the bounds of text: $oldText of length: ${oldText.length}');
 
-    final String newText = _replace(oldText, replacementSource, replacementDestinationStart, replacementDestinationEnd);
+    final String newText = _replace(oldText, replacementSource, TextRange(start: replacementDestinationStart, end: replacementDestinationEnd));
 
-    assert(_textRangeIsValid(newSelection, newText));
-    assert(_textRangeIsValid(newComposing, newText));
+    assert(_debugTextRangeIsValid(newSelection, newText), 'TextEditingDelta.fromJSON failed, the selection range: $newSelection is not within the bounds of text: $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(newComposing, newText), 'TextEditingDelta.fromJSON failed, the composing range: $newComposing is not within the bounds of text: $newText of length: ${newText.length}');
 
     final bool isEqual = oldText == newText;
 
@@ -287,7 +285,10 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, textInserted, insertionOffset, insertionOffset);
+    assert(_debugTextRangeIsValid(TextRange.collapsed(insertionOffset), newText), 'Applying TextEditingDeltaInsertion failed, the insertionOffset: $insertionOffset is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, textInserted, TextRange.collapsed(insertionOffset));
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaInsertion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaInsertion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -320,7 +321,10 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, '', deletedRange.start, deletedRange.end);
+    assert(_debugTextRangeIsValid(deletedRange, newText), 'Applying TextEditingDeltaDeletion failed, the deletedRange: $deletedRange is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, '', deletedRange);
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaDeletion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaDeletion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -363,7 +367,10 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, replacementText, replacedRange.start, replacedRange.end);
+    assert(_debugTextRangeIsValid(replacedRange, newText), 'Applying TextEditingDeltaReplacement failed, the replacedRange: $replacedRange is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, replacementText, replacedRange);
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaReplacement failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaReplacement failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -394,6 +401,8 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
+    assert(_debugTextRangeIsValid(selection, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the selection range: $selection is not within the bounds of $oldText of length: ${oldText.length}');
+    assert(_debugTextRangeIsValid(composing, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the composing region: $composing is not within the bounds of $oldText of length: ${oldText.length}');
     return TextEditingValue(text: oldText, selection: selection, composing: composing);
   }
 }

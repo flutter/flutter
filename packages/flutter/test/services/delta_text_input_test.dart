@@ -102,8 +102,8 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\brange.start >= 0 && range.start <= text.length\b')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bRange start 3 is out of text of length 1\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the selection range\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: 1 of length: 1\b')));
     });
 
     test('Invalid TextRange fails loudly when being converted to JSON - Faulty deltaStart and deltaEnd', () async {
@@ -141,8 +141,8 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\brange.end >= 0 && range.end <= text.length\b')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bRange end 1 is out of text of length 0\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the delta range\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text:  of length: 0\b')));
     });
 
     test('Invalid TextRange fails loudly when being converted to JSON - Faulty Selection', () async {
@@ -180,8 +180,8 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\brange.start >= 0 && range.start <= text.length\b')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bRange start 6 is out of text of length 5\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the selection range\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: hello of length: 5\b')));
     });
 
     test('Invalid TextRange fails loudly when being converted to JSON - Faulty Composing Region', () async {
@@ -198,13 +198,13 @@ void main() {
           '"oldText": "worl",'
           ' "deltaText": "world",'
           ' "deltaStart": 0,'
-          ' "deltaEnd": 5,'
+          ' "deltaEnd": 4,'
           ' "selectionBase": 5,'
           ' "selectionExtent": 5,'
           ' "selectionAffinity" : "TextAffinity.downstream" ,'
           ' "selectionIsDirectional": false,'
           ' "composingBase": 0,'
-          ' "composingExtent": 5}';
+          ' "composingExtent": 6}';
 
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'method': 'TextInputClient.updateEditingStateWithDeltas',
@@ -219,8 +219,8 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\brange.end >= 0 && range.end <= text.length\b')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bRange end 5 is out of text of length 4\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bTextEditingDelta.fromJSON failed, the composing rangesss\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: world of length: 5\b')));
     });
   });
 }
