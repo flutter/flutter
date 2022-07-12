@@ -404,16 +404,17 @@ class _LoupeState extends State<Loupe> {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        //TODO need to take an opacity
-        // and make it private it is too powerful for the world
-        Magnifier(
-            focalPoint: widget.focalPoint,
-            shape: widget.decoration.shape,
-            magnificationScale: widget.magnificationScale,
-            child: SizedBox.fromSize(
-              size: widget.size,
-              child: widget.child,
-            )),
+        Opacity(
+          opacity: widget.decoration.opacity,
+          child: _Magnifier(
+              focalPoint: widget.focalPoint,
+              shape: widget.decoration.shape,
+              magnificationScale: widget.magnificationScale,
+              child: SizedBox.fromSize(
+                size: widget.size,
+                child: widget.child,
+              )),
+        ),
         Opacity(
           opacity: widget.decoration.opacity,
           child: _LoupeStyle(
@@ -484,11 +485,10 @@ class _DonutClip extends CustomClipper<Path> {
       oldClipper.borderRadius != borderRadius;
 }
 
-class Magnifier extends SingleChildRenderObjectWidget {
-  /// Construct a [Magnifier],
-  Magnifier(
-      {super.key,
-      super.child,
+class _Magnifier extends SingleChildRenderObjectWidget {
+  /// Construct a [_Magnifier],
+  _Magnifier(
+      {super.child,
       ShapeBorder? shape,
       this.magnificationScale = 1,
       this.focalPoint = Offset.zero})
@@ -499,7 +499,7 @@ class Magnifier extends SingleChildRenderObjectWidget {
             : null;
 
   ///  [focalPoint] of the magnifier is the area the center of the
-  /// [Magnifier] points to, relative to the center of the magnifier.
+  /// [_Magnifier] points to, relative to the center of the magnifier.
   /// If left as [Offset.zero], the magnifier will magnify whatever is directly
   /// below it.
   final Offset focalPoint;
@@ -586,6 +586,7 @@ class _RenderMagnification extends RenderProxyBox {
         ..focalPoint = focalPoint;
     }
 
+    BackdropFilterLayer()
     context.pushLayer(layer!, super.paint, offset);
   }
 }
@@ -606,14 +607,14 @@ class _MagnificationLayer extends ContainerLayer {
 
   CustomClipper<Path>? clip;
 
+  ClipPathEngineLayer? _clipPathEngineLayer;
+  BackdropFilterEngineLayer? _backdropFilterLayer;
+
   @override
   void addToScene(SceneBuilder builder) {
-    // If shape is null, can push the most optimized clip, a regular rectangle.
-    if (clip == null) {
-      builder.pushClipRect(globalPosition & size);
-    } else {
-      builder.pushClipPath(clip!.getClip(size).shift(globalPosition));
-    }
+    _clipPathEngineLayer = builder.pushClipPath(
+        clip!.getClip(size).shift(globalPosition),
+        oldLayer: _clipPathEngineLayer);
 
     // Create and push transform.
     final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
@@ -622,7 +623,11 @@ class _MagnificationLayer extends ContainerLayer {
           magnificationScale * (focalPoint.dx - thisCenter.dx) + thisCenter.dx,
           magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
-    builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage));
+
+    _backdropFilterLayer = builder.pushBackdropFilter(
+        ImageFilter.matrix(matrix.storage),
+        oldLayer: _backdropFilterLayer);
+
     builder.pop();
 
     super.addToScene(builder);
