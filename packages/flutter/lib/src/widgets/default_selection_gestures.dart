@@ -350,7 +350,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                     context, 
                     SecondaryTapUpIntent(
                       intents: <Intent>[
-                        SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                        SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),//renderEditable doesn't have focus
                         SelectionToolbarControlIntent.toggle(position: details.globalPosition),
                       ],
                       enabledContext: context,
