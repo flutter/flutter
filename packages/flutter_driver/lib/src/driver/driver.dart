@@ -522,8 +522,8 @@ abstract class FlutterDriver {
   /// This can be called even if the [TestTextInput] has not been [TestTextInput.register]ed.
   ///
   /// Example:
-  ///
-  /// ```dart
+  /// {@tool snippet}
+  /// ```
   /// test('submit text in a text field', () async {
   ///   var textField = find.byValueKey('enter-text-field');
   ///   await driver.tap(textField);  // acquire focus
@@ -532,6 +532,8 @@ abstract class FlutterDriver {
   ///   await driver.sendTextInputAction(TextInputAction.done);  // submit text
   /// });
   /// ```
+  /// {@end-tool}
+  /// 
   Future<void> sendTextInputAction(TextInputAction action,
       {Duration? timeout}) async {
     assert(action != null);
