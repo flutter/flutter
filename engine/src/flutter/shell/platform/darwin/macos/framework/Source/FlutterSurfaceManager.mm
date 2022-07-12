@@ -7,6 +7,8 @@
 #import <Metal/Metal.h>
 #import <OpenGL/gl.h>
 
+#include <algorithm>
+
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
