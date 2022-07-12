@@ -272,8 +272,8 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckEnabled,
-    SpellCheckConfiguration? spellCheckConfiguration,
+    this.spellCheckConfiguration,
+    TextStyle? misspelledTextStyle,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -337,13 +337,9 @@ class CupertinoTextField extends StatefulWidget {
                        selectAll: true,
                        paste: true,
                      ))),
-       spellCheckConfiguration = spellCheckConfiguration ?? 
-          (spellCheckEnabled ?? true
-              ? SpellCheckConfiguration(
-                  misspelledTextStyle: cupertinoMisspelledTextStyle,
-                )
-              : null
-          );
+         misspelledTextStyle = spellCheckConfiguration == null
+            ? null
+            : cupertinoMisspelledTextStyle;
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -441,8 +437,8 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckEnabled,
-    SpellCheckConfiguration? spellCheckConfiguration,
+    this.spellCheckConfiguration,
+    TextStyle? misspelledTextStyle,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -507,13 +503,9 @@ class CupertinoTextField extends StatefulWidget {
                        selectAll: true,
                        paste: true,
                      ))),
-       spellCheckConfiguration = spellCheckConfiguration ?? 
-          (spellCheckEnabled ?? true
-              ? SpellCheckConfiguration(
-                  misspelledTextStyle: cupertinoMisspelledTextStyle,
-                )
-              : null
-          );
+         misspelledTextStyle = spellCheckConfiguration == null
+            ? null
+            : cupertinoMisspelledTextStyle;
 
   /// Controls the text being edited.
   ///
@@ -796,19 +788,11 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// Whether or not to enable default spell check behavior for Cupertino.
-  ///
-  /// This has no effect if [spellCheckConfiguration] is specified; in this case,
-  /// spell check will be enabled and that configuration will be used in place
-  /// of the default for Material.
-  ///
-  /// See also:
-  ///
-  ///  * [EditableTextState], which outlines the default behavior for spell check.
-  final bool? spellCheckEnabled;
-
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// {@macro flutter.widgets.EditableText.misspelledTextStyle}
+  final TextStyle? misspelledTextStyle;
 
   static const TextStyle cupertinoMisspelledTextStyle =
     const TextStyle(
@@ -860,8 +844,8 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('spellCheckEnabled', spellCheckEnabled, defaultValue: null));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('misspelledTextStyle', misspelledTextStyle, defaultValue: null));
   }
 }
 
@@ -1329,6 +1313,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
             spellCheckConfiguration: widget.spellCheckConfiguration,
+            misspelledTextStyle: widget.misspelledTextStyle,
           ),
         ),
       ),

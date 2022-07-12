@@ -165,30 +165,17 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, SpellCheckConfiguration? spellCheckConfiguration}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
     final bool composingRegionOutOfRange = !value.isComposingRangeValid || !withComposing;
-    final bool spellCheckEnabled = spellCheckConfiguration != null &&
-                             spellCheckConfiguration.spellCheckSuggestionsHandler != null &&
-                             spellCheckConfiguration.spellCheckResults != null;
-
-    if (spellCheckEnabled) {
-      return spellCheckConfiguration.spellCheckSuggestionsHandler!
-        .buildTextSpanWithSpellCheckSuggestions(
-          value, 
-          composingRegionOutOfRange,
-          style, 
-          spellCheckConfiguration.misspelledTextStyle, 
-          spellCheckConfiguration.spellCheckResults!
-        );
-    }
 
     if (composingRegionOutOfRange) {
       return TextSpan(style: style, text: text);
     }
+
     final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
         ?? const TextStyle(decoration: TextDecoration.underline);
     return TextSpan(
@@ -571,6 +558,7 @@ class EditableText extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckConfiguration,
+    this.misspelledTextStyle,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -639,6 +627,10 @@ class EditableText extends StatefulWidget {
           && spellCheckConfiguration.spellCheckSuggestionsHandler == null,
           'spellCheckEnabled must not be false if spellCheckService or spellCheckSuggestionsHandler specified'
        ),
+       assert(
+          misspelledTextStyle == null || spellCheckConfiguration != null,
+          'spellCheckConfiguration must be specified if spell check behavior desired'
+      ),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1464,6 +1456,14 @@ class EditableText extends StatefulWidget {
   /// then spell check is disabled by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
 
+  /// {@template flutter.widgets.EditableText.misspelledTextStyle}
+  /// Style used to indicate misspelled words.
+  ///
+  /// This should only be specified if spell check is enabled by specifying a
+  /// [spellCheckConfiguraiton], in which case this should not be null.
+  /// {@endtemplate}
+  final TextStyle? misspelledTextStyle;
+
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -1641,6 +1641,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('misspelledTextStyle', misspelledTextStyle, defaultValue: null));
   }
 }
 
@@ -1682,6 +1683,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
   @visibleForTesting
   bool get spellCheckEnabled => _spellCheckEnabled;
+
+  /// The most up-to-date spell check results for text input.
+  ///
+  /// These results will be updated via calls to spell check through a
+  /// [SpellCheckService] and used by a [SpellCheckSuggestionsHandler] to
+  /// build the [TextSpan] tree for text input and menus for replacement
+  /// suggestions of misspelled words.
+  SpellCheckResults? _spellCheckResults;
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.
@@ -1885,7 +1894,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _spellCheckEnabled = true;
     SpellCheckService? spellCheckService = widget.spellCheckConfiguration!.spellCheckService;
     SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckConfiguration!.spellCheckSuggestionsHandler;
-    TextStyle misspelledTextStyle = widget.spellCheckConfiguration!.misspelledTextStyle;
 
     assert(
       spellCheckService != null
@@ -1901,7 +1909,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       SpellCheckConfiguration(
         spellCheckService: spellCheckService,
         spellCheckSuggestionsHandler: spellCheckSuggestionsHandler,
-        misspelledTextStyle: misspelledTextStyle,
       );
   }
 
@@ -2740,7 +2747,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return;
       }
 
-      _spellCheckConfiguration!.spellCheckResults = SpellCheckResults(text, spellCheckResults);
+      _spellCheckResults = SpellCheckResults(text, spellCheckResults);
       renderEditable.text = buildTextSpan();
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -3607,6 +3614,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       };
       final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
+
       if (breiflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length) {
@@ -3632,13 +3640,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ],
       );
     }
+    final bool spellCheckEnabled = _spellCheckConfiguration != null &&
+                                     _spellCheckConfiguration!.spellCheckSuggestionsHandler != null &&
+                                     _spellCheckResults != null;
+    final bool withComposing = !widget.readOnly && _hasFocus;
+    if (spellCheckEnabled) {
+      // If the composing range is out of range for the current text, ignore it to
+      // preserve the tree integrity, otherwise in release mode a RangeError will
+      // be thrown and this EditableText will be built with a broken subtree.
+      assert(!_value.composing.isValid || !withComposing || _value.isComposingRangeValid);
+
+      final bool composingRegionOutOfRange = !_value.isComposingRangeValid || !withComposing;
+
+      return _spellCheckConfiguration!.spellCheckSuggestionsHandler!
+                .buildTextSpanWithSpellCheckSuggestions(
+                  _value, 
+                  composingRegionOutOfRange,
+                  widget.style, 
+                  widget.misspelledTextStyle!, 
+                  _spellCheckResults!
+      );
+    }      
 
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
       context: context,
       style: widget.style,
-      withComposing: !widget.readOnly && _hasFocus,
-      spellCheckConfiguration: _spellCheckConfiguration,
+      withComposing: withComposing,
     );
   }
 }

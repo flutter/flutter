@@ -16,10 +16,9 @@ import 'package:flutter/services.dart'
 class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
-  SpellCheckConfiguration({
+  const SpellCheckConfiguration({
     this.spellCheckService,
     this.spellCheckSuggestionsHandler,
-    required this.misspelledTextStyle,
   });
 
   /// The service used to fetch spell check results for text input.
@@ -28,17 +27,6 @@ class SpellCheckConfiguration {
   /// The handler used to mark misspelled words in text input and display
   /// a menu of the replacement suggestions for these misspelled words.
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
-
-  /// The most up-to-date spell check results for text input.
-  ///
-  /// These results will be updated by the
-  /// [spellCheckService] and used by the [spellCheckSuggestionsHandler] to
-  /// build the [TextSpan] tree for text input and menus for replacement
-  /// suggestions of misspelled words.
-  SpellCheckResults? spellCheckResults;
-
-  /// The style of text to use to indicate misspelled text.
-  TextStyle misspelledTextStyle;
 }
 
 /// Determines how misspelled words are indicated in text input and how
