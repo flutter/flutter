@@ -3,30 +3,50 @@ import 'package:flutter/widgets.dart';
 
 /// A CupertinoLoupe, specifically for text editing.
 ///
-/// Delegates styling to [CupertinoLoupe], but is positioned depending on
+/// Delegates styling to [CupertinoLoupe] with is positioned depending on
 /// [loupeSelectionOverlayInfoBearer].
 ///
-/// Specifically, the text editing loupe positions itself at the vertical center of the
-/// line the text editing handle is on, with some vertical tolerance. There are only global
-/// constraints on the X axis based on the screen width, minus some threshold. This means
-/// that the loupe positions itself exactly at the X of the touchpoint, but not off the screen.
+/// Specifically, the [CupertinoTextEditingLoupe] follows the following rules:
+/// - Never position itself horizontally outside the screen width, with [_kHorizontalScreenEdgePadding] padding.
+/// - Hidden if a gesture is detected [_kHideIfBelowThreshold] units below the line, shown otherwise.
+/// - Follow the X of the gesture directly (with respect to rule 1).
+/// - Have some vertical drag resistance; i.e. if a gesture is detected k units below the field,
+/// then have vertical offset [_kDragResistance] * k.
 class CupertinoTextEditingLoupe extends StatefulWidget {
-  /// A drag resistance on the Y of the lens, before it snaps to the next line.
-  static const double _kDragResistance = 10;
-
-  /// On iOS, the loupe hides itself if you drag too far below the actual text.
-  static const double _kHideIfBelowThreshold = -48;
-
-  static const double _kHorizontalScreenEdgePadding = 10;
-
-  final LoupeController controller;
-  final ValueNotifier<LoupeSelectionOverlayInfoBearer>
-      loupeSelectionOverlayInfoBearer;
-
+  /// Construct a [RawLoupe] in the Cupertino style, positioning with respect to
+  /// [loupeSelectionOverlayInfoBearer].
   const CupertinoTextEditingLoupe(
       {super.key,
       required this.controller,
       required this.loupeSelectionOverlayInfoBearer});
+
+  /// A drag resistance on the Y of the lens, before it snaps to the next line.
+  static const double _kDragResistance = 10;
+
+  /// The loupe hides itself if you drag too far below the text line that 
+  /// you are hovering over.
+  static const double _kHideIfBelowThreshold = -48;
+
+  /// The padding on either edge of the screen that any part of the loupe 
+  /// cannot exist past. 
+  /// 
+  /// This includes the entire loupe, not just the center.
+  /// 
+  /// If the screen has width w, then the loupe is bound to 
+  /// [_kHorizontalScreenEdgePadding, w - _kHorizontalScreenEdgePadding].
+  static const double _kHorizontalScreenEdgePadding = 10;
+
+
+  /// The duration that the loupe drags behind it's final position.
+  static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
+
+  /// This loupe's controller. 
+  final LoupeController controller;
+
+  /// [CupertinoTextEditingLoupe] will determine it's own positioning 
+  /// based on the [LoupeSelectionOverlayInfoBearer] of this notifier.
+  final ValueNotifier<LoupeSelectionOverlayInfoBearer>
+      loupeSelectionOverlayInfoBearer;
 
   @override
   State<CupertinoTextEditingLoupe> createState() =>
@@ -35,7 +55,6 @@ class CupertinoTextEditingLoupe extends StatefulWidget {
 
 class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
   late Offset _currentAdjustedLoupePosition;
-
   double _verticalFocalPointAdjustment = 0;
 
   @override
@@ -61,10 +80,10 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
   void _determineLoupePositionAndFocalPoint() {
     final LoupeSelectionOverlayInfoBearer textEditingContext =
         widget.loupeSelectionOverlayInfoBearer.value;
-            
 
     // The exact Y of the center of the current line.
-    final double verticalCenterOfCurrentLine = textEditingContext.handleRect.center.dy;
+    final double verticalCenterOfCurrentLine =
+        textEditingContext.handleRect.center.dy;
 
     // If the loupe is currently showing, but we have dragged out of threshold,
     // we should hide it.
@@ -92,8 +111,9 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
                     textEditingContext.globalGesturePosition.dy) /
                 CupertinoTextEditingLoupe._kDragResistance);
 
+
+    // The raw position, tracking the gesture directly.
     final Offset rawLoupePosition = Offset(
-        // The X is exactly where the gesture is.
         textEditingContext.globalGesturePosition.dx -
             CupertinoLoupe._kLoupeSize.width / 2,
         verticalPositionOfLens -
@@ -102,6 +122,8 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
 
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 
+    // Adjust the loupe position so that it never exists outside the horizontal
+    // padding.
     final Offset adjustedLoupePosition = LoupeController.shiftWithinBounds(
       bounds: Rect.fromLTRB(
           screenRect.left +
@@ -129,29 +151,34 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoLoupe(
-      controller: widget.controller,
-      position: _currentAdjustedLoupePosition,
-      additionalFocalPointOffset: Offset(0, _verticalFocalPointAdjustment),
+    return AnimatedPositioned(
+      duration: CupertinoTextEditingLoupe._kDragAnimationDuration,
+      curve: Curves.easeOut,
+      left: _currentAdjustedLoupePosition.dx,
+      top: _currentAdjustedLoupePosition.dy,
+      child: CupertinoLoupe(
+        controller: widget.controller,
+        additionalFocalPointOffset: Offset(0, _verticalFocalPointAdjustment),
+      ),
     );
   }
 }
 
-/// A [Loupe] in the Cupertino style.
+/// A [RawLoupe] in the Cupertino style.
 ///
 /// Control the position and display status of [CupertinoLoupe]
 /// through a given [LoupeController].
 ///
-/// [CupertinoLoupe] is a wrapper around [Loupe] that handles styling
+/// [CupertinoLoupe] is a wrapper around [RawLoupe] that handles styling
 /// and trasitions.
 ///
 /// See also:
-/// * [Loupe], the backing implementation.
+/// * [RawLoupe], the backing implementation.
 /// * [CupertinoTextEditingLoupe], a widget that positions [CupertinoLoupe] based on
 /// [LoupeSelectionOverlayInfoBearer].
 /// * [LoupeController], the controller for this loupe.
 class CupertinoLoupe extends StatefulWidget {
-  /// Creates a [Loupe] in the Cupertino style.
+  /// Creates a [RawLoupe] in the Cupertino style.
   ///
   /// This loupe has a small drag delay and remains within the bounds of
   /// [MediaQuery]'s size. This means that when this loupe is repositioned through
@@ -164,25 +191,17 @@ class CupertinoLoupe extends StatefulWidget {
   const CupertinoLoupe({
     super.key,
     required this.controller,
-    required this.position,
     this.additionalFocalPointOffset = Offset.zero,
   });
   // These constants were eyeballed on an iPhone XR iOS v15.5.
   static const double _kVerticalFocalPointOffset = -25;
   static const Size _kLoupeSize = Size(82.5, 45);
-  static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
   static const Duration _kIoAnimationDuration = Duration(milliseconds: 150);
   static const BorderRadius _kBorderRadius =
       BorderRadius.all(Radius.elliptical(60, 50));
 
-  /// This [Loupe]'s controller.
+  /// This [RawLoupe]'s controller.
   final LoupeController controller;
-
-  /// The position of this [Loupe].
-  ///
-  /// This position may not be precise, due to [CupertinoLoupe] having
-  /// a small drag delay (of [Duration] [_kDragAnimationDuration]).
-  final Offset position;
 
   /// Any additional focal point offset, applied over the regular focal
   /// point offset defined in [CupertinoLoupe._kVerticalFocalPointOffset].
@@ -222,41 +241,35 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedPositioned(
-        duration: CupertinoLoupe._kDragAnimationDuration,
-        curve: Curves.easeOut,
-        left: widget.position.dx,
-        top: widget.position.dy,
-        child: Transform.translate(
-            offset: Offset.lerp(
-              const Offset(0, -CupertinoLoupe._kVerticalFocalPointOffset),
-              Offset.zero,
-              _ioAnimation.value,
-            )!,
-            child: Loupe(
-              transitionAnimationController: _ioAnimationController,
-              controller: widget.controller,
-              focalPoint: Offset(
-                      0,
-                      (CupertinoLoupe._kVerticalFocalPointOffset -
-                              CupertinoLoupe._kLoupeSize.height / 2) *
-                          _ioAnimation.value) +
-                  widget.additionalFocalPointOffset,
-              decoration: LoupeDecoration(
-                opacity: _ioAnimation.value,
-                shape: const RoundedRectangleBorder(
-                    borderRadius: CupertinoLoupe._kBorderRadius,
-                    side:
-                        BorderSide(color: Color.fromARGB(255, 235, 235, 235))),
-                shadows: const <BoxShadow>[
-                  BoxShadow(
-                      color: Color.fromARGB(34, 0, 0, 0),
-                      blurRadius: 5,
-                      spreadRadius: 0.2,
-                      offset: Offset(0, 3))
-                ],
-              ),
-              size: CupertinoLoupe._kLoupeSize,
-            )));
+    return Transform.translate(
+        offset: Offset.lerp(
+          const Offset(0, -CupertinoLoupe._kVerticalFocalPointOffset),
+          Offset.zero,
+          _ioAnimation.value,
+        )!,
+        child: RawLoupe(
+          transitionAnimationController: _ioAnimationController,
+          controller: widget.controller,
+          focalPoint: Offset(
+                  0,
+                  (CupertinoLoupe._kVerticalFocalPointOffset -
+                          CupertinoLoupe._kLoupeSize.height / 2) *
+                      _ioAnimation.value) +
+              widget.additionalFocalPointOffset,
+          decoration: LoupeDecoration(
+            opacity: _ioAnimation.value,
+            shape: const RoundedRectangleBorder(
+                borderRadius: CupertinoLoupe._kBorderRadius,
+                side: BorderSide(color: Color.fromARGB(255, 235, 235, 235))),
+            shadows: const <BoxShadow>[
+              BoxShadow(
+                  color: Color.fromARGB(34, 0, 0, 0),
+                  blurRadius: 5,
+                  spreadRadius: 0.2,
+                  offset: Offset(0, 3))
+            ],
+          ),
+          size: CupertinoLoupe._kLoupeSize,
+        ));
   }
 }

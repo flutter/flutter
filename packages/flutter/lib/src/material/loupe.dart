@@ -1,27 +1,71 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/src/rendering/object.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/src/cupertino/loupe.dart';
 
-/// Material or Android?
-class MaterialTextEditingLoupe extends StatefulWidget {
-  const MaterialTextEditingLoupe(
+/// {@template widgets.material.loupe.loupe}
+/// A [Loupe] positioned by rules dictated by the native Android loupe.
+/// {@endtemplate}
+///
+/// {@template widgets.material.loupe.positionRules}
+/// Positions itself based on [loupeSelectionOverlayInfoBearer]. Specifically, follows the
+/// following rules:
+/// - Tracks the gesture, but clamped to the beginning and end of the currently editing line.
+/// - Focal point may never contain anything out of bounds.
+/// - Never goes out of bounds vertically; offset until the entire loupe is in the screen. The
+/// focal point, regardless of this transformation, always points to the touch Y.
+/// - If just jumped between lines (prevY != currentY) then animate for duration
+/// [_jumpBetweenLinesAnimationDuration].
+/// {@endtemplate}
+class TextEditingLoupe extends StatefulWidget {
+  /// returns a dummy widget if no loupe exists for the platform.
+  static Widget adaptive(
+    BuildContext context,
+    LoupeController controller,
+    ValueNotifier<LoupeSelectionOverlayInfoBearer>
+        loupeSelectionOverlayInfoBearer,
+  ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return CupertinoTextEditingLoupe(
+        controller: controller,
+        loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer,
+      );
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return TextEditingLoupe(
+          controller: controller,
+          loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer);
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  /// {@macro widgets.material.loupe.loupe}
+  /// {@template widgets.material.loupe.positionRules}
+  const TextEditingLoupe(
       {super.key,
       required this.controller,
       required this.loupeSelectionOverlayInfoBearer});
+
+  /// The duration that the position is animated if [TextEditingLoupe] just jumped between lines.
+  static const Duration _jumpBetweenLinesAnimationDuration =
+      Duration(milliseconds: 70);
+
+  /// A [LoupeController] for this loupe.
   final LoupeController controller;
+
+  /// [TextEditingLoupe] positions itself based on [loupeSelectionOverlayInfoBearer].
+  ///
+  /// {@macro widgets.material.loupe.positionRules}
   final ValueNotifier<LoupeSelectionOverlayInfoBearer>
       loupeSelectionOverlayInfoBearer;
 
   @override
-  State<MaterialTextEditingLoupe> createState() =>
-      _MaterialTextEditingLoupeState();
+  State<TextEditingLoupe> createState() => _TextEditingLoupeState();
 }
 
-class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
+class _TextEditingLoupeState extends State<TextEditingLoupe> {
   // Should _only_ be null on construction. This is because of the animation logic.
   // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
   // animations are added when last_build_y != current_build_y, but this condition
@@ -30,7 +74,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
   // {@endtemplate}
   Offset? loupePosition;
 
-  // A timer that unsets itself after an animation duration. 
+  // A timer that unsets itself after an animation duration.
   // If the timer exists, then it blah blah blah
   Timer? _positionShouldBeAnimatedTimer;
   bool get _positionShouldBeAnimated => _positionShouldBeAnimatedTimer != null;
@@ -62,6 +106,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     super.didChangeDependencies();
   }
 
+  /// {@macro widgets.material.loupe.positionRules}
   void _determineLoupePositionAndFocalPoint() {
     final LoupeSelectionOverlayInfoBearer selectionInfo =
         widget.loupeSelectionOverlayInfoBearer.value;
@@ -70,24 +115,21 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     // Since by default, we draw at the top left corner, this offset
     // shifts the loupe so we draw at the center, and then also include
     // the "above touch point" shift.
-    final Offset basicLoupeOffset = Offset(
-        MaterialLoupe._size.width / 2,
-        MaterialLoupe._size.height -
-            MaterialLoupe._kStandardVerticalFocalPointShift);
+    final Offset basicLoupeOffset = Offset(Loupe._size.width / 2,
+        Loupe._size.height - Loupe._kStandardVerticalFocalPointShift);
 
     // Since the loupe should not go past the edges of the line,
     // but must track the gesture otherwise, bound the X of the loupe
     // to always stay between line start and end.
     final double loupeX = selectionInfo.globalGesturePosition.dx.clamp(
-      selectionInfo.currentLineBoundries.left, 
-      selectionInfo.currentLineBoundries.right
-    );
+        selectionInfo.currentLineBoundries.left,
+        selectionInfo.currentLineBoundries.right);
 
     //place the loupe at the previously calculated X, and the Y should be
     // exactly at the center of the handle.
     final Rect unadjustedLoupeRect =
         Offset(loupeX, selectionInfo.handleRect.center.dy) - basicLoupeOffset &
-            MaterialLoupe._size;
+            Loupe._size;
 
     // Shift the loupe so that, if we are ever out of the screen, we become in bounds.
     final Rect screenBoundsAdjustedLoupeRect =
@@ -100,7 +142,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     // The insets, from either edge, that the focal point should not point
     // past lest the loupe displays something out of bounds.
     final double horizontalMaxFocalPointEdgeInsets =
-        (MaterialLoupe._size.width / 2) / MaterialLoupe._magnification;
+        (Loupe._size.width / 2) / Loupe._magnification;
 
     // Adjust the focal point horizontally such that none of the loupe
     // ever points to anything out of bounds.
@@ -132,8 +174,10 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
         _positionShouldBeAnimatedTimer!.cancel();
       }
 
+      // Create a timer that deletes itself when the timer is complete.
+      // This is [mounted] safe, since the timer is canceled in [dispose].
       _positionShouldBeAnimatedTimer = Timer(
-          MaterialLoupe._verticalAnimationDuration,
+          TextEditingLoupe._jumpBetweenLinesAnimationDuration,
           () => setState(() {
                 _positionShouldBeAnimatedTimer = null;
               }));
@@ -150,7 +194,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
     assert(loupePosition != null,
         'Loupe position should only be null before the first build.');
 
-    final Widget loupe = MaterialLoupe(
+    final Widget loupe = Loupe(
       controller: widget.controller,
       additionalFocalPointOffset: extraFocalPointOffset,
     );
@@ -161,7 +205,7 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
       // Material Loupe typically does not animate, unless we jump between lines,
       // in whichcase we animate between lines.
       duration: _positionShouldBeAnimated
-          ? MaterialLoupe._verticalAnimationDuration
+          ? TextEditingLoupe._jumpBetweenLinesAnimationDuration
           : Duration.zero,
       child: loupe,
     );
@@ -171,10 +215,10 @@ class _MaterialTextEditingLoupeState extends State<MaterialTextEditingLoupe> {
 /// A Material styled loupe.
 ///
 /// This widget focuses on mimicing the _style_ of the loupe on material. For a
-/// widget that is focused on mimicing the behavior of a material loupe, see [MaterialTextEditingLoupe].
-class MaterialLoupe extends StatelessWidget {
-  /// Creates a [Loupe] in the Material style.
-  const MaterialLoupe({
+/// widget that is focused on mimicing the behavior of a material loupe, see [TextEditingLoupe].
+class Loupe extends StatelessWidget {
+  /// Creates a [RawLoupe] in the Material style.
+  const Loupe({
     super.key,
     this.additionalFocalPointOffset = Offset.zero,
     required this.controller,
@@ -197,11 +241,9 @@ class MaterialLoupe extends StatelessWidget {
 
   final Offset additionalFocalPointOffset;
 
-  static const Duration _verticalAnimationDuration = Duration(milliseconds: 70);
-
   @override
   Widget build(BuildContext context) {
-    return Loupe(
+    return RawLoupe(
       controller: controller,
       decoration: const LoupeDecoration(
           shape: RoundedRectangleBorder(
@@ -209,10 +251,7 @@ class MaterialLoupe extends StatelessWidget {
           shadows: _shadows),
       magnificationScale: _magnification,
       focalPoint: additionalFocalPointOffset +
-          Offset(
-              0,
-              _kStandardVerticalFocalPointShift -
-                  MaterialLoupe._size.height / 2),
+          Offset(0, _kStandardVerticalFocalPointShift - Loupe._size.height / 2),
       size: _size,
       child: Container(
         color: _filmColor,

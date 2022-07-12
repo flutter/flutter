@@ -11,17 +11,19 @@ import 'package:flutter/rendering.dart';
 /// {@template flutter.widgets.loupe.loupeControllerWidgetBuilder}
 /// A builder that builds a Widget with a [LoupeController].
 ///
-/// the [controller] should be passed into [Loupe.controller]. The third paramater
+/// the [controller] should be passed into [RawLoupe.controller]. The third paramater
 /// is any additional info passed to the loupe, if desired.
 /// {@endtemplate}
-typedef LoupeControllerWidgetBuilder<T> = Widget Function(
+typedef LoupeControllerWidgetBuilder<T> = Widget? Function(
     BuildContext context, LoupeController controller, T data);
 
-/// Controls an instance of a [Loupe], if this [LoupeController] is passed to [Loupe.controller].
-/// If unattached to any [Loupe] (i.e., not passed to a [Loupe]), does nothing.
+/// Controls an instance of a [RawLoupe], if this [LoupeController] is passed to [RawLoupe.controller].
+/// If unattached to any [RawLoupe] (i.e., not passed to a [RawLoupe]), does nothing.
 ///
-/// [LoupeController] handles driving [Loupe.transitionAnimationController]'s in / out animation
+/// [LoupeController] handles driving [RawLoupe.transitionAnimationController]'s in / out animation
 /// based on calls to show / hide, respectively.
+///
+/// To check the status of the loupe, see [LoupeController.status].
 class LoupeController {
   /// This stream is used to tell the loupe that it should begin it's enter / hide animation.
   /// The [LoupeController] sends its loupe true or false for show / hide respectively,
@@ -36,7 +38,7 @@ class LoupeController {
   ///
   /// This is public in case other overlay entries need to be positioned
   /// above or below this [overlayEntry]. Anything in the paint order after
-  /// the [Loupe] will not be displaued in the loupe; this means that if it
+  /// the [RawLoupe] will not be displaued in the loupe; this means that if it
   /// is desired for an overlay entry to be displayed in the loupe,
   /// it _must_ be positioned below the loupe.
   ///
@@ -83,12 +85,23 @@ class LoupeController {
   ValueNotifier<AnimationStatus> status =
       ValueNotifier<AnimationStatus>(AnimationStatus.dismissed);
 
-  /// Shows the [Loupe] that this controller controlls.
+  /// Function that returns a function and the other function checks platform to check if the builder should be null
+  /// 
+  /// 
+  /// Shows the [RawLoupe] that this controller controlls.
+  ///
   /// Returns a future that completes when the loupe is fully shown, i.e. done
   /// with it's entry animation.
   ///
   /// To control what overlays are shown in the loupe, utilize [below]. See
   /// [overlayEntry] for more details on how to utilize [below].
+  ///
+  /// Regardless of if [overlayEntry] == null or not, this will replace the [overlayEntry]
+  /// with a new one, resetting it's state.
+  ///
+  /// If the loupe already exists (i.e. [overlayEntry] != null), then consider using
+  /// [signalShow], to avoid having to re-insert a widget into the overlay and resetting
+  /// any stateful behavior.
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -225,14 +238,14 @@ class LoupeController {
   }
 }
 
-/// A decoration for a [Loupe].
+/// A decoration for a [RawLoupe].
 ///
 /// [LoupeDecoration] does not expose [ShapeDecoration.color], [ShapeDecoration.image],
-/// or [ShapeDecoration.gradient], since they will be covered by the [Loupe]'s lense.
+/// or [ShapeDecoration.gradient], since they will be covered by the [RawLoupe]'s lense.
 ///
 /// Also takes an [opacity].
 /// {@template flutter.widgets.loupe.opacity.reason}
-/// This is because [Loupe]'s lens is backed by [BackdropFilter],
+/// This is because [RawLoupe]'s lens is backed by [BackdropFilter],
 /// which, to have any opacity, must be the first decendant of [Opacity].
 /// (see https://github.com/flutter/engine/pull/34435)
 /// {@endtemplate}
@@ -259,7 +272,7 @@ class LoupeDecoration extends ShapeDecoration {
   int get hashCode => Object.hash(super.hashCode, opacity);
 }
 
-/// A common building base for [Loupe]s.
+/// A common building base for [RawLoupe]s.
 ///
 /// A loupe can be convienently managed by [LoupeController], which handles
 /// showing and hiding the loupe, with an optional entry / exit animation.
@@ -271,10 +284,10 @@ class LoupeDecoration extends ShapeDecoration {
 ///
 /// See:
 /// * [LoupeController], a controller to handle loupes in an overlay.
-/// * [AndroidLoupe], the Android-style consumer of [Loupe].
-/// * [CupertinoLoupe], the iOS-style consumer of [Loupe].
-class Loupe extends StatefulWidget {
-  /// Constructs a [Loupe].
+/// * [AndroidLoupe], the Android-style consumer of [RawLoupe].
+/// * [CupertinoLoupe], the iOS-style consumer of [RawLoupe].
+class RawLoupe extends StatefulWidget {
+  /// Constructs a [RawLoupe].
   ///
   /// {@template flutter.widgets.loupe.loupe.invisibility_warning}
   /// By default, this loupe uses the default [LoupeDecoration],
@@ -283,7 +296,7 @@ class Loupe extends StatefulWidget {
   /// since it is painting exactly what is under it, exactly where it was painted
   /// orignally.
   /// {@endtemplate}
-  const Loupe(
+  const RawLoupe(
       {super.key,
       required this.controller,
       this.magnificationScale = 1,
@@ -302,7 +315,7 @@ class Loupe extends StatefulWidget {
   ///
   /// This animation controller will be driven forward and backwards depending
   /// on [LoupeController.show] and [LoupeController.hide]. If manually stopped
-  /// during a transition, the [Loupe] will wait for the transition to complete
+  /// during a transition, the [RawLoupe] will wait for the transition to complete
   /// to signal to the controller that it can be safely removed.
   final AnimationController? transitionAnimationController;
 
@@ -313,8 +326,8 @@ class Loupe extends StatefulWidget {
 
   /// The [LoupeController] for this loupe.
   ///
-  /// This [Loupe] will show / hide itself based on the controller's show / hide calls.
-  /// This [Loupe]'s status is always in sync with [controller.status].
+  /// This [RawLoupe] will show / hide itself based on the controller's show / hide calls.
+  /// This [RawLoupe]'s status is always in sync with [controller.status].
   final LoupeController controller;
 
   /// The size of the loupe.
@@ -330,20 +343,20 @@ class Loupe extends StatefulWidget {
   /// position. The focal point will always be exactly on the draw position.
   final Offset focalPoint;
 
-  /// An optional widget to posiiton inside the len of the [Loupe].
+  /// An optional widget to posiiton inside the len of the [RawLoupe].
   ///
-  /// This is positioned over the [Loupe] - it may be useful for tinting the
-  /// [Loupe], or drawing a crosshair like UI.
+  /// This is positioned over the [RawLoupe] - it may be useful for tinting the
+  /// [RawLoupe], or drawing a crosshair like UI.
   final Widget? child;
 
   /// How "zoomed in" the magnification subject is in the lens.
   final double magnificationScale;
 
   @override
-  State<Loupe> createState() => _LoupeState();
+  State<RawLoupe> createState() => _RawLoupeState();
 }
 
-class _LoupeState extends State<Loupe> {
+class _RawLoupeState extends State<RawLoupe> {
   late StreamSubscription<AnimationStatus> _animationRequestsSubscription;
 
   @override
@@ -431,6 +444,9 @@ class _LoupeState extends State<Loupe> {
   }
 }
 
+/// Because backdrop filter will filter any widgets before it, we should
+/// apply the style after (i.e. in a younger sibling) to avoid the loupe
+/// from seeing it's own styling.
 class _LoupeStyle extends StatelessWidget {
   const _LoupeStyle(this.decoration, {required this.size});
 
@@ -499,7 +515,7 @@ class _Magnifier extends SingleChildRenderObjectWidget {
               )
             : null;
 
-  ///  [focalPoint] of the magnifier is the area the center of the
+  /// [focalPoint] of the magnifier is the area the center of the
   /// [_Magnifier] points to, relative to the center of the magnifier.
   /// If left as [Offset.zero], the magnifier will magnify whatever is directly
   /// below it.
@@ -579,7 +595,11 @@ class _RenderMagnification extends RenderProxyBox {
           magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
 
-    layer = BackdropFilterLayer(filter: ImageFilter.matrix(matrix.storage));
+    if (layer == null) {
+      layer = BackdropFilterLayer(filter: ImageFilter.matrix(matrix.storage));
+    } else {
+      layer!.filter = ImageFilter.matrix(matrix.storage);
+    }
 
     context.pushLayer(layer!, super.paint, offset);
   }

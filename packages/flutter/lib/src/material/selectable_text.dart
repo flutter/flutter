@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+import 'loupe.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'text_selection.dart';
@@ -203,7 +204,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.loupeBuilder,
+    this.loupeBuilder = TextEditingLoupe.adaptive,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -430,7 +431,7 @@ class SelectableText extends StatefulWidget {
   final SelectionChangedCallback? onSelectionChanged;
 
   /// {@macro flutter.widgets.loupe.loupeControllerWidgetBuilder}
-  final LoupeControllerWidgetBuilder? loupeBuilder;
+  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();

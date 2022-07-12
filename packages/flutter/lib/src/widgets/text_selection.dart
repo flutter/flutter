@@ -412,6 +412,10 @@ class TextSelectionOverlay {
   /// from inside [_showLoupe] and [_hideLoupe]. If it is desired to show or hide the loupe,
   ///  call [_showLoupe] or [_hideLoupe]. This is because the loupe needs to orchestrate
   /// with other properties in [TextSelectionOverlay].
+  /// 
+  /// [_loupeController] and [_loupeBuilder] will only be null if the constructor was
+  /// explicitly passed in null. Otherwise, it will be a builder function that returns 
+  /// the platform widget, or null, if no loupe is built for the platform.
   final LoupeController? _loupeController;
   final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? _loupeBuilder;
 
@@ -578,15 +582,23 @@ class TextSelectionOverlay {
   // Start from empty, so we don't utilize any rememnant values
   _loupeSelectionOverlayInfoBearer.value = initalInfoBearer;
 
+  // If we don't build a loupe for the specified platform,
+  // then we should short circuit.
+  final Widget? builtLoupe = _loupeBuilder!(
+      context, 
+      _loupeController!, 
+      _loupeSelectionOverlayInfoBearer,
+    );
+
+    if (builtLoupe == null) {
+      return;
+    }
+
   _loupeController!.show(
     context: context, 
     // Android Loupe does not show the handles, but cupertino does.
     below: defaultTargetPlatform == TargetPlatform.iOS ? null : _selectionOverlay._handles!.first,
-    builder: (BuildContext context) => _loupeBuilder!(
-      context, 
-      _loupeController!, 
-      _loupeSelectionOverlayInfoBearer,
-    ));
+    builder: (BuildContext context) => builtLoupe);
   }
 
   void _hideLoupe() {

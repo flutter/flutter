@@ -330,6 +330,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.loupeBuilder = TextEditingLoupe.adaptive,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -391,6 +392,8 @@ class TextField extends StatefulWidget {
                        selectAll: true,
                        paste: true,
                      )));
+
+  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
   /// Controls the text being edited.
   ///
@@ -1149,7 +1152,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
     VoidCallback? handleDidGainAccessibilityFocus;
-    LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -1163,14 +1165,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         autocorrectionTextRectColor = selectionColor;
-        loupeBuilder = (
-          BuildContext context, 
-          LoupeController controller, 
-          ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeSelectionOverlayInfoBearer
-        ) => CupertinoTextEditingLoupe(
-          controller: controller, 
-          loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer,
-        );
         break;
 
       case TargetPlatform.macOS:
@@ -1192,17 +1186,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        if (theme.platform == TargetPlatform.android) {
-          loupeBuilder = (
-            BuildContext context,
-            LoupeController controller, 
-            ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeSelectionOverlayInfoBearer  
-          ) => MaterialTextEditingLoupe(
-            controller: controller, 
-            loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer,
-          );
-        }
-
         forcePressEnabled = false;
         textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
@@ -1298,7 +1281,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          loupeBuilder: loupeBuilder,
+          loupeBuilder: widget.loupeBuilder,
         ),
       ),
     );
