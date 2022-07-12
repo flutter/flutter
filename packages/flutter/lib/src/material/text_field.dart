@@ -334,7 +334,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextMenu,
+    this.buildContextMenu = _defaultBuildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -761,6 +761,17 @@ class TextField extends StatefulWidget {
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.
   final EditableTextToolbarBuilder? buildContextMenu;
+
+  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return DefaultTextSelectionToolbar(
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      editableTextState: editableTextState,
+      buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+        editableTextState,
+      ),
+    );
+  }
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -1273,17 +1284,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          buildContextMenu: widget.buildContextMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-            return DefaultTextSelectionToolbar(
-              primaryAnchor: primaryAnchor,
-              secondaryAnchor: secondaryAnchor,
-              editableTextState: editableTextState,
-              buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
-                widget.toolbarOptions,
-                editableTextState,
-              ),
-            );
-          },
+          buildContextMenu: widget.buildContextMenu,
         ),
       ),
     );

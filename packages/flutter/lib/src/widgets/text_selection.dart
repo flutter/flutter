@@ -342,6 +342,8 @@ class TextSelectionOverlay {
   late final SelectionOverlay _selectionOverlay;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  ///
+  /// If not provided, no context menu will be built.
   final ContextMenuBuilder? buildContextMenu;
 
   /// Retrieve current value.
@@ -392,6 +394,10 @@ class TextSelectionOverlay {
     _updateSelectionOverlay();
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.showToolbar();
+      return;
+    }
+
+    if (buildContextMenu == null) {
       return;
     }
 

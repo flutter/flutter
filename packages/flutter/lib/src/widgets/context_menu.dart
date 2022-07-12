@@ -290,8 +290,9 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
     'Use `buildContextMenu` instead of `toolbarOptions`. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
-  static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(ToolbarOptions? toolbarOptions, EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
-    return toolbarOptions == null ? null : <ContextMenuButtonData>[
+  static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
+    final ToolbarOptions toolbarOptions = editableTextState.widget.toolbarOptions;
+    return <ContextMenuButtonData>[
       if (toolbarOptions.cut
           && TextSelectionToolbarButtonDatasBuilder.canCut(editableTextState))
         ContextMenuButtonData(

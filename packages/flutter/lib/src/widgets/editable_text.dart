@@ -2629,14 +2629,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      buildContextMenu: (
+      buildContextMenu: widget.buildContextMenu == null ? null : (
         BuildContext context,
         Offset primaryAnchor,
         [Offset? secondaryAnchor]
       ) {
-        if (widget.buildContextMenu == null) {
-          return const SizedBox.shrink();
-        }
         return widget.buildContextMenu!(
           context,
           this,

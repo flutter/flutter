@@ -208,7 +208,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.buildContextMenu,
+    this.buildContextMenu = _defaultBuildContextMenu,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -266,7 +266,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.buildContextMenu,
+    this.buildContextMenu = _defaultBuildContextMenu,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -436,6 +436,17 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
   final EditableTextToolbarBuilder? buildContextMenu;
+
+  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return DefaultTextSelectionToolbar(
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      editableTextState: editableTextState,
+      buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+        editableTextState,
+      ),
+    );
+  }
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -717,17 +728,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
-        buildContextMenu: widget.buildContextMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-          return DefaultTextSelectionToolbar(
-            primaryAnchor: primaryAnchor,
-            secondaryAnchor: secondaryAnchor,
-            editableTextState: editableTextState,
-            buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
-              widget.toolbarOptions,
-              editableTextState,
-            ),
-          );
-        },
+        buildContextMenu: widget.buildContextMenu,
       ),
     );
 

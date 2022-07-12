@@ -35,7 +35,7 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
-    this.buildContextMenu,
+    this.buildContextMenu = _defaultBuildContextMenu,
     required this.child,
   });
 
@@ -60,6 +60,14 @@ class SelectionArea extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  static Widget _defaultBuildContextMenu(BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return DefaultTextSelectionToolbar(
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      buttonDatas: buttonDatas,
+    );
+  }
 
   @override
   State<StatefulWidget> createState() => _SelectionAreaState();
@@ -104,21 +112,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       selectionControls: controls,
       focusNode: _effectiveFocusNode,
-      buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-        if (widget.buildContextMenu != null) {
-          return widget.buildContextMenu!(
-            context,
-            buttonDatas,
-            primaryAnchor,
-            secondaryAnchor,
-          );
-        }
-        return DefaultTextSelectionToolbar(
-          primaryAnchor: primaryAnchor,
-          secondaryAnchor: secondaryAnchor,
-          buttonDatas: buttonDatas,
-        );
-      },
+      buildContextMenu: widget.buildContextMenu,
       child: widget.child,
     );
   }

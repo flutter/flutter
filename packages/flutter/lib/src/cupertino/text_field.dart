@@ -277,7 +277,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextMenu,
+    this.buildContextMenu = _defaultBuildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -419,7 +419,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextMenu,
+    this.buildContextMenu = _defaultBuildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -756,6 +756,41 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [DefaultCupertinoTextSelectionToolbar], which is built by default.
   final EditableTextToolbarBuilder? buildContextMenu;
 
+  /// The platform that the current `defaultTargetPlatform` will be treated as.
+  ///
+  /// The Cupertino library has no access to Material, so it cannot build things
+  /// like the Material text selection toolbars on the platforms that use them.
+  /// Instead it will treat those non-Cupertino platforms as if they are the
+  /// platform returned here.
+  ///
+  /// For example, using a CupertionTextField on an Android device will show the
+  /// iOS text selection toolbar.
+  static TargetPlatform get _cupertinoPlatform {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return TargetPlatform.iOS;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        return TargetPlatform.macOS;
+    }
+  }
+
+  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return DefaultCupertinoTextSelectionToolbar(
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      editableTextState: editableTextState,
+      targetPlatform: _cupertinoPlatform,
+      buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+        editableTextState,
+        _cupertinoPlatform,
+      ),
+    );
+  }
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -817,28 +852,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   bool _showSelectionHandles = false;
 
   late _CupertinoTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
-
-  /// The platform that the current `defaultTargetPlatform` will be treated as.
-  ///
-  /// The Cupertino library has no access to Material, so it cannot build things
-  /// like the Material text selection toolbars on the platforms that use them.
-  /// Instead it will treat those non-Cupertino platforms as if they are the
-  /// platform returned here.
-  ///
-  /// For example, using a CupertionTextField on an Android device will show the
-  /// iOS text selection toolbar.
-  static TargetPlatform get _cupertinoPlatform {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return TargetPlatform.iOS;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.macOS:
-        return TargetPlatform.macOS;
-    }
-  }
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
@@ -1286,19 +1299,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-            buildContextMenu: widget.buildContextMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-              return DefaultCupertinoTextSelectionToolbar(
-                primaryAnchor: primaryAnchor,
-                secondaryAnchor: secondaryAnchor,
-                editableTextState: editableTextState,
-                targetPlatform: _cupertinoPlatform,
-                buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
-                  widget.toolbarOptions,
-                  editableTextState,
-                  _cupertinoPlatform,
-                ),
-              );
-            },
+            buildContextMenu: widget.buildContextMenu,
           ),
         ),
       ),
