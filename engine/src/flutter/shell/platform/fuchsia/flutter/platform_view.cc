@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flow/embedded_views.h"
+#include "pointer_injector_delegate.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include "platform_view.h"
@@ -62,6 +63,7 @@ PlatformView::PlatformView(
     fuchsia::ui::pointer::MouseSourceHandle mouse_source,
     fuchsia::ui::views::FocuserHandle focuser,
     fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
+    fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry,
     OnEnableWireframe wireframe_enabled_callback,
     OnUpdateView on_update_view_callback,
     OnCreateSurface on_create_surface_callback,
@@ -100,6 +102,9 @@ PlatformView::PlatformView(
   SetInterfaceErrorHandler(text_sync_service_, "Text Sync Service");
   SetInterfaceErrorHandler(keyboard_listener_binding_, "Keyboard Listener");
   SetInterfaceErrorHandler(keyboard_, "Keyboard");
+
+  fuchsia::ui::views::ViewRef view_ref_clone;
+  fidl::Clone(view_ref, &view_ref_clone);
 
   // Configure keyboard listener.
   keyboard_->AddListener(std::move(view_ref),
@@ -149,6 +154,11 @@ PlatformView::PlatformView(
       weak->DispatchPointerDataPacket(std::move(packet));
     });
   }
+
+  // Configure the pointer injector delegate.
+  pointer_injector_delegate_ = std::make_unique<PointerInjectorDelegate>(
+      std::move(pointerinjector_registry), std::move(view_ref_clone),
+      is_flatland);
 
   // Finally! Register the native platform message handlers.
   RegisterPlatformMessageHandlers();
@@ -845,6 +855,10 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     }
   } else if (method.rfind("View.focus", 0) == 0) {
     return focus_delegate_->HandlePlatformMessage(root, message->response());
+  } else if (method.rfind(PointerInjectorDelegate::kPointerInjectorMethodPrefix,
+                          0) == 0) {
+    return pointer_injector_delegate_->HandlePlatformMessage(
+        root, message->response());
   } else {
     FML_LOG(ERROR) << "Unknown " << message->channel() << " method " << method;
   }
