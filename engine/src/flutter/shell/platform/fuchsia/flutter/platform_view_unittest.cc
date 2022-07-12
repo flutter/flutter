@@ -271,6 +271,12 @@ class PlatformViewBuilder {
     return *this;
   }
 
+  PlatformViewBuilder& SetPointerinjectorRegistry(
+      fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry) {
+    pointerinjector_registry_ = std::move(pointerinjector_registry);
+    return *this;
+  }
+
   PlatformViewBuilder& SetSessionListenerRequest(
       fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener> request) {
     session_listener_request_ = std::move(request);
@@ -316,7 +322,8 @@ class PlatformViewBuilder {
         external_external_view_embedder_, std::move(ime_service_),
         std::move(keyboard_), std::move(touch_source_),
         std::move(mouse_source_), std::move(focuser_),
-        std::move(view_ref_focused_), std::move(session_listener_request_),
+        std::move(view_ref_focused_), std::move(pointerinjector_registry_),
+        std::move(session_listener_request_),
         std::move(on_session_listener_error_callback_),
         std::move(wireframe_enabled_callback_),
         std::move(on_create_view_callback_),
@@ -343,6 +350,7 @@ class PlatformViewBuilder {
   fuchsia::ui::pointer::MouseSourceHandle mouse_source_;
   fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused_;
   fuchsia::ui::views::FocuserHandle focuser_;
+  fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry_;
   fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
       session_listener_request_;
   fit::closure on_session_listener_error_callback_;

@@ -35,6 +35,7 @@ class FlatlandPlatformView final : public flutter_runner::PlatformView {
       fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
       fuchsia::ui::composition::ParentViewportWatcherHandle
           parent_viewport_watcher,
+      fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry,
       OnEnableWireframe wireframe_enabled_callback,
       OnCreateFlatlandView on_create_view_callback,
       OnUpdateView on_update_view_callback,
