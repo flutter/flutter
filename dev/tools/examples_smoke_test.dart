@@ -17,7 +17,6 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-const bool kIsWeb = identical(0, 0.0);
 FileSystem filesystem = const LocalFileSystem();
 ProcessManager processManager = const LocalProcessManager();
 Platform platform = const LocalPlatform();
