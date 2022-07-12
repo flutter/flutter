@@ -254,13 +254,13 @@ class TextInputType {
 /// the inappropriate value, Android will use "unspecified" on the platform
 /// side and iOS will use "default" on the platform side.
 ///
-/// This class has been cloned to `flutter_driver/lib/src/common/action.dart` as `TextInputAction`,
-/// and must be kept in sync.
-///
 /// See also:
 ///
 ///  * [TextInput], which configures the platform's keyboard setup.
 ///  * [EditableText], which invokes callbacks when the action button is pressed.
+// 
+// This class has been cloned to `flutter_driver/lib/src/common/action.dart` as `TextInputAction`,
+// and must be kept in sync.
 enum TextInputAction {
   /// Logical meaning: There is no relevant input action for the current input
   /// source, e.g., [TextField].
