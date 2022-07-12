@@ -1736,6 +1736,8 @@ class Scaffold extends StatefulWidget {
   ///  * [showBottomSheet], which displays a bottom sheet as a route that can
   ///    be dismissed with the scaffold's back button.
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
+  ///  * [BottomSheetThemeData], which can be used to customize the default
+  ///    bottom sheet property values when using a [BottomSheet].
   final Widget? bottomSheet;
 
   /// If true the [body] and the scaffold's floating widgets should size
@@ -2180,7 +2182,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             ),
           );
         },
-        true,
+        isPersistent: true,
         animationController: animationController,
       );
     }
@@ -2223,8 +2225,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   PersistentBottomSheetController<T> _buildBottomSheet<T>(
-    WidgetBuilder builder,
-    bool isPersistent, {
+    WidgetBuilder builder, {
+    required bool isPersistent,
     required AnimationController animationController,
     Color? backgroundColor,
     double? elevation,
@@ -2410,7 +2412,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(
         builder,
-        false,
+        isPersistent: false,
         animationController: controller,
         backgroundColor: backgroundColor,
         elevation: elevation,
@@ -3163,7 +3165,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       },
       child: Semantics(
         container: true,
-        onDismiss: close,
+        onDismiss: !widget.isPersistent ? close : null,
         child:  NotificationListener<DraggableScrollableNotification>(
           onNotification: extentChanged,
           child: BottomSheet(
