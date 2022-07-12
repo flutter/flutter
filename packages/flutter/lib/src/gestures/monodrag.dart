@@ -243,14 +243,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
-  /// Record the pointers which down. The [Set] will clear when any pointer up.
-  /// See also:
-  /// [handleEvent]
+  // Record the pointers that are currently down. This set removes an unaccepted pointer if it becomes up, and
+  // this set is cleared when an accepted pointer becomes up.
+  // Used in [handleEvent].
   final Set<int> _multiPointerStartTrackers = HashSet<int>();
 
-  /// Record the pointers which move. The [List] will clear when a batch of [PointerMoveEvent]s comes.
-  /// See also:
-  /// [handleEvent]
+  // Record the moving pointers that are yet to fill a batch. The list is cleared once a new batch of
+  // [PointerMoveEvent]s is detected. Used in [handleEvent].
   final List<PointerEvent> _multiPointerMoveTrackers = <PointerEvent>[];
 
   /// Record the pointer accept or not. If the pointer up which is accepted,
@@ -319,56 +318,76 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _addPointer(event);
   }
 
-  /// When multiple pointers down and move, there may be the following situations
-  /// by different platforms:
-  ///   1) They both move:
-  ///   The gesture will move until all the pointers' [PointerMoveEvent] or [PointerPanZoomUpdateEvent] come individually.
-  ///   The gesture will move delta(combined) = max(delta(i) which are positive) + min(delta(i) which are negative),
-  ///   The drag location will be the average of all pointers.
-  ///   Logic:
-  ///     When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes, add the [PointerEvent] in
-  ///     the [_multiPointerMoveTrackers]. When all the pointers' [PointerMoveEvent] come individually,
-  ///     they are considered a batch, the gesture will update by the rules above.
-  ///   Example:
-  ///     When two pointers (p1 and p2) down, the sequence of [PointerMoveEvent]s is : p1 down, p2 down, p1 move +50, p2 move +10,
-  ///     p1 move +30, p2 move -10 , p1 up and p2 up.
-  ///     The [handleEvent] process will be:
-  ///       p1 down ([_multiPointerStartTrackers].add),
-  ///       p2 down([_multiPointerStartTrackers].add),
-  ///       p1 move +50 ([_multiPointerMoveTrackers].add and the gesture wait),
-  ///       p2 move +10 ([_multiPointerMoveTrackers].add, the gesture update +50, and [_multiPointerMoveTrackers].clear),
-  ///       p1 move +30 ([_multiPointerMoveTrackers].add and the gesture wait),
-  ///       p2 move -10 ([_multiPointerMoveTrackers].add, the gesture update +20, and [_multiPointerMoveTrackers].clear),
-  ///       p1 up ([_multiPointerStartTrackers].clear),
-  ///       p2 up.
-  ///
-  ///   2) Only some of pointers moves (it means the pointers' [PointerMoveEvent] or [PointerPanZoomUpdateEvent]
-  ///   that are not moving do not come instead of [Offset] zero:
-  ///   The gesture will move if two [PointerMoveEvent] or [PointerPanZoomUpdateEvent]s of the same pointer come.
-  ///   The gesture will move delta(combined) = max(delta(i) which are positive) + min(delta(i) which are negative)
-  ///   The drag location will be the average of these moved pointers.
-  ///   Logic:
-  ///     When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes, add the [PointerEvent] in
-  ///     the [_multiPointerMoveTrackers]. When a [PointerMoveEvent] or [PointerPanZoomUpdateEvent] comes which pointer has been in
-  ///     the [_multiPointerMoveTrackers], the gesture will update immediately then add this [PointerEvent] in the [_multiPointerMoveTrackers].
-  ///   Example:
-  ///     When two pointers (p1 and p2) down, the sequence of [PointerMoveEvent]s is : p1 down, p2 down, p1 move +50, p1 move +10,
-  ///     p1 move +30, p1 move -10 , p1 up and p2 up.
-  ///     The [handleEvent] process will be:
-  ///       p1 down ([_multiPointerStartTrackers].add),
-  ///       p2 down ([_multiPointerStartTrackers].add),
-  ///       p1 move +50 ([_multiPointerMoveTrackers].add and the gesture wait),
-  ///       p1 move +10 ([_multiPointerMoveTrackers].clear, the gesture update +50, and [_multiPointerMoveTrackers].add,),
-  ///       p1 move +30 ([_multiPointerMoveTrackers].clear, the gesture update +10, and [_multiPointerMoveTrackers].add,),
-  ///       p1 move -10 ([_multiPointerMoveTrackers].clear, the gesture update +30, and [_multiPointerMoveTrackers].add,),
-  ///       p1 up ([_multiPointerStartTrackers].clear),
-  ///       p2 up.
-  ///       It means the last [PointerEvent] will be lost, this is acceptable. If the gesture update the last [PointerEvent]
-  ///       in the pointer up stage, it may cause flickering.
-  ///
-  /// When any pointer up which is accepted, the another pointers are given up.
   @override
   void handleEvent(PointerEvent event) {
+    // When multiple pointers down and move, there may be the following situations
+    // by different platforms:
+    //
+    // 1) The PointerMoveEvents of all pointers reached here when both pointers move (for example on Android and iOS).
+    //
+    //  * The gesture will move until all the pointers' PointerMoveEvent or PointerPanZoomUpdateEvent come individually.
+    //  * The gesture will move delta(combined) = max(delta(i) which are positive) + min(delta(i) which are negative),
+    //  * The drag location will be the average of all pointers.
+    //
+    // Logic:
+    //
+    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the PointerEvent in
+    //    the _multiPointerMoveTrackers.
+    //  * When all the pointers' PointerMoveEvent come individually,
+    //    they are considered a batch, the gesture will update by the rules above.
+    //
+    // Example:
+    //
+    //  * When two pointers (p1 and p2) down, the sequence of PointerMoveEvents is : p1 down, p2 down, p1 move +50, p2 move +10,
+    //    p1 move +30, p2 move -10 , p1 up and p2 up.
+    //    The handleEvent process will be:
+    //     * p1 down (_multiPointerStartTrackers.add),
+    //     * p2 down(_multiPointerStartTrackers.add),
+    //     * p1 move +50 (_multiPointerMoveTrackers.add and the gesture wait),
+    //     * p2 move +10 (_multiPointerMoveTrackers.add, the gesture update +50, and _multiPointerMoveTrackers.clear),
+    //     * p1 move +30 (_multiPointerMoveTrackers.add and the gesture wait),
+    //     * p2 move -10 (_multiPointerMoveTrackers.add, the gesture update +20, and _multiPointerMoveTrackers.clear),
+    //     * p1 up (_multiPointerStartTrackers.clear),
+    //     * p2 up.
+    //
+    // 2) The PointerMoveEvents of all pointers reach here if some pointers do not move (for example on Android).
+    //
+    //  * This means that the delta of the not moved pointers' PointerMoveEvent or PointerPanZoomUpdateEvent is zero.
+    //    So the logic is the same as 1).
+    //
+    // 3) Only the PointerMoveEvents of moved pointers reach here if some pointers do not move (for example on iOS).
+    //
+    //  * it means that the not moved pointers' PointerMoveEvent or PointerPanZoomUpdateEvent
+    //    does not reach here instead of the delta is zero.
+    //  * The gesture will move if two PointerMoveEvent or PointerPanZoomUpdateEvents of the same pointer come.
+    //  * The gesture will move delta(combined) = max(delta(i) which are positive) + min(delta(i) which are negative).
+    //  * The drag location will be the average of these moved pointers.
+    //
+    // Logic:
+    //
+    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the PointerEvent in
+    //    the _multiPointerMoveTrackers.
+    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes which pointer has been in
+    //    the _multiPointerMoveTrackers, the gesture will update immediately
+    //    then add this PointerEvent in the _multiPointerMoveTrackers.
+    //
+    // Example:
+    //
+    //  * When two pointers (p1 and p2) down, the sequence of PointerMoveEvents is : p1 down, p2 down, p1 move +50, p1 move +10,
+    //    p1 move +30, p1 move -10 , p1 up and p2 up.
+    //    The handleEvent process will be:
+    //     * p1 down (_multiPointerStartTrackers.add),
+    //     * p2 down (_multiPointerStartTrackers.add),
+    //     * p1 move +50 (_multiPointerMoveTrackers.add and the gesture wait),
+    //     * p1 move +10 (_multiPointerMoveTrackers.clear, the gesture update +50, and _multiPointerMoveTrackers.add,),
+    //     * p1 move +30 (_multiPointerMoveTrackers.clear, the gesture update +10, and _multiPointerMoveTrackers.add,),
+    //     * p1 move -10 (_multiPointerMoveTrackers.clear, the gesture update +30, and _multiPointerMoveTrackers.add,),
+    //     * p1 up (_multiPointerStartTrackers.clear),
+    //     * p2 up.
+    //     * It means the last PointerEvent will be lost, this is acceptable. If the gesture update the last PointerEvent
+    //       in the pointer up stage, it may cause flickering.
+    //
+    // When any pointer up which is accepted, the another pointers are given up.
     assert(_state != _DragState.ready);
     if (!event.synthesized &&
         (event is PointerDownEvent ||

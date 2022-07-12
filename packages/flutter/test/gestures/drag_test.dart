@@ -535,7 +535,219 @@ void main() {
     ]);
   });
 
-  testGesture('Multiple pointers down and  both pointers move behavior', (GestureTester tester) {
+  testGesture('A pointer joins and leave behavior', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 =
+    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 =
+    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(() => drag1.dispose);
+    addTearDown(() => drag2.dispose);
+
+    Offset? updatedScrollDelta;
+    final List<String> log = <String>[];
+    drag1.onDown = (_) { log.add('drag1-down'); };
+    drag1.onStart = (_) { log.add('drag1-start'); };
+    drag1.onUpdate = (DragUpdateDetails details) {
+      updatedScrollDelta = details.delta;
+      log.add('drag1-update');
+    };
+    drag1.onEnd = (_) { log.add('drag1-end'); };
+    drag1.onCancel = () { log.add('drag1-cancel'); };
+    drag2.onDown = (_) { log.add('drag2-down'); };
+    drag2.onStart = (_) { log.add('drag2-start'); };
+    drag2.onUpdate = (_) { log.add('drag2-update'); };
+    drag2.onEnd = (_) { log.add('drag2-end'); };
+    drag2.onCancel = () { log.add('drag2-cancel'); };
+
+    // Now only one pointer moves.
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
+    drag1.addPointer(down5);
+    drag2.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+    ]);
+
+    tester.route(pointer5.move(const Offset(100.0, 0.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+    ]);
+    expect(updatedScrollDelta, const Offset(90.0, 0.0));
+
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+    ]);
+    expect(updatedScrollDelta, const Offset(-50.0, 0.0));
+
+    // Let another pointer join.
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(const Offset(20.0, 20.0));
+    drag1.addPointer(down6);
+    drag2.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+    ]);
+
+    // They move at the opposite direction. Pointer5 moves (-10, -10)
+    // and pointer6 moves (+20, +20)
+    tester.route(pointer5.move(const Offset(40.0, 40.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+    ]);
+    tester.route(pointer6.move(const Offset(40.0, 40.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+    ]);
+    expect(updatedScrollDelta, const Offset(10.0, 0.0));
+
+    // They move at the same direction. Pointer5 moves (20, 20)
+    // and pointer6 moves (+30, +30)
+    tester.route(pointer5.move(const Offset(60.0, 60.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+    ]);
+    tester.route(pointer6.move(const Offset(70.0, 70.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+    ]);
+    expect(updatedScrollDelta, const Offset(30.0, 0.0));
+    updatedScrollDelta = null;
+
+    // One pointer leaves and the remaining pointer still moves.
+    tester.route(pointer6.up());
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+      'drag1-end',
+    ]);
+
+    tester.route(pointer5.move(const Offset(30.0, 40.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+      'drag1-end',
+    ]);
+    expect(updatedScrollDelta, isNull);
+
+    tester.route(pointer5.move(const Offset(40.0, 50.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+      'drag1-end',
+    ]);
+    expect(updatedScrollDelta, isNull);
+
+    tester.route(pointer5.move(const Offset(50.0, 60.0)));
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+      'drag1-end',
+    ]);
+    expect(updatedScrollDelta, isNull);
+
+    tester.route(pointer5.up());
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      'drag1-update',
+      'drag2-down',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+      'drag1-end',
+    ]);
+  });
+
+  testGesture('Two pointers down and both move', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.start;
     final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer()
@@ -571,31 +783,63 @@ void main() {
     drag2.addPointer(down6);
     tester.closeArena(6);
     tester.route(down6);
-    log.add('-a');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+    ]);
 
-    // For the reason of DragStartBehavior.start, drag1 won but no move.
+    // The drag1 won the arena but triggered no movement due to DragStartBehavior.start.
     tester.route(pointer5.move(const Offset(100.0, 0.0)));
-    log.add('-b');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+    ]);
     expect(updatedScrollDelta, isNull);
 
-    // For the reason of two pointers down, pointer6 moved but gesture will not move immediately.
+    // // The drag2 won the arena but triggered no movement due to DragStartBehavior.start.
     tester.route(pointer6.move(const Offset(50.0, 50.0)));
-    log.add('-c');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+    ]);
     expect(updatedScrollDelta, isNull);
 
-    // Pointer5 moved, then the gesture flushed pointer5 last delta and pointer6 last delta. pointer5 moved(-50.0, 50.0)
-    // and pointer6 moved (60.0, 80.0), the gesture moved (10, 0) finally because of HorizontalDragGestureRecognizer.
+    // Pointer 5 moved, but the gesture recognizer is waiting for a full batch, so there are no movement yet.
     tester.route(pointer5.move(const Offset(80.0, 100.0)));
-    log.add('-d');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+      'drag1-update',
+    ]);
     expect(updatedScrollDelta, const Offset(10.0, 0.0));
 
+    // Pointer 6 moved, making a full batch. The gesture recognizer dispatches movement.
     updatedScrollDelta = null;
     tester.route(pointer6.move(const Offset(40.0, 70.0)));
-    log.add('-e');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+      'drag1-update',
+    ]);
     expect(updatedScrollDelta, isNull);
 
     tester.route(pointer5.move(const Offset(40.0, 100.0)));
-    log.add('-f');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+    ]);
     expect(updatedScrollDelta, const Offset(-40.0, 0.0));
 
     tester.route(pointer5.up());
@@ -604,21 +848,15 @@ void main() {
     expect(log, <String>[
       'drag1-down',
       'drag2-down',
-      '-a',
       'drag1-start',
       'drag2-cancel',
-      '-b',
-      '-c',
       'drag1-update',
-      '-d',
-      '-e',
       'drag1-update',
-      '-f',
       'drag1-end',
     ]);
   });
 
-  testGesture('Multiple pointers down but only one pointer moves behavior', (GestureTester tester) {
+  testGesture('Two pointers down but only one moves', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.start;
     final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer()
@@ -654,26 +892,52 @@ void main() {
     drag2.addPointer(down6);
     tester.closeArena(6);
     tester.route(down6);
-    log.add('-a');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+    ]);
 
-    // For the reason of DragStartBehavior.start, drag1 won but no move.
+    // The `drag1` won the arena but triggered no movement due to `DragStartBehavior.start`.
     tester.route(pointer5.move(const Offset(100.0, 0.0)));
-    log.add('-b');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+    ]);
     expect(updatedScrollDelta, isNull);
 
-    // For the reason of two pointers down, pointer5 moved but gesture will not move immediately.
+    // Pointer 5 moved, but the gesture recognizer is waiting for a full batch, so there are no movement yet.
     tester.route(pointer5.move(const Offset(50.0, 50.0)));
-    log.add('-c');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+    ]);
     expect(updatedScrollDelta, isNull);
 
-    // Pointer5 moved again, then the gesture flush last move.
+    // Pointer 5 moved again. The gesture recognizer takes it as a new batch, and dispatches movement.
     tester.route(pointer5.move(const Offset(70.0, 100.0)));
-    log.add('-d');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+      'drag1-update',
+    ]);
     expect(updatedScrollDelta, const Offset(-50.0, 0.0));
 
-    // Pointer5 moved again, then the gesture flush last move.
+    // Pointer 5 moved again. Another new batch.
     tester.route(pointer5.move(const Offset(80.0, 70.0)));
-    log.add('-e');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      'drag1-start',
+      'drag2-cancel',
+      'drag1-update',
+      'drag1-update',
+    ]);
     expect(updatedScrollDelta, const Offset(20.0, 0.0));
 
     tester.route(pointer5.up());
@@ -682,15 +946,10 @@ void main() {
     expect(log, <String>[
       'drag1-down',
       'drag2-down',
-      '-a',
       'drag1-start',
       'drag2-cancel',
-      '-b',
-      '-c',
       'drag1-update',
-      '-d',
       'drag1-update',
-      '-e',
       'drag1-end',
     ]);
   });
