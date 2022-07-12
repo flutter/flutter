@@ -59,12 +59,12 @@ void main() {
     });
 
     test('Verify invalid TextEditingDeltaInsertion fails to apply', () {
-      const TextEditingDeltaInsertion delta = 
+      const TextEditingDeltaInsertion delta =
               TextEditingDeltaInsertion(
-                oldText: 'hello worl', 
-                textInserted: 'd', 
-                insertionOffset: 11, 
-                selection: TextSelection.collapsed(offset: 11), 
+                oldText: 'hello worl',
+                textInserted: 'd',
+                insertionOffset: 11,
+                selection: TextSelection.collapsed(offset: 11),
                 composing: TextRange.empty,
               );
 
@@ -124,11 +124,11 @@ void main() {
     });
 
     test('Verify invalid TextEditingDeltaDeletion fails to apply', () {
-      const TextEditingDeltaDeletion delta = 
+      const TextEditingDeltaDeletion delta =
               TextEditingDeltaDeletion(
-                oldText: 'hello world', 
+                oldText: 'hello world',
                 deletedRange: TextRange(start: 5, end: 12),
-                selection: TextSelection.collapsed(offset: 5), 
+                selection: TextSelection.collapsed(offset: 5),
                 composing: TextRange.empty,
               );
 
@@ -216,12 +216,12 @@ void main() {
     });
 
     test('Verify invalid TextEditingDeltaReplacement fails to apply', () {
-      const TextEditingDeltaReplacement delta = 
+      const TextEditingDeltaReplacement delta =
               TextEditingDeltaReplacement(
-                oldText: 'hello worl', 
-                replacementText: 'world', 
-                replacedRange: TextRange(start: 5, end: 11), 
-                selection: TextSelection.collapsed(offset: 11), 
+                oldText: 'hello worl',
+                replacementText: 'world',
+                replacedRange: TextRange(start: 5, end: 11),
+                selection: TextSelection.collapsed(offset: 11),
                 composing: TextRange.empty,
               );
 
@@ -253,10 +253,10 @@ void main() {
     });
 
     test('Verify invalid TextEditingDeltaNonTextUpdate fails to apply', () {
-      const TextEditingDeltaNonTextUpdate delta = 
+      const TextEditingDeltaNonTextUpdate delta =
               TextEditingDeltaNonTextUpdate(
-                oldText: 'hello world', 
-                selection: TextSelection.collapsed(offset: 12), 
+                oldText: 'hello world',
+                selection: TextSelection.collapsed(offset: 12),
                 composing: TextRange.empty,
               );
 
