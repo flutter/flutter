@@ -33,6 +33,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   const FloatingActionButtonThemeData({
     this.foregroundColor,
     this.backgroundColor,
+    this.disabledBackgroundColor,
     this.focusColor,
     this.hoverColor,
     this.splashColor,
@@ -60,6 +61,10 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
   /// background.
   final Color? backgroundColor;
+
+  /// Color to be used for the unselected, disabled [FloatingActionButton]'s
+  /// background.
+  final Color? disabledBackgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
   final Color? focusColor;
@@ -134,6 +139,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   FloatingActionButtonThemeData copyWith({
     Color? foregroundColor,
     Color? backgroundColor,
+    Color? disabledBackgroundColor,
     Color? focusColor,
     Color? hoverColor,
     Color? splashColor,
@@ -156,6 +162,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      disabledBackgroundColor: disabledBackgroundColor ?? this.disabledBackgroundColor,
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       splashColor: splashColor ?? this.splashColor,
@@ -190,6 +197,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     return FloatingActionButtonThemeData(
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      disabledBackgroundColor: Color.lerp(a?.disabledBackgroundColor, b?.disabledBackgroundColor, t),
       focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
       hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
       splashColor: Color.lerp(a?.splashColor, b?.splashColor, t),
@@ -212,13 +220,14 @@ class FloatingActionButtonThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll(<Object?>[
     foregroundColor,
     backgroundColor,
     focusColor,
     hoverColor,
     splashColor,
     elevation,
+    disabledBackgroundColor,
     focusElevation,
     hoverElevation,
     disabledElevation,
@@ -233,7 +242,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     extendedIconLabelSpacing,
     extendedPadding,
     extendedTextStyle,
-  );
+  ]);
 
   @override
   bool operator ==(Object other) {
@@ -246,6 +255,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     return other is FloatingActionButtonThemeData
         && other.foregroundColor == foregroundColor
         && other.backgroundColor == backgroundColor
+        && other.disabledBackgroundColor == disabledBackgroundColor
         && other.focusColor == focusColor
         && other.hoverColor == hoverColor
         && other.splashColor == splashColor
@@ -272,6 +282,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
 
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('disabledBackgroundColor', disabledBackgroundColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));

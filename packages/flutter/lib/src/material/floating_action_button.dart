@@ -102,6 +102,7 @@ class FloatingActionButton extends StatelessWidget {
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
+    this.disabledBackgroundColor,
     this.focusColor,
     this.hoverColor,
     this.splashColor,
@@ -151,6 +152,7 @@ class FloatingActionButton extends StatelessWidget {
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
+    this.disabledBackgroundColor,
     this.focusColor,
     this.hoverColor,
     this.splashColor,
@@ -198,6 +200,7 @@ class FloatingActionButton extends StatelessWidget {
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
+    this.disabledBackgroundColor,
     this.focusColor,
     this.hoverColor,
     this.splashColor,
@@ -244,6 +247,7 @@ class FloatingActionButton extends StatelessWidget {
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
+    this.disabledBackgroundColor,
     this.focusColor,
     this.hoverColor,
     this.heroTag = const _DefaultHeroTag(),
@@ -253,7 +257,7 @@ class FloatingActionButton extends StatelessWidget {
     this.splashColor,
     this.highlightElevation,
     this.disabledElevation,
-    required this.onPressed,
+    this.onPressed,
     this.mouseCursor = SystemMouseCursors.click,
     this.shape,
     this.isExtended = true,
@@ -302,11 +306,19 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The button's background color.
   ///
-  /// If this property is null, then the
+  /// If this property is `null`, then the
   /// [FloatingActionButtonThemeData.backgroundColor] of
   /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
   /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
   final Color? backgroundColor;
+
+  /// The button's background color when it is disabled.
+  ///
+  /// If this property is `null`, then the
+  /// [FloatingActionButtonThemeData.disabledBackgroundColor] of
+  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
+  final Color? disabledBackgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
   ///
@@ -515,13 +527,21 @@ class FloatingActionButton extends StatelessWidget {
     final FloatingActionButtonThemeData defaults = theme.useMaterial3
       ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
       : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
+    
 
     final Color foregroundColor = this.foregroundColor
       ?? floatingActionButtonTheme.foregroundColor
       ?? defaults.foregroundColor!;
-    final Color backgroundColor = this.backgroundColor
-      ?? floatingActionButtonTheme.backgroundColor
-      ?? defaults.backgroundColor!;
+    final Color backgroundColor;
+    if (onPressed != null) {
+      backgroundColor = this.backgroundColor
+        ?? floatingActionButtonTheme.backgroundColor
+        ?? defaults.backgroundColor!;
+    } else {
+      backgroundColor = disabledBackgroundColor
+        ?? floatingActionButtonTheme.disabledBackgroundColor
+        ?? defaults.disabledBackgroundColor!;
+    }
     final Color focusColor = this.focusColor
       ?? floatingActionButtonTheme.focusColor
       ?? defaults.focusColor!;
@@ -766,6 +786,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 
   @override Color? get foregroundColor => _colors.onSecondary;
   @override Color? get backgroundColor => _colors.secondary;
+  @override Color? get disabledBackgroundColor => _colors.secondary;
   @override Color? get focusColor => _theme.focusColor;
   @override Color? get hoverColor => _theme.hoverColor;
   @override Color? get splashColor => _theme.splashColor;
@@ -821,6 +842,7 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
 
   @override Color? get foregroundColor => _colors.onPrimaryContainer;
   @override Color? get backgroundColor => _colors.primaryContainer;
+  @override Color? get disabledBackgroundColor => _colors.primaryContainer.withOpacity(0.12);
   @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.12);
   @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.12);
   @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
