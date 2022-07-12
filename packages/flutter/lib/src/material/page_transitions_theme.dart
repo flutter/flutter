@@ -194,6 +194,11 @@ class _ZoomPageTransition extends StatelessWidget {
   ///    property when the [_ZoomPageTransition] is used as a page transition.
   final Animation<double> secondaryAnimation;
 
+  /// Whether the [RasterWidget] based-rasterized strategy for the zoom page transition
+  /// will be used.
+  ///
+  /// Notably, this improves performance by disabling animations on both the outgoing and
+  /// incoming route.
   final bool preferRasterization;
 
   /// The widget below this widget in the tree.
@@ -278,46 +283,10 @@ class _ZoomEnterTransition extends StatefulWidget {
   State<_ZoomEnterTransition> createState() => _ZoomEnterTransitionState();
 }
 
-mixin _ZoomTransitionBase {
-  // Don't rasterize if:
-  // 1. rasterization is disabled by the platform.
-  // 2. The animation is paused/stopped.
-  // 3. The values of the scale/fade transition do not
-  //    benefit from rasterization.
-  final ValueNotifier<bool> rasterize = ValueNotifier<bool>(false);
-
-  late Animation<double> fadeTransition;
-  late Animation<double> scaleTransition;
-
-  bool get allowRasterization;
-
-  void _onAnimationValueChange() {
-    if ((scaleTransition.value == 1.0) &&
-        (fadeTransition.value == 0.0 ||
-         fadeTransition.value == 1.0)) {
-        rasterize.value = false;
-      } else {
-        rasterize.value = allowRasterization;
-      }
-  }
-
-  void _onAnimationStatusChange(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        rasterize.value = false;
-        break;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        rasterize.value = allowRasterization;
-        break;
-    }
-  }
-}
-
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
+  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
   @override
-  bool get allowRasterization => widget.preferRasterization && isHardwareAccelerated();
+  bool get allowRasterization => !kIsWeb && widget.preferRasterization;
 
   late _ZoomEnterTransitionDelegate delegate;
 
@@ -351,8 +320,8 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
         : _scaleUpTransition
       ).animate(widget.animation);
 
-    widget.animation.addListener(_onAnimationValueChange);
-    widget.animation.addStatusListener(_onAnimationStatusChange);
+    widget.animation.addListener(onAnimationValueChange);
+    widget.animation.addStatusListener(onAnimationStatusChange);
   }
 
   @override
@@ -370,8 +339,8 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   @override
   void didUpdateWidget(covariant _ZoomEnterTransition oldWidget) {
     if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
-      oldWidget.animation.removeListener(_onAnimationValueChange);
-      oldWidget.animation.removeStatusListener(_onAnimationStatusChange);
+      oldWidget.animation.removeListener(onAnimationValueChange);
+      oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
       delegate.dispose();
       delegate = _ZoomEnterTransitionDelegate(
@@ -386,47 +355,43 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
 
   @override
   void dispose() {
-    widget.animation.removeListener(_onAnimationValueChange);
-    widget.animation.removeStatusListener(_onAnimationStatusChange);
+    widget.animation.removeListener(onAnimationValueChange);
+    widget.animation.removeStatusListener(onAnimationStatusChange);
     delegate.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _AlternateRasterWidget(
-      delegate: delegate,
-      rasterize: rasterize,
-      child: widget.child,
+    if (allowRasterization) {
+      return RasterWidget(delegate: delegate, controller: controller, child: widget.child);
+    }
+    return AnimatedBuilder(
+      animation: widget.animation,
       builder: (BuildContext context, Widget? child) {
-        return AnimatedBuilder(
-          animation: widget.animation,
-          builder: (BuildContext context, Widget? child) {
-            double scrimOpacity = 0;
-            // The transition's scrim opacity only increases on the forward transition.
-            // In the reverse transition, the opacity should always be 0.0.
-            //
-            // Therefore, we need to only apply the scrim opacity animation when
-            // the transition is running forwards.
-            //
-            // The reason that we check that the animation's status is not `completed`
-            // instead of checking that it is `forward` is that this allows
-            // the interrupted reversal of the forward transition to smoothly fade
-            // the scrim away. This prevents a disjointed removal of the scrim.
-            if (!widget.reverse && widget.animation.status != AnimationStatus.completed) {
-              scrimOpacity = _scrimOpacityTween.evaluate(widget.animation)!;
-            }
-            return ColoredBox(
-              color: Colors.black.withOpacity(scrimOpacity),
-              child: child,
-            );
-          },
-          child: ScaleTransition(
-            scale: scaleTransition,
-            child: FadeTransition(opacity: fadeTransition, child: child),
-          ),
+        double scrimOpacity = 0;
+        // The transition's scrim opacity only increases on the forward transition.
+        // In the reverse transition, the opacity should always be 0.0.
+        //
+        // Therefore, we need to only apply the scrim opacity animation when
+        // the transition is running forwards.
+        //
+        // The reason that we check that the animation's status is not `completed`
+        // instead of checking that it is `forward` is that this allows
+        // the interrupted reversal of the forward transition to smoothly fade
+        // the scrim away. This prevents a disjointed removal of the scrim.
+        if (!widget.reverse && widget.animation.status != AnimationStatus.completed) {
+          scrimOpacity = _scrimOpacityTween.evaluate(widget.animation)!;
+        }
+        return ColoredBox(
+          color: Colors.black.withOpacity(scrimOpacity),
+          child: child,
         );
       },
+      child: ScaleTransition(
+        scale: scaleTransition,
+        child: FadeTransition(opacity: fadeTransition, child: widget.child),
+      ),
     );
   }
 }
@@ -488,9 +453,9 @@ class _ZoomEnterTransitionDelegate extends RasterWidgetDelegate {
   @override
   bool shouldRepaint(covariant _ZoomEnterTransitionDelegate oldDelegate) {
     return oldDelegate.reverse != reverse
-      || oldDelegate.animation != animation
-      || oldDelegate.scale != scale
-      || oldDelegate.fade != fade;
+      || oldDelegate.animation.value != animation.value
+      || oldDelegate.scale.value != scale.value
+      || oldDelegate.fade.value != fade.value;
   }
 }
 
@@ -515,8 +480,9 @@ class _ZoomExitTransition extends StatefulWidget {
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
   late _ZoomExitTransitionDelegate delegate;
 
+  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
   @override
-  bool get allowRasterization => widget.preferRasterization && isHardwareAccelerated();
+  bool get allowRasterization => !kIsWeb && widget.preferRasterization;
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -542,8 +508,8 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       : _scaleUpTransition
     ).animate(widget.animation);
 
-    widget.animation.addListener(_onAnimationValueChange);
-    widget.animation.addStatusListener(_onAnimationStatusChange);
+    widget.animation.addListener(onAnimationValueChange);
+    widget.animation.addStatusListener(onAnimationStatusChange);
   }
 
   @override
@@ -560,8 +526,8 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   @override
   void didUpdateWidget(covariant _ZoomExitTransition oldWidget) {
     if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
-      oldWidget.animation.removeListener(_onAnimationValueChange);
-      oldWidget.animation.removeStatusListener(_onAnimationStatusChange);
+      oldWidget.animation.removeListener(onAnimationValueChange);
+      oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
       delegate.dispose();
       delegate = _ZoomExitTransitionDelegate(
@@ -575,27 +541,27 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
 
   @override
   void dispose() {
-    widget.animation.removeListener(_onAnimationValueChange);
-    widget.animation.removeStatusListener(_onAnimationStatusChange);
+    widget.animation.removeListener(onAnimationValueChange);
+    widget.animation.removeStatusListener(onAnimationStatusChange);
     delegate.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _AlternateRasterWidget(
-      delegate: delegate,
-      rasterize: rasterize,
-      child: widget.child,
-      builder: (BuildContext context, Widget? child) {
-        return ScaleTransition(
-          scale: scaleTransition,
-          child: FadeTransition(
-            opacity: fadeTransition,
-            child: child,
-          ),
-        );
-      },
+    if (allowRasterization) {
+      return RasterWidget(
+        delegate: delegate,
+        controller: controller,
+        child: widget.child,
+      );
+    }
+    return ScaleTransition(
+      scale: scaleTransition,
+      child: FadeTransition(
+        opacity: fadeTransition,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -621,7 +587,7 @@ class _ZoomExitTransitionDelegate extends RasterWidgetDelegate {
 
   @override
   bool shouldRepaint(covariant _ZoomExitTransitionDelegate oldDelegate) {
-    return oldDelegate.reverse != reverse || oldDelegate.fade != fade || oldDelegate.scale != scale;
+    return oldDelegate.reverse != reverse || oldDelegate.fade.value != fade.value || oldDelegate.scale.value != scale.value;
   }
 
   @override
@@ -913,69 +879,39 @@ void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double
   context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
 }
 
-// A widget that either draws the provided [child] using [RasterWidget]
-// and delegate or by using [builder] and passing the child through.
-class _AlternateRasterWidget extends StatefulWidget {
-  const _AlternateRasterWidget({
-    required this.delegate,
-    required this.builder,
-    required this.child,
-    required this.rasterize,
-  });
+mixin _ZoomTransitionBase {
+  // Don't rasterize if:
+  // 1. Rasterization is disabled by the platform.
+  // 2. The animation is paused/stopped.
+  // 3. The values of the scale/fade transition do not
+  //    benefit from rasterization.
+  final RasterWidgetController controller = RasterWidgetController();
 
-  final RasterWidgetDelegate delegate;
-  final TransitionBuilder builder;
-  final Widget? child;
-  final ValueNotifier<bool> rasterize;
+  late Animation<double> fadeTransition;
+  late Animation<double> scaleTransition;
 
-  @override
-  State<_AlternateRasterWidget> createState() => _AnimatedRasterState();
-}
+  bool get allowRasterization;
 
-class _AnimatedRasterState extends State<_AlternateRasterWidget> {
-  bool rasterize = false;
+  void onAnimationValueChange() {
+    if ((scaleTransition.value == 1.0) &&
+        (fadeTransition.value == 0.0 ||
+         fadeTransition.value == 1.0)) {
+        controller.rasterize = false;
+      } else {
+        controller.rasterize = allowRasterization;
+      }
+  }
 
-  void _onRasterizeChange() {
-    final bool newValue = widget.rasterize.value;
-    if (newValue == rasterize) {
-      return;
+  void onAnimationStatusChange(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        controller.rasterize = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        controller.rasterize = allowRasterization;
+        break;
     }
-    setState(() {
-      rasterize = newValue;
-    });
-  }
-
-  @override
-  void initState() {
-    rasterize = widget.rasterize.value;
-    widget.rasterize.addListener(_onRasterizeChange);
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant _AlternateRasterWidget oldWidget) {
-    if (oldWidget.rasterize != widget.rasterize) {
-      oldWidget.rasterize.removeListener(_onRasterizeChange);
-      widget.rasterize.addListener(_onRasterizeChange);
-      _onRasterizeChange();
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    widget.rasterize.removeListener(_onRasterizeChange);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (rasterize) {
-      return RasterWidget(
-        delegate: widget.delegate,
-        child: widget.child,
-      );
-    }
-    return widget.builder(context, widget.child);
   }
 }

@@ -2604,8 +2604,10 @@ class RenderTransform extends RenderProxyBox {
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
-          // If either X or Y scale are 0.0 then nothing will actually be drawn.
-          if (transform[0] == 0.0 || transform[5] == 0.0) {
+          // if the matrix is singular the children would be compressed to a line or
+          // single point, instead short-circuit and paint nothing.
+          final double det = transform.determinant();
+          if (det == 0 || !det.isFinite) {
             layer = null;
             return;
           }

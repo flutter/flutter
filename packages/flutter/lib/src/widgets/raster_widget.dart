@@ -10,53 +10,75 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-/// Whether or not the application is currently using a hardware accelerated
-/// backend.
-bool isHardwareAccelerated() {
-  final ui.SceneBuilder builder = ui.SceneBuilder();
-  final ui.Scene scene = builder.build();
-  late ui.Image image;
-  try {
-    image = scene.toGpuImage(1, 1);
-  } on UnsupportedError {
-    // Flutter Web HTML backend.
-    return false;
+/// A controller for the [RasterWidget] that controls when the child image is displayed
+/// and when to regenerated the child image.
+///
+/// When the value of [rasterize] is true, The [RasterWidget] will convert the child scene into
+/// an image. This image will be drawn in place of the children until [rasterize] is false.
+/// Any changes to the widget tree that would normally cause it to repaint are ignored.
+///
+/// To force [RasterWidget] to recreate the child image, call [clear].
+class RasterWidgetController extends ChangeNotifier {
+  /// Create a new [RasterWidgetController].
+  ///
+  /// By default, [rasterize] is `false` and cannot be `null`.
+  RasterWidgetController({
+    bool rasterize = false
+  }) : _rasterize = rasterize;
+
+  /// Reset the raster held by any listening [RasterWidget].
+  ///
+  /// This has no effect if [rasterize] is `false`.
+  void clear() {
+    notifyListeners();
   }
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  try {
-    canvas.drawImage(image, Offset.zero, Paint());
-  } on ui.PictureRasterizationException {
-    // Software rendering backend on iOS, flutter_tester, or Android software rendering.
-    return false;
+
+  /// Whether a rasterized version of this render objects child is drawn in
+  /// place of the child.
+  bool get rasterize => _rasterize;
+  bool _rasterize;
+  set rasterize(bool value) {
+    if (value == rasterize) {
+      return;
+    }
+    _rasterize = value;
+    notifyListeners();
   }
-  image.dispose();
-  return true;
 }
 
 /// A widget that replaces its child with a rasterized version of the child.
 ///
-/// Not all backends support this rendering strategy, specifically the html backend of
-/// flutter on the web, android emulators with --enable-software-rendering, and iOS
-/// while backgrounded. If this widget is used in these cases, it will simply paint its
-/// child as is. Whether or not this widget is supported can be detected at runtime with
-/// [isHardwareAccelerated].
+/// By default, the child is drawn as is. The default [delegate] simply scales
+/// down the image by the current device pixel ratio and paints it into the
+/// canvas. How this image is drawn can be customized by providing a new
+/// subclass of [RasterWidgetDelegate] to the [delegate] argument.
+///
+/// This widget is not supported on the HTML backend of Flutter for the web.
 class RasterWidget extends SingleChildRenderObjectWidget {
   /// Create a new [RasterWidget].
+  ///
+  /// The [controller] and [child] arguments are required.
   const RasterWidget({
     super.key,
-    required this.delegate,
-    super.child
+    this.delegate = const _RasterDefaultDelegate(),
+    required this.controller,
+    required super.child
   });
 
-  /// The delegate used to draw the `ui.Image` representing the rasterized child widget.
+  /// A delegate that allows customization of how the image is painted.
+  ///
+  /// If not provided, defaults to a delegate which paints the child as is.
   final RasterWidgetDelegate delegate;
+
+  /// The controller that determines when to display the children as an image.
+  final RasterWidgetController controller;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderRasterWidget(
-      delegate,
-      MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
+      delegate: delegate,
+      controller: controller,
+      devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
     );
   }
 
@@ -64,11 +86,12 @@ class RasterWidget extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, covariant RenderRasterWidget renderObject) {
     renderObject
       ..delegate = delegate
+      ..controller = controller
       ..devicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0;
   }
 }
 
-/// A delegate used to draw the `ui.Image` representing the rasterized child widget.
+/// A delegate used to draw the image representing the rasterized child.
 abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// Called whenever the [image] that represents a [RasterWidget]s child should be painted.
   ///
@@ -76,23 +99,31 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// [pixelRatio] to account for device independent pixels.
   ///
   /// There is no offset given in this paint method, as the parent is an [OffsetLayer] all
-  /// offsets are `Offset.zero`.
+  /// offsets are [Offset.zero].
   ///
-  /// Example:
+  /// {@tool snippet}
+  ///
+  /// The follow method shows how the default implementation of the delegate used by the
+  /// [RasterWidget] paints the child image. This must account for the fact that the image
+  /// width and height will be given in physical pixels, while the image must be painted with
+  /// device independent pixels. That is, the width and height of the image is the widget and
+  /// height of the provided `area`, multiplied by the `pixelRatio`:
   ///
   /// ```dart
   /// void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
-  ///   var src = Rect.fromLTWH(0, 0, image.width, image.height);
-  ///   var dst = Rect.fromLTWH(0, 0, area.width, area.height);
-  ///   context.canvas.drawImageRect(image, src, dst);
+  ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  ///   final Rect dst = Rect.fromLTWH(0, 0, area.width, area.height);
+  ///   final Paint paint = Paint()
+  ///     ..filterQuality = FilterQuality.low;
+  ///   context.canvas.drawImageRect(image, src, dst, paint);
   /// }
-  ///
   /// ```
+  /// {@end-tool}
   void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio);
 
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderRasterWidget] object, or any time that a new
-  /// [RasterWidgetDelegate] object is created with a new instance of the custom painter
+  /// [RasterWidgetDelegate] object is created with a new instance of the
   /// delegate class (which amounts to the same thing, because the latter is
   /// implemented in terms of the former).
   ///
@@ -109,6 +140,10 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// without [shouldRepaint] being called at all (e.g. if the box changes
   /// size).
   ///
+  /// Changing the delegate will not cause the child image retained by the
+  /// [RenderRasterWidget] to be updated. Instead, [RasterWidgetController.clear] can
+  /// be used to force the generation of a new image.
+  ///
   /// The `oldDelegate` argument will never be null.
   bool shouldRepaint(covariant RasterWidgetDelegate oldDelegate);
 }
@@ -116,9 +151,17 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
 /// A render object that draws its child as a [ui.Image].
 class RenderRasterWidget extends RenderProxyBox {
   /// Create a new [RenderRasterWidget].
-  RenderRasterWidget(this._delegate, this._devicePixelRatio);
+  RenderRasterWidget({
+    required RasterWidgetDelegate delegate,
+    required double devicePixelRatio,
+    required RasterWidgetController controller,
+  }) : _delegate = delegate,
+       _devicePixelRatio = devicePixelRatio,
+       _controller = controller {
+    _currentlyRepaintBoundary = controller.rasterize;
+  }
 
-  /// The device pixel ratio used to create the child raster.
+  /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
   double _devicePixelRatio;
   set devicePixelRatio(double value) {
@@ -129,30 +172,57 @@ class RenderRasterWidget extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// The delegate used to draw the `ui.Image` representing the rasterized child widget.
+  /// Whether a rasterized version of this render objects child is drawn in
+  /// place of the child.
+  RasterWidgetController get controller => _controller;
+  RasterWidgetController _controller;
+  set controller(RasterWidgetController value) {
+    if (value == controller) {
+      return;
+    }
+    controller.removeListener(_onRasterValueChanged);
+    final bool oldValue = controller.rasterize;
+    _controller = value;
+    if (attached) {
+      controller.addListener(_onRasterValueChanged);
+      if (oldValue != controller.rasterize) {
+        _onRasterValueChanged();
+      }
+    }
+  }
+
+  /// The delegate used to draw the image representing the child.
   RasterWidgetDelegate get delegate => _delegate;
   RasterWidgetDelegate _delegate;
   set delegate(RasterWidgetDelegate value) {
-    if (!value.shouldRepaint(delegate)) {
+    if (value == delegate) {
       return;
     }
     delegate.removeListener(markNeedsPaint);
+    final RasterWidgetDelegate oldDelegate = _delegate;
     _delegate = value;
-    delegate.addListener(markNeedsPaint);
-    markNeedsPaint();
+    if (attached) {
+      delegate.addListener(markNeedsPaint);
+      if (delegate.shouldRepaint(oldDelegate)) {
+        markNeedsPaint();
+      }
+    }
   }
 
   ui.Image? _childRaster;
+  bool _currentlyRepaintBoundary = false;
 
   @override
   void attach(covariant PipelineOwner owner) {
     delegate.addListener(markNeedsPaint);
+    controller.addListener(_onRasterValueChanged);
     super.attach(owner);
   }
 
   @override
   void detach() {
     delegate.removeListener(markNeedsPaint);
+    controller.removeListener(_onRasterValueChanged);
     _childRaster?.dispose();
     _childRaster = null;
     super.detach();
@@ -161,35 +231,83 @@ class RenderRasterWidget extends RenderProxyBox {
   @override
   void dispose() {
     delegate.removeListener(markNeedsPaint);
+    controller.removeListener(_onRasterValueChanged);
     _childRaster?.dispose();
     _childRaster = null;
     super.dispose();
   }
 
+  void _onRasterValueChanged() {
+    final bool wasRepaintBoundary = _currentlyRepaintBoundary;
+    _currentlyRepaintBoundary = controller.rasterize;
+    if (_currentlyRepaintBoundary != wasRepaintBoundary) {
+      markNeedsCompositingBitsUpdate();
+    }
+    _childRaster?.dispose();
+    _childRaster = null;
+    markNeedsPaint();
+  }
+
   // Paint [child] with this painting context, then convert to a raster and detach all
   // children from this layer.
-  ui.Image _paintAndDetachToGpuImage() {
+  ui.Image _paintAndDetachToImage() {
     final OffsetLayer offsetLayer = layer! as OffsetLayer;
     final PaintingContext context = PaintingContext(offsetLayer, Offset.zero & size);
     super.paint(context, Offset.zero);
+    // This ignore is here because this method is protected by the `PaintingContext`. Adding a new
+    // method that performs the work of `_paintAndDetachToImage` would avoid the need for this, but
+    // that would conflict with our goals of minimizing painting context.
     // ignore: invalid_use_of_protected_member
     context.stopRecordingIfNeeded();
-    final ui.Image image = offsetLayer.toGpuImage(Offset.zero & size, pixelRatio: devicePixelRatio);
+    final ui.Image image = offsetLayer.toImageSync(Offset.zero & size, pixelRatio: devicePixelRatio);
     offsetLayer.removeAllChildren();
     return image;
   }
 
   @override
-  bool get isRepaintBoundary => child != null;
-
+  bool get isRepaintBoundary => child != null && _currentlyRepaintBoundary;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _childRaster ??= _paintAndDetachToGpuImage();
-    try {
+    if (controller.rasterize) {
+      _childRaster ??= _paintAndDetachToImage();
       delegate.paint(context, offset & size, _childRaster!, devicePixelRatio);
-    } on ui.PictureRasterizationException {
-      super.paint(context, offset);
+      return;
     }
+    _childRaster?.dispose();
+    _childRaster = null;
+    super.paint(context, offset);
   }
+}
+
+// A delegate that paints the child widget as is.
+class _RasterDefaultDelegate implements RasterWidgetDelegate {
+  const _RasterDefaultDelegate();
+
+  @override
+  void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
+    final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final Rect dst = Rect.fromLTWH(0, 0, area.width, area.height);
+    final Paint paint = Paint()
+      ..filterQuality = FilterQuality.low;
+    context.canvas.drawImageRect(image, src, dst, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant RasterWidgetDelegate oldDelegate) => false;
+
+  @override
+  void addListener(ui.VoidCallback listener) { }
+
+  @override
+  void dispose() { }
+
+  @override
+  bool get hasListeners => false;
+
+  @override
+  void notifyListeners() { }
+
+  @override
+  void removeListener(ui.VoidCallback listener) { }
 }
