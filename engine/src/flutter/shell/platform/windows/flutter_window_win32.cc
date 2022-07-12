@@ -16,10 +16,6 @@ namespace {
 // constant for machines running at 100% scaling.
 constexpr int base_dpi = 96;
 
-// TODO: See if this can be queried from the OS; this value is chosen
-// arbitrarily to get something that feels reasonable.
-constexpr int kScrollOffsetMultiplier = 20;
-
 // Maps a Flutter cursor name to an HCURSOR.
 //
 // Returns the arrow cursor for unknown constants.
@@ -228,7 +224,7 @@ void FlutterWindowWin32::OnScroll(double delta_x,
 
   ScreenToClient(GetWindowHandle(), &point);
   binding_handler_delegate_->OnScroll(point.x, point.y, delta_x, delta_y,
-                                      kScrollOffsetMultiplier, device_kind,
+                                      GetScrollOffsetMultiplier(), device_kind,
                                       device_id);
 }
 

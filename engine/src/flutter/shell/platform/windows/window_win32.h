@@ -199,6 +199,9 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
 
   UINT GetCurrentHeight();
 
+  // Returns the current pixel per scroll tick value.
+  virtual float GetScrollOffsetMultiplier();
+
  protected:
   // Win32's DefWindowProc.
   //
@@ -229,9 +232,15 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
   // Retrieves a class instance pointer for |window|
   static WindowWin32* GetThisFromHandle(HWND const window) noexcept;
 
+  // Updates the cached scroll_offset_multiplier_ value based off OS settings.
+  void UpdateScrollOffsetMultiplier();
+
   int current_dpi_ = 0;
   int current_width_ = 0;
   int current_height_ = 0;
+
+  // Holds the conversion factor from lines scrolled to pixels scrolled.
+  float scroll_offset_multiplier_;
 
   // WM_DPICHANGED_BEFOREPARENT defined in more recent Windows
   // SDK
