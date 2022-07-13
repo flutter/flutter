@@ -24,6 +24,9 @@ typedef LoupeControllerWidgetBuilder<T> = Widget? Function(
 /// based on calls to show / hide, respectively.
 ///
 /// To check the status of the loupe, see [LoupeController.status].
+// TODO(antholeole): This whole paradigm can be removed once portals 
+// lands - then the loupe can be controlled though a widget in the tree.
+// https://github.com/flutter/flutter/pull/105335
 class LoupeController {
   /// This stream is used to tell the loupe that it should begin it's enter / hide animation.
   /// The [LoupeController] sends its loupe true or false for show / hide respectively,
@@ -86,8 +89,8 @@ class LoupeController {
       ValueNotifier<AnimationStatus>(AnimationStatus.dismissed);
 
   /// Function that returns a function and the other function checks platform to check if the builder should be null
-  /// 
-  /// 
+  ///
+  ///
   /// Shows the [RawLoupe] that this controller controlls.
   ///
   /// Returns a future that completes when the loupe is fully shown, i.e. done
@@ -107,7 +110,7 @@ class LoupeController {
     required WidgetBuilder builder,
     Widget? debugRequiredFor,
     OverlayEntry? below,
-  }) {
+  }) async {
     _forceHide();
     final OverlayState? overlayState = Overlay.of(
       context,
