@@ -356,7 +356,7 @@ class FormField<T> extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [FormState], which explains the submission behaviour in its submit
+  ///  * [FormState.submit], which explains the submission behaviour in its submit
   ///    method.
   final String? submissionKey;
 
