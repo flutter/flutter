@@ -534,12 +534,6 @@ class TestParameters {
   // that require SkCanvas->DisplayList transfers.
   // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
   bool is_draw_shadows() const { return is_draw_shadows_; }
-  // The CPU renders nothing for drawVertices with a Blender.
-  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12200
-  bool is_draw_vertices() const { return is_draw_vertices_; }
-  // The CPU renders nothing for drawAtlas with a Blender.
-  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12199
-  bool is_draw_atlas() const { return is_draw_atlas_; }
   // Tests that call drawTextBlob with an sk_ref paint attribute will cause
   // those attributes to be stored in an internal Skia cache so we need
   // to expect that the |sk_ref.unique()| call will fail in those cases.
@@ -556,16 +550,8 @@ class TestParameters {
     is_draw_shadows_ = true;
     return *this;
   }
-  TestParameters& set_draw_vertices() {
-    is_draw_vertices_ = true;
-    return *this;
-  }
   TestParameters& set_draw_text_blob() {
     is_draw_text_blob_ = true;
-    return *this;
-  }
-  TestParameters& set_draw_atlas() {
-    is_draw_atlas_ = true;
     return *this;
   }
   TestParameters& set_draw_display_list() {
@@ -599,9 +585,7 @@ class TestParameters {
   const DisplayListAttributeFlags& flags_;
 
   bool is_draw_shadows_ = false;
-  bool is_draw_vertices_ = false;
   bool is_draw_text_blob_ = false;
-  bool is_draw_atlas_ = false;
   bool is_draw_display_list_ = false;
   bool is_draw_line_ = false;
   bool is_draw_arc_center_ = false;
@@ -1130,7 +1114,7 @@ class CanvasCompareTester {
                      .with_bg(bg));
     }
 
-    if (!(testP.is_draw_atlas() || testP.is_draw_vertices())) {
+    {
       sk_sp<SkBlender> blender =
           SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, false);
       {
@@ -2631,8 +2615,7 @@ TEST_F(DisplayListCanvas, DrawVerticesWithColors) {
           [=](DisplayListBuilder& builder) {  //
             builder.drawVertices(vertices, DlBlendMode::kSrcOver);
           },
-          kDrawVerticesFlags)
-          .set_draw_vertices());
+          kDrawVerticesFlags));
 }
 
 TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
@@ -2684,8 +2667,7 @@ TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
             }
             builder.drawVertices(vertices, DlBlendMode::kSrcOver);
           },
-          kDrawVerticesFlags)
-          .set_draw_vertices());
+          kDrawVerticesFlags));
 }
 
 TEST_F(DisplayListCanvas, DrawImageNearest) {
@@ -2966,8 +2948,7 @@ TEST_F(DisplayListCanvas, DrawAtlasNearest) {
             builder.drawAtlas(DlImage::Make(image), xform, tex, dl_colors, 4,
                               DlBlendMode::kSrcOver, sampling, nullptr, true);
           },
-          kDrawAtlasWithPaintFlags)
-          .set_draw_atlas());
+          kDrawAtlasWithPaintFlags));
 }
 
 TEST_F(DisplayListCanvas, DrawAtlasNearestNoPaint) {
@@ -3009,8 +2990,7 @@ TEST_F(DisplayListCanvas, DrawAtlasNearestNoPaint) {
                               DlBlendMode::kSrcOver, sampling,  //
                               nullptr, false);
           },
-          kDrawAtlasFlags)
-          .set_draw_atlas());
+          kDrawAtlasFlags));
 }
 
 TEST_F(DisplayListCanvas, DrawAtlasLinear) {
@@ -3051,8 +3031,7 @@ TEST_F(DisplayListCanvas, DrawAtlasLinear) {
             builder.drawAtlas(DlImage::Make(image), xform, tex, dl_colors, 2,
                               DlBlendMode::kSrcOver, sampling, nullptr, true);
           },
-          kDrawAtlasWithPaintFlags)
-          .set_draw_atlas());
+          kDrawAtlasWithPaintFlags));
 }
 
 sk_sp<SkPicture> makeTestPicture() {
