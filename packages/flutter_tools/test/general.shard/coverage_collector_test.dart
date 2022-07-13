@@ -358,7 +358,7 @@ void main() {
       final Directory fooDir = Directory('${tempDir.path}/foo/');
       fooDir.createSync();
       final File fooFile = File('${fooDir.path}/foo.dart');
-      fooFile.writeAsStringSync('hit\nnohit // coverage:ignore-line\nhit\n');
+      fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
       final String packagesPath = file.path;
       final CoverageCollector collector = CoverageCollector(
