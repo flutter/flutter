@@ -161,8 +161,8 @@ class FormState extends State<Form> {
     }
   }
 
-  /// returns a [Map] with a {submissionKey: value} entry for every
-  /// child FormField that has a non-null submissionKey.
+  /// Returns a [Map] with a {submissionKey: value} entry for every
+  /// child [FormField] that has a non-null submissionKey.
   Map<String, dynamic> submit() {
     final Map<String, dynamic> data = <String, dynamic>{};
 
@@ -349,14 +349,14 @@ class FormField<T> extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-  /// submission key used to identify this [FormField] value at the [Form] level
+  /// Submission key used to identify this [FormField] value at the [Form] level
   ///
   /// submissionKey must be set to a non null value for the this [FormField]
   /// value to be included in the parent's [Form] submit.
   ///
   /// See also:
   ///
-  ///  * [FormState], which explains the submission behaviour in its submit
+  ///  * [FormState.submit], which explains the submission behaviour in its submit
   ///    method.
   final String? submissionKey;
 
@@ -397,8 +397,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     widget.onSaved?.call(value);
   }
 
-  /// used by [FormState] to retrieve this [FormField] value
-  MapEntry<String, T?>? _onSubmit() {
+  /// Used by [FormState] to retrieve this [FormField] value.
+  MapEntry<String, T?>? onSubmit() {
     if (widget.submissionKey == null) {
       return null;
     }
