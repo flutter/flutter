@@ -942,7 +942,14 @@ class LocalizationsGenerator {
   @visibleForTesting
   static File templateArbFileFromFileName(String templateArbFileName, Directory inputDirectory) {
     final File templateArbFile = inputDirectory.childFile(templateArbFileName);
-    final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
+    final FileStat templateArbFileStat = templateArbFile.statSync();
+    final String templateArbFileStatModeString = templateArbFileStat.modeString();
+    final FileSystemEntityType templateArbFileStatType = templateArbFileStat.type;
+    if (templateArbFileStatType == FileSystemEntityType.notFound) {
+      throw L10nException(
+        "The 'template-arb-file', $templateArbFile, does not exist."
+      );
+    }
     if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-') {
       throw L10nException(
         "The 'template-arb-file', $templateArbFile, is not readable.\n"
