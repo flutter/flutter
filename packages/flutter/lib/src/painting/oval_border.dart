@@ -16,6 +16,7 @@ import 'circle_border.dart';
 /// such that it touches the edges of the box. There is no difference between
 /// `CircleBorder(eccentricity = 1.0)` and `OvalBorder()`. [OvalBorder] works as
 /// an alias for users to discover this feature.
+/// 
 /// See also:
 ///
 ///  * [CircleBorder], which draws a circle, centering when the box is rectangular.

@@ -39,10 +39,10 @@ class CircleBorder extends OutlinedBorder {
         assert(eccentricity >= 0.0, 'The eccentricity argument $eccentricity is not greater than or equal to zero.'),
         assert(eccentricity <= 1.0, 'The eccentricity argument $eccentricity is not less than or equal to one.');
 
-  /// Defines the ratio (0.0-1.0) from which the border will be drawn
-  /// to the longest side of a rectangular box, touching all the sides.
-  /// When 0.0, it draws a circle. When 1.0, it draws an oval.
-  /// This property is ignored when applied to a squared box.
+  /// Defines the ratio (0.0-1.0) from which the border will deform
+  /// to fit a rectangle.
+  /// When 0.0, it draws a circle touching at least two sides of the rectangle.
+  /// When 1.0, it draws an oval touching all sides of the rectangle.
   final double eccentricity;
 
   @override
