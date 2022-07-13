@@ -1468,6 +1468,35 @@ const Map<int, PhysicalKeyboardKey> kIosToPhysicalKey = <int, PhysicalKeyboardKe
   0x000000e7: PhysicalKeyboardKey.metaRight,
 };
 
+/// Maps iOS specific string values of nonvisible keys to logical keys
+///
+/// Some unprintable keys on iOS has literal names on their key label, such as
+/// "UIKeyInputEscape". See:
+/// https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
+const Map<String, LogicalKeyboardKey> kIosSpecialLogicalMap = <String, LogicalKeyboardKey>{
+  'UIKeyInputEscape': LogicalKeyboardKey.escape,
+  'UIKeyInputF1': LogicalKeyboardKey.f1,
+  'UIKeyInputF2': LogicalKeyboardKey.f2,
+  'UIKeyInputF3': LogicalKeyboardKey.f3,
+  'UIKeyInputF4': LogicalKeyboardKey.f4,
+  'UIKeyInputF5': LogicalKeyboardKey.f5,
+  'UIKeyInputF6': LogicalKeyboardKey.f6,
+  'UIKeyInputF7': LogicalKeyboardKey.f7,
+  'UIKeyInputF8': LogicalKeyboardKey.f8,
+  'UIKeyInputF9': LogicalKeyboardKey.f9,
+  'UIKeyInputF10': LogicalKeyboardKey.f10,
+  'UIKeyInputF11': LogicalKeyboardKey.f11,
+  'UIKeyInputF12': LogicalKeyboardKey.f12,
+  'UIKeyInputUpArrow': LogicalKeyboardKey.arrowUp,
+  'UIKeyInputDownArrow': LogicalKeyboardKey.arrowDown,
+  'UIKeyInputLeftArrow': LogicalKeyboardKey.arrowLeft,
+  'UIKeyInputRightArrow': LogicalKeyboardKey.arrowRight,
+  'UIKeyInputHome': LogicalKeyboardKey.home,
+  'UIKeyInputEnd': LogicalKeyboardKey.enter,
+  'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
+  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown,
+};
+
 /// A map of iOS key codes which have printable representations, but appear
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
