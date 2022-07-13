@@ -7,39 +7,55 @@ import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 if (enable_unittests) {
-  impellerc("spirv_compile_supported_op_shaders") {
-    shaders = [
-      "127_OpFNegate.frag",
-      "129_OpFAdd.frag",
-      "131_OpFSub.frag",
-      "142_OpVectorTimesScalar.frag",
-      "143_OpMatrixTimesScalar.frag",
-      "144_OpVectorTimesMatrix.frag",
-      "145_OpMatrixTimesVector.frag",
-      "146_OpMatrixTimesMatrix.frag",
-      "148_OpDot.frag",
-      "164_OpLogicalEqual.frag",
-      "165_OpLogicalNotEqual.frag",
-      "166_OpLogicalOr.frag",
-      "167_OpLogicalAnd.frag",
-      "168_OpLogicalNot.frag",
-      "180_OpFOrdEqual.frag",
-      "183_OpFUnordNotEqual.frag",
-      "184_OpFOrdLessThan.frag",
-      "186_OpFOrdGreaterThan.frag",
-      "188_OpFOrdLessThanEqual.frag",
-      "190_OpFOrdGreaterThanEqual.frag",
-      "19_OpTypeVoid.frag",
-      "20_OpTypeBool.frag",
-      "21_OpTypeInt.frag",
-      "22_OpTypeFloat.frag",
-      "23_OpTypeVector.frag",
-      "246_OpLoopMerge.frag",
-      "24_OpTypeMatrix.frag",
-      "250_OpBranchConditional.frag",
-      "33_OpTypeFunction.frag",
-    ]
+  test_shaders = [
+    "127_OpFNegate.frag",
+    "129_OpFAdd.frag",
+    "131_OpFSub.frag",
+    "142_OpVectorTimesScalar.frag",
+    "143_OpMatrixTimesScalar.frag",
+    "144_OpVectorTimesMatrix.frag",
+    "145_OpMatrixTimesVector.frag",
+    "146_OpMatrixTimesMatrix.frag",
+    "148_OpDot.frag",
+    "164_OpLogicalEqual.frag",
+    "165_OpLogicalNotEqual.frag",
+    "166_OpLogicalOr.frag",
+    "167_OpLogicalAnd.frag",
+    "168_OpLogicalNot.frag",
+    "180_OpFOrdEqual.frag",
+    "183_OpFUnordNotEqual.frag",
+    "184_OpFOrdLessThan.frag",
+    "186_OpFOrdGreaterThan.frag",
+    "188_OpFOrdLessThanEqual.frag",
+    "190_OpFOrdGreaterThanEqual.frag",
+    "19_OpTypeVoid.frag",
+    "20_OpTypeBool.frag",
+    "21_OpTypeInt.frag",
+    "22_OpTypeFloat.frag",
+    "23_OpTypeVector.frag",
+    "246_OpLoopMerge.frag",
+    "24_OpTypeMatrix.frag",
+    "250_OpBranchConditional.frag",
+    "33_OpTypeFunction.frag",
+  ]
 
+  group("supported_op_shaders") {
+    deps = [
+      ":sksl_compile_supported_op_shaders",
+      ":spirv_compile_supported_op_shaders",
+    ]
+  }
+
+  impellerc("spirv_compile_supported_op_shaders") {
+    shaders = test_shaders
     shader_target_flag = "--flutter-spirv"
+    intermediates_subdir = "spirv"
+  }
+
+  impellerc("sksl_compile_supported_op_shaders") {
+    shaders = test_shaders
+    shader_target_flag = "--sksl"
+    intermediates_subdir = "sksl"
+    sl_file_extension = "sksl"
   }
 }

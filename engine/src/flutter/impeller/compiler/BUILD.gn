@@ -28,6 +28,8 @@ impeller_component("compiler_lib") {
     "runtime_stage_data.h",
     "source_options.cc",
     "source_options.h",
+    "spirv_sksl.cc",
+    "spirv_sksl.h",
     "switches.cc",
     "switches.h",
     "types.cc",
