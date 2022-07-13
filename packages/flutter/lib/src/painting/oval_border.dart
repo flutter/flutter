@@ -46,7 +46,7 @@ class OvalBorder extends CircleBorder {
 
   @override
   String toString() {
-    if (eccentricity != 0.0) {
+    if (eccentricity != 1.0) {
       return '${objectRuntimeType(this, 'OvalBorder')}($side, eccentricity: $eccentricity)';
     }
     return '${objectRuntimeType(this, 'OvalBorder')}($side)';
