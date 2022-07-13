@@ -114,65 +114,26 @@ enum ListTileControlAffinity {
 /// is expensive. Consider only wrapping the [ListTile]s that require it
 /// or include a common [Material] ancestor where possible.
 ///
-/// {@tool snippet}
+/// [ListTile] must be wrapped in a [Material] widget to animate [tileColor],
+/// [selectedTileColor], [focusColor], and [hoverColor] as these colors
+/// are not drawn by the list tile itself but by the material widget ancestor.
 ///
+/// {@tool dartpad}
+/// This example showcases how [ListTile] needs to be wrapped in a [Material]
+/// widget to animate colors.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
 ///
 /// ![Different variations of ListTile](https://flutter.github.io/assets-for-api-docs/assets/material/list_tile.png)
 ///
-/// ```dart
-/// ListView(
-///   children: const <Widget>[
-///     Card(child: ListTile(title: Text('One-line ListTile'))),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(),
-///         title: Text('One-line with leading widget'),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         title: Text('One-line with trailing widget'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(),
-///         title: Text('One-line with both widgets'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         title: Text('One-line dense ListTile'),
-///         dense: true,
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(size: 56.0),
-///         title: Text('Two-line ListTile'),
-///         subtitle: Text('Here is a second line'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(size: 72.0),
-///         title: Text('Three-line ListTile'),
-///         subtitle: Text(
-///           'A sufficiently long subtitle warrants three lines.'
-///         ),
-///         trailing: Icon(Icons.more_vert),
-///         isThreeLine: true,
-///       ),
-///     ),
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/list_tile/list_tile.1.dart **
 /// {@end-tool}
+///
 /// {@tool snippet}
 ///
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
