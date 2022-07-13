@@ -349,7 +349,7 @@ class FormField<T> extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-  /// submission key used to identify this [FormField] value at the [Form] level
+  /// Submission key used to identify this [FormField] value at the [Form] level
   ///
   /// submissionKey must be set to a non null value for the this [FormField]
   /// value to be included in the parent's [Form] submit.
