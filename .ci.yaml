@@ -1982,7 +1982,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android old_gallery__transition_perf
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
