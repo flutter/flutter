@@ -145,6 +145,7 @@ class TextFormField extends FormField<String> {
     AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
     super.restorationId,
+    super.submissionKey,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
   }) : assert(initialValue == null || controller == null),

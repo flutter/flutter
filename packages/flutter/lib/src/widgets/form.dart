@@ -44,7 +44,7 @@ class Form extends StatefulWidget {
     this.onChanged,
     AutovalidateMode? autovalidateMode,
   }) : assert(child != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+      autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// Returns the closest [FormState] which encloses the given context.
   ///
@@ -161,6 +161,22 @@ class FormState extends State<Form> {
     }
   }
 
+  /// returns a [Map] with a {submissionKey: value} entry for every
+  /// child FormField that has a non-null submissionKey.
+  Map<String, dynamic> submit() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+
+    for (final FormFieldState<dynamic> field in _fields) {
+      final MapEntry<String, dynamic>? entry = field.onSubmit();
+
+      if (entry != null) {
+        data.addEntries(<MapEntry<String, dynamic>>[entry]);
+      }
+    }
+
+    return data;
+  }
+
   /// Resets every [FormField] that is a descendant of this [Form] back to its
   /// [FormField.initialValue].
   ///
@@ -268,8 +284,9 @@ class FormField<T> extends StatefulWidget {
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
     this.restorationId,
+    this.submissionKey,
   }) : assert(builder != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+        autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -332,6 +349,17 @@ class FormField<T> extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
+  /// submission key used to identify this [FormField] value at the [Form] level
+  ///
+  /// submissionKey must be set to a non null value for the this [FormField]
+  /// value to be included in the parent's [Form] submit.
+  ///
+  /// See also:
+  ///
+  ///  * [FormState], which explains the submission behaviour in its submit
+  ///    method.
+  final String? submissionKey;
+
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
 }
@@ -367,6 +395,14 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
     widget.onSaved?.call(value);
+  }
+
+  /// used by [FormState] to retrieve this [FormField] value
+  MapEntry<String, T?>? onSubmit() {
+    if (widget.submissionKey == null) {
+      return null;
+    }
+    return MapEntry<String, T?>(widget.submissionKey!, value);
   }
 
   /// Resets the field to its initial value.
