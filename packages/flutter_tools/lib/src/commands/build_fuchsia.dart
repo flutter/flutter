@@ -79,9 +79,9 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,
-      targetPlatform: getTargetPlatformForName(stringArg('target-platform')!),
+      targetPlatform: getTargetPlatformForName(stringArgDeprecated('target-platform')!),
       buildInfo: buildInfo,
-      runnerPackageSource: stringArg('runner-source')!,
+      runnerPackageSource: stringArgDeprecated('runner-source')!,
     );
     return FlutterCommandResult.success();
   }

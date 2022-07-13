@@ -73,7 +73,6 @@ class IOCallbackManager implements CallbackManager {
     assert(!_isSurfaceRendered, 'Surface already converted to an image');
     await integrationTestChannel.invokeMethod<void>(
       'convertFlutterSurfaceToImage',
-      null,
     );
     _isSurfaceRendered = true;
 
@@ -81,7 +80,6 @@ class IOCallbackManager implements CallbackManager {
       assert(_isSurfaceRendered, 'Surface is not an image');
       await integrationTestChannel.invokeMethod<void>(
         'revertFlutterImage',
-        null,
       );
       _isSurfaceRendered = false;
     });

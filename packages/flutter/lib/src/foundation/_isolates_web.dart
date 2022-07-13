@@ -4,6 +4,8 @@
 
 import 'isolates.dart' as isolates;
 
+export 'isolates.dart' show ComputeCallback;
+
 /// The dart:html implementation of [isolate.compute].
 Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String? debugLabel }) async {
   // To avoid blocking the UI immediately for an expensive function call, we

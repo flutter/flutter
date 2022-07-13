@@ -160,8 +160,9 @@ Widget _wrapWithBackground({
     child: result,
   );
 
-  if (backgroundColor.alpha == 0xFF)
+  if (backgroundColor.alpha == 0xFF) {
     return childWithBackground;
+  }
 
   return ClipRect(
     child: BackdropFilter(
@@ -237,6 +238,7 @@ bool _isTransitionable(BuildContext context) {
 ///    [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a navigation bar to be placed in a
 ///    scrolling list and that supports iOS-11-style large titles.
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/bars/navigation-bars/>
 class CupertinoNavigationBar extends StatefulWidget implements ObstructingPreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
@@ -573,6 +575,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
 ///    pages.
 ///  * [CustomScrollView], a ScrollView that creates custom scroll effects using slivers.
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/bars/navigation-bars/>
 class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Creates a navigation bar for scrolling lists.
   ///

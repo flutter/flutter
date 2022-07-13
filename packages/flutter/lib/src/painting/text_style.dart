@@ -14,10 +14,10 @@ import 'text_painter.dart';
 const String _kDefaultDebugLabel = 'unknown';
 
 const String _kColorForegroundWarning = 'Cannot provide both a color and a foreground\n'
-    'The color argument is just a shorthand for "foreground: new Paint()..color = color".';
+    'The color argument is just a shorthand for "foreground: Paint()..color = color".';
 
 const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor and a background\n'
-    'The backgroundColor argument is just a shorthand for "background: new Paint()..color = color".';
+    'The backgroundColor argument is just a shorthand for "background: Paint()..color = color".';
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_painter.dart, as well as the
@@ -377,7 +377,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// #### Supported font formats
 ///
-/// Font formats currently supported by Flutter :
+/// Font formats currently supported by Flutter:
 ///
 ///  * `.ttc`
 ///  * `.ttf`
@@ -504,7 +504,7 @@ class TextStyle with Diagnosticable {
   /// style (e.g., in a [TextSpan] tree).
   ///
   /// If this is false, properties that don't have explicit values will revert
-  /// to the defaults: white in color, a font size of 10 pixels, in a sans-serif
+  /// to the defaults: white in color, a font size of 14 pixels, in a sans-serif
   /// font face.
   final bool inherit;
 
@@ -529,8 +529,9 @@ class TextStyle with Diagnosticable {
   /// specified in one place, it will dominate [color] in another.
   final Color? backgroundColor;
 
-  /// The name of the font to use when painting the text (e.g., Roboto). If the
-  /// font is defined in a package, this will be prefixed with
+  /// The name of the font to use when painting the text (e.g., Roboto).
+  ///
+  /// If the font is defined in a package, this will be prefixed with
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
@@ -842,8 +843,9 @@ class TextStyle with Diagnosticable {
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
     String? newDebugLabel;
     assert(() {
-      if (this.debugLabel != null)
+      if (this.debugLabel != null) {
         newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
+      }
       return true;
     }());
 
@@ -954,8 +956,9 @@ class TextStyle with Diagnosticable {
 
     String? modifiedDebugLabel;
     assert(() {
-      if (debugLabel != null)
+      if (debugLabel != null) {
         modifiedDebugLabel = '($debugLabel).apply';
+      }
       return true;
     }());
 
@@ -966,7 +969,7 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? _fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
+      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)], // ignore_clamp_double_lint
       fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
@@ -1007,19 +1010,22 @@ class TextStyle with Diagnosticable {
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
   ///
-  /// Similarly, One of [backgroundColor] or [background] must be null, and if
+  /// Similarly, one of [backgroundColor] or [background] must be null, and if
   /// this or `other` has [background] specified it will be given preference
   /// over any backgroundColor parameter.
   TextStyle merge(TextStyle? other) {
-    if (other == null)
+    if (other == null) {
       return this;
-    if (!other.inherit)
+    }
+    if (!other.inherit) {
       return other;
+    }
 
     String? mergedDebugLabel;
     assert(() {
-      if (other.debugLabel != null || debugLabel != null)
+      if (other.debugLabel != null || debugLabel != null) {
         mergedDebugLabel = '(${debugLabel ?? _kDefaultDebugLabel}).merge(${other.debugLabel ?? _kDefaultDebugLabel})';
+      }
       return true;
     }());
 
@@ -1270,8 +1276,9 @@ class TextStyle with Diagnosticable {
   ///
   ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
   RenderComparison compareTo(TextStyle other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return RenderComparison.identical;
+    }
     if (inherit != other.inherit ||
         fontFamily != other.fontFamily ||
         fontSize != other.fontSize ||
@@ -1289,24 +1296,28 @@ class TextStyle with Diagnosticable {
         !listEquals(fontFeatures, other.fontFeatures) ||
         !listEquals(fontVariations, other.fontVariations) ||
         !listEquals(fontFamilyFallback, other.fontFamilyFallback) ||
-        overflow != other.overflow)
+        overflow != other.overflow) {
       return RenderComparison.layout;
+    }
     if (color != other.color ||
         backgroundColor != other.backgroundColor ||
         decoration != other.decoration ||
         decorationColor != other.decorationColor ||
         decorationStyle != other.decorationStyle ||
-        decorationThickness != other.decorationThickness)
+        decorationThickness != other.decorationThickness) {
       return RenderComparison.paint;
+    }
     return RenderComparison.identical;
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextStyle
         && other.inherit == inherit
         && other.color == color
@@ -1373,8 +1384,9 @@ class TextStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
-    if (debugLabel != null)
+    if (debugLabel != null) {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
+    }
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[
       ColorProperty('${prefix}color', color, defaultValue: null),
       ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null),
@@ -1406,22 +1418,25 @@ class TextStyle with Diagnosticable {
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null || decorationThickness != null) {
       final List<String> decorationDescription = <String>[];
-      if (decorationStyle != null)
+      if (decorationStyle != null) {
         decorationDescription.add(decorationStyle!.name);
+      }
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
       styles.add(ColorProperty('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
-      if (decorationColor != null)
+      if (decorationColor != null) {
         decorationDescription.add('$decorationColor');
+      }
 
       // Intentionally collide with the property 'decoration' added below.
       // Tools that show hidden properties could choose the first property
       // matching the name to disambiguate.
       styles.add(DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
-      if (decoration != null)
+      if (decoration != null) {
         decorationDescription.add('$decoration');
+      }
       assert(decorationDescription.isNotEmpty);
       styles.add(MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
       styles.add(DoubleProperty('${prefix}decorationThickness', decorationThickness, unit: 'x', defaultValue: null));
@@ -1431,8 +1446,9 @@ class TextStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
     styles.forEach(properties.add);
 
-    if (!styleSpecified)
+    if (!styleSpecified) {
       properties.add(FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
+    }
 
     styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
   }

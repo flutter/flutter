@@ -427,6 +427,12 @@ class _LicensePageState extends State<LicensePage> {
   final ValueNotifier<int?> selectedId = ValueNotifier<int?>(null);
 
   @override
+  void dispose() {
+    selectedId.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
       detailPageFABlessGutterWidth: _getGutterSize(context),
@@ -607,31 +613,29 @@ class _PackagesViewState extends State<_PackagesView> {
     final _LicenseData data,
     final bool drawSelection,
   ) {
-    return ListView(
-      children: <Widget>[
-        widget.about,
-        ...data.packages
-            .asMap()
-            .entries
-            .map<Widget>((MapEntry<int, String> entry) {
-              final String packageName = entry.value;
-              final int index = entry.key;
-              final List<int> bindings = data.packageLicenseBindings[packageName]!;
-              return _PackageListTile(
-                packageName: packageName,
-                index: index,
-                isSelected: drawSelection && entry.key == (selectedId ?? 0),
-                numberLicenses: bindings.length,
-                onTap: () {
-                  widget.selectedId.value = index;
-                  _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
-                    packageName,
-                    bindings.map((int i) => data.licenses[i]).toList(growable: false),
-                  ));
-                },
-              );
-            }),
-      ],
+    return ListView.builder(
+      itemCount: data.packages.length + 1,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == 0) {
+          return widget.about;
+        }
+        final int packageIndex = index - 1;
+        final String packageName = data.packages[packageIndex];
+        final List<int> bindings = data.packageLicenseBindings[packageName]!;
+        return _PackageListTile(
+          packageName: packageName,
+          index: packageIndex,
+          isSelected: drawSelection && packageIndex == (selectedId ?? 0),
+          numberLicenses: bindings.length,
+          onTap: () {
+            widget.selectedId.value = packageIndex;
+            _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
+              packageName,
+              bindings.map((int i) => data.licenses[i]).toList(growable: false),
+            ));
+          },
+        );
+      },
     );
   }
 }
@@ -1321,6 +1325,12 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
     detailPageFABGutterWidth = _kDetailPageFABGutterWidth;
     masterViewWidth = _kMasterViewWidth;
     floatingActionButtonLocation = FloatingActionButtonLocation.endTop;
+  }
+
+  @override
+  void dispose() {
+    _detailArguments.dispose();
+    super.dispose();
   }
 
   @override

@@ -432,8 +432,9 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   @override
   void didUpdateWidget(RangeSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.onChanged == widget.onChanged)
+    if (oldWidget.onChanged == widget.onChanged) {
       return;
+    }
     final bool wasEnabled = oldWidget.onChanged != null;
     final bool isEnabled = widget.onChanged != null;
     if (wasEnabled != isEnabled) {
@@ -533,16 +534,20 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           towardsEnd = dx < 0;
           break;
       }
-      if (towardsStart)
+      if (towardsStart) {
         return Thumb.start;
-      if (towardsEnd)
+      }
+      if (towardsEnd) {
         return Thumb.end;
+      }
     } else {
       // Snap position on the track if its in the inactive range.
-      if (tapValue < values.start || inStartTouchTarget)
+      if (tapValue < values.start || inStartTouchTarget) {
         return Thumb.start;
-      if (tapValue > values.end || inEndTouchTarget)
+      }
+      if (tapValue > values.end || inEndTouchTarget) {
         return Thumb.end;
+      }
     }
     return null;
   }
@@ -699,6 +704,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
+      gestureSettings: MediaQuery.of(context).gestureSettings,
     );
   }
 
@@ -719,7 +725,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..platform = Theme.of(context).platform;
+      ..platform = Theme.of(context).platform
+      ..gestureSettings = MediaQuery.of(context).gestureSettings;
   }
 }
 
@@ -739,6 +746,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     required this.onChangeEnd,
     required _RangeSliderState state,
     required TextDirection textDirection,
+    required DeviceGestureSettings gestureSettings,
   })  : assert(values != null),
         assert(values.start >= 0.0 && values.start <= 1.0),
         assert(values.end >= 0.0 && values.end <= 1.0),
@@ -763,12 +771,14 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _handleDragCancel;
+      ..onCancel = _handleDragCancel
+      ..gestureSettings = gestureSettings;
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
-      ..onTapCancel = _handleTapCancel;
+      ..onTapCancel = _handleTapCancel
+      ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -870,17 +880,25 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   TargetPlatform _platform;
   TargetPlatform get platform => _platform;
   set platform(TargetPlatform value) {
-    if (_platform == value)
+    if (_platform == value) {
       return;
+    }
     _platform = value;
     markNeedsSemanticsUpdate();
+  }
+
+  DeviceGestureSettings? get gestureSettings => _drag.gestureSettings;
+  set gestureSettings(DeviceGestureSettings? gestureSettings) {
+    _drag.gestureSettings = gestureSettings;
+    _tap.gestureSettings = gestureSettings;
   }
 
   SemanticFormatterCallback? _semanticFormatterCallback;
   SemanticFormatterCallback? get semanticFormatterCallback => _semanticFormatterCallback;
   set semanticFormatterCallback(SemanticFormatterCallback? value) {
-    if (_semanticFormatterCallback == value)
+    if (_semanticFormatterCallback == value) {
       return;
+    }
     _semanticFormatterCallback = value;
     markNeedsSemanticsUpdate();
   }
@@ -898,8 +916,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   RangeLabels? get labels => _labels;
   RangeLabels? _labels;
   set labels(RangeLabels? labels) {
-    if (labels == _labels)
+    if (labels == _labels) {
       return;
+    }
     _labels = labels;
     _updateLabelPainters();
   }
@@ -907,8 +926,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   SliderThemeData get sliderTheme => _sliderTheme;
   SliderThemeData _sliderTheme;
   set sliderTheme(SliderThemeData value) {
-    if (value == _sliderTheme)
+    if (value == _sliderTheme) {
       return;
+    }
     _sliderTheme = value;
     markNeedsPaint();
   }
@@ -916,8 +936,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   ThemeData? get theme => _theme;
   ThemeData? _theme;
   set theme(ThemeData? value) {
-    if (value == _theme)
+    if (value == _theme) {
       return;
+    }
     _theme = value;
     markNeedsPaint();
   }
@@ -925,8 +946,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   double get textScaleFactor => _textScaleFactor;
   double _textScaleFactor;
   set textScaleFactor(double value) {
-    if (value == _textScaleFactor)
+    if (value == _textScaleFactor) {
       return;
+    }
     _textScaleFactor = value;
     _updateLabelPainters();
   }
@@ -934,8 +956,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   Size get screenSize => _screenSize;
   Size _screenSize;
   set screenSize(Size value) {
-    if (value == screenSize)
+    if (value == screenSize) {
       return;
+    }
     _screenSize = value;
     markNeedsPaint();
   }
@@ -943,8 +966,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   ValueChanged<RangeValues>? get onChanged => _onChanged;
   ValueChanged<RangeValues>? _onChanged;
   set onChanged(ValueChanged<RangeValues>? value) {
-    if (value == _onChanged)
+    if (value == _onChanged) {
       return;
+    }
     final bool wasEnabled = isEnabled;
     _onChanged = value;
     if (wasEnabled != isEnabled) {
@@ -960,8 +984,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (value == _textDirection)
+    if (value == _textDirection) {
       return;
+    }
     _textDirection = value;
     _updateLabelPainters();
   }
@@ -1002,8 +1027,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _updateLabelPainter(Thumb thumb) {
-    if (labels == null)
+    if (labels == null) {
       return;
+    }
 
     final String text;
     final TextPainter labelPainter;
@@ -1079,7 +1105,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double _discretize(double value) {
-    double result = value.clamp(0.0, 1.0);
+    double result = clampDouble(value, 0.0, 1.0);
     if (isDiscrete) {
       result = (result * divisions!).round() / divisions!;
     }
@@ -1092,7 +1118,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _startInteraction(Offset globalPosition) {
     _state.showValueIndicator();
-    final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0);
+    final double tapValue = clampDouble(_getValueFromGlobalPosition(globalPosition), 0.0, 1.0);
     _lastThumbSelection = sliderTheme.thumbSelector!(textDirection, values, tapValue, _thumbSize, size, 0);
 
     if (_lastThumbSelection != null) {
@@ -1613,11 +1639,11 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double get _decreasedStartValue {
-    return (values.start - _semanticActionUnit).clamp(0.0, 1.0);
+    return clampDouble(values.start - _semanticActionUnit, 0.0, 1.0);
   }
 
   double get _increasedEndValue {
-    return (values.end + _semanticActionUnit).clamp(0.0, 1.0);
+    return clampDouble(values.end + _semanticActionUnit, 0.0, 1.0);
   }
 
   double get _decreasedEndValue {

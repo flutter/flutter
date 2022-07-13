@@ -754,7 +754,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool updateGoldens = false,
     TestWatcher watcher,
     int concurrency,
-    bool buildTestAssets = false,
+    String testAssetDirectory,
     FlutterProject flutterProject,
     String icudtlPath,
     Directory coverageDirectory,

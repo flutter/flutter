@@ -41,8 +41,6 @@ enum Artifact {
 
   /// The root of the sky_engine package.
   skyEnginePath,
-  /// The location of the macOS engine podspec file.
-  flutterMacOSPodspec,
 
   // Fuchsia artifacts from the engine prebuilts.
   fuchsiaKernelCompiler,
@@ -193,8 +191,6 @@ String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, Build
       return '';
     case Artifact.skyEnginePath:
       return 'sky_engine';
-    case Artifact.flutterMacOSPodspec:
-      return 'FlutterMacOS.podspec';
     case Artifact.fuchsiaKernelCompiler:
       return 'kernel_compiler.snapshot';
     case Artifact.fuchsiaFlutterRunner:
@@ -477,7 +473,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterMacOSFramework:
-      case Artifact.flutterMacOSPodspec:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
@@ -511,7 +506,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
-      case Artifact.flutterMacOSPodspec:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.fontSubset:
@@ -558,7 +552,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterMacOSFramework:
-      case Artifact.flutterMacOSPodspec:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
       case Artifact.fontSubset:
@@ -614,7 +607,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSFramework:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
-      case Artifact.flutterMacOSPodspec:
       case Artifact.linuxHeaders:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
@@ -890,8 +882,6 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _getFlutterPatchedSdkPath(BuildMode.debug);
       case Artifact.skyEnginePath:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
-      case Artifact.flutterMacOSPodspec:
-        return _fileSystem.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
       case Artifact.fuchsiaKernelCompiler:
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         final String modeName = mode!.isRelease ? 'release' : mode.toString();

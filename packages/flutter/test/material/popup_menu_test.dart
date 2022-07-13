@@ -1620,7 +1620,6 @@ void main() {
     );
   });
 
-
   testWidgets('CheckedPopupMenuItem custom padding', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const CheckedPopupMenuItem<String>(child: Text('item')).runtimeType;
@@ -2039,7 +2038,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -2078,6 +2076,86 @@ void main() {
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
                 child: PopupMenuItem<int>(
+                  key: key,
+                  value: 1,
+                  enabled: false,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('CheckedPopupMenuItem changes mouse cursor when hovered', (WidgetTester tester) async {
+    const Key key = ValueKey<int>(1);
+    // Test CheckedPopupMenuItem() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: CheckedPopupMenuItem<int>(
+                  key: key,
+                  mouseCursor: SystemMouseCursors.text,
+                  value: 1,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: CheckedPopupMenuItem<int>(
+                  key: key,
+                  value: 1,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: CheckedPopupMenuItem<int>(
                   key: key,
                   value: 1,
                   enabled: false,
@@ -2806,6 +2884,58 @@ void main() {
     iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // PopupMenuButton icon size overrides IconTheme's size.
     expect(iconButton.iconSize, 50.0);
+  });
+
+  testWidgets('Popup menu clip behavior', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107215
+    final Key popupButtonKey = UniqueKey();
+    const double radius = 20.0;
+
+    Widget buildPopupMenu({required Clip clipBehavior}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupButtonKey,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(radius)),
+              ),
+              clipBehavior: clipBehavior,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.none));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.none);
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+
+    // Popup menu with custom ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.hardEdge));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.hardEdge);
   });
 }
 

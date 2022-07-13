@@ -12,6 +12,7 @@ import 'test_data/deferred_components_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
+
 void main() {
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
@@ -38,6 +39,8 @@ void main() {
       '--target-platform=android-arm64',
     ], workingDirectory: tempDir.path);
 
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('app-release.aab'));
     expect(result.stdout.toString(), contains('Deferred components prebuild validation passed.'));
@@ -72,6 +75,8 @@ void main() {
       'appbundle',
     ], workingDirectory: tempDir.path);
 
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
     expect(result.stdout.toString(), contains('app-release.aab'));
     expect(result.stdout.toString(), contains('Deferred components prebuild validation passed.'));
     expect(result.stdout.toString(), contains('Deferred components gen_snapshot validation passed.'));
@@ -116,6 +121,8 @@ void main() {
       '--no-deferred-components',
     ], workingDirectory: tempDir.path);
 
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
     expect(result.stdout.toString().contains('app-release.aab'), true);
     expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), false);
     expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
@@ -162,6 +169,8 @@ void main() {
       '--no-validate-deferred-components',
     ], workingDirectory: tempDir.path);
 
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
     expect(result.stdout.toString().contains('app-release.aab'), true);
     expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), false);
     expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);

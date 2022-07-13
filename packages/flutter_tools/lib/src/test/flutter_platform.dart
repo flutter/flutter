@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -47,22 +47,22 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 /// main()`), you can set an observatory port explicitly.
 FlutterPlatform installHook({
   TestWrapper testWrapper = const TestWrapper(),
-  @required String shellPath,
-  @required DebuggingOptions debuggingOptions,
-  TestWatcher watcher,
+  required String shellPath,
+  required DebuggingOptions debuggingOptions,
+  TestWatcher? watcher,
   bool enableObservatory = false,
   bool machine = false,
-  String precompiledDillPath,
-  Map<String, String> precompiledDillFiles,
+  String? precompiledDillPath,
+  Map<String, String>? precompiledDillFiles,
   bool updateGoldens = false,
-  bool buildTestAssets = false,
+  String? testAssetDirectory,
   InternetAddressType serverType = InternetAddressType.IPv4,
-  Uri projectRootDirectory,
-  FlutterProject flutterProject,
-  String icudtlPath,
-  PlatformPluginRegistration platformPluginRegistration,
-  Device integrationTestDevice,
-  String integrationTestUserIdentifier,
+  Uri? projectRootDirectory,
+  FlutterProject? flutterProject,
+  String? icudtlPath,
+  PlatformPluginRegistration? platformPluginRegistration,
+  Device? integrationTestDevice,
+  String? integrationTestUserIdentifier,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
@@ -86,7 +86,7 @@ FlutterPlatform installHook({
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
     updateGoldens: updateGoldens,
-    buildTestAssets: buildTestAssets,
+    testAssetDirectory: testAssetDirectory,
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
@@ -119,9 +119,9 @@ FlutterPlatform installHook({
 // NOTE: this API is used by the fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
-  @required Uri testUrl,
-  @required InternetAddress host,
-  File testConfigFile,
+  required Uri testUrl,
+  required InternetAddress host,
+  File? testConfigFile,
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
@@ -271,8 +271,8 @@ typedef Finalizer = Future<void> Function();
 /// The flutter test platform used to integrate with package:test.
 class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
-    @required this.shellPath,
-    @required this.debuggingOptions,
+    required this.shellPath,
+    required this.debuggingOptions,
     this.watcher,
     this.enableObservatory,
     this.machine,
@@ -280,7 +280,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.precompiledDillPath,
     this.precompiledDillFiles,
     this.updateGoldens,
-    this.buildTestAssets,
+    this.testAssetDirectory,
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
@@ -290,26 +290,26 @@ class FlutterPlatform extends PlatformPlugin {
 
   final String shellPath;
   final DebuggingOptions debuggingOptions;
-  final TestWatcher watcher;
-  final bool enableObservatory;
-  final bool machine;
-  final InternetAddress host;
-  final String precompiledDillPath;
-  final Map<String, String> precompiledDillFiles;
-  final bool updateGoldens;
-  final bool buildTestAssets;
-  final Uri projectRootDirectory;
-  final FlutterProject flutterProject;
-  final String icudtlPath;
+  final TestWatcher? watcher;
+  final bool? enableObservatory;
+  final bool? machine;
+  final InternetAddress? host;
+  final String? precompiledDillPath;
+  final Map<String, String>? precompiledDillFiles;
+  final bool? updateGoldens;
+  final String? testAssetDirectory;
+  final Uri? projectRootDirectory;
+  final FlutterProject? flutterProject;
+  final String? icudtlPath;
 
   /// The device to run the test on for Integration Tests.
   ///
   /// If this is null, the test will run as a regular test with the Flutter
   /// Tester; otherwise it will run as a Integration Test on this device.
-  final Device integrationTestDevice;
+  final Device? integrationTestDevice;
   bool get _isIntegrationTest => integrationTestDevice != null;
 
-  final String integrationTestUserIdentifier;
+  final String? integrationTestUserIdentifier;
 
   final FontConfigManager _fontConfigManager = FontConfigManager();
 
@@ -317,7 +317,7 @@ class FlutterPlatform extends PlatformPlugin {
   ///
   /// To speed up compilation, each compile is initialized from an existing
   /// dill file from previous runs, if possible.
-  TestCompiler compiler;
+  TestCompiler? compiler;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -361,7 +361,7 @@ class FlutterPlatform extends PlatformPlugin {
     _testCount += 1;
     final StreamController<dynamic> localController = StreamController<dynamic>();
     final StreamController<dynamic> remoteController = StreamController<dynamic>();
-    final Completer<_AsyncError> testCompleteCompleter = Completer<_AsyncError>();
+    final Completer<_AsyncError?> testCompleteCompleter = Completer<_AsyncError?>();
     final _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink = _FlutterPlatformStreamSinkWrapper<dynamic>(
       remoteController.sink,
       testCompleteCompleter.future,
@@ -384,17 +384,17 @@ class FlutterPlatform extends PlatformPlugin {
     List<String> definitions,
     List<String> typeDefinitions,
     String libraryUri,
-    String klass,
+    String? klass,
     bool isStatic,
   ) async {
-    if (compiler == null || compiler.compiler == null) {
+    if (compiler == null || compiler!.compiler == null) {
       throw Exception('Compiler is not set up properly to compile $expression');
     }
-    final CompilerOutput compilerOutput =
-      await compiler.compiler.compileExpression(expression, definitions,
+    final CompilerOutput? compilerOutput =
+      await compiler!.compiler!.compileExpression(expression, definitions,
         typeDefinitions, libraryUri, klass, isStatic);
     if (compilerOutput != null && compilerOutput.expressionData != null) {
-      return base64.encode(compilerOutput.expressionData);
+      return base64.encode(compilerOutput.expressionData!);
     }
     throw Exception('Failed to compile $expression');
   }
@@ -404,7 +404,7 @@ class FlutterPlatform extends PlatformPlugin {
       return IntegrationTestTestDevice(
         id: ourTestCount,
         debuggingOptions: debuggingOptions,
-        device: integrationTestDevice,
+        device: integrationTestDevice!,
         userIdentifier: integrationTestUserIdentifier,
       );
     }
@@ -415,11 +415,11 @@ class FlutterPlatform extends PlatformPlugin {
       processManager: globals.processManager,
       logger: globals.logger,
       shellPath: shellPath,
-      enableObservatory: enableObservatory,
+      enableObservatory: enableObservatory!,
       machine: machine,
       debuggingOptions: debuggingOptions,
       host: host,
-      buildTestAssets: buildTestAssets,
+      testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
       compileExpression: _compileExpressionService,
@@ -427,14 +427,14 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
-  Future<_AsyncError> _startTest(
+  Future<_AsyncError?> _startTest(
     String testPath,
     StreamChannel<dynamic> testHarnessChannel,
     int ourTestCount,
   ) async {
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
-    _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
+    _AsyncError? outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     final List<Finalizer> finalizers = <Finalizer>[]; // Will be run in reverse order.
     bool controllerSinkClosed = false;
@@ -447,7 +447,7 @@ class FlutterPlatform extends PlatformPlugin {
       // If a kernel file is given, then use that to launch the test.
       // If mapping is provided, look kernel file from mapping.
       // If all fails, create a "listener" dart that invokes actual test.
-      String mainDart;
+      String? mainDart;
       if (precompiledDillPath != null) {
         mainDart = precompiledDillPath;
         // When start paused is specified, it means that the user is likely
@@ -457,10 +457,10 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
           final Uri testUri = globals.fs.file(testPath).uri;
           // Trigger a compilation to initialize the resident compiler.
-          unawaited(compiler.compile(testUri));
+          unawaited(compiler!.compile(testUri));
         }
       } else if (precompiledDillFiles != null) {
-        mainDart = precompiledDillFiles[testPath];
+        mainDart = precompiledDillFiles![testPath];
       } else {
         mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
 
@@ -468,7 +468,7 @@ class FlutterPlatform extends PlatformPlugin {
         if (integrationTestDevice == null) {
           // Lazily instantiate compiler so it is built only if it is actually used.
           compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject);
-          mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
+          mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 
           if (mainDart == null) {
             testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
@@ -479,7 +479,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
-      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart);
+      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart!);
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
@@ -494,7 +494,7 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final Uri processObservatoryUri = await testDevice.observatoryUri;
+          final Uri? processObservatoryUri = await testDevice.observatoryUri;
           if (processObservatoryUri != null) {
             globals.printTrace('test $ourTestCount: Observatory uri is available at $processObservatoryUri');
           } else {
@@ -584,7 +584,7 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   String _generateTestMain({
-    Uri testUrl,
+    required Uri testUrl,
   }) {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
@@ -592,14 +592,14 @@ class FlutterPlatform extends PlatformPlugin {
 
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
-      packageConfig[flutterProject?.manifest?.appName],
-      Cache.flutterRoot,
+      packageConfig[flutterProject!.manifest.appName],
+      Cache.flutterRoot!,
     );
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
-      host: host,
-      updateGoldens: updateGoldens,
+      host: host!,
+      updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
       languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}',
       integrationTest: _isIntegrationTest,
@@ -609,7 +609,7 @@ class FlutterPlatform extends PlatformPlugin {
   @override
   Future<dynamic> close() async {
     if (compiler != null) {
-      await compiler.dispose();
+      await compiler!.dispose();
       compiler = null;
     }
     await _fontConfigManager.dispose();
@@ -633,7 +633,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   _FlutterPlatformStreamSinkWrapper(this._parent, this._shellProcessClosed);
 
   final StreamSink<S> _parent;
-  final Future<_AsyncError> _shellProcessClosed;
+  final Future<_AsyncError?> _shellProcessClosed;
 
   @override
   Future<void> get done => _done.future;
@@ -650,7 +650,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
         assert(futureResults.first == null);
         final dynamic lastResult = futureResults.last;
         if (lastResult is _AsyncError) {
-          _done.completeError(lastResult.error, lastResult.stack);
+          _done.completeError(lastResult.error as Object, lastResult.stack);
         } else {
           assert(lastResult == null);
           _done.complete();
@@ -664,7 +664,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   @override
   void add(S event) => _parent.add(event);
   @override
-  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) => _parent.addError(errorEvent, stackTrace);
+  void addError(Object errorEvent, [ StackTrace? stackTrace ]) => _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
 }
@@ -681,9 +681,9 @@ class _AsyncError {
 /// The returned future completes when either side is closed, which also
 /// indicates when the tests have finished.
 Future<void> _pipeHarnessToRemote({
-  @required int id,
-  @required StreamChannel<dynamic> harnessChannel,
-  @required StreamChannel<String> remoteChannel,
+  required int id,
+  required StreamChannel<dynamic> harnessChannel,
+  required StreamChannel<String> remoteChannel,
 }) async {
   globals.printTrace('test $id: Waiting for test harness or tests to finish');
 

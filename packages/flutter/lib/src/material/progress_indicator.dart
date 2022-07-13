@@ -186,8 +186,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     paint.color = valueColor;
 
     void drawBar(double x, double width) {
-      if (width <= 0.0)
+      if (width <= 0.0) {
         return;
+      }
 
       final double left;
       switch (textDirection) {
@@ -202,7 +203,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     if (value != null) {
-      drawBar(0.0, value!.clamp(0.0, 1.0) * size.width);
+      drawBar(0.0, clampDouble(value!, 0.0, 1.0) * size.width);
     } else {
       final double x1 = size.width * line1Tail.transform(animationValue);
       final double width1 = size.width * line1Head.transform(animationValue) - x1;
@@ -308,17 +309,19 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
       vsync: this,
     );
-    if (widget.value == null)
+    if (widget.value == null) {
       _controller.repeat();
+    }
   }
 
   @override
   void didUpdateWidget(LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
   }
 
   @override
@@ -359,8 +362,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
 
-    if (widget.value != null)
+    if (widget.value != null) {
       return _buildIndicator(context, _controller.value, textDirection);
+    }
 
     return AnimatedBuilder(
       animation: _controller.view,
@@ -385,7 +389,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
        arcSweep = value != null
-         ? value.clamp(0.0, 1.0) * _sweep
+         ? clampDouble(value, 0.0, 1.0) * _sweep
          : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color? backgroundColor;
@@ -419,8 +423,9 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
     }
 
-    if (value == null) // Indeterminate
+    if (value == null) { // Indeterminate
       paint.strokeCap = StrokeCap.square;
+    }
 
     canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
   }
@@ -548,17 +553,19 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       vsync: this,
     );
-    if (widget.value == null)
+    if (widget.value == null) {
       _controller.repeat();
+    }
   }
 
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
   }
 
   @override
@@ -617,8 +624,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   Widget build(BuildContext context) {
     switch (widget._indicatorType) {
       case _ActivityIndicatorType.material:
-        if (widget.value != null)
+        if (widget.value != null) {
           return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        }
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
         final ThemeData theme = Theme.of(context);
@@ -631,8 +639,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            if (widget.value != null)
+            if (widget.value != null) {
               return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+            }
             return _buildAnimation();
         }
     }
@@ -683,8 +692,9 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
   @override
   void paint(Canvas canvas, Size size) {
     super.paint(canvas, size);
-    if (arrowheadScale > 0.0)
+    if (arrowheadScale > 0.0) {
       paintArrowhead(canvas, size);
+    }
   }
 }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -11,7 +9,7 @@ import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('WebDriverService catches SocketExceptions cleanly and includes link to documentation', () async {

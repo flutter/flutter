@@ -11,6 +11,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,8 +31,9 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null)
+    if (widget.child != null) {
       return widget.child!;
+    }
     return Container();
   }
 }
@@ -851,6 +853,88 @@ void main() {
     tester.binding.platformDispatcher.clearPlatformBrightnessTestValue();
   });
 
+  testWidgets('MaterialApp animates theme changes', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData darkTheme = ThemeData.dark();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: ThemeMode.light,
+        home: Builder(
+          builder: (BuildContext context) {
+            return const Scaffold();
+          },
+        ),
+      ),
+    );
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.scaffoldBackgroundColor);
+
+    // Change to dark theme
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        themeMode: ThemeMode.dark,
+        home: Builder(
+          builder: (BuildContext context) {
+            return const Scaffold();
+          },
+        ),
+      ),
+    );
+
+    // Wait half kThemeAnimationDuration = 200ms.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Default curve is linear so background should be half way between
+    // the two colors.
+    final Color halfBGColor = Color.lerp(lightTheme.scaffoldBackgroundColor, darkTheme.scaffoldBackgroundColor, 0.5)!;
+    expect(tester.widget<Material>(find.byType(Material)).color, halfBGColor);
+  });
+
+  testWidgets('MaterialApp theme animation can be turned off', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData darkTheme = ThemeData.dark();
+    int scaffoldRebuilds = 0;
+
+    final Widget scaffold = Builder(
+      builder: (BuildContext context) {
+        scaffoldRebuilds++;
+        // Use Theme.of() to ensure we are building when the theme changes.
+        return Scaffold(backgroundColor: Theme.of(context).scaffoldBackgroundColor);
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: ThemeMode.light,
+        themeAnimationDuration: Duration.zero,
+        home: scaffold,
+      ),
+    );
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.scaffoldBackgroundColor);
+    expect(scaffoldRebuilds, 1);
+
+    // Change to dark theme
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        themeMode: ThemeMode.dark,
+        themeAnimationDuration: Duration.zero,
+        home: scaffold,
+      ),
+    );
+
+    // Wait for any animation to finish.
+    await tester.pumpAndSettle();
+    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.scaffoldBackgroundColor);
+    expect(scaffoldRebuilds, 2);
+  });
+
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
     // Mock the Window to explicitly report a light platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
@@ -1023,6 +1107,110 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    await tester.pumpWidget(MaterialApp.router(
+      routerDelegate: delegate,
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: const RouteInformation(
+        location: 'initial',
+      ),
+    );
+    await tester.pumpWidget(MaterialApp.router(
+      routeInformationProvider: provider,
+      routerDelegate: delegate,
+    ));
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+    await tester.pumpWidget(MaterialApp.router(
+      routerDelegate: delegate,
+      routerConfig: routerConfig,
+    ));
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
+        routeInformationProvider: PlatformRouteInformationProvider(
+          initialRouteInformation: const RouteInformation(
+            location: 'initial',
+          ),
+        ),
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: SimpleNavigatorRouterDelegate(
+          builder: (BuildContext context, RouteInformation information) {
+            return Text(information.location!);
+          },
+          onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+            delegate.routeInformation = const RouteInformation(
+              location: 'popped',
+            );
+            return route.didPop(result);
+          },
+        ),
+        backButtonDispatcher: RootBackButtonDispatcher()
+    );
+    await tester.pumpWidget(MaterialApp.router(
+      routerConfig: routerConfig,
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+
   testWidgets('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;
     await tester.pumpWidget(MaterialApp(
@@ -1158,6 +1346,83 @@ void main() {
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets(
+    'ListView clip behavior updates overscroll indicator clip behavior', (WidgetTester tester) async {
+      Widget buildFrame(Clip clipBehavior) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: 20,
+                  clipBehavior: clipBehavior,
+                  itemBuilder: (BuildContext context, int index){
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text('Index $index'),
+                    );
+                  },
+                ),
+              ),
+              Opacity(
+                opacity: 0.5,
+                child: Container(
+                  color: const Color(0xD0FF0000),
+                  height: 100,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // Test default clip behavior.
+      await tester.pumpWidget(buildFrame(Clip.hardEdge));
+
+      expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+      expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+      expect(find.text('Index 1'), findsOneWidget);
+
+      RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Currently not clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+      // Overscroll the start.
+      await gesture.moveBy(const Offset(0.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(find.text('Index 1'), findsOneWidget);
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Now clipping
+      expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Test custom clip behavior.
+      await tester.pumpWidget(buildFrame(Clip.none));
+
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Currently not clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+      // Overscroll the start.
+      await gesture.moveBy(const Offset(0.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(find.text('Index 1'), findsOneWidget);
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Now clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {

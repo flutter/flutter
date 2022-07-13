@@ -25,7 +25,7 @@ class BasicProject extends Project {
 
   Future<void> main() async {
     while (true) {
-      runApp(new MyApp());
+      runApp(MyApp());
       await Future.delayed(const Duration(milliseconds: 50));
     }
   }
@@ -34,9 +34,9 @@ class BasicProject extends Project {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp( // BUILD BREAKPOINT
+      return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: new Container(),
+        home: Container(),
       );
     }
   }
@@ -136,7 +136,7 @@ class BasicProjectWithTimelineTraces extends Project {
 
   Future<void> main() async {
     while (true) {
-      runApp(new MyApp());
+      runApp(MyApp());
       await Future.delayed(const Duration(milliseconds: 50));
       Timeline.instantSync('main');
     }
@@ -146,9 +146,9 @@ class BasicProjectWithTimelineTraces extends Project {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp( // BUILD BREAKPOINT
+      return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: new Container(),
+        home: Container(),
       );
     }
   }
@@ -208,7 +208,7 @@ class BasicProjectWithUnaryMain extends Project {
   import 'package:flutter/material.dart';
   Future<void> main(List<String> args) async {
     while (true) {
-      runApp(new MyApp());
+      runApp(MyApp());
       await Future.delayed(const Duration(milliseconds: 50));
     }
   }
@@ -216,9 +216,9 @@ class BasicProjectWithUnaryMain extends Project {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp( // BUILD BREAKPOINT
+      return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: new Container(),
+        home: Container(),
       );
     }
   }

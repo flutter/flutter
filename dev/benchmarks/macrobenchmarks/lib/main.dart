@@ -11,6 +11,7 @@ import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
 import 'src/backdrop_filter.dart';
+import 'src/clipper_cache.dart';
 import 'src/color_filter_and_fade.dart';
 import 'src/color_filter_cache.dart';
 import 'src/cubic_bezier.dart';
@@ -21,11 +22,13 @@ import 'src/gradient_perf.dart';
 import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
+import 'src/list_text_layout.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
 import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
+import 'src/raster_cache_use_memory.dart';
 import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
@@ -58,12 +61,14 @@ class MacrobenchmarksApp extends StatelessWidget {
         kTextRouteName: (BuildContext context) => const TextPage(),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
+        kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
         kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
+        kRasterCacheUseMemory: (BuildContext context) => const RasterCacheUseMemory(),
         kShaderMaskCacheRouteName: (BuildContext context) => const ShaderMaskCachePage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
@@ -74,6 +79,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kGradientPerfRouteName: (BuildContext context) => const GradientPerfHomePage(),
         ...gradientPerfRoutes,
         kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
+        kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
       },
     );
   }
@@ -169,6 +175,13 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
+            key: const Key(kClipperCacheRouteName),
+            child: const Text('Clipper Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kClipperCacheRouteName);
+            },
+          ),
+          ElevatedButton(
             key: const Key(kColorFilterAndFadeRouteName),
             child: const Text('Color Filter and Fade'),
             onPressed: () {
@@ -180,6 +193,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Color Filter Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterCacheRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kRasterCacheUseMemory),
+            child: const Text('RasterCache Use Memory'),
+            onPressed: () {
+              Navigator.pushNamed(context, kRasterCacheUseMemory);
             },
           ),
           ElevatedButton(
@@ -264,6 +284,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Animated complex opacity perf'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedComplexOpacityPerfRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kListTextLayoutRouteName),
+            child: const Text('A list with lots of text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kListTextLayoutRouteName);
             },
           ),
         ],

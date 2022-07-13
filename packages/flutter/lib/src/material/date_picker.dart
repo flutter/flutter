@@ -1751,7 +1751,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
     return Column(
       children: <Widget>[
-        _DayHeaders(),
+        const _DayHeaders(),
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
           child: _CalendarKeyboardNavigator(
@@ -1887,10 +1887,11 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
   int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
     if (textDirection == TextDirection.rtl) {
-      if (traversalDirection == TraversalDirection.left)
+      if (traversalDirection == TraversalDirection.left) {
         traversalDirection = TraversalDirection.right;
-      else if (traversalDirection == TraversalDirection.right)
+      } else if (traversalDirection == TraversalDirection.right) {
         traversalDirection = TraversalDirection.left;
+      }
     }
     return _directionOffset[traversalDirection]!;
   }
@@ -1946,6 +1947,8 @@ class _FocusedDate extends InheritedWidget {
 
 
 class _DayHeaders extends StatelessWidget {
+  const _DayHeaders();
+
   /// Builds widgets showing abbreviated days of week. The first widget in the
   /// returned list corresponds to the first day of week for the current locale.
   ///
@@ -1971,8 +1974,9 @@ class _DayHeaders extends StatelessWidget {
       result.add(ExcludeSemantics(
         child: Center(child: Text(weekday, style: headerStyle)),
       ));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
+      if (i == (localizations.firstDayOfWeekIndex - 1) % 7) {
         break;
+      }
     }
     return result;
   }
@@ -2385,8 +2389,9 @@ class _MonthItemState extends State<_MonthItem> {
       // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
       // a leap year.
       final int day = i - dayOffset + 1;
-      if (day > daysInMonth)
+      if (day > daysInMonth) {
         break;
+      }
       if (day < 1) {
         dayItems.add(Container());
       } else {

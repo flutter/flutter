@@ -35,7 +35,6 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
-final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
 
@@ -339,6 +338,7 @@ Future<void> _runGeneralToolTests() async {
     _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
+
     // Detect unit test time regressions (poor time delay handling, etc).
     // This overrides the 15 minute default for tools tests.
     // See the README.md and dart_test.yaml files in the flutter_tools package.
@@ -1083,6 +1083,10 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
+    () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
+    () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
+    () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
+    () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -1654,7 +1658,7 @@ Future<void> _dartRunTest(String workingDirectory, {
     if (coverage != null)
       '--coverage=$coverage',
     if (perTestTimeout != null)
-      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
+      '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
@@ -1807,31 +1811,6 @@ void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
   environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
 }
 
-Map<String, String> _initGradleEnvironment() {
-  final String? androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
-      ? Platform.environment['ANDROID_SDK_ROOT']
-      : Platform.environment['ANDROID_HOME'];
-  if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
-    print('${red}Could not find Android SDK; set ANDROID_SDK_ROOT.$reset');
-    exit(1);
-  }
-  return <String, String>{
-    'ANDROID_HOME': androidSdkRoot!,
-    'ANDROID_SDK_ROOT': androidSdkRoot,
-  };
-}
-
-final Map<String, String> gradleEnvironment = _initGradleEnvironment();
-
-void deleteFile(String path) {
-  // This is technically a race condition but nobody else should be running
-  // while this script runs, so we should be ok. (Sadly recursive:true does not
-  // obviate the need for existsSync, at least on Windows.)
-  final File file = File(path);
-  if (file.existsSync())
-    file.deleteSync();
-}
-
 enum CiProviders {
   cirrus,
   luci,
@@ -1858,18 +1837,6 @@ CiProviders? get ciProvider {
     return CiProviders.luci;
   }
   return null;
-}
-
-/// Returns the name of the branch being tested.
-String get branchName {
-  switch(ciProvider) {
-    case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_BRANCH']!;
-    case CiProviders.luci:
-      return Platform.environment['LUCI_BRANCH']!;
-    case null:
-      return '';
-  }
 }
 
 /// Checks the given file's contents to determine if they match the allowed

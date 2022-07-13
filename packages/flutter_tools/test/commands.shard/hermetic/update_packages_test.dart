@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/commands/update_packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -171,6 +172,47 @@ void main() {
       Cache: () => Cache.test(
         processManager: FakeProcessManager.any(),
       ),
+    });
+  });
+
+  group('generateFakePubspec', () {
+    const String prevVersion = '1.2.0';
+    testUsingContext('constrains package versions to >= previous version if doUpgrade: true', () {
+      final String pubspecSource = generateFakePubspec(
+        <PubspecDependency>[
+          PubspecDependency(
+            '  foo: $prevVersion',
+            'foo',
+            '',
+            version: prevVersion,
+            sourcePath: '/path/to/pubspec.yaml',
+            kind: DependencyKind.normal,
+            isTransitive: false,
+          ),
+        ],
+        doUpgrade: true,
+      );
+      final YamlMap pubspec = loadYaml(pubspecSource) as YamlMap;
+      expect((pubspec['dependencies'] as YamlMap)['foo'], '>= $prevVersion');
+    });
+
+    testUsingContext('uses previous package versions doUpgrade: false', () {
+      final String pubspecSource = generateFakePubspec(
+        <PubspecDependency>[
+          PubspecDependency(
+            '  foo: $prevVersion',
+            'foo',
+            '',
+            version: prevVersion,
+            sourcePath: '/path/to/pubspec.yaml',
+            kind: DependencyKind.normal,
+            isTransitive: false,
+          ),
+        ],
+        doUpgrade: false,
+      );
+      final YamlMap pubspec = loadYaml(pubspecSource) as YamlMap;
+      expect((pubspec['dependencies'] as YamlMap)['foo'], prevVersion);
     });
   });
 }

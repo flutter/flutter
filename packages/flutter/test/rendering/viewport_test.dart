@@ -1708,9 +1708,8 @@ void main() {
           '   If this widget is always nested in a scrollable widget there is\n'
           '   no need to use a viewport because there will always be enough\n'
           '   horizontal space for the children. In this case, consider using a\n'
-          '   Row instead. Otherwise, consider using the "shrinkWrap" property\n'
-          '   (or a ShrinkWrappingViewport) to size the width of the viewport\n'
-          '   to the sum of the widths of its children.\n',
+          '   Row or Wrap instead. Otherwise, consider using a CustomScrollView\n'
+          '   to concatenate arbitrary slivers into a single scrollable.\n',
       );
     });
 
@@ -1743,9 +1742,9 @@ void main() {
           '   If this widget is always nested in a scrollable widget there is\n'
           '   no need to use a viewport because there will always be enough\n'
           '   vertical space for the children. In this case, consider using a\n'
-          '   Column instead. Otherwise, consider using the "shrinkWrap"\n'
-          '   property (or a ShrinkWrappingViewport) to size the height of the\n'
-          '   viewport to the sum of the heights of its children.\n',
+          '   Column or Wrap instead. Otherwise, consider using a\n'
+          '   CustomScrollView to concatenate arbitrary slivers into a single\n'
+          '   scrollable.\n',
       );
     });
   });
@@ -2158,4 +2157,41 @@ void main() {
     await tester.drag(find.text('b'), const Offset(0, 200));
     await tester.pumpAndSettle();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('Viewport describeApproximateClip respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        clipBehavior: Clip.none,
+        slivers: <Widget>[
+          SliverToBoxAdapter(child: SizedBox(width: 20, height: 20)),
+        ]
+      ),
+    ));
+    RenderViewport viewport = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(viewport.clipBehavior, Clip.none);
+    bool visited = false;
+    viewport.visitChildren((RenderObject child) {
+      visited = true;
+      expect(viewport.describeApproximatePaintClip(child as RenderSliver), null);
+    });
+    expect(visited, true);
+
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(child: SizedBox(width: 20, height: 20)),
+        ]
+      ),
+    ));
+    viewport = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(viewport.clipBehavior, Clip.hardEdge);
+    visited = false;
+    viewport.visitChildren((RenderObject child) {
+      visited = true;
+      expect(viewport.describeApproximatePaintClip(child as RenderSliver), Offset.zero & viewport.size);
+    });
+    expect(visited, true);
+  });
 }

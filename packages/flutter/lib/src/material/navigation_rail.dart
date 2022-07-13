@@ -15,9 +15,11 @@ import 'navigation_rail_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-/// A material widget that is meant to be displayed at the left or right of an
+/// A Material Design widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and
 /// five.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=y9xchtVTtqQ}
 ///
 /// The navigation rail is meant for layouts with wide viewports, such as a
 /// desktop web or tablet landscape layout. For smaller layouts, like mobile
@@ -61,11 +63,12 @@ import 'theme.dart';
 ///    destinations in the navigation rail.
 ///  * [BottomNavigationBar], which is a similar navigation widget that's laid
 ///     out horizontally.
-///  * https://material.io/components/navigation-rail/
+///  * <https://material.io/components/navigation-rail/>
+///  * <https://m3.material.io/components/navigation-rail>
 class NavigationRail extends StatefulWidget {
   /// Creates a Material Design navigation rail.
   ///
-  /// The value of [destinations] must be a list of one or more
+  /// The value of [destinations] must be a list of two or more
   /// [NavigationRailDestination] values.
   ///
   /// If [elevation] is specified, it must be non-negative.
@@ -376,7 +379,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
-    final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _NavigationRailDefaultsM3(context) : _NavigationRailDefaultsM2(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? defaults.backgroundColor!;
@@ -436,8 +439,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           useIndicator: useIndicator,
                           indicatorColor: useIndicator ? indicatorColor : null,
                           onTap: () {
-                            if (widget.onDestinationSelected != null)
+                            if (widget.onDestinationSelected != null) {
                               widget.onDestinationSelected!(i);
+                            }
                           },
                           indexLabel: localizations.tabLabel(
                             tabIndex: i + 1,
@@ -906,8 +910,9 @@ const Widget _verticalSpacer = SizedBox(height: 8.0);
 const double _verticalIconLabelSpacingM3 = 4.0;
 const double _verticalDestinationSpacingM3 = 12.0;
 
-class _DefaultsM2 extends NavigationRailThemeData {
-  _DefaultsM2(BuildContext context)
+// Hand coded defaults based on Material Design 2.
+class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
+  _NavigationRailDefaultsM2(BuildContext context)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(
@@ -949,15 +954,17 @@ class _DefaultsM2 extends NavigationRailThemeData {
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - NavigationRail
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
-class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
+  _NavigationRailDefaultsM3(this.context)
       : super(
           elevation: 0.0,
           groupAlignment: -1,
@@ -999,4 +1006,4 @@ class _TokenDefaultsM3 extends NavigationRailThemeData {
 
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - NavigationRail

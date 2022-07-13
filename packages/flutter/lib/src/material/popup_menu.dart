@@ -347,8 +347,9 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1!;
 
-    if (!widget.enabled)
+    if (!widget.enabled) {
       style = style.copyWith(color: theme.disabledColor);
+    }
 
     Widget item = AnimatedDefaultTextStyle(
       style: style,
@@ -460,6 +461,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     super.enabled,
     super.padding,
     super.height,
+    super.mouseCursor,
     super.child,
   }) : assert(checked != null);
 
@@ -503,22 +505,25 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   @override
   void handleTap() {
     // This fades the checkmark in or out when tapped.
-    if (widget.checked)
+    if (widget.checked) {
       _controller.reverse();
-    else
+    } else {
       _controller.forward();
+    }
     super.handleTap();
   }
 
   @override
   Widget buildChild() {
-    return ListTile(
-      enabled: widget.enabled,
-      leading: FadeTransition(
-        opacity: _opacity,
-        child: Icon(_controller.isDismissed ? null : Icons.done),
+    return IgnorePointer(
+      child: ListTile(
+        enabled: widget.enabled,
+        leading: FadeTransition(
+          opacity: _opacity,
+          child: Icon(_controller.isDismissed ? null : Icons.done),
+        ),
+        title: widget.child,
       ),
-      title: widget.child,
     );
   }
 }
@@ -529,11 +534,13 @@ class _PopupMenu<T> extends StatelessWidget {
     required this.route,
     required this.semanticLabel,
     this.constraints,
+    required this.clipBehavior,
   });
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -543,7 +550,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
       final CurvedAnimation opacity = CurvedAnimation(
         parent: route.animation!,
         curve: Interval(start, end),
@@ -602,6 +609,7 @@ class _PopupMenu<T> extends StatelessWidget {
           child: Material(
             shape: route.shape ?? popupMenuTheme.shape,
             color: route.color ?? popupMenuTheme.color,
+            clipBehavior: clipBehavior,
             type: MaterialType.card,
             elevation: route.elevation ?? popupMenuTheme.elevation ?? 8.0,
             child: Align(
@@ -673,8 +681,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     double y = position.top;
     if (selectedItemIndex != null && itemSizes != null) {
       double selectedItemOffset = _kMenuVerticalPadding;
-      for (int index = 0; index < selectedItemIndex!; index += 1)
+      for (int index = 0; index < selectedItemIndex!; index += 1) {
         selectedItemOffset += itemSizes[index]!.height;
+      }
       selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
       y = y + buttonHeight / 2.0 - selectedItemOffset;
     }
@@ -721,14 +730,16 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
-    if (x < screen.left + _kMenuScreenPadding + padding.left)
+    if (x < screen.left + _kMenuScreenPadding + padding.left) {
       x = screen.left + _kMenuScreenPadding + padding.left;
-    else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right)
+    } else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right) {
       x = screen.right - childSize.width - _kMenuScreenPadding - padding.right;
-    if (y < screen.top + _kMenuScreenPadding + padding.top)
+    }
+    if (y < screen.top + _kMenuScreenPadding + padding.top) {
       y = _kMenuScreenPadding + padding.top;
-    else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom)
+    } else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom) {
       y = screen.bottom - childSize.height - _kMenuScreenPadding - padding.bottom;
+    }
 
     return Offset(x,y);
   }
@@ -761,6 +772,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.color,
     required this.capturedThemes,
     this.constraints,
+    required this.clipBehavior,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -773,6 +785,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final Color? color;
   final CapturedThemes capturedThemes;
   final BoxConstraints? constraints;
+  final Clip clipBehavior;
 
   @override
   Animation<double> createAnimation() {
@@ -801,8 +814,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     int? selectedItemIndex;
     if (initialValue != null) {
       for (int index = 0; selectedItemIndex == null && index < items.length; index += 1) {
-        if (items[index].represents(initialValue))
+        if (items[index].represents(initialValue)) {
           selectedItemIndex = index;
+        }
       }
     }
 
@@ -810,6 +824,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       route: this,
       semanticLabel: semanticLabel,
       constraints: constraints,
+      clipBehavior: clipBehavior,
     );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(
@@ -887,6 +902,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// label is not provided, it will default to
 /// [MaterialLocalizations.popupMenuLabel].
 ///
+/// The `clipBehavior` argument is used to clip the shape of the menu. Defaults to
+/// [Clip.none].
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -907,6 +925,7 @@ Future<T?> showMenu<T>({
   Color? color,
   bool useRootNavigator = false,
   BoxConstraints? constraints,
+  Clip clipBehavior = Clip.none,
 }) {
   assert(context != null);
   assert(position != null);
@@ -937,6 +956,7 @@ Future<T?> showMenu<T>({
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     constraints: constraints,
+    clipBehavior: clipBehavior,
   ));
 }
 
@@ -1006,6 +1026,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.enableFeedback,
     this.constraints,
     this.position = PopupMenuPosition.over,
+    this.clipBehavior = Clip.none,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
        assert(
@@ -1137,6 +1158,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// popup menu appear directly over the button that was used to create it.
   final PopupMenuPosition position;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// The [clipBehavior] argument is used the clip shape of the menu.
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1186,10 +1214,12 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
         constraints: widget.constraints,
+        clipBehavior: widget.clipBehavior,
       )
       .then<void>((T? newValue) {
-        if (!mounted)
+        if (!mounted) {
           return null;
+        }
         if (newValue == null) {
           widget.onCanceled?.call();
           return null;
@@ -1218,7 +1248,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     assert(debugCheckHasMaterialLocalizations(context));
 
-    if (widget.child != null)
+    if (widget.child != null) {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
@@ -1229,6 +1259,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: widget.child,
         ),
       );
+    }
 
     return IconButton(
       icon: widget.icon ?? Icon(Icons.adaptive.more),

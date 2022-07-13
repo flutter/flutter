@@ -4,10 +4,8 @@
 
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Directory;
-import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -59,6 +57,89 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+      );
+    });
+
+    test('web HTML test', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'GOLDCTL': 'goldctl',
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'FLUTTER_TEST_BROWSER': 'Chrome',
+          'FLUTTER_WEB_RENDERER': 'html',
+        },
+        operatingSystem: 'macos'
+      );
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+          '--add-test-optional-key', 'image_matching_algorithm:fuzzy',
+          '--add-test-optional-key', 'fuzzy_max_different_pixels:20',
+          '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:4',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+
+      expect(
+        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
+        isTrue,
+      );
+    });
+
+    test('web CanvasKit test', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'GOLDCTL': 'goldctl',
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'FLUTTER_TEST_BROWSER': 'Chrome',
+          'FLUTTER_WEB_RENDERER': 'canvaskit',
+        },
+        operatingSystem: 'macos'
+      );
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+
+      expect(
+        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
+        isTrue,
       );
     });
 
@@ -1004,23 +1085,6 @@ class FakeHttpClientRequest extends Fake implements HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
     return response;
-  }
-}
-
-class FakeHttpClientResponse extends Fake implements HttpClientResponse {
-  FakeHttpClientResponse(this.response);
-
-  final List<int> response;
-
-  @override
-  StreamSubscription<List<int>> listen(
-    void Function(List<int> event)? onData, {
-      Function? onError,
-      void Function()? onDone,
-      bool? cancelOnError,
-    }) {
-    return Stream<List<int>>.fromFuture(Future<List<int>>.value(response))
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
 

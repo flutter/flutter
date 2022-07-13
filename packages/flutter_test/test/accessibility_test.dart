@@ -59,14 +59,14 @@ void main() {
       TextStyle(color: blue29, backgroundColor: surface, fontSize: 18),
     ];
 
-    Widget _appWithTextWidget(TextStyle style) => _boilerplate(
+    Widget appWithTextWidget(TextStyle style) => _boilerplate(
       Text('this is text', style: style.copyWith(height: 30.0)),
     );
 
     for (final TextStyle style in textStylesMeetingGuideline) {
       testWidgets('text with style $style', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(_appWithTextWidget(style));
+        await tester.pumpWidget(appWithTextWidget(style));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
@@ -75,7 +75,7 @@ void main() {
     for (final TextStyle style in textStylesDoesNotMeetingGuideline) {
       testWidgets('text with $style', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(_appWithTextWidget(style));
+        await tester.pumpWidget(appWithTextWidget(style));
         await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
         handle.dispose();
       });
@@ -261,7 +261,7 @@ void main() {
   });
 
   group('custom minimum contrast guideline', () {
-    Widget _icon({
+    Widget iconWidget({
       IconData icon = Icons.search,
       required Color color,
       required Color background,
@@ -273,7 +273,7 @@ void main() {
       );
     }
 
-    Widget _text({
+    Widget textWidget({
       String text = 'Text',
       required Color color,
       required Color background,
@@ -285,16 +285,16 @@ void main() {
       );
     }
 
-    Widget _row(List<Widget> widgets) => _boilerplate(Row(children: widgets));
+    Widget rowWidget(List<Widget> widgets) => _boilerplate(Row(children: widgets));
 
     final Finder findIcons = find.byWidgetPredicate((Widget widget) => widget is Icon);
     final Finder findTexts = find.byWidgetPredicate((Widget widget) => widget is Text);
     final Finder findIconsAndTexts = find.byWidgetPredicate((Widget widget) => widget is Icon || widget is Text);
 
     testWidgets('Black icons on white background', (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.black, background: Colors.white),
-        _icon(color: Colors.black, background: Colors.white),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.black, background: Colors.white),
+        iconWidget(color: Colors.black, background: Colors.white),
       ]));
 
       await expectLater(
@@ -304,9 +304,9 @@ void main() {
     });
 
     testWidgets('Black icons on black background', (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.black, background: Colors.black),
-        _icon(color: Colors.black, background: Colors.black),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.black, background: Colors.black),
+        iconWidget(color: Colors.black, background: Colors.black),
       ]));
 
       await expectLater(
@@ -317,9 +317,9 @@ void main() {
 
     testWidgets('White icons on black background ("dark mode")',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.white, background: Colors.black),
-        _icon(color: Colors.white, background: Colors.black),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.white, background: Colors.black),
+        iconWidget(color: Colors.white, background: Colors.black),
       ]));
 
       await expectLater(
@@ -329,11 +329,11 @@ void main() {
     });
 
     testWidgets('Using different icons', (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.black, background: Colors.white, icon: Icons.more_horiz),
-        _icon(color: Colors.black, background: Colors.white, icon: Icons.description),
-        _icon(color: Colors.black, background: Colors.white, icon: Icons.image),
-        _icon(color: Colors.black, background: Colors.white, icon: Icons.beach_access),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.black, background: Colors.white, icon: Icons.more_horiz),
+        iconWidget(color: Colors.black, background: Colors.white, icon: Icons.description),
+        iconWidget(color: Colors.black, background: Colors.white, icon: Icons.image),
+        iconWidget(color: Colors.black, background: Colors.white, icon: Icons.beach_access),
       ]));
 
       await expectLater(
@@ -344,9 +344,9 @@ void main() {
 
     testWidgets('One invalid instance fails entire test',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.black, background: Colors.white),
-        _icon(color: Colors.black, background: Colors.black),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.black, background: Colors.white),
+        iconWidget(color: Colors.black, background: Colors.black),
       ]));
 
       await expectLater(
@@ -357,11 +357,11 @@ void main() {
 
     testWidgets('White on different colors, passing',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.white, background: Colors.red[800]!, icon: Icons.more_horiz),
-        _icon(color: Colors.white, background: Colors.green[800]!, icon: Icons.description),
-        _icon(color: Colors.white, background: Colors.blue[800]!, icon: Icons.image),
-        _icon(color: Colors.white, background: Colors.purple[800]!, icon: Icons.beach_access),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.white, background: Colors.red[800]!, icon: Icons.more_horiz),
+        iconWidget(color: Colors.white, background: Colors.green[800]!, icon: Icons.description),
+        iconWidget(color: Colors.white, background: Colors.blue[800]!, icon: Icons.image),
+        iconWidget(color: Colors.white, background: Colors.purple[800]!, icon: Icons.beach_access),
       ]));
 
       await expectLater(tester,
@@ -370,11 +370,11 @@ void main() {
 
     testWidgets('White on different colors, failing',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.white, background: Colors.red[200]!, icon: Icons.more_horiz),
-        _icon(color: Colors.white, background: Colors.green[400]!, icon: Icons.description),
-        _icon(color: Colors.white, background: Colors.blue[600]!, icon: Icons.image),
-        _icon(color: Colors.white, background: Colors.purple[800]!, icon: Icons.beach_access),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.white, background: Colors.red[200]!, icon: Icons.more_horiz),
+        iconWidget(color: Colors.white, background: Colors.green[400]!, icon: Icons.description),
+        iconWidget(color: Colors.white, background: Colors.blue[600]!, icon: Icons.image),
+        iconWidget(color: Colors.white, background: Colors.purple[800]!, icon: Icons.beach_access),
       ]));
 
       await expectLater(
@@ -384,7 +384,7 @@ void main() {
     });
 
     testWidgets('Absence of icons, passing', (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[]));
+      await tester.pumpWidget(rowWidget(<Widget>[]));
 
       await expectLater(
         tester,
@@ -394,9 +394,9 @@ void main() {
 
     testWidgets('Absence of icons, passing - 2nd test',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _text(color: Colors.black, background: Colors.white),
-        _text(color: Colors.black, background: Colors.black),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        textWidget(color: Colors.black, background: Colors.white),
+        textWidget(color: Colors.black, background: Colors.black),
       ]));
 
       await expectLater(
@@ -407,11 +407,11 @@ void main() {
 
     testWidgets('Guideline ignores widgets of other types',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.black, background: Colors.white),
-        _icon(color: Colors.black, background: Colors.white),
-        _text(color: Colors.black, background: Colors.white),
-        _text(color: Colors.black, background: Colors.black),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.black, background: Colors.white),
+        iconWidget(color: Colors.black, background: Colors.white),
+        textWidget(color: Colors.black, background: Colors.white),
+        textWidget(color: Colors.black, background: Colors.black),
       ]));
 
       await expectLater(
@@ -429,9 +429,9 @@ void main() {
     });
 
     testWidgets('Custom minimum ratio - Icons', (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.blue, background: Colors.white),
-        _icon(color: Colors.black, background: Colors.white),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.blue, background: Colors.white),
+        iconWidget(color: Colors.black, background: Colors.white),
       ]));
 
       await expectLater(
@@ -445,9 +445,9 @@ void main() {
     });
 
     testWidgets('Custom minimum ratio - Texts', (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _text(color: Colors.blue, background: Colors.white),
-        _text(color: Colors.black, background: Colors.white),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        textWidget(color: Colors.blue, background: Colors.white),
+        textWidget(color: Colors.black, background: Colors.white),
       ]));
 
       await expectLater(
@@ -463,11 +463,11 @@ void main() {
     testWidgets(
         'Custom minimum ratio - Different standards for icons and texts',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_row(<Widget>[
-        _icon(color: Colors.blue, background: Colors.white),
-        _icon(color: Colors.black, background: Colors.white),
-        _text(color: Colors.blue, background: Colors.white),
-        _text(color: Colors.black, background: Colors.white),
+      await tester.pumpWidget(rowWidget(<Widget>[
+        iconWidget(color: Colors.blue, background: Colors.white),
+        iconWidget(color: Colors.black, background: Colors.white),
+        textWidget(color: Colors.blue, background: Colors.white),
+        textWidget(color: Colors.black, background: Colors.white),
       ]));
 
       await expectLater(
@@ -765,7 +765,7 @@ void main() {
         backgroundColor: Colors.white,
         body: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: const Color(0xFFFBBC04),
+            backgroundColor: const Color(0xFFFBBC04),
             elevation: 0,
           ),
           onPressed: () {},

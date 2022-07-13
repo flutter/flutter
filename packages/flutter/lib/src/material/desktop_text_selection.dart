@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -153,7 +154,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final Offset midpointAnchor = Offset(
-      (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
+      clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         mediaQuery.padding.left,
         mediaQuery.size.width - mediaQuery.padding.right,
       ),

@@ -15,6 +15,7 @@ void main() {
     double minChildSize = .25,
     bool snap = false,
     List<double>? snapSizes,
+    Duration? snapAnimationDuration,
     double? itemExtent,
     Key? containerKey,
     Key? stackKey,
@@ -40,6 +41,7 @@ void main() {
                 initialChildSize: initialChildSize,
                 snap: snap,
                 snapSizes: snapSizes,
+                snapAnimationDuration: snapAnimationDuration,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
@@ -62,6 +64,54 @@ void main() {
       ),
     );
   }
+
+  testWidgets('Do not crash when replacing scroll position during the drag', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89681
+    bool showScrollbars = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.2,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (BuildContext context, ScrollController scrollController) {
+                showScrollbars = !showScrollbars;
+                // Change the scroll behavior will trigger scroll position replace.
+                final ScrollBehavior behavior = const ScrollBehavior().copyWith(scrollbars: showScrollbars);
+                return ScrollConfiguration(
+                  behavior: behavior,
+                  child: ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    controller: scrollController,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemCount: 100,
+                    itemBuilder: (_, int index) => SizedBox(
+                      height: 100,
+                      child: ColoredBox(
+                        color: Colors.primaries[index % Colors.primaries.length],
+                        child: Text('Item $index'),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('Item 1'), const Offset(0, 200), 350);
+    await tester.pumpAndSettle();
+
+    // Go without throw.
+  });
 
   testWidgets('Scrolls correct amount when maxChildSize < 1.0', (WidgetTester tester) async {
     const Key key = ValueKey<String>('container');
@@ -326,7 +376,59 @@ void main() {
       expect(find.text('Item 70'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    debugDefaultTargetPlatformOverride = null;
+    testWidgets('Ballistic animation on fling should not leak Ticker', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/101061
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.8,
+                minChildSize: 0.2,
+                maxChildSize: 0.9,
+                expand: false,
+                builder: (_, ScrollController scrollController) {
+                  return ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    controller: scrollController,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemCount: 100,
+                    itemBuilder: (_, int index) => SizedBox(
+                      height: 100,
+                      child: ColoredBox(
+                        color: Colors.primaries[index % Colors.primaries.length],
+                        child: Text('Item $index'),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.flingFrom(
+        tester.getCenter(find.text('Item 1')),
+        const Offset(0, 50),
+        10000,
+      );
+
+      // Pumps several times to let the DraggableScrollableSheet react to scroll position changes.
+      const int numberOfPumpsBeforeError = 22;
+      for (int i = 0; i < numberOfPumpsBeforeError; i++) {
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+
+      // Dispose the DraggableScrollableSheet
+      await tester.pumpWidget(const SizedBox.shrink());
+
+      // When a Ticker leaks an exception is thrown
+      expect(tester.takeException(), isNull);
+    });
   });
 
   testWidgets('Does not snap away from initial child on build', (WidgetTester tester) async {
@@ -385,58 +487,64 @@ void main() {
     });
   }
 
-  testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
-    const Key stackKey = ValueKey<String>('stack');
-    const Key containerKey = ValueKey<String>('container');
-    await tester.pumpWidget(boilerplateWidget(null,
-      snap: true,
-      stackKey: stackKey,
-      containerKey: containerKey,
-      snapSizes: <double>[.25, .5, .75, 1.0],
-    ));
-    await tester.pumpAndSettle();
-    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+  for (final Duration? snapAnimationDuration in <Duration?>[null, const Duration(seconds: 2)]) {
+    testWidgets(
+      'Zero velocity drag snaps to nearest snap target with '
+      'snapAnimationDuration: $snapAnimationDuration',
+      (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      await tester.pumpWidget(boilerplateWidget(null,
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        snapSizes: <double>[.25, .5, .75, 1.0],
+        snapAnimationDuration: snapAnimationDuration
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
 
-    // We are dragging up, but we'll snap down because we're closer to .75 than 1.
-    await tester.drag(find.text('Item 1'), Offset(0, -.35 * screenHeight));
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(.75, precisionErrorTolerance),
-    );
+      // We are dragging up, but we'll snap down because we're closer to .75 than 1.
+      await tester.drag(find.text('Item 1'), Offset(0, -.35 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.75, precisionErrorTolerance),
+      );
 
-    // Drag up and snap up.
-    await tester.drag(find.text('Item 1'), Offset(0, -.2 * screenHeight));
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(1.0, precisionErrorTolerance),
-    );
+      // Drag up and snap up.
+      await tester.drag(find.text('Item 1'), Offset(0, -.2 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
-    // Drag down and snap up.
-    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight));
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(1.0, precisionErrorTolerance),
-    );
+      // Drag down and snap up.
+      await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
-    // Drag down and snap down.
-    await tester.drag(find.text('Item 1'), Offset(0, .45 * screenHeight));
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(.5, precisionErrorTolerance),
-    );
+      // Drag down and snap down.
+      await tester.drag(find.text('Item 1'), Offset(0, .45 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
 
-    // Fling up with negligible velocity and snap down.
-    await tester.fling(find.text('Item 1'), Offset(0, .1 * screenHeight), 1);
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(.5, precisionErrorTolerance),
-    );
-  }, variant: TargetPlatformVariant.all());
+      // Fling up with negligible velocity and snap down.
+      await tester.fling(find.text('Item 1'), Offset(0, .1 * screenHeight), 1);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+    }, variant: TargetPlatformVariant.all());
+  }
 
   for (final List<double>? snapSizes in <List<double>?>[null, <double>[]]) {
     testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (WidgetTester tester) async {
@@ -644,6 +752,63 @@ void main() {
     ));
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Transitioning between scrollable children sharing a scroll controller will not throw', (WidgetTester tester) async {
+    int s = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: DraggableScrollableSheet(
+              initialChildSize: 0.25,
+              snap: true,
+              snapSizes: const <double>[0.25, 0.5, 1.0],
+              builder: (BuildContext context, ScrollController scrollController) {
+                return PrimaryScrollController(
+                  controller: scrollController,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: (s.isEven)
+                      ? ListView(
+                        children: <Widget>[
+                          ElevatedButton(
+                            onPressed: () => setState(() => ++s),
+                            child: const Text('Switch to 2'),
+                          ),
+                          Container(
+                            height: 400,
+                            color: Colors.blue,
+                          ),
+                        ],
+                      )
+                      : SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () => setState(() => ++s),
+                              child: const Text('Switch to 1'),
+                            ),
+                            Container(
+                              height: 400,
+                              color: Colors.blue,
+                            ),
+                          ],
+                        )
+                      ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    ));
+
+    // Trigger the AnimatedSwitcher between ListViews
+    await tester.tap(find.text('Switch to 2'));
+    await tester.pump();
+    // Completes without throwing
+  });
 
   testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];

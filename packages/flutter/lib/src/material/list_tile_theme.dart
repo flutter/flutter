@@ -146,8 +146,9 @@ class ListTileThemeData with Diagnosticable {
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ListTileThemeData(
       dense: t < 0.5 ? a?.dense : b?.dense,
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -188,10 +189,12 @@ class ListTileThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ListTileThemeData
       && other.dense == dense
       && other.shape == shape

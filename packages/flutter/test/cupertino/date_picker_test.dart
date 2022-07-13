@@ -15,6 +15,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1514,6 +1515,91 @@ void main() {
     ));
     expect(lastSelectedItem, 1);
     handle.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/98567
+  testWidgets('picker semantics action test', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    debugResetSemanticsIdCounter();
+    final DateTime initialDate = DateTime(2018, 6, 8);
+    late DateTime? date;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              onDateTimeChanged: (DateTime newDate) => date = newDate,
+              initialDateTime: initialDate,
+              maximumDate: initialDate.add(const Duration(days: 2)),
+              minimumDate: initialDate.subtract(const Duration(days: 2)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(4, SemanticsAction.decrease);
+    await tester.pumpAndSettle();
+
+    expect(date, DateTime(2018, 6, 7));
+
+    handle.dispose();
+  });
+
+  testWidgets('DatePicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+    Widget buildDatePicker(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
+        home: CupertinoDatePicker(
+          mode: CupertinoDatePickerMode.date,
+          onDateTimeChanged: (DateTime neData) {},
+          initialDateTime: DateTime(2018, 10, 10),
+        ),
+      );
+    }
+
+    // CupertinoDatePicker with light theme.
+    await tester.pumpWidget(buildDatePicker(Brightness.light));
+    RenderParagraph paragraph = tester.renderObject(find.text('October').first);
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+
+    // CupertinoDatePicker with dark theme.
+    await tester.pumpWidget(buildDatePicker(Brightness.dark));
+    paragraph = tester.renderObject(find.text('October').first);
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+  });
+
+  testWidgets('TimerPicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+    Widget buildTimerPicker(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
+        home: CupertinoTimerPicker(
+          mode: CupertinoTimerPickerMode.hm,
+          onTimerDurationChanged: (Duration newDuration) {},
+          initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+        ),
+      );
+    }
+
+    // CupertinoTimerPicker with light theme.
+    await tester.pumpWidget(buildTimerPicker(Brightness.light));
+    RenderParagraph paragraph = tester.renderObject(find.text('hours'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+
+    // CupertinoTimerPicker with light theme.
+    await tester.pumpWidget(buildTimerPicker(Brightness.dark));
+    paragraph = tester.renderObject(find.text('hours'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
 }
 

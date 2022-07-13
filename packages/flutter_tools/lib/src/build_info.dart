@@ -70,7 +70,7 @@ class BuildInfo {
   /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.dart_tool/packages`.
+  /// file. If not provided, defaults to `.dart_tool/package_config.json`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
@@ -90,12 +90,14 @@ class BuildInfo {
   /// It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.
   /// On Android it is used as versionCode.
   /// On Xcode builds it is used as CFBundleVersion.
+  /// On Windows it is used as the build suffix for the product and file versions.
   final String? buildNumber;
 
   /// A "x.y.z" string used as the version number shown to users.
   /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
   /// On Android it is used as versionName.
   /// On Xcode builds it is used as CFBundleShortVersionString.
+  /// On Windows it is used as the major, minor, and patch parts of the product and file versions.
   final String? buildName;
 
   /// An optional directory path to save debugging information from dwarf stack

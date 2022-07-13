@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -48,6 +47,7 @@ void main() {
   });
 
   testWidgets('Theme overrides selection style', (WidgetTester tester) async {
+    final Key key = UniqueKey();
     const Color defaultSelectionColor = Color(0x11111111);
     const Color defaultCursorColor = Color(0x22222222);
     const Color themeSelectionColor = Color(0x33333333);
@@ -66,7 +66,9 @@ void main() {
                   cursorColor: themeCursorColor,
                 ),
               ),
-              child: const TextField(),
+              child: TextField(
+                key: key,
+              ),
             )
           ),
         ),
@@ -83,6 +85,12 @@ void main() {
       child.visitChildren(recursiveFinder);
     }
     root.visitChildren(recursiveFinder);
+
+    // Focus text field so it has a selection color. The selection color is null
+    // on an unfocused text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
     expect(renderEditable.selectionColor, themeSelectionColor);
     expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
   });
@@ -192,8 +200,9 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (final Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem'))) {
       expect(Theme.of(item).brightness, equals(Brightness.light));
+    }
   });
 
   testWidgets('ModalBottomSheet inherits shadowed app theme', (WidgetTester tester) async {

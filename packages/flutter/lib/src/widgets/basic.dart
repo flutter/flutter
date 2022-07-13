@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
@@ -71,7 +72,7 @@ export 'package:flutter/services.dart' show
   AssetBundle;
 
 // Examples can assume:
-// class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
+// class TestWidget extends StatelessWidget { const TestWidget({super.key}); @override Widget build(BuildContext context) => const Placeholder(); }
 // late WidgetTester tester;
 // late bool _visible;
 // class Sky extends CustomPainter { @override void paint(Canvas c, Size s) {} @override bool shouldRepaint(Sky s) => false; }
@@ -1304,7 +1305,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.transformHitTests = true,
     this.filterQuality,
     super.child,
-  }) : transform = Matrix4.rotationZ(angle);
+  }) : transform = _computeRotation(angle);
 
   /// Creates a widget that transforms its child using a translation.
   ///
@@ -1380,6 +1381,38 @@ class Transform extends SingleChildRenderObjectWidget {
   })  : assert(!(scale == null && scaleX == null && scaleY == null), "At least one of 'scale', 'scaleX' and 'scaleY' is required to be non-null"),
         assert(scale == null || (scaleX == null && scaleY == null), "If 'scale' is non-null then 'scaleX' and 'scaleY' must be left null"),
         transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0);
+
+  // Computes a rotation matrix for an angle in radians, attempting to keep rotations
+  // at integral values for angles of 0, π/2, π, 3π/2.
+  static Matrix4 _computeRotation(double radians) {
+    assert(radians.isFinite, 'Cannot compute the rotation matrix for a non-finite angle: $radians');
+    if (radians == 0.0) {
+      return Matrix4.identity();
+    }
+    final double sin = math.sin(radians);
+    if (sin == 1.0) {
+      return _createZRotation(1.0, 0.0);
+    }
+    if (sin == -1.0) {
+      return _createZRotation(-1.0, 0.0);
+    }
+    final double cos = math.cos(radians);
+    if (cos == -1.0) {
+      return _createZRotation(0.0, -1.0);
+    }
+    return _createZRotation(sin, cos);
+  }
+
+  static Matrix4 _createZRotation(double sin, double cos) {
+    final Matrix4 result = Matrix4.zero();
+    result.storage[0] = cos;
+    result.storage[1] = sin;
+    result.storage[4] = -sin;
+    result.storage[5] = cos;
+    result.storage[10] = 1.0;
+    result.storage[15] = 1.0;
+    return result;
+  }
 
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
@@ -2170,8 +2203,9 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -2797,6 +2831,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
+  /// {@template flutter.widgets.basic.fractionallySizedBox.widthFactor}
   /// If non-null, the fraction of the incoming width given to the child.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
@@ -2804,8 +2839,10 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///
   /// If null, the incoming width constraints are passed to the child
   /// unmodified.
+  /// {@endtemplate}
   final double? widthFactor;
 
+  /// {@template flutter.widgets.basic.fractionallySizedBox.heightFactor}
   /// If non-null, the fraction of the incoming height given to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
@@ -2813,8 +2850,10 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///
   /// If null, the incoming height constraints are passed to the child
   /// unmodified.
+  /// {@endtemplate}
   final double? heightFactor;
 
+  /// {@template flutter.widgets.basic.fractionallySizedBox.alignment}
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
@@ -2833,6 +2872,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
+  /// {@endtemplate}
   final AlignmentGeometry alignment;
 
   @override
@@ -3175,8 +3215,9 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!(widget as Offstage).offstage)
+    if (!(widget as Offstage).offstage) {
       super.debugVisitOnstageChildren(visitor);
+    }
   }
 }
 
@@ -3844,6 +3885,13 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_O0PPD1Xfbk}
 ///
+/// {@tool dartpad}
+/// This example shows a [IndexedStack] widget being used to lay out one card
+/// at a time from a series of cards, each keeping their respective states.
+///
+/// ** See code in examples/api/lib/widgets/basic/indexed_stack.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Stack], for more details about stacks.
@@ -4133,8 +4181,9 @@ class Positioned extends ParentDataWidget<StackParentData> {
 
     if (needsLayout) {
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -4566,7 +4615,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///     ),
 ///     Expanded(
 ///       child: FittedBox(
-///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: FlutterLogo(),
 ///       ),
 ///     ),
@@ -4765,7 +4813,6 @@ class Row extends Flex {
 ///     Text('Craft beautiful UIs'),
 ///     Expanded(
 ///       child: FittedBox(
-///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: FlutterLogo(),
 ///       ),
 ///     ),
@@ -4995,8 +5042,9 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
     if (needsLayout) {
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -5319,6 +5367,8 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// A widget that sizes and positions children efficiently, according to the
 /// logic in a [FlowDelegate].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=NG6pvXpnIso}
+///
 /// Flow layouts are optimized for repositioning children using transformation
 /// matrices.
 ///
@@ -5453,6 +5503,35 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## Selections
+///
+/// To make this [RichText] Selectable, the [RichText] needs to be in the
+/// subtree of a [SelectionArea] or [SelectableRegion] and a
+/// [SelectionRegistrar] needs to be assigned to the
+/// [RichText.selectionRegistrar]. One can use
+/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a
+/// context. This enables users to select the text in [RichText]s with mice or
+/// touch events.
+///
+/// The [selectionColor] also needs to be set if the selection is enabled to
+/// draw the selection highlights.
+///
+/// {@tool snippet}
+///
+/// This sample demonstrates how to assign a [SelectionRegistrar] for RichTexts
+/// in the SelectionArea subtree.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
+///
+/// ```dart
+/// RichText(
+///   text: const TextSpan(text: 'Hello'),
+///   selectionRegistrar: SelectionContainer.maybeOf(context),
+///   selectionColor: const Color(0xAF6694e8),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextStyle], which discusses how to style text.
@@ -5461,6 +5540,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///    [DefaultTextStyle] to a single string.
 ///  * [Text.rich], a const text widget that provides similar functionality
 ///    as [RichText]. [Text.rich] will inherit [TextStyle] from [DefaultTextStyle].
+///  * [SelectableRegion], which provides an overview of the selection system.
 class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
@@ -5485,6 +5565,8 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.selectionRegistrar,
+    this.selectionColor,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5492,6 +5574,7 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
+       assert(selectionRegistrar == null || selectionColor != null),
        super(children: _extractChildren(text));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
@@ -5573,6 +5656,12 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  /// The [SelectionRegistrar] this rich text is subscribed to.
+  final SelectionRegistrar? selectionRegistrar;
+
+  /// The color to use when painting the selection.
+  final Color? selectionColor;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5587,6 +5676,8 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.maybeLocaleOf(context),
+      registrar: selectionRegistrar,
+      selectionColor: selectionColor,
     );
   }
 
@@ -5604,7 +5695,9 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
-      ..locale = locale ?? Localizations.maybeLocaleOf(context);
+      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..registrar = selectionRegistrar
+      ..selectionColor = selectionColor;
   }
 
   @override
@@ -5702,9 +5795,8 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Use the "low" quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default "none" which corresponds
-  /// to nearest-neighbor.
+  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
+  /// bilinear interpolation.
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
@@ -6395,12 +6487,15 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final List<String> listeners = <String>[];
-    if (onEnter != null)
+    if (onEnter != null) {
       listeners.add('enter');
-    if (onExit != null)
+    }
+    if (onExit != null) {
       listeners.add('exit');
-    if (onHover != null)
+    }
+    if (onHover != null) {
       listeners.add('hover');
+    }
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
@@ -6408,6 +6503,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that creates a separate display list for its child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=cVAGLDuc2xE}
 ///
 /// This widget creates a separate display list for its child, which
 /// can improve performance if the subtree repaints at different times than
@@ -6901,97 +6998,21 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
-  AttributedString? get _effectiveAttributedLabel {
-    return properties.attributedLabel ??
-          (properties.label == null ? null : AttributedString(properties.label!));
-  }
-
-  AttributedString? get _effectiveAttributedValue {
-    return properties.attributedValue ??
-        (properties.value == null ? null : AttributedString(properties.value!));
-  }
-
-  AttributedString? get _effectiveAttributedIncreasedValue {
-    return properties.attributedIncreasedValue ??
-        (properties.increasedValue == null ? null : AttributedString(properties.increasedValue!));
-  }
-
-  AttributedString? get _effectiveAttributedDecreasedValue {
-    return properties.attributedDecreasedValue ??
-        (properties.decreasedValue == null ? null : AttributedString(properties.decreasedValue!));
-  }
-
-  AttributedString? get _effectiveAttributedHint {
-    return properties.attributedHint ??
-        (properties.hint == null ? null : AttributedString(properties.hint!));
-  }
-
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
       excludeSemantics: excludeSemantics,
-      enabled: properties.enabled,
-      checked: properties.checked,
-      toggled: properties.toggled,
-      selected: properties.selected,
-      button: properties.button,
-      slider: properties.slider,
-      keyboardKey: properties.keyboardKey,
-      link: properties.link,
-      header: properties.header,
-      textField: properties.textField,
-      readOnly: properties.readOnly,
-      focusable: properties.focusable,
-      focused: properties.focused,
-      liveRegion: properties.liveRegion,
-      maxValueLength: properties.maxValueLength,
-      currentValueLength: properties.currentValueLength,
-      inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
-      obscured: properties.obscured,
-      multiline: properties.multiline,
-      scopesRoute: properties.scopesRoute,
-      namesRoute: properties.namesRoute,
-      hidden: properties.hidden,
-      image: properties.image,
-      attributedLabel: _effectiveAttributedLabel,
-      attributedValue: _effectiveAttributedValue,
-      attributedIncreasedValue: _effectiveAttributedIncreasedValue,
-      attributedDecreasedValue: _effectiveAttributedDecreasedValue,
-      attributedHint: _effectiveAttributedHint,
-      tooltip: properties.tooltip,
-      hintOverrides: properties.hintOverrides,
+      properties: properties,
       textDirection: _getTextDirection(context),
-      sortKey: properties.sortKey,
-      tagForChildren: properties.tagForChildren,
-      onTap: properties.onTap,
-      onLongPress: properties.onLongPress,
-      onScrollLeft: properties.onScrollLeft,
-      onScrollRight: properties.onScrollRight,
-      onScrollUp: properties.onScrollUp,
-      onScrollDown: properties.onScrollDown,
-      onIncrease: properties.onIncrease,
-      onDecrease: properties.onDecrease,
-      onCopy: properties.onCopy,
-      onDismiss: properties.onDismiss,
-      onCut: properties.onCut,
-      onPaste: properties.onPaste,
-      onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
-      onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
-      onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
-      onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
-      onSetSelection: properties.onSetSelection,
-      onSetText: properties.onSetText,
-      onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
-      onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
-      customSemanticsActions: properties.customSemanticsActions,
     );
   }
 
   TextDirection? _getTextDirection(BuildContext context) {
-    if (properties.textDirection != null)
+    if (properties.textDirection != null) {
       return properties.textDirection;
+    }
 
     final bool containsText = properties.attributedLabel != null ||
                               properties.label != null ||
@@ -6999,8 +7020,9 @@ class Semantics extends SingleChildRenderObjectWidget {
                               properties.hint != null ||
                               properties.tooltip != null;
 
-    if (!containsText)
+    if (!containsText) {
       return null;
+    }
 
     return Directionality.maybeOf(context);
   }
@@ -7011,60 +7033,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..explicitChildNodes = explicitChildNodes
       ..excludeSemantics = excludeSemantics
-      ..scopesRoute = properties.scopesRoute
-      ..enabled = properties.enabled
-      ..checked = properties.checked
-      ..toggled = properties.toggled
-      ..selected = properties.selected
-      ..button = properties.button
-      ..slider = properties.slider
-      ..keyboardKey = properties.keyboardKey
-      ..link = properties.link
-      ..header = properties.header
-      ..textField = properties.textField
-      ..readOnly = properties.readOnly
-      ..focusable = properties.focusable
-      ..focused = properties.focused
-      ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
-      ..obscured = properties.obscured
-      ..multiline = properties.multiline
-      ..hidden = properties.hidden
-      ..image = properties.image
-      ..liveRegion = properties.liveRegion
-      ..maxValueLength = properties.maxValueLength
-      ..currentValueLength = properties.currentValueLength
-      ..attributedLabel = _effectiveAttributedLabel
-      ..attributedValue = _effectiveAttributedValue
-      ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
-      ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
-      ..attributedHint = _effectiveAttributedHint
-      ..tooltip = properties.tooltip
-      ..hintOverrides = properties.hintOverrides
-      ..namesRoute = properties.namesRoute
-      ..textDirection = _getTextDirection(context)
-      ..sortKey = properties.sortKey
-      ..tagForChildren = properties.tagForChildren
-      ..onTap = properties.onTap
-      ..onLongPress = properties.onLongPress
-      ..onScrollLeft = properties.onScrollLeft
-      ..onScrollRight = properties.onScrollRight
-      ..onScrollUp = properties.onScrollUp
-      ..onScrollDown = properties.onScrollDown
-      ..onIncrease = properties.onIncrease
-      ..onDismiss = properties.onDismiss
-      ..onDecrease = properties.onDecrease
-      ..onCopy = properties.onCopy
-      ..onCut = properties.onCut
-      ..onPaste = properties.onPaste
-      ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
-      ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
-      ..onSetSelection = properties.onSetSelection
-      ..onSetText = properties.onSetText
-      ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
-      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
-      ..customSemanticsActions = properties.customSemanticsActions;
+      ..properties = properties
+      ..textDirection = _getTextDirection(context);
   }
 
   @override
@@ -7280,8 +7250,9 @@ class KeyedSubtree extends StatelessWidget {
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
   /// the sum of its list index and `baseIndex`.
   static List<Widget> ensureUniqueKeysForList(List<Widget> items, { int baseIndex = 0 }) {
-    if (items == null || items.isEmpty)
+    if (items == null || items.isEmpty) {
       return items;
+    }
 
     final List<Widget> itemsWithUniqueKeys = <Widget>[];
     int itemIndex = baseIndex;
@@ -7407,6 +7378,8 @@ class Builder extends StatelessWidget {
 typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
 ///
 /// The [StateSetter] function passed to the [builder] is used to invoke a
 /// rebuild instead of a typical [State]'s [State.setState].

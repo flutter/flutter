@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 /// The Flutter logo, in widget form. This widget respects the [IconTheme].
 /// For guidelines on using the Flutter logo, visit https://flutter.dev/brand.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=aAmP-WcI6dg}
+///
 /// See also:
 ///
 ///  * [IconTheme], which provides ambient configuration for icons.

@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 void main() => runApp(const KeyExampleApp());
 
 class KeyExampleApp extends StatelessWidget {
-  const KeyExampleApp({Key? key}) : super(key: key);
+  const KeyExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class KeyExampleApp extends StatelessWidget {
 }
 
 class MyKeyExample extends StatefulWidget {
-  const MyKeyExample({Key? key}) : super(key: key);
+  const MyKeyExample({super.key});
 
   @override
   State<MyKeyExample> createState() => _MyKeyExampleState();

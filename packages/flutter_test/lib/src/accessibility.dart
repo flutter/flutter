@@ -638,7 +638,7 @@ Map<Color, int> _colorsWithinRect(
 
   final Map<int, int> rgbaToCount = <int, int>{};
 
-  int _getPixel(ByteData data, int x, int y) {
+  int getPixel(ByteData data, int x, int y) {
     final int offset = (y * width + x) * 4;
     return data.getUint32(offset);
   }
@@ -646,7 +646,7 @@ Map<Color, int> _colorsWithinRect(
   for (int x = leftX; x < rightX; x++) {
     for (int y = topY; y < bottomY; y++) {
       rgbaToCount.update(
-        _getPixel(data, x, y),
+        getPixel(data, x, y),
         (int count) => count + 1,
         ifAbsent: () => 1,
       );

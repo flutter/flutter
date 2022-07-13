@@ -20,8 +20,9 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
     assert(containedInkWell);
     return rectCallback;
   }
-  if (containedInkWell)
+  if (containedInkWell) {
     return () => Offset.zero & referenceBox.size;
+  }
   return null;
 }
 
@@ -185,8 +186,9 @@ class InkSplash extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
+    if (status == AnimationStatus.completed) {
       dispose();
+    }
   }
 
   @override
@@ -201,8 +203,9 @@ class InkSplash extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset? center = _position;
-    if (_repositionToReferenceBox)
+    if (_repositionToReferenceBox) {
       center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
+    }
     paintInkCircle(
       canvas: canvas,
       transform: transform,

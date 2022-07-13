@@ -220,6 +220,8 @@ class MaterialApp extends StatefulWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.themeMode = ThemeMode.system,
+    this.themeAnimationDuration = kThemeAnimationDuration,
+    this.themeAnimationCurve = Curves.linear,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -248,15 +250,19 @@ class MaterialApp extends StatefulWidget {
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
-       backButtonDispatcher = null;
+       backButtonDispatcher = null,
+       routerConfig = null;
 
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
+  ///
+  /// {@macro flutter.widgets.WidgetsApp.router}
   const MaterialApp.router({
     super.key,
     this.scaffoldMessengerKey,
     this.routeInformationProvider,
-    required RouteInformationParser<Object> this.routeInformationParser,
-    required RouterDelegate<Object> this.routerDelegate,
+    this.routeInformationParser,
+    this.routerDelegate,
+    this.routerConfig,
     this.backButtonDispatcher,
     this.builder,
     this.title = '',
@@ -267,6 +273,8 @@ class MaterialApp extends StatefulWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.themeMode = ThemeMode.system,
+    this.themeAnimationDuration = kThemeAnimationDuration,
+    this.themeAnimationCurve = Curves.linear,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -283,8 +291,7 @@ class MaterialApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.useInheritedMediaQuery = false,
-  }) : assert(routeInformationParser != null),
-       assert(routerDelegate != null),
+  }) : assert(routerDelegate != null || routerConfig != null),
        assert(title != null),
        assert(debugShowMaterialGrid != null),
        assert(showPerformanceOverlay != null),
@@ -352,6 +359,9 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
   final BackButtonDispatcher? backButtonDispatcher;
+
+  /// {@macro flutter.widgets.widgetsApp.routerConfig}
+  final RouterConfig<Object>? routerConfig;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
@@ -465,6 +475,30 @@ class MaterialApp extends StatefulWidget {
   ///  * [ThemeData.brightness], which indicates to various parts of the
   ///    system what kind of theme is being used.
   final ThemeMode? themeMode;
+
+  /// The duration of animated theme changes.
+  ///
+  /// When the theme changes (either by the [theme], [darkTheme] or [themeMode]
+  /// parameters changing) it is animated to the new theme over time.
+  /// The [themeAnimationDuration] determines how long this animation takes.
+  ///
+  /// To have the theme change immediately, you can set this to [Duration.zero].
+  ///
+  /// The default is [kThemeAnimationDuration].
+  ///
+  /// See also:
+  ///   [themeAnimationCurve], which defines the curve used for the animation.
+  final Duration themeAnimationDuration;
+
+  /// The curve to apply when animating theme changes.
+  ///
+  /// The default is [Curves.linear].
+  ///
+  /// This is ignored if [themeAnimationDuration] is [Duration.zero].
+  ///
+  /// See also:
+  ///   [themeAnimationDuration], which defines how long the animation is.
+  final Curve themeAnimationCurve;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color? color;
@@ -813,6 +847,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case AndroidOverscrollIndicator.stretch:
             return StretchingOverscrollIndicator(
               axisDirection: details.direction,
+              clipBehavior: details.clipBehavior ?? Clip.hardEdge,
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
@@ -832,7 +867,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
 class _MaterialAppState extends State<MaterialApp> {
   late HeroController _heroController;
 
-  bool get _usesRouter => widget.routerDelegate != null;
+  bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
 
   @override
   void initState() {
@@ -889,6 +924,8 @@ class _MaterialAppState extends State<MaterialApp> {
         cursorColor: effectiveCursorColor,
         child: AnimatedTheme(
           data: theme,
+          duration: widget.themeAnimationDuration,
+          curve: widget.themeAnimationCurve,
           child: widget.builder != null
             ? Builder(
                 builder: (BuildContext context) {
@@ -925,8 +962,9 @@ class _MaterialAppState extends State<MaterialApp> {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
         routeInformationProvider: widget.routeInformationProvider,
-        routeInformationParser: widget.routeInformationParser!,
-        routerDelegate: widget.routerDelegate!,
+        routeInformationParser: widget.routeInformationParser,
+        routerDelegate: widget.routerDelegate,
+        routerConfig: widget.routerConfig,
         backButtonDispatcher: widget.backButtonDispatcher,
         builder: _materialBuilder,
         title: widget.title,
@@ -993,8 +1031,9 @@ class _MaterialAppState extends State<MaterialApp> {
     result = Focus(
       canRequestFocus: false,
       onKey: (FocusNode node, RawKeyEvent event) {
-        if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape)
+        if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape) {
           return KeyEventResult.ignored;
+        }
         return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
       },
       child: result,

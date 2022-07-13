@@ -221,12 +221,67 @@ void main() {
 
       final Offset contextMenu = tester.getCenter(find.byWidget(child));
       await gesture.moveTo(contextMenu);
-      addTearDown(gesture.removePointer);
       await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
         kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
+    });
+
+    testWidgets('CupertinoContextMenu is in the correct position when within a Transform.scale', (WidgetTester tester) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800, 600)),
+            child: Transform.scale(
+              scale: 0.5,
+              child: Align(
+                //alignment: Alignment.bottomRight,
+                child: CupertinoContextMenu(
+                  actions: const <CupertinoContextMenuAction>[
+                    CupertinoContextMenuAction(
+                      child: Text('CupertinoContextMenuAction'),
+                    ),
+                  ],
+                  child: child
+                ),
+              )
+            )
+          )
+        )
+      ));
+      expect(find.byWidget(child), findsOneWidget);
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      expect(find.byType(ShaderMask), findsNothing);
+
+      // Start a press on the child.
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // The _DecoyChild is showing directly on top of the child.
+      expect(findDecoyChild(child), findsOneWidget);
+      Rect decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, equals(decoyChildRect));
+
+      expect(find.byType(ShaderMask), findsOneWidget);
+
+      // After a small delay, the _DecoyChild has begun to animate.
+      await tester.pump(const Duration(milliseconds: 100));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+
+      // Eventually the decoy fully scales by _kOpenSize.
+      await tester.pump(const Duration(milliseconds: 500));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+      expect(decoyChildRect.width, childRect.width * kOpenScale);
+
+      // Then the CupertinoContextMenu opens.
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
     });
   });
 

@@ -281,11 +281,12 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
 
     assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
     final Widget result = DefaultTextStyle(
-      style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
+      style: textStyle.copyWith(color: CupertinoDynamicColor.maybeResolve(textStyle.color, context)),
       child: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -438,12 +439,14 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
 
   // This method exists to allow controller to be non-null. It is only called with a null oldValue from constructor.
   void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
-    if (value == oldValue)
+    if (value == oldValue) {
       return;
-    if (oldValue != null)
+    }
+    if (oldValue != null) {
       oldValue.removeListener(_handleScrollUpdate);
-    else
+    } else {
       _currentIndex = value.initialItem;
+    }
     value.addListener(_handleScrollUpdate);
     _controller = value;
   }
@@ -451,8 +454,9 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (textDirection == value)
+    if (textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsSemanticsUpdate();
   }
@@ -464,14 +468,13 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   }
 
   void _handleDecrease() {
-    if (_currentIndex == 0)
-      return;
     controller.jumpToItem(_currentIndex - 1);
   }
 
   void _handleScrollUpdate() {
-    if (controller.selectedItem == _currentIndex)
+    if (controller.selectedItem == _currentIndex) {
       return;
+    }
     _currentIndex = controller.selectedItem;
     markNeedsSemanticsUpdate();
   }
@@ -484,8 +487,9 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    if (children.isEmpty)
+    if (children.isEmpty) {
       return super.assembleSemanticsNode(node, config, children);
+    }
     final SemanticsNode scrollable = children.first;
     final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
     scrollable.visitChildren((SemanticsNode child) {

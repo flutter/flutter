@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -240,8 +240,18 @@ void main() {
     expect(renderOpacity.needsCompositing, false);
   });
 
-  test('RenderOpacity does composite if it is opaque', () {
+  test('RenderOpacity does not composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderOpacity, phase: EnginePhase.composite);
+    expect(renderOpacity.needsCompositing, false);
+  });
+
+  test('RenderOpacity does composite if it is partially opaque', () {
+    final RenderOpacity renderOpacity = RenderOpacity(
+      opacity: 0.1,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
@@ -272,10 +282,24 @@ void main() {
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderAnimatedOpacity does composite if it is opaque', () {
+  test('RenderAnimatedOpacity does not composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+      opacity: opacityAnimation,
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    expect(renderAnimatedOpacity.needsCompositing, false);
+  });
+
+  test('RenderAnimatedOpacity does composite if it is partially opaque', () {
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 0.5;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       opacity: opacityAnimation,
@@ -685,6 +709,166 @@ void main() {
     childBox.markNeedsCompositingBitsUpdate();
 
     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
+
+  test('Offstage implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
+    parent.adoptChild(offstage);
+
+    expect(offstage.paintsChild(box), true);
+
+    offstage.offstage = true;
+
+    expect(offstage.paintsChild(box), false);
+  });
+
+  test('Opacity implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOpacity opacity = RenderOpacity(child: box);
+    parent.adoptChild(opacity);
+
+    expect(opacity.paintsChild(box), true);
+
+    opacity.opacity = 0;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(box), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
+    final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(sliver), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(sliver), false);
+  });
+
+  test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
+    final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+    final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: Clip.none, child: child);
+    layout(renderClipRect);
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      null,
+    );
+    renderClipRect.clipBehavior = Clip.hardEdge;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAlias;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAliasWithSaveLayer;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+  });
+
+  // Simulate painting a RenderBox as if 'debugPaintSizeEnabled == true'
+  Function(PaintingContext, Offset) debugPaint(RenderBox renderBox) {
+    layout(renderBox);
+    pumpFrame(phase: EnginePhase.compositingBits);
+    return (PaintingContext context, Offset offset) {
+      renderBox.paint(context, offset);
+      renderBox.debugPaintSize(context, offset);
+    };
+  }
+
+  test('RenderClipPath.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
+    Function(PaintingContext, Offset) debugPaintClipRect(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+      final RenderClipPath renderClipPath = RenderClipPath(clipBehavior: clip, child: child);
+      return debugPaint(renderClipPath);
+    }
+
+    // RenderClipPath.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawPath, 1));
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+
+    // RenderClipPath.debugPaintSize does not draw when clipBehavior is Clip.none
+    // Regression test for https://github.com/flutter/flutter/issues/105969
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
+
+  test('RenderClipRect.debugPaintSize draws a rect and a debug text when clipBehavior is not Clip.none', () {
+    Function(PaintingContext, Offset) debugPaintClipRect(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+      final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: clip, child: child);
+      return debugPaint(renderClipRect);
+    }
+
+    // RenderClipRect.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawRect, 1));
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+
+    // RenderClipRect.debugPaintSize does not draw when clipBehavior is Clip.none
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawRect, 0));
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
+
+  test('RenderClipRRect.debugPaintSize draws a rounded rect and a debug text when clipBehavior is not Clip.none', () {
+    Function(PaintingContext, Offset) debugPaintClipRRect(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+      final RenderClipRRect renderClipRRect = RenderClipRRect(clipBehavior: clip, child: child);
+      return debugPaint(renderClipRRect);
+    }
+
+    // RenderClipRRect.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipRRect(Clip.hardEdge), paintsExactlyCountTimes(#drawRRect, 1));
+    expect(debugPaintClipRRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+
+    // RenderClipRRect.debugPaintSize does not draw when clipBehavior is Clip.none
+    expect(debugPaintClipRRect(Clip.none), paintsExactlyCountTimes(#drawRRect, 0));
+    expect(debugPaintClipRRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
+
+  test('RenderClipOval.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
+    Function(PaintingContext, Offset) debugPaintClipOval(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+      final RenderClipOval renderClipOval = RenderClipOval(clipBehavior: clip, child: child);
+      return debugPaint(renderClipOval);
+    }
+
+    // RenderClipOval.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipOval(Clip.hardEdge), paintsExactlyCountTimes(#drawPath, 1));
+    expect(debugPaintClipOval(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+
+    // RenderClipOval.debugPaintSize does not draw when clipBehavior is Clip.none
+    expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
+    expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
   });
 }
 

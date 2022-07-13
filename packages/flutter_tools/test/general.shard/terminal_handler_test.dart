@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -50,21 +48,6 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   startTime: 0,
   isSystemIsolate: false,
   isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final vm_service.VM fakeVM = vm_service.VM(
-  isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
-  pid: 1,
-  hostCPU: '',
-  isolateGroups: <vm_service.IsolateGroupRef>[],
-  targetCPU: '',
-  startTime: 0,
-  name: 'dart',
-  architectureBits: 64,
-  operatingSystem: '',
-  version: '',
-  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
-  systemIsolates: <vm_service.IsolateRef>[],
 );
 
 final FlutterView fakeFlutterView = FlutterView(
@@ -960,14 +943,14 @@ void main() {
       listViews,
       FakeVmServiceRequest(
         method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object>{
+        args: <String, Object?>{
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'false',
         },
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object>{
+        args: <String, Object?>{
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'true',
         },
@@ -986,7 +969,7 @@ void main() {
       listViews,
       FakeVmServiceRequest(
         method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object>{
+        args: <String, Object?>{
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'false',
         },
@@ -1000,7 +983,7 @@ void main() {
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object>{
+        args: <String, Object?>{
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'true',
         },
@@ -1020,7 +1003,7 @@ void main() {
       listViews,
       FakeVmServiceRequest(
         method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object>{
+        args: <String, Object?>{
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'false',
         },
@@ -1034,7 +1017,7 @@ void main() {
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object>{
+        args: <String, Object?>{
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'true',
         },
@@ -1105,7 +1088,7 @@ void main() {
         listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object>{
+          args: <String, Object?>{
             'isolateId': fakeUnpausedIsolate.id,
             'enabled': 'false',
           },
@@ -1130,7 +1113,7 @@ void main() {
         listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object>{
+          args: <String, Object?>{
             'isolateId': fakeUnpausedIsolate.id,
             'enabled': 'false',
           },
@@ -1142,7 +1125,7 @@ void main() {
         ),
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object>{
+          args: <String, Object?>{
             'isolateId': fakeUnpausedIsolate.id,
             'enabled': 'true',
           },
@@ -1165,7 +1148,7 @@ void main() {
         listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object>{
+          args: <String, Object?>{
             'isolateId': fakeUnpausedIsolate.id,
             'enabled': 'false',
           },
@@ -1177,7 +1160,7 @@ void main() {
         ),
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object>{
+          args: <String, Object?>{
             'isolateId': fakeUnpausedIsolate.id,
             'enabled': 'true',
           },
@@ -1201,14 +1184,14 @@ void main() {
         listViews,
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object>{
+          args: <String, Object?>{
             'isolateId': fakeUnpausedIsolate.id,
             'enabled': 'false',
           },
         ),
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object>{
+          args: <String, Object?>{
             'isolateId': fakeUnpausedIsolate.id,
             'enabled': 'true',
           },
@@ -1324,7 +1307,7 @@ class FakeResidentRunner extends ResidentHandlers {
   }
 
   @override
-  void printHelp({bool details}) {
+  void printHelp({required bool details}) {
     if (details) {
       calledPrintWithDetails = true;
     } else {
@@ -1336,7 +1319,7 @@ class FakeResidentRunner extends ResidentHandlers {
   Future<void> runSourceGenerators() async {  }
 
   @override
-  Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String reason}) async {
+  Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) async {
     if (fullRestart && !supportsRestart) {
       throw StateError('illegal restart');
     }
@@ -1360,7 +1343,7 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
   bool calledLaunchDevToolsInBrowser = false;
 
   @override
-  bool launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) {
+  bool launchDevToolsInBrowser({List<FlutterDevice?>? flutterDevices}) {
     return calledLaunchDevToolsInBrowser = true;
   }
 }
@@ -1397,8 +1380,8 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
   bool supportsScreenshot = false,
   int reloadExitCode = 0,
   BuildMode buildMode = BuildMode.debug,
-  Logger logger,
-  FileSystem fileSystem,
+  Logger? logger,
+  FileSystem? fileSystem,
 }) {
   final Logger testLogger = logger ?? BufferLogger.test();
   final Signals signals = Signals.test();
@@ -1455,7 +1438,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;
-  String receivedCommand;
+  String? receivedCommand;
 
   @override
   Future<void> cleanupAfterSignal() async { }
@@ -1464,24 +1447,25 @@ class TestRunner extends Fake implements ResidentRunner {
   Future<void> cleanupAtFinish() async { }
 
   @override
-  void printHelp({ bool details }) {
+  void printHelp({ bool? details }) {
     hasHelpBeenPrinted = true;
   }
 
   @override
-  Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+  Future<int?> run({
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
-    String route,
+    String? route,
   }) async => null;
 
   @override
-  Future<int> attach({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+  Future<int?> attach({
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   }) async => null;
 }
 
@@ -1505,10 +1489,10 @@ class _TestSignals implements Signals {
     if (!_handlersTable.containsKey(signal)) {
       return false;
     }
-    if (!_handlersTable[signal].containsKey(token)) {
+    if (!_handlersTable[signal]!.containsKey(token)) {
       return false;
     }
-    _handlersTable[signal].remove(token);
+    _handlersTable[signal]!.remove(token);
     return true;
   }
 

@@ -393,7 +393,7 @@ abstract class PageTransitionsBuilder {
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
   ///
-  /// The [MaterialPageRoute.buildTransitions] method looks up the current
+  /// The [MaterialPageRoute.buildTransitions] method looks up the
   /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
   /// and delegates to this method with a [PageTransitionsBuilder] based
   /// on the theme's [ThemeData.platform].
@@ -533,7 +533,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// Defines the page transition animations used by [MaterialPageRoute]
 /// for different [TargetPlatform]s.
 ///
-/// The [MaterialPageRoute.buildTransitions] method looks up the current
+/// The [MaterialPageRoute.buildTransitions] method looks up the
 /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
 /// and delegates to [buildTransitions].
 ///
@@ -584,8 +584,9 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     TargetPlatform platform = Theme.of(context).platform;
 
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
+    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
       platform = TargetPlatform.iOS;
+    }
 
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
@@ -600,12 +601,15 @@ class PageTransitionsTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
-    if (other is PageTransitionsTheme && identical(builders, other.builders))
+    }
+    if (other is PageTransitionsTheme && identical(builders, other.builders)) {
       return true;
+    }
     return other is PageTransitionsTheme
         && listEquals<PageTransitionsBuilder?>(_all(other.builders), _all(builders));
   }

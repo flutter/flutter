@@ -38,14 +38,6 @@ final CustomDeviceConfig testConfig = CustomDeviceConfig(
   forwardPortSuccessRegex: RegExp('testforwardportsuccess')
 );
 
-const String testConfigPingSuccessOutput = 'testpingsuccess\n';
-const String testConfigForwardPortSuccessOutput = 'testforwardportsuccess\n';
-final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(enabled: false);
-final CustomDeviceConfig testConfigNonForwarding = testConfig.copyWith(
-  explicitForwardPortCommand: true,
-  explicitForwardPortSuccessRegex: true,
-);
-
 const Map<String, dynamic> testConfigJson = <String, dynamic>{
   'id': 'testid',
   'label': 'testlabel',

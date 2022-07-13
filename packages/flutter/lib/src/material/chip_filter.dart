@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
+import 'chip_theme.dart';
 import 'debug.dart';
+import 'theme.dart';
 import 'theme_data.dart';
 
 /// A Material Design filter chip.
@@ -28,7 +31,7 @@ import 'theme_data.dart';
 /// }
 ///
 /// class CastFilter extends StatefulWidget {
-///   const CastFilter({Key? key}) : super(key: key);
+///   const CastFilter({super.key});
 ///
 ///   @override
 ///   State createState() => CastFilterState();
@@ -83,6 +86,13 @@ import 'theme_data.dart';
 /// ```
 /// {@end-tool}
 ///
+/// ## Material Design 3
+///
+/// [FilterChip] can be used for multiple select Filter chip from
+/// Material Design 3. If [ThemeData.useMaterial3] is true, then [FilterChip]
+/// will be styled to match the Material Design 3 specification for Filter
+/// chips. Use [ChoiceChip] for single select Filter chips.
+///
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
@@ -130,6 +140,8 @@ class FilterChip extends StatelessWidget
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
+    this.surfaceTintColor,
+    this.iconTheme,
     this.selectedShadowColor,
     this.showCheckmark,
     this.checkmarkColor,
@@ -184,6 +196,8 @@ class FilterChip extends StatelessWidget
   @override
   final Color? shadowColor;
   @override
+  final Color? surfaceTintColor;
+  @override
   final Color? selectedShadowColor;
   @override
   final bool? showCheckmark;
@@ -191,6 +205,8 @@ class FilterChip extends StatelessWidget
   final Color? checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
+  @override
+  final IconThemeData? iconTheme;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -198,7 +214,11 @@ class FilterChip extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final ChipThemeData? defaults = Theme.of(context).useMaterial3
+      ? _FilterChipDefaultsM3(context, isEnabled, selected)
+      : null;
     return RawChip(
+      defaultProperties: defaults,
       avatar: avatar,
       label: label,
       labelStyle: labelStyle,
@@ -221,6 +241,7 @@ class FilterChip extends StatelessWidget
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
       selectedShadowColor: selectedShadowColor,
       showCheckmark: showCheckmark,
       checkmarkColor: checkmarkColor,
@@ -228,3 +249,84 @@ class FilterChip extends StatelessWidget
     );
   }
 }
+
+// BEGIN GENERATED TOKEN PROPERTIES - FilterChip
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+class _FilterChipDefaultsM3 extends ChipThemeData {
+  const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
+    : super(
+        elevation: 0.0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        showCheckmark: true,
+      );
+
+  final BuildContext context;
+  final bool isEnabled;
+  final bool isSelected;
+
+  @override
+  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+
+  @override
+  Color? get backgroundColor => null;
+
+  @override
+  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+
+  @override
+  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get selectedColor => isEnabled
+    ? Theme.of(context).colorScheme.secondaryContainer
+    : Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get checkmarkColor => Theme.of(context).colorScheme.onSecondaryContainer;
+
+  @override
+  Color? get disabledColor => isSelected
+   ? Theme.of(context).colorScheme.onSurface.withOpacity(0.12)
+   : null;
+
+  @override
+  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
+
+  @override
+  BorderSide? get side => !isSelected
+    ? isEnabled
+      ? BorderSide(color: Theme.of(context).colorScheme.outline)
+      : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
+    : null;
+
+  @override
+  IconThemeData? get iconTheme => IconThemeData(
+    color: isEnabled
+      ? null
+      : Theme.of(context).colorScheme.onSurface,
+    size: 18.0,
+  );
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
+
+  /// The chip at text scale 1 starts with 8px on each side and as text scaling
+  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+  /// Once the widget has a text scaling of 2 or higher than the label padding
+  /// remains 4px.
+  @override
+  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
+    const EdgeInsets.symmetric(horizontal: 8.0),
+    const EdgeInsets.symmetric(horizontal: 4.0),
+    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+  )!;
+}
+
+// END GENERATED TOKEN PROPERTIES - FilterChip
