@@ -204,7 +204,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.loupeBuilder = TextEditingLoupe.adaptive,
+    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeControllerBuilder,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),

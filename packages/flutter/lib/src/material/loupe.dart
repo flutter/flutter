@@ -18,8 +18,15 @@ import 'package:flutter/src/cupertino/loupe.dart';
 /// [_jumpBetweenLinesAnimationDuration].
 /// {@endtemplate}
 class TextEditingLoupe extends StatefulWidget {
+  /// {@macro widgets.material.loupe.loupe}
+  /// {@template widgets.material.loupe.positionRules}
+  const TextEditingLoupe(
+      {super.key,
+      required this.controller,
+      required this.loupeSelectionOverlayInfoBearer});
+
   /// returns a dummy widget if no loupe exists for the platform.
-  static Widget adaptive(
+  static Widget? adaptiveLoupeControllerBuilder(
     BuildContext context,
     LoupeController controller,
     ValueNotifier<LoupeSelectionOverlayInfoBearer>
@@ -38,15 +45,8 @@ class TextEditingLoupe extends StatefulWidget {
           loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer);
     }
 
-    return const SizedBox.shrink();
+    return null;
   }
-
-  /// {@macro widgets.material.loupe.loupe}
-  /// {@template widgets.material.loupe.positionRules}
-  const TextEditingLoupe(
-      {super.key,
-      required this.controller,
-      required this.loupeSelectionOverlayInfoBearer});
 
   /// The duration that the position is animated if [TextEditingLoupe] just jumped between lines.
   static const Duration _jumpBetweenLinesAnimationDuration =

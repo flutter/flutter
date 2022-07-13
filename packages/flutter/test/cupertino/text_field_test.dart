@@ -5813,9 +5813,7 @@ void main() {
             'built loupe key equal to passed in loupe key', 
             equals(customLoupe.key)
         ));
-    },
-        variant: TargetPlatformVariant.all(
-            excluding: <TargetPlatform>{ TargetPlatform.iOS }));
+    });
 
     test('should be null on null passed in null', () {
       const CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
@@ -5848,7 +5846,7 @@ void main() {
               <TargetPlatform>{ TargetPlatform.iOS }));
     });
 
-    testWidgets('should build CupertinoLoupe on iOS',
+    testWidgets('should build nothing on not iOS',
         (WidgetTester tester) async {
       const CupertinoTextField defaultCupertinoTextField = CupertinoTextField();
 

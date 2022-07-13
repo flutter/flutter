@@ -330,7 +330,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeBuilder = TextEditingLoupe.adaptive,
+    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeControllerBuilder,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),

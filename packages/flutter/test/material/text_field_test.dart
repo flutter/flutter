@@ -11541,4 +11541,124 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
+  group('loupe builder', () {
+    Future<BuildContext> contextTrap(WidgetTester tester,
+        {Widget Function(Widget child)? wrapper}) async {
+      late BuildContext outerContext;
+
+      Widget identity(Widget child) {
+        return child;
+      }
+
+      await tester.pumpWidget(
+          (wrapper ?? identity)(Builder(builder: (BuildContext context) {
+        outerContext = context;
+        return Container();
+      })));
+
+      return outerContext;
+    }
+
+    testWidgets('should build custom loupe if given',
+        (WidgetTester tester) async {
+      final Widget customLoupe = Container(key: UniqueKey(),);
+      final TextField textField = TextField(
+        loupeBuilder: (_, __, ___) => customLoupe,
+      );
+
+      final BuildContext context = await contextTrap(tester,
+          wrapper: (Widget child) => MaterialApp(
+                home: child,
+      ));
+
+      expect(
+          textField.loupeBuilder!(
+              context,
+              LoupeController(),
+              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+                const LoupeSelectionOverlayInfoBearer.empty(),
+              )),
+          isA<Widget>().having(
+            (Widget widget) => widget.key, 
+            'built loupe key equal to passed in loupe key', 
+            equals(customLoupe.key)
+        ));
+    });
+
+    test('should be null on null passed in null', () {
+      const TextField textField = TextField(
+        loupeBuilder: null,
+      );
+      expect(textField.loupeBuilder, isNull);
+    });
+
+    group('defaults', () {
+      testWidgets('should build Loupe on Android',
+          (WidgetTester tester) async {
+        const TextField textField =
+            TextField();
+
+        final BuildContext context = await contextTrap(tester,
+            wrapper: (Widget child) => MaterialApp(
+                  home: child,
+                ));
+
+        expect(
+            textField.loupeBuilder!(
+                context,
+                LoupeController(),
+                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+                  const LoupeSelectionOverlayInfoBearer.empty(),
+                )),
+            isA<TextEditingLoupe>());
+      },
+          variant: const TargetPlatformVariant(
+              <TargetPlatform>{ TargetPlatform.android }));
+    });
+
+
+      testWidgets('should build CupertinoLoupe on iOS',
+          (WidgetTester tester) async {
+        const TextField textField =
+            TextField();
+
+        final BuildContext context = await contextTrap(tester,
+            wrapper: (Widget child) => MaterialApp(
+                  home: child,
+                ));
+
+        expect(
+            textField.loupeBuilder!(
+                context,
+                LoupeController(),
+                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+                  const LoupeSelectionOverlayInfoBearer.empty(),
+                )),
+            isA<CupertinoTextEditingLoupe>());
+      },
+          variant: const TargetPlatformVariant(
+              <TargetPlatform>{ TargetPlatform.iOS }));
+
+    testWidgets('should build nothing on Android and iOS',
+        (WidgetTester tester) async {
+      const TextField defaultTextField = TextField();
+
+      final BuildContext context = await contextTrap(tester,
+          wrapper: (Widget child) => MaterialApp(
+                home: child,
+      ));
+
+      expect(
+          defaultTextField.loupeBuilder!(
+              context,
+              LoupeController(),
+              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+                const LoupeSelectionOverlayInfoBearer.empty(),
+              )),
+          isNull);
+    },
+        variant: TargetPlatformVariant.all(
+            excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  });
 }
