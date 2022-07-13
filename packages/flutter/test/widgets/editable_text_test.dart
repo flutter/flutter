@@ -7926,7 +7926,6 @@ void main() {
     expect(controller.value.selection.isCollapsed, isTrue);
     expect(controller.value.selection.baseOffset, 0);
     expect(scrollController.position.pixels, 0.0);
-    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
 
     // Page Up scrolls to the end.
     await sendKeys(
