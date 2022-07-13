@@ -12,6 +12,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
+import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
@@ -141,10 +142,35 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     assert(hasPixels);
     final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
-      beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
+      beginActivity(BallisticScrollActivity(
+        this,
+        simulation,
+        context.vsync,
+        initVelocity: velocity,
+        initPosition: pixels,
+      ));
     } else {
       goIdle();
     }
+  }
+
+  @override
+  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
+    assert(hasPixels);
+    final FixedScrollMetrics initScrollMetrics = FixedScrollMetrics(
+      minScrollExtent: minScrollExtent,
+      maxScrollExtent: maxScrollExtent,
+      pixels: initPosition,
+      viewportDimension: viewportDimension,
+      axisDirection: axisDirection,
+    );
+    final Simulation? simulation = physics.createBallisticSimulation(
+        initScrollMetrics, initVelocity);
+    if (simulation == null) {
+      goIdle();
+      return null;
+    }
+    return simulation;
   }
 
   @override
