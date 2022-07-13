@@ -405,22 +405,24 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   auto iter = mutators_stack.Begin();
   while (iter != mutators_stack.End()) {
     switch ((*iter)->GetType()) {
-      case transform: {
+      case kTransform: {
         CATransform3D transform = GetCATransform3DFromSkMatrix((*iter)->GetMatrix());
         finalTransform = CATransform3DConcat(transform, finalTransform);
         break;
       }
-      case clip_rect:
+      case kClipRect:
         [maskView clipRect:(*iter)->GetRect() matrix:finalTransform];
         break;
-      case clip_rrect:
+      case kClipRRect:
         [maskView clipRRect:(*iter)->GetRRect() matrix:finalTransform];
         break;
-      case clip_path:
+      case kClipPath:
         [maskView clipPath:(*iter)->GetPath() matrix:finalTransform];
         break;
-      case opacity:
+      case kOpacity:
         embedded_view.alpha = (*iter)->GetAlphaFloat() * embedded_view.alpha;
+        break;
+      case kBackdropFilter:
         break;
     }
     ++iter;

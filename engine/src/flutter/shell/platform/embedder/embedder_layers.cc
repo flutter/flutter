@@ -115,22 +115,22 @@ void EmbedderLayers::PushPlatformViewLayer(
     for (auto i = mutators.Bottom(); i != mutators.Top(); ++i) {
       const auto& mutator = *i;
       switch (mutator->GetType()) {
-        case MutatorType::clip_rect: {
+        case MutatorType::kClipRect: {
           mutations_array.push_back(
               mutations_referenced_
                   .emplace_back(ConvertMutation(mutator->GetRect()))
                   .get());
         } break;
-        case MutatorType::clip_rrect: {
+        case MutatorType::kClipRRect: {
           mutations_array.push_back(
               mutations_referenced_
                   .emplace_back(ConvertMutation(mutator->GetRRect()))
                   .get());
         } break;
-        case MutatorType::clip_path: {
+        case MutatorType::kClipPath: {
           // Unsupported mutation.
         } break;
-        case MutatorType::transform: {
+        case MutatorType::kTransform: {
           const auto& matrix = mutator->GetMatrix();
           if (!matrix.isIdentity()) {
             mutations_array.push_back(
@@ -138,7 +138,7 @@ void EmbedderLayers::PushPlatformViewLayer(
                     .get());
           }
         } break;
-        case MutatorType::opacity: {
+        case MutatorType::kOpacity: {
           const double opacity =
               std::clamp(mutator->GetAlphaFloat(), 0.0f, 1.0f);
           if (opacity < 1.0) {
@@ -147,6 +147,8 @@ void EmbedderLayers::PushPlatformViewLayer(
                     .get());
           }
         } break;
+        case MutatorType::kBackdropFilter:
+          break;
       }
     }
 
