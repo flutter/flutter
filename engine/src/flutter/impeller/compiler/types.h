@@ -34,6 +34,7 @@ enum class TargetPlatform {
   kOpenGLDesktop,
   kRuntimeStageMetal,
   kRuntimeStageGLES,
+  kSkSL,
 };
 
 bool TargetPlatformIsMetal(TargetPlatform platform);

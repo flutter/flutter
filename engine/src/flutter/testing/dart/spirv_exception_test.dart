@@ -33,7 +33,7 @@ void main() {
 }
 
 Stream<Uint8List> _exceptionShaders() async* {
-  final Directory dir = spvDirectory('exception_shaders');
+  final Directory dir = shaderDirectory('exception_shaders');
   await for (final FileSystemEntity entry in dir.list()) {
     if (entry is! File) {
       continue;

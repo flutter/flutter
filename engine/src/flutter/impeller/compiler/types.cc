@@ -67,6 +67,8 @@ std::string TargetPlatformToString(TargetPlatform platform) {
       return "RuntimeStageMetal";
     case TargetPlatform::kRuntimeStageGLES:
       return "RuntimeStageGLES";
+    case TargetPlatform::kSkSL:
+      return "SkSL";
   }
   FML_UNREACHABLE();
 }
@@ -108,6 +110,7 @@ bool TargetPlatformNeedsSL(TargetPlatform platform) {
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kSkSL:
       return true;
     case TargetPlatform::kUnknown:
     case TargetPlatform::kFlutterSPIRV:
@@ -127,6 +130,7 @@ bool TargetPlatformNeedsReflection(TargetPlatform platform) {
       return true;
     case TargetPlatform::kUnknown:
     case TargetPlatform::kFlutterSPIRV:
+    case TargetPlatform::kSkSL:
       return false;
   }
   FML_UNREACHABLE();
@@ -202,6 +206,7 @@ spirv_cross::CompilerMSL::Options::Platform TargetPlatformToMSLPlatform(
     case TargetPlatform::kMetalDesktop:
       return spirv_cross::CompilerMSL::Options::Platform::macOS;
     case TargetPlatform::kFlutterSPIRV:
+    case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
@@ -238,6 +243,7 @@ std::string TargetPlatformSLExtension(TargetPlatform platform) {
     case TargetPlatform::kRuntimeStageMetal:
       return "metal";
     case TargetPlatform::kFlutterSPIRV:
+    case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
@@ -266,6 +272,7 @@ bool TargetPlatformIsOpenGL(TargetPlatform platform) {
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kUnknown:
     case TargetPlatform::kFlutterSPIRV:
+    case TargetPlatform::kSkSL:
       return false;
   }
   FML_UNREACHABLE();
@@ -279,11 +286,11 @@ bool TargetPlatformIsMetal(TargetPlatform platform) {
       return true;
     case TargetPlatform::kUnknown:
     case TargetPlatform::kFlutterSPIRV:
+    case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
       return false;
-      break;
   }
   FML_UNREACHABLE();
 }

@@ -15,6 +15,9 @@ CompilerBackend::CompilerBackend(MSLCompiler compiler)
 CompilerBackend::CompilerBackend(GLSLCompiler compiler)
     : CompilerBackend(Type::kGLSL, compiler) {}
 
+CompilerBackend::CompilerBackend(SkSLCompiler compiler)
+    : CompilerBackend(Type::kSkSL, compiler) {}
+
 CompilerBackend::CompilerBackend() = default;
 
 CompilerBackend::CompilerBackend(Type type, Compiler compiler)
@@ -54,6 +57,10 @@ const spirv_cross::Compiler* CompilerBackend::GetCompiler() const {
     return compiler;
   }
 
+  if (auto compiler = GetSkSLCompiler()) {
+    return compiler;
+  }
+
   return nullptr;
 }
 
@@ -63,6 +70,9 @@ spirv_cross::Compiler* CompilerBackend::GetCompiler() {
   }
   if (auto* glsl = std::get_if<GLSLCompiler>(&compiler_)) {
     return glsl->get();
+  }
+  if (auto* sksl = std::get_if<SkSLCompiler>(&compiler_)) {
+    return sksl->get();
   }
   return nullptr;
 }
@@ -77,6 +87,13 @@ const spirv_cross::CompilerMSL* CompilerBackend::GetMSLCompiler() const {
 const spirv_cross::CompilerGLSL* CompilerBackend::GetGLSLCompiler() const {
   if (auto* glsl = std::get_if<GLSLCompiler>(&compiler_)) {
     return glsl->get();
+  }
+  return nullptr;
+}
+
+const CompilerSkSL* CompilerBackend::GetSkSLCompiler() const {
+  if (auto* sksl = std::get_if<SkSLCompiler>(&compiler_)) {
+    return sksl->get();
   }
   return nullptr;
 }

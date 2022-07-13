@@ -342,6 +342,8 @@ static std::string ToString(CompilerBackend::Type type) {
       return "Metal Shading Language";
     case CompilerBackend::Type::kGLSL:
       return "OpenGL Shading Language";
+    case CompilerBackend::Type::kSkSL:
+      return "SkSL Shading Language";
   }
   FML_UNREACHABLE();
 }

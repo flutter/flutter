@@ -79,7 +79,6 @@ const int _opVectorShuffle = 79;
 const int _opCompositeConstruct = 80;
 const int _opCompositeExtract = 81;
 const int _opImageSampleImplicitLod = 87;
-const int _opImageQuerySize = 104;
 const int _opConvertFToS = 110;
 const int _opConvertSToF = 111;
 const int _opFNegate = 127;

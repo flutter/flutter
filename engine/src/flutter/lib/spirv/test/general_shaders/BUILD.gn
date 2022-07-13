@@ -7,15 +7,31 @@ import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 if (enable_unittests) {
-  impellerc("spirv_compile_general_shaders") {
-    shaders = [
-      "blue_green_sampler.frag",
-      "children_and_uniforms.frag",
-      "functions.frag",
-      "simple.frag",
-      "uniforms.frag",
-    ]
+  test_shaders = [
+    "blue_green_sampler.frag",
+    "children_and_uniforms.frag",
+    "functions.frag",
+    "simple.frag",
+    "uniforms.frag",
+  ]
 
+  group("general_shaders") {
+    deps = [
+      ":sksl_compile_general_shaders",
+      ":spirv_compile_general_shaders",
+    ]
+  }
+
+  impellerc("spirv_compile_general_shaders") {
+    shaders = test_shaders
     shader_target_flag = "--flutter-spirv"
+    intermediates_subdir = "spirv"
+  }
+
+  impellerc("sksl_compile_general_shaders") {
+    shaders = test_shaders
+    shader_target_flag = "--sksl"
+    intermediates_subdir = "sksl"
+    sl_file_extension = "sksl"
   }
 }
