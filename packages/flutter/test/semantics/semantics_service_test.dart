@@ -19,12 +19,14 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-    await SemanticsService.announce('announcement 1', TextDirection.ltr);
-    await SemanticsService.announce('announcement 2', TextDirection.rtl);
+    await SemanticsService.announce('announcement 1', TextDirection.ltr, assertiveAnnouncement: false);
+    await SemanticsService.announce('announcement 2', TextDirection.rtl, assertiveAnnouncement: true);
+    await SemanticsService.announce('announcement 3', TextDirection.rtl);
 
     expect(log, equals(<Map<String, dynamic>>[
-      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1}},
-      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1, 'assertiveAnnouncement': false}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0, 'assertiveAnnouncement': true}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 3', 'textDirection': 0, 'assertiveAnnouncement': null}},
     ]));
   });
 }

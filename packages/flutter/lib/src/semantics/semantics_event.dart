@@ -71,7 +71,7 @@ abstract class SemanticsEvent {
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection)
+  const AnnounceSemanticsEvent(this.message, this.textDirection, this.assertiveAnnouncement)
     : assert(message != null),
       assert(textDirection != null),
       super('announce');
@@ -86,11 +86,16 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   /// This property must not be null.
   final TextDirection textDirection;
 
+  /// Determines whether aria announcement needs to be 'polite' or 'assertive' in Flutter web
+  /// Default mode is 'assertive'. Set to false for 'polite'
+  final bool? assertiveAnnouncement;
+
   @override
   Map<String, dynamic> getDataMap() {
     return <String, dynamic>{
       'message': message,
       'textDirection': textDirection.index,
+      'assertiveAnnouncement': assertiveAnnouncement,
     };
   }
 }

@@ -29,8 +29,8 @@ class SemanticsService {
   ///
   /// For example a camera application can use this method to make accessibility
   /// announcements regarding objects in the viewfinder.
-  static Future<void> announce(String message, TextDirection textDirection) async {
-    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(message, textDirection);
+  static Future<void> announce(String message, TextDirection textDirection, {bool? assertiveAnnouncement}) async {
+    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(message, textDirection, assertiveAnnouncement);
     await SystemChannels.accessibility.send(event.toMap());
   }
 
