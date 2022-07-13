@@ -1399,7 +1399,6 @@ targets:
   - name: Linux_android raster_cache_use_memory_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3980,6 +3979,20 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+
+  - name: Windows platform_channel_sample_test_windows
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: platform_channel_sample_test_windows
+    scheduler: luci
 
   - name: Windows plugin_dependencies_test
     recipe: devicelab/devicelab_drone

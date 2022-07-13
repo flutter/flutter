@@ -12,6 +12,39 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/103741
+  testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget buildFrame({required bool extendBodyBehindAppBar}) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            extendBodyBehindAppBar: extendBodyBehindAppBar,
+            resizeToAvoidBottomInset: false,
+            body: SingleChildScrollView(
+              controller: controller,
+              child: const FlutterLogo(
+                size: 1107,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true));
+    expect(controller.position.pixels, 0.0);
+
+    controller.jumpTo(100.0);
+    await tester.pump();
+    expect(controller.position.pixels, 100.0);
+
+    await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false));
+    expect(controller.position.pixels, 100.0);
+  });
+
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
@@ -2402,6 +2435,7 @@ void main() {
       '   ancestor was:\n'
       '     Builder\n'
       '   The ancestors of this widget were:\n'
+      '     KeyedSubtree-[GlobalKey#00000]\n'
       '     _BodyBuilder\n'
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.body>]\n'
@@ -2547,6 +2581,45 @@ void main() {
     await tester.pumpAndSettle();
     expect(isDrawerOpen, false);
     expect(isEndDrawerOpen, false);
+  });
+
+  testWidgets('ScaffoldMessenger showSnackBar throws an intuitive error message if called during build', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('SnackBar')));
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    ));
+
+    final FlutterError error = tester.takeException() as FlutterError;
+    final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
+    expect(summary.toString(), 'The showSnackBar() method cannot be called during build.');
+  });
+
+  testWidgets('Persistent BottomSheet is not dismissible via a11y means', (WidgetTester tester) async {
+    final Key bottomSheetKey = UniqueKey();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        bottomSheet: Container(
+          key: bottomSheetKey,
+          height: 44,
+          color: Colors.blue,
+          child: const Text('BottomSheet'),
+        ),
+      ),
+    ));
+
+    expect(
+      tester.getSemantics(find.byKey(bottomSheetKey)),
+      // Having the redundant argument value makes the intent of the test clear.
+      // ignore: avoid_redundant_argument_values
+      matchesSemantics(label: 'BottomSheet', hasDismissAction: false),
+    );
   });
 }
 

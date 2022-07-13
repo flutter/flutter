@@ -5,15 +5,14 @@
 import 'template.dart';
 
 class IconButtonTemplate extends TokenTemplate {
-  const IconButtonTemplate(super.fileName, super.tokens)
-      : super(colorSchemePrefix: '_colors.',
-  );
+  const IconButtonTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends ButtonStyle {
+  _${blockName}DefaultsM3(this.context)
     : super(
         animationDuration: kThemeChangeDuration,
         enableFeedback: true,
@@ -35,12 +34,26 @@ class _TokenDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return ${componentColor('md.comp.icon-button.disabled.icon')};
       }
+      if (states.contains(MaterialState.selected)) {
+        return ${componentColor('md.comp.icon-button.selected.icon')};
+      }
       return ${componentColor('md.comp.icon-button.unselected.icon')};
     });
 
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.hovered)) {
+          return ${componentColor('md.comp.icon-button.selected.hover.state-layer')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.icon-button.selected.focus.state-layer')};
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('md.comp.icon-button.selected.pressed.state-layer')};
+        }
+      }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.icon-button.unselected.hover.state-layer')};
       }

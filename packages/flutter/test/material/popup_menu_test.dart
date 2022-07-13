@@ -2885,6 +2885,58 @@ void main() {
     // PopupMenuButton icon size overrides IconTheme's size.
     expect(iconButton.iconSize, 50.0);
   });
+
+  testWidgets('Popup menu clip behavior', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107215
+    final Key popupButtonKey = UniqueKey();
+    const double radius = 20.0;
+
+    Widget buildPopupMenu({required Clip clipBehavior}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupButtonKey,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(radius)),
+              ),
+              clipBehavior: clipBehavior,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.none));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.none);
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+
+    // Popup menu with custom ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.hardEdge));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.hardEdge);
+  });
 }
 
 class TestApp extends StatefulWidget {

@@ -16,7 +16,6 @@ import 'dartdoc_checker.dart';
 
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
-const String kSnippetsRoot = 'dev/snippets';
 
 const String kDummyPackageName = 'Flutter';
 const String kPlatformIntegrationPackageName = 'platform_integration';
