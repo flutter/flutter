@@ -21,12 +21,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
 import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.StandardMethodCodec;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +39,7 @@ public class SpellCheckPluginTest {
   private static void sendToBinaryMessageHandler(
       BinaryMessenger.BinaryMessageHandler binaryMessageHandler, String method, Object args) {
     MethodCall methodCall = new MethodCall(method, args);
-    ByteBuffer encodedMethodCall = JSONMethodCodec.INSTANCE.encodeMethodCall(methodCall);
+    ByteBuffer encodedMethodCall = StandardMethodCodec.INSTANCE.encodeMethodCall(methodCall);
     binaryMessageHandler.onMessage(
         (ByteBuffer) encodedMethodCall.flip(), mock(BinaryMessenger.BinaryReply.class));
   }
@@ -185,7 +186,7 @@ public class SpellCheckPluginTest {
 
     spellCheckPlugin.onGetSentenceSuggestions(new SentenceSuggestionsInfo[] {});
 
-    verify(mockResult).success(new ArrayList<String>());
+    verify(mockResult).success(new ArrayList<HashMap<String, Object>>());
   }
 
   @Test
@@ -209,6 +210,16 @@ public class SpellCheckPluginTest {
               new int[] {5})
         });
 
-    verify(mockResult).success(new ArrayList<String>(Arrays.asList("7.11.world\nword\nold")));
+    ArrayList<HashMap<String, Object>> expectedResults = new ArrayList<HashMap<String, Object>>();
+    HashMap<String, Object> expectedResult = new HashMap<String, Object>();
+
+    expectedResult.put(SpellCheckPlugin.START_INDEX_KEY, 7);
+    expectedResult.put(SpellCheckPlugin.END_INDEX_KEY, 12);
+    expectedResult.put(
+        SpellCheckPlugin.SUGGESTIONS_KEY,
+        new ArrayList<String>(Arrays.asList("world", "word", "old")));
+    expectedResults.add(expectedResult);
+
+    verify(mockResult).success(expectedResults);
   }
 }
