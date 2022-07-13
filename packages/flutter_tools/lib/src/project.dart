@@ -647,7 +647,7 @@ The detected reason was:
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlParserException {
+    } on XmlException {
       throwToolExit('Error parsing $appManifestFile '
                     'Please ensure that the android manifest is a valid XML document and try again.');
     } on FileSystemException {
