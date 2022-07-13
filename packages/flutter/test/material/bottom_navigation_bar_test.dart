@@ -551,7 +551,7 @@ void main() {
     expect(unselectedIcon.color, equals(unselectedColor));
   });
 
-  testWidgets('label style color should not override itemColor for BottomNavigationBarType.fixed', (WidgetTester tester) async {
+  testWidgets('label style color should override itemColor only for the label for BottomNavigationBarType.fixed', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedColor = Color(0xFF0004FF);
@@ -572,6 +572,7 @@ void main() {
             unselectedLabelStyle: const TextStyle(color: unselectedLabelColor),
             selectedItemColor: selectedColor,
             unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
@@ -592,9 +593,11 @@ void main() {
 
     expect(selectedIcon.color, equals(selectedColor));
     expect(unselectedIcon.color, equals(unselectedColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.color, equals(selectedLabelColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!.color, equals(unselectedLabelColor));
   });
 
-  testWidgets('label style color should not override itemColor for BottomNavigationBarType.shifting', (WidgetTester tester) async {
+  testWidgets('label style color should override itemColor only for the label for BottomNavigationBarType.shifting', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedColor = Color(0xFF0004FF);
@@ -615,6 +618,7 @@ void main() {
             unselectedLabelStyle: const TextStyle(color: unselectedLabelColor),
             selectedItemColor: selectedColor,
             unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
@@ -635,6 +639,8 @@ void main() {
 
     expect(selectedIcon.color, equals(selectedColor));
     expect(unselectedIcon.color, equals(unselectedColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.color, equals(selectedLabelColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!.color, equals(unselectedLabelColor));
   });
 
   testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.fixed', (WidgetTester tester) async {
@@ -666,6 +672,7 @@ void main() {
             unselectedIconTheme: unselectedIconTheme,
             selectedItemColor: selectedColor,
             unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
@@ -713,6 +720,7 @@ void main() {
             unselectedLabelStyle: unselectedTextStyle,
             selectedIconTheme: selectedIconTheme,
             unselectedIconTheme: unselectedIconTheme,
+            useLegacyColorScheme: false,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
@@ -743,7 +751,6 @@ void main() {
     const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
     const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
 
-
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -755,6 +762,7 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedIconTheme: selectedIconTheme,
             unselectedIconTheme: unselectedIconTheme,
+            useLegacyColorScheme: false,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
@@ -800,6 +808,7 @@ void main() {
             unselectedIconTheme: unselectedIconTheme,
             selectedItemColor: selectedColor,
             unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
