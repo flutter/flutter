@@ -22,15 +22,19 @@ class WindowBindingHandlerDelegate {
   // called on the platform thread.
   virtual void OnWindowSizeChanged(size_t width, size_t height) = 0;
 
+  // Notifies delegate that backing window needs to be repainted.
+  // Typically called by currently configured WindowBindingHandler.
+  virtual void OnWindowRepaint() = 0;
+
   // Notifies delegate that backing window mouse has moved.
-  // Typically called by currently configured WindowBindingHandler
+  // Typically called by currently configured WindowBindingHandler.
   virtual void OnPointerMove(double x,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
-  // pressed. Typically called by currently configured WindowBindingHandler
+  // pressed. Typically called by currently configured WindowBindingHandler.
   virtual void OnPointerDown(double x,
                              double y,
                              FlutterPointerDeviceKind device_kind,
@@ -38,7 +42,7 @@ class WindowBindingHandlerDelegate {
                              FlutterPointerMouseButtons button) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
-  // released. Typically called by currently configured WindowBindingHandler
+  // released. Typically called by currently configured WindowBindingHandler.
   virtual void OnPointerUp(double x,
                            double y,
                            FlutterPointerDeviceKind device_kind,
@@ -46,18 +50,18 @@ class WindowBindingHandlerDelegate {
                            FlutterPointerMouseButtons button) = 0;
 
   // Notifies delegate that backing window mouse pointer has left the window.
-  // Typically called by currently configured WindowBindingHandler
+  // Typically called by currently configured WindowBindingHandler.
   virtual void OnPointerLeave(double x,
                               double y,
                               FlutterPointerDeviceKind device_kind,
                               int32_t device_id) = 0;
 
   // Notifies delegate that a pan/zoom gesture has started.
-  // Typically called by DirectManipulationEventHandler
+  // Typically called by DirectManipulationEventHandler.
   virtual void OnPointerPanZoomStart(int32_t device_id) = 0;
 
   // Notifies delegate that a pan/zoom gesture has updated.
-  // Typically called by DirectManipulationEventHandler
+  // Typically called by DirectManipulationEventHandler.
   virtual void OnPointerPanZoomUpdate(int32_t device_id,
                                       double pan_x,
                                       double pan_y,
@@ -65,11 +69,11 @@ class WindowBindingHandlerDelegate {
                                       double rotation) = 0;
 
   // Notifies delegate that a pan/zoom gesture has ended.
-  // Typically called by DirectManipulationEventHandler
+  // Typically called by DirectManipulationEventHandler.
   virtual void OnPointerPanZoomEnd(int32_t device_id) = 0;
 
   // Notifies delegate that backing window has received text.
-  // Typically called by currently configured WindowBindingHandler
+  // Typically called by currently configured WindowBindingHandler.
   virtual void OnText(const std::u16string&) = 0;
 
   // Notifies delegate that backing window size has received key press. Should
@@ -109,7 +113,7 @@ class WindowBindingHandlerDelegate {
   virtual void OnComposeChange(const std::u16string& text, int cursor_pos) = 0;
 
   // Notifies delegate that backing window size has recevied scroll.
-  // Typically called by currently configured WindowBindingHandler
+  // Typically called by currently configured WindowBindingHandler.
   virtual void OnScroll(double x,
                         double y,
                         double delta_x,

@@ -109,6 +109,13 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32 {
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi() { return GetCurrentDPI(); }
 
+  // Simulates a WindowProc message from the OS.
+  LRESULT InjectWindowMessage(UINT const message,
+                              WPARAM const wparam,
+                              LPARAM const lparam) {
+    return HandleMessage(message, wparam, lparam);
+  }
+
   MOCK_METHOD1(OnDpiScale, void(unsigned int));
   MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
   MOCK_METHOD4(OnPointerMove,
@@ -344,6 +351,16 @@ TEST(FlutterWindowWin32Test, OnScrollCallsGetScrollOffsetMultiplier) {
 
   win32window.OnScroll(0.0f, 0.0f, kFlutterPointerDeviceKindMouse,
                        kDefaultPointerDeviceId);
+}
+
+TEST(FlutterWindowWin32Test, OnWindowRepaint) {
+  MockFlutterWindowWin32 win32window;
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  EXPECT_CALL(delegate, OnWindowRepaint()).Times(1);
+
+  win32window.InjectWindowMessage(WM_PAINT, 0, 0);
 }
 
 }  // namespace testing

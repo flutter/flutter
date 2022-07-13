@@ -335,6 +335,9 @@ WindowWin32::HandleMessage(UINT const message,
       current_height_ = height;
       HandleResize(width, height);
       break;
+    case WM_PAINT:
+      OnPaint();
+      break;
     case WM_TOUCH: {
       UINT num_points = LOWORD(wparam);
       touch_points_.resize(num_points);

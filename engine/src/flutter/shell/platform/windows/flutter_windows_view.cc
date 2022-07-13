@@ -163,6 +163,10 @@ void FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   }
 }
 
+void FlutterWindowsView::OnWindowRepaint() {
+  ForceRedraw();
+}
+
 void FlutterWindowsView::OnPointerMove(double x,
                                        double y,
                                        FlutterPointerDeviceKind device_kind,
@@ -603,6 +607,8 @@ void FlutterWindowsView::CreateRenderSurface() {
     PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
     engine_->surface_manager()->CreateSurface(GetRenderTarget(), bounds.width,
                                               bounds.height);
+    resize_target_width_ = bounds.width;
+    resize_target_height_ = bounds.height;
   }
 }
 

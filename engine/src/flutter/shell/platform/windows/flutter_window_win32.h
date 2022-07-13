@@ -37,6 +37,9 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   void OnResize(unsigned int width, unsigned int height) override;
 
   // |WindowWin32|
+  void OnPaint() override;
+
+  // |WindowWin32|
   void OnPointerMove(double x,
                      double y,
                      FlutterPointerDeviceKind device_kind,

@@ -135,6 +135,12 @@ void FlutterWindowWin32::OnResize(unsigned int width, unsigned int height) {
   }
 }
 
+void FlutterWindowWin32::OnPaint() {
+  if (binding_handler_delegate_ != nullptr) {
+    binding_handler_delegate_->OnWindowRepaint();
+  }
+}
+
 void FlutterWindowWin32::OnPointerMove(double x,
                                        double y,
                                        FlutterPointerDeviceKind device_kind,
