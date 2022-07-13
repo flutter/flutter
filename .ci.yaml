@@ -1374,7 +1374,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: clipper_cache_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android color_filter_and_fade_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1957,7 +1956,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_perf__e2e_summary
-    scheduler: luci
     bringup: true
 
   - name: Linux_android list_text_layout_impeller_perf__e2e_summary
@@ -1968,7 +1966,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_impeller_perf__e2e_summary
-    scheduler: luci
     bringup: true
 
   - name: Linux_android new_gallery__crane_perf
@@ -1990,7 +1987,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: old_gallery__transition_perf
-    scheduler: luci
 
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2081,7 +2077,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: new_gallery_impeller__transition_perf
-    scheduler: luci
 
   - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2092,7 +2087,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: new_gallery_impeller__transition_perf
-    scheduler: luci
 
   - name: Linux_android picture_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2459,7 +2453,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac build_tests_1_4
     recipe: flutter/flutter_drone
@@ -3276,7 +3269,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios external_ui_integration_test_ios
     bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
@@ -3287,7 +3279,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: external_ui_integration_test_ios
-    scheduler: luci
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
@@ -3572,7 +3563,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_impeller_ios__transition_perf
-    scheduler: luci
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     bringup: true # Flaky https://github.com/flutter/flutter/issues/102236
@@ -3583,7 +3573,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
@@ -3713,7 +3702,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: native_platform_view_ui_tests_ios
-    scheduler: luci
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
