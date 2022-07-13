@@ -1,4 +1,4 @@
-Signature: 0196aab5b40e6464b5e2d26ed4d98c37
+Signature: ce8297457a99cde321c7fcb18f3010ef
 
 UNUSED LICENSES:
 
@@ -2442,7 +2442,6 @@ FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderBase.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkLinearGradient.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkLinearGradient.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkRadialGradient.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/SkRadialGradient.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkSweepGradient.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkSweepGradient.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkTwoPointConicalGradient.cpp
