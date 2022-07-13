@@ -7,8 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/ios/migrations/deployment_target_migration.dart';
-import 'package:flutter_tools/src/ios/migrations/indirect_input_events_migration.dart';
-import 'package:flutter_tools/src/ios/migrations/minimum_frame_duration_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/host_app_info_plist_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_object_version_migration.dart';
@@ -739,7 +738,7 @@ platform :ios, '11.0'
       });
     });
 
-    group('add CADisableMinimumFrameDurationOnPhone key to info.plist migration', () {
+    group('update info.plist migration', () {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger testLogger;
       late FakeIosProject project;
@@ -754,14 +753,14 @@ platform :ios, '11.0'
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final MinimumFrameDurationMigration iosProjectMigration = MinimumFrameDurationMigration(
+        final HostAppInfoPlistMigration iosProjectMigration = HostAppInfoPlistMigration(
           project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
         expect(infoPlistFile.existsSync(), isFalse);
 
-        expect(testLogger.traceText, contains('Info.plist not found, skipping minimum frame duration migration.'));
+        expect(testLogger.traceText, contains('Info.plist not found, skipping host app Info.plist migration.'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -773,83 +772,6 @@ platform :ios, '11.0'
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-</dict>
-</plist>
-''';
-        infoPlistFile.writeAsStringSync(infoPlistFileContent);
-
-        final MinimumFrameDurationMigration iosProjectMigration = MinimumFrameDurationMigration(
-          project,
-          testLogger,
-        );
-        final DateTime infoPlistFileLastModified = infoPlistFile.lastModifiedSync();
-        expect(iosProjectMigration.migrate(), isTrue);
-
-        expect(infoPlistFile.lastModifiedSync(), infoPlistFileLastModified);
-        expect(testLogger.statusText, isEmpty);
-      });
-
-      testWithoutContext('info.plist is migrated to use CADisableMinimumFrameDurationOnPhone', () {
-        const String infoPlistFileContent = '''
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-</dict>
-</plist>
-''';
-        infoPlistFile.writeAsStringSync(infoPlistFileContent);
-
-        final MinimumFrameDurationMigration iosProjectMigration = MinimumFrameDurationMigration(
-          project,
-          testLogger,
-        );
-        expect(iosProjectMigration.migrate(), isTrue);
-        expect(infoPlistFile.readAsStringSync(), equals('''
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-</dict>
-</plist>
-'''));
-      });
-    });
-
-    group('add UIApplicationSupportsIndirectInputEvents key to info.plist migration', () {
-      late MemoryFileSystem memoryFileSystem;
-      late BufferLogger testLogger;
-      late FakeIosProject project;
-      late File infoPlistFile;
-
-      setUp(() {
-        memoryFileSystem = MemoryFileSystem();
-        testLogger = BufferLogger.test();
-        project = FakeIosProject();
-        infoPlistFile = memoryFileSystem.file('info.plist');
-        project.defaultHostInfoPlist = infoPlistFile;
-      });
-
-      testWithoutContext('skipped if files are missing', () {
-        final IndirectInputEventsMigration iosProjectMigration = IndirectInputEventsMigration(
-          project,
-          testLogger,
-        );
-        expect(iosProjectMigration.migrate(), isTrue);
-        expect(infoPlistFile.existsSync(), isFalse);
-
-        expect(testLogger.traceText, contains('Info.plist not found, skipping indirect input events migration.'));
-        expect(testLogger.statusText, isEmpty);
-      });
-
-      testWithoutContext('skipped if nothing to upgrade', () {
-        const String infoPlistFileContent = '''
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>
@@ -857,7 +779,7 @@ platform :ios, '11.0'
 ''';
         infoPlistFile.writeAsStringSync(infoPlistFileContent);
 
-        final IndirectInputEventsMigration iosProjectMigration = IndirectInputEventsMigration(
+        final HostAppInfoPlistMigration iosProjectMigration = HostAppInfoPlistMigration(
           project,
           testLogger,
         );
@@ -868,7 +790,7 @@ platform :ios, '11.0'
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('info.plist is migrated to use UIApplicationSupportsIndirectInputEvents', () {
+      testWithoutContext('info.plist is migrated', () {
         const String infoPlistFileContent = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -879,7 +801,7 @@ platform :ios, '11.0'
 ''';
         infoPlistFile.writeAsStringSync(infoPlistFileContent);
 
-        final IndirectInputEventsMigration iosProjectMigration = IndirectInputEventsMigration(
+        final HostAppInfoPlistMigration iosProjectMigration = HostAppInfoPlistMigration(
           project,
           testLogger,
         );
@@ -889,6 +811,8 @@ platform :ios, '11.0'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>
