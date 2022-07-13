@@ -221,20 +221,26 @@ class OverlayEntry implements Listenable {
 class _OverlayInfoWidget extends InheritedWidget {
   const _OverlayInfoWidget({
     required this.state,
+    required this.overlayState,
     required super.child,
   });
 
   final _OverlayEntryWidgetState state;
+  final OverlayState overlayState;
 
   @override
-  bool updateShouldNotify(_OverlayInfoWidget oldWidget) => oldWidget.state != state;
+  bool updateShouldNotify(_OverlayInfoWidget oldWidget) => oldWidget.state != state || oldWidget.overlayState != overlayState;
 }
 
 /// A location in a particular [Overlay].
 abstract class OverlayInfo {
+  /// The underlying [RenderObject] of the [Overlay]. Must not
   _RenderTheatre get _overlayRenderObject;
 
   /// The closest [OverlayInfo] that encloses the given context.
+  ///
+  /// The widget subtree associated with the given `context` will be notified
+  /// when it is moved to a different [Overlay] or a different [OverlayEntry].
   ///
   /// This method returns null when no enclosing [Overlay] can be found in the
   /// given [context].
@@ -247,6 +253,7 @@ class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
     required Key key,
     required this.entry,
+    required this.overlayState,
     this.tickerEnabled = true,
   }) : assert(key != null),
        assert(entry != null),
@@ -255,6 +262,7 @@ class _OverlayEntryWidget extends StatefulWidget {
 
   final OverlayEntry entry;
   final bool tickerEnabled;
+  final OverlayState overlayState;
 
   @override
   _OverlayEntryWidgetState createState() => _OverlayEntryWidgetState();
@@ -283,6 +291,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> implements Ove
       enabled: widget.tickerEnabled,
       child: _OverlayInfoWidget(
         state: this,
+        overlayState: widget.overlayState,
         child: Builder(builder: widget.entry.builder),
       ),
     );
@@ -583,6 +592,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
         onstageCount += 1;
         children.add(_OverlayEntryWidget(
           key: entry._key,
+          overlayState: this,
           entry: entry,
         ));
         if (entry.opaque) {
@@ -591,6 +601,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       } else if (entry.maintainState) {
         children.add(_OverlayEntryWidget(
           key: entry._key,
+          overlayState: this,
           entry: entry,
           tickerEnabled: false,
         ));
@@ -1054,6 +1065,9 @@ class _OverlayPortalElement extends RenderObjectElement {
   Element? _overlayChild;
   Element? _child;
 
+  // The current Overlay that we inserted `_overlayChild`'s render object onto.
+  _RenderTheatre? _renderThreatre;
+
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
@@ -1080,8 +1094,10 @@ class _OverlayPortalElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
+    // The _overlayChild Element does not have a key because the _DeferredLayout
+    // widget does not take a Key, so only the regular _child can be taken by
+    // global key reparenting.
     assert(child == _child);
-    // The _overlayChild Element does not have a key.
     _child = null;
     super.forgetChild(child);
   }
@@ -1115,7 +1131,7 @@ class _OverlayPortalElement extends RenderObjectElement {
     // render subtree entirely such that if the widget gets reparented to a
     // different overlay entry, the overlay child is inserted in the right
     // position in the overlay's child list.
-    if (box != null && box.attached) {
+    if (box != null) {
       removeRenderObjectChild(box, widget.overlayInfo);
     }
     super.deactivate();
@@ -1123,10 +1139,12 @@ class _OverlayPortalElement extends RenderObjectElement {
 
   @override
   void insertRenderObjectChild(RenderBox child, OverlayInfo? slot) {
-    assert(child.parent == null);
+    assert(child.parent == null, "$child's parent is not null: ${child.parent}");
     if (slot != null) {
       renderObject._deferredLayoutChild = child as _RenderDeferredLayoutBox;
-      slot._overlayRenderObject.addDeferredChild(child);
+      assert(_renderThreatre == null);
+      _renderThreatre = slot._overlayRenderObject..addDeferredChild(child);
+      assert(_renderThreatre != null);
     } else {
       renderObject.child = child;
     }
@@ -1134,10 +1152,12 @@ class _OverlayPortalElement extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(RenderBox child, OverlayInfo? oldSlot, OverlayInfo? newSlot) {
-    assert(oldSlot != null || newSlot != null, '$this: $child changing slot: $oldSlot => $newSlot');
-    if (child.attached) {
-      oldSlot?._overlayRenderObject.removeDeferredChild(child as _RenderDeferredLayoutBox);
-    }
+    // The [_DeferredLayout] widget does not have a key so there will be no
+    // reparenting between _overlayChild and _child.
+    assert(oldSlot != null && newSlot != null, '$this: $child changing slot: $oldSlot => $newSlot');
+    assert(_renderThreatre != null);
+    _renderThreatre?.removeDeferredChild(child as _RenderDeferredLayoutBox);
+    _renderThreatre = null;
     insertRenderObjectChild(child, newSlot);
   }
 
@@ -1148,10 +1168,10 @@ class _OverlayPortalElement extends RenderObjectElement {
       return;
     }
     assert(renderObject._deferredLayoutChild == child);
+    assert(_renderThreatre != null);
+    _renderThreatre?.removeDeferredChild(child as _RenderDeferredLayoutBox);
+    _renderThreatre = null;
     renderObject._deferredLayoutChild = null;
-    if (child.attached) {
-      slot._overlayRenderObject.removeDeferredChild(child as _RenderDeferredLayoutBox);
-    }
   }
 
   @override

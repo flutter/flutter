@@ -600,7 +600,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       final Canvas canvas = context.canvas;
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
-      canvas.clipRect(Offset.zero & size);
+      //canvas.clipRect(Offset.zero & size);
       for (final InkFeature inkFeature in _inkFeatures!) {
         inkFeature._paint(canvas);
       }
@@ -687,32 +687,70 @@ abstract class InkFeature {
     onRemoved?.call();
   }
 
+  // Returns the paint transform that allows `fromRenderObject` to perform paint
+  // in `toRenderObject`'s coordinate space.
+  //
+  // Returns null if `fromRenderObject` and `toRenderObject` are not in the
+  // same render tree, or
+  static Matrix4? _getPaintTransform(
+    RenderObject fromRenderObject,
+    RenderObject toRenderObject,
+  ) {
+    final List<RenderObject> fromPath = <RenderObject>[fromRenderObject];
+    final List<RenderObject> toPath = <RenderObject>[toRenderObject];
+
+    RenderObject from = fromRenderObject;
+    RenderObject to = toRenderObject;
+    //print('$from (${from.depth}) -> $to (${to.depth})');
+
+    while (!identical(from, to)) {
+      final int fromDepth = from.depth;
+      final int toDepth = to.depth;
+
+      if (fromDepth >= toDepth) {
+        final AbstractNode? fromParent = from.parent;
+        // Return early if the 2 render objects are not in the same render tree,
+        // or one of them is offscreen and thus not painted.
+        if (fromParent is! RenderObject || !fromParent.paintsChild(from)) {
+          return null;
+        }
+        fromPath.add(fromParent);
+        from  = fromParent;
+      }
+
+      if (fromDepth <= toDepth) {
+        final AbstractNode? toParent = to.parent;
+        if (toParent is! RenderObject || !toParent.paintsChild(to)) {
+          return null;
+        }
+        toPath.add(toParent);
+        to  = toParent;
+      }
+    }
+    assert(identical(from, to));
+
+    final Matrix4 transform = Matrix4.identity();
+    final Matrix4 inverseTransform = Matrix4.identity();
+
+    for (int index = toPath.length - 1; index > 0; index -= 1) {
+      toPath[index].applyPaintTransform(toPath[index - 1], transform);
+    }
+    for (int index = fromPath.length - 1; index > 0; index -= 1) {
+      fromPath[index].applyPaintTransform(fromPath[index - 1], inverseTransform);
+    }
+
+    final double det = inverseTransform.invert();
+    return det != 0 ? (inverseTransform..multiply(transform)) : null;
+  }
+
   void _paint(Canvas canvas) {
     assert(referenceBox.attached);
     assert(!_debugDisposed);
-    // find the chain of renderers from us to the feature's referenceBox
-    final List<RenderObject> descendants = <RenderObject>[referenceBox];
-    RenderObject node = referenceBox;
-    while (node != _controller) {
-      final RenderObject childNode = node;
-      node = node.parent! as RenderObject;
-      if (!node.paintsChild(childNode)) {
-        // Some node between the reference box and this would skip painting on
-        // the reference box, so bail out early and avoid unnecessary painting.
-        // Some cases where this can happen are the reference box being
-        // offstage, in a fully transparent opacity node, or in a keep alive
-        // bucket.
-        return;
-      }
-      descendants.add(node);
-    }
     // determine the transform that gets our coordinate system to be like theirs
-    final Matrix4 transform = Matrix4.identity();
-    assert(descendants.length >= 2);
-    for (int index = descendants.length - 1; index > 0; index -= 1) {
-      descendants[index].applyPaintTransform(descendants[index - 1], transform);
+    final Matrix4? transform = _getPaintTransform(_controller, referenceBox);
+    if (transform != null) {
+      paintFeature(canvas, transform);
     }
-    paintFeature(canvas, transform);
   }
 
   /// Override this method to paint the ink feature.
