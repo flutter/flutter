@@ -129,7 +129,7 @@ void main() {
 
 
   testWidgets(
-    'submit retrieves only values from child formFields with non-null submissionkeys', 
+    'submit retrieves only values from child formFields with non-null submissionkeys',
     (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
