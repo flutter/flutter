@@ -375,7 +375,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
       Settings settings,
       std::unique_ptr<Animator> animator,
       const std::string& initial_route,
-      fml::WeakPtr<IOManager> io_manager) const;
+      fml::WeakPtr<IOManager> io_manager,
+      fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the engine engine. Called by the shell on the UI task
