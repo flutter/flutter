@@ -4262,6 +4262,7 @@ targets:
     scheduler: luci
 
   - name: Windows_android basic_material_app_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/107549
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
