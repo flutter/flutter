@@ -87,28 +87,32 @@ enum ListTileControlAffinity {
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
-/// One ancestor must be a [Material] widget and typically this is
-/// provided by the app's [Scaffold]. The [tileColor],
-/// [selectedTileColor], [focusColor], and [hoverColor] are not
-/// painted by the list tile itself but by the material widget
-/// ancestor. This generally has no effect. However, if an opaque
-/// widget, like `Container(color: Colors.white)`, is included in
-/// between the [ListTile] and its [Material] ancestor, then the
-/// opaque widget will obscure the material widget and its background
-/// [tileColor], etc. If this a problem, one can wrap a [Material]
-/// widget around the list tile, e.g.:
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], [selectedTileColor], [focusColor], and [hoverColor]
+/// are not painted by the [ListTile] itself but by the [Material] widget
+/// ancestor. In this case, one can wrap a [Material] widget around the
+/// [ListTile], e.g.:
 ///
+/// {@tool snippet}
 /// ```dart
 /// Container(
 ///   color: Colors.green,
-///   child: Material(
+///   child: const Material(
 ///     child: ListTile(
-///       title: const Text('ListTile with red background'),
+///       title: Text('ListTile with red background'),
 ///       tileColor: Colors.red,
 ///     ),
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+///
+/// ## Performance considerations when wrapping [ListTile] with [Material]
+///
+/// Wrapping a large number of [ListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [ListTile]s that require it
+/// or include a common [Material] ancestor where possible.
 ///
 /// {@tool snippet}
 ///
