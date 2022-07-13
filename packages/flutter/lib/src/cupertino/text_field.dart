@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/cupertino/loupe.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -782,7 +782,7 @@ class CupertinoTextField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@macro flutter.widgets.Loupe.loupeControllerWidgetBuilder}
-  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>> loupeBuilder;
+  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
