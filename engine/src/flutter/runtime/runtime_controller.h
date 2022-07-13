@@ -106,7 +106,8 @@ class RuntimeController : public PlatformConfigurationClient {
       std::shared_ptr<const fml::Mapping> persistent_isolate_data,
       fml::WeakPtr<IOManager> io_manager,
       fml::WeakPtr<ImageDecoder> image_decoder,
-      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry) const;
+      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+      fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const;
 
   // |PlatformConfigurationClient|
   ~RuntimeController() override;
