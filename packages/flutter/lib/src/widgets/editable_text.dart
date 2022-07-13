@@ -684,7 +684,7 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = buildContextMenu != null ? const ToolbarOptions() : toolbarOptions ??
+       toolbarOptions = selectionControls is TextSelectionHandleControls && toolbarOptions == null ? const ToolbarOptions() : toolbarOptions ??
            (obscureText
                ? (readOnly
                    // No point in even offering "Select All" in a read-only obscured
@@ -3278,11 +3278,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback? _semanticsOnCopy(TextSelectionControls? controls) {
     return widget.selectionEnabled
-        && copyEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
             ? TextSelectionToolbarButtonDatasBuilder.canCopy(this)
-            : widget.selectionControls?.canCopy(this) ?? false)
+            : copyEnabled && (widget.selectionControls?.canCopy(this) ?? false))
       ? () {
         controls?.handleCopy(this);
         copySelection(SelectionChangedCause.toolbar);
@@ -3292,11 +3291,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
     return widget.selectionEnabled
-        && cutEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
             ? TextSelectionToolbarButtonDatasBuilder.canCut(this)
-            : widget.selectionControls?.canCut(this) ?? false)
+            : cutEnabled && (widget.selectionControls?.canCut(this) ?? false))
       ? () {
         controls?.handleCut(this);
         cutSelection(SelectionChangedCause.toolbar);
@@ -3306,11 +3304,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback? _semanticsOnPaste(TextSelectionControls? controls) {
     return widget.selectionEnabled
-        && pasteEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
             ? TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus?.value ?? ClipboardStatus.pasteable)
-            : widget.selectionControls?.canPaste(this) ?? false)
+            : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
         && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
       ? () {
         controls?.handlePaste(this);

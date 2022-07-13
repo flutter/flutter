@@ -1228,6 +1228,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         child: EditableText(
           key: editableTextKey,
           readOnly: widget.readOnly || !_isEnabled,
+          toolbarOptions: widget.toolbarOptions,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
           controller: controller,
