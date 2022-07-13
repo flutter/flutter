@@ -956,16 +956,16 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final IconThemeData effectiveSelectedIconTheme =
       _effectiveIconTheme(
         widget.selectedIconTheme ?? bottomTheme.selectedIconTheme,
-        widget.selectedItemColor 
-        ?? bottomTheme.selectedItemColor 
+        widget.selectedItemColor
+        ?? bottomTheme.selectedItemColor
         ?? themeColor
       );
 
     final IconThemeData effectiveUnselectedIconTheme =
       _effectiveIconTheme(
         widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-        widget.unselectedItemColor 
-        ?? bottomTheme.unselectedItemColor 
+        widget.unselectedItemColor
+        ?? bottomTheme.unselectedItemColor
         ?? themeData.unselectedWidgetColor
       );
 
