@@ -536,12 +536,14 @@ std::unique_ptr<Shell> Shell::Spawn(
           fml::RefPtr<SkiaUnrefQueue> unref_queue,
           fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
           std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
-        return engine->Spawn(/*delegate=*/delegate,
-                             /*dispatcher_maker=*/dispatcher_maker,
-                             /*settings=*/settings,
-                             /*animator=*/std::move(animator),
-                             /*initial_route=*/initial_route,
-                             /*io_manager=*/std::move(io_manager));
+        return engine->Spawn(
+            /*delegate=*/delegate,
+            /*dispatcher_maker=*/dispatcher_maker,
+            /*settings=*/settings,
+            /*animator=*/std::move(animator),
+            /*initial_route=*/initial_route,
+            /*io_manager=*/std::move(io_manager),
+            /*snapshot_delegate=*/std::move(snapshot_delegate));
       },
       is_gpu_disabled);
   result->RunEngine(std::move(run_configuration));

@@ -51,9 +51,10 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     std::shared_ptr<const fml::Mapping> p_persistent_isolate_data,
     fml::WeakPtr<IOManager> io_manager,
     fml::WeakPtr<ImageDecoder> image_decoder,
-    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry) const {
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const {
   UIDartState::Context spawned_context{
-      context_.task_runners,         context_.snapshot_delegate,
+      context_.task_runners,         std::move(snapshot_delegate),
       std::move(io_manager),         context_.unref_queue,
       std::move(image_decoder),      std::move(image_generator_registry),
       advisory_script_uri,           advisory_script_entrypoint,

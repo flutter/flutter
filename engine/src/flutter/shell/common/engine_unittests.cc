@@ -141,6 +141,7 @@ class EngineTest : public testing::FixtureTest {
   fml::WeakPtr<IOManager> io_manager_;
   std::unique_ptr<RuntimeController> runtime_controller_;
   std::shared_ptr<fml::ConcurrentTaskRunner> image_decoder_task_runner_;
+  fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
 };
 }  // namespace
 
@@ -270,7 +271,7 @@ TEST_F(EngineTest, SpawnSharesFontLibrary) {
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                               std::string(), io_manager_);
+                               std::string(), io_manager_, snapshot_delegate_);
     EXPECT_TRUE(spawn != nullptr);
     EXPECT_EQ(&engine->GetFontCollection(), &spawn->GetFontCollection());
   });
@@ -296,7 +297,7 @@ TEST_F(EngineTest, SpawnWithCustomInitialRoute) {
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                               "/foo", io_manager_);
+                               "/foo", io_manager_, snapshot_delegate_);
     EXPECT_TRUE(spawn != nullptr);
     ASSERT_EQ("/foo", spawn->InitialRoute());
   });
@@ -332,7 +333,7 @@ TEST_F(EngineTest, SpawnResetsViewportMetrics) {
     EXPECT_EQ(old_platform_data.viewport_metrics.physical_height, kViewHeight);
 
     auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                               std::string(), io_manager_);
+                               std::string(), io_manager_, snapshot_delegate_);
     EXPECT_TRUE(spawn != nullptr);
     auto& new_viewport_metrics =
         spawn->GetRuntimeController()->GetPlatformData().viewport_metrics;
@@ -363,8 +364,9 @@ TEST_F(EngineTest, SpawnWithCustomSettings) {
     Settings custom_settings = settings_;
     custom_settings.persistent_isolate_data =
         std::make_shared<fml::DataMapping>("foo");
-    auto spawn = engine->Spawn(delegate_, dispatcher_maker_, custom_settings,
-                               nullptr, std::string(), io_manager_);
+    auto spawn =
+        engine->Spawn(delegate_, dispatcher_maker_, custom_settings, nullptr,
+                      std::string(), io_manager_, snapshot_delegate_);
     EXPECT_TRUE(spawn != nullptr);
     auto new_persistent_isolate_data =
         const_cast<RuntimeController*>(spawn->GetRuntimeController())
