@@ -844,6 +844,61 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
   });
 
+  testWidgets('TabBarView children can be updated during animation', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107399
+    final List<String> log = <String>[];
+
+    Widget buildFrameWithMarker(String marker) {
+      return MaterialApp(
+        home: DefaultTabController(
+          animationDuration: const Duration(seconds: 1),
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(text: 'LEFT'),
+                  Tab(text: 'RIGHT'),
+                ],
+              ),
+              title: const Text('Tabs Test'),
+            ),
+            body: TabBarView(
+              children: <Widget>[
+                TabBody(index: 0, log: log, marker: marker),
+                TabBody(index: 1, log: log, marker: marker),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    const String initialMarker = 'before';
+    await tester.pumpWidget(buildFrameWithMarker(initialMarker));
+    expect(log, <String>['init: 0']);
+    expect(find.text('0-$initialMarker'), findsOneWidget);
+
+    // Select the second tab and wait until the transition starts
+    await tester.tap(find.text('RIGHT'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Check that both TabBody's are instantiated while the transition is animating
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(log, <String>['init: 0', 'init: 1']);
+
+    // Update the TabBody's states while the transition is animating
+    const String updatedMarker = 'after';
+    await tester.pumpWidget(buildFrameWithMarker(updatedMarker));
+
+    // Wait until the transition ends
+    await tester.pumpAndSettle();
+
+    // The TabBody state of the second TabBar should have been updated
+    expect(find.text('1-$initialMarker'), findsNothing);
+    expect(find.text('1-$updatedMarker'), findsOneWidget);
+  });
+
   testWidgets('TabBar unselectedLabelColor control test', (WidgetTester tester) async {
     final TabController controller = TabController(
       vsync: const TestVSync(),
@@ -4845,10 +4900,11 @@ class TabBarDemo extends StatelessWidget {
 class MockScrollMetrics extends Fake implements ScrollMetrics { }
 
 class TabBody extends StatefulWidget {
-  const TabBody({ super.key, required this.index, required this.log });
+  const TabBody({ super.key, required this.index, required this.log, this.marker = ''});
 
   final int index;
   final List<String> log;
+  final String marker;
 
   @override
   State<TabBody> createState() => TabBodyState();
@@ -4877,7 +4933,9 @@ class TabBodyState extends State<TabBody> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('${widget.index}'),
+      child: widget.marker.isEmpty
+        ? Text('${widget.index}')
+        : Text('${widget.index}-${widget.marker}'),
     );
   }
 }

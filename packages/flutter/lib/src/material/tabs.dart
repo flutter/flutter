@@ -1454,7 +1454,7 @@ class _TabBarViewState extends State<TabBarView> {
       _pageController.jumpToPage(_currentIndex!);
       _warpUnderwayCount -= 1;
     }
-    if (widget.children != oldWidget.children && _warpUnderwayCount == 0) {
+    if (widget.children != oldWidget.children) {
       _updateChildren();
     }
   }
