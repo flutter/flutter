@@ -6,10 +6,8 @@
 //
 // Run with --help for usage.
 
-// TODO(gspencergoog): Support clang formatting on Windows.
-// TODO(gspencergoog): Support Java formatting on Windows.
-
 import 'dart:io';
+import 'dart:math';
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
@@ -84,13 +82,7 @@ String formatCheckToName(FormatCheck check) {
 }
 
 List<String> formatCheckNames() {
-  List<FormatCheck> allowed;
-  if (!Platform.isWindows) {
-    allowed = FormatCheck.values;
-  } else {
-    allowed = <FormatCheck>[FormatCheck.gn, FormatCheck.whitespace];
-  }
-  return allowed
+  return FormatCheck.values
       .map<String>((FormatCheck check) => check.toString().replaceFirst('$FormatCheck.', ''))
       .toList();
 }
@@ -214,7 +206,13 @@ abstract class FormatChecker {
   @protected
   Stream<List<int>> codeUnitsAsStream(List<int>? input) async* {
     if (input != null) {
-      yield input;
+      int pos = 0;
+      while (input.length > pos) {
+        // On Windows large pages seem to be truncated
+        final int len = min(input.length - pos, 512);
+        yield input.getRange(pos, pos + len).toList(growable: false);
+        pos += len;
+      }
     }
   }
 
@@ -324,6 +322,8 @@ class ClangFormatChecker extends FormatChecker {
       clangOs = 'linux-x64';
     } else if (Platform.isMacOS) {
       clangOs = 'mac-x64';
+    } else if (Platform.isWindows) {
+      clangOs = 'windows-x64';
     } else {
       throw FormattingException(
           "Unknown operating system: don't know how to run clang-format here.");
@@ -400,8 +400,25 @@ class ClangFormatChecker extends FormatChecker {
     await for (final WorkerJob completedJob in completedClangFormats) {
       if (completedJob.result.exitCode == 0) {
         diffJobs.add(
-          WorkerJob(<String>['diff', '-u', completedJob.command.last, '-'],
-              stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw), failOk: true),
+          WorkerJob(<String>[
+            'git',
+            'diff',
+            '--no-index',
+            '-U0',
+            '--no-color',
+            '--',
+            completedJob.command.last,
+            '-'
+          ], stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw),
+             failOk: true
+          ),
+        );
+      } else {
+        final String formatterCommand = completedJob.command.join(' ');
+        error(
+          'Formatter command \'$formatterCommand\' failed with exit code '
+          '${completedJob.result.exitCode}. Command output follows:\n\n'
+          '${completedJob.result.output}'
         );
       }
     }
@@ -540,16 +557,32 @@ class JavaFormatChecker extends FormatChecker {
       processRunner: _processRunner,
       printReport: namedReport('Java format'),
     );
-    final Stream<WorkerJob> completedClangFormats = formatPool.startWorkers(formatJobs);
+    final Stream<WorkerJob> completedJavaFormats = formatPool.startWorkers(formatJobs);
     final List<WorkerJob> diffJobs = <WorkerJob>[];
-    await for (final WorkerJob completedJob in completedClangFormats) {
+    await for (final WorkerJob completedJob in completedJavaFormats) {
       if (completedJob.result.exitCode == 0) {
         diffJobs.add(
           WorkerJob(
-            <String>['diff', '-u', completedJob.command.last, '-'],
+            <String>[
+              'git',
+              'diff',
+              '--no-index',
+              '-U0',
+              '--no-color',
+              '--',
+              completedJob.command.last,
+              '-'
+            ],
             stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw),
             failOk: true,
           ),
+        );
+      } else {
+        final String formatterCommand = completedJob.command.join(' ');
+        error(
+          'Formatter command \'$formatterCommand\' failed with exit code '
+          '${completedJob.result.exitCode}. Command output follows:\n\n'
+          '${completedJob.result.output}'
         );
       }
     }
@@ -637,45 +670,88 @@ class GnFormatChecker extends FormatChecker {
     final List<String> cmd = <String>[
       gnBinary.path,
       'format',
-      if (!fixing) '--dry-run',
+      if (!fixing) '--stdin',
     ];
-    final List<WorkerJob> jobs = <WorkerJob>[];
+    final List<WorkerJob> jobs = [];
     for (final String file in filesToCheck) {
-      jobs.add(WorkerJob(<String>[...cmd, file]));
+      if (!fixing) {
+        final WorkerJob job = WorkerJob(
+            cmd,
+            stdinRaw: codeUnitsAsStream(File(path.join(repoDir.absolute.path, file)).readAsBytesSync()),
+            failOk: true,
+            name: <String>[...cmd, file].join(' '),
+          );
+        jobs.add(job);
+      } else {
+        jobs.add(WorkerJob(<String>[...cmd, file], name: <String>[...cmd, file].join(' ')));
+      }
     }
     final ProcessPool gnPool = ProcessPool(
       processRunner: _processRunner,
       printReport: namedReport('gn format'),
     );
-    final List<WorkerJob> completedJobs = await gnPool.runToCompletion(jobs);
-    reportDone();
-    final List<String> incorrect = <String>[];
-    for (final WorkerJob job in completedJobs) {
-      if (job.result.exitCode == 2) {
-        incorrect.add('  ${job.command.last}');
-      }
-      if (job.result.exitCode == 1) {
-        // GN has exit code 1 if it had some problem formatting/checking the
-        // file.
-        throw FormattingException(
-          'Unable to format ${job.command.last}:\n${job.result.output}',
+    final Stream<WorkerJob> completedJobs = gnPool.startWorkers(jobs);
+    final List<WorkerJob> diffJobs = <WorkerJob>[];
+    await for (final WorkerJob completedJob in completedJobs) {
+      if (completedJob.result.exitCode == 0) {
+        diffJobs.add(
+          WorkerJob(
+            <String>[
+              'git',
+              'diff',
+              '--no-index',
+              '-U0',
+              '--no-color',
+              '--',
+              completedJob.name.split(' ').last,
+              '-'
+            ],
+            stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw),
+            failOk: true,
+          ),
+        );
+      } else {
+        final String formatterCommand = completedJob.command.join(' ');
+        error(
+          'Formatter command \'$formatterCommand\' failed with exit code '
+          '${completedJob.result.exitCode}. Command output follows:\n\n'
+          '${completedJob.result.output}'
         );
       }
     }
-    if (incorrect.isNotEmpty) {
-      final bool plural = incorrect.length > 1;
+    final ProcessPool diffPool = ProcessPool(
+      processRunner: _processRunner,
+      printReport: namedReport('diff'),
+    );
+    final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
+    final Iterable<WorkerJob> failed = completedDiffs.where((WorkerJob job) {
+      return job.result.exitCode != 0;
+    });
+    reportDone();
+    if (failed.isNotEmpty) {
+      final bool plural = failed.length > 1;
       if (fixing) {
-        message('Fixed ${incorrect.length} GN file${plural ? 's' : ''}'
+        message('Fixed ${failed.length} GN file${plural ? 's' : ''}'
             ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
       } else {
-        error('Found ${incorrect.length} GN file${plural ? 's' : ''}'
-            ' which ${plural ? 'were' : 'was'} formatted incorrectly:');
-        incorrect.forEach(stderr.writeln);
+        error('Found ${failed.length} GN file${plural ? 's' : ''}'
+            ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+        stdout.writeln('To fix, run:');
+        stdout.writeln();
+        stdout.writeln('patch -p0 <<DONE');
+        for (final WorkerJob job in failed) {
+          stdout.write(job.result.output);
+        }
+        stdout.writeln('DONE');
+        stdout.writeln();
       }
     } else {
-      message('All GN files formatted correctly.');
+      message(
+        'Completed checking ${completedDiffs.length} GN files with no '
+        'formatting problems.'
+      );
     }
-    return incorrect.length;
+    return failed.length;
   }
 }
 
@@ -699,7 +775,7 @@ class PythonFormatChecker extends FormatChecker {
     yapfBin = File(path.join(
       repoDir.absolute.path,
       'tools',
-      'yapf.sh',
+      Platform.isWindows ? 'yapf.bat' : 'yapf.sh',
     ));
     _yapfStyle = File(path.join(
       repoDir.absolute.path,
@@ -961,8 +1037,7 @@ Future<int> main(List<String> arguments) async {
       allowed: formatCheckNames(),
       defaultsTo: formatCheckNames(),
       help: 'Specifies which checks will be performed. Defaults to all checks. '
-          'May be specified more than once to perform multiple types of checks. '
-          'On Windows, only whitespace and gn checks are currently supported.');
+          'May be specified more than once to perform multiple types of checks. ');
   parser.addFlag('verbose', help: 'Print verbose output.', defaultsTo: verbose);
 
   late final ArgResults options;

@@ -55,6 +55,7 @@ class Command {
 
   static final RegExp _pathRegex = RegExp(r'\S*clang/bin/clang');
   static final RegExp _argRegex = RegExp(r'-MF \S*');
+  static final RegExp _windowsRspRegex = RegExp(r'@ (\S*)');
 
   String? _tidyArgs;
 
@@ -63,6 +64,15 @@ class Command {
     return _tidyArgs ??= (() {
       String result = command;
       result = result.replaceAll(_pathRegex, '');
+      if (io.Platform.isWindows) {
+        final io.File rsp = io.File(path.join(
+          directory.path,
+          _windowsRspRegex.firstMatch(command)?.group(1) ?? '',
+        ));
+        if (rsp.existsSync()) {
+          result = rsp.readAsStringSync().replaceAll('/std:', '-std=');
+        }
+      }
       result = result.replaceAll(_argRegex, '');
       return result;
     })();
@@ -72,10 +82,20 @@ class Command {
 
   /// The command but with clang-tidy instead of clang.
   String get tidyPath {
-    return _tidyPath ??= _pathRegex.stringMatch(command)?.replaceAll(
-      'clang/bin/clang',
-      'clang/bin/clang-tidy',
-    ) ?? '';
+    String clangTidy() {
+      String clangTidy = _pathRegex.stringMatch(command)?.replaceAll(
+                'clang/bin/clang',
+                'clang/bin/clang-tidy',
+              ) ?? '';
+      if (io.Platform.isWindows) {
+        // On Windows [Process].run() sets the working dir after executing the process
+        clangTidy = path.join(directory.path, clangTidy);
+      }
+
+      return clangTidy;
+    }
+
+    return _tidyPath ??= clangTidy();
   }
 
   /// Whether this command operates on any of the files in `queries`.
