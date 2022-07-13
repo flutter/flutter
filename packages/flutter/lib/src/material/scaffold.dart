@@ -242,7 +242,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   // SNACKBAR API
 
-  /// Shows  a [SnackBar] across all registered [Scaffold]s.
+  /// Shows a [SnackBar] across all registered [Scaffold]s.
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
@@ -289,10 +289,43 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
-    setState(() {
-      _snackBars.addLast(controller);
-    });
-    _updateScaffolds();
+    try {
+      setState(() {
+        _snackBars.addLast(controller);
+      });
+      _updateScaffolds();
+    } catch (exception) {
+      assert (() {
+        if (exception is FlutterError) {
+          final String summary = exception.diagnostics.first.toDescription();
+          if (summary == 'setState() or markNeedsBuild() called during build.') {
+            final List<DiagnosticsNode> information = <DiagnosticsNode>[
+              ErrorSummary('The showSnackBar() method cannot be called during build.'),
+              ErrorDescription(
+                'The showSnackBar() method was called during build, which is '
+                'prohibited as showing snack bars requires updating state. Updating '
+                'state is not possible during build.',
+              ),
+              ErrorHint(
+                'Instead of calling showSnackBar() during build, call it directly '
+                'in your on tap (and related) callbacks. If you need to immediately '
+                'show a snack bar, make the call in initState() or '
+                'didChangeDependencies() instead. Otherwise, you can also schedule a '
+                'post-frame callback using SchedulerBinding.addPostFrameCallback to '
+                'show the snack bar after the current frame.',
+              ),
+              context.describeOwnershipChain(
+                'The ownership chain for the particular ScaffoldMessenger is',
+              ),
+            ];
+            throw FlutterError.fromParts(information);
+          }
+        }
+        return true;
+      }());
+      rethrow;
+    }
+
     return controller;
   }
 
@@ -1703,6 +1736,8 @@ class Scaffold extends StatefulWidget {
   ///  * [showBottomSheet], which displays a bottom sheet as a route that can
   ///    be dismissed with the scaffold's back button.
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
+  ///  * [BottomSheetThemeData], which can be used to customize the default
+  ///    bottom sheet property values when using a [BottomSheet].
   final Widget? bottomSheet;
 
   /// If true the [body] and the scaffold's floating widgets should size
@@ -2124,6 +2159,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         return false;
       }
 
+      // Stop the animation and unmount the dismissed sheets from the tree immediately,
+      // otherwise may cause duplicate GlobalKey assertion if the sheet sub-tree contains
+      // GlobalKey widgets.
+      if (_dismissedBottomSheets.isNotEmpty) {
+        final List<_StandardBottomSheet> sheets = List<_StandardBottomSheet>.of(_dismissedBottomSheets, growable: false);
+        for (final _StandardBottomSheet sheet in sheets) {
+          sheet.animationController.reset();
+        }
+        assert(_dismissedBottomSheets.isEmpty);
+      }
+
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) {
           return NotificationListener<DraggableScrollableNotification>(
@@ -2136,7 +2182,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             ),
           );
         },
-        true,
+        isPersistent: true,
         animationController: animationController,
       );
     }
@@ -2179,8 +2225,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   PersistentBottomSheetController<T> _buildBottomSheet<T>(
-    WidgetBuilder builder,
-    bool isPersistent, {
+    WidgetBuilder builder, {
+    required bool isPersistent,
     required AnimationController animationController,
     Color? backgroundColor,
     double? elevation,
@@ -2366,7 +2412,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(
         builder,
-        false,
+        isPersistent: false,
         animationController: controller,
         backgroundColor: backgroundColor,
         elevation: elevation,
@@ -3119,7 +3165,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       },
       child: Semantics(
         container: true,
-        onDismiss: close,
+        onDismiss: !widget.isPersistent ? close : null,
         child:  NotificationListener<DraggableScrollableNotification>(
           onNotification: extentChanged,
           child: BottomSheet(

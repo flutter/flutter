@@ -602,7 +602,7 @@ Your Flutter application is created using an older version of the Android
 embedding. It is being deprecated in favor of Android embedding v2. Follow the
 steps at
 
-https://flutter.dev/go/android-project-migration
+https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
 
 to migrate your project. You may also pass the --ignore-deprecation flag to
 ignore this check and continue with the deprecated v1 embedding. However,
@@ -734,7 +734,20 @@ class WebProject extends FlutterProjectPlatform {
       .childDirectory('web')
       .childFile('index.html');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {}
+  /// The .dart_tool/dartpad directory
+  Directory get dartpadToolDirectory => parent.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('dartpad');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
+    /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
+    /// See: https://github.com/dart-lang/dart-services/pull/874
+    await injectBuildTimePluginFiles(
+      parent,
+      destination: dartpadToolDirectory,
+      webPlatform: true,
+    );
+  }
 }
 
 /// The Fuchsia sub project.

@@ -5,16 +5,15 @@
 import 'template.dart';
 
 class DialogTemplate extends TokenTemplate {
-  const DialogTemplate(super.fileName, super.tokens)
-    : super(colorSchemePrefix: '_colors.',
-        textThemePrefix: '_textTheme.'
-      );
+  const DialogTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends DialogTheme {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends DialogTheme {
+  _${blockName}DefaultsM3(this.context)
     : super(
         alignment: Alignment.center,
         elevation: ${elevation("md.comp.dialog.container")},

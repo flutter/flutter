@@ -2582,6 +2582,45 @@ void main() {
     expect(isDrawerOpen, false);
     expect(isEndDrawerOpen, false);
   });
+
+  testWidgets('ScaffoldMessenger showSnackBar throws an intuitive error message if called during build', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('SnackBar')));
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    ));
+
+    final FlutterError error = tester.takeException() as FlutterError;
+    final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
+    expect(summary.toString(), 'The showSnackBar() method cannot be called during build.');
+  });
+
+  testWidgets('Persistent BottomSheet is not dismissible via a11y means', (WidgetTester tester) async {
+    final Key bottomSheetKey = UniqueKey();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        bottomSheet: Container(
+          key: bottomSheetKey,
+          height: 44,
+          color: Colors.blue,
+          child: const Text('BottomSheet'),
+        ),
+      ),
+    ));
+
+    expect(
+      tester.getSemantics(find.byKey(bottomSheetKey)),
+      // Having the redundant argument value makes the intent of the test clear.
+      // ignore: avoid_redundant_argument_values
+      matchesSemantics(label: 'BottomSheet', hasDismissAction: false),
+    );
+  });
 }
 
 class _GeometryListener extends StatefulWidget {

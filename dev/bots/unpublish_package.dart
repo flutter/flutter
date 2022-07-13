@@ -14,7 +14,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Platform;
-import 'dart:typed_data';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
@@ -209,8 +208,6 @@ class ProcessRunner {
     return utf8.decoder.convert(output).trim();
   }
 }
-
-typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> headers});
 
 class ArchiveUnpublisher {
   ArchiveUnpublisher(
