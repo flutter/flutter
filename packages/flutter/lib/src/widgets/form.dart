@@ -167,7 +167,7 @@ class FormState extends State<Form> {
     final Map<String, dynamic> data = <String, dynamic>{};
 
     for (final FormFieldState<dynamic> field in _fields) {
-      final MapEntry<String, dynamic>? entry = field.onSubmit();
+      final MapEntry<String, dynamic>? entry = field._onSubmit();
 
       if (entry != null) {
         data.addEntries(<MapEntry<String, dynamic>>[entry]);
@@ -398,7 +398,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   /// used by [FormState] to retrieve this [FormField] value
-  MapEntry<String, T?>? onSubmit() {
+  MapEntry<String, T?>? _onSubmit() {
     if (widget.submissionKey == null) {
       return null;
     }
