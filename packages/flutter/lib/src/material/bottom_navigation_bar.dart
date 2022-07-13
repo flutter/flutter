@@ -385,7 +385,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///    orientation.
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
-  /// This flag is controlling how [BottomNavigationBar] is going to use 
+  /// This flag is controlling how [BottomNavigationBar] is going to use
   /// the colors provided by the properties and the theme.
   final bool useLegacyColorScheme;
 
@@ -946,32 +946,32 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
     final TextStyle effectiveSelectedLabelStyle =
       _effectiveTextStyle(
-        widget.selectedLabelStyle 
+        widget.selectedLabelStyle
         ?? bottomTheme.selectedLabelStyle,
         widget.selectedFontSize,
       );
     final TextStyle effectiveUnselectedLabelStyle =
       _effectiveTextStyle(
-        widget.unselectedLabelStyle 
+        widget.unselectedLabelStyle
         ?? bottomTheme.unselectedLabelStyle,
         widget.unselectedFontSize,
       );
 
     final IconThemeData effectiveSelectedIconTheme =
       _effectiveIconTheme(
-        widget.selectedIconTheme 
+        widget.selectedIconTheme
         ?? bottomTheme.selectedIconTheme,
-        widget.selectedItemColor 
-        ?? bottomTheme.selectedItemColor 
+        widget.selectedItemColor
+        ?? bottomTheme.selectedItemColor
         ?? themeColor
       );
 
     final IconThemeData effectiveUnselectedIconTheme =
       _effectiveIconTheme(
-        widget.unselectedIconTheme 
+        widget.unselectedIconTheme
         ?? bottomTheme.unselectedIconTheme,
-        widget.unselectedItemColor 
-        ?? bottomTheme.unselectedItemColor 
+        widget.unselectedItemColor
+        ?? bottomTheme.unselectedItemColor
         ?? themeData.unselectedWidgetColor
       );
 
@@ -979,7 +979,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
        colorTween = ColorTween(
-          begin: widget.unselectedItemColor 
+          begin: widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.unselectedWidgetColor,
           end: widget.selectedItemColor
