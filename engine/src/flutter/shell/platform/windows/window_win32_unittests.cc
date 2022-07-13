@@ -273,5 +273,11 @@ TEST(MockWin32Window, KeyDownWithCtrlToggled) {
   SetKeyboardState(keyboard_state);
 }
 
+TEST(MockWin32Window, Paint) {
+  MockWin32Window window;
+  EXPECT_CALL(window, OnPaint()).Times(1);
+  window.InjectWindowMessage(WM_PAINT, 0, 0);
+}
+
 }  // namespace testing
 }  // namespace flutter
