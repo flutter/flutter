@@ -200,15 +200,17 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior with TapR
     final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(hitRegions);
     final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{};
 
-    // Remove any members of the same group as the hit regions from the
-    // outsideRegions so that groups act as a single region.
     for (final RenderTapRegion region in hitRegions) {
       if (region.groupId == null) {
         insideRegions.add(region);
         continue;
       }
-      outsideRegions.removeAll(_groupIdToRegions[region.groupId]!);
-      insideRegions.addAll(_groupIdToRegions[region.groupId]!);
+      // Remove any members of the same group as the hit regions from the
+      // outsideRegions and add all to the insideRegions so that groups act as a
+      // single region.
+      final Set<RenderTapRegion> groupRegions = _groupIdToRegions[region.groupId]!;
+      outsideRegions.removeAll(groupRegions);
+      insideRegions.addAll(groupRegions);
     }
 
     for (final RenderTapRegion region in outsideRegions) {
@@ -249,7 +251,8 @@ class TapRegion extends SingleChildRenderObjectWidget {
     this.onTapOutside,
     this.onTapInside,
     this.groupId,
-  });
+    String? debugLabel,
+  }) : debugLabel = kReleaseMode ? null : debugLabel;
 
   /// Whether or not this [TapRegion] is enabled as part of the composite region.
   final bool enabled;
@@ -272,6 +275,11 @@ class TapRegion extends SingleChildRenderObjectWidget {
   /// If the group id is null, then only this region is hit tested.
   final Object? groupId;
 
+  /// An optional debug label to help with debugging in debug mode.
+  ///
+  /// Will be null in release mode.
+  final String? debugLabel;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderTapRegion(
@@ -280,6 +288,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
       onTapOutside: onTapOutside,
       onTapInside: onTapInside,
       groupId: groupId,
+      debugLabel: debugLabel,
     );
   }
 
@@ -290,6 +299,17 @@ class TapRegion extends SingleChildRenderObjectWidget {
     renderObject.groupId = groupId;
     renderObject.onTapOutside = onTapOutside;
     renderObject.onTapInside = onTapInside;
+    if (kReleaseMode) {
+      renderObject.debugLabel = debugLabel;
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }
 }
 
@@ -307,9 +327,11 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
     this.onTapOutside,
     this.onTapInside,
     Object? groupId,
+    String? debugLabel,
   })  : _registry = registry,
         _enabled = enabled,
-        _groupId = groupId;
+        _groupId = groupId,
+        debugLabel = kReleaseMode ? null : debugLabel;
 
   bool _isRegistered = false;
 
@@ -320,6 +342,9 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   /// A callback to be invoked when a tap is detected inside of this
   /// [RenderTapRegion] or any region with the same [groupId].
   VoidCallback? onTapInside;
+
+  /// A label used in debug builds. Will be null in release builds.
+  String? debugLabel;
 
   /// Whether or not this region should participate in the composite region.
   bool get enabled => _enabled;
@@ -390,6 +415,7 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }

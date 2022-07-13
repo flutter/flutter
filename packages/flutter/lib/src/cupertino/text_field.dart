@@ -1249,6 +1249,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       context,
     ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
+    // The border needs to have the same group ID as the EditableText, so if the
+    // widget didn't provide one, use this state object as the group ID.
+    final Object tapRegionGroupId = widget.tapRegionGroupId ?? this;
+
     final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
@@ -1288,7 +1292,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
             onTapOutside: widget.onTapOutside,
-            tapRegionGroupId: widget.tapRegionGroupId,
+            tapRegionGroupId: tapRegionGroupId,
             inputFormatters: formatters,
             rendererIgnoresPointer: true,
             cursorWidth: widget.cursorWidth,
@@ -1327,18 +1331,22 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         _requestKeyboard();
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: Container(
-          decoration: effectiveDecoration,
-          color: !enabled && effectiveDecoration == null ? disabledColor : null,
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: Align(
-              alignment: Alignment(-1.0, _textAlignVertical.y),
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+      child: TapRegion(
+        groupId: tapRegionGroupId,
+        enabled: enabled,
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: Container(
+            decoration: effectiveDecoration,
+            color: !enabled && effectiveDecoration == null ? disabledColor : null,
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: Align(
+                alignment: Alignment(-1.0, _textAlignVertical.y),
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+              ),
             ),
           ),
         ),

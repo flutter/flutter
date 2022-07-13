@@ -1158,12 +1158,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
   // AutofillClient implementation end.
 
-  // The decoration needs to have the same group ID as the EditableText, so if the
-  // widget didn't provide one, use this state object as the group ID.
-  Object? get _tapRegionGroupId {
-    return widget.tapRegionGroupId ?? this;
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1199,6 +1193,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
     VoidCallback? handleDidGainAccessibilityFocus;
+    // The decoration needs to have the same group ID as the EditableText, so if
+    // the widget didn't provide one, use this state object as the group ID.
+    final Object tapRegionGroupId = widget.tapRegionGroupId ?? this;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -1305,7 +1302,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           onTapOutside: widget.onTapOutside,
-          tapRegionGroupId: _tapRegionGroupId,
+          tapRegionGroupId: tapRegionGroupId,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
@@ -1339,13 +1336,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget? child) {
-          if (focusNode.hasPrimaryFocus) {
-            child = TapRegion(
-              groupId: _tapRegionGroupId,
-              child: child,
-            );
-          }
-          return InputDecorator(
+          child = InputDecorator(
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
@@ -1356,6 +1347,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             expands: widget.expands,
             child: child,
           );
+          if (focusNode.hasPrimaryFocus) {
+            return TapRegion(
+              groupId: tapRegionGroupId,
+              child: child,
+            );
+          } else {
+            return child;
+          }
         },
         child: child,
       );

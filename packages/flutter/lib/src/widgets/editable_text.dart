@@ -3494,6 +3494,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
         if (kIsWeb) {
           widget.focusNode.unfocus();
         }
@@ -3501,8 +3502,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-      widget.focusNode.unfocus();
+        widget.focusNode.unfocus();
+        break;
     }
   }
 
@@ -3516,6 +3517,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       groupId: _tapRegionGroupId,
       enabled: widget.focusNode.hasPrimaryFocus,
       onTapOutside: widget.onTapOutside ?? _handleDefaultTapOutside,
+      debugLabel: kReleaseMode ? null : 'EditableText',
       child: MouseRegion(
         cursor: widget.mouseCursor ?? SystemMouseCursors.text,
         child: Actions(
@@ -3528,7 +3530,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             child: Focus(
               focusNode: widget.focusNode,
               includeSemantics: false,
-              debugLabel: 'EditableText',
+              debugLabel: kReleaseMode ? null : 'EditableText',
               child: Scrollable(
                 excludeFromSemantics: true,
                 axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
