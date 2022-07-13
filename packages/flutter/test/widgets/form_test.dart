@@ -84,6 +84,93 @@ void main() {
     await checkText('');
   });
 
+  testWidgets('submit retrieves all the values from child FormFields', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+     Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        submissionKey: 'firstKey',
+                        initialValue: 'firstValue',
+                      ),
+                      TextFormField(
+                        submissionKey: 'secondKey',
+                        initialValue: 'secondValue',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Map<String, dynamic> data = formKey.currentState!.submit();
+
+    expect(data.containsKey('firstKey'), isTrue);
+    expect(data.containsKey('secondKey'), isTrue);
+
+    expect(data['firstKey'], 'firstValue');
+    expect(data['secondKey'], 'secondValue');
+  });
+
+
+  testWidgets(
+    'submit retrieves only values from child formFields with non-null submissionkeys', 
+    (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+     Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        submissionKey: 'firstKey',
+                        initialValue: 'firstValue',
+                      ),
+                      TextFormField(
+                        initialValue: 'secondValue',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Map<String, dynamic> data = formKey.currentState!.submit();
+
+    expect(data.containsKey('firstKey'), isTrue);
+    expect(data.containsKey('secondKey'), isFalse);
+
+    expect(data['firstKey'], 'firstValue');
+  });
+
   testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? errorText(String? value) => '${value ?? ''}/error';
