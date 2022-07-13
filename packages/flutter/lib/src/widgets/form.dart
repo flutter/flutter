@@ -398,7 +398,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   /// Used by [FormState] to retrieve this [FormField] value.
-  MapEntry<String, T?>? onSubmit() {
+  MapEntry<String, T?>? _onSubmit() {
     if (widget.submissionKey == null) {
       return null;
     }
