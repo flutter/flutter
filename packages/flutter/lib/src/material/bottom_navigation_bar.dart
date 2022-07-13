@@ -455,7 +455,7 @@ class _BottomNavigationTile extends StatelessWidget {
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
 
     // The effective tool tip message to be shown on the BottomNavigationBarItem.
-    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
+    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip;
 
     // Defines the padding for the animating icons + labels.
     //
@@ -1004,7 +1004,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(debugCheckHasOverlay(context));
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
     final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout

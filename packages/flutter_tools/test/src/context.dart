@@ -44,7 +44,7 @@ import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
-export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
+export 'fake_process_manager.dart' show FakeCommand, FakeProcessManager, ProcessManager;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>()! as BufferLogger;
@@ -122,7 +122,6 @@ void testUsingContext(
           TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
-          final String flutterRoot = getFlutterRoot();
           return runZonedGuarded<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
@@ -134,7 +133,7 @@ void testUsingContext(
                   if (initializeFlutterRoot) {
                     // Provide a sane default for the flutterRoot directory. Individual
                     // tests can override this either in the test or during setup.
-                    Cache.flutterRoot ??= flutterRoot;
+                    Cache.flutterRoot ??= getFlutterRoot();
                   }
                   return await testMethod();
                 },

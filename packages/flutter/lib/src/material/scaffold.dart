@@ -84,6 +84,8 @@ enum _ScaffoldSlot {
 /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.0.dart **
 /// {@end-tool}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lytQi-slT5Y}
+///
 /// See also:
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
@@ -264,6 +266,23 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
   /// {@end-tool}
+  ///
+  /// ## Relative positioning of floating SnackBars
+  ///
+  /// A [SnackBar] with [SnackBar.behavior] set to [SnackBarBehavior.floating] is
+  /// positioned above the widgets provided to [Scaffold.floatingActionButton],
+  /// [Scaffold.persistentFooterButtons], and [Scaffold.bottomNavigationBar].
+  /// If some or all of these widgets take up enough space such that the SnackBar
+  /// would not be visible when positioned above them, an error will be thrown.
+  /// In this case, consider constraining the size of these widgets to allow room for
+  /// the SnackBar to be visible.
+  ///
+  /// {@tool dartpad}
+  /// Here is an example showing that a floating [SnackBar] appears above [Scaffold.floatingActionButton].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
+  /// {@end-tool}
+  ///
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
     assert(
       _scaffolds.isNotEmpty,
@@ -1151,6 +1170,32 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
+
+      assert((){
+        // Whether a floating SnackBar has been offsetted too high.
+        //
+        // To improve the developper experience, this assert is done after the call to positionChild.
+        // if we assert sooner the SnackBar is visible because its defaults position is (0,0) and
+        // it can cause confusion to the user as the error message states that the SnackBar is off screen.
+        if (isSnackBarFloating) {
+          final bool snackBarVisible = (snackBarYOffsetBase - snackBarSize.height) >= 0;
+          if (!snackBarVisible) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Floating SnackBar presented off screen.'),
+              ErrorDescription(
+                'A SnackBar with behavior property set to SnackBarBehavior.floating is fully '
+                'or partially off screen because some or all the widgets provided to '
+                'Scaffold.floatingActionButton, Scaffold.persistentFooterButtons and '
+                'Scaffold.bottomNavigationBar take up too much vertical space.\n'
+              ),
+              ErrorHint(
+                'Consider constraining the size of these widgets to allow room for the SnackBar to be visible.',
+              ),
+            ]);
+          }
+        }
+        return true;
+      }());
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -2029,7 +2074,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
-    if (_drawerOpened.value != isOpened) {
+    if (_drawerOpened.value != isOpened && _drawerKey.currentState != null) {
       setState(() {
         _drawerOpened.value = isOpened;
       });
@@ -2038,7 +2083,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    if (_endDrawerOpened.value != isOpened) {
+    if (_endDrawerOpened.value != isOpened && _endDrawerKey.currentState != null) {
       setState(() {
         _endDrawerOpened.value = isOpened;
       });
@@ -2578,6 +2623,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
     _scaffoldMessenger?._unregister(this);
+    _drawerOpened.dispose();
+    _endDrawerOpened.dispose();
     super.dispose();
   }
 

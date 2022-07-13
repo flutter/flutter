@@ -65,6 +65,7 @@ class BundleBuilder {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      usage: globals.flutterUsage,
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
@@ -184,6 +185,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
+                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
               );
               break;
           }

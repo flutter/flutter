@@ -77,7 +77,7 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// The default label style is [TextTheme.bodyText1] from the overall
+  /// The default label style is [TextTheme.bodyLarge] from the overall
   /// theme's [ThemeData.textTheme].
   //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
@@ -1167,7 +1167,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final ChipThemeData chipDefaults = widget.defaultProperties ?? ChipThemeData.fromDefaults(
       brightness: brightness,
       secondaryColor: brightness == Brightness.dark ? Colors.tealAccent[200]! : theme.primaryColor,
-      labelStyle: theme.textTheme.bodyText1!,
+      labelStyle: theme.textTheme.bodyLarge!,
     );
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final OutlinedBorder resolvedShape = _getShape(theme, chipTheme, chipDefaults);
@@ -1310,9 +1310,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         child: result,
       ),
     );
-    // if (height != null) {
-    //   result = SizedBox(height: height, child: result);
-    // }
     return Semantics(
       button: widget.tapEnabled,
       container: true,
@@ -1323,7 +1320,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 }
 
-/// Redirects the [position.dy] passed to [RenderBox.hitTest] to the vertical
+/// Redirects the [buttonRect.dy] passed to [RenderBox.hitTest] to the vertical
 /// center of the widget.
 ///
 /// The primary purpose of this widget is to allow padding around the [RawChip]

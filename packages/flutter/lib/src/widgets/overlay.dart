@@ -13,6 +13,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A place in an [Overlay] that can contain a widget.
 ///
 /// Overlay entries are inserted into an [Overlay] using the
@@ -278,6 +281,17 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// navigation and being able to insert widgets on top of the pages in an app.
 /// To simply display a stack of widgets, consider using [Stack] instead.
 ///
+/// An [Overlay] widget requires a [Directionality] widget to be in scope, so
+/// that it can resolve direction-sensitive coordinates of any
+/// [Positioned.directional] children.
+///
+/// {@tool dartpad}
+/// This example shows how to use the [Overlay] to highlight the [NavigationBar]
+/// destination.
+///
+/// ** See code in examples/api/lib/widgets/overlay/overlay.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [OverlayEntry], the class that is used for describing the overlay entries.
@@ -331,7 +345,7 @@ class Overlay extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// OverlayState overlay = Overlay.of(context);
+  /// OverlayState overlay = Overlay.of(context)!;
   /// ```
   ///
   /// If `rootOverlay` is set to true, the state from the furthest instance of

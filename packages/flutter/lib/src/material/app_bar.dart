@@ -25,6 +25,10 @@ import 'tabs.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late String _logoAsset;
+// double _myToolbarHeight = 250.0;
+
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 const double _kMaxTitleTextScaleFactor = 1.34; // TODO(perc): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
 
@@ -138,6 +142,14 @@ class _PreferredAppBarSize extends Size {
 /// color set to [ColorScheme.onPrimary].
 ///
 /// ** See code in examples/api/lib/material/app_bar/app_bar.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to listen to a nested Scrollable's scroll notification
+/// in a nested scroll view using the [notificationPredicate] property and use it
+/// to make [scrolledUnderElevation] take effect.
+///
+/// ** See code in examples/api/lib/material/app_bar/app_bar.3.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -311,10 +323,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   home: Scaffold(
   ///     appBar: AppBar(
   ///       title: SizedBox(
-  ///         height: toolbarHeight,
-  ///         child: Image.asset(logoAsset),
+  ///         height: _myToolbarHeight,
+  ///         child: Image.asset(_logoAsset),
   ///       ),
-  ///       toolbarHeight: toolbarHeight,
+  ///       toolbarHeight: _myToolbarHeight,
   ///     ),
   ///   ),
   /// )
@@ -331,6 +343,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The [actions] become the trailing component of the [NavigationToolbar] built
   /// by this widget. The height of each action is constrained to be no bigger
   /// than the [toolbarHeight].
+  ///
+  /// To avoid having the last action covered by the debug banner, you may want
+  /// to set the [MaterialApp.debugShowCheckedModeBanner] to false.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -724,7 +739,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If this property is null, then [AppBarTheme.toolbarTextStyle] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default
-  /// value is a copy of the overall theme's [TextTheme.bodyText2]
+  /// value is a copy of the overall theme's [TextTheme.bodyMedium]
   /// [TextStyle], with color set to the app bar's [foregroundColor].
   /// {@endtemplate}
   ///
@@ -740,7 +755,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If this property is null, then [AppBarTheme.titleTextStyle] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default
-  /// value is a copy of the overall theme's [TextTheme.headline6]
+  /// value is a copy of the overall theme's [TextTheme.titleLarge]
   /// [TextStyle], with color set to the app bar's [foregroundColor].
   /// {@endtemplate}
   ///
@@ -935,17 +950,17 @@ class _AppBarState extends State<AppBar> {
       ?? overallIconTheme;
 
     TextStyle? toolbarTextStyle = backwardsCompatibility
-      ? widget.textTheme?.bodyText2
-        ?? appBarTheme.textTheme?.bodyText2
-        ?? theme.primaryTextTheme.bodyText2
+      ? widget.textTheme?.bodyMedium
+        ?? appBarTheme.textTheme?.bodyMedium
+        ?? theme.primaryTextTheme.bodyMedium
       : widget.toolbarTextStyle
         ?? appBarTheme.toolbarTextStyle
         ?? defaults.toolbarTextStyle?.copyWith(color: foregroundColor);
 
     TextStyle? titleTextStyle = backwardsCompatibility
-      ? widget.textTheme?.headline6
-        ?? appBarTheme.textTheme?.headline6
-        ?? theme.primaryTextTheme.headline6
+      ? widget.textTheme?.titleLarge
+        ?? appBarTheme.textTheme?.titleLarge
+        ?? theme.primaryTextTheme.titleLarge
       : widget.titleTextStyle
         ?? appBarTheme.titleTextStyle
         ?? defaults.titleTextStyle?.copyWith(color: foregroundColor);
@@ -2308,10 +2323,10 @@ class _AppBarDefaultsM2 extends AppBarTheme {
   IconThemeData? get iconTheme => _theme.iconTheme;
 
   @override
-  TextStyle? get toolbarTextStyle => _theme.textTheme.bodyText2;
+  TextStyle? get toolbarTextStyle => _theme.textTheme.bodyMedium;
 
   @override
-  TextStyle? get titleTextStyle => _theme.textTheme.headline6;
+  TextStyle? get titleTextStyle => _theme.textTheme.titleLarge;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - AppBar
@@ -2359,7 +2374,7 @@ class _AppBarDefaultsM3 extends AppBarTheme {
   );
 
   @override
-  TextStyle? get toolbarTextStyle => _textTheme.bodyText2;
+  TextStyle? get toolbarTextStyle => _textTheme.bodyMedium;
 
   @override
   TextStyle? get titleTextStyle => _textTheme.titleLarge;

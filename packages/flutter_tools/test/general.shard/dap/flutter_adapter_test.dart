@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dap.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -96,6 +97,29 @@ void main() {
         // Ensure the VM's pid was not recorded.
         expect(adapter.pidsToTerminate, isNot(contains(123)));
       });
+
+      test('calls "app.stop" on terminateRequest', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        final Completer<void> launchCompleter = Completer<void>();
+        await adapter.launchRequest(MockRequest(), args, launchCompleter.complete);
+        await launchCompleter.future;
+
+        final Completer<void> terminateCompleter = Completer<void>();
+        await adapter.terminateRequest(MockRequest(), TerminateArguments(restart: false), terminateCompleter.complete);
+        await terminateCompleter.future;
+
+        expect(adapter.flutterRequests, contains('app.stop'));
+      });
     });
 
     group('attachRequest', () {
@@ -138,6 +162,28 @@ void main() {
 
         // Ensure the VM's pid was not recorded.
         expect(adapter.pidsToTerminate, isNot(contains(123)));
+      });
+
+      test('calls "app.detach" on terminateRequest', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+
+        final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
+          cwd: '/project',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        final Completer<void> attachCompleter = Completer<void>();
+        await adapter.attachRequest(MockRequest(), args, attachCompleter.complete);
+        await attachCompleter.future;
+
+        final Completer<void> terminateCompleter = Completer<void>();
+        await adapter.terminateRequest(MockRequest(), TerminateArguments(restart: false), terminateCompleter.complete);
+        await terminateCompleter.future;
+
+        expect(adapter.flutterRequests, contains('app.detach'));
       });
     });
 

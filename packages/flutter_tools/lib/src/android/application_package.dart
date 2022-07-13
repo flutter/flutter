@@ -139,7 +139,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     XmlDocument document;
     try {
       document = XmlDocument.parse(manifestString);
-    } on XmlParserException catch (exception) {
+    } on XmlException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
         manifestLocation = fileSystem.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');

@@ -9,7 +9,7 @@ import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
 /// A [FormField] that contains a [TextField].
 ///
@@ -125,6 +125,7 @@ class TextFormField extends FormField<String> {
     int? maxLength,
     ValueChanged<String>? onChanged,
     GestureTapCallback? onTap,
+    TapRegionCallback? onTapOutside,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
@@ -217,6 +218,7 @@ class TextFormField extends FormField<String> {
                maxLength: maxLength,
                onChanged: onChangedHandler,
                onTap: onTap,
+               onTapOutside: onTapOutside,
                onEditingComplete: onEditingComplete,
                onSubmitted: onFieldSubmitted,
                inputFormatters: inputFormatters,

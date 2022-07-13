@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:archive/archive.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 
 const String kDocRoot = 'dev/docs/doc';
 
@@ -63,10 +64,30 @@ Future<void> generateDocs(String url, String docName, String checkFile) async {
     }
   }
 
+  /// If object then copy files to old location if the archive is using the new location.
+  final bool exists = Directory('$kDocRoot/$docName/objectc_docs').existsSync();
+  if (exists) {
+    copyFolder(Directory('$kDocRoot/$docName/objectc_docs'), Directory('$kDocRoot/$docName/'));
+  }
+
   final File testFile = File('${output.path}/$checkFile');
   if (!testFile.existsSync()) {
     print('Expected file ${testFile.path} not found');
     exit(1);
   }
   print('$docName ready to go!');
+}
+
+/// Copies the files in a directory recursively to a new location.
+void copyFolder(Directory source, Directory destination) {
+  source.listSync()
+  .forEach((FileSystemEntity entity) {
+    if (entity is Directory) {
+      final Directory newDirectory = Directory(path.join(destination.absolute.path, path.basename(entity.path)));
+      newDirectory.createSync();
+      copyFolder(entity.absolute, newDirectory);
+    } else if (entity is File) {
+      entity.copySync(path.join(destination.path, path.basename(entity.path)));
+    }
+  });
 }
