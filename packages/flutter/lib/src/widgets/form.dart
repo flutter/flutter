@@ -161,8 +161,8 @@ class FormState extends State<Form> {
     }
   }
 
-  /// returns a [Map] with a {submissionKey: value} entry for every
-  /// child FormField that has a non-null submissionKey.
+  /// Returns a [Map] with a {submissionKey: value} entry for every
+  /// child [FormField] that has a non-null submissionKey.
   Map<String, dynamic> submit() {
     final Map<String, dynamic> data = <String, dynamic>{};
 
