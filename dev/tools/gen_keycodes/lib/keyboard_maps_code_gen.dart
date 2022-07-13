@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'data.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -37,9 +38,7 @@ bool _isDigit(String? char) {
 /// Generates the keyboard_maps.g.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
-  KeyboardMapsCodeGenerator(super.keyData, super.logicalData, this.specialKeyMapping);
-
-  final Map<String, String> specialKeyMapping;
+  KeyboardMapsCodeGenerator(super.keyData, super.logicalData);
 
   List<PhysicalKeyEntry> get _numpadKeyData {
     return keyData.entries.where((PhysicalKeyEntry entry) {
@@ -251,7 +250,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of iOS key label to logical keys for special keys.
   String get _iOSSpecialMap {
     final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
-    specialKeyMapping.forEach((String key, String logicalName) {
+    kIosSpecialKeyMapping.forEach((String key, String logicalName) {
       final LogicalKeyEntry entry = logicalData.entryByName(logicalName);
       lines.add(entry.value, "  '$key': LogicalKeyboardKey.${entry.constantName},");
     });

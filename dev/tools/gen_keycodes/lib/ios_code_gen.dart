@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
 import 'constants.dart';
+import 'data.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -28,9 +29,7 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for iOS, based on the information in the key
 /// data structure given to it.
 class IOSCodeGenerator extends PlatformCodeGenerator {
-  IOSCodeGenerator(super.keyData, super.logicalData, this.specialKeyMapping);
-
-  final Map<String, String> specialKeyMapping;
+  IOSCodeGenerator(super.keyData, super.logicalData);
 
   /// This generates the map of iOS key codes to physical keys.
   String get _scanCodeMap {
@@ -109,9 +108,9 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   String get _specialKeyMapping {
     final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
-    specialKeyMapping.forEach((String key, String logicalName) {
+    kIosSpecialKeyMapping.forEach((String key, String logicalName) {
       final int value = logicalData.entryByName(logicalName).value;
-      lines.add(value, '  $key : @(${toHex(value)}),');
+      lines.add(value, '  @"$key" : @(${toHex(value)}),');
     });
     return lines.join().trimRight();
   }

@@ -8,7 +8,6 @@ import 'dart:io' hide Platform;
 import 'package:args/args.dart';
 import 'package:gen_keycodes/android_code_gen.dart';
 import 'package:gen_keycodes/base_code_gen.dart';
-import 'package:gen_keycodes/data.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
 import 'package:gen_keycodes/ios_code_gen.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
@@ -224,7 +223,7 @@ Future<void> main(List<String> rawArguments) async {
       KeyboardKeysCodeGenerator(physicalData, logicalData));
   await generate('key maps',
       parsedArguments['maps'] as String,
-      KeyboardMapsCodeGenerator(physicalData, logicalData, kIosSpecialKeyMapping));
+      KeyboardMapsCodeGenerator(physicalData, logicalData));
   await generate('engine utils',
       path.join(PlatformCodeGenerator.engineRoot,
           'shell', 'platform', 'embedder', 'test_utils', 'key_codes.g.h'),
@@ -247,7 +246,6 @@ Future<void> main(List<String> rawArguments) async {
     'ios': IOSCodeGenerator(
       physicalData,
       logicalData,
-      kIosSpecialKeyMapping,
     ),
     'windows': WindowsCodeGenerator(
       physicalData,
