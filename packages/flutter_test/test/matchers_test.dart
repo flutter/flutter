@@ -4,6 +4,7 @@
 
 // flutter_ignore_for_file: golden_tag (see analyze.dart)
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart';
@@ -195,6 +196,38 @@ void main() {
 
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
+  });
+
+  test('matrixMoreOrLessEquals', () {
+    expect(
+      Matrix4.rotationZ(math.pi),
+      matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+       -1,  0, 0, 0,
+        0, -1, 0, 0,
+        0,  0, 1, 0,
+        0,  0, 0, 1,
+      ]))
+    );
+
+    expect(
+      Matrix4.rotationZ(math.pi),
+      matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+       -2,  0, 0, 0,
+        0, -2, 0, 0,
+        0,  0, 1, 0,
+        0,  0, 0, 1,
+      ]), epsilon: 2)
+    );
+
+    expect(
+      Matrix4.rotationZ(math.pi),
+      isNot(matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+       -2,  0, 0, 0,
+        0, -2, 0, 0,
+        0,  0, 1, 0,
+        0,  0, 0, 1,
+      ])))
+    );
   });
 
   test('rectMoreOrLessEquals', () {
