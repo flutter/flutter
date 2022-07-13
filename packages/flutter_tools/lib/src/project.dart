@@ -645,11 +645,14 @@ The detected reason was:
       return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `${appManifestFile.absolute.path}` file');
     }
     XmlDocument document;
+    final String parseExceptionMessage = 'Error parsing $appManifestFile '
+      'Please ensure that the android manifest is a valid XML document and try again.';
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
     } on XmlParserException {
-      throwToolExit('Error parsing $appManifestFile '
-                    'Please ensure that the android manifest is a valid XML document and try again.');
+      throwToolExit(parseExceptionMessage);
+    } on XmlTagException {
+      throwToolExit(parseExceptionMessage);
     } on FileSystemException {
       throwToolExit('Error reading $appManifestFile even though it exists. '
                     'Please ensure that you have read permission to this file and try again.');
