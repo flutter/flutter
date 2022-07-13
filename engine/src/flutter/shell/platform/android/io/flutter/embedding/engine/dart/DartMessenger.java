@@ -312,8 +312,10 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       int replyId,
       long messageData) {
     final DartMessengerTaskQueue taskQueue = (handlerInfo != null) ? handlerInfo.taskQueue : null;
+    TraceSection.beginAsyncSection("PlatformChannel ScheduleHandler on " + channel, replyId);
     Runnable myRunnable =
         () -> {
+          TraceSection.endAsyncSection("PlatformChannel ScheduleHandler on " + channel, replyId);
           TraceSection.begin("DartMessenger#handleMessageFromDart on " + channel);
           try {
             invokeHandler(handlerInfo, message, replyId);

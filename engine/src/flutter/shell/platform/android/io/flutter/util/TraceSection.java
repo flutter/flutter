@@ -8,18 +8,36 @@ import androidx.annotation.NonNull;
 import androidx.tracing.Trace;
 
 public final class TraceSection {
+  private static String cropSectionName(@NonNull String sectionName) {
+    return sectionName.length() < 124 ? sectionName : sectionName.substring(0, 124) + "...";
+  }
+
   /**
    * Wraps Trace.beginSection to ensure that the line length stays below 127 code units.
    *
    * @param sectionName The string to display as the section name in the trace.
    */
   public static void begin(@NonNull String sectionName) {
-    sectionName = sectionName.length() < 124 ? sectionName : sectionName.substring(0, 124) + "...";
-    Trace.beginSection(sectionName);
+    Trace.beginSection(cropSectionName(sectionName));
   }
 
   /** Wraps Trace.endSection. */
   public static void end() throws RuntimeException {
     Trace.endSection();
+  }
+
+  /**
+   * Wraps Trace.beginAsyncSection to ensure that the line length stays below 127 code units.
+   *
+   * @param sectionName The string to display as the section name in the trace.
+   * @param cookie Unique integer defining the section.
+   */
+  public static void beginAsyncSection(String sectionName, int cookie) {
+    Trace.beginAsyncSection(cropSectionName(sectionName), cookie);
+  }
+
+  /** Wraps Trace.endAsyncSection to ensure that the line length stays below 127 code units. */
+  public static void endAsyncSection(String sectionName, int cookie) {
+    Trace.endAsyncSection(cropSectionName(sectionName), cookie);
   }
 }
