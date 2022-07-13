@@ -11,12 +11,11 @@ import 'circle_border.dart';
 
 /// A border that fits an elliptical shape.
 ///
-/// Typically used with [ShapeDecoration] to draw an oval.
-/// Instead of centering the [Border] to a square, like [CircleBorder],
-/// it fills the available space, such that it touches the edges of the box.
-/// There is no difference between `CircleBorder(eccentricity = 1.0)` and `OvalBorder()`.
-/// [OvalBorder] works as an alias for users to discover this feature.
-///
+/// Typically used with [ShapeDecoration] to draw an oval. Instead of centering
+/// the [Border] to a square, like [CircleBorder], it fills the available space,
+/// such that it touches the edges of the box. There is no difference between
+/// `CircleBorder(eccentricity = 1.0)` and `OvalBorder()`. [OvalBorder] works as
+/// an alias for users to discover this feature.
 /// See also:
 ///
 ///  * [CircleBorder], which draws a circle, centering when the box is rectangular.

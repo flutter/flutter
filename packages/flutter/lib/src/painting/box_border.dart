@@ -624,16 +624,20 @@ class Border extends BoxBorder {
       return true;
     }());
     assert(() {
-      if (shape != BoxShape.rectangle) {
-        final String errorShape = (shape == BoxShape.circle) ? 'a circle' : 'an oval';
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only be drawn as $errorShape if it is uniform.'),
-          ErrorDescription('The following is not uniform:'),
-          if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
-          if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
-          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
-          if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
-        ]);
+      switch (shape) {
+        case BoxShape.circle:
+        case BoxShape.oval:
+          final String errorShape = (shape == BoxShape.circle) ? 'a circle' : 'an oval';
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('A Border can only be drawn as $errorShape if it is uniform.'),
+            ErrorDescription('The following is not uniform:'),
+            if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
+            if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
+            if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+            if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
+          ]);
+        case BoxShape.rectangle:
+          break;
       }
       return true;
     }());

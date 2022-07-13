@@ -18,9 +18,11 @@ import 'edge_insets.dart';
 /// When applied to a rectangular space, the border paints in the center of the
 /// rectangle.
 ///
-/// The [eccentricity] parameter allows the circle to be painted touching all
-/// the edges of a rectangle, becoming an oval. When applied to a
-/// squared space, [eccentricity] is ignored.
+/// The [eccentricity] parameter describes how much a circle will deform to
+/// fit the rectangle it is a border for. A value of zero implies no
+/// deformation (a circle touching at least two sides of the rectangle), a
+/// value of one implies full deformation (an oval touching all sides of the
+/// rectangle).
 ///
 /// See also:
 ///
@@ -32,7 +34,9 @@ class CircleBorder extends OutlinedBorder {
   ///
   /// The [side] argument must not be null.
   const CircleBorder({ super.side, this.eccentricity = 0 })
-      : assert(side != null && eccentricity != null && eccentricity >= 0.0 && eccentricity <= 1.0);
+      : assert(side != null),
+        assert(eccentricity >= 0.0, 'The eccentricity argument $eccentricity is not greater than or equal to zero.'),
+        assert(eccentricity <= 1.0, 'The eccentricity argument $eccentricity is not less than or equal to one.');
 
   /// Defines the ratio (0.0-1.0) from which the border will be drawn
   /// to the longest side of a rectangular box, touching all the sides.

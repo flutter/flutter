@@ -126,7 +126,7 @@ class BoxDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(shape == BoxShape.rectangle || borderRadius == null); // Can't have a border radius if you're a circle or oval.
+    assert(shape == BoxShape.rectangle || borderRadius == null); // Can't have a border radius if you're a circle or an oval.
     return super.debugAssertIsValid();
   }
 
@@ -382,7 +382,7 @@ class BoxDecoration extends Decoration {
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
       case BoxShape.oval:
-        final RRect bounds = RRect.fromRectAndRadius(Offset.zero & size,Radius.elliptical(size.width, size.height));
+        final RRect bounds = RRect.fromRectAndRadius(Offset.zero & size, Radius.elliptical(size.width, size.height));
         return bounds.contains(position);
     }
   }
