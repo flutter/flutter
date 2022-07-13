@@ -48,7 +48,7 @@ static void BM_PlatformMessageResponseDartComplete(benchmark::State& state) {
 
       auto message = fml::MakeRefCounted<PlatformMessageResponseDart>(
           tonic::DartPersistentValue(isolate->get(), closure),
-          thread_host.ui_thread->GetTaskRunner());
+          thread_host.ui_thread->GetTaskRunner(), "");
 
       message->Complete(std::move(mapping));
 

@@ -97,7 +97,7 @@ Dart_Handle SendPlatformMessage(Dart_Handle window,
   if (!Dart_IsNull(callback)) {
     response = fml::MakeRefCounted<PlatformMessageResponseDart>(
         tonic::DartPersistentValue(dart_state, callback),
-        dart_state->GetTaskRunners().GetUITaskRunner());
+        dart_state->GetTaskRunners().GetUITaskRunner(), name);
   }
   if (Dart_IsNull(data_handle)) {
     dart_state->platform_configuration()->client()->HandlePlatformMessage(
