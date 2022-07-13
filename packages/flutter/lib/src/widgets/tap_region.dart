@@ -87,9 +87,9 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context,
-      RenderProxyBoxWithHitTestBehavior renderObject,
-      ) {}
+    BuildContext context,
+    RenderProxyBoxWithHitTestBehavior renderObject,
+  ) {}
 }
 
 /// A render object that provides notification of a tap inside or outside of a
@@ -198,18 +198,24 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior with TapR
     final Set<RenderTapRegion> hitRegions =
     _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
     final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(hitRegions);
+    final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{};
 
     // Remove any members of the same group as the hit regions from the
     // outsideRegions so that groups act as a single region.
     for (final RenderTapRegion region in hitRegions) {
       if (region.groupId == null) {
+        insideRegions.add(region);
         continue;
       }
       outsideRegions.removeAll(_groupIdToRegions[region.groupId]!);
+      insideRegions.addAll(_groupIdToRegions[region.groupId]!);
     }
 
     for (final RenderTapRegion region in outsideRegions) {
       region.onTapOutside?.call();
+    }
+    for (final RenderTapRegion region in insideRegions) {
+      region.onTapInside?.call();
     }
   }
 
@@ -241,6 +247,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     required super.child,
     this.enabled = true,
     this.onTapOutside,
+    this.onTapInside,
     this.groupId,
   });
 
@@ -248,13 +255,21 @@ class TapRegion extends SingleChildRenderObjectWidget {
   final bool enabled;
 
   /// A callback to be invoked when a tap is detected outside of this
-  /// [RenderTapRegion].
+  /// [RenderTapRegion] and any other region with the same [groupId], if any.
   final VoidCallback? onTapOutside;
+
+  /// A callback to be invoked when a tap is detected inside of this
+  /// [RenderTapRegion], or any other tap region with the same [groupId], if
+  /// any.
+  final VoidCallback? onTapInside;
 
   /// An optional group ID that groups [TapRegion]s together so that they
   /// operate as one region. If any member of a group is hit by a particular
   /// tap, then the [onTapOutside] will not be called for any members of the
-  /// group.
+  /// group. If any member of the group is hit, then all members will have their
+  /// [onTapInside] called.
+  ///
+  /// If the group id is null, then only this region is hit tested.
   final Object? groupId;
 
   @override
@@ -263,6 +278,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
       onTapOutside: onTapOutside,
+      onTapInside: onTapInside,
       groupId: groupId,
     );
   }
@@ -273,6 +289,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     renderObject.enabled = enabled;
     renderObject.groupId = groupId;
     renderObject.onTapOutside = onTapOutside;
+    renderObject.onTapInside = onTapInside;
   }
 }
 
@@ -288,6 +305,7 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
     TapRegionRegistry? registry,
     bool enabled = true,
     this.onTapOutside,
+    this.onTapInside,
     Object? groupId,
   })  : _registry = registry,
         _enabled = enabled,
@@ -296,8 +314,12 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   bool _isRegistered = false;
 
   /// A callback to be invoked when a tap is detected outside of this
-  /// [RenderTapRegion].
+  /// [RenderTapRegion] and all other regions with the same [groupId].
   VoidCallback? onTapOutside;
+
+  /// A callback to be invoked when a tap is detected inside of this
+  /// [RenderTapRegion] or any region with the same [groupId].
+  VoidCallback? onTapInside;
 
   /// Whether or not this region should participate in the composite region.
   bool get enabled => _enabled;
