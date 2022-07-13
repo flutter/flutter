@@ -96,6 +96,9 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
   // Called when a resize occurs.
   virtual void OnResize(UINT width, UINT height) = 0;
 
+  // Called when a paint is requested.
+  virtual void OnPaint() = 0;
+
   // Called when the pointer moves within the
   // window bounds.
   virtual void OnPointerMove(double x,

@@ -37,6 +37,7 @@ class MockWin32Window : public WindowWin32 {
 
   MOCK_METHOD1(OnDpiScale, void(unsigned int));
   MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
+  MOCK_METHOD0(OnPaint, void());
   MOCK_METHOD4(OnPointerMove,
                void(double, double, FlutterPointerDeviceKind, int32_t));
   MOCK_METHOD5(OnPointerDown,
