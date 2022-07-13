@@ -573,6 +573,7 @@ void main() {
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
+              onTapOutside: () {},
             ),
           );
         }).toList(),
@@ -603,6 +604,7 @@ void main() {
             color: Colors.green,
             child: TextField(
               focusNode: focusNodes[index],
+              onTapOutside: () {},
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -636,6 +638,7 @@ void main() {
             color: Colors.green,
             child: TextField(
               focusNode: focusNode,
+              onTapOutside: () {},
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -669,6 +672,7 @@ void main() {
             color: Colors.green,
             child: TextField(
               focusNode: focusNode,
+              onTapOutside: () {},
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -703,6 +707,7 @@ void main() {
               color: Colors.green,
               child: TextField(
                 focusNode: focusNodes[index],
+                onTapOutside: () {},
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

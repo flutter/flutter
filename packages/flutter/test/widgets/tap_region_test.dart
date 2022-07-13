@@ -1,0 +1,94 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('TapRegionSurface detects outside taps', (WidgetTester tester) async {
+    final Set<String> clickedOutside = <String>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  const Text('Outside'),
+                  TapRegion(
+                    onTapOutside: () {
+                      clickedOutside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: () {
+                      clickedOutside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: () {
+                      clickedOutside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(clickedOutside, isEmpty);
+
+    await click(find.text('No Group'));
+    expect(clickedOutside, unorderedEquals(<String>{
+      'Group 1 A',
+      'Group 1 B',
+    }));
+    clickedOutside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(clickedOutside, equals(<String>{
+      'No Group',
+    }));
+    clickedOutside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(clickedOutside, equals(<String>{
+      'No Group',
+    }));
+    clickedOutside.clear();
+
+    await click(find.text('Outside'));
+    expect(clickedOutside, unorderedEquals(<String>{
+      'No Group',
+      'Group 1 A',
+      'Group 1 B',
+    }));
+    clickedOutside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(clickedOutside, isEmpty);
+  });
+}

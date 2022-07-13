@@ -2831,6 +2831,7 @@ void main() {
               fontFamily: 'Ahem',
               fontSize: 10.0,
             ),
+            onTapOutside: () {},
           ),
         ),
       ),
@@ -3124,7 +3125,10 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
-            child: CupertinoTextField(controller: controller),
+            child: CupertinoTextField(
+              controller: controller,
+              onTapOutside: () {},
+            ),
           ),
         ),
       );

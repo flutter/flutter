@@ -20,6 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -235,6 +236,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
+    Object? tapRegionGroupId,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -268,6 +270,7 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
+      tapRegionGroupId: tapRegionGroupId,
     );
   }
 
@@ -611,12 +614,14 @@ class SelectionOverlay {
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
     Offset? toolbarLocation,
+    Object? tapRegionGroupId,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndpoints = selectionEndpoints,
-       _toolbarLocation = toolbarLocation {
+       _toolbarLocation = toolbarLocation,
+       _tapRegionGroupId = tapRegionGroupId {
     final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
     assert(
       overlay != null,
@@ -827,6 +832,17 @@ class SelectionOverlay {
     _markNeedsBuild();
   }
 
+  /// The [TapRegion] group ID that the toolbar overlay should belong to.
+  Object? get tapRegionGroupId => _tapRegionGroupId;
+  Object? _tapRegionGroupId;
+  set tapRegionGroupId(Object? value) {
+    if (_tapRegionGroupId == value) {
+      return;
+    }
+    _tapRegionGroupId = value;
+    _markNeedsBuild();
+  }
+
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
@@ -1028,6 +1044,7 @@ class SelectionOverlay {
         visibility: toolbarVisible,
         selectionDelegate: selectionDelegate,
         clipboardStatus: clipboardStatus,
+        tapRegionGroupId: tapRegionGroupId,
       ),
     );
   }
@@ -1047,6 +1064,7 @@ class _SelectionToolbarOverlay extends StatefulWidget {
     required this.selectionEndpoints,
     required this.selectionDelegate,
     required this.clipboardStatus,
+    required this.tapRegionGroupId,
   });
 
   final double preferredLineHeight;
@@ -1059,6 +1077,7 @@ class _SelectionToolbarOverlay extends StatefulWidget {
   final List<TextSelectionPoint> selectionEndpoints;
   final TextSelectionDelegate? selectionDelegate;
   final ClipboardStatusNotifier? clipboardStatus;
+  final Object? tapRegionGroupId;
 
   @override
   _SelectionToolbarOverlayState createState() => _SelectionToolbarOverlayState();
@@ -1106,25 +1125,28 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: CompositedTransformFollower(
-        link: widget.layerLink,
-        showWhenUnlinked: false,
-        offset: -widget.editingRegion.topLeft,
-        child: Builder(
-          builder: (BuildContext context) {
-            return widget.selectionControls!.buildToolbar(
-              context,
-              widget.editingRegion,
-              widget.preferredLineHeight,
-              widget.midpoint,
-              widget.selectionEndpoints,
-              widget.selectionDelegate!,
-              widget.clipboardStatus,
-              widget.toolbarLocation,
-            );
-          },
+    return TapRegion(
+      groupId: widget.tapRegionGroupId,
+      child: FadeTransition(
+        opacity: _opacity,
+        child: CompositedTransformFollower(
+          link: widget.layerLink,
+          showWhenUnlinked: false,
+          offset: -widget.editingRegion.topLeft,
+          child: Builder(
+            builder: (BuildContext context) {
+              return widget.selectionControls!.buildToolbar(
+                context,
+                widget.editingRegion,
+                widget.preferredLineHeight,
+                widget.midpoint,
+                widget.selectionEndpoints,
+                widget.selectionDelegate!,
+                widget.clipboardStatus,
+                widget.toolbarLocation,
+              );
+            },
+          ),
         ),
       ),
     );

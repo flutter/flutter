@@ -32,6 +32,7 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'shortcuts.dart';
+import 'tap_region.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -608,6 +609,8 @@ class EditableText extends StatefulWidget {
     this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
+    this.onTapOutside,
+    this.tapRegionGroupId,
     List<TextInputFormatter>? inputFormatters,
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
@@ -1212,6 +1215,31 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.SelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
+
+  /// Called for each tap that occurs outside of the editable text when the text
+  /// field is focused.
+  ///
+  /// If this is null, then, on desktop platforms and web browsers, this will
+  /// execute [FocusNode.unfocus] on the [focusNode] for this editable text. It
+  /// will do nothing by default on mobile applications.
+  ///
+  /// See also:
+  ///
+  ///  * [tapRegionGroupId] if you would like to add this [EditableText] to a
+  ///    [TapRegion] group.
+  final VoidCallback? onTapOutside;
+
+  /// An optional group identifier for the [TapRegion] that surrounds the
+  /// [EditableText].
+  ///
+  /// This group ID will also be used for tap region in the popup toolbars for
+  /// this [EditableText].
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion.groupId] for a description of how the group ID is used and
+  ///    what it does.
+  final Object? tapRegionGroupId;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
@@ -2361,6 +2389,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
+  // The overlay needs to have the same group ID as this EditableText, so if the
+  // widget didn't provide one, use this state object as the group ID.
+  Object? get _tapRegionGroupId {
+    return widget.tapRegionGroupId ?? this;
+  }
+
   // Finds the closest scroll offset to the current scroll offset that fully
   // reveals the given caret rect. If the given rect's main axis extent is too
   // large to be fully revealed in `renderEditable`, it will be centered along
@@ -2576,6 +2610,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
+      tapRegionGroupId: _tapRegionGroupId,
     );
   }
 
@@ -3452,102 +3487,126 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
   };
 
+  // The default behavior if widget.onTapOutside is null.
+  void _handleDefaultTapOutside() {
+    /// The focus dropping behavior is only present on desktop platforms
+    /// and mobile browsers.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        if (kIsWeb) {
+          widget.focusNode.unfocus();
+        }
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+      widget.focusNode.unfocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    return MouseRegion(
-      cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-      child: Actions(
-        actions: _actions,
-        child: _TextEditingHistory(
-          controller: widget.controller,
-          onTriggered: (TextEditingValue value) {
-            userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
-          },
-          child: Focus(
-            focusNode: widget.focusNode,
-            includeSemantics: false,
-            debugLabel: 'EditableText',
-            child: Scrollable(
-              excludeFromSemantics: true,
-              axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-              controller: _scrollController,
-              physics: widget.scrollPhysics,
-              dragStartBehavior: widget.dragStartBehavior,
-              restorationId: widget.restorationId,
-              // If a ScrollBehavior is not provided, only apply scrollbars when
-              // multiline. The overscroll indicator should not be applied in
-              // either case, glowing or stretching.
-              scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-                scrollbars: _isMultiline,
-                overscroll: false,
-              ),
-              viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                return CompositedTransformTarget(
-                  link: _toolbarLayerLink,
-                  child: Semantics(
-                    onCopy: _semanticsOnCopy(controls),
-                    onCut: _semanticsOnCut(controls),
-                    onPaste: _semanticsOnPaste(controls),
-                    child: _ScribbleFocusable(
-                      focusNode: widget.focusNode,
-                      editableKey: _editableKey,
-                      enabled: widget.scribbleEnabled,
-                      updateSelectionRects: () {
-                        _openInputConnection();
-                        _updateSelectionRects(force: true);
-                      },
-                      child: _Editable(
-                        key: _editableKey,
-                        startHandleLayerLink: _startHandleLayerLink,
-                        endHandleLayerLink: _endHandleLayerLink,
-                        inlineSpan: buildTextSpan(),
-                        value: _value,
-                        cursorColor: _cursorColor,
-                        backgroundCursorColor: widget.backgroundCursorColor,
-                        showCursor: EditableText.debugDeterministicCursor
-                            ? ValueNotifier<bool>(widget.showCursor)
-                            : _cursorVisibilityNotifier,
-                        forceLine: widget.forceLine,
-                        readOnly: widget.readOnly,
-                        hasFocus: _hasFocus,
-                        maxLines: widget.maxLines,
-                        minLines: widget.minLines,
-                        expands: widget.expands,
-                        strutStyle: widget.strutStyle,
-                        selectionColor: widget.selectionColor,
-                        textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                        textAlign: widget.textAlign,
-                        textDirection: _textDirection,
-                        locale: widget.locale,
-                        textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                        textWidthBasis: widget.textWidthBasis,
-                        obscuringCharacter: widget.obscuringCharacter,
-                        obscureText: widget.obscureText,
-                        offset: offset,
-                        onCaretChanged: _handleCaretChanged,
-                        rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                        cursorWidth: widget.cursorWidth,
-                        cursorHeight: widget.cursorHeight,
-                        cursorRadius: widget.cursorRadius,
-                        cursorOffset: widget.cursorOffset ?? Offset.zero,
-                        selectionHeightStyle: widget.selectionHeightStyle,
-                        selectionWidthStyle: widget.selectionWidthStyle,
-                        paintCursorAboveText: widget.paintCursorAboveText,
-                        enableInteractiveSelection: widget._userSelectionEnabled,
-                        textSelectionDelegate: this,
-                        devicePixelRatio: _devicePixelRatio,
-                        promptRectRange: _currentPromptRectRange,
-                        promptRectColor: widget.autocorrectionTextRectColor,
-                        clipBehavior: widget.clipBehavior,
+    return TapRegion(
+      groupId: _tapRegionGroupId,
+      enabled: widget.focusNode.hasPrimaryFocus,
+      onTapOutside: widget.onTapOutside ?? _handleDefaultTapOutside,
+      child: MouseRegion(
+        cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+        child: Actions(
+          actions: _actions,
+          child: _TextEditingHistory(
+            controller: widget.controller,
+            onTriggered: (TextEditingValue value) {
+              userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+            },
+            child: Focus(
+              focusNode: widget.focusNode,
+              includeSemantics: false,
+              debugLabel: 'EditableText',
+              child: Scrollable(
+                excludeFromSemantics: true,
+                axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                controller: _scrollController,
+                physics: widget.scrollPhysics,
+                dragStartBehavior: widget.dragStartBehavior,
+                restorationId: widget.restorationId,
+                // If a ScrollBehavior is not provided, only apply scrollbars when
+                // multiline. The overscroll indicator should not be applied in
+                // either case, glowing or stretching.
+                scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                  scrollbars: _isMultiline,
+                  overscroll: false,
+                ),
+                viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                  return CompositedTransformTarget(
+                    link: _toolbarLayerLink,
+                    child: Semantics(
+                      onCopy: _semanticsOnCopy(controls),
+                      onCut: _semanticsOnCut(controls),
+                      onPaste: _semanticsOnPaste(controls),
+                      child: _ScribbleFocusable(
+                        focusNode: widget.focusNode,
+                        editableKey: _editableKey,
+                        enabled: widget.scribbleEnabled,
+                        updateSelectionRects: () {
+                          _openInputConnection();
+                          _updateSelectionRects(force: true);
+                        },
+                        child: _Editable(
+                          key: _editableKey,
+                          startHandleLayerLink: _startHandleLayerLink,
+                          endHandleLayerLink: _endHandleLayerLink,
+                          inlineSpan: buildTextSpan(),
+                          value: _value,
+                          cursorColor: _cursorColor,
+                          backgroundCursorColor: widget.backgroundCursorColor,
+                          showCursor: EditableText.debugDeterministicCursor
+                              ? ValueNotifier<bool>(widget.showCursor)
+                              : _cursorVisibilityNotifier,
+                          forceLine: widget.forceLine,
+                          readOnly: widget.readOnly,
+                          hasFocus: _hasFocus,
+                          maxLines: widget.maxLines,
+                          minLines: widget.minLines,
+                          expands: widget.expands,
+                          strutStyle: widget.strutStyle,
+                          selectionColor: widget.selectionColor,
+                          textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                          textAlign: widget.textAlign,
+                          textDirection: _textDirection,
+                          locale: widget.locale,
+                          textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                          textWidthBasis: widget.textWidthBasis,
+                          obscuringCharacter: widget.obscuringCharacter,
+                          obscureText: widget.obscureText,
+                          offset: offset,
+                          onCaretChanged: _handleCaretChanged,
+                          rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                          cursorWidth: widget.cursorWidth,
+                          cursorHeight: widget.cursorHeight,
+                          cursorRadius: widget.cursorRadius,
+                          cursorOffset: widget.cursorOffset ?? Offset.zero,
+                          selectionHeightStyle: widget.selectionHeightStyle,
+                          selectionWidthStyle: widget.selectionWidthStyle,
+                          paintCursorAboveText: widget.paintCursorAboveText,
+                          enableInteractiveSelection: widget._userSelectionEnabled,
+                          textSelectionDelegate: this,
+                          devicePixelRatio: _devicePixelRatio,
+                          promptRectRange: _currentPromptRectRange,
+                          promptRectColor: widget.autocorrectionTextRectColor,
+                          clipBehavior: widget.clipBehavior,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),

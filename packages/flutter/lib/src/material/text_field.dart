@@ -320,6 +320,8 @@ class TextField extends StatefulWidget {
     bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
+    this.onTapOutside,
+    this.tapRegionGroupId,
     this.mouseCursor,
     this.buildCounter,
     this.scrollController,
@@ -674,6 +676,35 @@ class TextField extends StatefulWidget {
   /// text field's internal gesture detector, use a [Listener].
   /// {@endtemplate}
   final GestureTapCallback? onTap;
+
+  /// {@template flutter.material.textfield.onTapOutside}
+  /// Called for each tap that occurs outside of the text field when the text
+  /// field is focused.
+  ///
+  /// If this is null, then, on desktop platforms and web browsers, this will
+  /// execute [FocusNode.unfocus] on the [focusNode] for this text field. It
+  /// will do nothing by default on mobile applications.
+  ///
+  /// See also:
+  ///
+  ///  * [tapRegionGroupId] if you would like to add this [TextField] to a
+  ///    particular [TapRegion] group.
+  /// {@endtemplate}
+  final GestureTapCallback? onTapOutside;
+
+  /// {@template flutter.material.textfield.tapRegionGroupId}
+  /// An optional group identifier for the [TapRegion] that surrounds the
+  /// [TextField].
+  ///
+  /// This group ID will also be used for tap region in the popup toolbars for
+  /// this text field.
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion.groupId] for a description of how the group ID is used and
+  ///    what it does.
+  /// {@endtemplate}
+  final Object? tapRegionGroupId;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -1127,6 +1158,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
   // AutofillClient implementation end.
 
+  // The decoration needs to have the same group ID as the EditableText, so if the
+  // widget didn't provide one, use this state object as the group ID.
+  Object? get _tapRegionGroupId {
+    return widget.tapRegionGroupId ?? this;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1267,6 +1304,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
+          onTapOutside: widget.onTapOutside,
+          tapRegionGroupId: _tapRegionGroupId,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
@@ -1300,6 +1339,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget? child) {
+          if (focusNode.hasPrimaryFocus) {
+            child = TapRegion(
+              groupId: _tapRegionGroupId,
+              child: child,
+            );
+          }
           return InputDecorator(
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
@@ -1334,34 +1379,31 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    return FocusTrapArea(
-      focusNode: focusNode,
-      child: MouseRegion(
-        cursor: effectiveMouseCursor,
-        onEnter: (PointerEnterEvent event) => _handleHover(true),
-        onExit: (PointerExitEvent event) => _handleHover(false),
-        child: IgnorePointer(
-          ignoring: !_isEnabled,
-          child: AnimatedBuilder(
-            animation: controller, // changes the _currentLength
-            builder: (BuildContext context, Widget? child) {
-              return Semantics(
-                maxValueLength: semanticsMaxValueLength,
-                currentValueLength: _currentLength,
-                onTap: widget.readOnly ? null : () {
-                  if (!_effectiveController.selection.isValid) {
-                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                  }
-                  _requestKeyboard();
-                },
-                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-                child: child,
-              );
-            },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
+    return MouseRegion(
+      cursor: effectiveMouseCursor,
+      onEnter: (PointerEnterEvent event) => _handleHover(true),
+      onExit: (PointerExitEvent event) => _handleHover(false),
+      child: IgnorePointer(
+        ignoring: !_isEnabled,
+        child: AnimatedBuilder(
+          animation: controller, // changes the _currentLength
+          builder: (BuildContext context, Widget? child) {
+            return Semantics(
+              maxValueLength: semanticsMaxValueLength,
+              currentValueLength: _currentLength,
+              onTap: widget.readOnly ? null : () {
+                if (!_effectiveController.selection.isValid) {
+                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                }
+                _requestKeyboard();
+              },
+              onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
               child: child,
-            ),
+            );
+          },
+          child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: child,
           ),
         ),
       ),

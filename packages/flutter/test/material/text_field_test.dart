@@ -9744,7 +9744,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: TextField(controller: controller),
+          child: TextField(
+            controller: controller,
+            onTapOutside: () {},
+          ),
         ),
       ),
     );
@@ -9935,7 +9938,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: TextField(controller: controller),
+          child: TextField(
+            controller: controller,
+            onTapOutside: () {},
+          ),
         ),
       ),
     );

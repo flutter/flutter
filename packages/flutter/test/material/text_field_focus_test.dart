@@ -168,6 +168,7 @@ void main() {
             children: <Widget>[
               TextField(
                 focusNode: focusNode,
+                onTapOutside: () {},
               ),
               Container(
                 height: 1000.0,
@@ -211,6 +212,7 @@ void main() {
                 decoration: InputDecoration(
                   prefixText: prefix,
                 ),
+                onTapOutside: () {},
               ),
               Container(
                 height: 1000.0,
@@ -490,8 +492,8 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
-    final FocusNode focusNodeA = FocusNode();
-    final FocusNode focusNodeB = FocusNode();
+    final FocusNode focusNodeA = FocusNode(debugLabel: 'A');
+    final FocusNode focusNodeB = FocusNode(debugLabel: 'B');
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -518,30 +520,33 @@ void main() {
     );
     // Tab over to the 3rd text field.
     for (int i = 0; i < 3; i += 1) {
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.up();
+      await gesture.removePointer();
     }
 
     expect(focusNodeA.hasFocus, true);
     expect(focusNodeB.hasFocus, false);
 
     // Click on the container to not hit either text field.
-    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(key)), kind: PointerDeviceKind.mouse);
+    await click(find.byKey(key));
     await tester.pump();
-    await tester.pumpAndSettle();
-    await down2.up();
-    await down2.removePointer();
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, false);
 
     // Second text field can still gain focus.
 
-    final TestGesture down3 = await tester.startGesture(tester.getCenter(find.byType(TextField).last), kind: PointerDeviceKind.mouse);
+    await click(find.byType(TextField).last);
     await tester.pump();
-    await tester.pumpAndSettle();
-    await down3.up();
-    await down3.removePointer();
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
