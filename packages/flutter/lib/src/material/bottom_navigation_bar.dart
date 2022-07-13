@@ -138,7 +138,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and
-  /// [unselectedItemColor] to style the label color.
+  /// [unselectedItemColor].
   ///
   /// If custom [IconThemeData]s are used, you must provide both
   /// [selectedIconTheme] and [unselectedIconTheme], and both
@@ -147,7 +147,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// If set, [IconThemeData]s take precedence over [iconSize],
   /// [selectedItemColor] and [unselectedItemColor].
   ///
-  /// If set, [IconThemeData]s take precedence over [TextStyle.color],
+  /// If set, [IconThemeData]s take precedence over [selectedItemColor] and [unselectedItemColor],
   /// for the icons only
   ///
   /// If both [selectedLabelStyle].fontSize and [selectedFontSize] are set,
@@ -390,7 +390,8 @@ class _BottomNavigationTile extends StatelessWidget {
     this.animation,
     this.iconSize, {
     this.onTap,
-    this.itemColorTween,
+    this.labelColorTween,
+    this.iconColorTween,
     this.flex,
     this.selected = false,
     required this.selectedLabelStyle,
@@ -407,16 +408,17 @@ class _BottomNavigationTile extends StatelessWidget {
        assert(item != null),
        assert(animation != null),
        assert(selected != null),
-        assert(selectedLabelStyle != null),
-        assert(unselectedLabelStyle != null),
-        assert(mouseCursor != null);
+       assert(selectedLabelStyle != null),
+       assert(unselectedLabelStyle != null),
+       assert(mouseCursor != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
   final Animation<double> animation;
   final double iconSize;
   final VoidCallback? onTap;
-  final ColorTween? itemColorTween;
+  final ColorTween? labelColorTween;
+  final ColorTween? iconColorTween;
   final double? flex;
   final bool selected;
   final IconThemeData? selectedIconTheme;
@@ -519,7 +521,7 @@ class _BottomNavigationTile extends StatelessWidget {
         child: _Tile(
           layout: layout,
           icon: _TileIcon(
-            itemColorTween: itemColorTween!,
+            colorTween: iconColorTween!,
             animation: animation,
             iconSize: iconSize,
             selected: selected,
@@ -528,7 +530,7 @@ class _BottomNavigationTile extends StatelessWidget {
             unselectedIconTheme: unselectedIconTheme,
           ),
           label: _Label(
-            itemColorTween: itemColorTween!,
+            colorTween: labelColorTween!,
             animation: animation,
             item: item,
             selectedLabelStyle: selectedLabelStyle,
@@ -608,7 +610,7 @@ class _Tile extends StatelessWidget {
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
-    required this.itemColorTween,
+    required this.colorTween,
     required this.animation,
     required this.iconSize,
     required this.selected,
@@ -618,7 +620,7 @@ class _TileIcon extends StatelessWidget {
   }) : assert(selected != null),
        assert(item != null);
 
-  final ColorTween itemColorTween;
+  final ColorTween colorTween;
   final Animation<double> animation;
   final double iconSize;
   final bool selected;
@@ -628,7 +630,7 @@ class _TileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color? iconColor = itemColorTween.evaluate(animation);
+    final Color? iconColor = colorTween.evaluate(animation);
     final IconThemeData defaultIconTheme = IconThemeData(
       color: iconColor,
       size: iconSize,
@@ -652,14 +654,14 @@ class _TileIcon extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   const _Label({
-    required this.itemColorTween,
+    required this.colorTween,
     required this.animation,
     required this.item,
     required this.selectedLabelStyle,
     required this.unselectedLabelStyle,
     required this.showSelectedLabels,
     required this.showUnselectedLabels,
-  }) : assert(itemColorTween != null),
+  }) : assert(colorTween != null),
        assert(animation != null),
        assert(item != null),
        assert(selectedLabelStyle != null),
@@ -667,7 +669,7 @@ class _Label extends StatelessWidget {
        assert(showSelectedLabels != null),
        assert(showUnselectedLabels != null);
 
-  final ColorTween itemColorTween;
+  final ColorTween colorTween;
   final Animation<double> animation;
   final BottomNavigationBarItem item;
   final TextStyle selectedLabelStyle;
@@ -685,16 +687,10 @@ class _Label extends StatelessWidget {
       selectedLabelStyle,
       animation.value,
     )!;
-    final ColorTween labelColor = ColorTween(
-      begin: unselectedLabelStyle.color
-        ?? itemColorTween.begin,
-      end: selectedLabelStyle.color
-        ?? itemColorTween.end,
-    );
     Widget text = DefaultTextStyle.merge(
       style: customStyle.copyWith(
         fontSize: selectedFontSize,
-        color: labelColor.evaluate(animation),
+        color: colorTween.evaluate(animation),
       ),
       // The font size should grow here when active, but because of the way
       // font rendering works, it doesn't grow smoothly if we just animate
@@ -853,22 +849,22 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           color: widget.items[index].backgroundColor!,
           vsync: this,
         )..controller.addStatusListener(
-            (AnimationStatus status) {
-              switch (status) {
-                case AnimationStatus.completed:
-                  setState(() {
-                    final _Circle circle = _circles.removeFirst();
-                    _backgroundColor = circle.color;
-                    circle.dispose();
-                  });
-                  break;
-                case AnimationStatus.dismissed:
-                case AnimationStatus.forward:
-                case AnimationStatus.reverse:
-                  break;
-              }
-            },
-          ),
+          (AnimationStatus status) {
+            switch (status) {
+              case AnimationStatus.completed:
+                setState(() {
+                  final _Circle circle = _circles.removeFirst();
+                  _backgroundColor = circle.color;
+                  circle.dispose();
+                });
+                break;
+              case AnimationStatus.dismissed:
+              case AnimationStatus.forward:
+              case AnimationStatus.reverse:
+                break;
+            }
+          },
+        ),
       );
     }
   }
@@ -908,8 +904,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor) {
-    // Prefer the iconTheme over itemColor if present.
-    return iconTheme ?? IconThemeData(color: itemColor);
+    final IconThemeData effectiveIconTheme = iconTheme ?? const IconThemeData();
+    // Prefer the iconTheme over itemColor and textStyle color if present.
+    // If iconTheme is not set, prefer textStyle color over itemColor
+    return iconTheme == null ? effectiveIconTheme.copyWith(color: itemColor) : effectiveIconTheme;
   }
 
   List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
@@ -918,6 +916,16 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
+
+    final Color themeColor;
+    switch (themeData.brightness) {
+      case Brightness.light:
+        themeColor = themeData.colorScheme.primary;
+        break;
+      case Brightness.dark:
+        themeColor = themeData.colorScheme.secondary;
+        break;
+    }
 
     final TextStyle effectiveSelectedLabelStyle =
       _effectiveTextStyle(
@@ -933,30 +941,27 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final IconThemeData effectiveSelectedIconTheme =
       _effectiveIconTheme(
         widget.selectedIconTheme ?? bottomTheme.selectedIconTheme,
-        widget.selectedItemColor
+        widget.selectedItemColor 
+        ?? bottomTheme.selectedItemColor 
+        ?? themeColor
       );
 
     final IconThemeData effectiveUnselectedIconTheme =
       _effectiveIconTheme(
         widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-        widget.unselectedItemColor
+        widget.unselectedItemColor 
+        ?? bottomTheme.unselectedItemColor 
+        ?? themeData.unselectedWidgetColor
       );
 
-    final Color themeColor;
-    switch (themeData.brightness) {
-      case Brightness.light:
-        themeColor = themeData.colorScheme.primary;
-        break;
-      case Brightness.dark:
-        themeColor = themeData.colorScheme.secondary;
-        break;
-    }
 
-    final ColorTween itemColorTween;
+
+    final ColorTween labelColorTween;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
-        itemColorTween = ColorTween(
-          begin: widget.unselectedItemColor
+        labelColorTween = ColorTween(
+          begin: effectiveUnselectedLabelStyle.color
+            ?? widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.unselectedWidgetColor,
           end: effectiveSelectedLabelStyle.color
@@ -967,11 +972,41 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
       case BottomNavigationBarType.shifting:
-        itemColorTween = ColorTween(
-          begin: widget.unselectedItemColor
+        labelColorTween = ColorTween(
+          begin: effectiveUnselectedLabelStyle.color
+            ?? widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.colorScheme.surface,
           end: effectiveSelectedLabelStyle.color
+            ?? widget.selectedItemColor
+            ?? bottomTheme.selectedItemColor
+            ?? themeData.colorScheme.surface,
+        );
+        break;
+    }
+
+    final ColorTween iconColorTween;
+    switch (_effectiveType) {
+      case BottomNavigationBarType.fixed:
+        iconColorTween = ColorTween(
+          begin: effectiveSelectedIconTheme.color
+            ?? widget.unselectedItemColor
+            ?? bottomTheme.unselectedItemColor
+            ?? themeData.unselectedWidgetColor,
+          end: effectiveUnselectedIconTheme.color
+            ?? widget.selectedItemColor
+            ?? bottomTheme.selectedItemColor
+            ?? widget.fixedColor
+            ?? themeColor,
+        );
+        break;
+      case BottomNavigationBarType.shifting:
+        iconColorTween = ColorTween(
+          begin: effectiveUnselectedIconTheme.color
+            ?? widget.unselectedItemColor
+            ?? bottomTheme.unselectedItemColor
+            ?? themeData.colorScheme.surface,
+          end: effectiveSelectedIconTheme.color
             ?? widget.selectedItemColor
             ?? bottomTheme.selectedItemColor
             ?? themeData.colorScheme.surface,
@@ -1002,7 +1037,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         onTap: () {
           widget.onTap?.call(i);
         },
-        itemColorTween: itemColorTween,
+        labelColorTween: labelColorTween,
+        iconColorTween: iconColorTween,
         flex: _evaluateFlex(_animations[i]),
         selected: i == widget.currentIndex,
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,

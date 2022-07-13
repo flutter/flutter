@@ -641,7 +641,7 @@ void main() {
     expect(unselectedIcon.color, equals(unselectedColor));
   });
 
-  testWidgets('iconTheme color should override label style color for BottomNavigationBarType.fixed', (WidgetTester tester) async {
+  testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.fixed', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedColor = Color(0xFF0004FF);
@@ -692,7 +692,7 @@ void main() {
     expect(unselectedIcon.color, equals(unselectedIconThemeColor));
   });
 
-  testWidgets('iconTheme color should override label style color for BottomNavigationBarType.shifted', (WidgetTester tester) async {
+  testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedLabelColor = Color(0xFFFF9900);
