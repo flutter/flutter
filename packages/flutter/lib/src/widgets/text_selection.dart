@@ -758,6 +758,8 @@ class TextSelectionOverlay {
 
   void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideMagnifier(shouldShowToolbar: !_selection.isCollapsed);
 
+  TextSelection? _lastSelection;
+
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
     selectionDelegate.userUpdateTextEditingValue(
@@ -765,6 +767,11 @@ class TextSelectionOverlay {
       SelectionChangedCause.drag,
     );
     selectionDelegate.bringIntoView(textPosition);
+
+    if (_lastSelection != newSelection) {
+      _lastSelection = newSelection;
+      HapticFeedback.selectionClick();
+    }
   }
 
   TextSelectionHandleType _chooseType(

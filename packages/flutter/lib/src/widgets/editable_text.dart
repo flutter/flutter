@@ -2706,21 +2706,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
-
-    // Trigger haptic feedback when handle drag changes selection on Android.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        if (!selection.isCollapsed && cause == SelectionChangedCause.drag) {
-          HapticFeedback.selectionClick();
-        }
-        break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        break;
-    }
   }
 
   Rect? _currentCaretRect;

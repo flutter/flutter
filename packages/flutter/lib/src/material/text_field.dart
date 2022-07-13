@@ -60,6 +60,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
+      final TextSelection lastSelection = _state._effectiveController.selection;
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -78,6 +79,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
             cause: SelectionChangedCause.longPress,
           );
           break;
+      }
+      if (_state._effectiveController.selection != lastSelection) {
+          HapticFeedback.selectionClick();
       }
     }
   }

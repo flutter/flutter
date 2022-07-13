@@ -4271,14 +4271,16 @@ void main() {
   });
 
   testWidgets('haptic feedback', (WidgetTester tester) async {
+    const String testValue = 'abc def ghi';
     final FeedbackTester feedback = FeedbackTester();
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = TextEditingController(text: testValue);
 
     await tester.pumpWidget(
       overlay(
         child: SizedBox(
           width: 100.0,
           child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
             controller: controller,
           ),
         ),
@@ -4290,12 +4292,54 @@ void main() {
     expect(feedback.clickSoundCount, 0);
     expect(feedback.hapticCount, 0);
 
-    await tester.longPress(find.byType(TextField));
+    final Offset longPressStartPos = textOffsetToPosition(tester, 2);
+    TestGesture gesture = await tester.startGesture(longPressStartPos);
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 0);
     expect(feedback.hapticCount, 1);
-
     feedback.dispose();
+
+    int selectionClickCount = 0;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'HapticFeedback.vibrate' && methodCall.arguments == 'HapticFeedbackType.selectionClick') {
+        selectionClickCount++;
+      }
+      return null;
+    });
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    });
+
+    // Long-press drag select one more character to trigger selectionClick feedback.
+    await gesture.moveTo(textOffsetToPosition(tester, 3));
+    await tester.pumpAndSettle();
+    expect(selectionClickCount, 1);
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    final TextSelection selection = controller.selection;
+    expect(selection.baseOffset, 0);
+    expect(selection.extentOffset, 4);
+
+    // Find the text selection handles.
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle to the next word to trigger selectionClick feedback.
+    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, 7);
+    gesture = await tester.startGesture(handlePos);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(selectionClickCount, 2);
   });
 
   testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {

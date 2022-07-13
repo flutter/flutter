@@ -1727,65 +1727,6 @@ void main() {
     expect(find.text('Copy'), findsNothing);
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia })); // [intended]
 
-  testWidgets('changing selection by dragging handles triggers haptic feedback on Android', (WidgetTester tester) async {
-    controller.text = 'blah blah blah';
-
-    final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      log.add(methodCall);
-      return null;
-    });
-    addTearDown(() {
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
-    });
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      ),
-    );
-
-    final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
-
-    // Select a word.
-    state.renderEditable.selectWordsInRange(
-      from: Offset.zero,
-      cause: SelectionChangedCause.tap,
-    );
-    await tester.pump();
-
-    // Find the handles.
-    final List<TextSelectionPoint> endpoints = globalize(
-      state.renderEditable.getEndpointsForSelection(state.textEditingValue.selection),
-      state.renderEditable,
-    );
-    expect(endpoints.length, 2);
-
-    // We use a small offset because the endpoint is on the very corner of the
-    // handle.
-    final Offset endHandlePosition = endpoints[1].point + const Offset(1.0, 1.0);
-
-    // Select 1 more character by dragging end handle to trigger feedback.
-    final TestGesture gesture = await tester.startGesture(endHandlePosition);
-    await gesture.moveTo(textOffsetToPosition(tester, 5));
-    await tester.pumpAndSettle();
-    expect(
-      log.last,
-      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
-    );
-  },
-    skip: kIsWeb, // [intended] this behavior isn't expected on web.
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-  );
-
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
     await tester.pumpWidget(
