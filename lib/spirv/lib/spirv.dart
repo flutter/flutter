@@ -6,7 +6,6 @@
 library spirv;
 
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
 // These parts only contain private members, all public

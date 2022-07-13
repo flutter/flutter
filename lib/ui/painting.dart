@@ -3906,27 +3906,65 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   /// [A current specification of valid SPIR-V is here.](https://github.com/flutter/engine/blob/master/lib/spirv/README.md)
   /// SPIR-V not meeting this specification will throw an exception.
   static Future<FragmentProgram> compile({
-    required ByteBuffer spirv,
+    ByteBuffer? spirv,
+    ByteBuffer? raw,
+    int? uniformFloatCount,
+    int? samplerCount,
     bool debugPrint = false,
   }) {
+    final bool spirvNull = spirv == null;
+    final bool rawNull = raw == null;
+    if (spirvNull && rawNull) {
+      throw ArgumentError(
+        'FragmentProgram.compile must be passed either the "spirv" or the '
+        '"raw" argument.',
+      );
+    }
+    if (!spirvNull && !rawNull) {
+      throw ArgumentError(
+        'FragmentProgram.compile must be passed only one of the "spirv" or the '
+        '"raw" arguments.',
+      );
+    }
+    if (!rawNull && uniformFloatCount == null && samplerCount == null) {
+      throw ArgumentError(
+        'FragmentProgram.compile requires the "uniformFloatCount" or the '
+        '"samplerCount" argument when passing the "raw" argument.',
+      );
+    }
     // Delay compilation without creating a timer, which interacts poorly with the
     // flutter test framework. See: https://github.com/flutter/flutter/issues/104084
-    return Future<FragmentProgram>.microtask(() => FragmentProgram._(spirv: spirv, debugPrint: debugPrint));
+    return Future<FragmentProgram>.microtask(() => FragmentProgram._(
+      spirv: spirv,
+      raw: raw,
+      uniformFloatCount: uniformFloatCount ?? 0,
+      samplerCount: samplerCount ?? 0,
+      debugPrint: debugPrint,
+    ));
   }
 
   @pragma('vm:entry-point')
   FragmentProgram._({
-    required ByteBuffer spirv,
+    ByteBuffer? spirv,
+    ByteBuffer? raw,
+    required int uniformFloatCount,
+    required int samplerCount,
     bool debugPrint = false,
   }) {
     _constructor();
-    final spv.TranspileResult result = spv.transpile(
-      spirv,
-      spv.TargetLanguage.sksl,
-    );
-    _init(result.src, debugPrint);
-    _uniformFloatCount = result.uniformFloatCount;
-    _samplerCount = result.samplerCount;
+    if (raw == null) {
+      final spv.TranspileResult result = spv.transpile(
+        spirv!,
+        spv.TargetLanguage.sksl,
+      );
+      _init(result.src, debugPrint);
+      _uniformFloatCount = result.uniformFloatCount;
+      _samplerCount = result.samplerCount;
+    } else {
+      _init(utf8.decode(raw.asUint8List()), debugPrint);
+      _uniformFloatCount = uniformFloatCount;
+      _samplerCount = samplerCount;
+    }
   }
 
   late final int _uniformFloatCount;
@@ -3993,9 +4031,12 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
     }
     if (floatUniforms.length != _uniformFloatCount) {
       throw ArgumentError(
-        'floatUniforms size: ${floatUniforms.length} must match given shader uniform count: $_uniformFloatCount.');
+        'floatUniforms size: ${floatUniforms.length} must match given shader '
+        'uniform count: $_uniformFloatCount.',
+      );
     }
-    if (_samplerCount > 0 && (samplerUniforms == null || samplerUniforms.length != _samplerCount)) {
+    if (_samplerCount > 0 &&
+        (samplerUniforms == null || samplerUniforms.length != _samplerCount)) {
       throw ArgumentError('samplerUniforms must have length $_samplerCount');
     }
     if (samplerUniforms == null) {
@@ -4004,7 +4045,10 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
       samplerUniforms = <ImageShader>[...samplerUniforms];
     }
     final _FragmentShader shader = _FragmentShader(
-        this, Float32List.fromList(floatUniforms), samplerUniforms);
+      this,
+      Float32List.fromList(floatUniforms),
+      samplerUniforms,
+    );
     _shader(shader, floatUniforms, samplerUniforms);
     return shader;
   }

@@ -55,6 +55,7 @@ static std::optional<fb::TargetPlatform> ToTargetPlatform(
     case TargetPlatform::kMetalDesktop:
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kFlutterSPIRV:
+    case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
       return std::nullopt;
