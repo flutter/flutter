@@ -117,9 +117,9 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
     // The raw position, tracking the gesture directly.
     final Offset rawLoupePosition = Offset(
         textEditingContext.globalGesturePosition.dx -
-            CupertinoLoupe.kLoupeSize.width / 2,
+            CupertinoLoupe.kSize.width / 2,
         verticalPositionOfLens -
-            (CupertinoLoupe.kLoupeSize.height -
+            (CupertinoLoupe.kSize.height -
                 CupertinoLoupe.kVerticalFocalPointOffset));
 
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
@@ -133,14 +133,14 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
           // iOS doesn't reposition for Y, so we should expand the threshold
           // so we can send the whole loupe out of bounds if need be.
           screenRect.top -
-              (CupertinoLoupe.kLoupeSize.height +
+              (CupertinoLoupe.kSize.height +
                   CupertinoLoupe.kVerticalFocalPointOffset),
           screenRect.right -
               CupertinoTextEditingLoupe._kHorizontalScreenEdgePadding,
           screenRect.bottom +
-              (CupertinoLoupe.kLoupeSize.height +
+              (CupertinoLoupe.kSize.height +
                   CupertinoLoupe.kVerticalFocalPointOffset)),
-      rect: rawLoupePosition & CupertinoLoupe.kLoupeSize,
+      rect: rawLoupePosition & CupertinoLoupe.kSize,
     ).topLeft;
 
     setState(() {
@@ -204,7 +204,7 @@ class CupertinoLoupe extends StatefulWidget {
 
   @visibleForTesting
   /// The size of the loupe.
-  static const Size kLoupeSize = Size(82.5, 45);
+  static const Size kSize = Size(82.5, 45);
   
   static const Duration _kIoAnimationDuration = Duration(milliseconds: 150);
   static const BorderRadius _kBorderRadius =
@@ -263,7 +263,7 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
           focalPoint: Offset(
                   0,
                   (CupertinoLoupe.kVerticalFocalPointOffset -
-                          CupertinoLoupe.kLoupeSize.height / 2) *
+                          CupertinoLoupe.kSize.height / 2) *
                       _ioAnimation.value) +
               widget.additionalFocalPointOffset,
           decoration: LoupeDecoration(
@@ -279,7 +279,7 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
                   offset: Offset(0, 3))
             ],
           ),
-          size: CupertinoLoupe.kLoupeSize,
+          size: CupertinoLoupe.kSize,
         ));
   }
 }

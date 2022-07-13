@@ -74,14 +74,12 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// A data class that allows the SelectionOverlay to delegate
 /// the loupe's positioning to the loupe itself, based on the
 /// info in [LoupeSelectionOverlayInfoBearer].
-/// 
-/// 
-/// 2 Issues:
-/// - First handle attempts to go below second handle sux
-/// - globalXLineEnd sux
-/// - RTL
 @immutable
 class LoupeSelectionOverlayInfoBearer {
+  /// Construct a [LoupeSelectionOverlayInfoBearer] from raw values.
+  /// 
+  /// It is recommended to use [LoupeSelectionOverlayInfoBearer._selectionControlDerrived]
+  /// in order to not manually re-calculate all the required parameters. 
   const LoupeSelectionOverlayInfoBearer({
     required this.globalGesturePosition,
     required this.handleRect,
@@ -109,7 +107,6 @@ class LoupeSelectionOverlayInfoBearer {
       offset: lineAtOffset.baseOffset,
     );
 
-    //TODO: should I write my own getLocalRectForPosition that doesn't take carat into account?
     final Rect lineBoundries = Rect.fromPoints(
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topLeft, 
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomRight
@@ -124,15 +121,26 @@ class LoupeSelectionOverlayInfoBearer {
     );
   }
 
+  /// construct an empty [LoupeSelectionOverlayInfoBearer], with all
+  /// values set to 0. 
   const LoupeSelectionOverlayInfoBearer.empty() : 
     globalGesturePosition = Offset.zero, 
     handleRect = Rect.zero,
     currentLineBoundries = Rect.zero,
     fieldBounds = Rect.zero;   
 
+  /// The offset of the gesture position that the loupe should be shown at.
   final Offset globalGesturePosition;
+
+  /// The rect of the current line the loupe should be shown at. Do not take 
+  /// into account any padding of the field; only the position of the first
+  /// and last character.
   final Rect currentLineBoundries;
+
+  /// The rect of the handle that the loupe should follow.
   final Rect handleRect;
+
+  /// The bounds of the entire text field that the Loupe is bound to.
   final Rect fieldBounds; 
 
   @override

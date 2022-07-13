@@ -11562,7 +11562,9 @@ void main() {
 
     testWidgets('should build custom loupe if given',
         (WidgetTester tester) async {
-      final Widget customLoupe = Container(key: UniqueKey(),);
+      final Widget customLoupe = Container(
+        key: UniqueKey(),
+      );
       final TextField textField = TextField(
         loupeBuilder: (_, __, ___) => customLoupe,
       );
@@ -11570,7 +11572,7 @@ void main() {
       final BuildContext context = await contextTrap(tester,
           wrapper: (Widget child) => MaterialApp(
                 home: child,
-      ));
+              ));
 
       expect(
           textField.loupeBuilder!(
@@ -11580,10 +11582,9 @@ void main() {
                 const LoupeSelectionOverlayInfoBearer.empty(),
               )),
           isA<Widget>().having(
-            (Widget widget) => widget.key, 
-            'built loupe key equal to passed in loupe key', 
-            equals(customLoupe.key)
-        ));
+              (Widget widget) => widget.key,
+              'built loupe key equal to passed in loupe key',
+              equals(customLoupe.key)));
     });
 
     test('should be null on null passed in null', () {
@@ -11594,10 +11595,8 @@ void main() {
     });
 
     group('defaults', () {
-      testWidgets('should build Loupe on Android',
-          (WidgetTester tester) async {
-        const TextField textField =
-            TextField();
+      testWidgets('should build Loupe on Android', (WidgetTester tester) async {
+        const TextField textField = TextField();
 
         final BuildContext context = await contextTrap(tester,
             wrapper: (Widget child) => MaterialApp(
@@ -11612,16 +11611,11 @@ void main() {
                   const LoupeSelectionOverlayInfoBearer.empty(),
                 )),
             isA<TextEditingLoupe>());
-      },
-          variant: const TargetPlatformVariant(
-              <TargetPlatform>{ TargetPlatform.android }));
-    });
-
+      }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
       testWidgets('should build CupertinoLoupe on iOS',
           (WidgetTester tester) async {
-        const TextField textField =
-            TextField();
+        const TextField textField = TextField();
 
         final BuildContext context = await contextTrap(tester,
             wrapper: (Widget child) => MaterialApp(
@@ -11636,29 +11630,30 @@ void main() {
                   const LoupeSelectionOverlayInfoBearer.empty(),
                 )),
             isA<CupertinoTextEditingLoupe>());
+      }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+      testWidgets('should build nothing on Android and iOS',
+          (WidgetTester tester) async {
+        const TextField defaultTextField = TextField();
+
+        final BuildContext context = await contextTrap(tester,
+            wrapper: (Widget child) => MaterialApp(
+                  home: child,
+                ));
+
+        expect(
+            defaultTextField.loupeBuilder!(
+                context,
+                LoupeController(),
+                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+                  const LoupeSelectionOverlayInfoBearer.empty(),
+                )),
+            isNull);
       },
-          variant: const TargetPlatformVariant(
-              <TargetPlatform>{ TargetPlatform.iOS }));
-
-    testWidgets('should build nothing on Android and iOS',
-        (WidgetTester tester) async {
-      const TextField defaultTextField = TextField();
-
-      final BuildContext context = await contextTrap(tester,
-          wrapper: (Widget child) => MaterialApp(
-                home: child,
-      ));
-
-      expect(
-          defaultTextField.loupeBuilder!(
-              context,
-              LoupeController(),
-              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                const LoupeSelectionOverlayInfoBearer.empty(),
-              )),
-          isNull);
-    },
-        variant: TargetPlatformVariant.all(
-            excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{
+            TargetPlatform.iOS,
+            TargetPlatform.android
+          }));
+    });
   });
 }

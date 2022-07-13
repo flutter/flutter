@@ -21,8 +21,8 @@ class _ProxyLoupeController extends LoupeController {
 
 void main() {
   final Offset basicOffset = Offset(
-    CupertinoLoupe.kLoupeSize.width / 2,
-      CupertinoLoupe.kLoupeSize.height -
+      CupertinoLoupe.kSize.width / 2,
+      CupertinoLoupe.kSize.height -
           CupertinoLoupe.kVerticalFocalPointOffset);
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 100);
   final _ProxyLoupeController proxyLoupeController = _ProxyLoupeController();
@@ -71,6 +71,8 @@ void main() {
       proxyLoupeController.overlayEntry!.remove();
       proxyLoupeController.overlayEntry = null;
     }
+    proxyLoupeController.hideCalls = 0;
+    proxyLoupeController.showCalls = 0;
   });
 
   group('CupertinoTextEditingLoupe', () {
@@ -85,30 +87,49 @@ void main() {
       testWidgets(
           'should be at gesture position if does not violate any positioning rules',
           (WidgetTester tester) async {
+        final Key fakeTextFieldKey = UniqueKey();
         final BuildContext context = await contextTrap(
           tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
+          wrapper: (Widget child) => Container(
+            color: const Color.fromARGB(255, 0, 255, 179),
+            child: MaterialApp(
+              home: Center(
+                  child: Container(
+                key: fakeTextFieldKey,
+                width: 10,
+                height: 10,
+                color: Colors.red,
+                child: child,
+              )),
+            ),
           ),
         );
 
-        final Offset gesturePosition = Offset(
-            MediaQuery.of(context).size.width / 2, reasonableTextField.top);
+        // Loupe should be positioned directly over the red square.
+        final RenderBox tapPointRenderBox =
+            tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
+        final Rect fakeTextFieldRect =
+            tapPointRenderBox.localToGlobal(Offset.zero) &
+                tapPointRenderBox.size;
 
         final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo =
             ValueNotifier<LoupeSelectionOverlayInfoBearer>(
                 LoupeSelectionOverlayInfoBearer(
-          currentLineBoundries: reasonableTextField,
-          fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
+          currentLineBoundries: fakeTextFieldRect,
+          fieldBounds: fakeTextFieldRect,
+          handleRect: fakeTextFieldRect,
           // The tap position is dragBelow units below the text field.
-          globalGesturePosition: gesturePosition,
+          globalGesturePosition: fakeTextFieldRect.center,
         ));
 
-        // Show the loupe initally, so that we get it in a not hidden state
         await showCupertinoLoupe(context, tester, loupeInfo);
-        expect(getLoupePosition(tester), gesturePosition - basicOffset);
+
+        // Should show two red squares; original, and one in the loupe,
+        // directly ontop of one another.
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('cupertino_loupe.position.default.png'),
+        );
       });
 
       testWidgets('should never horizontally be outside of Screen Padding',
@@ -168,7 +189,7 @@ void main() {
         // The loupe should be greater than the text field, since we "dragged" it down,
         // but excatly following the drag position.
         expect(getLoupePosition(tester).dy + basicOffset.dy,
-            greaterThan(reasonableTextField.top));
+            greaterThan(reasonableTextField.center.dy));
         expect(getLoupePosition(tester).dy + basicOffset.dy,
             lessThan(dragPositionBelowTextField));
       });
@@ -247,7 +268,8 @@ void main() {
         expect(proxyLoupeController.hideCalls, 1);
       });
 
-      testWidgets('should re-show if gesture', (WidgetTester tester) async {
+      testWidgets('should re-show if gesture moves back up',
+          (WidgetTester tester) async {
         final BuildContext context = await contextTrap(
           tester,
           wrapper: (Widget child) => MaterialApp(

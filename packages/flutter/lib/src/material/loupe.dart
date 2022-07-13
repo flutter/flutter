@@ -15,7 +15,7 @@ import 'package:flutter/src/cupertino/loupe.dart';
 /// - Never goes out of bounds vertically; offset until the entire loupe is in the screen. The
 /// focal point, regardless of this transformation, always points to the touch Y.
 /// - If just jumped between lines (prevY != currentY) then animate for duration
-/// [_jumpBetweenLinesAnimationDuration].
+/// [jumpBetweenLinesAnimationDuration].
 /// {@endtemplate}
 class TextEditingLoupe extends StatefulWidget {
   /// {@macro widgets.material.loupe.loupe}
@@ -25,7 +25,9 @@ class TextEditingLoupe extends StatefulWidget {
       required this.controller,
       required this.loupeSelectionOverlayInfoBearer});
 
-  /// returns a dummy widget if no loupe exists for the platform.
+  /// A [LoupeControllerWidgetBuilder]<[LoupeSelectionOverlayInfoBearer]>
+  /// that returns a [CupertinoTextEditingLoupe] on iOS, [TextEditingLoupe]
+  /// on Android, and null on all other platforms.
   static Widget? adaptiveLoupeControllerBuilder(
     BuildContext context,
     LoupeController controller,
@@ -49,7 +51,8 @@ class TextEditingLoupe extends StatefulWidget {
   }
 
   /// The duration that the position is animated if [TextEditingLoupe] just jumped between lines.
-  static const Duration _jumpBetweenLinesAnimationDuration =
+  @visibleForTesting
+  static const Duration jumpBetweenLinesAnimationDuration =
       Duration(milliseconds: 70);
 
   /// A [LoupeController] for this loupe.
@@ -67,19 +70,22 @@ class TextEditingLoupe extends StatefulWidget {
 
 class _TextEditingLoupeState extends State<TextEditingLoupe> {
   // Should _only_ be null on construction. This is because of the animation logic.
+  //
   // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
   // animations are added when last_build_y != current_build_y, but this condition
   // is true on the inital render. Thus, this is null for the first frame and the
   // condition becomes [loupePosition != null && last_build_y != this_build_y].
   // {@endtemplate}
-  Offset? loupePosition;
+  Offset? _loupePosition;
 
   // A timer that unsets itself after an animation duration.
-  // If the timer exists, then it blah blah blah
+  // If the timer exists, then the loupe animates it's position -
+  // if this timer does not exist, the loupe tracks the gesture (with respect
+  // to the positioning rules) directly.
   Timer? _positionShouldBeAnimatedTimer;
   bool get _positionShouldBeAnimated => _positionShouldBeAnimatedTimer != null;
 
-  Offset extraFocalPointOffset = Offset.zero;
+  Offset _extraFocalPointOffset = Offset.zero;
 
   @override
   void initState() {
@@ -115,8 +121,8 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     // Since by default, we draw at the top left corner, this offset
     // shifts the loupe so we draw at the center, and then also include
     // the "above touch point" shift.
-    final Offset basicLoupeOffset = Offset(Loupe._size.width / 2,
-        Loupe._size.height - Loupe._kStandardVerticalFocalPointShift);
+    final Offset basicLoupeOffset = Offset(Loupe.kSize.width / 2,
+        Loupe.kSize.height - Loupe.kStandardVerticalFocalPointShift);
 
     // Since the loupe should not go past the edges of the line,
     // but must track the gesture otherwise, bound the X of the loupe
@@ -129,9 +135,11 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     // exactly at the center of the handle.
     final Rect unadjustedLoupeRect =
         Offset(loupeX, selectionInfo.handleRect.center.dy) - basicLoupeOffset &
-            Loupe._size;
+            Loupe.kSize;
 
     // Shift the loupe so that, if we are ever out of the screen, we become in bounds.
+    // Note that this probably won't have much an effect on the X, since we already bound
+    // to the currentLineBoundries, but will shift vertically if the loupe is out of bounds.
     final Rect screenBoundsAdjustedLoupeRect =
         LoupeController.shiftWithinBounds(
             bounds: screenRect, rect: unadjustedLoupeRect);
@@ -142,15 +150,24 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     // The insets, from either edge, that the focal point should not point
     // past lest the loupe displays something out of bounds.
     final double horizontalMaxFocalPointEdgeInsets =
-        (Loupe._size.width / 2) / Loupe._magnification;
+        (Loupe.kSize.width / 2) / Loupe._magnification;
 
     // Adjust the focal point horizontally such that none of the loupe
     // ever points to anything out of bounds.
-    final double newGlobalFocalPointX = screenBoundsAdjustedLoupeRect.center.dx
-        .clamp(
-            selectionInfo.fieldBounds.left + horizontalMaxFocalPointEdgeInsets,
-            selectionInfo.fieldBounds.right -
-                horizontalMaxFocalPointEdgeInsets);
+    final double newGlobalFocalPointX;
+
+    // If the text field is so narrow that we can't not show out of bounds,
+    // then settle for pointing to the center all the time.
+    if (selectionInfo.fieldBounds.width <
+        horizontalMaxFocalPointEdgeInsets * 2) {
+      newGlobalFocalPointX = selectionInfo.fieldBounds.center.dy;
+    } else {
+      // Otherwise, we can clamp the focal point to always point not
+      // out of bounds.
+      newGlobalFocalPointX = screenBoundsAdjustedLoupeRect.center.dx.clamp(
+          selectionInfo.fieldBounds.left + horizontalMaxFocalPointEdgeInsets,
+          selectionInfo.fieldBounds.right - horizontalMaxFocalPointEdgeInsets);
+    }
 
     // Since the previous value is now a global offset (i.e. globalFocalPoint
     // now points directly to a part of the screen), we must subtract our global offset
@@ -167,8 +184,10 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
         newRelativeFocalPointX,
         screenBoundsAdjustedLoupeRect.top - unadjustedLoupeRect.top);
 
+
+    Timer? positionShouldBeAnimated = _positionShouldBeAnimatedTimer;
     // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
-    if (loupePosition != null && finalLoupePosition.dy != loupePosition!.dy) {
+    if (_loupePosition != null && finalLoupePosition.dy != _loupePosition!.dy) {
       if (_positionShouldBeAnimatedTimer != null &&
           _positionShouldBeAnimatedTimer!.isActive) {
         _positionShouldBeAnimatedTimer!.cancel();
@@ -176,36 +195,37 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
 
       // Create a timer that deletes itself when the timer is complete.
       // This is [mounted] safe, since the timer is canceled in [dispose].
-      _positionShouldBeAnimatedTimer = Timer(
-          TextEditingLoupe._jumpBetweenLinesAnimationDuration,
+      positionShouldBeAnimated = Timer(
+          TextEditingLoupe.jumpBetweenLinesAnimationDuration,
           () => setState(() {
                 _positionShouldBeAnimatedTimer = null;
               }));
     }
 
     setState(() {
-      loupePosition = finalLoupePosition;
-      extraFocalPointOffset = focalPointAdjustmentForScreenBoundsAdjustment;
+      _loupePosition = finalLoupePosition;
+      _positionShouldBeAnimatedTimer = positionShouldBeAnimated;
+      _extraFocalPointOffset = focalPointAdjustmentForScreenBoundsAdjustment;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(loupePosition != null,
+    assert(_loupePosition != null,
         'Loupe position should only be null before the first build.');
 
     final Widget loupe = Loupe(
       controller: widget.controller,
-      additionalFocalPointOffset: extraFocalPointOffset,
+      additionalFocalPointOffset: _extraFocalPointOffset,
     );
 
     return AnimatedPositioned(
-      top: loupePosition!.dy,
-      left: loupePosition!.dx,
+      top: _loupePosition!.dy,
+      left: _loupePosition!.dx,
       // Material Loupe typically does not animate, unless we jump between lines,
       // in whichcase we animate between lines.
       duration: _positionShouldBeAnimated
-          ? TextEditingLoupe._jumpBetweenLinesAnimationDuration
+          ? TextEditingLoupe.jumpBetweenLinesAnimationDuration
           : Duration.zero,
       child: loupe,
     );
@@ -214,8 +234,8 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
 
 /// A Material styled loupe.
 ///
-/// This widget focuses on mimicing the _style_ of the loupe on material. For a
-/// widget that is focused on mimicing the behavior of a material loupe, see [TextEditingLoupe].
+/// This widget focuses on mimicking the _style_ of the loupe on material. For a
+/// widget that is focused on mimicking the behavior of a material loupe, see [TextEditingLoupe].
 class Loupe extends StatelessWidget {
   /// Creates a [RawLoupe] in the Material style.
   const Loupe({
@@ -224,8 +244,15 @@ class Loupe extends StatelessWidget {
     required this.controller,
   });
 
-  static const Size _size = Size(77.37, 37.9);
-  static const double _kStandardVerticalFocalPointShift = -18;
+  @visibleForTesting
+
+  /// The size of the loupe.
+  static const Size kSize = Size(77.37, 37.9);
+
+  @visibleForTesting
+
+  /// The vertical shift that the loupe should be over the focal point.
+  static const double kStandardVerticalFocalPointShift = -18;
   static const Color _filmColor = Color.fromARGB(8, 158, 158, 158);
   static const List<BoxShadow> _shadows = <BoxShadow>[
     BoxShadow(
@@ -237,8 +264,14 @@ class Loupe extends StatelessWidget {
   static const double _borderRadius = 40;
   static const double _magnification = 1.25;
 
+  /// This loupe's controller.
   final LoupeController controller;
 
+  /// Any additional offset the focal point requires to "point"
+  /// to the correct place.
+  ///
+  /// This is useful for instances where the loupe is not pointing to something
+  /// directly below it.
   final Offset additionalFocalPointOffset;
 
   @override
@@ -251,16 +284,10 @@ class Loupe extends StatelessWidget {
           shadows: _shadows),
       magnificationScale: _magnification,
       focalPoint: additionalFocalPointOffset +
-          Offset(0, _kStandardVerticalFocalPointShift - Loupe._size.height / 2),
-      size: _size,
+          Offset(0, kStandardVerticalFocalPointShift - Loupe.kSize.height / 2),
+      size: kSize,
       child: Container(
         color: _filmColor,
-        child: Center(
-            child: Container(
-          width: 2.5,
-          height: 2.5,
-          decoration: BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-        )),
       ),
     );
   }
