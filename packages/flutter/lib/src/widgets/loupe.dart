@@ -24,7 +24,7 @@ typedef LoupeControllerWidgetBuilder<T> = Widget? Function(
 /// based on calls to show / hide, respectively.
 ///
 /// To check the status of the loupe, see [LoupeController.status].
-// TODO(antholeole): This whole paradigm can be removed once portals 
+// TODO(antholeole): This whole paradigm can be removed once portals
 // lands - then the loupe can be controlled though a widget in the tree.
 // https://github.com/flutter/flutter/pull/105335
 class LoupeController {
@@ -126,7 +126,7 @@ class LoupeController {
     overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
-    overlayState!.insert(below: below, overlayEntry!);
+    overlayState!.insert(overlayEntry!, below: below);
 
     return signalShow();
   }

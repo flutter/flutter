@@ -127,7 +127,8 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     // Since the loupe should not go past the edges of the line,
     // but must track the gesture otherwise, bound the X of the loupe
     // to always stay between line start and end.
-    final double loupeX = selectionInfo.globalGesturePosition.dx.clamp(
+    final double loupeX = clampDouble(
+        selectionInfo.globalGesturePosition.dx,
         selectionInfo.currentLineBoundries.left,
         selectionInfo.currentLineBoundries.right);
 
@@ -164,7 +165,8 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     } else {
       // Otherwise, we can clamp the focal point to always point not
       // out of bounds.
-      newGlobalFocalPointX = screenBoundsAdjustedLoupeRect.center.dx.clamp(
+      newGlobalFocalPointX = clampDouble(
+          screenBoundsAdjustedLoupeRect.center.dx,
           selectionInfo.fieldBounds.left + horizontalMaxFocalPointEdgeInsets,
           selectionInfo.fieldBounds.right - horizontalMaxFocalPointEdgeInsets);
     }
@@ -183,7 +185,6 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     final Offset focalPointAdjustmentForScreenBoundsAdjustment = Offset(
         newRelativeFocalPointX,
         screenBoundsAdjustedLoupeRect.top - unadjustedLoupeRect.top);
-
 
     Timer? positionShouldBeAnimated = _positionShouldBeAnimatedTimer;
     // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
