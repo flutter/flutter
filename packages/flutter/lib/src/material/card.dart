@@ -239,36 +239,3 @@ class _CardDefaultsM3 extends CardTheme {
 }
 
 // END GENERATED TOKEN PROPERTIES - Card
-
-// BEGIN GENERATED TOKEN PROPERTIES - Card
-
-// Do not edit by hand. The code between the "BEGIN GENERATED" and
-// "END GENERATED" comments are generated from data in the Material
-// Design token database by the script:
-//   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_101
-
-// Generated version v0_101
-class _CardDefaultsM3 extends CardTheme {
-  const _CardDefaultsM3(this.context)
-    : super(
-        clipBehavior: Clip.none,
-        elevation: 1.0,
-        margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0))),
-      );
-
-  final BuildContext context;
-
-  @override
-  Color? get color => Theme.of(context).colorScheme.surface;
-
-  @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
-
-  @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
-}
-
-// END GENERATED TOKEN PROPERTIES - Card

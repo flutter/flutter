@@ -767,6 +767,6 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   Color? get scrimColor => Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.onSurface.withOpacity(0.68) : Colors.black54;
 
   @override
-  ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(0.0), bottomRight: Radius.circular(0.0)));
+  ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)));
 }
 // END GENERATED TOKEN PROPERTIES - Drawer
