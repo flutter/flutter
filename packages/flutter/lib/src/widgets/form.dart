@@ -169,9 +169,20 @@ class FormState extends State<Form> {
     for (final FormFieldState<dynamic> field in _fields) {
       final MapEntry<String, dynamic>? entry = field._onSubmit();
 
-      if (entry != null) {
-        data.addEntries(<MapEntry<String, dynamic>>[entry]);
+      if (entry == null) {
+        continue;
       }
+
+      if(data.containsKey(entry.key)) {
+        throw FlutterError(
+          'Duplicate SubmissionKey found \n'
+          'Two or more Formfield decendant of this Form have the same '
+          'submissionKey. This will cause the Formfield value to be '
+          'overwritten. Assure every formfield has a unique submissionKey'
+        );
+      }
+      
+      data.addEntries(<MapEntry<String, dynamic>>[entry]);
     }
 
     return data;

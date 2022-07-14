@@ -171,6 +171,45 @@ void main() {
     expect(data['firstKey'], 'firstValue');
   });
 
+  testWidgets(
+    'submit on form with duplicate submissionKeys throws flutterError',
+    (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+     Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        submissionKey: 'firstKey',
+                        initialValue: 'firstValue',
+                      ),
+                      TextFormField(
+                        submissionKey: 'firstKey',
+                        initialValue: 'firstKey', 
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    expect(() => formKey.currentState!.submit(), throwsFlutterError);
+  });
+
   testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? errorText(String? value) => '${value ?? ''}/error';
