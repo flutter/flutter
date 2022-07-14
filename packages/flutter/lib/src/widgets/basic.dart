@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
@@ -1304,7 +1305,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.transformHitTests = true,
     this.filterQuality,
     super.child,
-  }) : transform = Matrix4.rotationZ(angle);
+  }) : transform = _computeRotation(angle);
 
   /// Creates a widget that transforms its child using a translation.
   ///
@@ -1380,6 +1381,38 @@ class Transform extends SingleChildRenderObjectWidget {
   })  : assert(!(scale == null && scaleX == null && scaleY == null), "At least one of 'scale', 'scaleX' and 'scaleY' is required to be non-null"),
         assert(scale == null || (scaleX == null && scaleY == null), "If 'scale' is non-null then 'scaleX' and 'scaleY' must be left null"),
         transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0);
+
+  // Computes a rotation matrix for an angle in radians, attempting to keep rotations
+  // at integral values for angles of 0, π/2, π, 3π/2.
+  static Matrix4 _computeRotation(double radians) {
+    assert(radians.isFinite, 'Cannot compute the rotation matrix for a non-finite angle: $radians');
+    if (radians == 0.0) {
+      return Matrix4.identity();
+    }
+    final double sin = math.sin(radians);
+    if (sin == 1.0) {
+      return _createZRotation(1.0, 0.0);
+    }
+    if (sin == -1.0) {
+      return _createZRotation(-1.0, 0.0);
+    }
+    final double cos = math.cos(radians);
+    if (cos == -1.0) {
+      return _createZRotation(0.0, -1.0);
+    }
+    return _createZRotation(sin, cos);
+  }
+
+  static Matrix4 _createZRotation(double sin, double cos) {
+    final Matrix4 result = Matrix4.zero();
+    result.storage[0] = cos;
+    result.storage[1] = sin;
+    result.storage[4] = -sin;
+    result.storage[5] = cos;
+    result.storage[10] = 1.0;
+    result.storage[15] = 1.0;
+    return result;
+  }
 
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
