@@ -61,11 +61,17 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the PointerSignalKind enum in pointer.dart.
-  @IntDef({PointerSignalKind.NONE, PointerSignalKind.SCROLL, PointerSignalKind.UNKNOWN})
+  @IntDef({
+    PointerSignalKind.NONE,
+    PointerSignalKind.SCROLL,
+    PointerSignalKind.SCROLL_INERTIA_CANCEL,
+    PointerSignalKind.UNKNOWN
+  })
   public @interface PointerSignalKind {
     int NONE = 0;
     int SCROLL = 1;
-    int UNKNOWN = 2;
+    int SCROLL_INERTIA_CANCEL = 2;
+    int UNKNOWN = 3;
   }
 
   // Must match the unpacking code in hooks.dart.

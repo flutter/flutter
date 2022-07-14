@@ -29,6 +29,7 @@ enum PointerDeviceKind {
 enum PointerSignalKind {
   none,
   scroll,
+  scrollInertiaCancel,
   unknown
 }
 
