@@ -2314,9 +2314,15 @@ void main() {
       ),
     );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+    final Padding firstItem = tester.widget<Padding>(
+      find.descendant(of: find.widgetWithText(InkResponse, 'Abc'), matching: find.widgetWithText(Padding, 'Abc'))
+    );
+    final Padding secondItem = tester.widget<Padding>(
+      find.descendant(of: find.widgetWithText(InkResponse, 'Def'), matching: find.widgetWithText(Padding, 'Def'))
+    );
+    final Padding thirdItem = tester.widget<Padding>(
+        find.descendant(of: find.widgetWithText(InkResponse, 'Ghi'), matching: find.widgetWithText(Padding, 'Ghi'))
+    );
 
     expect(firstItem.padding, defaultPadding);
     expect(secondItem.padding, secondItemPadding);
@@ -2355,9 +2361,15 @@ void main() {
       ),
     );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+    final Padding firstItem = tester.widget<Padding>(
+        find.descendant(of: find.widgetWithText(InkResponse, 'Abc'), matching: find.widgetWithText(Padding, 'Abc'))
+    );
+    final Padding secondItem = tester.widget<Padding>(
+        find.descendant(of: find.widgetWithText(InkResponse, 'Def'), matching: find.widgetWithText(Padding, 'Def'))
+    );
+    final Padding thirdItem = tester.widget<Padding>(
+        find.descendant(of: find.widgetWithText(InkResponse, 'Ghi'), matching: find.widgetWithText(Padding, 'Ghi'))
+    );
 
     expect(firstItem.padding, defaultPadding);
     expect(secondItem.padding, secondItemPadding);
@@ -2396,9 +2408,15 @@ void main() {
       ),
     );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+    final Padding firstItem = tester.widget<Padding>(
+        find.descendant(of: find.widgetWithText(InkResponse, 'Abc'), matching: find.widgetWithText(Padding, 'Abc'))
+    );
+    final Padding secondItem = tester.widget<Padding>(
+        find.descendant(of: find.widgetWithText(InkResponse, 'Def'), matching: find.widgetWithText(Padding, 'Def'))
+    );
+    final Padding thirdItem = tester.widget<Padding>(
+        find.descendant(of: find.widgetWithText(InkResponse, 'Ghi'), matching: find.widgetWithText(Padding, 'Ghi'))
+    );
 
     expect(firstItem.padding, defaultPadding);
     expect(secondItem.padding, secondItemPadding);
@@ -2635,6 +2653,44 @@ void main() {
     // Indicator without Stack widget
     final RenderBox lastIndicator = tester.renderObject(find.byType(Icon).last);
     expect(lastIndicator.localToGlobal(Offset.zero).dx, 28.0);
+  });
+
+  testWidgets('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+    const double safeAreaPadding = 40.0;
+    NavigationRail navigationRail() {
+      return NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(_buildWidget(navigationRail()));
+    final double defaultWidth = tester.getSize(find.byType(NavigationRail)).width;
+    expect(defaultWidth, 80);
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(left: safeAreaPadding),
+          ),
+          child: navigationRail(),
+        ),
+      ),
+    );
+    final double updatedWidth = tester.getSize(find.byType(NavigationRail)).width;
+    expect(updatedWidth, defaultWidth + safeAreaPadding);
   });
 
   group('Material 2', () {
@@ -4392,6 +4448,45 @@ void main() {
       expect(lastIndicator.localToGlobal(Offset.zero).dx, 24.0);
     });
 
+    testWidgets('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+      const double safeAreaPadding = 40.0;
+      NavigationRail navigationRail() {
+        return NavigationRail(
+          selectedIndex: 0,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Def'),
+            ),
+          ],
+        );
+      }
+
+      await tester.pumpWidget(_buildWidget(navigationRail(), useMaterial3: false));
+      final double defaultWidth = tester.getSize(find.byType(NavigationRail)).width;
+      expect(defaultWidth, 72);
+
+      await tester.pumpWidget(
+        _buildWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.only(left: safeAreaPadding),
+              ),
+              child: navigationRail(),
+            ),
+            useMaterial3: false
+        ),
+      );
+      final double updatedWidth = tester.getSize(find.byType(NavigationRail)).width;
+      expect(updatedWidth, defaultWidth + safeAreaPadding);
+    });
+
   }); // End Material 2 group
 }
 
@@ -4592,6 +4687,22 @@ Material _railMaterial(WidgetTester tester) {
     find.descendant(
       of: find.byType(NavigationRail),
       matching: find.byType(Material),
+    ),
+  );
+}
+
+Widget _buildWidget(Widget child, {bool useMaterial3 = true}) {
+  return MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
+    home: Scaffold(
+      body: Row(
+        children: <Widget>[
+          child,
+          const Expanded(
+            child: Text('body'),
+          ),
+        ],
+      ),
     ),
   );
 }
