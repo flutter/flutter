@@ -39,6 +39,27 @@ enum SupportedPlatform {
   root, // Special platform to represent the root project directory
 }
 
+String? platformToSubdirectoryPrefix(SupportedPlatform platform) {
+  switch(platform) {
+    case SupportedPlatform.android:
+      return 'android';
+    case SupportedPlatform.ios:
+      return 'ios';
+    case SupportedPlatform.linux:
+      return 'linux';
+    case SupportedPlatform.macos:
+      return 'macos';
+    case SupportedPlatform.web:
+      return 'web';
+    case SupportedPlatform.windows:
+      return 'windows';
+    case SupportedPlatform.fuchsia:
+      return 'fuchsia';
+    case SupportedPlatform.root:
+      return 'root';
+  }
+}
+
 class FlutterProjectFactory {
   FlutterProjectFactory({
     required Logger logger,
@@ -602,7 +623,7 @@ Your Flutter application is created using an older version of the Android
 embedding. It is being deprecated in favor of Android embedding v2. Follow the
 steps at
 
-https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
+https://flutter.dev/go/android-project-migration
 
 to migrate your project. You may also pass the --ignore-deprecation flag to
 ignore this check and continue with the deprecated v1 embedding. However,
@@ -647,7 +668,7 @@ The detected reason was:
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlException {
+    } on XmlParserException {
       throwToolExit('Error parsing $appManifestFile '
                     'Please ensure that the android manifest is a valid XML document and try again.');
     } on FileSystemException {
@@ -734,20 +755,7 @@ class WebProject extends FlutterProjectPlatform {
       .childDirectory('web')
       .childFile('index.html');
 
-  /// The .dart_tool/dartpad directory
-  Directory get dartpadToolDirectory => parent.directory
-      .childDirectory('.dart_tool')
-      .childDirectory('dartpad');
-
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
-    /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFiles(
-      parent,
-      destination: dartpadToolDirectory,
-      webPlatform: true,
-    );
-  }
+  Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
 /// The Fuchsia sub project.

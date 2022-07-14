@@ -11,8 +11,64 @@ import '../../src/common.dart';
 import '../test_utils.dart';
 import 'project.dart';
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/flutter_project_metadata.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/migrate/migrate_compute.dart';
+import 'package:flutter_tools/src/migrate/migrate_result.dart';
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
+import 'package:flutter_tools/src/project.dart';
+
+import '../test_utils.dart';
+
 class MigrateProject extends Project {
-  MigrateProject(this.version, {this.vanilla = true});
+  MigrateProject(this.version, {this.vanilla = true, this.main});
+
+  final String version;
+
+  /// Manually set main.dart
+  @override
+  final String? main;
+
+  /// Non-vanilla is a set of changed files that guarantee a merge conflict.
+  final bool vanilla;
+
+  late String _appPath;
+
+  static Future<void> installProject(String verison, Directory dir, {bool vanilla = true, String? main}) async {
+    final MigrateProject project = MigrateProject(verison, vanilla: vanilla, main: main);
+    await project.setUpIn(dir);
+
+    // Init a git repo to test uncommitted changes checks
+    await globals.processManager.run(<String>[
+      'git',
+      'init',
+    ], workingDirectory: dir.path);
+    await globals.processManager.run(<String>[
+      'git',
+      'checkout',
+      '-b',
+      'master',
+    ], workingDirectory: dir.path);
+    await commitChanges(dir);
+  }
+
+  static Future<void> commitChanges(Directory dir) async {
+    await globals.processManager.run(<String>[
+      'git',
+      'add',
+      '.',
+    ], workingDirectory: dir.path);
+    await globals.processManager.run(<String>[
+      'git',
+      'commit',
+      '-m',
+      '"Initial commit"',
+    ], workingDirectory: dir.path);
+  }
 
   @override
   Future<void> setUpIn(Directory dir, {
@@ -52,6 +108,7 @@ class MigrateProject extends Project {
     ], workingDirectory: dir.path);
 
     if (Platform.isWindows) {
+      print('swin');
       await processManager.run(<String>[
         'robocopy',
         tempDir.path,
@@ -88,16 +145,11 @@ class MigrateProject extends Project {
       ], workingDirectory: dir.path);
 
       final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
-      for (final FileSystemEntity file in allFiles) {
-        if (file is! File) {
-          continue;
-        }
-        await processManager.run(<String>[
-          'chmod',
-          '+w',
-          file.path,
-        ], workingDirectory: dir.path);
-      }
+      await processManager.run(<String>[
+        'chmod',
+        '+w',
+        '${dir.path}${fileSystem.path.separator}*',
+      ], workingDirectory: dir.path);
     }
 
     if (!vanilla) {
@@ -105,13 +157,12 @@ class MigrateProject extends Project {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'other.dart'), libOther);
       writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspecCustom);
     }
+    if (main != null) {
+      writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), main!);
+    }
     tryToDelete(tempDir);
     tryToDelete(depotToolsDir);
   }
-
-  final String version;
-  final bool vanilla;
-  late String _appPath;
 
   // Maintain the same pubspec as the configured app.
   @override
