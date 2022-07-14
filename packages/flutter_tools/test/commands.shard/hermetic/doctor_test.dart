@@ -630,6 +630,8 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
@@ -642,6 +644,8 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
   });
 
@@ -653,46 +657,64 @@ void main() {
     testUsingContext('validate installed + installed = installed', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[✓]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate installed + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate installed + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate partial + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate partial + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate partial + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate missing + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate missing + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate missing + missing = missing', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, missing).diagnose(), isFalse);
       expect(logger.statusText, startsWith('[✗]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
   });
 
@@ -1148,4 +1170,32 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<TargetPlatform> get targetPlatform =>  Future<TargetPlatform>.value(TargetPlatform.android);
+}
+
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  bool usesTerminalUi = false;
+
+  void addPrompt(List<String> characters, String selected) {
+    _characters = characters;
+    _selected = selected;
+  }
+
+  @override
+  final bool supportsColor = false;
+
+  List<String>? _characters;
+  String? _selected;
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) async {
+    expect(acceptedCharacters, _characters);
+    return _selected!;
+  }
 }
