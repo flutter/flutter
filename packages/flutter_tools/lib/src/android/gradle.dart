@@ -958,7 +958,7 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
   XmlDocument document;
   try {
     document = XmlDocument.parse(pomFile.readAsStringSync());
-  } on XmlParserException {
+  } on XmlException {
     throwToolExit(
       'Error parsing $pomPath. Please ensure that this is a valid XML document.'
     );

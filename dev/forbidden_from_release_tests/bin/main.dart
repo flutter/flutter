@@ -10,11 +10,9 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
-const ProcessManager processManager = LocalProcessManager();
 const FileSystem fs = LocalFileSystem();
 
 Future<void> main(List<String> args) async {

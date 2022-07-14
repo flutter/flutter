@@ -1495,15 +1495,13 @@ class _TabBarViewState extends State<TabBarView> {
     }
 
     final Duration duration = _controller!.animationDuration;
-
-    if (duration == Duration.zero) {
-      _pageController.jumpToPage(_currentIndex!);
-      return Future<void>.value();
-    }
-
     final int previousIndex = _controller!.previousIndex;
 
     if ((_currentIndex! - previousIndex).abs() == 1) {
+      if (duration == Duration.zero) {
+        _pageController.jumpToPage(_currentIndex!);
+        return Future<void>.value();
+      }
       _warpUnderwayCount += 1;
       await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
@@ -1524,6 +1522,11 @@ class _TabBarViewState extends State<TabBarView> {
       _childrenWithKey[previousIndex] = temp;
     });
     _pageController.jumpToPage(initialPage);
+
+    if (duration == Duration.zero) {
+      _pageController.jumpToPage(_currentIndex!);
+      return Future<void>.value();
+    }
 
     await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
     if (!mounted) {

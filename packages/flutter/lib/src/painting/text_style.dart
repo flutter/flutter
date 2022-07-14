@@ -504,7 +504,7 @@ class TextStyle with Diagnosticable {
   /// style (e.g., in a [TextSpan] tree).
   ///
   /// If this is false, properties that don't have explicit values will revert
-  /// to the defaults: white in color, a font size of 10 pixels, in a sans-serif
+  /// to the defaults: white in color, a font size of 14 pixels, in a sans-serif
   /// font face.
   final bool inherit;
 
@@ -1010,7 +1010,7 @@ class TextStyle with Diagnosticable {
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
   ///
-  /// Similarly, One of [backgroundColor] or [background] must be null, and if
+  /// Similarly, one of [backgroundColor] or [background] must be null, and if
   /// this or `other` has [background] specified it will be given preference
   /// over any backgroundColor parameter.
   TextStyle merge(TextStyle? other) {

@@ -902,4 +902,107 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
   });
+
+  testWidgets('RefreshIndicator disallows indicator - glow', (WidgetTester tester) async {
+    refreshCalled = false;
+    bool glowAccepted = true;
+    ScrollNotification? lastNotification;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: Builder(
+            builder: (BuildContext context) {
+              return NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification notification) {
+                  if (notification is OverscrollNotification
+                      && lastNotification is! OverscrollNotification) {
+                    final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: true);
+                    confirmationNotification.dispatch(context);
+                    glowAccepted = confirmationNotification.accepted;
+                  }
+                  lastNotification = notification;
+                  return false;
+                },
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                    return SizedBox(
+                      height: 200.0,
+                      child: Text(item),
+                    );
+                  }).toList(),
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+    expect(refreshCalled, true);
+    expect(glowAccepted, false);
+  });
+
+  testWidgets('RefreshIndicator disallows indicator - stretch', (WidgetTester tester) async {
+    refreshCalled = false;
+    bool stretchAccepted = true;
+    ScrollNotification? lastNotification;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: true),
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: Builder(
+              builder: (BuildContext context) {
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification notification) {
+                    if (notification is OverscrollNotification
+                        && lastNotification is! OverscrollNotification) {
+                      final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: true);
+                      confirmationNotification.dispatch(context);
+                      stretchAccepted = confirmationNotification.accepted;
+                    }
+                    lastNotification = notification;
+                    return false;
+                  },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                      return SizedBox(
+                        height: 200.0,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                  ),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+    expect(refreshCalled, true);
+    expect(stretchAccepted, false);
+  });
 }
