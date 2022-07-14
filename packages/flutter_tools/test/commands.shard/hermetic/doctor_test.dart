@@ -570,6 +570,8 @@ void main() {
         '! Doctor found issues in 4\n'
         '  categories.\n'
     ));
+  }, overrides: <Type, Generator>{
+    AnsiTerminal: () => FakeTerminal(),
   });
 
   testUsingContext('validate verbose output wrapping', () async {
@@ -614,6 +616,8 @@ void main() {
         '! Doctor found issues in 4\n'
         '  categories.\n'
     ));
+  }, overrides: <Type, Generator>{
+    AnsiTerminal: () => FakeTerminal(),
   });
 
   group('doctor with grouped validators', () {
