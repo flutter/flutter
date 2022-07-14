@@ -215,8 +215,7 @@ void main() {
                   Offset(reasonableTextField.left - gestureOutsideLine, 0),
             )));
 
-        // Should be less than the right edge, since we have padding.
-        expect(getLoupePosition(tester).dx,
+        expect(getLoupePosition(tester).dx + basicOffset.dx,
             greaterThanOrEqualTo(reasonableTextField.left));
       });
 
@@ -472,7 +471,8 @@ void main() {
 
         await tester.pump();
         expect(getIsAnimated(tester), true);
-        await tester.pump(TextEditingLoupe.jumpBetweenLinesAnimationDuration + const Duration(seconds: 2));
+        await tester.pump(TextEditingLoupe.jumpBetweenLinesAnimationDuration +
+            const Duration(seconds: 2));
         expect(getIsAnimated(tester), false);
       });
     });

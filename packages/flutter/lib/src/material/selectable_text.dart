@@ -9,9 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
-import 'loupe.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
+import 'loupe.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
