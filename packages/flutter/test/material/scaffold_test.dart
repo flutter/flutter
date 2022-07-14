@@ -2650,7 +2650,7 @@ void main() {
     final Finder textFieldFinder = find.byKey(textEditingKey);
     await tester.showKeyboard(textFieldFinder);
     await tester.pump(const Duration(milliseconds: 400));
-    
+
     // I don't know how to make the keyboard really open here and add the view
     //  insets, i have tested this in my project and it works, its a simple
     //  feature that doesn't interact with anything else
