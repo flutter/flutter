@@ -100,12 +100,13 @@ class RasterCache {
     const SkMatrix& matrix;
     const SkRect& logical_rect;
     const char* flow_type;
-    bool checkerboard;
   };
 
-  static std::unique_ptr<RasterCacheResult> Rasterize(
+  std::unique_ptr<RasterCacheResult> Rasterize(
       const RasterCache::Context& context,
-      const std::function<void(SkCanvas*)>& draw_function);
+      const std::function<void(SkCanvas*)>& draw_function,
+      const std::function<void(SkCanvas*, const SkRect& rect)>&
+          draw_checkerboard) const;
 
   explicit RasterCache(
       size_t access_threshold = 3,
