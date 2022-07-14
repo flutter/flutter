@@ -554,114 +554,117 @@ TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
   // Third cancel should be dropped
 }
 
-TEST(PointerDataPacketConverterTest, CanConvetScroll) {
-  PointerDataPacketConverter converter;
-  auto packet = std::make_unique<PointerDataPacket>(6);
-  PointerData data;
-  CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
-                                  PointerData::SignalKind::kNone, 0, 0.0, 0.0,
-                                  0.0, 0.0, 0);
-  packet->SetPointerData(0, data);
-  CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
-                                  PointerData::SignalKind::kNone, 1, 0.0, 0.0,
-                                  0.0, 0.0, 0);
-  packet->SetPointerData(1, data);
-  CreateSimulatedMousePointerData(data, PointerData::Change::kDown,
-                                  PointerData::SignalKind::kNone, 1, 0.0, 0.0,
-                                  0.0, 0.0, 1);
-  packet->SetPointerData(2, data);
-  CreateSimulatedMousePointerData(data, PointerData::Change::kHover,
-                                  PointerData::SignalKind::kScroll, 0, 34.0,
-                                  34.0, 30.0, 0.0, 0);
-  packet->SetPointerData(3, data);
-  CreateSimulatedMousePointerData(data, PointerData::Change::kHover,
-                                  PointerData::SignalKind::kScroll, 1, 49.0,
-                                  49.0, 50.0, 0.0, 0);
-  packet->SetPointerData(4, data);
-  CreateSimulatedMousePointerData(data, PointerData::Change::kHover,
-                                  PointerData::SignalKind::kScroll, 2, 10.0,
-                                  20.0, 30.0, 40.0, 0);
-  packet->SetPointerData(5, data);
-  auto converted_packet = converter.Convert(std::move(packet));
+TEST(PointerDataPacketConverterTest, CanConvertPointerSignals) {
+  PointerData::SignalKind signal_kinds[] = {
+      PointerData::SignalKind::kScroll,
+      PointerData::SignalKind::kScrollInertiaCancel,
+  };
+  for (const PointerData::SignalKind& kind : signal_kinds) {
+    PointerDataPacketConverter converter;
+    auto packet = std::make_unique<PointerDataPacket>(6);
+    PointerData data;
+    CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
+                                    PointerData::SignalKind::kNone, 0, 0.0, 0.0,
+                                    0.0, 0.0, 0);
+    packet->SetPointerData(0, data);
+    CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
+                                    PointerData::SignalKind::kNone, 1, 0.0, 0.0,
+                                    0.0, 0.0, 0);
+    packet->SetPointerData(1, data);
+    CreateSimulatedMousePointerData(data, PointerData::Change::kDown,
+                                    PointerData::SignalKind::kNone, 1, 0.0, 0.0,
+                                    0.0, 0.0, 1);
+    packet->SetPointerData(2, data);
+    CreateSimulatedMousePointerData(data, PointerData::Change::kHover, kind, 0,
+                                    34.0, 34.0, 30.0, 0.0, 0);
+    packet->SetPointerData(3, data);
+    CreateSimulatedMousePointerData(data, PointerData::Change::kHover, kind, 1,
+                                    49.0, 49.0, 50.0, 0.0, 0);
+    packet->SetPointerData(4, data);
+    CreateSimulatedMousePointerData(data, PointerData::Change::kHover, kind, 2,
+                                    10.0, 20.0, 30.0, 40.0, 0);
+    packet->SetPointerData(5, data);
+    auto converted_packet = converter.Convert(std::move(packet));
 
-  std::vector<PointerData> result;
-  UnpackPointerPacket(result, std::move(converted_packet));
+    std::vector<PointerData> result;
+    UnpackPointerPacket(result, std::move(converted_packet));
 
-  ASSERT_EQ(result.size(), (size_t)9);
-  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
-  ASSERT_EQ(result[0].signal_kind, PointerData::SignalKind::kNone);
-  ASSERT_EQ(result[0].device, 0);
-  ASSERT_EQ(result[0].physical_x, 0.0);
-  ASSERT_EQ(result[0].physical_y, 0.0);
-  ASSERT_EQ(result[0].synthesized, 0);
+    ASSERT_EQ(result.size(), (size_t)9);
+    ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
+    ASSERT_EQ(result[0].signal_kind, PointerData::SignalKind::kNone);
+    ASSERT_EQ(result[0].device, 0);
+    ASSERT_EQ(result[0].physical_x, 0.0);
+    ASSERT_EQ(result[0].physical_y, 0.0);
+    ASSERT_EQ(result[0].synthesized, 0);
 
-  ASSERT_EQ(result[1].change, PointerData::Change::kAdd);
-  ASSERT_EQ(result[1].signal_kind, PointerData::SignalKind::kNone);
-  ASSERT_EQ(result[1].device, 1);
-  ASSERT_EQ(result[1].physical_x, 0.0);
-  ASSERT_EQ(result[1].physical_y, 0.0);
-  ASSERT_EQ(result[1].synthesized, 0);
+    ASSERT_EQ(result[1].change, PointerData::Change::kAdd);
+    ASSERT_EQ(result[1].signal_kind, PointerData::SignalKind::kNone);
+    ASSERT_EQ(result[1].device, 1);
+    ASSERT_EQ(result[1].physical_x, 0.0);
+    ASSERT_EQ(result[1].physical_y, 0.0);
+    ASSERT_EQ(result[1].synthesized, 0);
 
-  ASSERT_EQ(result[2].change, PointerData::Change::kDown);
-  ASSERT_EQ(result[2].signal_kind, PointerData::SignalKind::kNone);
-  ASSERT_EQ(result[2].device, 1);
-  ASSERT_EQ(result[2].physical_x, 0.0);
-  ASSERT_EQ(result[2].physical_y, 0.0);
-  ASSERT_EQ(result[2].synthesized, 0);
+    ASSERT_EQ(result[2].change, PointerData::Change::kDown);
+    ASSERT_EQ(result[2].signal_kind, PointerData::SignalKind::kNone);
+    ASSERT_EQ(result[2].device, 1);
+    ASSERT_EQ(result[2].physical_x, 0.0);
+    ASSERT_EQ(result[2].physical_y, 0.0);
+    ASSERT_EQ(result[2].synthesized, 0);
 
-  // Converter will synthesize a hover to position for device 0.
-  ASSERT_EQ(result[3].change, PointerData::Change::kHover);
-  ASSERT_EQ(result[3].signal_kind, PointerData::SignalKind::kNone);
-  ASSERT_EQ(result[3].device, 0);
-  ASSERT_EQ(result[3].physical_x, 34.0);
-  ASSERT_EQ(result[3].physical_y, 34.0);
-  ASSERT_EQ(result[3].physical_delta_x, 34.0);
-  ASSERT_EQ(result[3].physical_delta_y, 34.0);
-  ASSERT_EQ(result[3].buttons, 0);
-  ASSERT_EQ(result[3].synthesized, 1);
+    // Converter will synthesize a hover to position for device 0.
+    ASSERT_EQ(result[3].change, PointerData::Change::kHover);
+    ASSERT_EQ(result[3].signal_kind, PointerData::SignalKind::kNone);
+    ASSERT_EQ(result[3].device, 0);
+    ASSERT_EQ(result[3].physical_x, 34.0);
+    ASSERT_EQ(result[3].physical_y, 34.0);
+    ASSERT_EQ(result[3].physical_delta_x, 34.0);
+    ASSERT_EQ(result[3].physical_delta_y, 34.0);
+    ASSERT_EQ(result[3].buttons, 0);
+    ASSERT_EQ(result[3].synthesized, 1);
 
-  ASSERT_EQ(result[4].change, PointerData::Change::kHover);
-  ASSERT_EQ(result[4].signal_kind, PointerData::SignalKind::kScroll);
-  ASSERT_EQ(result[4].device, 0);
-  ASSERT_EQ(result[4].physical_x, 34.0);
-  ASSERT_EQ(result[4].physical_y, 34.0);
-  ASSERT_EQ(result[4].scroll_delta_x, 30.0);
-  ASSERT_EQ(result[4].scroll_delta_y, 0.0);
+    ASSERT_EQ(result[4].change, PointerData::Change::kHover);
+    ASSERT_EQ(result[4].signal_kind, kind);
+    ASSERT_EQ(result[4].device, 0);
+    ASSERT_EQ(result[4].physical_x, 34.0);
+    ASSERT_EQ(result[4].physical_y, 34.0);
+    ASSERT_EQ(result[4].scroll_delta_x, 30.0);
+    ASSERT_EQ(result[4].scroll_delta_y, 0.0);
 
-  // Converter will synthesize a move to position for device 1.
-  ASSERT_EQ(result[5].change, PointerData::Change::kMove);
-  ASSERT_EQ(result[5].signal_kind, PointerData::SignalKind::kNone);
-  ASSERT_EQ(result[5].device, 1);
-  ASSERT_EQ(result[5].physical_x, 49.0);
-  ASSERT_EQ(result[5].physical_y, 49.0);
-  ASSERT_EQ(result[5].physical_delta_x, 49.0);
-  ASSERT_EQ(result[5].physical_delta_y, 49.0);
-  ASSERT_EQ(result[5].buttons, 1);
-  ASSERT_EQ(result[5].synthesized, 1);
+    // Converter will synthesize a move to position for device 1.
+    ASSERT_EQ(result[5].change, PointerData::Change::kMove);
+    ASSERT_EQ(result[5].signal_kind, PointerData::SignalKind::kNone);
+    ASSERT_EQ(result[5].device, 1);
+    ASSERT_EQ(result[5].physical_x, 49.0);
+    ASSERT_EQ(result[5].physical_y, 49.0);
+    ASSERT_EQ(result[5].physical_delta_x, 49.0);
+    ASSERT_EQ(result[5].physical_delta_y, 49.0);
+    ASSERT_EQ(result[5].buttons, 1);
+    ASSERT_EQ(result[5].synthesized, 1);
 
-  ASSERT_EQ(result[6].change, PointerData::Change::kHover);
-  ASSERT_EQ(result[6].signal_kind, PointerData::SignalKind::kScroll);
-  ASSERT_EQ(result[6].device, 1);
-  ASSERT_EQ(result[6].physical_x, 49.0);
-  ASSERT_EQ(result[6].physical_y, 49.0);
-  ASSERT_EQ(result[6].scroll_delta_x, 50.0);
-  ASSERT_EQ(result[6].scroll_delta_y, 0.0);
+    ASSERT_EQ(result[6].change, PointerData::Change::kHover);
+    ASSERT_EQ(result[6].signal_kind, kind);
+    ASSERT_EQ(result[6].device, 1);
+    ASSERT_EQ(result[6].physical_x, 49.0);
+    ASSERT_EQ(result[6].physical_y, 49.0);
+    ASSERT_EQ(result[6].scroll_delta_x, 50.0);
+    ASSERT_EQ(result[6].scroll_delta_y, 0.0);
 
-  // Converter will synthesize an add for device 2.
-  ASSERT_EQ(result[7].change, PointerData::Change::kAdd);
-  ASSERT_EQ(result[7].signal_kind, PointerData::SignalKind::kNone);
-  ASSERT_EQ(result[7].device, 2);
-  ASSERT_EQ(result[7].physical_x, 10.0);
-  ASSERT_EQ(result[7].physical_y, 20.0);
-  ASSERT_EQ(result[7].synthesized, 1);
+    // Converter will synthesize an add for device 2.
+    ASSERT_EQ(result[7].change, PointerData::Change::kAdd);
+    ASSERT_EQ(result[7].signal_kind, PointerData::SignalKind::kNone);
+    ASSERT_EQ(result[7].device, 2);
+    ASSERT_EQ(result[7].physical_x, 10.0);
+    ASSERT_EQ(result[7].physical_y, 20.0);
+    ASSERT_EQ(result[7].synthesized, 1);
 
-  ASSERT_EQ(result[8].change, PointerData::Change::kHover);
-  ASSERT_EQ(result[8].signal_kind, PointerData::SignalKind::kScroll);
-  ASSERT_EQ(result[8].device, 2);
-  ASSERT_EQ(result[8].physical_x, 10.0);
-  ASSERT_EQ(result[8].physical_y, 20.0);
-  ASSERT_EQ(result[8].scroll_delta_x, 30.0);
-  ASSERT_EQ(result[8].scroll_delta_y, 40.0);
+    ASSERT_EQ(result[8].change, PointerData::Change::kHover);
+    ASSERT_EQ(result[8].signal_kind, kind);
+    ASSERT_EQ(result[8].device, 2);
+    ASSERT_EQ(result[8].physical_x, 10.0);
+    ASSERT_EQ(result[8].physical_y, 20.0);
+    ASSERT_EQ(result[8].scroll_delta_x, 30.0);
+    ASSERT_EQ(result[8].scroll_delta_y, 40.0);
+  }
 }
 
 TEST(PointerDataPacketConverterTest, CanConvertTrackpadGesture) {
