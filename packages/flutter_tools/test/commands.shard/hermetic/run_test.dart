@@ -221,22 +221,42 @@ void main() {
       });
 
       testUsingContext('fails when targeted device is not Android with --device-user', () async {
-        fs.file('pubspec.yaml').createSync();
-        fs.file('.packages').writeAsStringSync('\n');
-        fs.file('lib/main.dart').createSync(recursive: true);
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
 
         mockDeviceManager
           ..devices = <Device>[device]
           ..targetDevices = <Device>[device];
 
-        final RunCommand command = RunCommand();
+        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
         await expectLater(createTestCommandRunner(command).run(<String>[
           'run',
           '--no-pub',
           '--device-user',
           '10',
         ]), throwsToolExit(message: '--device-user is only supported for Android. At least one Android device is required.'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => mockDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('succeeds when targeted device is an Android device with --device-user', () async {
+        final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+
+        mockDeviceManager
+          ..devices = <Device>[device]
+          ..targetDevices = <Device>[device];
+
+        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--device-user',
+          '10',
+        ]);
+        // Finishes normally without error.
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -876,16 +896,22 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
-  FakeDevice({bool isLocalEmulator = false, TargetPlatform targetPlatform = TargetPlatform.ios, String sdkNameAndVersion = ''})
-   : _isLocalEmulator = isLocalEmulator,
-     _targetPlatform = targetPlatform,
-     _sdkNameAndVersion = sdkNameAndVersion;
+  FakeDevice({
+    bool isLocalEmulator = false,
+    TargetPlatform targetPlatform = TargetPlatform.ios,
+    String sdkNameAndVersion = '',
+    PlatformType platformType = PlatformType.ios,
+  }): _isLocalEmulator = isLocalEmulator,
+      _targetPlatform = targetPlatform,
+      _sdkNameAndVersion = sdkNameAndVersion,
+      _platformType = platformType;
 
   static const int kSuccess = 1;
   static const int kFailure = -1;
   final TargetPlatform _targetPlatform;
   final bool _isLocalEmulator;
   final String _sdkNameAndVersion;
+  final PlatformType _platformType;
 
   @override
   Category get category => Category.mobile;
@@ -943,7 +969,7 @@ class FakeDevice extends Fake implements Device {
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
   @override
-  final PlatformType platformType = PlatformType.ios;
+  PlatformType get platformType => _platformType;
 
   bool startAppSuccess;
 
@@ -1009,6 +1035,13 @@ class TestRunCommandWithFakeResidentRunner extends RunCommand {
   // ignore: must_call_super
   Future<void> validateCommand() async {
     devices = <Device>[FakeDevice()..supportsHotReload = true];
+  }
+}
+
+class TestRunCommandThatOnlyValidates extends RunCommand {
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
   }
 }
 

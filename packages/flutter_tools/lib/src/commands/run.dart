@@ -495,7 +495,7 @@ class RunCommand extends RunCommandBase {
     }
 
     if (userIdentifier != null
-      && devices!.every((Device device) => device is! AndroidDevice)) {
+      && devices!.every((Device device) => device.platformType != PlatformType.android)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
