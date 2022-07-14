@@ -3565,7 +3565,6 @@ targets:
       task_name: new_gallery_impeller_ios__transition_perf
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/102236
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
