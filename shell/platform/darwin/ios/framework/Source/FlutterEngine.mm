@@ -393,7 +393,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)attachView {
   self.iosPlatformView->attachView();
-  [_textInputPlugin.get() setupIndirectScribbleInteraction:self.viewController];
 }
 
 - (void)setFlutterViewControllerWillDeallocObserver:(id<NSObject>)observer {
