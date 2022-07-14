@@ -92,7 +92,7 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
           return (chosenWidget?.overtakeAnimation!=null)? chosenWidget?.overtakeAnimation!(child, _controller)?? child : child;
         }
       },
-      child:chosenWidget ?? const SlotLayoutConfig(key: Key(''), child: SizedBox(width: 0, height: 0)),
+      child: chosenWidget ?? SlotLayoutConfig(key: const Key(''), builder: (_) => const SizedBox.shrink()),
     );
   }
 }
