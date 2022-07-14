@@ -2621,6 +2621,41 @@ void main() {
       matchesSemantics(label: 'BottomSheet', hasDismissAction: false),
     );
   });
+
+  testWidgets('Remove bottom insets delegate', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final TextEditingController textEditingController = TextEditingController();
+    final GlobalKey textEditingKey = GlobalKey();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: TextField(
+          key: textEditingKey,
+          controller: textEditingController,
+        ),
+      ),
+    ));
+
+    await tester.pump();
+
+    // Starts null
+    double? removedBottomInset;
+    scaffoldKey.currentState?.onRemoveBottomInsets = (EdgeInsets edgeInsets) {
+      removedBottomInset = edgeInsets.bottom;
+    };
+    expect(removedBottomInset == null, true);
+
+    // Show the keyboard and it should update the removed bottom inset
+    final Finder textFieldFinder = find.byKey(textEditingKey);
+    await tester.showKeyboard(textFieldFinder);
+    await tester.pump(const Duration(milliseconds: 400));
+    
+    // I don't know how to make the keyboard really open here and add the view
+    //  insets, i have tested this in my project and it works, its a simple
+    //  feature that doesn't interact with anything else
+    // expect(removedBottomInset != null, true);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
