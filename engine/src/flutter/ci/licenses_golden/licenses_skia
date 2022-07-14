@@ -1,4 +1,4 @@
-Signature: 6a651a0ecdcd0d3a2195d21957c4c4c7
+Signature: ddc2cdf68879964a1878abe2ba6a0cb7
 
 UNUSED LICENSES:
 
@@ -5581,6 +5581,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack_graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.h
+FILE: ../../../third_party/skia/src/gpu/graphite/DrawCommands.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawParams.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GlobalCache.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/GlobalCache.h
@@ -5643,6 +5644,7 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsTrivialExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
+FILE: ../../../third_party/skia/src/text/StrikeForGPU.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.h
 FILE: ../../../third_party/skia/src/text/gpu/SubRunContainer.cpp
