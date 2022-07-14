@@ -181,7 +181,7 @@ class FormState extends State<Form> {
           'overwritten. Assure every formfield has a unique submissionKey'
         );
       }
-      
+
       data.addEntries(<MapEntry<String, dynamic>>[entry]);
     }
 

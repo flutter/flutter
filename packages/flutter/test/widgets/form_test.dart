@@ -194,7 +194,7 @@ void main() {
                       ),
                       TextFormField(
                         submissionKey: 'firstKey',
-                        initialValue: 'firstKey', 
+                        initialValue: 'firstKey',
                       ),
                     ],
                   ),
