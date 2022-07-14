@@ -1499,7 +1499,7 @@ class EditableText extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@macro flutter.widgets.loupe.loupeControllerWidgetBuilder}
-  /// 
+  ///
   /// If not procided, no loupeBuilder will be shown.
   final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
