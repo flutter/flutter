@@ -188,6 +188,16 @@ void main() {
         await project.regeneratePlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
+      _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
+        // This is not a valid Xml document
+        const String invalidManifest = '<manifest></application>';
+        final FlutterProject project = await someProject(androidManifestOverride: invalidManifest);
+
+        expect(
+          () => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore),
+          throwsToolExit(message: 'Please ensure that the android manifest is a valid XML document and try again.'),
+        );
+      });
       _testInMemory('Android project not on v2 embedding shows a warning', () async {
         final FlutterProject project = await someProject();
         // The default someProject with an empty <manifest> already indicates
@@ -195,7 +205,7 @@ void main() {
         // android:name="flutterEmbedding" android:value="2" />.
 
         project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
-        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
       });
       _testInMemory('Android project not on v2 embedding exits', () async {
         final FlutterProject project = await someProject();
@@ -207,7 +217,7 @@ void main() {
           Future<dynamic>.sync(() => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit)),
           contains('Build failed due to use of deprecated Android v1 embedding.')
         );
-        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
         expect(testLogger.statusText, contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in '));
       });
       _testInMemory('Project not on v2 embedding does not warn if deprecation status is irrelevant', () async {
@@ -226,13 +236,13 @@ void main() {
         // android:name="flutterEmbedding" android:value="2" />.
 
         project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
-        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
       });
       _testInMemory('Android plugin project does not throw v1 embedding deprecation warning', () async {
         final FlutterProject project = await aPluginProject();
 
         project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit);
-        expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
         expect(testLogger.statusText, isNot(contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ')));
       });
       _testInMemory('Android plugin without example app does not show a warning', () async {
@@ -240,7 +250,7 @@ void main() {
         project.example.directory.deleteSync();
 
         await project.regeneratePlatformSpecificTooling();
-        expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
@@ -769,7 +779,9 @@ apply plugin: 'kotlin-android'
   });
 }
 
-Future<FlutterProject> someProject() async {
+Future<FlutterProject> someProject({
+  String androidManifestOverride,
+}) async {
   final Directory directory = globals.fs.directory('some_project');
   directory.childDirectory('.dart_tool')
     .childFile('package_config.json')
@@ -781,7 +793,7 @@ Future<FlutterProject> someProject() async {
       ..createSync(recursive: true);
   androidDirectory
     .childFile('AndroidManifest.xml')
-    .writeAsStringSync('<manifest></manifest>');
+    .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
   return FlutterProject.fromDirectory(directory);
 }
 

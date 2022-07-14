@@ -12,6 +12,7 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
+// enum Meridiem { am, pm }
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
@@ -39,6 +40,35 @@ import 'theme_data.dart';
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The
 /// [secondary] widget is placed on the opposite side. This maps to the
 /// [ListTile.leading] and [ListTile.trailing] properties of [ListTile].
+///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [RadioListTile] itself but by the [Material] widget ancestor. In this
+/// case, one can wrap a [Material] widget around the [RadioListTile], e.g.:
+///
+/// {@tool snippet}
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: RadioListTile<Meridiem>(
+///       tileColor: Colors.red,
+///       title: const Text('AM'),
+///       groupValue: Meridiem.am,
+///       value: Meridiem.am,
+///       onChanged:(Meridiem? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ## Performance considerations when wrapping [RadioListTile] with [Material]
+///
+/// Wrapping a large number of [RadioListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [RadioListTile]s that require it
+/// or include a common [Material] ancestor where possible.
 ///
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
