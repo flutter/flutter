@@ -402,6 +402,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       ? unselectedIconTheme
       : unselectedIconTheme.copyWith(opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity);
 
+    final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
+
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: Semantics(
@@ -410,7 +412,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
           elevation: elevation,
           color: backgroundColor,
           child: SafeArea(
-            right: false,
+            right: isRTLDirection,
+            left: !isRTLDirection,
             child: Column(
               children: <Widget>[
                 _verticalSpacer,

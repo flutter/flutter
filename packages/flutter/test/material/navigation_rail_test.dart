@@ -2691,6 +2691,21 @@ void main() {
     );
     final double updatedWidth = tester.getSize(find.byType(NavigationRail)).width;
     expect(updatedWidth, defaultWidth + safeAreaPadding);
+
+    // test width when text direction is RTL.
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(right: safeAreaPadding),
+          ),
+          child: navigationRail(),
+        ),
+        isRTL: true,
+      ),
+    );
+    final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
+    expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
   });
 
   group('Material 2', () {
@@ -4485,6 +4500,22 @@ void main() {
       );
       final double updatedWidth = tester.getSize(find.byType(NavigationRail)).width;
       expect(updatedWidth, defaultWidth + safeAreaPadding);
+
+      // test width when text direction is RTL.
+      await tester.pumpWidget(
+        _buildWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(right: safeAreaPadding),
+            ),
+            child: navigationRail(),
+          ),
+          useMaterial3: false,
+          isRTL: true,
+        ),
+      );
+      final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
+      expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
     });
 
   }); // End Material 2 group
@@ -4691,17 +4722,20 @@ Material _railMaterial(WidgetTester tester) {
   );
 }
 
-Widget _buildWidget(Widget child, {bool useMaterial3 = true}) {
+Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}) {
   return MaterialApp(
     theme: ThemeData(useMaterial3: useMaterial3),
-    home: Scaffold(
-      body: Row(
-        children: <Widget>[
-          child,
-          const Expanded(
-            child: Text('body'),
-          ),
-        ],
+    home: Directionality(
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        body: Row(
+          children: <Widget>[
+            child,
+            const Expanded(
+              child: Text('body'),
+            ),
+          ],
+        ),
       ),
     ),
   );
