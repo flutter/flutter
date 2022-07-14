@@ -214,6 +214,7 @@ void main() {
       delegate: delegate,
       controller: controller,
       devicePixelRatio: 1.0,
+      ignorePlatformViews: false,
     );
 
     expect(delegate.addedListenerCount, 0);
@@ -245,6 +246,7 @@ void main() {
       delegate: delegate,
       controller: controller,
       devicePixelRatio: 1.0,
+      ignorePlatformViews: false,
     );
 
     expect(controller.addedListenerCount, 0);
@@ -312,7 +314,7 @@ class TestDelegate extends RasterWidgetDelegate {
   }
 
   @override
-  void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
+  void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
     count += 1;
     lastImage = image;
   }
