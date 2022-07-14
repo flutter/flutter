@@ -5,6 +5,7 @@
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -870,6 +871,8 @@ void main() {
           buildNumber: '1.0',
         ), throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
@@ -944,6 +947,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
@@ -1018,6 +1023,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
@@ -1092,6 +1099,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
@@ -1167,6 +1176,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
@@ -1223,6 +1234,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
@@ -1307,6 +1320,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
@@ -1391,6 +1406,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
@@ -1475,6 +1492,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
@@ -1559,6 +1578,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
   });
 }
@@ -1568,4 +1589,9 @@ class FakeGradleUtils extends Fake implements GradleUtils {
   String getExecutable(FlutterProject project) {
     return 'gradlew';
   }
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
 }
