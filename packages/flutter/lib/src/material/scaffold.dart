@@ -2581,6 +2581,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     super.dispose();
   }
 
+  /// Delegate triggered when we remove the bottom insets
+  void Function(EdgeInsets edgeInsets)? onRemoveBottomInsets;
+
   void _addIfNonNull(
     List<LayoutId> children,
     Widget? child,
@@ -2599,6 +2602,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       removeBottom: removeBottomPadding,
     );
     if (removeBottomInset) {
+      onRemoveBottomInsets?.call(data.viewInsets);
       data = data.removeViewInsets(removeBottom: true);
     }
 
