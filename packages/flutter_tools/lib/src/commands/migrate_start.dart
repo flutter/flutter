@@ -8,6 +8,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../migrate/migrate_compute.dart';
+import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_result.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
@@ -148,7 +149,7 @@ class MigrateStartCommand extends FlutterCommand {
     }
 
     if (await hasUncommittedChanges(project.directory.path, logger, migrateUtils)) {
-      return const FlutterCommandResult(ExitStatus.fail);
+      // return const FlutterCommandResult(ExitStatus.fail);
     }
 
     List<SupportedPlatform>? platforms;
@@ -169,10 +170,10 @@ class MigrateStartCommand extends FlutterCommand {
       targetAppPath: stringArg('target-app-directory'),
       baseRevision: stringArg('base-revision'),
       targetRevision: stringArg('target-revision'),
-      deleteTempDirectories: boolArg('delete-temp-directories'),
+      deleteTempDirectories: boolArg('delete-temp-directories') ?? true,
       platforms: platforms,
-      preferTwoWayMerge: boolArg('prefer-two-way-merge'),
-      allowFallbackBaseRevision: boolArg('allow-fallback-base-revision'),
+      preferTwoWayMerge: boolArg('prefer-two-way-merge') ?? false,
+      allowFallbackBaseRevision: boolArg('allow-fallback-base-revision') ?? false,
       fileSystem: fileSystem,
       logger: logger,
       migrateUtils: migrateUtils,
@@ -188,7 +189,7 @@ class MigrateStartCommand extends FlutterCommand {
 
     await writeStagingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
 
-    logger.printStatus('The migrate tool has staged proposed changes in the migrate working directory.\n');
+    logger.printStatus('The migrate tool has staged proposed changes in the migrate staging directory.\n');
     logger.printStatus('Guided conflict resolution wizard:');
     printCommandText('flutter migrate resolve-conflicts', logger);
     logger.printStatus('Check the status and diffs of the migration with:');
@@ -214,7 +215,7 @@ class MigrateStartCommand extends FlutterCommand {
       try {
         fileSystem.directory(p).deleteSync(recursive: true);
       } on FileSystemException catch (e) {
-        logger.printError('Unabled to delete ${d.path} due to ${e.message}, please clean up manually.');
+        logger.printError('Unabled to delete $p due to ${e.message}, please clean up manually.');
       }
     }
   }

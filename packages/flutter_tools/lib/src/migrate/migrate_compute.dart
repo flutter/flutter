@@ -211,8 +211,6 @@ Future<MigrateResult?> computeMigration({
   logger.printStatus('Generating base reference app', indent: 2, color: TerminalColor.grey);
   status.resume();
 
-  final MigrateResult migrateResult = MigrateResult.empty();
-
   // Generate the base templates
   final bool customBaseProjectDir = baseAppPath != null;
   final bool customTargetProjectDir = targetAppPath != null;
@@ -234,9 +232,11 @@ Future<MigrateResult?> computeMigration({
       logger.printStatus('Created temporary directory: ${targetProjectDir.path}', indent: 2, color: TerminalColor.grey);
     }
   }
+  context.migrateResult.generatedBaseTemplateDirectory = baseProjectDir;
+  context.migrateResult.generatedTargetTemplateDirectory = targetProjectDir;
 
-  await migrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path);
-  await migrateUtils.gitInit(migrateResult.generatedTargetTemplateDirectory!.absolute.path);
+  await migrateUtils.gitInit(context.migrateResult.generatedBaseTemplateDirectory!.absolute.path);
+  await migrateUtils.gitInit(context.migrateResult.generatedTargetTemplateDirectory!.absolute.path);
 
   final String name = flutterProject.manifest.appName;
   final String androidLanguage = flutterProject.android.isKotlin ? 'kotlin' : 'java';
@@ -295,14 +295,14 @@ Future<MigrateResult?> computeMigration({
   logger.printStatus('Diffing base and target reference app.', indent: 2, color: TerminalColor.grey);
   status.resume();
 
-  migrateResult.diffMap.addAll(await baseProject.diff(context, targetProject));
+  context.migrateResult.diffMap.addAll(await baseProject.diff(context, targetProject));
 
   // Check for any new files that were added in the target reference app that did not
   // exist in the base reference app.
   status.pause();
   logger.printStatus('Finding newly added files', indent: 2, color: TerminalColor.grey);
   status.resume();
-  migrateResult.addedFiles.addAll(await baseProject.newlyAddedFiles(context, targetProject));
+  context.migrateResult.addedFiles.addAll(await baseProject.newlyAddedFiles(context, targetProject));
 
   // Merge any base->target changed files with the version in the developer's project.
   // Files that the developer left unchanged are fully updated to match the target reference.
@@ -326,15 +326,15 @@ Future<MigrateResult?> computeMigration({
   if (deleteTempDirectories) {
     // Don't delete user-provided directories
     if (!customBaseProjectDir) {
-      migrateResult.tempDirectories.add(migrateResult.generatedBaseTemplateDirectory!);
+      context.migrateResult.tempDirectories.add(context.migrateResult.generatedBaseTemplateDirectory!);
     }
     if (!customTargetProjectDir) {
-      migrateResult.tempDirectories.add(migrateResult.generatedTargetTemplateDirectory!);
+      context.migrateResult.tempDirectories.add(context.migrateResult.generatedTargetTemplateDirectory!);
     }
-    migrateResult.tempDirectories.addAll(migrateResult.sdkDirs.values);
+    context.migrateResult.tempDirectories.addAll(context.migrateResult.sdkDirs.values);
   }
   status.stop();
-  return migrateResult;
+  return context.migrateResult;
 }
 
 String getLocalPath(String path, String basePath, FileSystem fileSystem) {
@@ -800,8 +800,8 @@ class MigrateRevisions {
     );
 
     final FlutterVersion version = FlutterVersion(workingDirectory: context.flutterProject.directory.absolute.path);
-    final String? metadataRevision = metadata.versionRevision;
-    targetRevision ??= version.frameworkRevision;
+    metadataRevision = metadata.versionRevision;
+    targetRevision = version.frameworkRevision;
     String rootBaseRevision = '';
     revisionToConfigs = <String, List<MigratePlatformConfig>>{};
     final Set<String> revisions = <String>{};
