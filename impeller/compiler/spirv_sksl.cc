@@ -306,7 +306,7 @@ void CompilerSkSL::emit_interface_block(const SPIRVariable& var) {
   statement(variable_decl(type, to_name(var.self), var.self), ";");
   if (output_name_.empty()) {
     output_name_ = to_name(var.self);
-  } else {
+  } else if (to_name(var.self) != output_name_) {
     SPIRV_CROSS_THROW("Only one output variable is supported: '" +
                       to_name(var.self) + "'");
   }
