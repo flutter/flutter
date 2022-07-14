@@ -5985,7 +5985,7 @@ void main() {
       await tester.pump();
       expect(focusNode.hasPrimaryFocus, isTrue);
 
-      // Tap just outside the border, but not inside the EditableText.
+      // Tap outside the border.
       await tester.tapAt(const Offset(10, 10));
       await tester.pump();
 
@@ -6015,7 +6015,8 @@ void main() {
       await tester.tapAt(const Offset(10, 10));
       await tester.pump();
 
-      expect(focusNode.hasPrimaryFocus, isTrue);
+      // Focus is lost on mobile browsers, but not mobile apps.
+      expect(focusNode.hasPrimaryFocus, kIsWeb ? isFalse : isTrue);
     }, variant: TargetPlatformVariant.mobile());
 
     testWidgets("tapping on toolbar doesn't lose focus", (WidgetTester tester) async {
@@ -6073,7 +6074,10 @@ void main() {
       await tester.tap(find.text('Copy'));
       await tester.pump();
       expect(focusNode.hasPrimaryFocus, isTrue);
-    }, variant: TargetPlatformVariant.all());
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb, // The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
+    );
     testWidgets("Tapping on border doesn't lose focus", (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       await tester.pumpWidget(

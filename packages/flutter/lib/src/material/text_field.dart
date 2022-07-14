@@ -1336,7 +1336,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget? child) {
-          child = InputDecorator(
+          return InputDecorator(
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
@@ -1347,14 +1347,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             expands: widget.expands,
             child: child,
           );
-          if (focusNode.hasPrimaryFocus) {
-            return TapRegion(
-              groupId: tapRegionGroupId,
-              child: child,
-            );
-          } else {
-            return child;
-          }
         },
         child: child,
       );
@@ -1378,7 +1370,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    return MouseRegion(
+    child = MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
       onExit: (PointerExitEvent event) => _handleHover(false),
@@ -1407,6 +1399,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
       ),
     );
+    if (focusNode.hasPrimaryFocus) {
+      child = TapRegion(
+        groupId: tapRegionGroupId,
+        child: child,
+      );
+    }
+    return child;
   }
 }
 

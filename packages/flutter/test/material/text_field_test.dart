@@ -11857,7 +11857,8 @@ void main() {
       await tester.tapAt(const Offset(10, 10));
       await tester.pump();
 
-      expect(focusNode.hasPrimaryFocus, isTrue);
+      // Focus is lost on mobile browsers, but not mobile apps.
+      expect(focusNode.hasPrimaryFocus, kIsWeb ? isFalse : isTrue);
     }, variant: TargetPlatformVariant.mobile());
 
     testWidgets("Tapping on toolbar doesn't lose focus", (WidgetTester tester) async {

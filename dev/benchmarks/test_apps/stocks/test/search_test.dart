@@ -30,10 +30,7 @@ void main() {
     expect(find.text('BANA'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Search'));
-    // We skip a minute at a time so that each phase of the animation
-    // is done in two frames, the start frame and the end frame.
-    // There are two phases currently, so that results in three frames.
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
 
     expect(find.text('AAPL'), findsOneWidget);
     expect(find.text('BANA'), findsOneWidget);
