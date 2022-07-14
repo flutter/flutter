@@ -1166,7 +1166,7 @@ mixin TextInputClient {
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
 
-  /// Performs the specified MacOS-specific selector selector from the
+  /// Performs the specified MacOS-specific selector from the
   /// `NSStandardKeyBindingResponding` protocol or user-specified selector
   /// from `DefaultKeyBinding.Dict`.
   void performSelector(String selectorName) {}
