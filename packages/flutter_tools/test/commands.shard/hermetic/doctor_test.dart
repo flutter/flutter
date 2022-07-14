@@ -1198,28 +1198,5 @@ class FakeDevice extends Fake implements Device {
 
 class FakeTerminal extends Fake implements AnsiTerminal {
   @override
-  bool usesTerminalUi = false;
-
-  void addPrompt(List<String> characters, String selected) {
-    _characters = characters;
-    _selected = selected;
-  }
-
-  @override
   final bool supportsColor = false;
-
-  List<String>? _characters;
-  String? _selected;
-
-  @override
-  Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
-  }) async {
-    expect(acceptedCharacters, _characters);
-    return _selected!;
-  }
 }
