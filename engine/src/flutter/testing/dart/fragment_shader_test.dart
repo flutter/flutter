@@ -184,6 +184,45 @@ void main() {
     expect(toFloat(renderedBytes.getUint8(3)), closeTo(1.0, epsilon));
   });
 
+  test('spirv for the ink_sparkle shader is accepted', () async {
+    final Uint8List spirv = await shaderFile(
+      path.join('spirv'),
+      'ink_sparkle.frag.spirv',
+    ).readAsBytes();
+    final FragmentProgram program = await FragmentProgram.compile(
+      spirv: spirv.buffer,
+    );
+
+    final Shader shader = program.shader(
+      floatUniforms: Float32List(32),
+    );
+
+    await _imageByteDataFromShader(shader: shader);
+
+    // Testing that no exceptions are thrown. Tests that the ink_sparkle shader
+    // produces the correct pixels are in the framework.
+  });
+
+  test('sksl for the ink_sparkle shader is accepted', () async {
+    final Uint8List sksl = await shaderFile(
+      path.join('sksl'),
+      'ink_sparkle.frag.sksl',
+    ).readAsBytes();
+    final FragmentProgram program = await FragmentProgram.compile(
+      raw: sksl.buffer,
+      uniformFloatCount: 32,
+    );
+
+    final Shader shader = program.shader(
+      floatUniforms: Float32List(32),
+    );
+
+    await _imageByteDataFromShader(shader: shader);
+
+    // Testing that no exceptions are thrown. Tests that the ink_sparkle shader
+    // produces the correct pixels are in the framework.
+  });
+
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
   final Map<String, ByteBuffer> supportedGLSLOpShaders = _loadShaders(
     path.join('supported_glsl_op_shaders', 'spirv'),

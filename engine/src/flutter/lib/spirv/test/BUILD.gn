@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 if (enable_unittests) {
@@ -17,5 +18,29 @@ if (enable_unittests) {
       "//third_party/vulkan-deps/spirv-tools/src:spvtools",
       "//third_party/vulkan-deps/spirv-tools/src:spvtools_val",
     ]
+  }
+
+  group("test") {
+    deps = [
+      ":sksl_ink_sparkle",
+      ":spirv_ink_sparkle",
+      "//flutter/lib/spirv/test/exception_shaders:spirv_compile_exception_shaders",
+      "//flutter/lib/spirv/test/general_shaders",
+      "//flutter/lib/spirv/test/supported_glsl_op_shaders",
+      "//flutter/lib/spirv/test/supported_op_shaders",
+    ]
+  }
+
+  impellerc("spirv_ink_sparkle") {
+    shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
+    shader_target_flag = "--flutter-spirv"
+    intermediates_subdir = "spirv"
+  }
+
+  impellerc("sksl_ink_sparkle") {
+    shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
+    shader_target_flag = "--sksl"
+    intermediates_subdir = "sksl"
+    sl_file_extension = "sksl"
   }
 }
