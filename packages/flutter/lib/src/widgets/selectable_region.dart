@@ -26,6 +26,10 @@ import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 
+// Examples can assume:
+// FocusNode _focusNode = FocusNode();
+// late GlobalKey key;
+
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.touch,
   PointerDeviceKind.stylus,
@@ -34,12 +38,21 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 
 /// A widget that introduces an area for user selections.
 ///
-/// Flutter widgets are not selectable by default. To enable selection for
-/// a Flutter application, consider wrapping a portion of widget subtree with
-/// [SelectableRegion]. The wrapped subtree can be selected by users using mouse
-/// or touch gestures, e.g. users can select widgets by holding the mouse
+/// Flutter widgets are not selectable by default. Wrapping a widget subtree
+/// with a [SelectableRegion] widget enables selection within that subtree (for
+/// example, [Text] widgets automatically look for selectable regions to enable
+/// selection). The wrapped subtree can be selected by users using mouse or
+/// touch gestures, e.g. users can select widgets by holding the mouse
 /// left-click and dragging across widgets, or they can use long press gestures
 /// to select words on touch devices.
+///
+/// A [SelectableRegion] widget requires configuration; in particular specific
+/// [selectionControls] must be provided.
+///
+/// The [SelectionArea] widget from the [material] library configures a
+/// [SelectableRegion] in a platform-specific manner (e.g. using a Material
+/// toolbar on Android, a Cupertino toolbar on iOS), and it may therefore be
+/// simpler to use that widget rather than using [SelectableRegion] directly.
 ///
 /// ## An overview of the selection system.
 ///
@@ -77,7 +90,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// MaterialApp(
 ///   home: SelectableRegion(
 ///     selectionControls: materialTextSelectionControls,
-///     focusNode: FocusNode(),
+///     focusNode: _focusNode, // initialized to FocusNode()
 ///     child: Scaffold(
 ///       appBar: AppBar(title: const Text('Flutter Code Sample')),
 ///       body: ListView(
@@ -160,6 +173,16 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// child selection area can not extend past its subtree, and the selection of
 /// the parent selection area can not extend inside the child selection area.
 ///
+/// ## Tests
+///
+/// In a test, a region can be selected either by faking drag events (e.g. using
+/// [WidgetTester.dragFrom]) or by sending intents to a widget inside the region
+/// that has been given a [GlobalKey], e.g.:
+///
+/// ```dart
+/// Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
+/// ```
+///
 /// See also:
 ///  * [SelectionArea], which creates a [SelectableRegion] with
 ///    platform-adaptive selection controls.
@@ -202,6 +225,9 @@ class SelectableRegion extends StatefulWidget {
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
+  ///
+  /// The [emptyTextSelectionControls] global variable provides a default
+  /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
 
   @override

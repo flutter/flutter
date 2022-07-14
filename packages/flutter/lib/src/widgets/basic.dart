@@ -5657,9 +5657,17 @@ class RichText extends MultiChildRenderObjectWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The [SelectionRegistrar] this rich text is subscribed to.
+  ///
+  /// If this is set, [selectionColor] must be non-null.
   final SelectionRegistrar? selectionRegistrar;
 
   /// The color to use when painting the selection.
+  ///
+  /// This is ignored if [selectionRegistrar] is null.
+  ///
+  /// See the section on selections in the [RichText] top-level API
+  /// documentation for more details on enabling selection in [RichText]
+  /// widgets.
   final Color? selectionColor;
 
   @override

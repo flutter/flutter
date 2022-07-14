@@ -281,6 +281,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// navigation and being able to insert widgets on top of the pages in an app.
 /// To simply display a stack of widgets, consider using [Stack] instead.
 ///
+/// An [Overlay] widget requires a [Directionality] widget to be in scope, so
+/// that it can resolve direction-sensitive coordinates of any
+/// [Positioned.directional] children.
+///
 /// {@tool dartpad}
 /// This example shows how to use the [Overlay] to highlight the [NavigationBar]
 /// destination.

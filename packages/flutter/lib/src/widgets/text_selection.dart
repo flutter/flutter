@@ -26,6 +26,7 @@ import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+export 'package:flutter/rendering.dart' show TextSelectionPoint;
 export 'package:flutter/services.dart' show TextSelectionDelegate;
 
 /// A duration that controls how often the drag selection update callback is
@@ -76,6 +77,11 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// implementer of the toolbar widget.
 ///
 /// Override text operations such as [handleCut] if needed.
+///
+/// See also:
+///
+///  * [SelectionArea], which selects appropriate text selection controls
+///    based on the current platform.
 abstract class TextSelectionControls {
   /// Builds a selection handle of the given `type`.
   ///
@@ -97,20 +103,20 @@ abstract class TextSelectionControls {
   ///
   /// Typically displays buttons for copying and pasting text.
   ///
-  /// [globalEditableRegion] is the TextField size of the global coordinate system
-  /// in logical pixels.
+  /// The [globalEditableRegion] parameter is the TextField size of the global
+  /// coordinate system in logical pixels.
   ///
-  /// [textLineHeight] is the `preferredLineHeight` of the [RenderEditable] we
-  /// are building a toolbar for.
+  /// The [textLineHeight] parameter is the [RenderEditable.preferredLineHeight]
+  /// of the [RenderEditable] we are building a toolbar for.
   ///
-  /// The [position] is a general calculation midpoint parameter of the toolbar.
-  /// If you want more detailed position information, can use [endpoints]
-  /// to calculate it.
+  /// The [selectionMidpoint] parameter is a general calculation midpoint
+  /// parameter of the toolbar. More detailed position information
+  /// is computable from the [endpoints] parameter.
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
     double textLineHeight,
-    Offset position,
+    Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ValueListenable<ClipboardStatus>? clipboardStatus,
@@ -206,6 +212,55 @@ abstract class TextSelectionControls {
     delegate.selectAll(SelectionChangedCause.toolbar);
   }
 }
+
+/// Text selection controls that do not show any toolbars or handles.
+///
+/// This is a placeholder, suitable for temporary use during development, but
+/// not practical for production. For example, it provides no way for the user
+/// to interact with selections: no context menus on desktop, no toolbars or
+/// drag handles on mobile, etc. For production, consider using
+/// [MaterialTextSelectionControls] or creating a custom subclass of
+/// [TextSelectionControls].
+///
+/// The [emptyTextSelectionControls] global variable has a
+/// suitable instance of this class.
+class EmptyTextSelectionControls extends TextSelectionControls {
+  @override
+  Size getHandleSize(double textLineHeight) => Size.zero;
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) => const SizedBox.shrink();
+
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+}
+
+/// Text selection controls that do not show any toolbars or handles.
+///
+/// This is a placeholder, suitable for temporary use during development, but
+/// not practical for production. For example, it provides no way for the user
+/// to interact with selections: no context menus on desktop, no toolbars or
+/// drag handles on mobile, etc. For production, consider using
+/// [materialTextSelectionControls] or creating a custom subclass of
+/// [TextSelectionControls].
+final TextSelectionControls emptyTextSelectionControls = EmptyTextSelectionControls();
+
 
 /// An object that manages a pair of text selection handles for a
 /// [RenderEditable].

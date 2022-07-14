@@ -19,6 +19,10 @@ import 'localizations.dart';
 /// assert(debugCheckHasCupertinoLocalizations(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasCupertinoLocalizations(BuildContext context) {
   assert(() {

@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
+import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'magnifier.dart';
 import 'text_selection.dart';
@@ -18,6 +19,10 @@ import 'theme.dart';
 /// Flutter widgets are not selectable by default. To enable selection for
 /// a specific screen, consider wrapping the body of the [Route] with a
 /// [SelectionArea].
+///
+/// The [SelectionArea] widget must have a [Localizations] ancestor that
+/// contains a [MaterialLocalizations] delegate; using the [MaterialApp] widget
+/// ensures that such an ancestor is present.
 ///
 /// {@tool dartpad}
 /// This example shows how to make a screen selectable.
@@ -85,6 +90,7 @@ class _SelectionAreaState extends State<SelectionArea> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     TextSelectionControls? controls = widget.selectionControls;
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
