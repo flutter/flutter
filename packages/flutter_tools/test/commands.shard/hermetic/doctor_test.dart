@@ -326,6 +326,8 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate non-verbose output format for run with crash', () async {
@@ -343,6 +345,8 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
@@ -359,6 +363,8 @@ void main() {
       });
 
       expect(logger.statusText, contains('Stuck validator that never completes exceeded maximum allowed duration of '));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
@@ -385,6 +391,8 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
 
@@ -397,6 +405,8 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
@@ -413,6 +423,8 @@ void main() {
               '\n'
               '! Doctor found issues in 2 categories.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate non-verbose output format', () async {
@@ -434,6 +446,8 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate verbose output format', () async {
@@ -464,6 +478,8 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate PII can be hidden', () async {
@@ -483,6 +499,8 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
   });
 
@@ -525,6 +543,7 @@ void main() {
         ),
       ]);
     }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
       Usage: () => testUsage,
     });
 
