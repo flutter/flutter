@@ -105,8 +105,9 @@ class Icon extends StatelessWidget {
   /// The fill for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `FILL` [FontVariation]
-  /// axis, otherwise has no effect. Must be between 0.0 (unfilled) and 1.0
-  /// (filled), inclusive.
+  /// axis, otherwise has no effect. Variable font filenames often indicate
+  /// the supported axes. Must be between 0.0 (unfilled) and 1.0 (filled),
+  /// inclusive.
   ///
   /// Can be used to convey a state transition for animation or interaction.
   ///
@@ -121,7 +122,8 @@ class Icon extends StatelessWidget {
   /// The stroke weight for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `wght` [FontVariation]
-  /// axis, otherwise has no effect. Must be greater than 0.
+  /// axis, otherwise has no effect. Variable font filenames often indicate
+  /// the supported axes. Must be greater than 0.
   ///
   /// Defaults to nearest [IconTheme]'s [IconThemeData.weight].
   ///
@@ -135,7 +137,8 @@ class Icon extends StatelessWidget {
   /// The grade (granular stroke weight) for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `GRAD` [FontVariation]
-  /// axis, otherwise has no effect. Can be negative.
+  /// axis, otherwise has no effect. Variable font filenames often indicate
+  /// the supported axes. Can be negative.
   ///
   /// Grade and [weight] both affect a symbol's stroke weight (thickness), but
   /// grade has a smaller impact on the size of the symbol.
@@ -157,7 +160,8 @@ class Icon extends StatelessWidget {
   /// The optical size for drawing the icon.
   ///
   /// Requires the underlying icon font to support the `opsz` [FontVariation]
-  /// axis, otherwise has no effect. Must be greater than 0.
+  /// axis, otherwise has no effect. Variable font filenames often indicate
+  /// the supported axes. Must be greater than 0.
   ///
   /// For an icon to look the same at different sizes, the stroke weight
   /// (thickness) must change as the icon size scales. Optical size offers a way
