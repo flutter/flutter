@@ -29,6 +29,9 @@ void main() {
   late Directory newerTargetFlutterDirectory;
   late Directory currentDir;
 
+  const String oldSdkRevision = '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
+  const String newSdkRevision = '85684f9300908116a78138ea4c6036c35c9a1236';
+
   setUpAll(() async {
     fileSystem = globals.localFileSystem;
     currentDir = createResolvedTempDirectorySync('current_app.');
@@ -54,12 +57,129 @@ void main() {
     );
     targetFlutterDirectory = createResolvedTempDirectorySync('targetFlutterDir.');
     newerTargetFlutterDirectory = createResolvedTempDirectorySync('newerTargetFlutterDir.');
-    await context.migrateUtils.cloneFlutter('5391447fae6209bb21a89e6a5a6583cac1af9b4b', targetFlutterDirectory.absolute.path);
-    await context.migrateUtils.cloneFlutter('85684f9300908116a78138ea4c6036c35c9a1236', newerTargetFlutterDirectory.absolute.path);
+    await context.migrateUtils.cloneFlutter(oldSdkRevision, targetFlutterDirectory.absolute.path);
+    await context.migrateUtils.cloneFlutter(newSdkRevision, newerTargetFlutterDirectory.absolute.path);
   });
 
   tearDownAll(() async {
     targetFlutterDirectory.deleteSync(recursive: true);
+  });
+
+  group('MigrateRevisions', () {
+    testUsingContext('extracts revisions', () async {
+      MigrateRevisions revisions = MigrateRevisions(
+        context: context,
+        baseRevision: oldSdkRevision,
+        allowFallbackBaseRevision: true,
+        platforms: <SupportedPlatform>[SupportedPlatform.android, SupportedPlatform.ios],
+      );
+
+      print(context.flutterProject.directory.childFile('.metadata').readAsStringSync());
+
+      expect(revisions.revisionsList, <String>[oldSdkRevision]);
+      expect(revisions.fallbackRevision, oldSdkRevision);
+      expect(revisions.metadataRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.unmanagedFiles.isEmpty, false);
+      expect(revisions.config.platformConfigs.isEmpty, false);
+      expect(revisions.config.platformConfigs.length, 3);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.root), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.android), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.ios), true);
+    });
+
+    testUsingContext('extracts revisions', () async {
+      MigrateRevisions revisions = MigrateRevisions(
+        context: context,
+        baseRevision: oldSdkRevision,
+        allowFallbackBaseRevision: true,
+        platforms: <SupportedPlatform>[SupportedPlatform.android, SupportedPlatform.ios],
+      );
+
+      File metadataFile = context.flutterProject.directory.childFile('.metadata');
+      metadataFile.writeAsStringSync('''
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
+#
+# This file should be version controlled and should not be manually edited.
+
+version:
+  revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+  channel: unknown
+
+project_type: app
+
+# Tracks metadata for the flutter migrate command
+migration:
+  platforms:
+    - platform: root
+      create_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+      base_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    - platform: android
+      create_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+      base_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    - platform: ios
+      create_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+      base_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    - platform: linux
+      create_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+      base_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    - platform: macos
+      create_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+      base_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    - platform: web
+      create_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+      base_revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    - platform: windows
+      create_revision: 36427af29421f406ac95ff55ea31d1dc49a45b5f
+      base_revision: 36427af29421f406ac95ff55ea31d1dc49a45b5f
+
+  # User provided section
+
+  # List of Local paths (relative to this file) that should be
+  # ignored by the migrate tool.
+  #
+  # Files that are not part of the templates will be ignored by default.
+  unmanaged_files:
+    - 'lib/main.dart'
+    - 'blah.dart'
+    - 'ios/Runner.xcodeproj/project.pbxproj'
+''', flush: true);
+      print(context.flutterProject.directory.childFile('.metadata').readAsStringSync());
+
+      expect(revisions.revisionsList, <String>[oldSdkRevision]);
+      expect(revisions.fallbackRevision, oldSdkRevision);
+      expect(revisions.metadataRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.unmanagedFiles.isEmpty, false);
+      expect(revisions.config.unmanagedFiles.length, 3);
+      expect(revisions.config.unmanagedFiles.contains('lib/main.dart'), true);
+      expect(revisions.config.unmanagedFiles.contains('blah.dart'), true);
+      expect(revisions.config.unmanagedFiles.contains('ios/Runner.xcodeproj/project.pbxproj'), true);
+
+      expect(revisions.config.platformConfigs.length, 7);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.root), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.android), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.ios), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.linux), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.macos), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.web), true);
+      expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.windows), true);
+
+      expect(revisions.config.platformConfigs['root']!.createRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['android']!.createRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['ios']!.createRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['linux']!.createRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['macos']!.createRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['web']!.createRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['windows']!.createRevision, '36427af29421f406ac95ff55ea31d1dc49a45b5f');
+
+      expect(revisions.config.platformConfigs['root']!.baseRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['android']!.baseRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['ios']!.baseRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['linux']!.baseRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['macos']!.baseRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['web']!.baseRevision, '9b2d32b605630f28625709ebd9d78ab3016b2bf6');
+      expect(revisions.config.platformConfigs['windows']!.baseRevision, '36427af29421f406ac95ff55ea31d1dc49a45b5f');
+    });
   });
 
   group('MigrateFlutterProject', () {
@@ -79,7 +199,7 @@ void main() {
 
       await targetProject.createProject(
         context,
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //targetRevision
+        oldSdkRevision, //targetRevision
         targetFlutterDirectory, //targetFlutterDirectory
       );
 
@@ -103,15 +223,15 @@ void main() {
 
       await baseProject.createProject(
         context,
-        <String>['5391447fae6209bb21a89e6a5a6583cac1af9b4b'], //revisionsList
+        <String>[oldSdkRevision], //revisionsList
         <String, List<MigratePlatformConfig>>{
-          '5391447fae6209bb21a89e6a5a6583cac1af9b4b': <MigratePlatformConfig>[
+          oldSdkRevision: <MigratePlatformConfig>[
             MigratePlatformConfig(platform: SupportedPlatform.android),
             MigratePlatformConfig(platform: SupportedPlatform.ios)
           ],
         }, //revisionToConfigs
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //fallbackRevision
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //targetRevision
+        oldSdkRevision, //fallbackRevision
+        oldSdkRevision, //targetRevision
         targetFlutterDirectory, //targetFlutterDirectory
       );
 
@@ -146,15 +266,15 @@ void main() {
 
       await baseProject.createProject(
         context,
-        <String>['5391447fae6209bb21a89e6a5a6583cac1af9b4b'], //revisionsList
+        <String>[oldSdkRevision], //revisionsList
         <String, List<MigratePlatformConfig>>{
-          '5391447fae6209bb21a89e6a5a6583cac1af9b4b': <MigratePlatformConfig>[
+          oldSdkRevision: <MigratePlatformConfig>[
             MigratePlatformConfig(platform: SupportedPlatform.android),
             MigratePlatformConfig(platform: SupportedPlatform.ios)
           ],
         }, //revisionToConfigs
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //fallbackRevision
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //targetRevision
+        oldSdkRevision, //fallbackRevision
+        oldSdkRevision, //targetRevision
         targetFlutterDirectory, //targetFlutterDirectory
       );
 
@@ -163,7 +283,7 @@ void main() {
 
       await targetProject.createProject(
         context,
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //revisionsList
+        oldSdkRevision, //revisionsList
         targetFlutterDirectory, //targetFlutterDirectory
       );
 
@@ -200,15 +320,15 @@ void main() {
 
       await baseProject.createProject(
         context,
-        <String>['5391447fae6209bb21a89e6a5a6583cac1af9b4b'], //revisionsList
+        <String>[oldSdkRevision], //revisionsList
         <String, List<MigratePlatformConfig>>{
-          '5391447fae6209bb21a89e6a5a6583cac1af9b4b': <MigratePlatformConfig>[
+          oldSdkRevision: <MigratePlatformConfig>[
             MigratePlatformConfig(platform: SupportedPlatform.android),
             MigratePlatformConfig(platform: SupportedPlatform.ios)
           ],
         }, //revisionToConfigs
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //fallbackRevision
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //targetRevision
+        oldSdkRevision, //fallbackRevision
+        oldSdkRevision, //targetRevision
         targetFlutterDirectory, //targetFlutterDirectory
       );
 
@@ -217,7 +337,7 @@ void main() {
 
       await targetProject.createProject(
         context,
-        '85684f9300908116a78138ea4c6036c35c9a1236', //revisionsList
+        newSdkRevision, //revisionsList
         newerTargetFlutterDirectory, //targetFlutterDirectory
       );
 
@@ -406,15 +526,15 @@ void main() {
 
       await baseProject.createProject(
         context,
-        <String>['5391447fae6209bb21a89e6a5a6583cac1af9b4b'], //revisionsList
+        <String>[oldSdkRevision], //revisionsList
         <String, List<MigratePlatformConfig>>{
-          '5391447fae6209bb21a89e6a5a6583cac1af9b4b': <MigratePlatformConfig>[
+          oldSdkRevision: <MigratePlatformConfig>[
             MigratePlatformConfig(platform: SupportedPlatform.android),
             MigratePlatformConfig(platform: SupportedPlatform.ios)
           ],
         }, //revisionToConfigs
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //fallbackRevision
-        '5391447fae6209bb21a89e6a5a6583cac1af9b4b', //targetRevision
+        oldSdkRevision, //fallbackRevision
+        oldSdkRevision, //targetRevision
         targetFlutterDirectory, //targetFlutterDirectory
       );
 
@@ -423,7 +543,7 @@ void main() {
 
       await targetProject.createProject(
         context,
-        '85684f9300908116a78138ea4c6036c35c9a1236', //revisionsList
+        newSdkRevision, //revisionsList
         newerTargetFlutterDirectory, //targetFlutterDirectory
       );
 
