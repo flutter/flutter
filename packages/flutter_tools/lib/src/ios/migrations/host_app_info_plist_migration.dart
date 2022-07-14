@@ -39,12 +39,12 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
 </plist>
 ''';
       const String plistWithKey = '''
-  <key>$_kDisableMinimumFrameDurationKey</key>
-  <true/>
+	<key>$_kDisableMinimumFrameDurationKey</key>
+	<true/>
 </dict>
 </plist>
 ''';
-      newContents = fileContents.replaceAll(plistEnd, plistWithKey);
+      newContents = newContents.replaceAll(plistEnd, plistWithKey);
     }
 
     if (!newContents.contains(_kIndirectInputEventsKey)) {
@@ -59,7 +59,7 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
 </dict>
 </plist>
 ''';
-      newContents = fileContents.replaceAll(plistEnd, plistWithKey);
+      newContents = newContents.replaceAll(plistEnd, plistWithKey);
     }
 
     return newContents;
