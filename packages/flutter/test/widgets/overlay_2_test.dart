@@ -141,6 +141,29 @@ void main() {
     expect(directionSeenByOverlayChild, textDirection);
   });
 
+  testWidgets('Can reparent Overlay', (WidgetTester tester) async {
+    final Widget widget = Directionality(
+      key: GlobalKey(debugLabel: 'key'),
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return OverlayPortal(
+                overlayInfo: OverlayInfo.of(context),
+                overlayChild: const SizedBox(),
+                child: const SizedBox(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    await tester.pumpWidget(SizedBox(child: widget));
+  });
+
   testWidgets('overlay child can use Positioned', (WidgetTester tester) async {
     double dimensions = 30;
     late StateSetter setState;

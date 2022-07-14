@@ -586,7 +586,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   void _didChangeLayout() {
-    if (_inkFeatures != null && _inkFeatures!.isNotEmpty) {
+    if (_inkFeatures?.isNotEmpty ?? false) {
       markNeedsPaint();
     }
   }
@@ -596,12 +596,13 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_inkFeatures != null && _inkFeatures!.isNotEmpty) {
+    final List<InkFeature>? inkFeatures = _inkFeatures;
+    if (inkFeatures != null && inkFeatures.isNotEmpty) {
       final Canvas canvas = context.canvas;
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
-      //canvas.clipRect(Offset.zero & size);
-      for (final InkFeature inkFeature in _inkFeatures!) {
+      canvas.clipRect(Offset.zero & size);
+      for (final InkFeature inkFeature in inkFeatures) {
         inkFeature._paint(canvas);
       }
       canvas.restore();
@@ -690,18 +691,19 @@ abstract class InkFeature {
   // Returns the paint transform that allows `fromRenderObject` to perform paint
   // in `toRenderObject`'s coordinate space.
   //
-  // Returns null if `fromRenderObject` and `toRenderObject` are not in the
-  // same render tree, or
+  // Returns null if either `fromRenderObject` or `toRenderObject` is not in the
+  // same render tree, or either of them is in an offscreen subtree (see
+  // RenderObject.paintsChild).
   static Matrix4? _getPaintTransform(
     RenderObject fromRenderObject,
     RenderObject toRenderObject,
   ) {
+    // The paths to fromRenderObject and toRenderObject's common ancestor.
     final List<RenderObject> fromPath = <RenderObject>[fromRenderObject];
     final List<RenderObject> toPath = <RenderObject>[toRenderObject];
 
     RenderObject from = fromRenderObject;
     RenderObject to = toRenderObject;
-    //print('$from (${from.depth}) -> $to (${to.depth})');
 
     while (!identical(from, to)) {
       final int fromDepth = from.depth;
@@ -710,7 +712,7 @@ abstract class InkFeature {
       if (fromDepth >= toDepth) {
         final AbstractNode? fromParent = from.parent;
         // Return early if the 2 render objects are not in the same render tree,
-        // or one of them is offscreen and thus not painted.
+        // or either of them is offscreen and thus not painted.
         if (fromParent is! RenderObject || !fromParent.paintsChild(from)) {
           return null;
         }
