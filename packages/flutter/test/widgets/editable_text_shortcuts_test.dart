@@ -1445,6 +1445,15 @@ void main() {
                 reason: activator.toString(),
               );
             }
+          }, variant: TargetPlatformVariant.all());
+
+          testWidgets('at start with page up', (WidgetTester tester) async {
+            controller.text = testText;
+            controller.selection = const TextSelection.collapsed(
+              offset: 0,
+            );
+
+            await tester.pumpWidget(buildEditableText());
 
             for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.pageUp)) {
               await sendKeyCombination(tester, activator);
@@ -1457,7 +1466,7 @@ void main() {
                 reason: activator.toString(),
               );
             }
-          }, variant: TargetPlatformVariant.all());
+          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
           testWidgets('at end', (WidgetTester tester) async {
             controller.text = testText;
@@ -1485,6 +1494,24 @@ void main() {
               expect(controller.selection.extentOffset, 72, reason: activator.toString());
             }
           }, variant: TargetPlatformVariant.all());
+
+          testWidgets('at end with page down', (WidgetTester tester) async {
+            controller.text = testText;
+            controller.selection = const TextSelection.collapsed(
+              offset: 72,
+            );
+
+            await tester.pumpWidget(buildEditableText());
+
+            for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.pageDown)) {
+              await sendKeyCombination(tester, activator);
+              await tester.pump();
+
+              expect(controller.text, testText);
+              expect(controller.selection.baseOffset, 72, reason: activator.toString());
+              expect(controller.selection.extentOffset, 72, reason: activator.toString());
+            }
+          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
           testWidgets('run', (WidgetTester tester) async {
             controller.text =
@@ -1605,7 +1632,7 @@ void main() {
               offset: 4,
               affinity: TextAffinity.upstream,
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
           testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =

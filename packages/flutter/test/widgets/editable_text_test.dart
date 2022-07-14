@@ -5853,85 +5853,90 @@ void main() {
       reason: 'on $platform',
     );
 
-    // Move down by page.
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.pageDown,
-      ],
-      targetPlatform: defaultTargetPlatform,
-    );
+    // Skip page down/up tests on Cupertino platforms as these keys don't
+    // move the caret.
+    if (defaultTargetPlatform != TargetPlatform.iOS
+        && defaultTargetPlatform != TargetPlatform.macOS) {
+      // Move down by page.
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.pageDown,
+        ],
+        targetPlatform: defaultTargetPlatform,
+      );
 
-    expect(
-      selection,
-      equals(
-        const TextSelection.collapsed(
-          offset: 55,
+      expect(
+        selection,
+        equals(
+          const TextSelection.collapsed(
+            offset: 55,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
+        reason: 'on $platform',
+      );
 
-    // Move up by page (to start).
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.pageUp,
-      ],
-      targetPlatform: defaultTargetPlatform,
-    );
+      // Move up by page (to start).
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.pageUp,
+        ],
+        targetPlatform: defaultTargetPlatform,
+      );
 
-    expect(
-      selection,
-      equals(
-        const TextSelection.collapsed(
-          offset: 0,
+      expect(
+        selection,
+        equals(
+          const TextSelection.collapsed(
+            offset: 0,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
+        reason: 'on $platform',
+      );
 
-    // Select towards end by page.
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.pageDown,
-      ],
-      shift: true,
-      targetPlatform: defaultTargetPlatform,
-    );
+      // Select towards end by page.
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.pageDown,
+        ],
+        shift: true,
+        targetPlatform: defaultTargetPlatform,
+      );
 
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: 55,
-          affinity: TextAffinity.upstream,
+      expect(
+        selection,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: 55,
+            affinity: TextAffinity.upstream,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
+        reason: 'on $platform',
+      );
 
-    // Change selection extent towards start by page.
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.pageUp,
-      ],
-      shift: true,
-      targetPlatform: defaultTargetPlatform,
-    );
+      // Change selection extent towards start by page.
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.pageUp,
+        ],
+        shift: true,
+        targetPlatform: defaultTargetPlatform,
+      );
 
-    expect(
-      selection,
-      equals(
-        const TextSelection.collapsed(
-          offset: 0,
+      expect(
+        selection,
+        equals(
+          const TextSelection.collapsed(
+            offset: 0,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
+        reason: 'on $platform',
+      );
+    }
 
     // Jump forward three words.
     await sendKeys(
