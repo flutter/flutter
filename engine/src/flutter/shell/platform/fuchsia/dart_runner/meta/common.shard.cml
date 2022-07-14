@@ -14,11 +14,6 @@
     ],
     use: [
         {
-            directory: "config-data",
-            rights: [ "r*" ],
-            path: "/config/data",
-        },
-        {
             protocol: [
                 "fuchsia.device.NameProvider",  // For fdio uname()
                 "fuchsia.feedback.CrashReporter",
