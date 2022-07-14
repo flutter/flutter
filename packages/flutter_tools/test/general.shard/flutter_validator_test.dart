@@ -192,7 +192,7 @@ void main() {
         ValidationMessage.hint('Upstream repository https://github.com/flutter/flutter.git is not the same as FLUTTER_GIT_URL'),
         ValidationMessage('FLUTTER_GIT_URL = https://githubmirror.com/flutter.git'),
         ValidationMessage(
-          'It is fine to continue if the errors are intentional, however it is '
+          'If this was intentional, you can disregard this warning; however it is '
           'recommended to use "git" directly to perform update checks and upgrades.'
         ),
       ]),
@@ -225,7 +225,7 @@ void main() {
           "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install."
         ),
         const ValidationMessage(
-          'It is fine to continue if the errors are intentional, however it is '
+          'If this was intentional, you can disregard this warning; however it is '
           'recommended to use "git" directly to perform update checks and upgrades.'
         ),
       ]),
@@ -258,7 +258,7 @@ void main() {
           'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
         ),
         const ValidationMessage(
-          'It is fine to continue if the errors are intentional, however it is '
+          'If this was intentional, you can disregard this warning; however it is '
           'recommended to use "git" directly to perform update checks and upgrades.'
         ),
       ]),
@@ -316,7 +316,7 @@ void main() {
             'https://githubmirror.com/flutter.git to dismiss this error.'
           ),
           const ValidationMessage(
-            'It is fine to continue if the errors are intentional, however it is '
+            'If this was intentional, you can disregard this warning; however it is '
             'recommended to use "git" directly to perform update checks and upgrades.'
           ),
         ]),
@@ -349,12 +349,40 @@ void main() {
             'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
           ),
           const ValidationMessage(
-            'It is fine to continue if the errors are intentional, however it is '
+            'If this was intentional, you can disregard this warning; however it is '
             'recommended to use "git" directly to perform update checks and upgrades.'
           ),
         ]),
       ));
     });
+  });
+
+  testWithoutContext('Do not show the message for intentional errors if FlutterValidator passes', () async {
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: FakePlatform(localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(
+        frameworkVersion: '1.0.0',
+        channel: 'beta'
+      ),
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
+      flutterRoot: () => 'sdk/flutter',
+    );
+
+    expect(await flutterValidator.validate(), _matchDoctorValidation(
+      validationType: ValidationType.installed,
+      statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
+      messages: isNot(
+        contains(const ValidationMessage(
+          'If this was intentional, you can disregard this warning; however it is '
+          'recommended to use "git" directly to perform update checks and upgrades.'
+        )),
+      ),
+    ));
   });
 }
 
