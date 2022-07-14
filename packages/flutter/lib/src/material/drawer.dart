@@ -213,7 +213,7 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
-    final DrawerThemeData defaults = theme.useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final DrawerThemeData defaults = theme.useMaterial3 ? _DrawerDefaultsM3(context) : _DrawerDefaultsM2(context);
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     String? label = semanticLabel;
     switch (Theme.of(context).platform) {
@@ -413,9 +413,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   DrawerThemeData get _defaults {
     if (Theme.of(context).useMaterial3) {
-      return _TokenDefaultsM3(context);
+      return _DrawerDefaultsM3(context);
     }
-    return _DefaultsM2(context);
+    return _DrawerDefaultsM2(context);
   }
 
   void _animationChanged() {
@@ -722,8 +722,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 }
 
-class _DefaultsM2 extends DrawerThemeData {
-  const _DefaultsM2(this.context)
+class _DrawerDefaultsM2 extends DrawerThemeData {
+  const _DrawerDefaultsM2(this.context)
     : super(
       elevation: 16.0,
       width: 304.0,
@@ -738,15 +738,18 @@ class _DefaultsM2 extends DrawerThemeData {
   Color? get scrimColor => Colors.black54;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - Drawer
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
 
 // Generated version v0_101
-class _TokenDefaultsM3 extends DrawerThemeData {
-  const _TokenDefaultsM3(this.context)
+class _DrawerDefaultsM3 extends DrawerThemeData {
+  const _DrawerDefaultsM3(this.context)
     : super(
       elevation: 0.0,
       width: 360.0,
@@ -764,6 +767,6 @@ class _TokenDefaultsM3 extends DrawerThemeData {
   Color? get scrimColor => Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.onSurface.withOpacity(0.68) : Colors.black54;
 
   @override
-  ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)));
+  ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(0.0), bottomRight: Radius.circular(0.0)));
 }
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - Drawer
