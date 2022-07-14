@@ -12,6 +12,7 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 import dev.flutter.scenarios.PlatformViewsActivity;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -124,9 +125,12 @@ public class PlatformViewWithSurfaceViewUiTest {
         goldName("testPlatformViewWithoutOverlayIntersection"));
   }
 
+  // TODO(dnfield): This is not safe until https://github.com/flutter/flutter/issues/31990
+  // is resolved.
+  @Ignore("not safe until https://github.com/flutter/flutter/issues/31990 is resolved")
   @Test
   public void testPlatformViewLargerThanDisplaySize() throws Exception {
-    // Regression test for https://github.com/flutter/flutter/issues/2897.
+    // Regression test for https://github.com/flutter/flutter/issues/28978.
     intent.putExtra("scenario_name", "platform_view_larger_than_display_size");
     ScreenshotUtil.capture(
         activityRule.launchActivity(intent), goldName("testPlatformViewLargerThanDisplaySize"));

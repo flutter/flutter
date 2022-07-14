@@ -117,7 +117,7 @@ class PlatformViewNoOverlayIntersectionScenario extends Scenario
 
 /// A platform view that is larger than the display size.
 /// This is only applicable on Android while using virtual displays.
-/// Related issue: https://github.com/flutter/flutter/issues/2897.
+/// Related issue: https://github.com/flutter/flutter/issues/28978.
 class PlatformViewLargerThanDisplaySize extends Scenario
     with _BasePlatformViewScenarioMixin {
   /// Creates the PlatformView scenario.
