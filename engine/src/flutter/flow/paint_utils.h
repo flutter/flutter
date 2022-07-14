@@ -11,8 +11,6 @@
 
 namespace flutter {
 
-void DrawCheckerboard(SkCanvas* canvas, SkColor c1, SkColor c2, int size);
-
 void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect);
 
 }  // namespace flutter
