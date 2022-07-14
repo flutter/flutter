@@ -148,12 +148,11 @@ bool LayerRasterCacheItem::TryToPrepareRasterCache(const PaintContext& context,
     if (const SkRect* paint_bounds = GetPaintBoundsFromLayer()) {
       RasterCache::Context r_context = {
           // clang-format off
-      .gr_context         = context.gr_context,
-      .dst_color_space    = context.dst_color_space,
-      .matrix             = matrix_,
-      .logical_rect       = *paint_bounds,
-      .flow_type          = flow_type,
-      .checkerboard       = context.checkerboard_offscreen_layers,
+          .gr_context         = context.gr_context,
+          .dst_color_space    = context.dst_color_space,
+          .matrix             = matrix_,
+          .logical_rect       = *paint_bounds,
+          .flow_type          = flow_type,
           // clang-format on
       };
       return context.raster_cache->UpdateCacheEntry(

@@ -159,7 +159,6 @@ bool DisplayListRasterCacheItem::TryToPrepareRasterCache(
       .matrix             = transformation_matrix_,
       .logical_rect       = bounds,
       .flow_type          = flow_type,
-      .checkerboard       = context.checkerboard_offscreen_layers,
       // clang-format on
   };
   return context.raster_cache->UpdateCacheEntry(

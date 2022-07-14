@@ -120,6 +120,39 @@ TEST(RasterCache, ThresholdIsRespectedForDisplayList) {
   ASSERT_TRUE(display_list_item.Draw(paint_context, &dummy_canvas, &paint));
 }
 
+TEST(RasterCache, SetCheckboardCacheImages) {
+  size_t threshold = 1;
+  flutter::RasterCache cache(threshold);
+
+  SkMatrix matrix = SkMatrix::I();
+  auto display_list = GetSampleDisplayList();
+
+  PaintContextHolder paint_context_holder = GetSamplePaintContextHolder(&cache);
+  auto& paint_context = paint_context_holder.paint_context;
+  auto dummy_draw_function = [](SkCanvas* canvas) {};
+  bool did_draw_checkerboard = false;
+  auto draw_checkerboard = [&](SkCanvas* canvas, const SkRect&) {
+    did_draw_checkerboard = true;
+  };
+  RasterCache::Context r_context = {
+      // clang-format off
+      .gr_context         = paint_context.gr_context,
+      .dst_color_space    = paint_context.dst_color_space,
+      .matrix             = matrix,
+      .logical_rect       = display_list->bounds(),
+      .flow_type          = "RasterCacheFlow::DisplayList",
+      // clang-format on
+  };
+
+  cache.SetCheckboardCacheImages(false);
+  cache.Rasterize(r_context, dummy_draw_function, draw_checkerboard);
+  ASSERT_FALSE(did_draw_checkerboard);
+
+  cache.SetCheckboardCacheImages(true);
+  cache.Rasterize(r_context, dummy_draw_function, draw_checkerboard);
+  ASSERT_TRUE(did_draw_checkerboard);
+}
+
 TEST(RasterCache, AccessThresholdOfZeroDisablesCachingForSkPicture) {
   size_t threshold = 0;
   flutter::RasterCache cache(threshold);
