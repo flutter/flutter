@@ -815,6 +815,8 @@ void main() {
         buildNumber: '1.0',
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
