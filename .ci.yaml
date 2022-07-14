@@ -2343,6 +2343,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
+    scheduler: luci
 
   - name: Staging_build_linux analyze
     presubmit: false
@@ -2766,6 +2767,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: plugin_lint_mac
+    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
