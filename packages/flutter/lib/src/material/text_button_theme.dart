@@ -55,9 +55,7 @@ class TextButtonThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return style.hashCode;
-  }
+  int get hashCode => style.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -107,7 +105,7 @@ class TextButtonTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TextButtonTheme theme = TextButtonTheme.of(context);
+  /// TextButtonThemeData theme = TextButtonTheme.of(context);
   /// ```
   static TextButtonThemeData of(BuildContext context) {
     final TextButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();

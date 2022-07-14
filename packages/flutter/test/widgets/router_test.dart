@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,6 +73,54 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
 
       await parser.parsingFuture;
+      await delegate.setNewRouteFuture;
+      await tester.pump();
+      expect(find.text('update'), findsOneWidget);
+    });
+  });
+
+  testWidgets('Interrupts route parsing should not crash', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final CompleterRouteInformationParser parser = CompleterRouteInformationParser();
+    final SimpleAsyncRouterDelegate delegate = SimpleAsyncRouterDelegate(
+      builder: (BuildContext context, RouteInformation? information) {
+        if (information == null)
+          return const Text('waiting');
+        return Text(information.location!);
+      },
+    );
+    await tester.runAsync(() async {
+      await tester.pumpWidget(buildBoilerPlate(
+        Router<RouteInformation>(
+          routeInformationProvider: provider,
+          routeInformationParser: parser,
+          routerDelegate: delegate,
+        ),
+      ));
+      // Future has not yet completed.
+      expect(find.text('waiting'), findsOneWidget);
+
+      final Completer<void> firstTransactionCompleter = parser.completer;
+
+      // Start a new parsing transaction before the previous one complete.
+      provider.value = const RouteInformation(
+        location: 'update',
+      );
+      await tester.pump();
+      expect(find.text('waiting'), findsOneWidget);
+      // Completing the previous transaction does not cause an update.
+      firstTransactionCompleter.complete();
+      await firstTransactionCompleter.future;
+      await tester.pump();
+      expect(find.text('waiting'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // Make sure the new transaction can complete and update correctly.
+      parser.completer.complete();
+      await parser.completer.future;
       await delegate.setNewRouteFuture;
       await tester.pump();
       expect(find.text('update'), findsOneWidget);
@@ -768,7 +818,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final ByteData routerMessage = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', routerMessage, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', routerMessage, (_) { });
     await tester.pump();
     expect(find.text('testRouteName'), findsOneWidget);
     expect(find.text('state'), findsOneWidget);
@@ -778,7 +828,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRouteName),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('newTestRouteName'), findsOneWidget);
   });
@@ -802,14 +852,14 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     );
 
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: true), type: RouteInformationReportingType.none);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: true));
     // Implicit reporting pushes new history entry if the location changes.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': false }),
     ]);
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: false), type: RouteInformationReportingType.none);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: false));
     // Since the location is the same, the provider sends replaces message.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
@@ -861,7 +911,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
 
     // Pop route through the message channel.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -1392,7 +1442,7 @@ class SimpleRouteInformationProvider extends RouteInformationProvider with Chang
   }
 
   @override
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
     _value = routeInformation;
     onRouterReport?.call(routeInformation, type);
   }
@@ -1406,6 +1456,24 @@ class SimpleAsyncRouteInformationParser extends RouteInformationParser<RouteInfo
   @override
   Future<RouteInformation> parseRouteInformation(RouteInformation information) {
     return parsingFuture = Future<RouteInformation>.value(information);
+  }
+
+  @override
+  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+    return configuration;
+  }
+}
+
+class CompleterRouteInformationParser extends RouteInformationParser<RouteInformation> {
+  CompleterRouteInformationParser();
+
+  late Completer<void> completer;
+
+  @override
+  Future<RouteInformation> parseRouteInformation(RouteInformation information) async {
+    completer = Completer<void>();
+    await completer.future;
+    return SynchronousFuture<RouteInformation>(information);
   }
 
   @override

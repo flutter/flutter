@@ -58,6 +58,9 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///           header: const Text('SECTION 1'),
 ///           children: <Widget>[
 ///             CupertinoFormRow(
+///               prefix: const Text('Toggle'),
+///               helper: const Text('Use your instincts'),
+///               error: toggleValue ? const Text('Cannot be true') : null,
 ///               child: CupertinoSwitch(
 ///                 value: toggleValue,
 ///                 onChanged: (bool value) {
@@ -66,9 +69,6 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///                   });
 ///                 },
 ///               ),
-///               prefix: const Text('Toggle'),
-///               helper: const Text('Use your instincts'),
-///               error: toggleValue ? const Text('Cannot be true') : null,
 ///             ),
 ///           ],
 ///         ),

@@ -9,6 +9,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'base/bot_detector.dart';
+import 'base/common.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'convert.dart';
@@ -21,16 +23,22 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     @required ProcessManager processManager,
     @required String dartExecutable,
     @required Logger logger,
+    @required BotDetector botDetector,
   })  : _processManager = processManager,
         _dartExecutable = dartExecutable,
-        _logger = logger;
+        _logger = logger,
+        _botDetector = botDetector;
 
   final ProcessManager _processManager;
   final String _dartExecutable;
   final Logger _logger;
+  final BotDetector _botDetector;
   final Completer<void> _processStartCompleter = Completer<void>();
 
   io.Process _devToolsProcess;
+  bool _devToolsProcessKilled = false;
+  @visibleForTesting
+  Future<void> devToolsProcessExit;
 
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$');
@@ -66,6 +74,16 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen(_logger.printError);
+
+      final bool runningOnBot = await _botDetector.isRunningOnBot;
+      devToolsProcessExit = _devToolsProcess.exitCode.then(
+        (int exitCode) {
+          if (!_devToolsProcessKilled && runningOnBot) {
+            throwToolExit('DevTools process failed: exitCode=$exitCode');
+          }
+        }
+      );
+
       devToolsUrl = await completer.future;
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
@@ -86,8 +104,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       devToolsUrl = null;
     }
     if (_devToolsProcess != null) {
+      _devToolsProcessKilled = true;
       _devToolsProcess.kill();
-      await _devToolsProcess.exitCode;
     }
   }
 }

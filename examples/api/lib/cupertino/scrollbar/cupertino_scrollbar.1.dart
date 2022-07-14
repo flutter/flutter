@@ -45,7 +45,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       radius: const Radius.circular(34.0),
       radiusWhileDragging: Radius.zero,
       controller: _controllerOne,
-      isAlwaysShown: true,
+      thumbVisibility: true,
       child: ListView.builder(
         controller: _controllerOne,
         itemCount: 120,

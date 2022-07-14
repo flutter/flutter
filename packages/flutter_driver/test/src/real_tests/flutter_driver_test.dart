@@ -745,8 +745,8 @@ void main() {
       const String waitForCommandLog = '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
       const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
 
-      expect(commandLog.contains(waitForCommandLog), true, reason: '$commandLog not contains $waitForCommandLog');
-      expect(commandLog.contains(responseLog), true, reason: '$commandLog not contains $responseLog');
+      expect(commandLog, contains(waitForCommandLog), reason: '$commandLog not contains $waitForCommandLog');
+      expect(commandLog, contains(responseLog), reason: '$commandLog not contains $responseLog');
     });
 
     test('logCommunicationToFile = false', () async {

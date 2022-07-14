@@ -649,7 +649,7 @@ void main() {
 
         // Prev/Next month buttons.
         expect(tester.getSemantics(previousMonthIcon), matchesSemantics(
-          label: 'Previous month December 2015',
+          label: 'Previous month',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -657,7 +657,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(nextMonthIcon), matchesSemantics(
-          label: 'Next month February 2016',
+          label: 'Next month',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -840,6 +840,7 @@ void main() {
             hasTapAction: true,
             isSelected: year == 2016,
             isFocusable: true,
+            isButton: true,
           ));
         }
       });

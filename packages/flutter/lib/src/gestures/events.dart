@@ -2108,6 +2108,8 @@ double computeHitSlop(PointerDeviceKind kind, DeviceGestureSettings? settings) {
     case PointerDeviceKind.invertedStylus:
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
+    default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+             // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
       return settings?.touchSlop ?? kTouchSlop;
   }
 }
@@ -2121,6 +2123,8 @@ double computePanSlop(PointerDeviceKind kind, DeviceGestureSettings? settings) {
     case PointerDeviceKind.invertedStylus:
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
+    default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+             // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
       return settings?.panSlop ?? kPanSlop;
   }
 }
@@ -2134,6 +2138,8 @@ double computeScaleSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.invertedStylus:
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
+    default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+             // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
       return kScaleSlop;
   }
 }

@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import '../../gallery/demo.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
-  const TextFormFieldDemo({ Key? key }) : super(key: key);
+  const TextFormFieldDemo({ super.key });
 
   static const String routeName = '/material/text-form-field';
 
@@ -26,7 +26,7 @@ class PersonData {
 
 class PasswordField extends StatefulWidget {
   const PasswordField({
-    Key? key,
+    super.key,
     this.fieldKey,
     this.hintText,
     this.labelText,
@@ -34,7 +34,7 @@ class PasswordField extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.onFieldSubmitted,
-  }) : super(key: key);
+  });
 
   final Key? fieldKey;
   final String? hintText;

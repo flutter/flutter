@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../gallery/demo.dart';
 
 class ImagesDemo extends StatelessWidget {
-  const ImagesDemo({Key? key}) : super(key: key);
+  const ImagesDemo({super.key});
 
   static const String routeName = '/images';
 

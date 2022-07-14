@@ -139,7 +139,7 @@ void testWidgets(
 }) {
   assert(variant != null);
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
@@ -419,7 +419,7 @@ Future<void> benchmarkWidgets(
     debugPrint(kDebugWarning);
     return true;
   }());
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
@@ -498,9 +498,9 @@ Future<void> expectLater(
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
-  WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
+  WidgetTester._(super.binding) {
     if (binding is LiveTestWidgetsFlutterBinding)
-      binding.deviceEventDispatcher = this;
+      (binding as LiveTestWidgetsFlutterBinding).deviceEventDispatcher = this;
   }
 
   /// The description string of the test currently being run.
@@ -709,7 +709,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'therefore no restoration data has been collected to restore from. Did you forget to wrap '
       'your widget tree in a RootRestorationScope?',
     );
-    final Widget widget = (binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget.child!;
+    final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
     final TestRestorationData restorationData = binding.restorationManager.restorationData;
     runApp(Container(key: UniqueKey()));
     await pump();
@@ -1106,7 +1106,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 
 class _TestTicker extends Ticker {
-  _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
+  _TestTicker(super.onTick, this._onDispose);
 
   final _TickerDisposeCallback _onDispose;
 

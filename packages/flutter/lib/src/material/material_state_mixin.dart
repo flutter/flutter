@@ -117,21 +117,21 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
 
   /// Mutator to mark a [MaterialState] value as either active or inactive.
   @protected
-  void setMaterialState(MaterialState _state, bool isSet) {
-    return isSet ? addMaterialState(_state) : removeMaterialState(_state);
+  void setMaterialState(MaterialState state, bool isSet) {
+    return isSet ? addMaterialState(state) : removeMaterialState(state);
   }
 
   /// Mutator to mark a [MaterialState] value as active.
   @protected
-  void addMaterialState(MaterialState _state) {
-    if (materialStates.add(_state))
+  void addMaterialState(MaterialState state) {
+    if (materialStates.add(state))
       setState((){});
   }
 
   /// Mutator to mark a [MaterialState] value as inactive.
   @protected
-  void removeMaterialState(MaterialState _state) {
-    if (materialStates.remove(_state))
+  void removeMaterialState(MaterialState state) {
+    if (materialStates.remove(state))
       setState((){});
   }
 

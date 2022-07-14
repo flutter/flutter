@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class PostBackdropFilterPage extends StatefulWidget {
-  const PostBackdropFilterPage({Key? key}) : super(key: key);
+  const PostBackdropFilterPage({super.key});
 
   @override
   State<PostBackdropFilterPage> createState() => _PostBackdropFilterPageState();

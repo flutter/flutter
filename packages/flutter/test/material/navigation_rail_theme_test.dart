@@ -13,8 +13,10 @@ void main() {
   });
 
   testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
+    // Material 3 defaults
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: true),
         home: Scaffold(
           body: NavigationRail(
             selectedIndex: 0,
@@ -26,6 +28,37 @@ void main() {
 
     expect(_railMaterial(tester).color, ThemeData().colorScheme.surface);
     expect(_railMaterial(tester).elevation, 0);
+    expect(_destinationSize(tester).width, 80.0);
+    expect(_selectedIconTheme(tester).size, 24.0);
+    expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.onSecondaryContainer);
+    expect(_selectedIconTheme(tester).opacity, null);
+    expect(_unselectedIconTheme(tester).size, 24.0);
+    expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
+    expect(_unselectedIconTheme(tester).opacity, null);
+    expect(_selectedLabelStyle(tester).fontSize, 14.0);
+    expect(_unselectedLabelStyle(tester).fontSize, 14.0);
+    expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
+    expect(_labelType(tester), NavigationRailLabelType.none);
+    expect(find.byType(NavigationIndicator), findsWidgets);
+  });
+
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
+    // This test can be removed when `useMaterial3` is deprecated.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: false),
+        home: Scaffold(
+          body: NavigationRail(
+            selectedIndex: 0,
+            destinations: _destinations(),
+          ),
+        ),
+      ),
+    );
+
+    expect(_railMaterial(tester).color, ThemeData().colorScheme.surface);
+    expect(_railMaterial(tester).elevation, 0);
+    expect(_destinationSize(tester).width, 72.0);
     expect(_selectedIconTheme(tester).size, 24.0);
     expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.primary);
     expect(_selectedIconTheme(tester).opacity, 1.0);
@@ -263,13 +296,13 @@ Material _railMaterial(WidgetTester tester) {
 }
 
 
-BoxDecoration? _indicatorDecoration(WidgetTester tester) {
+ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(NavigationIndicator),
       matching: find.byType(Container),
     ),
-  ).decoration as BoxDecoration?;
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
@@ -306,6 +339,16 @@ TextStyle _unselectedLabelStyle(WidgetTester tester) {
       matching: find.byType(RichText),
     ),
   ).text.style!;
+}
+
+Size _destinationSize(WidgetTester tester) {
+  return tester.getSize(
+    find.ancestor(
+      of: find.byIcon(Icons.favorite),
+      matching: find.byType(Material),
+    )
+    .first
+  );
 }
 
 Align _destinationsAlign(WidgetTester tester) {

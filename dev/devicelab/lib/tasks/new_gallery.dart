@@ -14,11 +14,13 @@ class NewGalleryPerfTest extends PerfTest {
     this.galleryDir, {
     String timelineFileName = 'transitions',
     String dartDefine = '',
+    bool enableImpeller = false,
   }) : super(
     galleryDir.path,
     'test_driver/transitions_perf.dart',
     timelineFileName,
     dartDefine: dartDefine,
+    enableImpeller: enableImpeller,
   );
 
   @override

@@ -279,27 +279,25 @@ class TimePickerThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      hourMinuteTextColor,
-      hourMinuteColor,
-      dayPeriodTextColor,
-      dayPeriodColor,
-      dialHandColor,
-      dialBackgroundColor,
-      dialTextColor,
-      entryModeIconColor,
-      hourMinuteTextStyle,
-      dayPeriodTextStyle,
-      helpTextStyle,
-      shape,
-      hourMinuteShape,
-      dayPeriodShape,
-      dayPeriodBorderSide,
-      inputDecorationTheme,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    hourMinuteTextColor,
+    hourMinuteColor,
+    dayPeriodTextColor,
+    dayPeriodColor,
+    dialHandColor,
+    dialBackgroundColor,
+    dialTextColor,
+    entryModeIconColor,
+    hourMinuteTextStyle,
+    dayPeriodTextStyle,
+    helpTextStyle,
+    shape,
+    hourMinuteShape,
+    dayPeriodShape,
+    dayPeriodBorderSide,
+    inputDecorationTheme,
+  );
 
   @override
   bool operator ==(Object other) {

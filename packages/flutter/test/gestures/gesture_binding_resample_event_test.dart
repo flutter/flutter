@@ -116,13 +116,13 @@ void main() {
     const Duration samplingOffset = Duration(milliseconds: -5);
     const Duration frameInterval = Duration(microseconds: 16667);
 
-    GestureBinding.instance!.resamplingEnabled = true;
-    GestureBinding.instance!.samplingOffset = samplingOffset;
+    GestureBinding.instance.resamplingEnabled = true;
+    GestureBinding.instance.samplingOffset = samplingOffset;
 
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
 
     // No pointer events should have been dispatched yet.
     expect(events.length, 0);
@@ -139,7 +139,7 @@ void main() {
     expect(events.length, 1);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[0].timeStamp, binding.frameTime! + samplingOffset);
-    expect(events[0].position, Offset(0.0 / ui.window.devicePixelRatio, 0.0));
+    expect(events[0].position, Offset(0.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
 
     // Second frame callback should have been requested.
     callback = binding.postFrameCallback;
@@ -154,8 +154,8 @@ void main() {
     expect(events.length, 2);
     expect(events[1], isA<PointerMoveEvent>());
     expect(events[1].timeStamp, binding.frameTime! + samplingOffset);
-    expect(events[1].position, Offset(10.0 / ui.window.devicePixelRatio, 0.0));
-    expect(events[1].delta, Offset(10.0 / ui.window.devicePixelRatio, 0.0));
+    expect(events[1].position, Offset(10.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[1].delta, Offset(10.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
 
     // Verify that resampling continues without a frame callback.
     async.elapse(frameInterval * 1.5);
@@ -179,6 +179,6 @@ void main() {
     // No more pointer events should have been dispatched.
     expect(events.length, 5);
 
-    GestureBinding.instance!.resamplingEnabled = false;
+    GestureBinding.instance.resamplingEnabled = false;
   });
 }

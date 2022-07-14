@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 class TextStyleItem extends StatelessWidget {
   const TextStyleItem({
-    Key? key,
+    super.key,
     required this.name,
     required this.style,
     required this.text,
-  }) : super(key: key);
+  });
 
   final String name;
   final TextStyle style;
@@ -39,7 +39,7 @@ class TextStyleItem extends StatelessWidget {
 }
 
 class TypographyDemo extends StatelessWidget {
-  const TypographyDemo({Key? key}) : super(key: key);
+  const TypographyDemo({super.key});
 
   static const String routeName = '/typography';
 

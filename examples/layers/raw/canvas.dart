@@ -122,6 +122,7 @@ void beginFrame(Duration timeStamp) {
 }
 
 void main() {
-  ui.window.onBeginFrame = beginFrame;
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance
+    ..onBeginFrame = beginFrame
+    ..scheduleFrame();
 }

@@ -34,7 +34,7 @@ class DoctorCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     globals.flutterVersion.fetchTagsAndUpdate();
-    if (argResults?.wasParsed('check-for-remote-artifacts') == true) {
+    if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
       final String engineRevision = stringArg('check-for-remote-artifacts')!;
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
         final bool success = await globals.doctor?.checkRemoteArtifacts(engineRevision) ?? false;

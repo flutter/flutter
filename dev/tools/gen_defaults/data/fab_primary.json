@@ -1,0 +1,28 @@
+{
+  "version": "v0_92",
+
+  "md.comp.fab.primary.container.color": "primaryContainer",
+  "md.comp.fab.primary.container.elevation": "md.sys.elevation.level3",
+  "md.comp.fab.primary.container.height": 56.0,
+  "md.comp.fab.primary.container.shadow-color": "shadow",
+  "md.comp.fab.primary.container.shape": "md.sys.shape.corner.large",
+  "md.comp.fab.primary.container.width": 56.0,
+  "md.comp.fab.primary.focus.container.elevation": "md.sys.elevation.level3",
+  "md.comp.fab.primary.focus.icon.color": "onPrimaryContainer",
+  "md.comp.fab.primary.focus.state-layer.color": "onPrimaryContainer",
+  "md.comp.fab.primary.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
+  "md.comp.fab.primary.hover.container.elevation": "md.sys.elevation.level4",
+  "md.comp.fab.primary.hover.icon.color": "onPrimaryContainer",
+  "md.comp.fab.primary.hover.state-layer.color": "onPrimaryContainer",
+  "md.comp.fab.primary.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
+  "md.comp.fab.primary.icon.color": "onPrimaryContainer",
+  "md.comp.fab.primary.icon.size": 24.0,
+  "md.comp.fab.primary.lowered.container.elevation": "md.sys.elevation.level1",
+  "md.comp.fab.primary.lowered.focus.container.elevation": "md.sys.elevation.level1",
+  "md.comp.fab.primary.lowered.hover.container.elevation": "md.sys.elevation.level2",
+  "md.comp.fab.primary.lowered.pressed.container.elevation": "md.sys.elevation.level1",
+  "md.comp.fab.primary.pressed.container.elevation": "md.sys.elevation.level3",
+  "md.comp.fab.primary.pressed.icon.color": "onPrimaryContainer",
+  "md.comp.fab.primary.pressed.state-layer.color": "onPrimaryContainer",
+  "md.comp.fab.primary.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity"
+}

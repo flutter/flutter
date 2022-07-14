@@ -21,7 +21,7 @@ import 'data_table.dart';
 abstract class DataTableSource extends ChangeNotifier {
   /// Called to obtain the data about a particular row.
   ///
-  /// The [new DataRow.byIndex] constructor provides a convenient way to construct
+  /// The [DataRow.byIndex] constructor provides a convenient way to construct
   /// [DataRow] objects for this callback's purposes without having to worry about
   /// independently keying each row.
   ///

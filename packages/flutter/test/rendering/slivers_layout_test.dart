@@ -19,6 +19,8 @@ class RenderLayoutWatcher extends RenderProxyBox {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderViewport basic test - impact of layout', () {
     RenderSliverToBoxAdapter sliver;
     RenderViewport viewport;

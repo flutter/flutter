@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -596,7 +595,7 @@ class ImageCacheStatus {
   }
 
   @override
-  int get hashCode => hashValues(pending, keepAlive, live);
+  int get hashCode => Object.hash(pending, keepAlive, live);
 
   @override
   String toString() => '${objectRuntimeType(this, 'ImageCacheStatus')}(pending: $pending, live: $live, keepAlive: $keepAlive)';
@@ -622,7 +621,7 @@ abstract class _CachedImageBase {
     assert(handle != null);
     // Give any interested parties a chance to listen to the stream before we
     // potentially dispose it.
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       assert(handle != null);
       handle?.dispose();
       handle = null;

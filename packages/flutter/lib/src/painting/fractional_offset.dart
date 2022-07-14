@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -78,7 +77,7 @@ class FractionalOffset extends Alignment {
   ///
   /// The offset is assumed to be relative to the same origin as the rectangle.
   ///
-  /// If the offset is relative to the top left of the rectangle, use [new
+  /// If the offset is relative to the top left of the rectangle, use [
   /// FractionalOffset.fromOffsetAndSize] instead, passing `rect.size`.
   ///
   /// The returned [FractionalOffset] describes the position of the

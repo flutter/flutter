@@ -83,7 +83,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// ancestor". To replace a non-null [maxLines] from an ancestor with the null
   /// value (to remove the restriction on number of lines), manually obtain the
   /// ambient [DefaultTextStyle] using [DefaultTextStyle.of], then create a new
-  /// [DefaultTextStyle] using the [new DefaultTextStyle] constructor directly.
+  /// [DefaultTextStyle] using the [DefaultTextStyle.new] constructor directly.
   /// See the source below for an example of how to do this (since that's
   /// essentially what this constructor does).
   static Widget merge({

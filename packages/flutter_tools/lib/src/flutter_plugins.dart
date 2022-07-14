@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -53,6 +54,9 @@ Plugin? _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependen
   if (flutterConfig == null || flutterConfig is! YamlMap || !flutterConfig.containsKey('plugin')) {
     return null;
   }
+  final String? flutterConstraintText = (pubspec['environment'] as YamlMap?)?['flutter'] as String?;
+  final semver.VersionConstraint? flutterConstraint = flutterConstraintText == null ?
+    null : semver.VersionConstraint.parse(flutterConstraintText);
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final YamlMap? dependencies = pubspec['dependencies'] as YamlMap?;
   globals.printTrace('Found plugin $name at $packageRootPath');
@@ -60,6 +64,7 @@ Plugin? _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependen
     name,
     packageRootPath,
     flutterConfig['plugin'] as YamlMap?,
+    flutterConstraint,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
@@ -98,6 +103,7 @@ const String _kFlutterPluginsPluginListKey = 'plugins';
 const String _kFlutterPluginsNameKey = 'name';
 const String _kFlutterPluginsPathKey = 'path';
 const String _kFlutterPluginsDependenciesKey = 'dependencies';
+const String _kFlutterPluginsHasNativeBuildKey = 'native_build';
 
 /// Filters [plugins] to those supported by [platformKey].
 List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
@@ -108,9 +114,13 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
   final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
   final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
   for (final Plugin plugin in platformPlugins) {
+    // This is guaranteed to be non-null due to the `where` filter above.
+    final PluginPlatform platformPlugin = plugin.platforms[platformKey]!;
     pluginInfo.add(<String, Object>{
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
+      if (platformPlugin is NativeOrDartPlugin)
+        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() || (platformPlugin as NativeOrDartPlugin).hasFfi(),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
@@ -130,7 +140,8 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
 ///         "dependencies": [
 ///           "plugin-a",
 ///           "plugin-b"
-///         ]
+///         ],
+///         "native_build": true
 ///       }
 ///     ],
 ///     "android": [],
@@ -259,9 +270,9 @@ const String _androidPluginRegistryTemplateOldEmbedding = '''
 package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
-{{#plugins}}
+{{#methodChannelPlugins}}
 import {{package}}.{{class}};
-{{/plugins}}
+{{/methodChannelPlugins}}
 
 /**
  * Generated file. Do not edit.
@@ -271,9 +282,9 @@ public final class GeneratedPluginRegistrant {
     if (alreadyRegisteredWith(registry)) {
       return;
     }
-{{#plugins}}
+{{#methodChannelPlugins}}
     {{class}}.registerWith(registry.registrarFor("{{package}}.{{class}}"));
-{{/plugins}}
+{{/methodChannelPlugins}}
   }
 
   private static boolean alreadyRegisteredWith(PluginRegistry registry) {
@@ -311,7 +322,7 @@ public final class GeneratedPluginRegistrant {
 {{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
-{{#plugins}}
+{{#methodChannelPlugins}}
   {{#supportsEmbeddingV2}}
     try {
       flutterEngine.getPlugins().add(new {{package}}.{{class}}());
@@ -328,7 +339,7 @@ public final class GeneratedPluginRegistrant {
     }
     {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
-{{/plugins}}
+{{/methodChannelPlugins}}
   }
 }
 ''';
@@ -352,12 +363,11 @@ AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, AndroidPlugin.kConfigKey);
-  final List<Map<String, Object?>> androidPlugins =
-    _extractPlatformMaps(nativePlugins, AndroidPlugin.kConfigKey);
+  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, AndroidPlugin.kConfigKey);
+  final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(methodChannelPlugins, AndroidPlugin.kConfigKey);
 
   final Map<String, Object> templateContext = <String, Object>{
-    'plugins': androidPlugins,
+    'methodChannelPlugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
   };
   final String javaSourcePath = globals.fs.path.join(
@@ -383,8 +393,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 
       final List<String> pluginsUsingV1 = <String>[];
       for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
         if (supportsEmbeddingV1 && !supportsEmbeddingV2) {
           templateContext['needsShim'] = true;
           if (plugin['name'] != null) {
@@ -421,8 +431,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
       );
       for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
@@ -474,20 +484,20 @@ const String _objcPluginRegistryImplementationTemplate = '''
 
 #import "GeneratedPluginRegistrant.h"
 
-{{#plugins}}
+{{#methodChannelPlugins}}
 #if __has_include(<{{name}}/{{class}}.h>)
 #import <{{name}}/{{class}}.h>
 #else
 @import {{name}};
 #endif
 
-{{/plugins}}
+{{/methodChannelPlugins}}
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
-{{#plugins}}
+{{#methodChannelPlugins}}
   [{{prefix}}{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{prefix}}{{class}}"]];
-{{/plugins}}
+{{/methodChannelPlugins}}
 }
 
 @end
@@ -501,14 +511,14 @@ const String _swiftPluginRegistryTemplate = '''
 import {{framework}}
 import Foundation
 
-{{#plugins}}
+{{#methodChannelPlugins}}
 import {{name}}
-{{/plugins}}
+{{/methodChannelPlugins}}
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  {{#plugins}}
+  {{#methodChannelPlugins}}
   {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
-{{/plugins}}
+{{/methodChannelPlugins}}
 }
 ''';
 
@@ -520,7 +530,7 @@ const String _pluginRegistrantPodspecTemplate = '''
 Pod::Spec.new do |s|
   s.name             = 'FlutterPluginRegistrant'
   s.version          = '0.0.1'
-  s.summary          = 'Registers plugins with your flutter app'
+  s.summary          = 'Registers plugins with your Flutter app'
   s.description      = <<-DESC
 Depends on all your plugins, and provides a function to register them.
                        DESC
@@ -534,9 +544,9 @@ Depends on all your plugins, and provides a function to register them.
   s.static_framework    = true
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.dependency '{{framework}}'
-  {{#plugins}}
+  {{#methodChannelPlugins}}
   s.dependency '{{name}}'
-  {{/plugins}}
+  {{/methodChannelPlugins}}
 end
 ''';
 
@@ -547,18 +557,19 @@ const String _dartPluginRegistryTemplate = '''
 
 // ignore_for_file: directives_ordering
 // ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: depend_on_referenced_packages
 
-{{#plugins}}
+{{#methodChannelPlugins}}
 import 'package:{{name}}/{{file}}';
-{{/plugins}}
+{{/methodChannelPlugins}}
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
 void registerPlugins(Registrar registrar) {
-{{#plugins}}
+{{#methodChannelPlugins}}
   {{class}}.registerWith(registrar);
-{{/plugins}}
+{{/methodChannelPlugins}}
   registrar.registerMessageHandler();
 }
 ''';
@@ -590,15 +601,15 @@ const String _cppPluginRegistryImplementationTemplate = '''
 
 #include "generated_plugin_registrant.h"
 
-{{#plugins}}
+{{#methodChannelPlugins}}
 #include <{{name}}/{{filename}}.h>
-{{/plugins}}
+{{/methodChannelPlugins}}
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
-{{#plugins}}
+{{#methodChannelPlugins}}
   {{class}}RegisterWithRegistrar(
       registry->GetRegistrarForPlugin("{{class}}"));
-{{/plugins}}
+{{/methodChannelPlugins}}
 }
 ''';
 
@@ -629,16 +640,16 @@ const String _linuxPluginRegistryImplementationTemplate = '''
 
 #include "generated_plugin_registrant.h"
 
-{{#plugins}}
+{{#methodChannelPlugins}}
 #include <{{name}}/{{filename}}.h>
-{{/plugins}}
+{{/methodChannelPlugins}}
 
 void fl_register_plugins(FlPluginRegistry* registry) {
-{{#plugins}}
+{{#methodChannelPlugins}}
   g_autoptr(FlPluginRegistrar) {{name}}_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "{{class}}");
   {{filename}}_register_with_registrar({{name}}_registrar);
-{{/plugins}}
+{{/methodChannelPlugins}}
 }
 ''';
 
@@ -648,9 +659,15 @@ const String _pluginCmakefileTemplate = r'''
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-{{#plugins}}
+{{#methodChannelPlugins}}
   {{name}}
-{{/plugins}}
+{{/methodChannelPlugins}}
+)
+
+list(APPEND FLUTTER_FFI_PLUGIN_LIST
+{{#ffiPlugins}}
+  {{name}}
+{{/ffiPlugins}}
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)
@@ -661,6 +678,11 @@ foreach(plugin ${FLUTTER_PLUGIN_LIST})
   list(APPEND PLUGIN_BUNDLED_LIBRARIES $<TARGET_FILE:${plugin}_plugin>)
   list(APPEND PLUGIN_BUNDLED_LIBRARIES ${${plugin}_bundled_libraries})
 endforeach(plugin)
+
+foreach(ffi_plugin ${FLUTTER_FFI_PLUGIN_LIST})
+  add_subdirectory({{pluginsDir}}/${ffi_plugin}/{{os}} plugins/${ffi_plugin})
+  list(APPEND PLUGIN_BUNDLED_LIBRARIES ${${ffi_plugin}_bundled_libraries})
+endforeach(ffi_plugin)
 ''';
 
 const String _dartPluginRegisterWith = r'''
@@ -685,10 +707,6 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 
 // @dart = {{dartLanguageVersion}}
 
-// When `{{mainEntrypoint}}` defines `main`, that definition is shadowed by the definition below.
-export '{{mainEntrypoint}}';
-
-import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#android}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
@@ -733,29 +751,17 @@ $_dartPluginRegisterWith
       {{/windows}}
     }
   }
-
-}
-
-typedef _UnaryFunction = dynamic Function(List<String> args);
-typedef _NullaryFunction = dynamic Function();
-
-void main(List<String> args) {
-  if (entrypoint.main is _UnaryFunction) {
-    (entrypoint.main as _UnaryFunction)(args);
-  } else {
-    (entrypoint.main as _NullaryFunction)();
-  }
 }
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, IOSPlugin.kConfigKey);
-  final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(nativePlugins, IOSPlugin.kConfigKey);
+  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, IOSPlugin.kConfigKey);
+  final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(methodChannelPlugins, IOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
     'deploymentTarget': '9.0',
     'framework': 'Flutter',
-    'plugins': iosPlugins,
+    'methodChannelPlugins': iosPlugins,
   };
   if (project.isModule) {
     final Directory registryDirectory = project.ios.pluginRegistrantHost;
@@ -799,11 +805,14 @@ String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
 }
 
 Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, LinuxPlugin.kConfigKey);
-  final List<Map<String, Object?>> linuxPlugins = _extractPlatformMaps(nativePlugins, LinuxPlugin.kConfigKey);
+  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, LinuxPlugin.kConfigKey);
+  final List<Map<String, Object?>> linuxMethodChannelPlugins = _extractPlatformMaps(methodChannelPlugins, LinuxPlugin.kConfigKey);
+  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, LinuxPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
+  final List<Map<String, Object?>> linuxFfiPlugins = _extractPlatformMaps(ffiPlugins, LinuxPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'linux',
-    'plugins': linuxPlugins,
+    'methodChannelPlugins': linuxMethodChannelPlugins,
+    'ffiPlugins': linuxFfiPlugins,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.linux),
   };
   await _writeLinuxPluginRegistrant(project.linux.managedDirectory, context);
@@ -835,12 +844,12 @@ Future<void> _writePluginCmakefile(File destinationFile, Map<String, Object> tem
 }
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, MacOSPlugin.kConfigKey);
-  final List<Map<String, Object?>> macosPlugins = _extractPlatformMaps(nativePlugins, MacOSPlugin.kConfigKey);
+  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, MacOSPlugin.kConfigKey);
+  final List<Map<String, Object?>> macosMethodChannelPlugins = _extractPlatformMaps(methodChannelPlugins, MacOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'macos',
     'framework': 'FlutterMacOS',
-    'plugins': macosPlugins,
+    'methodChannelPlugins': macosMethodChannelPlugins,
   };
   _renderTemplateToFile(
     _swiftPluginRegistryTemplate,
@@ -850,19 +859,36 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
-/// Filters out Dart-only plugins, which shouldn't be added to the native generated registrants.
-List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
+/// Filters out any plugins that don't use method channels, and thus shouldn't be added to the native generated registrants.
+List<Plugin> _filterMethodChannelPlugins(List<Plugin> plugins, String platformKey) {
   return plugins.where((Plugin element) {
     final PluginPlatform? plugin = element.platforms[platformKey];
     if (plugin == null) {
       return false;
     }
     if (plugin is NativeOrDartPlugin) {
-      return (plugin as NativeOrDartPlugin).isNative();
+      return (plugin as NativeOrDartPlugin).hasMethodChannel();
     }
     // Not all platforms have the ability to create Dart-only plugins. Therefore, any plugin that doesn't
     // implement NativeOrDartPlugin is always native.
     return true;
+  }).toList();
+}
+
+/// Filters out Dart-only and method channel plugins.
+///
+/// FFI plugins do not need native code registration, but their binaries need to be bundled.
+List<Plugin> _filterFfiPlugins(List<Plugin> plugins, String platformKey) {
+  return plugins.where((Plugin element) {
+    final PluginPlatform? plugin = element.platforms[platformKey];
+    if (plugin == null) {
+      return false;
+    }
+    if (plugin is NativeOrDartPlugin) {
+      final NativeOrDartPlugin plugin_ = plugin as NativeOrDartPlugin;
+      return plugin_.hasFfi();
+    }
+    return false;
   }).toList();
 }
 
@@ -881,12 +907,15 @@ List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, P
 
 @visibleForTesting
 Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
-  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> win32Plugins = _filterPluginsByVariant(nativePlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.win32);
-  final List<Map<String, Object?>> pluginInfo = _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> win32Plugins = _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.win32);
+  final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
+  final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(ffiPlugins, WindowsPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'windows',
-    'plugins': pluginInfo,
+    'methodChannelPlugins': windowsMethodChannelPlugins,
+    'ffiPlugins': windowsFfiPlugins,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windows),
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context, templateRenderer);
@@ -897,12 +926,15 @@ Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugin
 /// filtering, for the purposes of tooling support and initial UWP bootstrap.
 @visibleForTesting
 Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
-  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> uwpPlugins = _filterPluginsByVariant(nativePlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
-  final List<Map<String, Object?>> pluginInfo = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> uwpPlugins = _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
+  final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
+  final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(ffiPlugins, WindowsPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'windows',
-    'plugins': pluginInfo,
+    'methodChannelPlugins': windowsMethodChannelPlugins,
+    'ffiPlugins': windowsFfiPlugins,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
   };
   await _writeCppPluginRegistrant(project.windowsUwp.managedDirectory, context, templateRenderer);
@@ -927,7 +959,7 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object
 Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
-    'plugins': webPlugins,
+    'methodChannelPlugins': webPlugins,
   };
   final File pluginFile = project.web.libDirectory.childFile('generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
@@ -1198,14 +1230,26 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         if (defaultImplementation != null) {
           defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
           continue;
-        } else if (platform != 'linux' && platform != 'macos' && platform != 'windows') {
-          // An interface package (i.e., one with no 'implements') with an
-          // inline implementation is its own default implementation.
-          // TODO(stuartmorgan): This should be true on desktop as well, but
-          // enabling that would be a breaking change for most existing
-          // Dart-only plugins. See https://github.com/flutter/flutter/issues/87862
-          implementsPackage = plugin.name;
-          defaultImplementations['$platform/${plugin.name}'] = plugin.name;
+        } else {
+          // An app-facing package (i.e., one with no 'implements') with an
+          // inline implementation should be its own default implementation.
+          // Desktop platforms originally did not work that way, and enabling
+          // it unconditionally would break existing published plugins, so
+          // only treat it as such if either:
+          // - the platform is not desktop, or
+          // - the plugin requires at least Flutter 2.11 (when this opt-in logic
+          //   was added), so that existing plugins continue to work.
+          // See https://github.com/flutter/flutter/issues/87862 for details.
+          final bool isDesktop = platform == 'linux' || platform == 'macos' || platform == 'windows';
+          final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
+          final semver.Version? minFlutterVersion = flutterConstraint != null &&
+            flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
+          final bool hasMinVersionForImplementsRequirement = minFlutterVersion != null &&
+            minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
+          if (!isDesktop || hasMinVersionForImplementsRequirement) {
+            implementsPackage = plugin.name;
+            defaultImplementations['$platform/${plugin.name}'] = plugin.name;
+          }
         }
       }
       if (plugin.pluginDartClassPlatforms[platform] == null ||

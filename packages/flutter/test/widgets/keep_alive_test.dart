@@ -327,8 +327,7 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
-      '                       │     painter: null\n'
-      '                       │     foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
       '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 1: RenderLimitedBox#00000\n'                                     // <----- no dashed line starts here
@@ -342,8 +341,7 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
-      '                       │     painter: null\n'
-      '                       │     foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
       '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       └─child with index 2: RenderLimitedBox#00000 NEEDS-PAINT\n'
@@ -357,8 +355,7 @@ void main() {
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                             size: Size(800.0, 400.0)\n'
-      '                             painter: null\n'
-      '                             foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                             painter: _PlaceholderPainter#00000()\n'
       '                             preferredSize: Size(Infinity, Infinity)\n',
     ));
     const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
@@ -490,8 +487,7 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
-      '                       │     painter: null\n'
-      '                       │     foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
       '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 5: RenderLimitedBox#00000\n'                                     // <----- this is index 5, not 0
@@ -505,8 +501,7 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
-      '                       │     painter: null\n'
-      '                       │     foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
       '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 6: RenderLimitedBox#00000\n'
@@ -520,8 +515,7 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
-      '                       │     painter: null\n'
-      '                       │     foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
       '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 7: RenderLimitedBox#00000 NEEDS-PAINT\n'
@@ -535,8 +529,7 @@ void main() {
       '                       ╎     parentData: <none> (can use size)\n'
       '                       ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       ╎     size: Size(800.0, 400.0)\n'
-      '                       ╎     painter: null\n'
-      '                       ╎     foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                       ╎     painter: _PlaceholderPainter#00000()\n'
       '                       ╎     preferredSize: Size(Infinity, Infinity)\n'
       '                       ╎\n'
       '                       ╎╌child with index 0 (kept alive but not laid out): RenderLimitedBox#00000\n'               // <----- this one is index 0 and is marked as being kept alive but not laid out
@@ -550,8 +543,7 @@ void main() {
       '                       ╎     parentData: <none> (can use size)\n'
       '                       ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       ╎     size: Size(800.0, 400.0)\n'
-      '                       ╎     painter: null\n'
-      '                       ╎     foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                       ╎     painter: _PlaceholderPainter#00000()\n'
       '                       ╎     preferredSize: Size(Infinity, Infinity)\n'
       '                       ╎\n'                                                                                // <----- dashed line ends here
       '                       └╌child with index 3 (kept alive but not laid out): RenderLimitedBox#00000\n'
@@ -565,8 +557,7 @@ void main() {
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                             size: Size(800.0, 400.0)\n'
-      '                             painter: null\n'
-      '                             foregroundPainter: _PlaceholderPainter#00000()\n'
+      '                             painter: _PlaceholderPainter#00000()\n'
       '                             preferredSize: Size(Infinity, Infinity)\n',
     ));
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87876

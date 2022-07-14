@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Codec;
-import 'dart:ui' show Size, Locale, TextDirection, hashValues;
+import 'dart:ui' show Size, Locale, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -110,7 +110,7 @@ class ImageConfiguration {
   }
 
   @override
-  int get hashCode => hashValues(bundle, devicePixelRatio, locale, size, platform);
+  int get hashCode => Object.hash(bundle, devicePixelRatio, locale, size, platform);
 
   @override
   String toString() {
@@ -387,7 +387,7 @@ abstract class ImageProvider<T extends Object> {
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
-        completer.complete(PaintingBinding.instance!.imageCache!.statusForKey(key));
+        completer.complete(PaintingBinding.instance.imageCache.statusForKey(key));
       },
       (T? key, Object exception, StackTrace? stack) async {
         if (handleError != null) {
@@ -435,38 +435,21 @@ abstract class ImageProvider<T extends Object> {
       didError = true;
     }
 
-    // If an error is added to a synchronous completer before a listener has been
-    // added, it can throw an error both into the zone and up the stack. Thus, it
-    // looks like the error has been caught, but it is in fact also bubbling to the
-    // zone. Since we cannot prevent all usage of Completer.sync here, or rather
-    // that changing them would be too breaking, we instead hook into the same
-    // zone mechanism to intercept the uncaught error and deliver it to the
-    // image stream's error handler. Note that these errors may be duplicated,
-    // hence the need for the `didError` flag.
-    final Zone dangerZone = Zone.current.fork(
-      specification: ZoneSpecification(
-        handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
-          handleError(error, stackTrace);
-        },
-      ),
-    );
-    dangerZone.runGuarded(() {
-      Future<T> key;
+    Future<T> key;
+    try {
+      key = obtainKey(configuration);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+      return;
+    }
+    key.then<void>((T key) {
+      obtainedKey = key;
       try {
-        key = obtainKey(configuration);
+        successCallback(key, handleError);
       } catch (error, stackTrace) {
         handleError(error, stackTrace);
-        return;
       }
-      key.then<void>((T key) {
-        obtainedKey = key;
-        try {
-          successCallback(key, handleError);
-        } catch (error, stackTrace) {
-          handleError(error, stackTrace);
-        }
-      }).catchError(handleError);
-    });
+    }).catchError(handleError);
   }
 
   /// Called by [resolve] with the key returned by [obtainKey].
@@ -492,7 +475,7 @@ abstract class ImageProvider<T extends Object> {
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
-      final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+      final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
         key,
         () => stream.completer!,
         onError: handleError,
@@ -500,9 +483,9 @@ abstract class ImageProvider<T extends Object> {
       assert(identical(completer, stream.completer));
       return;
     }
-    final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+    final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
-      () => load(key, PaintingBinding.instance!.instantiateImageCodec),
+      () => load(key, PaintingBinding.instance.instantiateImageCodec),
       onError: handleError,
     );
     if (completer != null) {
@@ -557,7 +540,7 @@ abstract class ImageProvider<T extends Object> {
   Future<bool> evict({ ImageCache? cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
-    return cache!.evict(key);
+    return cache.evict(key);
   }
 
   /// Converts an ImageProvider's settings plus an ImageConfiguration to a key
@@ -627,7 +610,7 @@ class AssetBundleImageKey {
   }
 
   @override
-  int get hashCode => hashValues(bundle, name, scale);
+  int get hashCode => Object.hash(bundle, name, scale);
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetBundleImageKey')}(bundle: $bundle, name: "$name", scale: $scale)';
@@ -674,11 +657,11 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     try {
       data = await key.bundle.load(key.name);
     } on FlutterError {
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       rethrow;
     }
     if (data == null) {
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('Unable to read data');
     }
     return decode(data.buffer.asUint8List());
@@ -709,7 +692,7 @@ class ResizeImageKey {
   }
 
   @override
-  int get hashCode => hashValues(_providerCacheKey, _width, _height);
+  int get hashCode => Object.hash(_providerCacheKey, _width, _height);
 }
 
 /// Instructs Flutter to decode the image at the specified dimensions
@@ -891,7 +874,7 @@ class FileImage extends ImageProvider<FileImage> {
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
@@ -908,7 +891,7 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  int get hashCode => hashValues(file.path, scale);
+  int get hashCode => Object.hash(file.path, scale);
 
   @override
   String toString() => '${objectRuntimeType(this, 'FileImage')}("${file.path}", scale: $scale)';
@@ -983,7 +966,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  int get hashCode => hashValues(bytes.hashCode, scale);
+  int get hashCode => Object.hash(bytes.hashCode, scale);
 
   @override
   String toString() => '${objectRuntimeType(this, 'MemoryImage')}(${describeIdentity(bytes)}, scale: $scale)';
@@ -1126,7 +1109,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  int get hashCode => hashValues(keyName, scale, bundle);
+  int get hashCode => Object.hash(keyName, scale, bundle);
 
   @override
   String toString() => '${objectRuntimeType(this, 'ExactAssetImage')}(name: "$keyName", scale: $scale, bundle: $bundle)';

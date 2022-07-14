@@ -25,6 +25,7 @@ import 'application_package.dart';
 import 'code_signing.dart';
 import 'iproxy.dart';
 import 'migrations/deployment_target_migration.dart';
+import 'migrations/minimum_frame_duration_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/project_object_version_migration.dart';
@@ -123,6 +124,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     ProjectBuildLocationMigration(app.project, globals.logger),
     DeploymentTargetMigration(app.project, globals.logger),
     ProjectObjectVersionMigration(app.project, globals.logger),
+    MinimumFrameDurationMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -297,7 +299,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (activeArchName != null) {
       buildCommands.add('ONLY_ACTIVE_ARCH=YES');
       // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
-      // as it cannot be build for the architecture of the flutter app.
+      // as it cannot be build for the architecture of the Flutter app.
       if (!hasWatchCompanion) {
         buildCommands.add('ARCHS=$activeArchName');
       }
@@ -462,6 +464,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         await globals.processUtils.run(
           <String>[
             'rsync',
+            '-8', // Avoid mangling filenames with encodings that do not match the current locale.
             '-av',
             '--delete',
             expectedOutputDirectory,
@@ -560,9 +563,9 @@ return result.exitCode != 0 &&
 
 Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsage, Logger logger) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
-  if (xcodeBuildExecution != null &&
-      xcodeBuildExecution.environmentType == EnvironmentType.physical &&
-      result.stdout?.toUpperCase().contains('BITCODE') == true) {
+  if (xcodeBuildExecution != null
+      && xcodeBuildExecution.environmentType == EnvironmentType.physical
+      && (result.stdout?.toUpperCase().contains('BITCODE') ?? false)) {
     BuildEvent('xcode-bitcode-failure',
       type: 'ios',
       command: xcodeBuildExecution.buildCommands.toString(),
@@ -574,9 +577,9 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
   // Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS.
   // or
   // Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator.
-  if (result.stdout?.contains('Building for iOS') == true
-      && result.stdout?.contains('but the linked and embedded framework') == true
-      && result.stdout?.contains('was built for iOS') == true) {
+  if ((result.stdout?.contains('Building for iOS') ?? false)
+      && (result.stdout?.contains('but the linked and embedded framework') ?? false)
+      && (result.stdout?.contains('was built for iOS') ?? false)) {
     logger.printError('');
     logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     logger.printError('');
@@ -584,11 +587,11 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError('  flutter clean');
     return;
   }
-  if (xcodeBuildExecution != null &&
-      xcodeBuildExecution.environmentType == EnvironmentType.physical &&
-      result.stdout?.contains('BCEROR') == true &&
+  if (xcodeBuildExecution != null
+      && xcodeBuildExecution.environmentType == EnvironmentType.physical
+      && (result.stdout?.contains('BCEROR') ?? false)
       // May need updating if Xcode changes its outputs.
-      result.stdout?.contains("Xcode couldn't find a provisioning profile matching") == true) {
+      && (result.stdout?.contains("Xcode couldn't find a provisioning profile matching") ?? false)) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }
@@ -602,9 +605,9 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
-  if (xcodeBuildExecution != null &&
-      xcodeBuildExecution.environmentType == EnvironmentType.physical &&
-      xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') == true) {
+  if (xcodeBuildExecution != null
+      && xcodeBuildExecution.environmentType == EnvironmentType.physical
+      && (xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') ?? false)) {
     logger.printError('');
     logger.printError('It appears that your application still contains the default signing identifier.');
     logger.printError("Try replacing 'com.example' with your signing id in Xcode:");

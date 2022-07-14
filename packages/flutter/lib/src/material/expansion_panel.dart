@@ -33,7 +33,7 @@ class _SaltedKey<S, V> extends LocalKey {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, salt, value);
+  int get hashCode => Object.hash(runtimeType, salt, value);
 
   @override
   String toString() {
@@ -57,6 +57,8 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2aJZzRMziJc}
 ///
 /// Expansion panels are only intended to be used as children for
 /// [ExpansionPanelList].

@@ -467,26 +467,20 @@ abstract class Repository {
 class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
-    String name = 'framework',
-    Remote upstreamRemote = const Remote(
+    super.name = 'framework',
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    String initialRef = FrameworkRepository.defaultBranch,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    String super.initialRef = FrameworkRepository.defaultBranch,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: <String>[
             ...?additionalRequiredLocalBranches,
             ...kReleaseChannels,
@@ -620,6 +614,39 @@ class FrameworkRepository extends Repository {
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 
+  /// Create a release candidate branch version file.
+  ///
+  /// This file allows for easily traversing what candidadate branch was used
+  /// from a release channel.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  Future<bool> updateCandidateBranchVersion(
+    String branch, {
+    @visibleForTesting File? versionFile,
+  }) async {
+    assert(branch.isNotEmpty);
+    versionFile ??= (await checkoutDirectory)
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('release-candidate-branch.version');
+    if (versionFile.existsSync()) {
+      final String oldCandidateBranch = versionFile.readAsStringSync();
+      if (oldCandidateBranch.trim() == branch.trim()) {
+        stdio.printTrace(
+          'Tried to update the candidate branch but version file is already up to date at: $branch',
+        );
+        return false;
+      }
+    }
+    stdio.printStatus('Create ${versionFile.path} containing $branch');
+    versionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${branch.trim()}\n',
+      flush: true,
+    );
+    return true;
+  }
+
   /// Update this framework's engine version file.
   ///
   /// Returns [true] if the version file was updated and a commit is needed.
@@ -724,26 +751,20 @@ class HostFrameworkRepository extends FrameworkRepository {
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
-    String name = 'engine',
-    String initialRef = EngineRepository.defaultBranch,
-    Remote upstreamRemote = const Remote(
+    super.name = 'engine',
+    String super.initialRef = EngineRepository.defaultBranch,
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
         );
 
@@ -844,46 +865,4 @@ class CiYaml {
   /// This is not cached as the contents can be written to while the conductor
   /// is running.
   YamlMap get contents => loadYaml(stringContents) as YamlMap;
-
-  List<String> get enabledBranches {
-    final YamlList yamlList = contents['enabled_branches'] as YamlList;
-    return yamlList.map<String>((dynamic element) {
-      return element as String;
-    }).toList();
-  }
-
-  static final RegExp _enabledBranchPattern = RegExp(r'enabled_branches:');
-
-  /// Update this .ci.yaml file with the given branch name.
-  ///
-  /// The underlying [File] is written to, but not committed to git. This method
-  /// will throw a [ConductorException] if the [branchName] is already present
-  /// in the file or if the file does not have an "enabled_branches:" field.
-  void enableBranch(String branchName) {
-    final List<String> newStrings = <String>[];
-    if (enabledBranches.contains(branchName)) {
-      throw ConductorException('${file.path} already contains the branch $branchName');
-    }
-    if (!_enabledBranchPattern.hasMatch(stringContents)) {
-      throw ConductorException(
-        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
-      );
-    }
-    final List<String> lines = stringContents.split('\n');
-    bool insertedCurrentBranch = false;
-    for (final String line in lines) {
-      // Every existing line should be copied to the new Yaml
-      newStrings.add(line);
-      if (insertedCurrentBranch) {
-        continue;
-      }
-      if (_enabledBranchPattern.hasMatch(line)) {
-        insertedCurrentBranch = true;
-        // Indent two spaces
-        final String indent = ' ' * 2;
-        newStrings.add('$indent- ${branchName.trim()}');
-      }
-    }
-    file.writeAsStringSync(newStrings.join('\n'), flush: true);
-  }
 }

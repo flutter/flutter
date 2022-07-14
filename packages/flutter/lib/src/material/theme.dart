@@ -18,6 +18,8 @@ const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 ///
 /// A theme describes the colors and typographic choices of an application.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=oTvQDJOBXmM}
+///
 /// Descendant widgets obtain the current theme's [ThemeData] object using
 /// [Theme.of]. When a widget uses [Theme.of], it is automatically rebuilt if
 /// the theme later changes, so that the changes can be applied.
@@ -61,7 +63,7 @@ class Theme extends StatelessWidget {
   /// [MaterialLocalizations], the returned data is localized according to the
   /// nearest available [MaterialLocalizations].
   ///
-  /// Defaults to [new ThemeData.fallback] if there is no [Theme] in the given
+  /// Defaults to [ThemeData.fallback] if there is no [Theme] in the given
   /// build context.
   ///
   /// Typical usage is as follows:

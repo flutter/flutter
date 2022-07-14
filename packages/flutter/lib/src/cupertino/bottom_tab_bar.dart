@@ -4,6 +4,8 @@
 
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -235,14 +237,17 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
                 tabIndex: index + 1,
                 tabCount: items.length,
               ),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onTap == null ? null : () { onTap!(index); },
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: _buildSingleTabItem(items[index], active),
+              child: MouseRegion(
+                cursor:  kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTap == null ? null : () { onTap!(index); },
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: _buildSingleTabItem(items[index], active),
+                    ),
                   ),
                 ),
               ),

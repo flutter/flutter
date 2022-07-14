@@ -406,6 +406,7 @@ void main() {
       onPointerDown: (PointerDownEvent event) {},
       onPointerUp: (PointerUpEvent event) {},
       onPointerMove: (PointerMoveEvent event) {},
+      onPointerHover: (PointerHoverEvent event) {},
       onPointerCancel: (PointerCancelEvent event) {},
       onPointerSignal: (PointerSignalEvent event) {},
       behavior: HitTestBehavior.opaque,
@@ -422,7 +423,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'behavior: opaque',
-      'listeners: down, move, up, cancel, signal',
+      'listeners: down, move, up, hover, cancel, signal',
     ]);
   });
 }

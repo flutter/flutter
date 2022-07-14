@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -141,6 +143,21 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
 
   @override
   void autofill(TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
 }
 
 class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {

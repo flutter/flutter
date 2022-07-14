@@ -21,32 +21,32 @@ void main() {
   });
 
   testWithoutContext('can step over statements', () async {
-    final SteppingProject _project = SteppingProject();
-    await _project.setUpIn(tempDir);
+    final SteppingProject project = SteppingProject();
+    await project.setUpIn(tempDir);
 
-    final FlutterRunTestDriver _flutter = FlutterRunTestDriver(tempDir);
+    final FlutterRunTestDriver flutter = FlutterRunTestDriver(tempDir);
 
-    await _flutter.run(withDebugger: true, startPaused: true);
-    await _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
-    await _flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
+    await flutter.run(withDebugger: true, startPaused: true);
+    await flutter.addBreakpoint(project.breakpointUri, project.breakpointLine);
+    await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
 
-    expect((await _flutter.getSourceLocation())?.line, equals(_project.breakpointLine));
+    expect((await flutter.getSourceLocation())?.line, equals(project.breakpointLine));
 
     // Issue 5 steps, ensuring that we end up on the annotated lines each time.
-    for (int i = 1; i <= _project.numberOfSteps; i += 1) {
-      await _flutter.stepOverOrOverAsyncSuspension();
-      final SourcePosition? location = await _flutter.getSourceLocation();
+    for (int i = 1; i <= project.numberOfSteps; i += 1) {
+      await flutter.stepOverOrOverAsyncSuspension();
+      final SourcePosition? location = await flutter.getSourceLocation();
       final int? actualLine = location?.line;
 
       // Get the line we're expected to stop at by searching for the comment
       // within the source code.
-      final int expectedLine = _project.lineForStep(i);
+      final int expectedLine = project.lineForStep(i);
 
       expect(actualLine, equals(expectedLine),
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
 
-    await _flutter.stop();
+    await flutter.stop();
   });
 }

@@ -233,7 +233,8 @@ class DismissUpdateDetails {
   DismissUpdateDetails({
     this.direction = DismissDirection.horizontal,
     this.reached = false,
-    this.previousReached = false
+    this.previousReached = false,
+    this.progress = 0.0,
   });
 
   /// The direction that the dismissible is being dragged.
@@ -247,6 +248,15 @@ class DismissUpdateDetails {
   /// This can be used in conjunction with [DismissUpdateDetails.reached] to catch the moment
   /// that the [Dismissible] is dragged across the threshold.
   final bool previousReached;
+
+  /// The offset ratio of the dismissible in its parent container.
+  ///
+  /// A value of 0.0 represents the normal position and 1.0 means the child is
+  /// completely outside its parent.
+  ///
+  /// This can be used to synchronize other elements to what the dismissible is doing on screen,
+  /// e.g. using this value to set the opacity thereby fading dismissible as it's dragged offscreen.
+  final double progress;
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -312,7 +322,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   bool _dismissThresholdReached = false;
 
   @override
-  bool get wantKeepAlive => _moveController?.isAnimating == true || _resizeController?.isAnimating == true;
+  bool get wantKeepAlive => (_moveController?.isAnimating ?? false) || (_resizeController?.isAnimating ?? false);
 
   @override
   void dispose() {
@@ -438,6 +448,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
           direction: _dismissDirection,
           reached: _dismissThresholdReached,
           previousReached: oldDismissThresholdReached,
+          progress: _moveController!.value,
       );
       widget.onUpdate!(details);
     }

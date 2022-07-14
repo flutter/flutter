@@ -159,7 +159,7 @@ void main() {
       }
     });
 
-    testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
+    testUsingContext("doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins", () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -189,11 +189,11 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       expect(generatedMain.existsSync(), isFalse);
     });
 
-    testUsingContext('regenerates generated_main.dart', () async {
+    testUsingContext('regenerates dart_plugin_registrant.dart', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -231,7 +231,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       final String mainContent = generatedMain.readAsStringSync();
       expect(
         mainContent,
@@ -243,10 +243,6 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          '// When `package:path_provider_example/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
-          "export 'package:path_provider_example/main.dart';\n"
-          '\n'
-          "import 'package:path_provider_example/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
@@ -272,24 +268,12 @@ void main() {
           '    } else if (Platform.isWindows) {\n'
           '    }\n'
           '  }\n'
-          '\n'
-          '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
-          '  }\n'
           '}\n'
         ),
       );
     });
 
-    testUsingContext('removes generated_main.dart if plugins are removed from pubspec.yaml', () async {
+    testUsingContext('removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -321,7 +305,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -372,7 +356,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final String mainContent = generatedMain.readAsStringSync();
       expect(
@@ -385,10 +369,6 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          '// When `file:///root/external.dart` defines `main`, that definition is shadowed by the definition below.\n'
-          "export 'file:///root/external.dart';\n"
-          '\n'
-          "import 'file:///root/external.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
@@ -413,18 +393,6 @@ void main() {
           '    } else if (Platform.isMacOS) {\n'
           '    } else if (Platform.isWindows) {\n'
           '    }\n'
-          '  }\n'
-          '\n'
-          '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
         ),

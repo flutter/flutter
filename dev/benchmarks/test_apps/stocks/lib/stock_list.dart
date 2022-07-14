@@ -9,12 +9,12 @@ import 'stock_row.dart';
 
 class StockList extends StatelessWidget {
   const StockList({
-    Key? key,
+    super.key,
     required this.stocks,
     required this.onOpen,
     required this.onShow,
     required this.onAction,
-  }) : super(key: key);
+  });
 
   final List<Stock> stocks;
   final StockRowActionCallback onOpen;

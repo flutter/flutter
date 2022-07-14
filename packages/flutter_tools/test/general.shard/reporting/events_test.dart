@@ -127,11 +127,11 @@ void main() {
 }
 
 class FakeGroupedValidator extends GroupedValidator {
-  FakeGroupedValidator(List<DoctorValidator> subValidators) : super(subValidators);
+  FakeGroupedValidator(super.subValidators);
 }
 
 class FakeDoctorValidator extends DoctorValidator {
-  FakeDoctorValidator(String title) : super(title);
+  FakeDoctorValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {

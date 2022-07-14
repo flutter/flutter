@@ -60,6 +60,8 @@ enum RefreshIndicatorTriggerMode {
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ORApMlzwMdM}
+///
 /// When the child's [Scrollable] descendant overscrolls, an animated circular
 /// progress indicator is faded into view. When the scroll ends, if the
 /// indicator has been dragged far enough for it to become completely opaque,
@@ -68,6 +70,12 @@ enum RefreshIndicatorTriggerMode {
 /// indicator disappears after the callback's [Future] has completed.
 ///
 /// The trigger mode is configured by [RefreshIndicator.triggerMode].
+///
+/// {@tool dartpad}
+/// This example shows how [RefreshIndicator] can be triggered in different ways.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.0.dart **
+/// {@end-tool}
 ///
 /// ## Troubleshooting
 ///
@@ -288,7 +296,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     // In this case, we don't want to trigger the refresh indicator.
     return ((notification is ScrollStartNotification && notification.dragDetails != null)
             || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
-      && notification.metrics.extentBefore == 0.0
+      && (( notification.metrics.axisDirection == AxisDirection.up && notification.metrics.extentAfter == 0.0)
+            || (notification.metrics.axisDirection == AxisDirection.down && notification.metrics.extentBefore == 0.0))
       && _mode == null
       && _start(notification.metrics.axisDirection);
   }
@@ -305,10 +314,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     bool? indicatorAtTopNow;
     switch (notification.metrics.axisDirection) {
       case AxisDirection.down:
-        indicatorAtTopNow = true;
-        break;
       case AxisDirection.up:
-        indicatorAtTopNow = false;
+        indicatorAtTopNow = true;
         break;
       case AxisDirection.left:
       case AxisDirection.right:
@@ -320,10 +327,15 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         _dismiss(_RefreshIndicatorMode.canceled);
     } else if (notification is ScrollUpdateNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        if (notification.metrics.extentBefore > 0.0) {
+        if ((notification.metrics.axisDirection  == AxisDirection.down && notification.metrics.extentBefore > 0.0)
+            || (notification.metrics.axisDirection  == AxisDirection.up && notification.metrics.extentAfter > 0.0)) {
           _dismiss(_RefreshIndicatorMode.canceled);
         } else {
-          _dragOffset = _dragOffset! - notification.scrollDelta!;
+          if (notification.metrics.axisDirection == AxisDirection.down) {
+            _dragOffset = _dragOffset! - notification.scrollDelta!;
+          } else if (notification.metrics.axisDirection == AxisDirection.up) {
+            _dragOffset = _dragOffset! + notification.scrollDelta!;
+          }
           _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
@@ -335,7 +347,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        _dragOffset = _dragOffset! - notification.overscroll;
+        if (notification.metrics.axisDirection == AxisDirection.down) {
+          _dragOffset = _dragOffset! - notification.overscroll;
+        } else if (notification.metrics.axisDirection == AxisDirection.up) {
+          _dragOffset = _dragOffset! + notification.overscroll;
+        }
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
@@ -374,10 +390,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     assert(_dragOffset == null);
     switch (direction) {
       case AxisDirection.down:
-        _isIndicatorAtTop = true;
-        break;
       case AxisDirection.up:
-        _isIndicatorAtTop = false;
+        _isIndicatorAtTop = true;
         break;
       case AxisDirection.left:
       case AxisDirection.right:

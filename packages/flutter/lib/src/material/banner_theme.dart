@@ -91,15 +91,13 @@ class MaterialBannerThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      contentTextStyle,
-      elevation,
-      padding,
-      leadingPadding,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    contentTextStyle,
+    elevation,
+    padding,
+    leadingPadding,
+  );
 
   @override
   bool operator ==(Object other) {

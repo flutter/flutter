@@ -61,7 +61,7 @@ void main() {
           command: const <String>[
             '/.tmp_rand0/flutter_preview.rand0/splash'
           ],
-          stdout: 'Observatory listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
+          stdout: 'The Dart VM service is listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
           completer: completer,
         )
       ]),

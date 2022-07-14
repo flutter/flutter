@@ -188,6 +188,7 @@ void main() {
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
+        '-8',
         '-av',
         '--delete',
         'build/ios/Release-iphoneos/My Super Awesome App.app',

@@ -44,8 +44,12 @@ conductor start \
   --engine-cherrypicks=72114dafe28c8700f1d5d629c6ae9d34172ba395 \
   --framework-cherrypicks=a3e66b396746f6581b2b7efd1b0d0f0074215128,d8d853436206e86f416236b930e97779b143a100 \
   --dart-revision=4511eb2a779a612d9d6b2012123575013e0aef12 \
-  --increment=m
 ```
+
+The conductor will, based on the release channel and the presence/lack of
+previous tags, determine which part of the release version should be
+incremented. In the cases where this is not correct, the version can be
+overridden with `--version-override=3.0.0`.
 
 For more details on these command line arguments, see `conductor help start`.
 This command will write to disk a state file that will persist until the release

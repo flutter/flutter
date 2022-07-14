@@ -25,16 +25,25 @@ mixin ViewportNotificationMixin on Notification {
   int _depth = 0;
 
   @override
-  bool visitAncestor(Element element) {
-    if (element is RenderObjectElement && element.renderObject is RenderAbstractViewport)
-      _depth += 1;
-    return super.visitAncestor(element);
-  }
-
-  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
+  }
+}
+
+/// A mixin that allows [Element]s containing [Viewport] like widgets to correctly
+/// modify the notification depth of a [ViewportNotificationMixin].
+///
+/// See also:
+///   * [Viewport], which creates a custom [MultiChildRenderObjectElement] that mixes
+///     this in.
+mixin ViewportElementMixin  on NotifiableElementMixin {
+  @override
+  bool onNotification(Notification notification) {
+    if (notification is ViewportNotificationMixin) {
+      notification._depth += 1;
+    }
+    return false;
   }
 }
 

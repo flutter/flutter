@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -48,15 +49,15 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoDesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
       endpoints: endpoints,
       globalEditableRegion: globalEditableRegion,
-      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       selectionMidpoint: selectionMidpoint,
@@ -67,14 +68,20 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
   /// Builds the text selection handles, but desktop has none.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     return const SizedBox.shrink();
   }
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
+  }
+
+  @override
+  void handleSelectAll(TextSelectionDelegate delegate) {
+    super.handleSelectAll(delegate);
+    delegate.hideToolbar();
   }
 }
 
@@ -114,8 +121,6 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
 }
 
 class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_CupertinoDesktopTextSelectionControlsToolbar> {
-  ClipboardStatusNotifier? _clipboardStatus;
-
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
@@ -125,46 +130,28 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
   @override
   void initState() {
     super.initState();
-    if (widget.handlePaste != null) {
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      _clipboardStatus!.update();
-    }
+    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(_CupertinoDesktopTextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.clipboardStatus != widget.clipboardStatus) {
-      if (_clipboardStatus != null) {
-        _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-        _clipboardStatus!.dispose();
-      }
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      if (widget.handlePaste != null) {
-        _clipboardStatus!.update();
-      }
+      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-    // When used in an Overlay, this can be disposed after its creator has
-    // already disposed _clipboardStatus.
-    if (_clipboardStatus != null && !_clipboardStatus!.disposed) {
-      _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-      if (widget.clipboardStatus == null) {
-        _clipboardStatus!.dispose();
-      }
-    }
+    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
   }
 
   @override
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null && _clipboardStatus!.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -206,7 +193,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
     if (widget.handlePaste != null
-        && _clipboardStatus!.value == ClipboardStatus.pasteable) {
+        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
@@ -245,7 +232,6 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     Key? key,
     required this.anchor,
     required this.children,
-    this.toolbarBuilder = _defaultToolbarBuilder,
   }) : assert(children.length > 0),
        super(key: key);
 
@@ -259,12 +245,6 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   ///   * [CupertinoDesktopTextSelectionToolbarButton], which builds a default
   ///     Mac-style text selection toolbar text button.
   final List<Widget> children;
-
-  /// {@macro flutter.material.TextSelectionToolbar.toolbarBuilder}
-  ///
-  /// The given anchor and isAbove can be used to position an arrow, as in the
-  /// default Cupertino toolbar.
-  final ToolbarBuilder toolbarBuilder;
 
   // Builds a toolbar just like the default Mac toolbar, with the right color
   // background, padding, and rounded corners.
@@ -308,7 +288,7 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         delegate: DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: toolbarBuilder(context, Column(
+        child: _defaultToolbarBuilder(context, Column(
           mainAxisSize: MainAxisSize.min,
           children: children,
         )),

@@ -361,10 +361,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-    // This test is expected to be skipped when Platform.isWindows:
-    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
-  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/92042
-
+  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
@@ -538,7 +535,7 @@ void main() {
         matches(RegExp(r'^The specific RenderFlex in question is: RenderFlex#..... OVERFLOWING:$')),
         startsWith('  creator: Row ← Test ← '),
         contains(' ← '),
-        endsWith(' ← ⋯'),
+        endsWith(' ⋯'),
         '  parentData: <none> (can use size)',
         '  constraints: BoxConstraints(w=800.0, h=600.0)',
         '  size: Size(800.0, 600.0)',

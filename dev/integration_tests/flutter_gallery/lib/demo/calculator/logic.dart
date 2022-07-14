@@ -17,7 +17,7 @@ class ExpressionToken {
 
 /// A token that represents a number.
 class NumberToken extends ExpressionToken {
-  NumberToken(String stringRep, this.number) : super(stringRep);
+  NumberToken(String super.stringRep, this.number);
 
   NumberToken.fromNumber(num number) : this('$number', number);
 

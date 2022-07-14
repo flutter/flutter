@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class CullOpacityPage extends StatefulWidget {
-  const CullOpacityPage({Key? key}) : super(key: key);
+  const CullOpacityPage({super.key});
 
   @override
   State<StatefulWidget> createState() => _CullOpacityPageState();

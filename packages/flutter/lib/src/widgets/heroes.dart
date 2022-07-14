@@ -800,7 +800,7 @@ class HeroController extends NavigatorObserver {
   @override
   void didReplace({ Route<dynamic>? newRoute, Route<dynamic>? oldRoute }) {
     assert(navigator != null);
-    if (newRoute?.isCurrent == true) {
+    if (newRoute?.isCurrent ?? false) {
       // Only run hero animations if the top-most route got replaced.
       _maybeStartHeroTransition(oldRoute, newRoute, HeroFlightDirection.push, false);
     }
@@ -851,17 +851,16 @@ class HeroController extends NavigatorObserver {
     if (toRoute != fromRoute && toRoute is PageRoute<dynamic> && fromRoute is PageRoute<dynamic>) {
       final PageRoute<dynamic> from = fromRoute;
       final PageRoute<dynamic> to = toRoute;
-      final Animation<double> animation = (flightType == HeroFlightDirection.push) ? to.animation! : from.animation!;
 
       // A user gesture may have already completed the pop, or we might be the initial route
       switch (flightType) {
         case HeroFlightDirection.pop:
-          if (animation.value == 0.0) {
+          if (from.animation!.value == 0.0) {
             return;
           }
           break;
         case HeroFlightDirection.push:
-          if (animation.value == 1.0) {
+          if (to.animation!.value == 1.0) {
             return;
           }
           break;
@@ -871,7 +870,7 @@ class HeroController extends NavigatorObserver {
       // maintainState = true, then the hero's final dimensions can be measured
       // immediately because their page's layout is still valid.
       if (isUserGestureTransition && flightType == HeroFlightDirection.pop && to.maintainState) {
-        _startHeroTransition(from, to, animation, flightType, isUserGestureTransition);
+        _startHeroTransition(from, to, flightType, isUserGestureTransition);
       } else {
         // Otherwise, delay measuring until the end of the next frame to allow
         // the 'to' route to build and layout.
@@ -881,8 +880,8 @@ class HeroController extends NavigatorObserver {
         // going to end up, and the `to` route will go back onstage.
         to.offstage = to.animation!.value == 0.0;
 
-        WidgetsBinding.instance!.addPostFrameCallback((Duration value) {
-          _startHeroTransition(from, to, animation, flightType, isUserGestureTransition);
+        WidgetsBinding.instance.addPostFrameCallback((Duration value) {
+          _startHeroTransition(from, to, flightType, isUserGestureTransition);
         });
       }
     }
@@ -893,7 +892,6 @@ class HeroController extends NavigatorObserver {
   void _startHeroTransition(
     PageRoute<dynamic> from,
     PageRoute<dynamic> to,
-    Animation<double> animation,
     HeroFlightDirection flightType,
     bool isUserGestureTransition,
   ) {

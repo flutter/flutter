@@ -101,7 +101,7 @@ class _PointDemoPainter extends CustomPainter {
 }
 
 class _PointDemo extends StatefulWidget {
-  const _PointDemo({ Key? key, required this.controller }) : super(key: key);
+  const _PointDemo({ super.key, required this.controller });
 
   final AnimationController controller;
 
@@ -268,7 +268,7 @@ class _RectangleDemoPainter extends CustomPainter {
 }
 
 class _RectangleDemo extends StatefulWidget {
-  const _RectangleDemo({ Key? key, required this.controller }) : super(key: key);
+  const _RectangleDemo({ super.key, required this.controller });
 
   final AnimationController controller;
 
@@ -400,7 +400,7 @@ class _ArcDemo {
 }
 
 class AnimationDemo extends StatefulWidget {
-  const AnimationDemo({ Key? key }) : super(key: key);
+  const AnimationDemo({ super.key });
 
   @override
   State<AnimationDemo> createState() => _AnimationDemoState();

@@ -28,11 +28,6 @@ function generate_docs() {
     # >>> If you update this version, also update it in dev/bots/analyze_sample_code.dart <<<
     "$DART" pub global activate snippets 0.2.5
 
-    # Run the snippets tool once to force building of the package executable,
-    # since "dart pub global run" has issues with startup concurrency.
-    # TODO(gspencergoog): Remove once pub issue is fixed, https://github.com/dart-lang/pub/issues/3165
-    "$DART" pub global run snippets --help
-
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.
     (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)

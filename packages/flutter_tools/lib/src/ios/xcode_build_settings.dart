@@ -184,10 +184,15 @@ Future<List<String>> _xcodeBuildSettingsLines({
     // NOTE: this assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
-    //
-    // Skip this step for macOS builds.
-    if (!useMacOSConfig) {
-      String arch;
+
+    String arch;
+    if (useMacOSConfig) {
+      if (localEngineName.contains('_arm64')) {
+        arch = 'arm64';
+      } else {
+        arch = 'x86_64';
+      }
+    } else {
       if (localEngineName.endsWith('_arm')) {
         arch = 'armv7';
       } else if (localEngineName.contains('_arm64')) {
@@ -197,18 +202,15 @@ Future<List<String>> _xcodeBuildSettingsLines({
       } else {
         arch = 'arm64';
       }
-      xcodeBuildSettings.add('ARCHS=$arch');
     }
+    xcodeBuildSettings.add('ARCHS=$arch');
   }
-  if (useMacOSConfig) {
-    // ARM not yet supported https://github.com/flutter/flutter/issues/69221
-    xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
-  } else {
-    String excludedSimulatorArchs = 'i386';
 
+  if (!useMacOSConfig) {
     // If any plugins or their dependencies do not support arm64 simulators
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
+    String excludedSimulatorArchs = 'i386';
     if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }

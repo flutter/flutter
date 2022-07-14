@@ -47,7 +47,7 @@ import 'diagnostics.dart';
 ///  * [InheritedNotifier], an abstract superclass for widgets that use a
 ///    [Listenable]'s notifications to trigger rebuilds in descendant widgets
 ///    that declare a dependency on them, using the [InheritedWidget] mechanism.
-///  * [new Listenable.merge], which creates a [Listenable] that triggers
+///  * [Listenable.merge], which creates a [Listenable] that triggers
 ///    notifications whenever any of a list of other [Listenable]s trigger their
 ///    notifications.
 abstract class Listenable {
@@ -98,12 +98,23 @@ abstract class ValueListenable<T> extends Listenable {
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
+/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
+///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   int _count = 0;
-  List<VoidCallback?> _listeners = List<VoidCallback?>.filled(0, null);
+  // The _listeners is intentionally set to a fixed-length _GrowableList instead
+  // of const [].
+  //
+  // The const [] creates an instance of _ImmutableList which would be
+  // different from fixed-length _GrowableList used elsewhere in this class.
+  // keeping runtime type the same during the lifetime of this class lets the
+  // compiler to infer concrete type for this property, and thus improves
+  // performance.
+  static final List<VoidCallback?> _emptyListeners = List<VoidCallback?>.filled(0, null);
+  List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
@@ -220,7 +231,7 @@ class ChangeNotifier implements Listenable {
   ///
   /// If the given listener is not registered, the call is ignored.
   ///
-  /// This method must not be called after [dispose] has been called.
+  /// This method returns immediately if [dispose] has been called.
   ///
   /// {@macro flutter.foundation.ChangeNotifier.addListener}
   ///
@@ -230,10 +241,14 @@ class ChangeNotifier implements Listenable {
   ///    changes.
   @override
   void removeListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed());
+    // This method is allowed to be called on disposed instances for usability
+    // reasons. Due to how our frame scheduling logic between render objects and
+    // overlays, it is common that the owner of this instance would be disposed a
+    // frame earlier than the listeners. Allowing calls to this method after it
+    // is disposed makes it easier for listeners to properly clean up.
     for (int i = 0; i < _count; i++) {
-      final VoidCallback? _listener = _listeners[i];
-      if (_listener == listener) {
+      final VoidCallback? listenerAtIndex = _listeners[i];
+      if (listenerAtIndex == listener) {
         if (_notificationCallStackDepth > 0) {
           // We don't resize the list during notifyListeners iterations
           // but we set to null, the listeners we want to remove. We will
@@ -253,8 +268,7 @@ class ChangeNotifier implements Listenable {
 
   /// Discards any resources used by the object. After this is called, the
   /// object is not in a usable state and should be discarded (calls to
-  /// [addListener] and [removeListener] will throw after the object is
-  /// disposed).
+  /// [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
   @mustCallSuper
@@ -264,6 +278,8 @@ class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
+    _listeners = _emptyListeners;
+    _count = 0;
   }
 
   /// Call all the registered listeners.

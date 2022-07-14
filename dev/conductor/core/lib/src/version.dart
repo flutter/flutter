@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import './globals.dart' show ConductorException, kReleaseIncrements, releaseCandidateBranchRegex;
+import 'globals.dart' show ConductorException, releaseCandidateBranchRegex;
+
+import 'proto/conductor_state.pbenum.dart';
 
 /// Possible string formats that `flutter --version` can return.
 enum VersionType {
@@ -262,10 +264,7 @@ class Version {
   ///
   /// Will throw a [ConductorException] if the version is not possible given the
   /// [candidateBranch] and [incrementLetter].
-  void ensureValid(String candidateBranch, String incrementLetter) {
-    if (!kReleaseIncrements.contains(incrementLetter)) {
-      throw ConductorException('Invalid incrementLetter: $incrementLetter');
-    }
+  void ensureValid(String candidateBranch, ReleaseType releaseType) {
     final RegExpMatch? branchMatch = releaseCandidateBranchRegex.firstMatch(candidateBranch);
     if (branchMatch == null) {
       throw ConductorException(
@@ -292,12 +291,12 @@ class Version {
     }
 
     // stable type versions don't have an m field set
-    if (type != VersionType.stable && incrementLetter != 'm') {
+    if (type != VersionType.stable && releaseType != ReleaseType.STABLE_HOTFIX && releaseType != ReleaseType.STABLE_INITIAL) {
       final String branchM = branchMatch.group(3)!;
       if (m != int.tryParse(branchM)) {
         throw ConductorException(
           'Parsed version ${toString()} has a different m value than candidate '
-          'branch $candidateBranch',
+          'branch $candidateBranch with type $type',
         );
       }
     }

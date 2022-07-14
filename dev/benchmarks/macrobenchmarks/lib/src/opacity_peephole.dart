@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../common.dart';
@@ -10,14 +12,14 @@ import '../common.dart';
 // combinations of children that can apply it themselves.
 // See https://github.com/flutter/flutter/issues/75697
 class OpacityPeepholePage extends StatelessWidget {
-  const OpacityPeepholePage({Key? key}) : super(key: key);
+  const OpacityPeepholePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Opacity Peephole tests')),
       body: ListView(
-        key: const Key('${kOpacityPeepholeRouteName}_listview'),
+        key: const Key(kOpacityScrollableName),
         children: <Widget>[
           for (OpacityPeepholeCase variant in allOpacityPeepholeCases)
             ElevatedButton(
@@ -284,7 +286,132 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
       );
     },
   ),
+  OpacityPeepholeCase.forValue(
+    route: kOpacityPeepholeGridOfRectsWithAlphaRouteName,
+    name: 'Grid of Rectangles with alpha',
+    builder: (double v) {
+      return Opacity(
+        opacity: _opacity(v),
+        child: SizedBox.expand(
+          child: CustomPaint(
+            painter: RectGridPainter((Canvas canvas, Size size) {
+              const int numRows = 10;
+              const int numCols = 7;
+              const double rectWidth = 30;
+              const double rectHeight = 30;
+              final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
+              final double vGap = (size.height - numRows * rectHeight) / (numRows + 1);
+              final double gap = min(hGap, vGap);
+              final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
+              final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
+              final Paint rectPaint = Paint();
+              for (int r = 0; r < numRows; r++, v = 1 - v) {
+                final double y = yOffset + r * (rectHeight + gap);
+                double cv = v;
+                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                  final double x = xOffset + c * (rectWidth + gap);
+                  rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), _opacity(cv));
+                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  canvas.drawRect(rect, rectPaint);
+                }
+              }
+            }),
+          ),
+        ),
+      );
+    },
+  ),
+  OpacityPeepholeCase.forValue(
+    route: kOpacityPeepholeGridOfAlphaSaveLayerRectsRouteName,
+    name: 'Grid of alpha SaveLayers of Rectangles',
+    builder: (double v) {
+      return Opacity(
+        opacity: _opacity(v),
+        child: SizedBox.expand(
+          child: CustomPaint(
+            painter: RectGridPainter((Canvas canvas, Size size) {
+              const int numRows = 10;
+              const int numCols = 7;
+              const double rectWidth = 30;
+              const double rectHeight = 30;
+              final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
+              final double vGap = (size.height - numRows * rectHeight) / (numRows + 1);
+              final double gap = min(hGap, vGap);
+              final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
+              final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
+              final Paint rectPaint = Paint();
+              final Paint layerPaint = Paint();
+              for (int r = 0; r < numRows; r++, v = 1 - v) {
+                final double y = yOffset + r * (rectHeight + gap);
+                double cv = v;
+                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                  final double x = xOffset + c * (rectWidth + gap);
+                  rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
+                  layerPaint.color = Color.fromRGBO(255, 255, 255, _opacity(cv));
+                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  canvas.saveLayer(null, layerPaint);
+                  canvas.drawRect(rect, rectPaint);
+                  canvas.restore();
+                }
+              }
+            }),
+          ),
+        ),
+      );
+    },
+  ),
+  OpacityPeepholeCase.forValue(
+    route: kOpacityPeepholeColumnOfAlphaSaveLayerRowsOfRectsRouteName,
+    name: 'Grid with alpha SaveLayer on Rows',
+    builder: (double v) {
+      return Opacity(
+        opacity: _opacity(v),
+        child: SizedBox.expand(
+          child: CustomPaint(
+            painter: RectGridPainter((Canvas canvas, Size size) {
+              const int numRows = 10;
+              const int numCols = 7;
+              const double rectWidth = 30;
+              const double rectHeight = 30;
+              final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
+              final double vGap = (size.height - numRows * rectHeight) / (numRows + 1);
+              final double gap = min(hGap, vGap);
+              final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
+              final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
+              final Paint rectPaint = Paint();
+              final Paint layerPaint = Paint();
+              for (int r = 0; r < numRows; r++, v = 1 - v) {
+                final double y = yOffset + r * (rectHeight + gap);
+                layerPaint.color = Color.fromRGBO(255, 255, 255, _opacity(v));
+                canvas.saveLayer(null, layerPaint);
+                double cv = v;
+                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                  final double x = xOffset + c * (rectWidth + gap);
+                  rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
+                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  canvas.drawRect(rect, rectPaint);
+                }
+                canvas.restore();
+              }
+            }),
+          ),
+        ),
+      );
+    },
+  ),
 ];
+
+class RectGridPainter extends CustomPainter {
+  RectGridPainter(this.painter);
+
+  final void Function(Canvas canvas, Size size) painter;
+
+  @override
+  void paint(Canvas canvas, Size size) => painter(canvas, size);
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+}
 
 Map<String, WidgetBuilder> opacityPeepholeRoutes = <String, WidgetBuilder>{
   for (OpacityPeepholeCase variant in allOpacityPeepholeCases)
@@ -292,7 +419,7 @@ Map<String, WidgetBuilder> opacityPeepholeRoutes = <String, WidgetBuilder>{
 };
 
 class VariantPage extends StatefulWidget {
-  const VariantPage({Key? key, required this.variant}) : super(key: key);
+  const VariantPage({super.key, required this.variant});
 
   final OpacityPeepholeCase variant;
 

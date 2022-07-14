@@ -24,7 +24,7 @@ void main() {
       final SerializableFinder listViewFinder = find.byValueKey(keys.kListView);
       final SerializableFinder textFieldFinder = find.byValueKey(keys.kDefaultTextField);
       final SerializableFinder offsetFinder = find.byValueKey(keys.kOffsetText);
-      final SerializableFinder keyboardVisibilityIndicatorFinder = find.text('keyboard visible');
+      final SerializableFinder keyboardVisibilityIndicatorFinder = find.byValueKey(keys.kKeyboardVisibleView);
 
       // Align TextField with bottom edge to ensure it would be covered when keyboard comes up.
       await driver.waitForAbsent(textFieldFinder);
@@ -39,7 +39,24 @@ void main() {
 
       // Bring up keyboard
       await driver.tap(textFieldFinder);
-      await driver.waitFor(keyboardVisibilityIndicatorFinder);
+
+      const int keyboardTimeout = 3;
+      bool keyboardVisible = false;
+      for (int i = 0; i < keyboardTimeout; i++) {
+        await Future<void>.delayed(const Duration(seconds: 1));
+        final String keyboardVisibilityText = await driver.getText(keyboardVisibilityIndicatorFinder);
+        keyboardVisible = keyboardVisibilityText == 'keyboard visible';
+        if (keyboardVisible) {
+          break;
+        }
+      }
+
+      if (!keyboardVisible) {
+        await driver.tap(find.text('dump app'));
+      }
+
+      // TODO(jmagman): Remove timeout once flake has been diagnosed. https://github.com/flutter/flutter/issues/96787
+      expect(keyboardVisible, isTrue);
 
       // Ensure that TextField is visible again
       await driver.waitFor(textFieldFinder);

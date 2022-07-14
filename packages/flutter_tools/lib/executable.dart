@@ -112,6 +112,7 @@ Future<void> main(List<String> args) async {
         processManager: globals.processManager,
         dartExecutable: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         logger: globals.logger,
+        botDetector: globals.botDetector,
       ),
       Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(

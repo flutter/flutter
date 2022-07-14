@@ -206,7 +206,7 @@ class XCDevice {
         unawaited(stdoutSubscription.cancel());
         unawaited(stderrSubscription.cancel());
       }).whenComplete(() async {
-        if (_deviceIdentifierByEvent?.hasListener == true) {
+        if (_deviceIdentifierByEvent?.hasListener ?? false) {
           // Tell listeners the process died.
           await _deviceIdentifierByEvent?.close();
         }

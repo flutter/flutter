@@ -11,9 +11,9 @@ import 'model/product.dart';
 
 class CategoryMenuPage extends StatelessWidget {
   const CategoryMenuPage({
-    Key? key,
+    super.key,
     this.onCategoryTap,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onCategoryTap;
 

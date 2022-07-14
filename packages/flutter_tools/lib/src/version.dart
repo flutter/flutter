@@ -8,6 +8,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/time.dart';
 import 'cache.dart';
@@ -16,11 +17,18 @@ import 'globals.dart' as globals;
 
 const String _unknownFrameworkVersion = '0.0.0-unknown';
 
+/// This maps old branch names to the names of branches that replaced them.
+///
+/// For example, in 2021 we deprecated the "dev" channel and transitioned "dev"
+/// users to the "beta" channel.
+const Map<String, String> kObsoleteBranches = <String, String>{
+  'dev': 'beta',
+};
+
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   // TODO(fujino): update to main https://github.com/flutter/flutter/issues/95041
   master,
-  dev,
   beta,
   stable,
 }
@@ -28,7 +36,6 @@ enum Channel {
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
   globals.kDefaultFrameworkChannel,
-  'dev',
   'beta',
   'stable',
 };
@@ -88,7 +95,7 @@ class FlutterVersion {
 
   String? _repositoryUrl;
   String? get repositoryUrl {
-    final String _ = channel;
+    final String _ = channel; // ignore: no_leading_underscores_for_local_identifiers
     return _repositoryUrl;
   }
 
@@ -233,11 +240,15 @@ class FlutterVersion {
     if (!kOfficialChannels.contains(channel)) {
       return;
     }
+    // Don't perform the update check if the tracking remote is not standard.
+    if (VersionUpstreamValidator(version: this, platform: globals.platform).run() != null) {
+      return;
+    }
     DateTime localFrameworkCommitDate;
     try {
+      // Don't perform the update check if fetching the latest local commit failed.
       localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate());
     } on VersionCheckError {
-      // Don't perform the update check if the version check failed.
       return;
     }
     final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
@@ -320,7 +331,7 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kOfficialChannels.contains(_branch)) {
+      if (!kOfficialChannels.contains(_branch) && !kObsoleteBranches.containsKey(_branch)) {
         return '[user-branch]';
       }
     }
@@ -396,6 +407,98 @@ class FlutterVersion {
       );
       return null;
     }
+  }
+}
+
+/// Checks if the provided [version] is tracking a standard remote.
+///
+/// A "standard remote" is one having the same url as(in order of precedence):
+///  * The value of `FLUTTER_GIT_URL` environment variable.
+///  * The HTTPS or SSH url of the Flutter repository as provided by GitHub.
+///
+/// To initiate the validation check, call [run].
+///
+/// This prevents the tool to check for version freshness from the standard
+/// remote but fetch updates from the upstream of current branch/channel, both
+/// of which can be different.
+///
+/// This also prevents unnecessary freshness check from a forked repo unless the
+/// user explicitly configures the environment to do so.
+class VersionUpstreamValidator {
+  VersionUpstreamValidator({
+    required this.version,
+    required this.platform,
+  });
+
+  final Platform platform;
+  final FlutterVersion version;
+
+  /// Performs the validation against the tracking remote of the [version].
+  ///
+  /// Returns [VersionCheckError] if the tracking remote is not standard.
+  VersionCheckError? run(){
+    final String? flutterGit = platform.environment['FLUTTER_GIT_URL'];
+    final String? repositoryUrl = version.repositoryUrl;
+
+    if (repositoryUrl == null) {
+      return VersionCheckError(
+        'The tool could not determine the remote upstream which is being '
+        'tracked by the SDK.'
+      );
+    }
+
+    // Strip `.git` suffix before comparing the remotes
+    final List<String> sanitizedStandardRemotes = <String>[
+      // If `FLUTTER_GIT_URL` is set, use that as standard remote.
+      if (flutterGit != null) flutterGit
+      // Else use the predefined standard remotes.
+      else ..._standardRemotes,
+    ].map((String remote) => stripDotGit(remote)).toList();
+
+    final String sanitizedRepositoryUrl = stripDotGit(repositoryUrl);
+
+    if (!sanitizedStandardRemotes.contains(sanitizedRepositoryUrl)) {
+      if (flutterGit != null) {
+        // If `FLUTTER_GIT_URL` is set, inform to either remove the
+        // `FLUTTER_GIT_URL` environment variable or set it to the current
+        // tracking remote.
+        return VersionCheckError(
+          'The Flutter SDK is tracking "$repositoryUrl" but "FLUTTER_GIT_URL" '
+          'is set to "$flutterGit".\n'
+          'Either remove "FLUTTER_GIT_URL" from the environment or set it to '
+          '"$repositoryUrl". '
+          'If this is intentional, it is recommended to use "git" directly to '
+          'manage the SDK.'
+        );
+      }
+      // If `FLUTTER_GIT_URL` is unset, inform to set the environment variable.
+      return VersionCheckError(
+        'The Flutter SDK is tracking a non-standard remote "$repositoryUrl".\n'
+        'Set the environment variable "FLUTTER_GIT_URL" to '
+        '"$repositoryUrl". '
+        'If this is intentional, it is recommended to use "git" directly to '
+        'manage the SDK.'
+      );
+    }
+    return null;
+  }
+
+  // The predefined list of remotes that are considered to be standard.
+  static final List<String> _standardRemotes = <String>[
+    'https://github.com/flutter/flutter.git',
+    'git@github.com:flutter/flutter.git',
+  ];
+
+  // Strips ".git" suffix from a given string, preferably an url.
+  // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.
+  // URLs without ".git" suffix will remain unaffected.
+  static final RegExp _patternUrlDotGit = RegExp(r'(.*)(\.git)$');
+  static String stripDotGit(String url) {
+    final RegExpMatch? match = _patternUrlDotGit.firstMatch(url);
+    if (match == null) {
+      return url;
+    }
+    return match.group(1)!;
   }
 }
 
@@ -634,6 +737,7 @@ class GitTagVersion {
         _runGit('git fetch ${globals.flutterGit} --tags -f', processUtils, workingDirectory);
       }
     }
+    // find all tags attached to the given [gitRef]
     final List<String> tags = _runGit(
       'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
 
@@ -729,7 +833,9 @@ class GitTagVersion {
       return '$x.$y.$z+hotfix.${hotfix! + 1}.pre.$commits';
     }
     if (devPatch != null && devVersion != null) {
-      return '$x.$y.$z-${devVersion! + 1}.0.pre.$commits';
+      // The next published release this commit will appear in will be a beta
+      // release, thus increment [y].
+      return '$x.${y! + 1}.0-0.0.pre.$commits';
     }
     return '$x.$y.${z! + 1}-0.0.pre.$commits';
   }
@@ -879,7 +985,7 @@ class VersionFreshnessValidator {
     final String updateMessage;
     switch (remoteVersionStatus) {
       case VersionCheckResult.newVersionAvailable:
-        updateMessage = newVersionAvailableMessage();
+        updateMessage = _newVersionAvailableMessage;
         break;
       case VersionCheckResult.versionIsCurrent:
       case VersionCheckResult.unknown:
@@ -887,7 +993,7 @@ class VersionFreshnessValidator {
         break;
     }
 
-    logger.printStatus(updateMessage, emphasis: true);
+    logger.printBox(updateMessage);
     await Future.wait<void>(<Future<void>>[
       stamp.store(
         newTimeWarningWasPrinted: now,
@@ -900,26 +1006,13 @@ class VersionFreshnessValidator {
 
 @visibleForTesting
 String versionOutOfDateMessage(Duration frameworkAge) {
-  String warning = 'WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.';
-  // Append enough spaces to match the message box width.
-  warning += ' ' * (74 - warning.length);
-
   return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ $warning ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
+WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.
+
+To update to the latest version, run "flutter upgrade".''';
 }
 
-@visibleForTesting
-String newVersionAvailableMessage() {
-  return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ A new version of Flutter is available!                                     ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
-}
+const String _newVersionAvailableMessage = '''
+A new version of Flutter is available!
+
+To update to the latest version, run "flutter upgrade".''';

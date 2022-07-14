@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-{{#withPluginHook}}
+{{#withPlatformChannelPluginHook}}
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
-{{/withPluginHook}}
+{{/withPlatformChannelPluginHook}}
+{{#withFfiPluginHook}}
+import 'dart:async';
+
+import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart' as {{pluginProjectName}};
+{{/withFfiPluginHook}}
 
 void main() {
   runApp(const MyApp());
@@ -121,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 {{/withPluginHook}}
-{{#withPluginHook}}
+{{#withPlatformChannelPluginHook}}
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -131,6 +136,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  final _{{pluginClassLowerCamelCase}} = {{pluginDartClass}}();
 
   @override
   void initState() {
@@ -145,7 +151,7 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await {{pluginDartClass}}.platformVersion ?? 'Unknown platform version';
+          await _{{pluginClassLowerCamelCase}}.getPlatformVersion() ?? 'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -174,4 +180,71 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-{{/withPluginHook}}
+{{/withPlatformChannelPluginHook}}
+{{#withFfiPluginHook}}
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late int sumResult;
+  late Future<int> sumAsyncResult;
+
+  @override
+  void initState() {
+    super.initState();
+    sumResult = {{pluginProjectName}}.sum(1, 2);
+    sumAsyncResult = {{pluginProjectName}}.sumAsync(3, 4);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const textStyle = TextStyle(fontSize: 25);
+    const spacerSmall = SizedBox(height: 10);
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Native Packages'),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                const Text(
+                  'This calls a native function through FFI that is shipped as source in the package. '
+                  'The native code is built as part of the Flutter Runner build.',
+                  style: textStyle,
+                  textAlign: TextAlign.center,
+                ),
+                spacerSmall,
+                Text(
+                  'sum(1, 2) = $sumResult',
+                  style: textStyle,
+                  textAlign: TextAlign.center,
+                ),
+                spacerSmall,
+                FutureBuilder<int>(
+                  future: sumAsyncResult,
+                  builder: (BuildContext context, AsyncSnapshot<int> value) {
+                    final displayValue =
+                        (value.hasData) ? value.data : 'loading';
+                    return Text(
+                      'await sumAsync(3, 4) = $displayValue',
+                      style: textStyle,
+                      textAlign: TextAlign.center,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+{{/withFfiPluginHook}}

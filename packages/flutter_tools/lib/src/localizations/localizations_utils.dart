@@ -156,7 +156,7 @@ Map<String, List<String>> _parseSection(String section) {
     }
     final int colon = line.indexOf(':');
     if (colon <= 0) {
-      throw 'not sure how to deal with "$line"';
+      throw Exception('not sure how to deal with "$line"');
     }
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);

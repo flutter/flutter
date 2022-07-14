@@ -158,10 +158,6 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// ```dart
   /// CupertinoContextMenu(
-  ///   child: FittedBox(
-  ///     fit: BoxFit.cover,
-  ///     child: Image.asset('assets/photo.jpg'),
-  ///   ),
   ///   // The FittedBox in the preview here allows the image to animate its
   ///   // aspect ratio when the CupertinoContextMenu is animating its preview
   ///   // widget open and closed.
@@ -184,6 +180,10 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
+  ///   child: FittedBox(
+  ///     fit: BoxFit.cover,
+  ///     child: Image.asset('assets/photo.jpg'),
+  ///   ),
   /// )
   /// ```
   ///
@@ -287,7 +287,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         // because _ContextMenuRoute renders its first frame offscreen.
         // Otherwise there would be a visible flash when nothing is rendered for
         // one frame.
-        SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
           _openController.reset();
@@ -714,7 +714,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
     // Render one frame offstage in the final position so that we can take
     // measurements of its layout and then animate to them.
-    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _updateTweenRects();
       _internalOffstage = false;
       _setOffstageInternally();

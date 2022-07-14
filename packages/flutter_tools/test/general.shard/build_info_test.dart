@@ -80,6 +80,18 @@ void main() {
     });
   });
 
+  testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
+    expect(getDartNameForDarwinArch(DarwinArch.armv7),  'armv7');
+    expect(getDartNameForDarwinArch(DarwinArch.arm64),  'arm64');
+    expect(getDartNameForDarwinArch(DarwinArch.x86_64), 'x64');
+  });
+
+  testWithoutContext('getNameForDarwinArch returns Apple names', () {
+    expect(getNameForDarwinArch(DarwinArch.armv7),  'armv7');
+    expect(getNameForDarwinArch(DarwinArch.arm64),  'arm64');
+    expect(getNameForDarwinArch(DarwinArch.x86_64), 'x86_64');
+  });
+
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
     expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
     expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');
@@ -105,7 +117,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       fileSystemRoots: <String>['test5', 'test6'],
       fileSystemScheme: 'scheme',
@@ -137,7 +149,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
@@ -152,7 +164,7 @@ void main() {
       'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
       'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
-      'PACKAGE_CONFIG': 'foo/.packages',
+      'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
     });
   });
@@ -167,7 +179,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );

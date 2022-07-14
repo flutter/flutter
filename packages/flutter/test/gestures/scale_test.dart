@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize scale gestures', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();

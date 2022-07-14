@@ -45,7 +45,7 @@ Future<void> processPodsIfNeeded(
     xcodeProject: xcodeProject,
     buildMode: buildMode,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
-  ) == true;
+  ) ?? false;
   if (didPodInstall) {
     fingerprinter.writeFingerprint();
   }

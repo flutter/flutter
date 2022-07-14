@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
@@ -11,10 +10,9 @@ import '../../xcode_project.dart';
 class DeploymentTargetMigration extends ProjectMigrator {
   DeploymentTargetMigration(
     IosProject project,
-    Logger logger,
+    super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _appFrameworkInfoPlist = project.appFrameworkInfoPlist,
-        super(logger);
+        _appFrameworkInfoPlist = project.appFrameworkInfoPlist;
 
   final File _xcodeProjectInfoFile;
   final File _appFrameworkInfoPlist;

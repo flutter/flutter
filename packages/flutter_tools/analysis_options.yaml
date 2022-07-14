@@ -7,7 +7,7 @@ linter:
     curly_braces_in_flow_control_structures: true
     library_private_types_in_public_api: false # Tool does not have any public API.
     no_runtimeType_toString: false # We use runtimeType for debugging in the tool.
-    only_throw_errors: false # For historical reasons we throw strings a lot.
+    only_throw_errors: true
     prefer_relative_imports: true
     public_member_api_docs: false # Tool does not have any public API.
     unawaited_futures: true

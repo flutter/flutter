@@ -35,7 +35,7 @@ class BenchCardInfiniteScroll extends WidgetRecorder {
 }
 
 class _InfiniteScrollCards extends StatefulWidget {
-  const _InfiniteScrollCards(this.initialOffset, this.finalOffset, {Key? key}) : super(key: key);
+  const _InfiniteScrollCards(this.initialOffset, this.finalOffset);
 
   final double initialOffset;
   final double finalOffset;

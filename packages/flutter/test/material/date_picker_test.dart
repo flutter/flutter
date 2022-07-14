@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +28,7 @@ void main() {
   String? fieldHintText;
   String? fieldLabelText;
   String? helpText;
+  TextInputType? keyboardType;
 
   final Finder nextMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));
   final Finder previousMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
@@ -52,6 +55,7 @@ void main() {
     fieldHintText = null;
     fieldLabelText = null;
     helpText = null;
+    keyboardType = null;
   });
 
   Future<void> prepareDatePicker(
@@ -94,6 +98,7 @@ void main() {
       fieldHintText: fieldHintText,
       fieldLabelText: fieldLabelText,
       helpText: helpText,
+      keyboardType: keyboardType,
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: textDirection,
@@ -701,6 +706,14 @@ void main() {
       });
     });
 
+    testWidgets('KeyboardType is used', (WidgetTester tester) async {
+      keyboardType = TextInputType.text;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        final TextField field = textField(tester);
+        expect(field.keyboardType, TextInputType.text);
+      });
+    });
+
     testWidgets('Initial date is the default', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.text('OK'));
@@ -1122,6 +1135,123 @@ void main() {
     testWidgets('small screen size - landscape - textScale 1.3', (WidgetTester tester) async {
       await _showPicker(tester, kSmallScreenSizeLandscape, 1.3);
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('showDatePicker avoids overlapping display features', () {
+    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2018),
+        lastDate: DateTime(2030),
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(DatePickerDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(DatePickerDialog)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning with Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2018),
+        lastDate: DateTime(2030),
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the right screen
+      expect(tester.getTopLeft(find.byType(DatePickerDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(DatePickerDialog)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning with defaults', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2018),
+        lastDate: DateTime(2030),
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(DatePickerDialog)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(DatePickerDialog)), const Offset(390.0, 600.0));
     });
   });
 

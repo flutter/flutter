@@ -487,7 +487,7 @@ class TestFeatureFlags implements FeatureFlags {
 }
 
 class FakeStatusLogger extends DelegatingLogger {
-  FakeStatusLogger(Logger delegate) : super(delegate);
+  FakeStatusLogger(super.delegate);
 
   late Status status;
 

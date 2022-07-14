@@ -518,7 +518,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     super.hashCode,
     text,
     recognizer,
@@ -526,7 +526,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     onEnter,
     onExit,
     mouseCursor,
-    hashList(children),
+    children == null ? null : Object.hashAll(children!),
   );
 
   @override

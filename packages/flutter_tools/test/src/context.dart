@@ -153,7 +153,7 @@ void testUsingContext(
             print(error); // ignore: avoid_print
             print(stackTrace); // ignore: avoid_print
             _printBufferedErrors(context);
-            throw error;
+            throw error; //ignore: only_throw_errors
           });
         },
       );
@@ -294,10 +294,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 12.3';
+  String get versionText => 'Xcode 13';
 
   @override
-  Version get version => Version(12, 3, null);
+  Version get version => Version(13, null, null);
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -348,10 +348,10 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 
   @override
   set currentDirectory(dynamic value) {
-    throw 'globals.fs.currentDirectory should not be set on the local file system during '
+    throw Exception('globals.fs.currentDirectory should not be set on the local file system during '
           'tests as this can cause race conditions with concurrent tests. '
           'Consider using a MemoryFileSystem for testing if possible or refactor '
-          'code to not require setting globals.fs.currentDirectory.';
+          'code to not require setting globals.fs.currentDirectory.');
   }
 }
 

@@ -36,12 +36,13 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages', // TODO(zanderso): make this required and remove the default.
+    this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
+    this.assumeInitializeFromDillUpToDate = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -66,10 +67,10 @@ class BuildInfo {
   /// Mode-Flavor (e.g. Release-Paid).
   final String? flavor;
 
-  /// The path to the .packages file to use for compilation.
+  /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.packages`.
+  /// file. If not provided, defaults to `.dart_tool/packages`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
@@ -159,6 +160,10 @@ class BuildInfo {
   /// If this is null, it will be initialized from the default cached location.
   final String? initializeFromDill;
 
+  /// If set, assumes that the file passed in [initializeFromDill] is up to date
+  /// and skips the check and potential invalidation of files.
+  final bool assumeInitializeFromDillUpToDate;
+
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -193,9 +198,13 @@ class BuildInfo {
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
 
-  /// the flavor name in the output files is lower-cased (see flutter.gradle),
+  /// the flavor name in the output apk files is lower-cased (see flutter.gradle),
   /// so the lower cased flavor name is used to compute the output file name
   String? get lowerCasedFlavor => flavor?.toLowerCase();
+
+  /// the flavor name in the output bundle files has the first character lower-cased,
+  /// so the uncapitalized flavor name is used to compute the output file name
+  String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -561,6 +570,31 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   ];
 }
 
+// Returns the Dart SDK's name for the specified target architecture.
+//
+// When building for Darwin platforms, the tool invokes architecture-specific
+// variants of `gen_snapshot`, one for each target architecture. The output
+// instructions are then built into architecture-specific binaries, which are
+// merged into a universal binary using the `lipo` tool.
+String getDartNameForDarwinArch(DarwinArch arch) {
+  switch (arch) {
+    case DarwinArch.armv7:
+      return 'armv7';
+    case DarwinArch.arm64:
+      return 'arm64';
+    case DarwinArch.x86_64:
+      return 'x64';
+  }
+}
+
+// Returns Apple's name for the specified target architecture.
+//
+// When invoking Apple tools such as `xcodebuild` or `lipo`, the tool often
+// passes one or more target architectures as paramters. The names returned by
+// this function reflect Apple's name for the specified architecture.
+//
+// For consistency with developer expectations, Flutter outputs also use these
+// architecture names in its build products for Darwin target platforms.
 String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
     case DarwinArch.armv7:
@@ -1007,4 +1041,11 @@ String getNameForHostPlatformArch(HostPlatform platform) {
     case HostPlatform.windows_x64:
       return 'x64';
   }
+}
+
+String? _uncapitalize(String? s) {
+  if (s == null || s.isEmpty) {
+    return s;
+  }
+  return s.substring(0, 1).toLowerCase() + s.substring(1);
 }

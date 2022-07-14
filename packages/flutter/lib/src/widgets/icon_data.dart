@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 /// A description of an icon fulfilled by a font glyph.
@@ -61,7 +59,7 @@ class IconData {
   }
 
   @override
-  int get hashCode => hashValues(codePoint, fontFamily, fontPackage, matchTextDirection);
+  int get hashCode => Object.hash(codePoint, fontFamily, fontPackage, matchTextDirection);
 
   @override
   String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';

@@ -49,6 +49,8 @@ import 'test_async_utils.dart';
 /// |  testName_isolatedDiff.png | ![An isolated pixel difference.](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png) |
 /// |  testName_maskedDiff.png   | ![A masked pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_maskedDiff.png) |
 ///
+/// {@macro flutter.flutter_test.matchesGoldenFile.custom_fonts}
+///
 /// See also:
 ///
 ///   * [GoldenFileComparator], the abstract class that [LocalFileComparator]

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
@@ -1308,34 +1307,34 @@ class TextStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<Object?>[
-      inherit,
-      color,
-      backgroundColor,
-      fontSize,
-      fontWeight,
-      fontStyle,
-      letterSpacing,
-      wordSpacing,
-      textBaseline,
-      height,
-      leadingDistribution,
-      locale,
-      foreground,
-      background,
-      hashList(shadows),
-      hashList(fontFeatures),
-      decoration,
-      decorationColor,
-      decorationStyle,
+  int get hashCode => Object.hash(
+    inherit,
+    color,
+    backgroundColor,
+    fontSize,
+    fontWeight,
+    fontStyle,
+    letterSpacing,
+    wordSpacing,
+    textBaseline,
+    height,
+    leadingDistribution,
+    locale,
+    foreground,
+    background,
+    shadows == null ? null : Object.hashAll(shadows!),
+    fontFeatures == null ? null : Object.hashAll(fontFeatures!),
+    decoration,
+    decorationColor,
+    decorationStyle,
+    Object.hash(
       decorationThickness,
       fontFamily,
-      hashList(fontFamilyFallback),
+      fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback!),
       _package,
       overflow,
-    ]);
-  }
+    ),
+  );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'TextStyle');

@@ -25,6 +25,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -61,6 +62,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -108,6 +110,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -150,6 +153,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -187,6 +191,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),
@@ -216,6 +221,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -247,6 +253,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -273,6 +280,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -296,6 +304,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -321,6 +330,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -340,6 +350,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),
@@ -357,6 +368,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),
@@ -376,6 +388,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),

@@ -48,7 +48,7 @@ class SpringDescription {
   /// The damping coefficient (c).
   ///
   /// Do not confuse the damping _coefficient_ (c) with the damping _ratio_ (ζ).
-  /// To create a [SpringDescription] with a damping ratio, use the [new
+  /// To create a [SpringDescription] with a damping ratio, use the [
   /// SpringDescription.withDampingRatio] constructor.
   ///
   /// The units of the damping coefficient are M/T, where M is the mass unit
@@ -104,7 +104,7 @@ class SpringSimulation extends Simulation {
 
   /// The kind of spring being simulated, for debugging purposes.
   ///
-  /// This is derived from the [SpringDescription] provided to the [new
+  /// This is derived from the [SpringDescription] provided to the [
   /// SpringSimulation] constructor.
   SpringType get type => _solution.type;
 
@@ -130,7 +130,7 @@ class ScrollSpringSimulation extends SpringSimulation {
   /// Creates a spring simulation from the provided spring description, start
   /// distance, end distance, and initial velocity.
   ///
-  /// See the [new SpringSimulation] constructor on the superclass for a
+  /// See the [SpringSimulation.new] constructor on the superclass for a
   /// discussion of the arguments' units.
   ScrollSpringSimulation(
     SpringDescription spring,

@@ -153,7 +153,7 @@ class Cache {
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
     return Cache(
-      rootOverride: rootOverride ??= fileSystem.directory('cache'),
+      rootOverride: rootOverride ?? fileSystem.directory('cache'),
       artifacts: artifacts ?? <ArtifactSet>[],
       logger: logger,
       fileSystem: fileSystem,

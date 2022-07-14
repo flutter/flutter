@@ -176,6 +176,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
 
   android {
       compileSdkVersion flutter.compileSdkVersion
+      ndkVersion flutter.ndkVersion
 
       sourceSets {
           main.java.srcDirs += 'src/main/kotlin'
@@ -548,7 +549,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
     <!-- Theme applied to the Android Window while the process is starting -->
     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <!-- Show a splash screen on the activity. Automatically removed when
-             Flutter draws its first frame -->
+             the Flutter engine draws its first frame -->
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.

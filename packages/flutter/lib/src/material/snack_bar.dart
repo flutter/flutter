@@ -204,6 +204,7 @@ class SnackBar extends StatefulWidget {
     this.animation,
     this.onVisible,
     this.dismissDirection = DismissDirection.down,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
@@ -211,6 +212,7 @@ class SnackBar extends StatefulWidget {
          'Width and margin can not be used together',
        ),
        assert(duration != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The primary content of the snack bar.
@@ -336,6 +338,11 @@ class SnackBar extends StatefulWidget {
   /// Cannot be null, defaults to [DismissDirection.down].
   final DismissDirection dismissDirection;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  final Clip clipBehavior;
+
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
@@ -367,6 +374,7 @@ class SnackBar extends StatefulWidget {
       animation: newAnimation,
       onVisible: onVisible,
       dismissDirection: dismissDirection,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -385,11 +393,11 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   void didUpdateWidget(SnackBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation!.removeStatusListener(_onAnimationStatusChanged);
       widget.animation!.addStatusListener(_onAnimationStatusChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -612,7 +620,10 @@ class _SnackBarState extends State<SnackBar> {
 
     return Hero(
       tag: '<SnackBar Hero tag - ${widget.content}>',
-      child: snackBarTransition,
+      child: ClipRect(
+        clipBehavior: widget.clipBehavior,
+        child: snackBarTransition,
+      ),
     );
   }
 }

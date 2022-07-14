@@ -127,7 +127,7 @@ class MultiImageCompleter extends ImageStreamCompleter {
 }
 
 void main() {
-  TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding.ensureInitialized();
 
   test('Decoration.lerp()', () {
     const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));

@@ -102,6 +102,8 @@ const double _inputFormLandscapeHeight = 108.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// ### State Restoration
 ///
 /// Using this method will not enable state restoration for the date picker.
@@ -113,7 +115,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This sample demonstrates how to create a restorable Material date picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -128,6 +130,8 @@ const double _inputFormLandscapeHeight = 108.0;
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showTimePicker], which shows a dialog that contains a material design time picker.
 ///
 Future<DateTime?> showDatePicker({
@@ -151,6 +155,8 @@ Future<DateTime?> showDatePicker({
   String? errorInvalidText,
   String? fieldHintText,
   String? fieldLabelText,
+  TextInputType? keyboardType,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(initialDate != null);
@@ -195,6 +201,7 @@ Future<DateTime?> showDatePicker({
     errorInvalidText: errorInvalidText,
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
+    keyboardType: keyboardType,
   );
 
   if (textDirection != null) {
@@ -219,6 +226,7 @@ Future<DateTime?> showDatePicker({
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
+    anchorPoint: anchorPoint,
   );
 }
 
@@ -249,6 +257,7 @@ class DatePickerDialog extends StatefulWidget {
     this.errorInvalidText,
     this.fieldHintText,
     this.fieldLabelText,
+    this.keyboardType,
     this.restorationId,
   }) : assert(initialDate != null),
        assert(firstDate != null),
@@ -333,6 +342,11 @@ class DatePickerDialog extends StatefulWidget {
   /// If this is null, it will default to the words representing the date format
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
+
+  /// The keyboard type of the [TextField].
+  ///
+  /// If this is null, it will default to [TextInputType.datetime]
+  final TextInputType? keyboardType;
 
   /// Restoration ID to save and restore the state of the [DatePickerDialog].
   ///
@@ -512,6 +526,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   errorInvalidText: widget.errorInvalidText,
                   fieldHintText: widget.fieldHintText,
                   fieldLabelText: widget.fieldLabelText,
+                  keyboardType: widget.keyboardType,
                   autofocus: true,
                 ),
                 const Spacer(),
@@ -889,6 +904,8 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// ### State Restoration
 ///
 /// Using this method will not enable state restoration for the date range picker.
@@ -914,7 +931,8 @@ class _DatePickerHeader extends StatelessWidget {
 ///  * [showDatePicker], which shows a material design date picker used to
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
-///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,
   DateTimeRange? initialDateRange,
@@ -938,6 +956,7 @@ Future<DateTimeRange?> showDateRangePicker({
   RouteSettings? routeSettings,
   TextDirection? textDirection,
   TransitionBuilder? builder,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(
@@ -1020,6 +1039,7 @@ Future<DateTimeRange?> showDateRangePicker({
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
+    anchorPoint: anchorPoint,
   );
 }
 

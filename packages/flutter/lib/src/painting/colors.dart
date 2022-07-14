@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
-import 'dart:ui' show Color, lerpDouble, hashValues;
+import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -226,7 +225,7 @@ class HSVColor {
   }
 
   @override
-  int get hashCode => hashValues(alpha, hue, saturation, value);
+  int get hashCode => Object.hash(alpha, hue, saturation, value);
 
   @override
   String toString() => '${objectRuntimeType(this, 'HSVColor')}($alpha, $hue, $saturation, $value)';
@@ -410,7 +409,7 @@ class HSLColor {
   }
 
   @override
-  int get hashCode => hashValues(alpha, hue, saturation, lightness);
+  int get hashCode => Object.hash(alpha, hue, saturation, lightness);
 
   @override
   String toString() => '${objectRuntimeType(this, 'HSLColor')}($alpha, $hue, $saturation, $lightness)';
@@ -431,7 +430,7 @@ class ColorSwatch<T> extends Color {
   /// Creates a color that has a small table of related colors called a "swatch".
   ///
   /// The `primary` argument should be the 32 bit ARGB value of one of the
-  /// values in the swatch, as would be passed to the [new Color] constructor
+  /// values in the swatch, as would be passed to the [Color.new] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
   /// the specific index of the color in the swatch.)
   const ColorSwatch(int primary, this._swatch) : super(primary);
@@ -454,7 +453,7 @@ class ColorSwatch<T> extends Color {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, value, _swatch);
+  int get hashCode => Object.hash(runtimeType, value, _swatch);
 
   @override
   String toString() => '${objectRuntimeType(this, 'ColorSwatch')}(primary value: ${super.toString()})';

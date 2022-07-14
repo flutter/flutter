@@ -10,7 +10,7 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` and `flutter attach --machine` which allow IDEs and tools to launch and attach to flutter applications and interact to send commands like Hot Reload. The command and events that are available in these modes are documented at the bottom of this document.
+A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` and `flutter attach --machine` which allow IDEs and tools to launch and attach to Flutter applications and interact to send commands like Hot Reload. The command and events that are available in these modes are documented at the bottom of this document.
 
 ## Protocol
 

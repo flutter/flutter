@@ -38,7 +38,7 @@ void main() {
     expect(
       await comparator.compare(
         Uint8List.fromList(_kFailPngBytes),
-        Uri.parse('flutter.new_golden_test.1'),
+        Uri.parse('flutter.new_golden_test.1.png'),
       ),
       isTrue,
     );
@@ -48,7 +48,7 @@ void main() {
     expect(
       await comparator.compare(
         Uint8List.fromList(_kFailPngBytes),
-        Uri.parse('flutter.new_golden_test.2'),
+        Uri.parse('flutter.new_golden_test.2.png'),
       ),
       isTrue,
     );

@@ -36,6 +36,7 @@ void main() {
 
     Widget build({
       Widget? header,
+      Widget? footer,
       Axis scrollDirection = Axis.vertical,
       bool reverse = false,
       EdgeInsets padding = EdgeInsets.zero,
@@ -51,6 +52,7 @@ void main() {
             width: itemHeight * 10,
             child: ReorderableListView(
               header: header,
+              footer: footer,
               scrollDirection: scrollDirection,
               onReorder: onReorder,
               reverse: reverse,
@@ -154,6 +156,20 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+      });
+
+      testWidgets('properly reorders with a footer', (WidgetTester tester) async {
+        await tester.pumpWidget(build(footer: const Text('Footer Text')));
+        expect(find.text('Footer Text'), findsOneWidget);
+        expect(listItems, orderedEquals(originalListItems));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 4')) + const Offset(0.0, itemHeight * 2),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
 
@@ -764,6 +780,29 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
       });
 
+      testWidgets('properly reorders with a footer', (WidgetTester tester) async {
+        await tester.pumpWidget(build(footer: const Text('Footer Text'), scrollDirection: Axis.horizontal));
+        expect(find.text('Footer Text'), findsOneWidget);
+        expect(listItems, orderedEquals(originalListItems));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 4')) + const Offset(itemHeight * 2, 0.0),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Footer Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+        await tester.pumpWidget(build(footer: const Text('Footer Text'), scrollDirection: Axis.horizontal));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 4')),
+          tester.getCenter(find.text('Item 3')),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Footer Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
+      });
+
       testWidgets('properly determines the horizontal drop area extents', (WidgetTester tester) async {
         final Widget reorderableListView = ReorderableListView(
           scrollDirection: Axis.horizontal,
@@ -1242,7 +1281,7 @@ void main() {
     });
 
     group('Padding', () {
-      testWidgets('Padding with no header', (WidgetTester tester) async {
+      testWidgets('Padding with no header & footer', (WidgetTester tester) async {
         const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
 
         // Vertical
@@ -1256,35 +1295,62 @@ void main() {
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(154, 20, 202, 560));
       });
 
-      testWidgets('Padding with header', (WidgetTester tester) async {
+      testWidgets('Padding with header or footer', (WidgetTester tester) async {
         const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
         const Key headerKey = Key('Header');
+        const Key footerKey = Key('Footer');
         const Widget verticalHeader = SizedBox(key: headerKey, height: 10);
         const Widget horizontalHeader = SizedBox(key: headerKey, width: 10);
+        const Widget verticalFooter = SizedBox(key: footerKey, height: 10);
+        const Widget horizontalFooter = SizedBox(key: footerKey, width: 10);
 
-        // Vertical
+        // Vertical Header
         await tester.pumpWidget(build(padding: padding, header: verticalHeader));
         expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(10, 20, 770, 30));
         expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 30, 770, 78));
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(10, 174, 770, 222));
 
-        // Vertical, reversed
+        // Vertical Footer
+        await tester.pumpWidget(build(padding: padding, footer: verticalFooter));
+        expect(tester.getRect(find.byKey(footerKey)), const Rect.fromLTRB(10, 212, 770, 222));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 20, 770, 68));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(10, 164, 770, 212));
+
+        // Vertical Header, reversed
         await tester.pumpWidget(build(padding: padding, header: verticalHeader, reverse: true));
         expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(10, 550, 770, 560));
         expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 502, 770, 550));
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(10, 358, 770, 406));
 
-        // Horizontal
+        // Vertical Footer, reversed
+        await tester.pumpWidget(build(padding: padding, footer: verticalFooter, reverse: true));
+        expect(tester.getRect(find.byKey(footerKey)), const Rect.fromLTRB(10, 358, 770, 368));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 512, 770, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(10, 368, 770, 416));
+
+        // Horizontal Header
         await tester.pumpWidget(build(padding: padding, header: horizontalHeader, scrollDirection: Axis.horizontal));
         expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(10, 20, 20, 560));
         expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(20, 20, 68, 560));
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(164, 20, 212, 560));
 
-        // Horizontal, reversed
+        // // Horizontal Footer
+        await tester.pumpWidget(build(padding: padding, footer: horizontalFooter, scrollDirection: Axis.horizontal));
+        expect(tester.getRect(find.byKey(footerKey)), const Rect.fromLTRB(202, 20, 212, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 20, 58, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(154, 20, 202, 560));
+
+        // Horizontal Header, reversed
         await tester.pumpWidget(build(padding: padding, header: horizontalHeader, scrollDirection: Axis.horizontal, reverse: true));
         expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(760, 20, 770, 560));
         expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(712, 20, 760, 560));
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(568, 20, 616, 560));
+
+        // // Horizontal Footer, reversed
+        await tester.pumpWidget(build(padding: padding, footer: horizontalFooter, scrollDirection: Axis.horizontal, reverse: true));
+        expect(tester.getRect(find.byKey(footerKey)), const Rect.fromLTRB(568, 20, 578, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(722, 20, 770, 560));
+        expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(578, 20, 626, 560));
       });
     });
 
@@ -1468,6 +1534,82 @@ void main() {
       expect(find.text('item $i'), findsOneWidget);
     }
     expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
+  });
+
+  testWidgets('ReorderableListView calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(8, (int index) => index);
+    int? startIndex, endIndex;
+    final Finder item0 = find.textContaining('item 0');
+
+    void handleReorder(int fromIndex, int toIndex) {
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: ReorderableListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            key: ValueKey<int>(items[index]),
+            height: 100,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('item ${items[index]}'),
+                ],
+              ),
+            ),
+          );
+        },
+        itemCount: items.length,
+        onReorder: handleReorder,
+        onReorderStart: (int index) {
+          startIndex = index;
+        },
+        onReorderEnd: (int index) {
+          endIndex = index;
+        },
+      ),
+    ));
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(0));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 0 to index 3
+    await drag.moveBy(const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(3));
+
+    startIndex = null;
+    endIndex = null;
+
+    drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(2));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 2 to index 0
+    await drag.moveBy(const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(0));
   });
 
   testWidgets('ReorderableListView throws an error when key is not passed to its children', (WidgetTester tester) async {

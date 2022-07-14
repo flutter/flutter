@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,5 +34,12 @@ void main() {
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 2.0));
     await tester.pumpWidget(const Placeholder(strokeWidth: 10.0));
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 10.0));
+  });
+
+   testWidgets('Placeholder child widget', (WidgetTester tester) async {
+    await tester.pumpWidget(const Placeholder());
+    expect(find.text('Label'), findsNothing);
+    await tester.pumpWidget(const MaterialApp(home: Placeholder(child: Text('Label'))));
+    expect(find.text('Label'), findsOneWidget);
   });
 }

@@ -40,7 +40,7 @@ class _StorageEntryIdentifier {
   }
 
   @override
-  int get hashCode => hashList(keys);
+  int get hashCode => Object.hashAll(keys);
 
   @override
   String toString() {

@@ -507,5 +507,5 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  int get hashCode => hashValues(borderSide, borderRadius, gapPadding);
+  int get hashCode => Object.hash(borderSide, borderRadius, gapPadding);
 }

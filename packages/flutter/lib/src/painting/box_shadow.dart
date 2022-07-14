@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 import 'dart:ui' as ui show Shadow, lerpDouble;
 
@@ -136,7 +135,7 @@ class BoxShadow extends ui.Shadow {
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius, blurStyle);
+  int get hashCode => Object.hash(color, offset, blurRadius, spreadRadius, blurStyle);
 
   @override
   String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}), $blurStyle';

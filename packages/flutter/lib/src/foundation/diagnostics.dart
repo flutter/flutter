@@ -1617,7 +1617,7 @@ abstract class DiagnosticsNode {
           'allowTruncate': allowTruncate,
         if (hasChildren)
           'hasChildren': hasChildren,
-        if (linePrefix?.isNotEmpty == true)
+        if (linePrefix?.isNotEmpty ?? false)
           'linePrefix': linePrefix,
         if (!allowWrap)
           'allowWrap': allowWrap,
@@ -2209,7 +2209,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    if (value == true) {
+    if (value ?? false) {
       if (ifTrue != null)
         return ifTrue!;
     } else if (value == false) {
@@ -2221,7 +2221,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   bool get showName {
-    if (value == null || (value == true && ifTrue == null) || (value == false && ifFalse == null)) {
+    if (value == null || ((value ?? false) && ifTrue == null) || (!(value ?? true) && ifFalse == null)) {
       // We are missing a description for the flag value so we need to show the
       // flag name. The property will have DiagnosticLevel.hidden for this case
       // so users will not see this the property in this case unless they are
@@ -2233,7 +2233,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   DiagnosticLevel get level {
-    if (value == true) {
+    if (value ?? false) {
       if (ifTrue == null)
         return DiagnosticLevel.hidden;
     }
@@ -3501,7 +3501,7 @@ abstract class DiagnosticableTree with Diagnosticable {
   /// [DiagnosticsTreeStyle.offstage] to indicate that they are offstage.
   ///
   /// The list must not contain any null entries. If there are explicit null
-  /// children to report, consider [new DiagnosticsNode.message] or
+  /// children to report, consider [DiagnosticsNode.message] or
   /// [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to
   /// provide.
   ///

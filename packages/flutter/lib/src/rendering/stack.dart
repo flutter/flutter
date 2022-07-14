@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble, hashValues;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -164,7 +164,7 @@ class RelativeRect {
   }
 
   @override
-  int get hashCode => hashValues(left, top, right, bottom);
+  int get hashCode => Object.hash(left, top, right, bottom);
 
   @override
   String toString() => 'RelativeRect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
@@ -268,24 +268,6 @@ enum StackFit {
   /// horizontal constraints will be tight and the vertical constraints will be
   /// loose.
   passthrough,
-}
-
-/// Whether overflowing children should be clipped, or their overflow be
-/// visible.
-///
-/// Deprecated. Use [Stack.clipBehavior] instead.
-@Deprecated(
-  'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-  'This feature was deprecated after v1.22.0-12.0.pre.',
-)
-enum Overflow {
-  /// Overflowing children will be visible.
-  ///
-  /// The visible overflow area will not accept hit testing.
-  visible,
-
-  /// Overflowing children will be clipped to the bounds of their parent.
-  clip,
 }
 
 /// Implements the stack layout algorithm.
@@ -748,5 +730,21 @@ class RenderIndexedStack extends RenderStack {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('index', index));
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    int i = 0;
+    RenderObject? child = firstChild;
+    while (child != null) {
+      children.add(child.toDiagnosticsNode(
+        name: 'child ${i + 1}',
+        style: i != index! ? DiagnosticsTreeStyle.offstage : null,
+      ));
+      child = (child.parentData! as StackParentData).nextSibling;
+      i += 1;
+    }
+    return children;
   }
 }

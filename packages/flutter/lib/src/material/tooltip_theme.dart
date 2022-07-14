@@ -156,22 +156,20 @@ class TooltipThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      height,
-      padding,
-      margin,
-      verticalOffset,
-      preferBelow,
-      excludeFromSemantics,
-      decoration,
-      textStyle,
-      waitDuration,
-      showDuration,
-      triggerMode,
-      enableFeedback
-    );
-  }
+  int get hashCode => Object.hash(
+    height,
+    padding,
+    margin,
+    verticalOffset,
+    preferBelow,
+    excludeFromSemantics,
+    decoration,
+    textStyle,
+    waitDuration,
+    showDuration,
+    triggerMode,
+    enableFeedback,
+  );
 
   @override
   bool operator==(Object other) {

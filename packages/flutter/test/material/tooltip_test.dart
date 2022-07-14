@@ -14,23 +14,6 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-void _ensureTooltipVisible(GlobalKey key) {
-  // This function uses "as dynamic"to defeat the static analysis. In general
-  // you want to avoid using this style in your code, as it will cause the
-  // analyzer to be unable to help you catch errors.
-  //
-  // In this case, we do it because we are trying to call internal methods of
-  // the tooltip code in order to test it. Normally, the state of a tooltip is a
-  // private class, but by using a GlobalKey we can get a handle to that object
-  // and by using "as dynamic" we can bypass the analyzer's type checks and call
-  // methods that we aren't supposed to be able to know about.
-  //
-  // It's ok to do this in tests, but you really don't want to do it in
-  // production code.
-  // ignore: avoid_dynamic_calls
-  (key.currentState as dynamic).ensureTooltipVisible();
-}
-
 const String tooltipText = 'TIP';
 
 Finder _findTooltipContainer(String tooltipText) {
@@ -42,7 +25,7 @@ Finder _findTooltipContainer(String tooltipText) {
 
 void main() {
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -56,7 +39,7 @@ void main() {
                       left: 300.0,
                       top: 0.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         height: 20.0,
                         padding: const EdgeInsets.all(5.0),
@@ -76,7 +59,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -99,7 +82,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -115,7 +98,7 @@ void main() {
                         left: 300.0,
                         top: 0.0,
                         child: Tooltip(
-                          key: key,
+                          key: tooltipKey,
                           message: tooltipText,
                           height: 20.0,
                           padding: const EdgeInsets.all(5.0),
@@ -136,7 +119,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /************************ 800x600 screen
@@ -161,7 +144,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -175,7 +158,7 @@ void main() {
                       left: 0.0,
                       top: 0.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         height: 20.0,
                         padding: const EdgeInsets.all(5.0),
@@ -195,7 +178,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -215,7 +198,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -229,7 +212,7 @@ void main() {
                       left: 400.0,
                       top: 300.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         height: 100.0,
                         padding: EdgeInsets.zero,
@@ -249,7 +232,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -271,7 +254,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -285,7 +268,7 @@ void main() {
                       left: 400.0,
                       top: 299.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         height: 190.0,
                         padding: EdgeInsets.zero,
@@ -305,7 +288,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -338,7 +321,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -352,7 +335,7 @@ void main() {
                       left: 400.0,
                       top: 300.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         height: 190.0,
                         padding: EdgeInsets.zero,
@@ -372,7 +355,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -393,7 +376,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -407,7 +390,7 @@ void main() {
                       left: 1600.0,
                       top: 300.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         height: 10.0,
                         padding: EdgeInsets.zero,
@@ -427,7 +410,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -450,7 +433,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -464,7 +447,7 @@ void main() {
                       left: 780.0,
                       top: 300.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         height: 10.0,
                         padding: EdgeInsets.zero,
@@ -484,7 +467,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -507,8 +490,8 @@ void main() {
   });
 
   testWidgets('Custom tooltip margin', (WidgetTester tester) async {
-    const double _customMarginValue = 10.0;
-    final GlobalKey key = GlobalKey();
+    const double customMarginValue = 10.0;
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -517,10 +500,10 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 return Tooltip(
-                  key: key,
+                  key: tooltipKey,
                   message: tooltipText,
                   padding: EdgeInsets.zero,
-                  margin: const EdgeInsets.all(_customMarginValue),
+                  margin: const EdgeInsets.all(customMarginValue),
                   child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
@@ -532,43 +515,43 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final Offset topLeftTipInGlobal = tester.getTopLeft(
       _findTooltipContainer(tooltipText),
     );
     final Offset topLeftTooltipContentInGlobal = tester.getTopLeft(find.text(tooltipText));
-    expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + _customMarginValue);
-    expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customMarginValue);
+    expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + customMarginValue);
+    expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + customMarginValue);
 
     final Offset topRightTipInGlobal = tester.getTopRight(
       _findTooltipContainer(tooltipText),
     );
     final Offset topRightTooltipContentInGlobal = tester.getTopRight(find.text(tooltipText));
-    expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customMarginValue);
-    expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customMarginValue);
+    expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - customMarginValue);
+    expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + customMarginValue);
 
     final Offset bottomLeftTipInGlobal = tester.getBottomLeft(
       _findTooltipContainer(tooltipText),
     );
     final Offset bottomLeftTooltipContentInGlobal = tester.getBottomLeft(find.text(tooltipText));
-    expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customMarginValue);
-    expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customMarginValue);
+    expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + customMarginValue);
+    expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - customMarginValue);
 
     final Offset bottomRightTipInGlobal = tester.getBottomRight(
       _findTooltipContainer(tooltipText),
     );
     final Offset bottomRightTooltipContentInGlobal = tester.getBottomRight(find.text(tooltipText));
-    expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customMarginValue);
-    expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customMarginValue);
+    expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - customMarginValue);
+    expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - customMarginValue);
   });
 
   testWidgets('Default tooltip message textStyle - light', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       home: Tooltip(
-        key: key,
+        key: tooltipKey,
         message: tooltipText,
         child: Container(
           width: 100.0,
@@ -577,7 +560,7 @@ void main() {
         ),
       ),
     ));
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -588,13 +571,13 @@ void main() {
   });
 
   testWidgets('Default tooltip message textStyle - dark', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         brightness: Brightness.dark,
       ),
       home: Tooltip(
-        key: key,
+        key: tooltipKey,
         message: tooltipText,
         child: Container(
           width: 100.0,
@@ -603,7 +586,7 @@ void main() {
         ),
       ),
     ));
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -614,10 +597,10 @@ void main() {
   });
 
   testWidgets('Custom tooltip message textStyle', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       home: Tooltip(
-        key: key,
+        key: tooltipKey,
         textStyle: const TextStyle(
           color: Colors.orange,
           decoration: TextDecoration.underline,
@@ -630,7 +613,7 @@ void main() {
         ),
       ),
     ));
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -676,10 +659,10 @@ void main() {
     // A Material widget is needed as an ancestor of the Text widget.
     // It is invalid to have text in a Material application that
     // does not have a Material ancestor.
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       home: Tooltip(
-        key: key,
+        key: tooltipKey,
         message: tooltipText,
         child: Container(
           width: 100.0,
@@ -688,7 +671,7 @@ void main() {
         ),
       ),
     ));
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<DefaultTextStyle>(
@@ -706,7 +689,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -715,7 +698,7 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 return Tooltip(
-                  key: key,
+                  key: tooltipKey,
                   message: tooltipText,
                   child: const SizedBox(
                     width: 0.0,
@@ -728,7 +711,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(
@@ -744,11 +727,11 @@ void main() {
 
   testWidgets('Tooltip default size, shape, and color test for Desktop', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/68601
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Tooltip(
-          key: key,
+          key: tooltipKey,
           message: tooltipText,
           child: const SizedBox(
             width: 0.0,
@@ -757,8 +740,7 @@ void main() {
         ),
       ),
     );
-    // ignore: avoid_dynamic_calls
-    (key.currentState as dynamic).ensureTooltipVisible();
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
@@ -776,7 +758,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
 
   testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
       color: Color(0x80800000),
@@ -789,7 +771,7 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 return Tooltip(
-                  key: key,
+                  key: tooltipKey,
                   decoration: customDecoration,
                   message: tooltipText,
                   child: const SizedBox(
@@ -803,7 +785,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(
@@ -861,6 +843,62 @@ void main() {
     await tester.pump(kLongPressTimeout);
     expect(find.text(tooltipText), findsOneWidget);
     await gesture.up();
+  });
+
+  testWidgets('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/96890
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Trigger the tip overlay.
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+
+    // Remove the `Tooltip` widget.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    // The tooltip overlay still on the tree and it will removed in the next frame.
+
+    // Dispatch the mouse in and out events before the overlay detached.
+    await gesture.moveTo(tester.getCenter(find.text(tooltipText)));
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    // Go without crashes.
+    await gesture.removePointer();
+    gesture = null;
   });
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
@@ -1192,8 +1230,8 @@ void main() {
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
 
-    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1207,7 +1245,7 @@ void main() {
                       left: 780.0,
                       top: 300.0,
                       child: Tooltip(
-                        key: key,
+                        key: tooltipKey,
                         message: tooltipText,
                         child: const SizedBox(width: 10.0, height: 10.0),
                       ),
@@ -1234,7 +1272,7 @@ void main() {
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
 
     // This triggers a rebuild of the semantics because the tree changes.
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
@@ -1320,13 +1358,13 @@ void main() {
   });
 
   testWidgets('Tooltip text displays with richMessage', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     const String textSpan1Text = 'I am a rich tooltip message. ';
     const String textSpan2Text = 'I am another span of a rich tooltip message';
     await tester.pumpWidget(
       MaterialApp(
         home: Tooltip(
-          key: key,
+          key: tooltipKey,
           richMessage: const TextSpan(
             text: textSpan1Text,
             children: <InlineSpan>[
@@ -1343,7 +1381,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RichText richText = tester.widget<RichText>(find.byType(RichText));

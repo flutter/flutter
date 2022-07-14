@@ -74,9 +74,7 @@ class _HeroTag {
   }
 
   @override
-  int get hashCode {
-    return identityHashCode(navigator);
-  }
+  int get hashCode => identityHashCode(navigator);
 }
 
 // An `AnimatedWidget` that imposes a fixed size on its child widget, and
@@ -566,10 +564,17 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// user scrolls, but it will also stretch when the user over-scrolls if the
 /// [stretch] value is `true`. Defaults to `false`.
 ///
+/// {@tool dartpad}
+/// This example shows [CupertinoSliverNavigationBar] in action inside a [CustomScrollView].
+///
+/// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
 ///    pages.
+///  * [CustomScrollView], a ScrollView that creates custom scroll effects using slivers.
 class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Creates a navigation bar for scrolling lists.
   ///
@@ -1330,7 +1335,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
     final ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
     if (onPressed == null) {
       assert(
-        currentRoute?.canPop == true,
+        currentRoute?.canPop ?? false,
         'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
       );
     }

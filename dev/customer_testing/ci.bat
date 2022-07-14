@@ -16,4 +16,4 @@ CD ..\customer_testing
 CMD /S /C "IF EXIST "..\..\bin\cache\pkg\tests\" RMDIR /S /Q ..\..\bin\cache\pkg\tests"
 git clone https://github.com/flutter/tests.git ..\..\bin\cache\pkg\tests
 FOR /F "usebackq tokens=*" %%a IN (`dart --enable-asserts ..\tools\bin\find_commit.dart ..\..\bin\cache\pkg\tests`) DO git -C ..\..\bin\cache\pkg\tests checkout %%a
-dart --enable-asserts run_tests.dart --skip-on-fetch-failure --skip-template ..\..\bin\cache\pkg\tests\registry\*.test
+dart --enable-asserts run_tests.dart --verbose --skip-on-fetch-failure --skip-template ..\..\bin\cache\pkg\tests\registry\*.test

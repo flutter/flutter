@@ -63,7 +63,7 @@ typedef LocaleListResolutionCallback = Locale? Function(List<Locale>? locales, I
 /// locale for the device after [LocaleListResolutionCallback] fails or is not provided.
 ///
 /// This callback is also used if the app is created with a specific locale using
-/// the [new WidgetsApp] `locale` parameter.
+/// the [WidgetsApp.new] `locale` parameter.
 ///
 /// The [locale] is either the value of [WidgetsApp.locale], or the device's default
 /// locale when the app started, or the device locale the user selected after the app
@@ -948,7 +948,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Checkerboards raster cache images.
@@ -1272,16 +1272,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // If window.defaultRouteName isn't '/', we should assume it was set
   // intentionally via `setInitialRoute`, and should override whatever is in
   // [widget.initialRoute].
-  String get _initialRouteName => WidgetsBinding.instance!.window.defaultRouteName != Navigator.defaultRouteName
-    ? WidgetsBinding.instance!.window.defaultRouteName
-    : widget.initialRoute ?? WidgetsBinding.instance!.window.defaultRouteName;
+  String get _initialRouteName => WidgetsBinding.instance.platformDispatcher.defaultRouteName != Navigator.defaultRouteName
+    ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
+    : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
   @override
   void initState() {
     super.initState();
     _updateRouting();
-    _locale = _resolveLocales(WidgetsBinding.instance!.window.locales, widget.supportedLocales);
-    WidgetsBinding.instance!.addObserver(this);
+    _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -1292,7 +1292,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _defaultRouteInformationProvider?.dispose();
     super.dispose();
   }
@@ -1333,7 +1333,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   bool get _usesRouter => widget.routerDelegate != null;
-  bool get _usesNavigator => widget.home != null || widget.routes?.isNotEmpty == true || widget.onGenerateRoute != null || widget.onUnknownRoute != null;
+  bool get _usesNavigator => widget.home != null
+      || (widget.routes?.isNotEmpty ?? false)
+      || widget.onGenerateRoute != null
+      || widget.onUnknownRoute != null;
 
   // ROUTER
 

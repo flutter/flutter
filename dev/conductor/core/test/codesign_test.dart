@@ -5,7 +5,6 @@
 import 'package:args/command_runner.dart';
 import 'package:conductor_core/src/codesign.dart';
 import 'package:conductor_core/src/repository.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
@@ -105,11 +104,16 @@ void main() {
       createRunner(commands: <FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
+        const FakeCommand(command: <String>[
+          'git',
           'clone',
           '--origin',
           'upstream',
           '--',
-          'file://$flutterRoot/',
+          FrameworkRepository.defaultUpstream,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -117,11 +121,6 @@ void main() {
           'checkout',
           FrameworkRepository.defaultBranch,
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -198,7 +197,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          'file://$flutterRoot/',
+          FrameworkRepository.defaultUpstream,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -291,7 +290,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          'file://$flutterRoot/',
+          FrameworkRepository.defaultUpstream,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -383,7 +382,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          'file://$flutterRoot/',
+          FrameworkRepository.defaultUpstream,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -447,7 +446,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          'file://$flutterRoot/',
+          FrameworkRepository.defaultUpstream,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -512,11 +511,11 @@ void main() {
 
 class FakeCodesignCommand extends CodesignCommand {
   FakeCodesignCommand({
-    required Checkouts checkouts,
+    required super.checkouts,
     required this.binariesWithEntitlements,
     required this.binariesWithoutEntitlements,
-    required Directory flutterRoot,
-  }) : super(checkouts: checkouts, flutterRoot: flutterRoot);
+    required super.flutterRoot,
+  });
 
   @override
   final Future<List<String>> binariesWithEntitlements;

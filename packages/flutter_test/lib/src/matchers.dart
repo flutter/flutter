@@ -354,6 +354,61 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```
 /// {@end-tool}
 ///
+/// {@template flutter.flutter_test.matchesGoldenFile.custom_fonts}
+/// ## Including Fonts
+///
+/// Custom fonts may render differently across different platforms, or
+/// between different versions of Flutter. For example, a golden file generated
+/// on Windows with fonts will likely differ from the one produced by another
+/// operating system. Even on the same platform, if the generated golden is
+/// tested with a different Flutter version, the test may fail and require an
+/// updated image.
+///
+/// By default, the Flutter framework uses a font called 'Ahem' which shows
+/// squares instead of characters, however, it is possible to render images using
+/// custom fonts. For example, this is how to load the 'Roboto' font for a
+/// golden test:
+///
+/// {@tool snippet}
+/// How to load a custom font for golden images.
+/// ```dart
+/// testWidgets('Creating a golden image with a custom font', (tester) async {
+///   // Assuming the 'Roboto.ttf' file is declared in the pubspec.yaml file
+///   final font = rootBundle.load('path/to/font-file/Roboto.ttf');
+///
+///   final fontLoader = FontLoader('Roboto')..addFont(font);
+///   await fontLoader.load();
+///
+///   await tester.pumpWidget(const SomeWidget());
+///
+///   await expectLater(
+///     find.byType(SomeWidget),
+///     matchesGoldenFile('someWidget.png'),
+///   );
+/// });
+/// ```
+/// {@end-tool}
+///
+/// The example above loads the desired font only for that specific test. To load
+/// a font for all golden file tests, the `FontLoader.load()` call could be
+/// moved in the `flutter_test_config.dart`. In this way, the font will always be
+/// loaded before a test:
+///
+/// {@tool snippet}
+/// Loading a custom font from the flutter_test_config.dart file.
+/// ```dart
+/// Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+///   setUpAll(() async {
+///     final fontLoader = FontLoader('SomeFont')..addFont(someFont);
+///     await fontLoader.load();
+///   });
+///
+///   await testMain();
+/// });
+/// ```
+/// {@end-tool}
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [GoldenFileComparator], which acts as the backend for this matcher.
@@ -363,8 +418,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher
-matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {
@@ -423,7 +477,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), matchesSemanticsNode(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
@@ -1688,7 +1742,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       imageFuture = captureImage(elements.single);
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
       final ByteData? bytes = await image.toByteData();

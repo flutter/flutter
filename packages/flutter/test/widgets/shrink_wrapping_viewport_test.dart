@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 void main() {
   testWidgets('ShrinkWrappingViewport respects clipBehavior', (WidgetTester tester) async {

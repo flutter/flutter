@@ -230,7 +230,7 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) == true;
+    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) ?? false;
   }
 
   @override

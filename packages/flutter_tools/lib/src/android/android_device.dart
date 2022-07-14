@@ -56,7 +56,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 /// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {
   AndroidDevice(
-    String id, {
+    super.id, {
     this.productID,
     required this.modelID,
     this.deviceCodeName,
@@ -74,7 +74,6 @@ class AndroidDevice extends Device {
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(
-         id,
          category: Category.mobile,
          platformType: PlatformType.android,
          ephemeral: true,
@@ -244,7 +243,6 @@ class AndroidDevice extends Device {
 
   AdbLogReader? _logReader;
   AdbLogReader? _pastLogReader;
-  AndroidDevicePortForwarder? _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
     return <String>[_androidSdk.adbPath!, '-s', id, ...args];
@@ -362,7 +360,7 @@ class AndroidDevice extends Device {
   }
 
   String _getSourceSha1(AndroidApk apk) {
-    final File shaFile = _fileSystem.file('${apk.file.path}.sha1');
+    final File shaFile = _fileSystem.file('${apk.applicationPackage.path}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
@@ -435,13 +433,13 @@ class AndroidDevice extends Device {
     AndroidApk app, {
     String? userIdentifier,
   }) async {
-    if (!app.file.existsSync()) {
-      _logger.printError('"${_fileSystem.path.relative(app.file.path)}" does not exist.');
+    if (!app.applicationPackage.existsSync()) {
+      _logger.printError('"${_fileSystem.path.relative(app.applicationPackage.path)}" does not exist.');
       return false;
     }
 
     final Status status = _logger.startProgress(
-      'Installing ${_fileSystem.path.relative(app.file.path)}...',
+      'Installing ${_fileSystem.path.relative(app.applicationPackage.path)}...',
     );
     final RunResult installResult = await _processUtils.run(
       adbCommandForDevice(<String>[
@@ -450,7 +448,7 @@ class AndroidDevice extends Device {
         '-r',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
-        app.file.path
+        app.applicationPackage.path
       ]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -845,7 +843,6 @@ class AndroidDevice extends Device {
   Future<void> dispose() async {
     _logReader?._stop();
     _pastLogReader?._stop();
-    await _portForwarder?.dispose();
   }
 }
 

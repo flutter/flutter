@@ -84,7 +84,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {

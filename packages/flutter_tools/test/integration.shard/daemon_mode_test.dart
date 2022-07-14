@@ -30,8 +30,8 @@ void main() {
   });
 
   testWithoutContext('device.getDevices', () async {
-    final BasicProject _project = BasicProject();
-    await _project.setUpIn(tempDir);
+    final BasicProject project = BasicProject();
+    await project.setUpIn(tempDir);
 
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
