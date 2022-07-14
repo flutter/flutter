@@ -1,7 +1,10 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 
 class _MockAnimationController extends AnimationController {
   _MockAnimationController()
@@ -34,30 +37,6 @@ void main() {
     });
   }
 
-  Future<BuildContext> contextTrap(WidgetTester tester,
-      {Widget Function(Widget child)? wrapper}) async {
-    late BuildContext outerContext;
-
-    Widget identity(Widget child) {
-      return child;
-    }
-
-    await tester.pumpWidget(
-        (wrapper ?? identity)(Builder(builder: (BuildContext context) {
-      outerContext = context;
-      return Container();
-    })));
-
-    return outerContext;
-  }
-
-  Widget wrapWithApp({required Widget child}) {
-    return MaterialApp(
-        home: Scaffold(
-      body: Builder(builder: (BuildContext context) => child),
-    ));
-  }
-
   group('Raw Loupe', () {
     testWidgets('should render with correct focal point and decoration',
         (WidgetTester tester) async {
@@ -67,8 +46,8 @@ void main() {
       const Offset loupePosition = Offset(200, 200);
       const double magnificationScale = 2;
 
-      await tester.pumpWidget(wrapWithApp(
-          child: Container(
+      await tester.pumpWidget(MaterialApp(
+          home: Container(
         key: appKey,
         color: Colors.orange,
         width: double.infinity,
@@ -146,8 +125,12 @@ void main() {
             size: const Size(100, 100),
           );
 
-          final BuildContext context = await contextTrap(tester,
-              wrapper: (Widget child) => wrapWithApp(child: child));
+          await tester.pumpWidget(const MaterialApp(
+            home: Placeholder(),
+          ));
+
+          final BuildContext context =
+              tester.firstElement(find.byType(Placeholder));
 
           loupeController.show(
             context: context,
@@ -177,8 +160,12 @@ void main() {
             size: const Size(100, 100),
           );
 
-          final BuildContext context = await contextTrap(tester,
-              wrapper: (Widget child) => wrapWithApp(child: child));
+          await tester.pumpWidget(const MaterialApp(
+            home: Placeholder(),
+          ));
+
+          final BuildContext context =
+              tester.firstElement(find.byType(Placeholder));
 
           loupeController.show(
             context: context,
@@ -224,8 +211,12 @@ void main() {
     group('show', () {
       testWidgets('should insert below below widget',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(tester,
-            wrapper: (Widget child) => wrapWithApp(child: child));
+        await tester.pumpWidget(const MaterialApp(
+          home: Text('text'),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Text));
 
         final Widget fakeLoupe = Placeholder(key: UniqueKey());
         final Widget fakeBefore = Placeholder(key: UniqueKey());
@@ -265,8 +256,12 @@ void main() {
             size: const Size(100, 100),
           );
 
-          final BuildContext context = await contextTrap(tester,
-              wrapper: (Widget child) => wrapWithApp(child: child));
+          await tester.pumpWidget(const MaterialApp(
+            home: Placeholder(),
+          ));
+
+          final BuildContext context =
+              tester.firstElement(find.byType(Placeholder));
 
           loupeController.show(
             context: context,
@@ -304,8 +299,12 @@ void main() {
             size: const Size(100, 100),
           );
 
-          final BuildContext context = await contextTrap(tester,
-              wrapper: (Widget child) => wrapWithApp(child: child));
+          await tester.pumpWidget(const MaterialApp(
+            home: Placeholder(),
+          ));
+
+          final BuildContext context =
+              tester.firstElement(find.byType(Placeholder));
 
           loupeController.show(
             context: context,

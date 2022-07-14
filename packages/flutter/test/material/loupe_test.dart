@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,23 +11,6 @@ void main() {
   const Rect reasonableTextField = Rect.fromLTRB(50, 100, 200, 100);
   final Offset basicOffset = Offset(Loupe.kSize.width / 2,
       Loupe.kSize.height - Loupe.kStandardVerticalFocalPointShift);
-
-  Future<BuildContext> contextTrap(WidgetTester tester,
-      {Widget Function(Widget child)? wrapper}) async {
-    late BuildContext outerContext;
-
-    Widget identity(Widget child) {
-      return child;
-    }
-
-    await tester.pumpWidget(
-        (wrapper ?? identity)(Builder(builder: (BuildContext context) {
-      outerContext = context;
-      return Container();
-    })));
-
-    return outerContext;
-  }
 
   Offset getLoupePosition(WidgetTester tester, [bool animated = false]) {
     if (animated) {
@@ -59,7 +46,12 @@ void main() {
   group('adaptiveLoupeControllerBuilder', () {
     testWidgets('should return a TextEditingLoupe on Android',
         (WidgetTester tester) async {
-      final BuildContext context = await contextTrap(tester);
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
           TextEditingLoupe.adaptiveLoupeControllerBuilder(
@@ -73,7 +65,12 @@ void main() {
 
     testWidgets('should return a CupertinoLoupe on iOS',
         (WidgetTester tester) async {
-      final BuildContext context = await contextTrap(tester);
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
           TextEditingLoupe.adaptiveLoupeControllerBuilder(
@@ -87,7 +84,12 @@ void main() {
 
     testWidgets('should return null on all platforms not Android, iOS',
         (WidgetTester tester) async {
-      final BuildContext context = await contextTrap(tester);
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
           TextEditingLoupe.adaptiveLoupeControllerBuilder(
@@ -110,9 +112,13 @@ void main() {
           'should be at gesture position if does not violate any positioning rules',
           (WidgetTester tester) async {
         final Key textField = UniqueKey();
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => Container(
+
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        await tester.pumpWidget(
+          Container(
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
               home: Center(
@@ -121,11 +127,14 @@ void main() {
                 width: 10,
                 height: 10,
                 color: Colors.red,
-                child: child,
+                child: const Placeholder(),
               )),
             ),
           ),
         );
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         // Loupe should be positioned directly over the red square.
         final RenderBox tapPointRenderBox =
@@ -159,13 +168,12 @@ void main() {
           (WidgetTester tester) async {
         const double gestureOutsideLine = 100;
 
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showLoupe(
             context,
@@ -192,13 +200,12 @@ void main() {
           (WidgetTester tester) async {
         const double gestureOutsideLine = 100;
 
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showLoupe(
             context,
@@ -221,13 +228,12 @@ void main() {
 
       testWidgets('should position vertically at the center of the line',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showLoupe(
             context,
@@ -249,13 +255,12 @@ void main() {
         final Rect topOfScreenTextFieldRect =
             Rect.fromPoints(Offset.zero, const Offset(200, 0));
 
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showLoupe(
             context,
@@ -281,13 +286,12 @@ void main() {
       testWidgets(
           'should shift focal point so that the lens sees nothing out of bounds',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showLoupe(
             context,
@@ -312,13 +316,12 @@ void main() {
         final Rect topOfScreenTextFieldRect =
             Rect.fromPoints(Offset.zero, const Offset(200, 0));
 
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showLoupe(
             context,
@@ -345,13 +348,12 @@ void main() {
 
       testWidgets('should not be animated on the inital state',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showLoupe(
             context,
@@ -369,13 +371,12 @@ void main() {
 
       testWidgets('should not be animated on horizontal shifts',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupePositioner =
             ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -405,13 +406,12 @@ void main() {
           (WidgetTester tester) async {
         const Offset verticalShift = Offset(0, 200);
 
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupePositioner =
             ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -441,13 +441,12 @@ void main() {
           (WidgetTester tester) async {
         const Offset verticalShift = Offset(0, 200);
 
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupePositioner =
             ValueNotifier<LoupeSelectionOverlayInfoBearer>(

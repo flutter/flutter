@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,29 +24,10 @@ class _ProxyLoupeController extends LoupeController {
 }
 
 void main() {
-  final Offset basicOffset = Offset(
-      CupertinoLoupe.kSize.width / 2,
-      CupertinoLoupe.kSize.height -
-          CupertinoLoupe.kVerticalFocalPointOffset);
+  final Offset basicOffset = Offset(CupertinoLoupe.kSize.width / 2,
+      CupertinoLoupe.kSize.height - CupertinoLoupe.kVerticalFocalPointOffset);
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 100);
   final _ProxyLoupeController proxyLoupeController = _ProxyLoupeController();
-
-  Future<BuildContext> contextTrap(WidgetTester tester,
-      {Widget Function(Widget child)? wrapper}) async {
-    late BuildContext outerContext;
-
-    Widget identity(Widget child) {
-      return child;
-    }
-
-    await tester.pumpWidget(
-        (wrapper ?? identity)(Builder(builder: (BuildContext context) {
-      outerContext = context;
-      return Container();
-    })));
-
-    return outerContext;
-  }
 
   // Note: make sure that your gesture is within threshold of the line,
   // or else the loupe status will stay hidden and this will not complete.
@@ -88,9 +73,9 @@ void main() {
           'should be at gesture position if does not violate any positioning rules',
           (WidgetTester tester) async {
         final Key fakeTextFieldKey = UniqueKey();
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => Container(
+
+        await tester.pumpWidget(
+          Container(
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
               home: Center(
@@ -99,11 +84,12 @@ void main() {
                 width: 10,
                 height: 10,
                 color: Colors.red,
-                child: child,
+                child: const Placeholder(),
               )),
             ),
           ),
         );
+        final BuildContext context = tester.element(find.byType(Placeholder));
 
         // Loupe should be positioned directly over the red square.
         final RenderBox tapPointRenderBox =
@@ -127,20 +113,22 @@ void main() {
         // Should show two red squares; original, and one in the loupe,
         // directly ontop of one another.
         await expectLater(
-          find.byType(MaterialApp),
+          find.byType(Placeholder),
           matchesGoldenFile('cupertino_loupe.position.default.png'),
         );
       });
 
       testWidgets('should never horizontally be outside of Screen Padding',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
+        await tester.pumpWidget(
+          const MaterialApp(
+            color: Color.fromARGB(7, 0, 129, 90),
+            home: Placeholder(),
           ),
         );
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showCupertinoLoupe(
             context,
@@ -164,13 +152,15 @@ void main() {
           (WidgetTester tester) async {
         final double dragPositionBelowTextField = reasonableTextField.top + 30;
 
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
+        await tester.pumpWidget(
+          const MaterialApp(
+            color: Color.fromARGB(7, 0, 129, 90),
+            home: Placeholder(),
           ),
         );
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         await showCupertinoLoupe(
             context,
@@ -198,13 +188,15 @@ void main() {
     group('status', () {
       testWidgets('should hide if gesture is far below the text field',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
+        await tester.pumpWidget(
+          const MaterialApp(
+            color: Color.fromARGB(7, 0, 129, 90),
+            home: Placeholder(),
           ),
         );
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo =
             ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -234,13 +226,15 @@ void main() {
 
       testWidgets('should hide if gesture is far below the text field',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
+        await tester.pumpWidget(
+          const MaterialApp(
+            color: Color.fromARGB(7, 0, 129, 90),
+            home: Placeholder(),
           ),
         );
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo =
             ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -270,13 +264,15 @@ void main() {
 
       testWidgets('should re-show if gesture moves back up',
           (WidgetTester tester) async {
-        final BuildContext context = await contextTrap(
-          tester,
-          wrapper: (Widget child) => MaterialApp(
-            color: const Color.fromARGB(7, 0, 129, 90),
-            home: child,
+        await tester.pumpWidget(
+          const MaterialApp(
+            color: Color.fromARGB(7, 0, 129, 90),
+            home: Placeholder(),
           ),
         );
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo =
             ValueNotifier<LoupeSelectionOverlayInfoBearer>(

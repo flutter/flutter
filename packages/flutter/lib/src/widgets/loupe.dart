@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 /// {@template flutter.widgets.loupe.loupeControllerWidgetBuilder}
 /// A builder that builds a Widget with a [LoupeController].
 ///
-/// the [controller] should be passed into [RawLoupe.controller]. The third paramater
+/// the [LoupeController] should be passed into [RawLoupe.controller]. The third paramater
 /// is any additional info passed to the loupe, if desired.
 /// {@endtemplate}
 typedef LoupeControllerWidgetBuilder<T> = Widget? Function(
@@ -206,8 +206,8 @@ class LoupeController {
   /// [rect] is fully constrained within [bounds], that is, any point
   /// in the output rect is guaranteed to also be a point in [bounds].
   ///
-  /// It is a runtime error for [rect.width] to be greater than [bounds.width],
-  /// and it is also an error for [rect.height] to be greater than [bounds.height].
+  /// It is a runtime error for [rect].width to be greater than [bounds].width,
+  /// and it is also an error for [rect].height to be greater than [bounds].height.
   ///
   /// This algorithm makes no guarantees about where this is placed within [bounds],
   /// only that the entirety of the output rect is inside [bounds].
@@ -287,8 +287,6 @@ class LoupeDecoration extends ShapeDecoration {
 ///
 /// See:
 /// * [LoupeController], a controller to handle loupes in an overlay.
-/// * [AndroidLoupe], the Android-style consumer of [RawLoupe].
-/// * [CupertinoLoupe], the iOS-style consumer of [RawLoupe].
 class RawLoupe extends StatefulWidget {
   /// Constructs a [RawLoupe].
   ///
@@ -330,7 +328,7 @@ class RawLoupe extends StatefulWidget {
   /// The [LoupeController] for this loupe.
   ///
   /// This [RawLoupe] will show / hide itself based on the controller's show / hide calls.
-  /// This [RawLoupe]'s status is always in sync with [controller.status].
+  /// This [RawLoupe]'s status is always in sync with [LoupeController.status].
   final LoupeController controller;
 
   /// The size of the loupe.
@@ -341,7 +339,7 @@ class RawLoupe extends StatefulWidget {
 
   /// The offset of the loupe from the widget's origin.
   ///
-  /// If [offset] is [Offset.zero], the loupe will be positioned
+  /// If [focalPoint] is [Offset.zero], the loupe will be positioned
   /// with it's center directly on the the top-left corner of the draw
   /// position. The focal point will always be exactly on the draw position.
   final Offset focalPoint;

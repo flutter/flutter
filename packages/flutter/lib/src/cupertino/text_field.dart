@@ -781,7 +781,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.Loupe.loupeControllerWidgetBuilder}
+  /// {@macro flutter.widgets.loupe.loupeControllerWidgetBuilder}
   final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
   @override
@@ -830,8 +830,8 @@ class CupertinoTextField extends StatefulWidget {
   }
 
   static Widget? _iosLoupeBuilder(
-    BuildContext context, 
-    LoupeController controller, 
+    BuildContext context,
+    LoupeController controller,
     ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeSelectionOverlayInfoBearer
   ) {
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -842,7 +842,7 @@ class CupertinoTextField extends StatefulWidget {
     }
 
     return null;
-  } 
+  }
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {

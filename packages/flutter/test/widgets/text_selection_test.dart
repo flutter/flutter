@@ -1247,6 +1247,39 @@ void main() {
       await tester.pump(const Duration(milliseconds: 20));
       expect(endDragEndDetails, isNotNull);
     });
+
+    group('loupe', () {
+      testWidgets('should show on handle drag start',
+          (WidgetTester tester) async {
+        final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+        final SelectionOverlay selectionOverlay = await pumpApp(
+          tester,
+          selectionControls: spy,
+        );
+        selectionOverlay
+          ..startHandleType = TextSelectionHandleType.left
+          ..endHandleType = TextSelectionHandleType.right
+          ..selectionEndPoints = const <TextSelectionPoint>[
+            TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+            TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+          ];
+        selectionOverlay.showHandles();
+
+        final RenderBox leftHandleRenderBox = tester
+            .firstRenderObject(find.byKey(spy.leftHandleKey)) as RenderBox;
+        final Rect leftHandleRect =
+            leftHandleRenderBox.localToGlobal(Offset.zero) &
+                leftHandleRenderBox.size;
+
+        tester.startGesture(leftHandleRect.center);
+
+        expect(find.byType(Loupe), true);
+      });
+      // should show on handle drag start
+      // should update on handle drag update
+      // should hide on handle drag end
+      // should show on handle
+    });
   });
 
   group('ClipboardStatusNotifier', () {

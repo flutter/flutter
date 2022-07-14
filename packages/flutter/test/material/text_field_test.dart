@@ -11543,23 +11543,6 @@ void main() {
   });
 
   group('loupe builder', () {
-    Future<BuildContext> contextTrap(WidgetTester tester,
-        {Widget Function(Widget child)? wrapper}) async {
-      late BuildContext outerContext;
-
-      Widget identity(Widget child) {
-        return child;
-      }
-
-      await tester.pumpWidget(
-          (wrapper ?? identity)(Builder(builder: (BuildContext context) {
-        outerContext = context;
-        return Container();
-      })));
-
-      return outerContext;
-    }
-
     testWidgets('should build custom loupe if given',
         (WidgetTester tester) async {
       final Widget customLoupe = Container(
@@ -11569,10 +11552,12 @@ void main() {
         loupeBuilder: (_, __, ___) => customLoupe,
       );
 
-      final BuildContext context = await contextTrap(tester,
-          wrapper: (Widget child) => MaterialApp(
-                home: child,
-              ));
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
 
       expect(
           textField.loupeBuilder!(
@@ -11598,10 +11583,12 @@ void main() {
       testWidgets('should build Loupe on Android', (WidgetTester tester) async {
         const TextField textField = TextField();
 
-        final BuildContext context = await contextTrap(tester,
-            wrapper: (Widget child) => MaterialApp(
-                  home: child,
-                ));
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         expect(
             textField.loupeBuilder!(
@@ -11617,10 +11604,12 @@ void main() {
           (WidgetTester tester) async {
         const TextField textField = TextField();
 
-        final BuildContext context = await contextTrap(tester,
-            wrapper: (Widget child) => MaterialApp(
-                  home: child,
-                ));
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         expect(
             textField.loupeBuilder!(
@@ -11636,10 +11625,12 @@ void main() {
           (WidgetTester tester) async {
         const TextField defaultTextField = TextField();
 
-        final BuildContext context = await contextTrap(tester,
-            wrapper: (Widget child) => MaterialApp(
-                  home: child,
-                ));
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         expect(
             defaultTextField.loupeBuilder!(

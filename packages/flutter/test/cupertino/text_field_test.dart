@@ -5772,34 +5772,21 @@ void main() {
   });
 
   group('loupe builder', () {
-    Future<BuildContext> contextTrap(WidgetTester tester,
-        {Widget Function(Widget child)? wrapper}) async {
-      late BuildContext outerContext;
-
-      Widget identity(Widget child) {
-        return child;
-      }
-
-      await tester.pumpWidget(
-          (wrapper ?? identity)(Builder(builder: (BuildContext context) {
-        outerContext = context;
-        return Container();
-      })));
-
-      return outerContext;
-    }
-
     testWidgets('should build custom loupe if given',
         (WidgetTester tester) async {
-      final Widget customLoupe = Container(key: UniqueKey(),);
+      final Widget customLoupe = Container(
+        key: UniqueKey(),
+      );
       final CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
         loupeBuilder: (_, __, ___) => customLoupe,
       );
 
-      final BuildContext context = await contextTrap(tester,
-          wrapper: (Widget child) => MaterialApp(
-                home: child,
-              ));
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
 
       expect(
           defaultCupertinoTextField.loupeBuilder!(
@@ -5809,10 +5796,9 @@ void main() {
                 const LoupeSelectionOverlayInfoBearer.empty(),
               )),
           isA<Widget>().having(
-            (Widget widget) => widget.key, 
-            'built loupe key equal to passed in loupe key', 
-            equals(customLoupe.key)
-        ));
+              (Widget widget) => widget.key,
+              'built loupe key equal to passed in loupe key',
+              equals(customLoupe.key)));
     });
 
     test('should be null on null passed in null', () {
@@ -5828,10 +5814,12 @@ void main() {
         const CupertinoTextField defaultCupertinoTextField =
             CupertinoTextField();
 
-        final BuildContext context = await contextTrap(tester,
-            wrapper: (Widget child) => MaterialApp(
-                  home: child,
-                ));
+        await tester.pumpWidget(const MaterialApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
 
         expect(
             defaultCupertinoTextField.loupeBuilder!(
@@ -5843,17 +5831,18 @@ void main() {
             isA<CupertinoTextEditingLoupe>());
       },
           variant: const TargetPlatformVariant(
-              <TargetPlatform>{ TargetPlatform.iOS }));
+              <TargetPlatform>{TargetPlatform.iOS}));
     });
 
-    testWidgets('should build nothing on not iOS',
-        (WidgetTester tester) async {
+    testWidgets('should build nothing on not iOS', (WidgetTester tester) async {
       const CupertinoTextField defaultCupertinoTextField = CupertinoTextField();
 
-      final BuildContext context = await contextTrap(tester,
-          wrapper: (Widget child) => MaterialApp(
-                home: child,
-              ));
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
 
       expect(
           defaultCupertinoTextField.loupeBuilder!(
@@ -5865,6 +5854,6 @@ void main() {
           isNull);
     },
         variant: TargetPlatformVariant.all(
-            excluding: <TargetPlatform>{ TargetPlatform.iOS }));
+            excluding: <TargetPlatform>{TargetPlatform.iOS}));
   });
 }

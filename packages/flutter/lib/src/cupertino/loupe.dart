@@ -53,8 +53,8 @@ class CupertinoTextEditingLoupe extends StatefulWidget {
 }
 
 class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
-  // Initalize to dummy values just incase the inital call to 
-  // _determineLoupePositionAndFocalPoint hides, and thus does not 
+  // Initalize to dummy values just incase the inital call to
+  // _determineLoupePositionAndFocalPoint hides, and thus does not
   // set these values.
   Offset _currentAdjustedLoupePosition = Offset.zero;
   double _verticalFocalPointAdjustment = 0;
@@ -183,8 +183,7 @@ class CupertinoLoupe extends StatefulWidget {
   /// Creates a [RawLoupe] in the Cupertino style.
   ///
   /// This loupe has a small drag delay and remains within the bounds of
-  /// [MediaQuery]'s size. This means that when this loupe is repositioned through
-  /// [controller.requestedPosition], [CupertinoLoupe] may not position itself exactly
+  /// [MediaQuery]'s size. [CupertinoLoupe] may not position itself exactly
   /// at the requestedPosition immediately, or at all if any part of the loupe is determined
   /// to be out of bounds.
   ///
@@ -205,7 +204,7 @@ class CupertinoLoupe extends StatefulWidget {
   @visibleForTesting
   /// The size of the loupe.
   static const Size kSize = Size(82.5, 45);
-  
+
   static const Duration _kIoAnimationDuration = Duration(milliseconds: 150);
   static const BorderRadius _kBorderRadius =
       BorderRadius.all(Radius.elliptical(60, 50));
