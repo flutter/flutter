@@ -75,8 +75,7 @@ void main() {
                 size: loupeSize,
                 focalPoint: loupeFocalPoint,
                 magnificationScale: magnificationScale,
-                decoration:
-                     LoupeDecoration(opacity: 0.75, shadows: <BoxShadow>[
+                decoration: LoupeDecoration(opacity: 0.75, shadows: <BoxShadow>[
                   BoxShadow(
                       spreadRadius: 10,
                       blurRadius: 10,
@@ -149,13 +148,13 @@ void main() {
         });
       });
 
-      testWidgets(
-          'should update shown based on animation status',
+      testWidgets('should update shown based on animation status',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
+          final LoupeController loupeController =
+              LoupeController(animationController: animationController);
+
           const RawLoupe testLoupe = RawLoupe(
-
-
             size: Size(100, 100),
           );
 
@@ -175,13 +174,15 @@ void main() {
           await tester.pump();
 
           // No time has passed, so the animation controller has not completed.
-          expect(loupeController.animationController?.status, AnimationStatus.forward);
+          expect(loupeController.animationController?.status,
+              AnimationStatus.forward);
           expect(loupeController.shown, true);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(loupeController.animationController?.status, AnimationStatus.completed);
+          expect(loupeController.animationController?.status,
+              AnimationStatus.completed);
           expect(loupeController.shown, true);
 
           loupeController.hide();
@@ -189,13 +190,15 @@ void main() {
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(loupeController.animationController?.status, AnimationStatus.reverse);
-          expect(loupeController.shown, true);
+          expect(loupeController.animationController?.status,
+              AnimationStatus.reverse);
+          expect(loupeController.shown, false);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(loupeController.animationController?.status, AnimationStatus.dismissed);
+          expect(loupeController.animationController?.status,
+              AnimationStatus.dismissed);
           expect(loupeController.shown, false);
         });
       });
@@ -218,8 +221,7 @@ void main() {
           home: Text('text'),
         ));
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Text));
+        final BuildContext context = tester.firstElement(find.byType(Text));
 
         final Widget fakeLoupe = Placeholder(key: UniqueKey());
         final Widget fakeBefore = Placeholder(key: UniqueKey());
@@ -253,9 +255,7 @@ void main() {
           final _MockAnimationController animationController =
               _MockAnimationController();
 
-          const  RawLoupe testLoupe = RawLoupe(
-
-
+          const RawLoupe testLoupe = RawLoupe(
             size: Size(100, 100),
           );
 
