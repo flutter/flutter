@@ -166,7 +166,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
       result.add(
         const ProjectValidatorResult(
           name: name,
-          value: 'All pub dependencies are hosted in https://pub.dartlang.org',
+          value: 'All pub dependencies are hosted on https://pub.dartlang.org',
           status: StatusProjectValidator.success,
         )
       );
