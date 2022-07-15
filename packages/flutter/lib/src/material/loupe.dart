@@ -25,9 +25,7 @@ class TextEditingLoupe extends StatefulWidget {
   /// {@macro widgets.material.loupe.loupe}
   /// {@template widgets.material.loupe.positionRules}
   const TextEditingLoupe(
-      {super.key,
-      required this.controller,
-      required this.loupeSelectionOverlayInfoBearer});
+      {super.key, required this.loupeSelectionOverlayInfoBearer});
 
   /// A [LoupeControllerWidgetBuilder]<[LoupeSelectionOverlayInfoBearer]>
   /// that returns a [CupertinoTextEditingLoupe] on iOS, [TextEditingLoupe]
@@ -47,7 +45,6 @@ class TextEditingLoupe extends StatefulWidget {
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       return TextEditingLoupe(
-          controller: controller,
           loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer);
     }
 
@@ -58,9 +55,6 @@ class TextEditingLoupe extends StatefulWidget {
   @visibleForTesting
   static const Duration jumpBetweenLinesAnimationDuration =
       Duration(milliseconds: 70);
-
-  /// A [LoupeController] for this loupe.
-  final LoupeController controller;
 
   /// [TextEditingLoupe] positions itself based on [loupeSelectionOverlayInfoBearer].
   ///
@@ -220,7 +214,6 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
         'Loupe position should only be null before the first build.');
 
     final Widget loupe = Loupe(
-      controller: widget.controller,
       additionalFocalPointOffset: _extraFocalPointOffset,
     );
 
@@ -246,7 +239,6 @@ class Loupe extends StatelessWidget {
   const Loupe({
     super.key,
     this.additionalFocalPointOffset = Offset.zero,
-    required this.controller,
   });
 
   @visibleForTesting
@@ -269,9 +261,6 @@ class Loupe extends StatelessWidget {
   static const double _borderRadius = 40;
   static const double _magnification = 1.25;
 
-  /// This loupe's controller.
-  final LoupeController controller;
-
   /// Any additional offset the focal point requires to "point"
   /// to the correct place.
   ///
@@ -282,7 +271,6 @@ class Loupe extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RawLoupe(
-      controller: controller,
       decoration: const LoupeDecoration(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),

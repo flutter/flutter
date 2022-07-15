@@ -28,14 +28,19 @@ typedef LoupeControllerWidgetBuilder<T> = Widget? Function(
 // lands - then the loupe can be controlled though a widget in the tree.
 // https://github.com/flutter/flutter/pull/105335
 class LoupeController {
-  /// This stream is used to tell the loupe that it should begin it's enter / hide animation.
-  /// The [LoupeController] sends its loupe true or false for show / hide respectively,
-  /// and then waits for an acknowledgement on the stream by the loupe.
+  /// If the loupe show / hide is controlled by an animation, then it should be passed here,
+  /// where this [LoupeController] will wait for the animation to complete before removing
+  /// it from the overlay.
   ///
-  /// The show / hide is done in this fashion because [LoupeController] shouldn't
-  /// clean up the overlay until the loupe is done animating out.
-  final StreamController<AnimationStatus> _animationStatus =
-      StreamController<AnimationStatus>.broadcast();
+  /// If there is no in / out animation for the loupe, [animationController] should be left
+  /// null.
+  LoupeController({this.animationController}) {
+    animationController?.value = 0;
+  }
+
+  /// The controller that will be driven in / out when show / hide is triggered,
+  /// respectively.
+  AnimationController? animationController;
 
   /// The loupe's [OverlayEntry], if currently visible.
   ///
@@ -76,7 +81,26 @@ class LoupeController {
   /// );
   /// ```
   /// {@end-tool}
+  ///
+  /// A null check on [overlayEntry] will not suffice to check if a loupe is in the
+  /// overlay or not; instead, you should check [shown]. This is because it is possible,
+  /// such as in cases where [hide] was called with removeFromOverlay false, that the loupe
+  /// is not shown, but the entry is not null.
   OverlayEntry? overlayEntry;
+
+  /// If the loupe is shown or not.
+  bool get shown {
+    if (overlayEntry == null) {
+      return false;
+    }
+
+    if (animationController != null) {
+      return animationController!.status == AnimationStatus.completed ||
+          animationController!.status == AnimationStatus.forward;
+    }
+
+    return true;
+  }
 
   /// The current status of the loupe.
   ///
@@ -99,19 +123,22 @@ class LoupeController {
   /// To control what overlays are shown in the loupe, utilize [below]. See
   /// [overlayEntry] for more details on how to utilize [below].
   ///
-  /// Regardless of if [overlayEntry] == null or not, this will replace the [overlayEntry]
-  /// with a new one, resetting it's state.
-  ///
-  /// If the loupe already exists (i.e. [overlayEntry] != null), then consider using
-  /// [signalShow], to avoid having to re-insert a widget into the overlay and resetting
-  /// any stateful behavior.
+  /// If the loupe already exists (i.e. [overlayEntry] != null), then [show] will
+  /// reshow the old overl.
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
     Widget? debugRequiredFor,
     OverlayEntry? below,
   }) async {
-    _forceHide();
+    if (overlayEntry != null) {
+      if (animationController?.status == AnimationStatus.dismissed) {
+        await animationController!.forward();
+      }
+
+      return;
+    }
+
     final OverlayState? overlayState = Overlay.of(
       context,
       rootOverlay: true,
@@ -128,78 +155,33 @@ class LoupeController {
     );
     overlayState!.insert(overlayEntry!, below: below);
 
-    return signalShow();
-  }
-
-  /// If there is a loupe in the overlay, but it is not shown (i.e. [hide] was called with
-  /// removeFromOverlay = false), then we should reshow it. Otherwise, do nothing.
-  Future<void> signalShow() async {
-    if (status.value == AnimationStatus.completed ||
-        status.value == AnimationStatus.forward) {
-      return;
+    if (animationController != null) {
+      await animationController?.forward();
     }
-
-    // Schedule the animation to begin in the next frame, since
-    // we need the the loupe to begin listening to the status stream.
-    final Completer<void> didRecieveAck = Completer<void>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // If the loupe was force removed between this and last frame,
-      // we shouldn't attempt to get an acknowledgement, since the future
-      // will wait forever.
-      if (overlayEntry == null) {
-        didRecieveAck.complete();
-        return;
-      }
-
-      _sendAnimationStatudAndAwaitAcknowledgement(
-        AnimationStatus.forward,
-        AnimationStatus.completed,
-      ).then((_) => didRecieveAck.complete());
-    });
-
-    return didRecieveAck.future;
   }
 
-  /// hide does not immediately remove the loupe.
+  /// Schedules a hide of the loupe.
+  ///
+  /// If this [LoupeController] has an [AnimationController],
+  /// then [hide] reverses the animation controller and waits
+  /// for the animation to complete. Then, if [removeFromOverlay]
+  /// is true, remove the loupe from the overlay.
+  ///
+  /// In general, [removeFromOverlay] should be true, unless
+  /// the loupe needs to preserve states between shows / hides.
   Future<void> hide({bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;
     }
 
-    await _sendAnimationStatudAndAwaitAcknowledgement(
-      AnimationStatus.reverse,
-      AnimationStatus.dismissed,
-    );
+    if (animationController != null) {
+      await animationController?.reverse();
+    }
 
     if (removeFromOverlay) {
-      _forceHide();
+      overlayEntry?.remove();
+      overlayEntry = null;
     }
-  }
-
-  /// Immediately hide the loupe, ignoring any exit animation.
-  void _forceHide() {
-    overlayEntry?.remove();
-    overlayEntry = null;
-  }
-
-  Future<AnimationStatus> _sendAnimationStatudAndAwaitAcknowledgement(
-      AnimationStatus message, AnimationStatus ack) async {
-    assert(overlayEntry != null,
-        'attempted to update animation status with no loupe.');
-
-    // Setup a future that waits for the acknowledgement. Skip the first message,
-    //since it's the initalization message.
-    final Future<AnimationStatus> acknowedgementFuture = _animationStatus.stream
-        .skip(1)
-        .firstWhere((AnimationStatus element) => element == ack);
-
-    status.value = message;
-    _animationStatus.add(message);
-
-    await acknowedgementFuture;
-
-    status.value = ack;
-    return ack;
   }
 
   /// A utility for calculating a new [Rect] from this rect such that
@@ -287,7 +269,7 @@ class LoupeDecoration extends ShapeDecoration {
 ///
 /// See:
 /// * [LoupeController], a controller to handle loupes in an overlay.
-class RawLoupe extends StatefulWidget {
+class RawLoupe extends StatelessWidget {
   /// Constructs a [RawLoupe].
   ///
   /// {@template flutter.widgets.loupe.loupe.invisibility_warning}
@@ -299,37 +281,18 @@ class RawLoupe extends StatefulWidget {
   /// {@endtemplate}
   const RawLoupe(
       {super.key,
-      required this.controller,
       this.magnificationScale = 1,
       required this.size,
       this.focalPoint = Offset.zero,
       this.child,
-      this.decoration = const LoupeDecoration(),
-      this.transitionAnimationController})
+      this.decoration = const LoupeDecoration()})
       : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
-
-  /// The animation controller that controls this loupes IO animations.
-  ///
-  /// If no [transitionAnimationController] is passed, no animations will be played
-  /// and [LoupeController.show] and [LoupeController.hide] will be effectively synchronous.
-  ///
-  /// This animation controller will be driven forward and backwards depending
-  /// on [LoupeController.show] and [LoupeController.hide]. If manually stopped
-  /// during a transition, the [RawLoupe] will wait for the transition to complete
-  /// to signal to the controller that it can be safely removed.
-  final AnimationController? transitionAnimationController;
 
   /// This loupe's decoration.
   ///
   /// {@macro flutter.widgets.loupe.loupe.invisibility_warning}
   final LoupeDecoration decoration;
-
-  /// The [LoupeController] for this loupe.
-  ///
-  /// This [RawLoupe] will show / hide itself based on the controller's show / hide calls.
-  /// This [RawLoupe]'s status is always in sync with [LoupeController.status].
-  final LoupeController controller;
 
   /// The size of the loupe.
   ///
@@ -354,90 +317,29 @@ class RawLoupe extends StatefulWidget {
   final double magnificationScale;
 
   @override
-  State<RawLoupe> createState() => _RawLoupeState();
-}
-
-class _RawLoupeState extends State<RawLoupe> {
-  late StreamSubscription<AnimationStatus> _animationRequestsSubscription;
-
-  @override
-  void initState() {
-    if (widget.transitionAnimationController == null) {
-      _animationRequestsSubscription = widget.controller._animationStatus.stream
-          .listen(_onNoAnimationTransitionRequest);
-    } else {
-      _animationRequestsSubscription = widget.controller._animationStatus.stream
-          .listen(_onAnimateTransitionRequest);
-    }
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _animationRequestsSubscription.cancel();
-    super.dispose();
-  }
-
-  // Automatically signals to the controller that the animation is complete,
-  // since there is no animation to run.
-  void _onNoAnimationTransitionRequest(AnimationStatus animationStatus) {
-    switch (animationStatus) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        break;
-      case AnimationStatus.forward:
-        widget.controller._animationStatus.add(AnimationStatus.completed);
-        break;
-      case AnimationStatus.reverse:
-        widget.controller._animationStatus.add(AnimationStatus.dismissed);
-        break;
-    }
-  }
-
-  // Runs the animation in the desired direction, then, when the animation is
-  // complete, signals to the controller that the animation is complete.
-  Future<void> _onAnimateTransitionRequest(
-      AnimationStatus animationStatus) async {
-    switch (animationStatus) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        break;
-      case AnimationStatus.forward:
-        await widget.transitionAnimationController!.forward();
-        widget.controller._animationStatus.add(AnimationStatus.completed);
-        break;
-      case AnimationStatus.reverse:
-        await widget.transitionAnimationController!.reverse();
-        widget.controller._animationStatus.add(AnimationStatus.dismissed);
-        break;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
         ClipPath.shape(
-          shape: widget.decoration.shape,
+          shape: decoration.shape,
           child: Opacity(
-            opacity: widget.decoration.opacity,
+            opacity: decoration.opacity,
             child: _Magnifier(
-                focalPoint: widget.focalPoint,
-                shape: widget.decoration.shape,
-                magnificationScale: widget.magnificationScale,
+                focalPoint: focalPoint,
+                shape: decoration.shape,
+                magnificationScale: magnificationScale,
                 child: SizedBox.fromSize(
-                  size: widget.size,
-                  child: widget.child,
+                  size: size,
+                  child: child,
                 )),
           ),
         ),
         Opacity(
-          opacity: widget.decoration.opacity,
+          opacity: decoration.opacity,
           child: _LoupeStyle(
-            widget.decoration,
-            size: widget.size,
+            decoration,
+            size: size,
           ),
         )
       ],

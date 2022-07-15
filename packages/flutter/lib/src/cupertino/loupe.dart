@@ -52,22 +52,40 @@ class CupertinoTextEditingLoupe extends StatefulWidget {
       _CupertinoTextEditingLoupeState();
 }
 
-class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
+class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
+    with SingleTickerProviderStateMixin {
   // Initalize to dummy values just incase the inital call to
   // _determineLoupePositionAndFocalPoint hides, and thus does not
   // set these values.
   Offset _currentAdjustedLoupePosition = Offset.zero;
   double _verticalFocalPointAdjustment = 0;
+  late AnimationController _ioAnimationController;
+  late Animation<double> _ioAnimation;
 
   @override
   void initState() {
+    _ioAnimationController = AnimationController(
+      value: 0,
+      vsync: this,
+      duration: CupertinoLoupe._kIoAnimationDuration,
+    )..addListener(() => setState(() {}));
+
+    widget.controller.animationController = _ioAnimationController;
     widget.loupeSelectionOverlayInfoBearer
         .addListener(_determineLoupePositionAndFocalPoint);
+
+    _ioAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+        CurvedAnimation(parent: _ioAnimationController, curve: Curves.easeOut));
+
     super.initState();
   }
 
   @override
   void dispose() {
+    widget.controller.animationController = null;
     widget.loupeSelectionOverlayInfoBearer
         .removeListener(_determineLoupePositionAndFocalPoint);
     super.dispose();
@@ -93,15 +111,15 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
             textEditingContext.globalGesturePosition.dy <
         CupertinoTextEditingLoupe._kHideIfBelowThreshold) {
       // only signal a hide if we are currently showing.
-      if (widget.controller.status.value == AnimationStatus.completed) {
+      if (widget.controller.shown) {
         widget.controller.hide(removeFromOverlay: false);
       }
       return;
     }
 
     // If we are gone, but got to this point, we shouldn't be: show.
-    if (widget.controller.status.value == AnimationStatus.dismissed) {
-      widget.controller.signalShow();
+    if (!widget.controller.shown) {
+      _ioAnimationController.forward();
     }
 
     // Never go above the center of the line, but have some resistance
@@ -112,7 +130,6 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
             (verticalCenterOfCurrentLine -
                     textEditingContext.globalGesturePosition.dy) /
                 CupertinoTextEditingLoupe._kDragResistance);
-
 
     // The raw position, tracking the gesture directly.
     final Offset rawLoupePosition = Offset(
@@ -159,7 +176,7 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
       left: _currentAdjustedLoupePosition.dx,
       top: _currentAdjustedLoupePosition.dy,
       child: CupertinoLoupe(
-        controller: widget.controller,
+        ioAnimationController: _ioAnimationController,
         additionalFocalPointOffset: Offset(0, _verticalFocalPointAdjustment),
       ),
     );
@@ -179,7 +196,7 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe> {
 /// * [CupertinoTextEditingLoupe], a widget that positions [CupertinoLoupe] based on
 /// [LoupeSelectionOverlayInfoBearer].
 /// * [LoupeController], the controller for this loupe.
-class CupertinoLoupe extends StatefulWidget {
+class CupertinoLoupe extends StatelessWidget {
   /// Creates a [RawLoupe] in the Cupertino style.
   ///
   /// This loupe has a small drag delay and remains within the bounds of
@@ -191,17 +208,19 @@ class CupertinoLoupe extends StatefulWidget {
   /// is shifted within the bounds of the screen size.
   const CupertinoLoupe({
     super.key,
-    required this.controller,
     this.additionalFocalPointOffset = Offset.zero,
+    this.ioAnimationController,
   });
   // These constants were eyeballed on an iPhone XR iOS v15.5.
 
   @visibleForTesting
+
   /// The vertical offset, from the center of the loupe,
   /// that the focal point should point to.
   static const double kVerticalFocalPointOffset = -25;
 
   @visibleForTesting
+
   /// The size of the loupe.
   static const Size kSize = Size(82.5, 45);
 
@@ -210,43 +229,11 @@ class CupertinoLoupe extends StatefulWidget {
       BorderRadius.all(Radius.elliptical(60, 50));
 
   /// This [RawLoupe]'s controller.
-  final LoupeController controller;
+  final AnimationController? ioAnimationController;
 
   /// Any additional focal point offset, applied over the regular focal
   /// point offset defined in [CupertinoLoupe.kVerticalFocalPointOffset].
   final Offset additionalFocalPointOffset;
-
-  @override
-  State<CupertinoLoupe> createState() => _CupertinoLoupeState();
-}
-
-class _CupertinoLoupeState extends State<CupertinoLoupe>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ioAnimationController;
-  late Animation<double> _ioAnimation;
-
-  @override
-  void initState() {
-    _ioAnimationController = AnimationController(
-      value: 0,
-      vsync: this,
-      duration: CupertinoLoupe._kIoAnimationDuration,
-    )..addListener(() => setState(() {}));
-
-    _ioAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-        CurvedAnimation(parent: _ioAnimationController, curve: Curves.easeOut));
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _ioAnimationController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -254,19 +241,17 @@ class _CupertinoLoupeState extends State<CupertinoLoupe>
         offset: Offset.lerp(
           const Offset(0, -CupertinoLoupe.kVerticalFocalPointOffset),
           Offset.zero,
-          _ioAnimation.value,
+          ioAnimationController?.value ?? 1,
         )!,
         child: RawLoupe(
-          transitionAnimationController: _ioAnimationController,
-          controller: widget.controller,
           focalPoint: Offset(
                   0,
                   (CupertinoLoupe.kVerticalFocalPointOffset -
                           CupertinoLoupe.kSize.height / 2) *
-                      _ioAnimation.value) +
-              widget.additionalFocalPointOffset,
+                      (ioAnimationController?.value ?? 1)) +
+              additionalFocalPointOffset,
           decoration: LoupeDecoration(
-            opacity: _ioAnimation.value,
+            opacity: ioAnimationController?.value ?? 1,
             shape: const RoundedRectangleBorder(
                 borderRadius: CupertinoLoupe._kBorderRadius,
                 side: BorderSide(color: Color.fromARGB(255, 235, 235, 235))),
