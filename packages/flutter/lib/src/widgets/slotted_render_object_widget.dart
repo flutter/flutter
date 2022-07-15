@@ -246,7 +246,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     final Map<S, Element> oldSlotToChild = _slotToChild;
     _slotToChild = <S, Element>{};
 
-    Map<Key, List<Element>>? debugDuplicatedKeys;
+    Map<Key, List<Element>>? debugDuplicateKeys;
 
     for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
       final Widget? widget = slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot);
@@ -276,7 +276,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
           assert(() {
             final Element? existingElement = _keyedChildren[newWidgetKey];
             if (existingElement != null) {
-              (debugDuplicatedKeys ??= <Key, List<Element>>{})
+              (debugDuplicateKeys ??= <Key, List<Element>>{})
                 .putIfAbsent(newWidgetKey, () => <Element>[existingElement])
                 .add(newChild);
             }
@@ -287,20 +287,20 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
       }
     }
     oldSlotToChild.values.forEach(deactivateChild);
-    assert(_debugDuplicatedKeys(debugDuplicatedKeys));
+    assert(_debugDuplicateKeys(debugDuplicateKeys));
   }
 
-  bool _debugDuplicatedKeys(Map<Key, List<Element>>? debugDuplicatedKeys) {
-    if (debugDuplicatedKeys == null) {
+  bool _debugDuplicateKeys(Map<Key, List<Element>>? debugDuplicateKeys) {
+    if (debugDuplicateKeys == null) {
       return true;
     }
-    for (final MapEntry<Key, List<Element>> duplicatedKey in debugDuplicatedKeys.entries) {
+    for (final MapEntry<Key, List<Element>> duplicateKey in debugDuplicateKeys.entries) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Multiple widgets used the same key in ${widget.runtimeType}.'),
         ErrorDescription(
-          'The key ${duplicatedKey.key} was used by multiple widgets. The parents of those widgets were:\n'
+          'The key ${duplicateKey.key} was used by multiple widgets. The parents of those widgets were:\n'
         ),
-        for (final Element element in duplicatedKey.value) ErrorDescription('  - $element\n'),
+        for (final Element element in duplicateKey.value) ErrorDescription('  - $element\n'),
         ErrorDescription(
           'A key can only be specified on one widget at a time in the same parent widget.',
         ),
