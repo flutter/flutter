@@ -731,10 +731,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (delta != 0.0 && targetScrollOffset != position.pixels) {
         GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
       }
-    }
-    else if (event is PointerScrollInertiaCancelEvent) {
+    } else if (event is PointerScrollInertiaCancelEvent) {
       position.jumpTo(position.pixels);
-      // Don't use pointer signal resolver, all hit-tested scrollables should stop
+      // Don't use the pointer signal resolver, all hit-tested scrollables should stop.
     }
   }
 
