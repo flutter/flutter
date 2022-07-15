@@ -520,6 +520,37 @@ void main() {
           Stdio: () => FakeStdio(),
           Logger: () => AppRunLogger(parent: BufferLogger.test()),
         });
+
+        testUsingContext('can pass --device-user', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice(platformType: PlatformType.android);
+          mockDeviceManager
+          ..devices = <Device>[device]
+          ..targetDevices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--machine',
+              '--device-user',
+              '10',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.userIdentifier, '10');
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => mockDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
       });
     });
 
@@ -1080,6 +1111,7 @@ class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(Daemon daemon) : super(daemon);
 
   bool /*?*/ multidexEnabled;
+  String /*?*/ userIdentifier;
 
   @override
   Future<AppInstance> startApp(
@@ -1098,8 +1130,10 @@ class CapturingAppDomain extends AppDomain {
     bool multidexEnabled = false,
     String isolateFilter,
     bool machine = true,
+    String userIdentifier,
   }) async {
     this.multidexEnabled = multidexEnabled;
+    this.userIdentifier = userIdentifier;
     throwToolExit('');
   }
 }

@@ -605,6 +605,7 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArgDeprecated('output-dill'),
           ipv6: ipv6 ?? false,
           multidexEnabled: boolArgDeprecated('multidex'),
+          userIdentifier: userIdentifier,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
