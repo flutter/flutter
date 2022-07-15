@@ -76,7 +76,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
 
   /// The children of the toolbar.
   ///
-  /// If provided, buttonDatas cannot also be provided.
+  /// If provided, [buttonDatas] cannot also be provided.
   final List<Widget>? children;
 
   @override
