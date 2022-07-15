@@ -1,4 +1,4 @@
-Signature: d29f5119c11c508cf5ee47ad2a5b6049
+Signature: b7adae60dd58eb2389c3b122d29ad1dd
 
 UNUSED LICENSES:
 
@@ -6578,6 +6578,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
 FILE: ../../../third_party/skia/include/core/SkOpenTypeSVGDecoder.h
+FILE: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
