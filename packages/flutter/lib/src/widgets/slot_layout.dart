@@ -70,6 +70,7 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     chosenWidget = SlotLayout.pickWidget(context, widget.config);
+    bool hasAnimation = false;
     if(chosenWidget!=null){
       changedWidget.value = chosenWidget!.key!;
     }
@@ -78,7 +79,7 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
       layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
         final Stack elements = Stack(
           children: <Widget>[
-            if (chosenWidget?.overtakeAnimation!=null && !previousChildren.contains(currentChild)) ...previousChildren.where((Widget element) => element.key!=currentChild!.key),
+            if(hasAnimation) ...previousChildren.where((Widget element) => element.key!=currentChild!.key),
             if (currentChild != null) currentChild,
           ],
         );
@@ -86,10 +87,14 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
       },
 
       transitionBuilder: (Widget child, Animation<double> animation){
+        final SlotLayoutConfig configChild = child as SlotLayoutConfig;
         if(child.key == chosenWidget?.key){
-          return (chosenWidget?.inAnimation!=null)? chosenWidget?.inAnimation!(child, _controller)?? child : child;
+          return (configChild.inAnimation!=null)? child.inAnimation!(child, _controller) : child;
         }else{
-          return (chosenWidget?.overtakeAnimation!=null)? chosenWidget?.overtakeAnimation!(child, _controller)?? child : child;
+          if(configChild.outAnimation!=null){
+            hasAnimation = true;
+          }
+          return (configChild.outAnimation!=null)? child.outAnimation!(child, _controller) : child;
         }
       },
       child: chosenWidget ?? SlotLayoutConfig(key: const Key(''), builder: (_) => const SizedBox.shrink()),
