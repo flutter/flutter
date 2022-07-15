@@ -287,22 +287,40 @@ flutter::PointerData CreateMouseDraft(const fup_MouseEvent& event,
     ptr.buttons = flutter_buttons;
   }
 
-  // Fuchsia currently provides scroll data in "ticks", not physical pixels.
-  // However, Flutter expects scroll data in physical pixels. To compensate for
-  // lack of guidance, we make up a "reasonable amount".
-  // TODO(fxbug.dev/85388): Replace with physical pixel scroll.
+  // Fuchsia previously only provided scroll data in "ticks", not physical
+  // pixels. On legacy platforms, since Flutter expects scroll data in physical
+  // pixels, to compensate for lack of guidance, we make up a "reasonable
+  // amount".
+  // TODO(fxbug.dev/103443): Remove the tick based scrolling after the
+  // transition.
   const int kScrollOffsetMultiplier = 20;
 
-  if (sample.has_scroll_v()) {
-    ptr.signal_kind = flutter::PointerData::SignalKind::kScroll;
-    double dy = -sample.scroll_v() * kScrollOffsetMultiplier;  // logical amount
-    ptr.scroll_delta_y = dy;  // Not yet physical; adjusted in Platform View.
+  double dy = 0;
+  double dx = 0;
+  bool is_scroll = false;
+
+  if (sample.has_scroll_v_physical_pixel()) {
+    dy = -sample.scroll_v_physical_pixel();
+    is_scroll = true;
+  } else if (sample.has_scroll_v()) {
+    dy = -sample.scroll_v() *
+         kScrollOffsetMultiplier;  // logical amount, not yet physical; adjusted
+                                   // in Platform View.
+    is_scroll = true;
   }
 
-  if (sample.has_scroll_h()) {
+  if (sample.has_scroll_h_physical_pixel()) {
+    dx = sample.scroll_h_physical_pixel();
+    is_scroll = true;
+  } else if (sample.has_scroll_h()) {
+    dx = sample.scroll_h() * kScrollOffsetMultiplier;  // logical amount
+    is_scroll = true;
+  }
+
+  if (is_scroll) {
     ptr.signal_kind = flutter::PointerData::SignalKind::kScroll;
-    double dx = sample.scroll_h() * kScrollOffsetMultiplier;  // logical amount
-    ptr.scroll_delta_x = dx;  // Not yet physical; adjusted in Platform View.
+    ptr.scroll_delta_y = dy;
+    ptr.scroll_delta_x = dx;
   }
 
   return ptr;
