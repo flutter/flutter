@@ -10,6 +10,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
+import 'package:flutter_driver/src/common/text_input_action.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
@@ -347,6 +348,16 @@ void main() {
         expect(result, 'hello');
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: get_text, timeout: $_kSerializedTestTimeout, finderType: ByValueKey, keyValueString: 123, keyValueType: int}',
+        ]);
+      });
+    });
+
+    group('sendTextInputAction', () {
+      test('sends the SendTextInputAction command with action done', () async {
+        fakeClient.responses['send_text_input_action'] = makeFakeResponse(<String, dynamic>{});
+        await driver.sendTextInputAction(TextInputAction.done, timeout: _kTestTimeout);
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: send_text_input_action, timeout: $_kSerializedTestTimeout, action: done}',
         ]);
       });
     });
