@@ -942,10 +942,9 @@ class LocalizationsGenerator {
   @visibleForTesting
   static File templateArbFileFromFileName(String templateArbFileName, Directory inputDirectory) {
     final File templateArbFile = inputDirectory.childFile(templateArbFileName);
-    final FileStat templateArbFileStat = templateArbFile.statSync();
-    final String templateArbFileStatModeString = templateArbFileStat.modeString();
-    final FileSystemEntityType templateArbFileStatType = templateArbFileStat.type;
-    if (templateArbFileStatType == FileSystemEntityType.notFound) {
+    final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
+    final bool templateArbFileExists = templateArbFile.existsSync();
+    if (!templateArbFileExists) {
       throw L10nException(
         "The 'template-arb-file', $templateArbFile, does not exist."
       );
