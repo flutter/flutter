@@ -19,12 +19,12 @@ class SlotLayoutConfig extends StatefulWidget {
   const SlotLayoutConfig({
     required this.builder,
     this.inAnimation,
-    this.overtakeAnimation,
+    this.outAnimation,
     required super.key,
   });
 
   /// The child Widget that the parent eventually returns with an animation.
-  final WidgetBuilder builder;
+  final WidgetBuilder? builder;
 
   /// A function that takes an [AnimationController] and a [Widget] and returns
   /// a [Widget].
@@ -43,7 +43,13 @@ class SlotLayoutConfig extends StatefulWidget {
   ///
   /// While it is not enforced, the recommended usage for this property is to
   /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget]
-  final Widget Function(Widget, AnimationController)? overtakeAnimation;
+  final Widget Function(Widget, AnimationController)? outAnimation;
+
+  /// An empty [SlotLayoutConfig] to be placed in a slot to indicate it is not
+  /// used.
+  static SlotLayoutConfig empty(){
+    return const SlotLayoutConfig(key: Key(''), builder: null);
+  }
 
   @override
   State<SlotLayoutConfig> createState() => _SlotLayoutConfigState();
@@ -52,6 +58,10 @@ class SlotLayoutConfig extends StatefulWidget {
 class _SlotLayoutConfigState extends State<SlotLayoutConfig> {
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context);
+    if(widget.builder!=null){
+      return widget.builder!(context);
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }
