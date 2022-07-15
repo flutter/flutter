@@ -140,6 +140,14 @@ class _PreferredAppBarSize extends Size {
 /// ** See code in examples/api/lib/material/app_bar/app_bar.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to listen to a nested Scrollable's scroll notification
+/// in a nested scroll view using the [notificationPredicate] property and use it
+/// to make [scrolledUnderElevation] take effect.
+///
+/// ** See code in examples/api/lib/material/app_bar/app_bar.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], which displays the [AppBar] in its [Scaffold.appBar] slot.
