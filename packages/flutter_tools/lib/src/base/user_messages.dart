@@ -48,7 +48,7 @@ class UserMessages {
       'On Fedora: dnf install libstdc++.i686\n'
       'On Arch: pacman -S lib32-gcc-libs';
   String get flutterValidatorErrorIntentional =>
-      'If this was intentional, you can disregard this warning; however it is '
+      'If those were intentional, you can disregard the above warnings; however it is '
       'recommended to use "git" directly to perform update checks and upgrades.';
 
   // Messages used in NoIdeValidator
