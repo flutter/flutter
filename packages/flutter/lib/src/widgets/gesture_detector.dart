@@ -288,7 +288,7 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.supportedDevices
+    this.supportedDevices,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
        assert(() {
@@ -1007,7 +1007,7 @@ class GestureDetector extends StatelessWidget {
 
   /// The kind of devices that are allowed to be recognized.
   ///
-  /// If set to null, events from all device types will be recognized.
+  /// If set to null, events from all device types will be recognized. Defaults to null.
   final Set<PointerDeviceKind>? supportedDevices;
 
   @override
