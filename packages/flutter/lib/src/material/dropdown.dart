@@ -1397,17 +1397,17 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
-      Widget displayedHint = _enabled ? widget.hint! : widget.disabledHint ?? widget.hint!;
-      if (widget.selectedItemBuilder == null) {
-        displayedHint = _DropdownMenuItemContainer(alignment: widget.alignment, child: displayedHint);
-      }
+      final Widget displayedHint = _enabled ? widget.hint! : widget.disabledHint ?? widget.hint!;
 
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle!.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
           ignoringSemantics: false,
-          child: displayedHint,
+          child: _DropdownMenuItemContainer(
+            alignment: widget.alignment,
+            child: displayedHint,
+          ),
         ),
       ));
     }
@@ -1509,6 +1509,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mouseCursor: effectiveMouseCursor,
           onTap: _enabled ? _handleTap : null,
           canRequestFocus: _enabled,
+          borderRadius: widget.borderRadius,
           focusNode: focusNode,
           autofocus: widget.autofocus,
           focusColor: widget.focusColor ?? Theme.of(context).focusColor,

@@ -475,8 +475,6 @@ void main() {
 
     final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first), kind: PointerDeviceKind.mouse);
     await tester.pump();
-    await tester.pumpAndSettle();
-    await down1.up();
     await down1.removePointer();
 
     expect(focusNodeA.hasFocus, true);

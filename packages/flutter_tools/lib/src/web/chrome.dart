@@ -164,11 +164,14 @@ class ChromiumLauncher {
   /// port is picked automatically.
   ///
   /// [skipCheck] does not attempt to make a devtools connection before returning.
+  ///
+  /// [webBrowserFlags] add arbitrary browser flags.
   Future<Chromium> launch(String url, {
     bool headless = false,
     int? debugPort,
     bool skipCheck = false,
     Directory? cacheDir,
+    List<String> webBrowserFlags = const <String>[],
   }) async {
     if (currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
@@ -215,6 +218,7 @@ class ChromiumLauncher {
           '--no-sandbox',
           '--window-size=2400,1800',
         ],
+      ...webBrowserFlags,
       url,
     ];
 

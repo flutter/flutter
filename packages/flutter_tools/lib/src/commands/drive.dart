@@ -279,6 +279,7 @@ class DriveCommand extends RunCommandBase {
         packageConfig,
         chromeBinary: stringArgDeprecated('chrome-binary'),
         headless: boolArgDeprecated('headless'),
+        webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
         browserDimension: stringArgDeprecated('browser-dimension')!.split(','),
         browserName: stringArgDeprecated('browser-name'),
         driverPort: stringArgDeprecated('driver-port') != null

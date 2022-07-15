@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../daemon.dart';
@@ -202,9 +203,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @protected
   Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int? browserDebugPort = featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
+    final int? webBrowserDebugPort = featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
       ? int.parse(stringArgDeprecated('web-browser-debug-port')!)
       : null;
+    final List<String> webBrowserFlags = featureFlags.isWebEnabled
+        ? stringsArg(FlutterOptions.kWebBrowserFlag)
+        : const <String>[];
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -216,7 +220,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-injected-client-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArgDeprecated('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArgDeprecated('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
+        webBrowserDebugPort: webBrowserDebugPort,
+        webBrowserFlags: webBrowserFlags,
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
       );
@@ -253,7 +258,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-injected-client-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArgDeprecated('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArgDeprecated('web-run-headless'),
-        webBrowserDebugPort: browserDebugPort,
+        webBrowserDebugPort: webBrowserDebugPort,
+        webBrowserFlags: webBrowserFlags,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArgDeprecated('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArgDeprecated('web-launch-url') : null,
         vmserviceOutFile: stringArgDeprecated('vmservice-out-file'),
@@ -489,7 +495,7 @@ class RunCommand extends RunCommandBase {
     }
 
     if (userIdentifier != null
-      && devices!.every((Device device) => device is! AndroidDevice)) {
+      && devices!.every((Device device) => device.platformType != PlatformType.android)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
@@ -714,7 +720,11 @@ class RunCommand extends RunCommandBase {
     } finally {
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
-      globals.terminal.singleCharMode = false;
+      try {
+        globals.terminal.singleCharMode = false;
+      } on StdinException {
+        // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
+      }
     }
     return FlutterCommandResult(
       ExitStatus.success,

@@ -25,7 +25,7 @@ export 'package:flutter/foundation.dart' show DiagnosticsNode, InformationCollec
 
 export 'arena.dart' show GestureArenaManager;
 export 'events.dart' show PointerEvent;
-export 'hit_test.dart' show HitTestEntry, HitTestTarget, HitTestResult;
+export 'hit_test.dart' show HitTestEntry, HitTestResult, HitTestTarget;
 export 'pointer_router.dart' show PointerRouter;
 export 'pointer_signal_resolver.dart' show PointerSignalResolver;
 

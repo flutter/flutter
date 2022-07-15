@@ -9,31 +9,22 @@ import '../project_validator.dart';
 import '../project_validator_result.dart';
 import '../runner/flutter_command.dart';
 
-class ValidateProjectCommand extends FlutterCommand {
-  ValidateProjectCommand({
+class ValidateProject {
+  ValidateProject({
     required this.fileSystem,
     required this.logger,
     required this.allProjectValidators,
+    required this.userPath,
     this.verbose = false
   });
 
   final FileSystem fileSystem;
   final Logger logger;
   final bool verbose;
+  final String userPath;
   final List<ProjectValidator> allProjectValidators;
 
-  @override
-  final String name = 'validate-project';
-
-  @override
-  final String description = 'Show information about the current project.';
-
-  @override
-  final String category = FlutterCommandCategory.project;
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    final String userPath = getUserPath();
+  Future<FlutterCommandResult> run() async {
     final Directory workingDirectory = userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
 
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
@@ -93,9 +84,5 @@ class ValidateProjectCommand extends FlutterCommand {
     }
 
     return '$icon $result';
-  }
-
-  String getUserPath(){
-    return (argResults == null || argResults!.rest.isEmpty) ? '' : argResults!.rest[0];
   }
 }
