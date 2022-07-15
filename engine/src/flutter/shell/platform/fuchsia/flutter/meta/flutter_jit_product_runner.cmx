@@ -27,6 +27,7 @@
             "fuchsia.ui.input.ImeService",
             "fuchsia.ui.input3.Keyboard",
             "fuchsia.ui.scenic.Scenic",
+            "fuchsia.ui.pointerinjector.Registry",
             "fuchsia.vulkan.loader.Loader"
         ]
     }
