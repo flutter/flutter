@@ -160,8 +160,6 @@ class MutatingRoute extends MaterialPageRoute<void> {
 }
 
 class AdditionalOverlayRoute extends PageRoute<void> with MaterialRouteTransitionMixin<void> {
-  late final OverlayEntry overlayEntry;
-
   @override
   bool get maintainState => false;
 
@@ -169,7 +167,7 @@ class AdditionalOverlayRoute extends PageRoute<void> with MaterialRouteTransitio
   Widget buildContent(BuildContext context) {
     return Hero(
       tag: 'a',
-      insertOverlayBelow: overlayEntry,
+      insertOverlayBelow: overlayEntries.last,
       child: const Text('AdditionalOverlayRoute'),
     );
   }
@@ -180,7 +178,7 @@ class AdditionalOverlayRoute extends PageRoute<void> with MaterialRouteTransitio
   Iterable<OverlayEntry> createOverlayEntries() {
     return <OverlayEntry>[
       ...super.createOverlayEntries(),
-      overlayEntry = OverlayEntry(builder: _buildOverlay),
+      OverlayEntry(builder: _buildOverlay),
     ];
   }
 }
@@ -3200,6 +3198,14 @@ Future<void> main() async {
     await tester.pump();
 
     final OverlayState overlay = navigatorKey.currentState!.overlay!;
-    expect(overlay.entries.indexOf(route.overlayEntry), overlay.entries.length - 1);
+    final OverlayEntry aboveOverlay = route.overlayEntries.last;
+    final OverlayEntry belowOverlay =
+      route.overlayEntries[route.overlayEntries.length - 2];
+    final int? aboveOverlayIndex = overlay.findEntryIndex(aboveOverlay);
+    final int? belowOverlayIndex = overlay.findEntryIndex(belowOverlay);
+
+    expect(aboveOverlayIndex, isNotNull);
+    expect(belowOverlayIndex, isNotNull);
+    expect(aboveOverlayIndex, belowOverlayIndex! + 2);
   });
 }

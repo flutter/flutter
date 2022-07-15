@@ -376,10 +376,6 @@ class Overlay extends StatefulWidget {
 class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   final List<OverlayEntry> _entries = <OverlayEntry>[];
 
-  /// Retrieve current list of [OverlayEntry]s.
-  @visibleForTesting
-  List<OverlayEntry> get entries => _entries;
-
   @override
   void initState() {
     super.initState();
@@ -541,6 +537,15 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       // We use the opacity of the entry in our build function, which means we
       // our state has changed.
     });
+  }
+
+  /// Finds the index of a given [OverlayEntry] in the overlay.
+  ///
+  /// Returns null if [entry] is not present in the overlay.
+  @visibleForTesting
+  int? findEntryIndex(OverlayEntry entry) {
+    final int index = _entries.indexOf(entry);
+    return index != -1 ? index : null;
   }
 
   @override

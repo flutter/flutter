@@ -162,6 +162,10 @@ enum HeroFlightDirection {
 /// B to A, route A's hero's widget is, by default, placed over where route B's
 /// hero's widget was, and then the animation goes the other way.
 ///
+/// Parameters of the [Hero]'s flight, specified by [Hero] arguments, are saved
+/// at the start of the route transition. Changing them during the flight won't
+/// have any effect on it.
+///
 /// ### Nested Navigators
 ///
 /// If either or both routes contain nested [Navigator]s, only [Hero]es
@@ -271,15 +275,21 @@ class Hero extends StatefulWidget {
   /// Defaults to false and cannot be null.
   final bool transitionOnUserGestures;
 
-  /// [OverlayEntry] below which overlay of this hero's flight should be inserted.
+  /// [OverlayEntry] below which overlay of this hero's flight should be
+  /// inserted.
   ///
-  /// This is useful for situations where hero on the target route should be (partially) visually obstructed by another
-  /// widget. Without placing this widget on an overlay and specifying it here, the hero would "jump" behind
-  /// the obstructing widget at the end of its flight.
+  /// This is useful for situations where hero on the target route should be
+  /// (partially) visually obstructed by another widget. Without placing
+  /// this widget on an overlay and specifying it here, the hero would "jump"
+  /// behind the obstructing widget at the end of its flight.
   ///
-  /// Target [Hero]'s [insertOverlayBelow] takes precedence before source [Hero]'s [insertOverlayBelow].
+  /// Target [Hero]'s [insertOverlayBelow] takes precedence before source
+  /// [Hero]'s [insertOverlayBelow].
   ///
-  /// Defaults to null, which means that the overlay will be inserted at the top.
+  /// Changing this parameter during this [Hero]'s flight will have no effect.
+  ///
+  /// Defaults to null, which means that the overlay will be inserted at
+  /// the top.
   final OverlayEntry? insertOverlayBelow;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
@@ -462,6 +472,7 @@ class _HeroFlightManifest {
     required this.toHero,
     required this.createRectTween,
     required this.shuttleBuilder,
+    required this.insertOverlayBelow,
     required this.isUserGestureTransition,
     required this.isDiverted,
   }) : assert(fromHero.widget.tag == toHero.widget.tag);
@@ -475,12 +486,11 @@ class _HeroFlightManifest {
   final _HeroState toHero;
   final CreateRectTween? createRectTween;
   final HeroFlightShuttleBuilder shuttleBuilder;
+  final OverlayEntry? insertOverlayBelow;
   final bool isUserGestureTransition;
   final bool isDiverted;
 
   Object get tag => fromHero.widget.tag;
-
-  OverlayEntry? get insertOverlayBelow => toHero.widget.insertOverlayBelow ?? fromHero.widget.insertOverlayBelow;
 
   Animation<double> get animation {
     return CurvedAnimation(
@@ -984,6 +994,8 @@ class HeroController extends NavigatorObserver {
             shuttleBuilder: toHero.widget.flightShuttleBuilder
                           ?? fromHero.widget.flightShuttleBuilder
                           ?? _defaultHeroFlightShuttleBuilder,
+            insertOverlayBelow: toHero.widget.insertOverlayBelow
+                ?? fromHero.widget.insertOverlayBelow,
             isUserGestureTransition: isUserGestureTransition,
             isDiverted: existingFlight != null,
           );
