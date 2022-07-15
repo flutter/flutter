@@ -1429,17 +1429,6 @@ void main() {
   });
 
   testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
-    // First try without cancelling.
-    await pumpTest(tester, null);
-    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
-    expect(getScrollOffset(tester), dragOffset);
-    await tester.pump(); // trigger fling
-    expect(getScrollOffset(tester), dragOffset);
-    await tester.pump(const Duration(seconds: 5));
-    expect(getScrollOffset(tester), closeTo(380.2303, 0.0001));
-    resetScrollOffset(tester);
-
-    // Now cancel partway into the inertia.
     await pumpTest(tester, null);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
@@ -1447,11 +1436,11 @@ void main() {
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(const Duration(milliseconds: 200));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-    testPointer.hover(tester.getCenter(find.byType(Scrollable)));
-    await tester.sendEventToBinding(testPointer.scrollInertiaCancel());
+    await tester.sendEventToBinding(testPointer.hover(tester.getCenter(find.byType(Scrollable))));
+    await tester.sendEventToBinding(testPointer.scrollInertiaCancel()); // Cancel partway through.
     await tester.pump();
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
-    await tester.pump(const Duration(milliseconds: 4800)); // Add up to the same 5 seconds as before.
+    await tester.pump(const Duration(milliseconds: 4800));
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
   });
 }
