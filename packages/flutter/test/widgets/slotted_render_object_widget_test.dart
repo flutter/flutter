@@ -159,18 +159,18 @@ void main() {
     expect(renderObject._topLeft!.size, const Size(100, 100));
     expect(renderObject._bottomRight!.size, const Size(10, 10));
     expect(renderObject._nullSlot!.size, const Size(50, 50));
-    expect(widget1Element, tester.element(find.byWidget(widget1)));
-    expect(widget2Element, tester.element(find.byWidget(widget2)));
-    expect(nullWidgetElement, tester.element(find.byWidget(nullWidget)));
+    expect(widget1Element, same(tester.element(find.byWidget(widget1))));
+    expect(widget2Element, same(tester.element(find.byWidget(widget2))));
+    expect(nullWidgetElement, same(tester.element(find.byWidget(nullWidget))));
 
     // Shifting slots
     await tester.pumpWidget(buildWidget(topLeft: nullWidget, bottomRight: widget2, nullSlot: widget1));
     expect(renderObject._topLeft!.size, const Size(50, 50));
     expect(renderObject._bottomRight!.size, const Size(100, 100));
     expect(renderObject._nullSlot!.size, const Size(10, 10));
-    expect(widget1Element, tester.element(find.byWidget(widget1)));
-    expect(widget2Element, tester.element(find.byWidget(widget2)));
-    expect(nullWidgetElement, tester.element(find.byWidget(nullWidget)));
+    expect(widget1Element, same(tester.element(find.byWidget(widget1))));
+    expect(widget2Element, same(tester.element(find.byWidget(widget2))));
+    expect(nullWidgetElement, same(tester.element(find.byWidget(nullWidget))));
 
     // Moving + Deleting.
     await tester.pumpWidget(buildWidget(bottomRight: widget2));
@@ -179,13 +179,13 @@ void main() {
     expect(renderObject._nullSlot, null);
     expect(widget1Element.debugIsDefunct, isTrue);
     expect(nullWidgetElement.debugIsDefunct, isTrue);
-    expect(widget2Element, tester.element(find.byWidget(widget2)));
+    expect(widget2Element, same(tester.element(find.byWidget(widget2))));
 
     // Moving.
     await tester.pumpWidget(buildWidget(topLeft: widget2));
     expect(renderObject._topLeft!.size, const Size(100, 100));
     expect(renderObject._bottomRight, null);
-    expect(widget2Element, tester.element(find.byWidget(widget2)));
+    expect(widget2Element, same(tester.element(find.byWidget(widget2))));
   });
 
   testWidgets('duplicated key error message', (WidgetTester tester) async {
