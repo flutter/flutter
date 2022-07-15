@@ -28,6 +28,7 @@ var styles = `
     position: absolute;
     top: 0px;
     left: 0px;
+    overflow: hidden;
   }
 
   .indeterminate {
