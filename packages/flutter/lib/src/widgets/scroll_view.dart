@@ -620,6 +620,14 @@ class CustomScrollView extends ScrollView {
 
 /// A [ScrollView] that uses a single child layout model.
 ///
+/// {@template flutter.widgets.BoxScroll.scrollBehaviour}
+/// ## Scrolling Behaviour
+///
+/// [ScrollBehavior] cannot be provided because it is only exposed
+/// in widgets where the scrolling is hard-coded due to scrollbars and
+/// overscroll indicators, or widget-specific [ScrollPhysics].
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [ListView], which is a [BoxScrollView] that uses a linear layout model.
@@ -1011,6 +1019,8 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
 /// {@end-tool}
+///
+/// {@macro flutter.widgets.BoxScroll.scrollBehaviour}
 ///
 /// See also:
 ///
