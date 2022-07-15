@@ -131,23 +131,26 @@ class AdaptiveScaffold extends StatefulWidget {
     }
     return Builder(
       builder: (BuildContext context) {
-        return SizedBox(
-          width: width,
-          height: MediaQuery.of(context).size.height,
-          child: NavigationRail(
-            labelType: labelType,
-            leading: leading,
-            trailing: trailing,
-            backgroundColor: backgroundColor,
-            extended: extended,
-            selectedIndex: selectedIndex,
-            destinations: <NavigationRailDestination>[
-              for (NavigationDestination destination in destinations)
-                NavigationRailDestination(
-                  label: Text(destination.label),
-                  icon: destination.icon,
-                )
-            ],
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            width: width,
+            height: MediaQuery.of(context).size.height,
+            child: NavigationRail(
+              labelType: labelType,
+              leading: leading,
+              trailing: trailing,
+              backgroundColor: backgroundColor,
+              extended: extended,
+              selectedIndex: selectedIndex,
+              destinations: <NavigationRailDestination>[
+                for (NavigationDestination destination in destinations)
+                  NavigationRailDestination(
+                    label: Text(destination.label),
+                    icon: destination.icon,
+                  )
+              ],
+            ),
           ),
         );
       }
@@ -263,7 +266,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             ? SlotLayout(
                 config: <int, SlotLayoutConfig>{
                   widget.breakpoints[0]: SlotLayoutConfig(
-                    overtakeAnimation: widget.offsetAnimations ? leftInOut : null,
+                    outAnimation: widget.offsetAnimations ? leftInOut : null,
                     key: const Key('primaryNavigation0'),
                     builder: (_) => const SizedBox(
                       width: 0,
@@ -311,7 +314,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     ),
                   ),
                   widget.breakpoints[1]: SlotLayoutConfig(
-                    overtakeAnimation: widget.offsetAnimations ? topToBottom : null,
+                    outAnimation: widget.offsetAnimations ? topToBottom : null,
                     key: const Key('botnavnone'),
                     builder: (_) => const SizedBox(width: 0, height: 0),
                   ),
@@ -334,8 +337,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       ? SlotLayoutConfig(
                           key: Key('$name${entry.key}'),
                           inAnimation: fadeIn,
-                          overtakeAnimation: fadeOut,
-                          builder: entry.value!,
+                          outAnimation: fadeOut,
+                          builder: entry.value,
                         )
                       : null
             },

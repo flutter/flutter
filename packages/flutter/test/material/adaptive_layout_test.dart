@@ -157,8 +157,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: SlotLayout(
             config: <int, SlotLayoutConfig>{
-              0: SlotLayoutConfig(inAnimation: leftOutIn, overtakeAnimation: leftInOut, key: const Key('0'), builder: (_) => const SizedBox(width: 10, height: 10)),
-              400: SlotLayoutConfig(inAnimation: leftOutIn, overtakeAnimation: leftInOut, key: const Key('400'), builder: (_) => const SizedBox(width: 10, height: 10)),
+              0: SlotLayoutConfig(inAnimation: leftOutIn, outAnimation: leftInOut, key: const Key('0'), builder: (_) => const SizedBox(width: 10, height: 10)),
+              400: SlotLayoutConfig(inAnimation: leftOutIn, outAnimation: leftInOut, key: const Key('400'), builder: (_) => const SizedBox(width: 10, height: 10)),
             },
           ),
         ),
