@@ -2196,7 +2196,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
         _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
         _lastTextPosition = currentTextPosition;
-        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!, resetLerpValue: _floatingCursorResetController!.value);
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
         break;
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
@@ -2204,7 +2204,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
         _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
         _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
-        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!, resetLerpValue: _floatingCursorResetController!.value);
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
         break;
       case FloatingCursorDragState.End:
         // Resume cursor blinking
