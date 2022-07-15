@@ -6,10 +6,10 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CupertinoListSectionInsetApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class CupertinoListSectionInsetApp extends StatelessWidget {
+  const CupertinoListSectionInsetApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

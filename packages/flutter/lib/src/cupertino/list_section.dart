@@ -212,7 +212,7 @@ class CupertinoListSection extends StatelessWidget {
     this.topMargin = _kMarginTop,
     bool hasLeading = true,
   }) : assert((children != null && children.length > 0) || header != null),
-       _type = CupertinoListSectionType.base,
+       type = CupertinoListSectionType.base,
        additionalDividerMargin = additionalDividerMargin ??
            (hasLeading ? _kBaseAdditionalDividerMargin : 0.0);
 
@@ -275,14 +275,19 @@ class CupertinoListSection extends StatelessWidget {
     this.topMargin,
     bool hasLeading = true,
   }) : assert((children != null && children.length > 0) || header != null),
-       _type = CupertinoListSectionType.insetGrouped,
+       type = CupertinoListSectionType.insetGrouped,
        additionalDividerMargin = additionalDividerMargin ??
            (hasLeading
                ? _kInsetAdditionalDividerMargin
                : _kInsetAdditionalDividerMarginWithoutLeading),
        margin = margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader);
 
-  final CupertinoListSectionType _type;
+  /// The type of list section, either base or inset grouped.
+  ///
+  /// This member is public for testing purposes only and cannot be set
+  /// manually. Instead, use a corresponding constructors.
+  @visibleForTesting
+  final CupertinoListSectionType type;
 
   /// Sets the form section header. The section header lies above the [children]
   /// rows. Usually a [Text] widget.
@@ -363,7 +368,7 @@ class CupertinoListSection extends StatelessWidget {
     if (header != null) {
       headerWidget = DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle.merge(
-              _type == CupertinoListSectionType.base
+              type == CupertinoListSectionType.base
                   ? TextStyle(
                       fontSize: 13.0,
                       color: CupertinoDynamicColor.resolve(
@@ -378,7 +383,7 @@ class CupertinoListSection extends StatelessWidget {
     Widget? footerWidget;
     if (footer != null) {
       footerWidget = DefaultTextStyle(
-        style: _type == CupertinoListSectionType.base
+        style: type == CupertinoListSectionType.base
             ? CupertinoTheme.of(context).textTheme.textStyle.merge(TextStyle(
                   fontSize: 13.0,
                   color: CupertinoDynamicColor.resolve(
@@ -398,7 +403,7 @@ class CupertinoListSection extends StatelessWidget {
       // to the top and bottom of the rows.
       final List<Widget> childrenWithDividers = <Widget>[];
 
-      if (_type == CupertinoListSectionType.base) {
+      if (type == CupertinoListSectionType.base) {
         childrenWithDividers.add(longDivider);
       }
 
@@ -408,11 +413,11 @@ class CupertinoListSection extends StatelessWidget {
       });
 
       childrenWithDividers.add(children!.last);
-      if (_type == CupertinoListSectionType.base) {
+      if (type == CupertinoListSectionType.base) {
         childrenWithDividers.add(longDivider);
       }
 
-      switch (_type) {
+      switch (type) {
         case CupertinoListSectionType.insetGrouped:
           childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
           break;
@@ -441,13 +446,13 @@ class CupertinoListSection extends StatelessWidget {
           color: CupertinoDynamicColor.resolve(backgroundColor, context)),
       child: Column(
         children: <Widget>[
-          if (_type == CupertinoListSectionType.base)
+          if (type == CupertinoListSectionType.base)
             SizedBox(height: topMargin),
           if (headerWidget != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: _type == CupertinoListSectionType.base
+                padding: type == CupertinoListSectionType.base
                     ? _kDefaultHeaderMargin
                     : _kInsetGroupedDefaultHeaderMargin,
                 child: headerWidget,
@@ -468,7 +473,7 @@ class CupertinoListSection extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: _type == CupertinoListSectionType.base
+                padding: type == CupertinoListSectionType.base
                     ? _kDefaultFooterMargin
                     : _kInsetGroupedDefaultFooterMargin,
                 child: footerWidget,
