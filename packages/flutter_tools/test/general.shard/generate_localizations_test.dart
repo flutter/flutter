@@ -180,6 +180,32 @@ void main() {
       );
     });
 
+    testWithoutContext('throws error when arb file does not exist', () {
+      // Set up project directory.
+      fs.currentDirectory
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .createSync(recursive: true);
+
+      // Arb file should be nonexistent in the l10n directory.
+      expect(
+        () => LocalizationsGenerator(
+          fileSystem: fs,
+          projectPathString: './',
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        ),
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains(', does not exist.'),
+        )),
+      );
+    });
+
     group('className should only take valid Dart class names', () {
       setUp(() {
         _standardFlutterDirectoryL10nSetup(fs);
