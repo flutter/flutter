@@ -91,13 +91,13 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
         if(child.key == chosenWidget?.key){
           return (configChild.inAnimation!=null)? child.inAnimation!(child, _controller) : child;
         }else{
-          if(configChild.outAnimation!=null){
+          if(configChild.outAnimation!=null && configChild!=null){
             hasAnimation = true;
           }
           return (configChild.outAnimation!=null)? child.outAnimation!(child, _controller) : child;
         }
       },
-      child: chosenWidget ?? SlotLayoutConfig(key: const Key(''), builder: (_) => const SizedBox.shrink()),
+      child: chosenWidget ?? SlotLayoutConfig.empty()
     );
   }
 }

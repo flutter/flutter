@@ -193,6 +193,7 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
     notifiers.forEach((String key, ValueNotifier<Key?> notifier) {
       notifier.value = chosenWidgets[key]?.key;
     });
+
     return CustomMultiChildLayout(
       delegate: _AdaptiveLayoutDelegate(
         slots: slots,
@@ -200,7 +201,7 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
         slotSizes: slotSizes,
         controller: _controller,
         bodyRatio: widget.bodyRatio,
-        secondaryBodyAnimating: isAnimating[_secondaryBodyID]!,
+        isAnimating: isAnimating,
         internalAnimations: widget.internalAnimations,
         horizontalBody: widget.horizontalBody,
         textDirection: Directionality.of(context) == TextDirection.ltr,
@@ -218,7 +219,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
     required this.slotSizes,
     required this.controller,
     required this.bodyRatio,
-    required this.secondaryBodyAnimating,
+    required this.isAnimating,
     required this.internalAnimations,
     required this.horizontalBody,
     required this.textDirection,
@@ -227,9 +228,9 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
   final Map<String, SlotLayout?> slots;
   final Map<String, SlotLayoutConfig?> chosenWidgets;
   final Map<String, Size?> slotSizes;
+  final Map<String, bool> isAnimating;
   final AnimationController controller;
   final double? bodyRatio;
-  final bool secondaryBodyAnimating;
   final bool internalAnimations;
   final bool horizontalBody;
   final bool textDirection;
@@ -243,7 +244,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
     double bottomMargin = 0;
 
     double animatedSize(double begin, double end) {
-      if(secondaryBodyAnimating){
+      if(isAnimating[_secondaryBodyID]!){
         return internalAnimations
             ? Tween<double>(begin: begin, end: end)
                 .animate(CurvedAnimation(parent: controller, curve: Curves.easeInOutCubic))
@@ -415,12 +416,14 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
   }
 
   void updateSize(String id, Size childSize) {
-    if(childSize!=slotSizes[id]){
-      controller.addStatusListener((AnimationStatus status) {
-        if(status == AnimationStatus.completed || status == AnimationStatus.dismissed){
+    if(slotSizes[id] != childSize){
+      void listener(AnimationStatus status) {
+        if((status == AnimationStatus.completed || status == AnimationStatus.dismissed) && slotSizes[id] != childSize){
           slotSizes.update(id, (Size? value) => childSize);
         }
-      });
+        controller.removeStatusListener(listener);
+      }
+      controller.addStatusListener(listener);
     }
   }
 

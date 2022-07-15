@@ -176,13 +176,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
-  @override
-  State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
-}
-
-
-class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
-  AnimatedWidget bottomToTop(Widget child, AnimationController animation) {
+  static AnimatedWidget bottomToTop(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(0, 1),
@@ -192,7 +186,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     );
   }
 
-  AnimatedWidget topToBottom(Widget child, AnimationController animation) {
+  static AnimatedWidget topToBottom(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: Offset.zero,
@@ -202,7 +196,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     );
   }
 
-  AnimatedWidget leftOutIn(Widget child, AnimationController animation) {
+  static AnimatedWidget leftOutIn(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(-1, 0),
@@ -212,7 +206,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     );
   }
 
-  AnimatedWidget leftInOut(Widget child, AnimationController animation) {
+  static AnimatedWidget leftInOut(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: Offset.zero,
@@ -222,7 +216,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     );
   }
 
-  AnimatedWidget rightOutIn(Widget child, AnimationController animation) {
+  static AnimatedWidget rightOutIn(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(1, 0),
@@ -232,19 +226,25 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     );
   }
 
-  Widget fadeIn(Widget child, AnimationController animation) {
+  static Widget fadeIn(Widget child, AnimationController animation) {
     return FadeTransition(
       opacity: CurvedAnimation(parent: animation, curve: Curves.easeInCubic),
       child: child,
     );
   }
 
-  Widget fadeOut(Widget child, AnimationController animation) {
+  static Widget fadeOut(Widget child, AnimationController animation) {
     return FadeTransition(
       opacity: CurvedAnimation(parent: ReverseAnimation(animation), curve: Curves.easeInCubic),
       child: child,
     );
   }
+  @override
+  State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
+}
+
+
+class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   @override
   Widget build(BuildContext context) {
     List<WidgetBuilder?>? bodyList = <WidgetBuilder?>[widget.smallBody ?? widget.body, widget.body, widget.largeBody ?? widget.body];
@@ -266,7 +266,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             ? SlotLayout(
                 config: <int, SlotLayoutConfig>{
                   widget.breakpoints[0]: SlotLayoutConfig(
-                    outAnimation: widget.offsetAnimations ? leftInOut : null,
+                    outAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftInOut : null,
                     key: const Key('primaryNavigation0'),
                     builder: (_) => const SizedBox(
                       width: 0,
@@ -274,7 +274,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     ),
                   ),
                   widget.breakpoints[1]: SlotLayoutConfig(
-                    inAnimation: widget.offsetAnimations ? leftOutIn : null,
+                    inAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftOutIn : null,
                     key: const Key('primaryNavigation1'),
                     builder: (_) => SizedBox(
                       width: 75,
@@ -286,7 +286,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     ),
                   ),
                   widget.breakpoints[2]: SlotLayoutConfig(
-                    inAnimation: widget.offsetAnimations ? leftOutIn : null,
+                    inAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftOutIn : null,
                     key: const Key('primaryNavigation2'),
                     builder: (_) => SizedBox(
                       width: 150,
@@ -305,7 +305,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             ? SlotLayout(
                 config: <int, SlotLayoutConfig>{
                   widget.breakpoints[0]: SlotLayoutConfig(
-                    inAnimation: widget.offsetAnimations ? bottomToTop : null,
+                    inAnimation: widget.offsetAnimations ? AdaptiveScaffold.bottomToTop : null,
                     key: const Key('botnav1'),
                     builder: (_) => BottomNavigationBar(
                       unselectedItemColor: Colors.grey,
@@ -314,7 +314,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     ),
                   ),
                   widget.breakpoints[1]: SlotLayoutConfig(
-                    outAnimation: widget.offsetAnimations ? topToBottom : null,
+                    outAnimation: widget.offsetAnimations ? AdaptiveScaffold.topToBottom : null,
                     key: const Key('botnavnone'),
                     builder: (_) => const SizedBox(width: 0, height: 0),
                   ),
@@ -336,8 +336,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                   widget.breakpoints[entry.key]: (entry.value != null)
                       ? SlotLayoutConfig(
                           key: Key('$name${entry.key}'),
-                          inAnimation: fadeIn,
-                          outAnimation: fadeOut,
+                          inAnimation: AdaptiveScaffold.fadeIn,
+                          outAnimation: AdaptiveScaffold.fadeOut,
                           builder: entry.value,
                         )
                       : null
