@@ -529,6 +529,7 @@ class BallisticScrollActivity extends ScrollActivity {
     super.delegate,
     Simulation simulation,
     TickerProvider vsync,
+    this.shouldIgnorePointer,
   ) {
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
@@ -579,7 +580,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  final bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;

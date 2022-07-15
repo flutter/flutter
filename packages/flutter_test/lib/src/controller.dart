@@ -388,6 +388,7 @@ abstract class WidgetController {
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
     bool warnIfMissed = true,
+    PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
     return flingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
@@ -398,6 +399,7 @@ abstract class WidgetController {
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
+      deviceKind: deviceKind,
     );
   }
 
@@ -417,11 +419,12 @@ abstract class WidgetController {
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
+    PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), deviceKind, null, buttons);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
