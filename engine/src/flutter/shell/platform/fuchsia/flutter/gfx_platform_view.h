@@ -36,6 +36,7 @@ class GfxPlatformView final : public flutter_runner::PlatformView,
       fuchsia::ui::pointer::MouseSourceHandle mouse_source,
       fuchsia::ui::views::FocuserHandle focuser,
       fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
+      fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry,
       fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
           session_listener_request,
       fit::closure on_session_listener_error_callback,
