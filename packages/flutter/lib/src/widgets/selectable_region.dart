@@ -1832,10 +1832,11 @@ class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
   }
 }
 
-// TODO(justinmc): This is duplicated in widgets/text_selection.dart.  Get
-// FadeTransition working there and make it public, then use here.
-// Wrap the given child in the widgets common to both buildContextMenu and
-// TextSelectionControls.buildToolbar.
+// TODO(justinmc): Currently this fades in but not out on all platforms. It
+// should follow the correct fading behavior for the current platform, then be
+// made public and de-duplicated with widgets/text_selection.dart.
+// https://github.com/flutter/flutter/issues/107732
+/// Wraps the child in the widgets and behavior that are common to all toolbars.
 class _SelectionToolbarWrapper extends StatefulWidget {
   const _SelectionToolbarWrapper({
     required this.layerLink,

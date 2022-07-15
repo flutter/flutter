@@ -1212,7 +1212,10 @@ class SelectionOverlay {
   }
 }
 
-// TODO(justinmc): FadeTransition should work just based on creation/disposal?
+// TODO(justinmc): Currently this fades in but not out on all platforms. It
+// should follow the correct fading behavior for the current platform, then be
+// made public and de-duplicated with widgets/selectable_region.dart.
+// https://github.com/flutter/flutter/issues/107732
 // Wrap the given child in the widgets common to both buildContextMenu and
 // TextSelectionControls.buildToolbar.
 class _SelectionToolbarWrapper extends StatefulWidget {
