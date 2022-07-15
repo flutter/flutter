@@ -1050,6 +1050,9 @@ class LocalizationsGenerator {
   }
 
   static bool _isValidGetterAndMethodName(String name) {
+    if (name.isEmpty) {
+      return false;
+    }
     // Public Dart method name must not start with an underscore
     if (name[0] == '_') {
       return false;
