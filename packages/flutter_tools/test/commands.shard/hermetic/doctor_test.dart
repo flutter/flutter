@@ -769,7 +769,6 @@ void main() {
   }, initializeFlutterRoot: false);
 
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
-    // Note, in production, the provider determines whether to show this via the 
     final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
       featureFlags: TestFeatureFlags(isAndroidEnabled: false),
     );
