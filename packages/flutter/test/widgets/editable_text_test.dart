@@ -12535,32 +12535,7 @@ void main() {
 
   group('Spell check', () {
     testWidgets(
-      'Spell check configured properly when spell check disabled by default',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: EditableText(
-              controller: TextEditingController(text: 'A'),
-              focusNode: FocusNode(),
-              style: const TextStyle(),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              cursorOpacityAnimates: true,
-              autofillHints: null,
-            ),
-          ),
-        );
-
-        final EditableTextState state =
-          tester.state<EditableTextState>(find.byType(EditableText));
-        expect(state.spellCheckEnabled, isFalse);
-        expect(state.spellCheckConfiguration,
-               equals(isNull)
-        );
-    });
-
-    testWidgets(
-        'Spell check configured properly when spell check disabled manually',
+        'Spell check configured properly when spell check disabled',
             (WidgetTester tester) async {
           await tester.pumpWidget(
             MaterialApp(
@@ -12572,7 +12547,6 @@ void main() {
                 backgroundCursorColor: Colors.grey,
                 cursorOpacityAnimates: true,
                 autofillHints: null,
-                spellCheckEnabled: false,
               ),
             ),
           );
@@ -12580,54 +12554,27 @@ void main() {
           final EditableTextState state =
             tester.state<EditableTextState>(find.byType(EditableText));
           expect(state.spellCheckEnabled, isFalse);
-          expect(
-            state.spellCheckConfiguration,
-            equals(isNull)
-          );
-      });
+        });
 
     testWidgets(
-        'Error thrown when spell check disabled by default incorrectly',
-          (WidgetTester tester) async {
-      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
-        false;
-
-      await tester.pumpWidget(
-          EditableText(
-              controller: TextEditingController(text: 'A'),
-              focusNode: FocusNode(),
-              style: const TextStyle(),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              cursorOpacityAnimates: true,
-              autofillHints: null,
-              spellCheckSuggestionsHandler: DefaultSpellCheckSuggestionsHandler(
-                  TargetPlatform.android)
-          ));
-
-      expect(tester.takeException(), isA<AssertionError>());
-    });
-
-    test(
-        'Error thrown when spell check disabled manually incorrectly',
-          () {
-          expect(() {
+        'Error thrown when spell check configuration defined without specifying misspelled text style',
+            (WidgetTester tester) async {
+          expect(
+              () {
                 EditableText(
-                  controller: TextEditingController(text: 'A'),
-                  focusNode: FocusNode(),
-                  style: const TextStyle(),
-                  cursorColor: Colors.blue,
-                  backgroundCursorColor: Colors.grey,
-                  cursorOpacityAnimates: true,
-                  autofillHints: null,
-                  spellCheckEnabled: false,
-                  spellCheckService: DefaultSpellCheckService(),
-                  spellCheckSuggestionsHandler: DefaultSpellCheckSuggestionsHandler(TargetPlatform.android),
-              );
-            },
-            throwsAssertionError,
+                    controller: TextEditingController(text: 'A'),
+                    focusNode: FocusNode(),
+                    style: const TextStyle(),
+                    cursorColor: Colors.blue,
+                    backgroundCursorColor: Colors.grey,
+                    cursorOpacityAnimates: true,
+                    autofillHints: null,
+                    spellCheckConfiguration: SpellCheckConfiguration()
+                );
+              },
+              throwsAssertionError
           );
-      });
+        });
 
     testWidgets(
         'Spell check configured properly when spell check enabled without specified spell check service and handler',
@@ -12645,7 +12592,10 @@ void main() {
                 backgroundCursorColor: Colors.grey,
                 cursorOpacityAnimates: true,
                 autofillHints: null,
-                spellCheckEnabled: true,
+                spellCheckConfiguration:
+                  SpellCheckConfiguration(
+                    misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                ),
               ),
             ),
           );
@@ -12661,14 +12611,14 @@ void main() {
             state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
             equals(DefaultSpellCheckSuggestionsHandler)
           );
-      });
+        });
 
     testWidgets(
         'Spell check configured properly with specified spell check service and handler',
             (WidgetTester tester) async {
-          final DefaultSpellCheckService fakeSpellCheckService = DefaultSpellCheckService();
-          final DefaultSpellCheckSuggestionsHandler fakeSpellCheckSuggestionsHandler =
-            DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
+          final FakeSpellCheckService fakeSpellCheckService = FakeSpellCheckService();
+          final FakeSpellCheckSuggestionsHandler fakeSpellCheckSuggestionsHandler =
+          FakeSpellCheckSuggestionsHandler();
 
           await tester.pumpWidget(
             MaterialApp(
@@ -12680,9 +12630,12 @@ void main() {
                 backgroundCursorColor: Colors.grey,
                 cursorOpacityAnimates: true,
                 autofillHints: null,
-                spellCheckEnabled: true,
-                spellCheckService: fakeSpellCheckService,
-                spellCheckSuggestionsHandler: fakeSpellCheckSuggestionsHandler,
+                spellCheckConfiguration:
+                  SpellCheckConfiguration(
+                    spellCheckService: fakeSpellCheckService,
+                    spellCheckSuggestionsHandler: fakeSpellCheckSuggestionsHandler,
+                    misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                ),
               ),
             ),
           );
@@ -12691,38 +12644,38 @@ void main() {
             tester.state<EditableTextState>(find.byType(EditableText));
           expect(
             state.spellCheckConfiguration!.spellCheckService.runtimeType,
-            equals(DefaultSpellCheckService)
+            equals(FakeSpellCheckService)
           );
           expect(
             state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
-            equals(DefaultSpellCheckSuggestionsHandler)
+            equals(FakeSpellCheckSuggestionsHandler)
           );
-      });
-    });
+        });
 
     testWidgets(
         'Error thrown when spell check enabled but no default spell check service available',
-          (WidgetTester tester) async {
-      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
-        false;
+            (WidgetTester tester) async {
+          tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+            false;
 
-      await tester.pumpWidget(
-          EditableText(
-              controller: TextEditingController(text: 'A'),
-              focusNode: FocusNode(),
-              style: const TextStyle(),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              cursorOpacityAnimates: true,
-              autofillHints: null,
-              spellCheckEnabled: true,
-              spellCheckSuggestionsHandler: DefaultSpellCheckSuggestionsHandler(
-                  TargetPlatform.android)
-          ));
+          await tester.pumpWidget(
+              EditableText(
+                  controller: TextEditingController(text: 'A'),
+                  focusNode: FocusNode(),
+                  style: const TextStyle(),
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  cursorOpacityAnimates: true,
+                  autofillHints: null,
+                  spellCheckConfiguration:
+                    SpellCheckConfiguration(
+                      misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                  ),
+              ));
 
-      expect(tester.takeException(), isA<AssertionError>());
-    });
-
+          expect(tester.takeException(), isA<AssertionError>());
+        });
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -13070,3 +13023,6 @@ class _AccentColorTextEditingController extends TextEditingController {
 class _TestScrollController extends ScrollController {
   bool get attached => hasListeners;
 }
+
+class FakeSpellCheckService extends DefaultSpellCheckService {}
+class FakeSpellCheckSuggestionsHandler extends DefaultSpellCheckSuggestionsHandler {}

@@ -13,28 +13,10 @@ late TextStyle misspelledTextStyle;
 void main() {
   setUp(() {
     // Using Android handling for testing.
-    defaultSpellCheckSuggestionsHandler =
-        DefaultSpellCheckSuggestionsHandler(TargetPlatform.android);
+    defaultSpellCheckSuggestionsHandler = DefaultSpellCheckSuggestionsHandler();
 
     composingStyle = const TextStyle(decoration: TextDecoration.underline);
-    misspelledTextStyle = const TextStyle(
-        decoration: TextDecoration.underline,
-        decorationColor: ColorSwatch<int>(
-          0xFFF44336,
-          <int, Color>{
-            50: Color(0xFFFFEBEE),
-            100: Color(0xFFFFCDD2),
-            200: Color(0xFFEF9A9A),
-            300: Color(0xFFE57373),
-            400: Color(0xFFEF5350),
-            500: Color(0xFFF44336),
-            600: Color(0xFFE53935),
-            700: Color(0xFFD32F2F),
-            800: Color(0xFFC62828),
-            900: Color(0xFFB71C1C),
-          },
-        ),
-        decorationStyle: TextDecorationStyle.wavy);
+    misspelledTextStyle = TextField.materialMisspelledTextStyle;
   });
 
   test(
@@ -44,9 +26,9 @@ void main() {
     final TextEditingValue value = TextEditingValue(text: text);
     final bool composingRegionOutOfRange = true;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(text, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
+      SpellCheckResults(text, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -54,11 +36,17 @@ void main() {
       TextSpan(style: misspelledTextStyle, text: 'wrold'),
       const TextSpan(text: '! Hey')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+      );
 
-    expect(textSpanTree, equals(expectedTextSpanTree));
+      expect(textSpanTree, equals(expectedTextSpanTree));
   });
 
   test(
@@ -69,9 +57,9 @@ void main() {
         text: text, composing: const TextRange(start: 14, end: 17));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(text, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
+      SpellCheckResults(text, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -80,9 +68,15 @@ void main() {
       const TextSpan(text: '! '),
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -95,11 +89,11 @@ void main() {
         text: text, composing: const TextRange(start: 12, end: 17));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(text, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 6, end: 11), <String>['wrong', 'worn', 'wrung']),
-      SuggestionSpan(
-          TextRange(start: 12, end: 17), <String>['wrong', 'worn', 'wrung'])
+      SpellCheckResults(text, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 6, end: 11), <String>['wrong', 'worn', 'wrung']),
+        SuggestionSpan(
+            TextRange(start: 12, end: 17), <String>['wrong', 'worn', 'wrung'])
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -109,9 +103,15 @@ void main() {
       TextSpan(style: composingStyle, text: 'worng'),
       const TextSpan(text: ' right'),
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+      );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -123,11 +123,11 @@ void main() {
     final TextEditingValue value = TextEditingValue(text: text);
     final bool composingRegionOutOfRange = true;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(text, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 6, end: 11), <String>['wrong', 'worn', 'wrung']),
-      SuggestionSpan(
-          TextRange(start: 12, end: 17), <String>['wrong', 'worn', 'wrung'])
+      SpellCheckResults(text, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 6, end: 11), <String>['wrong', 'worn', 'wrung']),
+        SuggestionSpan(
+            TextRange(start: 12, end: 17), <String>['wrong', 'worn', 'wrung'])
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -137,9 +137,15 @@ void main() {
       TextSpan(style: misspelledTextStyle, text: 'worng'),
       const TextSpan(text: ' right'),
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -153,9 +159,9 @@ void main() {
         text: text, composing: const TextRange(start: 14, end: 17));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(resultsText, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
+      SpellCheckResults(resultsText, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -164,9 +170,15 @@ void main() {
       const TextSpan(text: '! '),
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -180,11 +192,11 @@ void main() {
         text: text, composing: const TextRange(start: 14, end: 17));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(resultsText, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 7, end: 12), <String>['world', 'word', 'old']),
-      SuggestionSpan(
-          TextRange(start: 17, end: 23), <String>['friend', 'fiend', 'fern'])
+      SpellCheckResults(resultsText, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 7, end: 12), <String>['world', 'word', 'old']),
+        SuggestionSpan(
+            TextRange(start: 17, end: 23), <String>['friend', 'fiend', 'fern'])
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -193,9 +205,15 @@ void main() {
       const TextSpan(text: '! '),
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -209,17 +227,23 @@ void main() {
         text: text, composing: const TextRange(start: 14, end: 17));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(resultsText, const <SuggestionSpan>[
-      SuggestionSpan(TextRange(start: 7, end: 12), <String>['wild', 'world']),
+      SpellCheckResults(resultsText, const <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 7, end: 12), <String>['wild', 'world']),
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
       const TextSpan(text: 'Hello, wrold! '),
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -233,9 +257,9 @@ void main() {
         text: text, composing: const TextRange(start: 20, end: 23));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(resultsText, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 7, end: 12), <String>['world', 'word', 'old']),
+      SpellCheckResults(resultsText, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 7, end: 12), <String>['world', 'word', 'old']),
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -244,9 +268,15 @@ void main() {
       const TextSpan(text: '! '),
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -260,9 +290,9 @@ void main() {
         text: text, composing: const TextRange(start: 14, end: 17));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(resultsText, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+      SpellCheckResults(resultsText, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -271,9 +301,15 @@ void main() {
       const TextSpan(text: '! '),
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -287,10 +323,10 @@ void main() {
         text: text, composing: const TextRange(start: 14, end: 17));
     final bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
-        SpellCheckResults(resultsText, const <SuggestionSpan>[
-      SuggestionSpan(
-          TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
-      SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He'])
+      SpellCheckResults(resultsText, const <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+        SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He'])
     ]);
 
     final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
@@ -302,9 +338,15 @@ void main() {
       TextSpan(style: misspelledTextStyle, text: 'Hye'),
       const TextSpan(text: '!')
     ]);
-    final TextSpan textSpanTree = defaultSpellCheckSuggestionsHandler
+    final TextSpan textSpanTree =
+      defaultSpellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
-            value, composingRegionOutOfRange, null, spellCheckResults);
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
