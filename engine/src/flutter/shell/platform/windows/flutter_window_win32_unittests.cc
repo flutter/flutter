@@ -211,6 +211,20 @@ TEST(FlutterWindowWin32Test, CreateDestroy) {
   ASSERT_TRUE(TRUE);
 }
 
+TEST(FlutterWindowWin32Test, OnBitmapSurfaceUpdated) {
+  FlutterWindowWin32 win32window(100, 100);
+  int old_handle_count = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+
+  constexpr size_t row_bytes = 100 * 4;
+  constexpr size_t height = 100;
+  std::array<char, row_bytes * height> allocation;
+  win32window.OnBitmapSurfaceUpdated(allocation.data(), row_bytes, height);
+
+  int new_handle_count = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+  // Check GDI resources leak
+  EXPECT_EQ(old_handle_count, new_handle_count);
+}
+
 // Tests that composing rect updates are transformed from Flutter logical
 // coordinates to device coordinates and passed to the text input manager
 // when the DPI scale is 100% (96 DPI).
