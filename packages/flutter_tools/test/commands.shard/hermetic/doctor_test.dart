@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210723"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -17,6 +11,7 @@ import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -743,10 +738,15 @@ void main() {
   });
 
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
-    expect(DoctorValidatorsProvider.defaultInstance.workflows,
-      contains(isA<WebWorkflow>()));
+    final List<Workflow> workflows = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      platform: FakePlatform(),
+    ).workflows;
+    expect(
+      workflows,
+      contains(isA<WebWorkflow>()),
+    );
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => fakeProcessManager,
   });
