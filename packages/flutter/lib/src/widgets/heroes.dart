@@ -995,7 +995,7 @@ class HeroController extends NavigatorObserver {
                           ?? fromHero.widget.flightShuttleBuilder
                           ?? _defaultHeroFlightShuttleBuilder,
             insertOverlayBelow: toHero.widget.insertOverlayBelow
-                ?? fromHero.widget.insertOverlayBelow,
+                          ?? fromHero.widget.insertOverlayBelow,
             isUserGestureTransition: isUserGestureTransition,
             isDiverted: existingFlight != null,
           );
