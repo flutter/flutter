@@ -764,9 +764,17 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   // [TextSelectionDelegate] overrides.
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   bool get cutEnabled => false;
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   bool get pasteEnabled => false;
 
@@ -804,6 +812,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   @override
   void bringIntoView(TextPosition position) {/* SelectableRegion must be in view at this point. */}
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   void cutSelection(SelectionChangedCause cause) {
     assert(false);
@@ -812,6 +824,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
     assert(false);
@@ -1770,9 +1786,9 @@ class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
     return state._selectionDelegate.value.hasContent;
   }
 
-  bool get _canCopy => _SelectableRegionContextMenuButtonDatasBuilder.canCopy(delegate);
+  bool get _canCopy => canCopy(delegate);
 
-  bool get _canSelectAll => _SelectableRegionContextMenuButtonDatasBuilder.canSelectAll(delegate);
+  bool get _canSelectAll => canSelectAll(delegate);
 
   void _handleCopy() {
     delegate._copy();

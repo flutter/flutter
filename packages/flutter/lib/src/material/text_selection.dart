@@ -120,6 +120,10 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     }
   }
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
     // Android allows SelectAll when selection is not collapsed, unless

@@ -88,6 +88,10 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     return Offset.zero;
   }
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {
     super.handleSelectAll(delegate);

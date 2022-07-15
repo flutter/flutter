@@ -1071,11 +1071,14 @@ mixin TextSelectionDelegate {
   )
   bool get selectAllEnabled => true;
 
-  // TODO(justinmc): Deprecate these too?
   /// Cut current selection to [Clipboard].
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
+  @Deprecated(
+    'Use `buildContextMenu` with a custom cut button instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   void cutSelection(SelectionChangedCause cause);
 
   /// Paste text from [Clipboard].
@@ -1084,6 +1087,10 @@ mixin TextSelectionDelegate {
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
+  @Deprecated(
+    'Use `buildContextMenu` with a custom paste button instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   Future<void> pasteText(SelectionChangedCause cause);
 
   /// Set the current selection to contain the entire text value.

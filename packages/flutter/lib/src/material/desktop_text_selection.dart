@@ -75,6 +75,10 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
     return Offset.zero;
   }
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
     // Allow SelectAll when selection is not collapsed, unless everything has
@@ -85,6 +89,10 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
            !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 
+  @Deprecated(
+    'Use `buildContextMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {
     super.handleSelectAll(delegate);
