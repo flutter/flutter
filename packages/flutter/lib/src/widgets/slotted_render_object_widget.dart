@@ -288,6 +288,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     }
     oldSlotToChild.values.forEach(deactivateChild);
     assert(_debugDuplicateKeys(debugDuplicateKeys));
+    assert(_keyedChildren.values.every(_slotToChild.values.contains), '_keyedChildren ${_keyedChildren.values} should be a subset of ${_slotToChild.values}');
   }
 
   bool _debugDuplicateKeys(Map<Key, List<Element>>? debugDuplicateKeys) {

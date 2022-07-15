@@ -275,7 +275,7 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   final Widget? nullSlot;
 
   @override
-  Iterable<_DiagonalSlot?> get slots => [null, ..._DiagonalSlot.values];
+  Iterable<_DiagonalSlot?> get slots => <_DiagonalSlot?>[null, ..._DiagonalSlot.values];
 
   @override
   Widget? childForSlot(_DiagonalSlot? slot) {
