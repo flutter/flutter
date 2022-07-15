@@ -563,6 +563,7 @@ class FlutterDevice {
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
+        dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
       );
     } on DevFSException {
       devFSStatus.cancel();
