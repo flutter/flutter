@@ -3654,6 +3654,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "13a233"}
+        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: native_platform_view_ui_tests_ios
