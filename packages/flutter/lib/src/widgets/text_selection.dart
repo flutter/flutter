@@ -411,7 +411,7 @@ class TextSelectionOverlay {
           ValueNotifier<LoupeSelectionOverlayInfoBearer>(const LoupeSelectionOverlayInfoBearer.empty());
 
 
-  /// The loupe and toolbar cannot be shown at the same time, and [loupeController] is
+  /// The loupe and toolbar cannot be shown at the same time, and [_loupeController] is
   /// dominant over [_effectiveToolbarVisibility]. `_effectiveToolbarVisibility.value == true &&
   /// _loupePosition.value != null` is considered an error, and is asserted as such
   /// in the [_updateTextSelectionOverlayVisibilities].

@@ -77,8 +77,8 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
   //
   // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
   // animations are added when last_build_y != current_build_y, but this condition
-  // is true on the inital render. Thus, this is null for the first frame and the
-  // condition becomes [loupePosition != null && last_build_y != this_build_y].
+  // is true on the inital render which is undesired. Thus, this is null for the
+  // first frame and the condition becomes [loupePosition != null && last_build_y != this_build_y].
   // {@endtemplate}
   Offset? _loupePosition;
 

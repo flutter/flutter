@@ -12,6 +12,153 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
 
+class _MockRenderEditable extends RenderEditable {
+  final String spanText;
+
+  _MockRenderEditable(
+      {required super.textDirection,
+      required super.startHandleLayerLink,
+      required super.endHandleLayerLink,
+      required super.offset,
+      required super.textSelectionDelegate,
+      this.spanText = 'Hi Im a span Text'});
+
+    @override
+    InlineSpan get text => WidgetSpan(
+      child: Text(spanText)
+    );
+}
+
+class _MockTextSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(
+      BuildContext context, TextSelectionHandleType type, double textLineHeight,
+      [VoidCallback? onTap]) {
+    return Container();
+  }
+
+  @override
+  Widget buildToolbar(
+      BuildContext context,
+      Rect globalEditableRegion,
+      double textLineHeight,
+      Offset position,
+      List<TextSelectionPoint> endpoints,
+      TextSelectionDelegate delegate,
+      ClipboardStatusNotifier? clipboardStatus,
+      Offset? lastSecondaryTapDownPosition) {
+    return Container();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size(10, textLineHeight);
+  }
+}
+
+class _MockTextSelectionDelegate with TextSelectionDelegate {
+  @override
+  void bringIntoView(TextPosition position) {}
+
+  @override
+  void copySelection(SelectionChangedCause cause) {}
+
+  @override
+  void cutSelection(SelectionChangedCause cause) {}
+
+  @override
+  void hideToolbar([bool hideHandles = true]) {}
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) async {}
+
+  @override
+  void selectAll(SelectionChangedCause cause) {}
+
+  @override
+  TextEditingValue get textEditingValue => const TextEditingValue();
+
+  @override
+  void userUpdateTextEditingValue(
+      TextEditingValue value, SelectionChangedCause cause) {}
+}
+
+class _MockScrollContext extends ScrollContext {
+  final BuildContext context;
+
+  _MockScrollContext(this.context);
+
+  @override
+  AxisDirection get axisDirection => AxisDirection.up;
+
+  @override
+  BuildContext? get notificationContext => context;
+
+  @override
+  void saveOffset(double offset) {}
+
+  @override
+  void setCanDrag(bool value) {}
+
+  @override
+  void setIgnorePointer(bool value) {}
+
+  @override
+  void setSemanticsActions(Set<SemanticsAction> actions) {}
+
+  @override
+  BuildContext get storageContext => context;
+
+  @override
+  TickerProvider get vsync => const TestVSync();
+}
+
+class _MockViewportOffset extends ScrollPositionWithSingleContext {
+  _MockViewportOffset(BuildContext context)
+      : super(
+            context: _MockScrollContext(context),
+            physics: const NeverScrollableScrollPhysics());
+}
+
+Future<TextSelectionOverlay> createTextSelectionOverlay(
+    WidgetTester tester) async {
+  final LayerLink toolbar = LayerLink();
+  final LayerLink startHandle = LayerLink();
+  final LayerLink endHandle = LayerLink();
+
+  final Key someElementKey = UniqueKey();
+
+  await tester.pumpWidget(MaterialApp(
+    home: Container(key: someElementKey),
+  ));
+
+  final BuildContext context = tester.firstElement(find.byKey(someElementKey));
+  final _MockTextSelectionDelegate mockTextSelectionDelegate =
+      _MockTextSelectionDelegate();
+return TextSelectionOverlay(
+    context: context,
+    value: TextEditingValue.empty,
+    toolbarLayerLink: toolbar,
+    startHandleLayerLink: startHandle,
+    endHandleLayerLink: endHandle,
+    renderObject: _MockRenderEditable(
+      spanText: 'Span text!',
+        textSelectionDelegate: mockTextSelectionDelegate,
+        offset: _MockViewportOffset(context),
+        endHandleLayerLink: endHandle,
+        startHandleLayerLink: startHandle,
+        textDirection: TextDirection.ltr),
+    selectionControls: _MockTextSelectionControls(),
+    selectionDelegate: mockTextSelectionDelegate,
+  );
+}
+
+
 void main() {
   late int tapCount;
   late int singleTapUpCount;
@@ -988,6 +1135,29 @@ void main() {
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
+  group('loupe', () {
+    late LoupeController loupeController;
+    Widget? loupeTrapBuilder(
+      BuildContext context,
+      LoupeController controller,
+      ValueNotifier<LoupeSelectionOverlayInfoBearer> info
+      ) {
+        loupeController = loupeController;
+        return const Placeholder();
+    }
+
+    testWidgets('should show on handle drag start',
+        (WidgetTester tester) async {
+          final TextSelectionOverlay textSelectionOverlay = await createTextSelectionOverlay(tester);
+      textSelectionOverlay.showHandles();
+      await tester.pumpAndSettle();
+    });
+    // should show on handle drag start
+    // should update on handle drag update
+    // should hide on handle drag end
+    // should show on handle
+  });
+
   group('SelectionOverlay', () {
     Future<SelectionOverlay> pumpApp(WidgetTester tester, {
       ValueChanged<DragStartDetails>? onStartDragStart,
@@ -1246,39 +1416,6 @@ void main() {
       await gesture2.up();
       await tester.pump(const Duration(milliseconds: 20));
       expect(endDragEndDetails, isNotNull);
-    });
-
-    group('loupe', () {
-      testWidgets('should show on handle drag start',
-          (WidgetTester tester) async {
-        final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
-        final SelectionOverlay selectionOverlay = await pumpApp(
-          tester,
-          selectionControls: spy,
-        );
-        selectionOverlay
-          ..startHandleType = TextSelectionHandleType.left
-          ..endHandleType = TextSelectionHandleType.right
-          ..selectionEndPoints = const <TextSelectionPoint>[
-            TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
-            TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
-          ];
-        selectionOverlay.showHandles();
-
-        final RenderBox leftHandleRenderBox = tester
-            .firstRenderObject(find.byKey(spy.leftHandleKey)) as RenderBox;
-        final Rect leftHandleRect =
-            leftHandleRenderBox.localToGlobal(Offset.zero) &
-                leftHandleRenderBox.size;
-
-        tester.startGesture(leftHandleRect.center);
-
-        expect(find.byType(Loupe), true);
-      });
-      // should show on handle drag start
-      // should update on handle drag update
-      // should hide on handle drag end
-      // should show on handle
     });
   });
 
