@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1190,6 +1189,51 @@ void main() {
     expect(controller.index, 2);
     expect(controller.previousIndex, 0);
     expect(controller.indexIsChanging, false);
+  });
+
+  testWidgets('TabBar should not throw when animation is disabled in controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102600
+    final List<String> tabs = <String>['A'];
+
+    Widget buildWithTabBarView() {
+      return boilerplate(
+        child: DefaultTabController(
+          animationDuration: Duration.zero,
+          length: tabs.length,
+          child: Column(
+            children: <Widget>[
+              TabBar(
+                tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                isScrollable: true,
+              ),
+              Flexible(
+                child: TabBarView(
+                  children: List<Widget>.generate(
+                    tabs.length,
+                    (int index) => Text('Tab $index'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWithTabBarView());
+    TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 0);
+
+    tabs.add('B');
+    await tester.pumpWidget(buildWithTabBarView());
+    tabs.add('C');
+    await tester.pumpWidget(buildWithTabBarView());
+    await tester.tap(find.text('C'));
+    await tester.pumpAndSettle();
+    controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 2);
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('TabBarView skips animation when disabled in controller', (WidgetTester tester) async {

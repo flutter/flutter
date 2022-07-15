@@ -15,8 +15,13 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
-export 'dart:ui' show SemanticsAction, StringAttribute, SpellOutStringAttribute, LocaleStringAttribute;
-export 'semantics_event.dart';
+export 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, DiagnosticsTreeStyle, Key, TextTreeConfiguration;
+export 'package:flutter/services.dart' show TextSelection;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'semantics_event.dart' show SemanticsEvent;
 
 /// Signature for a function that is called for each [SemanticsNode].
 ///

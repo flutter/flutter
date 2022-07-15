@@ -206,7 +206,7 @@ void _writeGeneratedFlutterConfig(
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, environment);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

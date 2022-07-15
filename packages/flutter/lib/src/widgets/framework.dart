@@ -3264,6 +3264,19 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return isDefunct;
   }
 
+  /// Returns true if the Element is active.
+  ///
+  /// This getter always returns false in profile and release builds.
+  /// See the lifecycle documentation for [Element] for additional information.
+  bool get debugIsActive {
+    bool isActive = false;
+    assert(() {
+      isActive = _lifecycleState == _ElementLifecycle.active;
+      return true;
+    }());
+    return isActive;
+  }
+
   /// The object that manages the lifecycle of this element.
   @override
   BuildOwner? get owner => _owner;

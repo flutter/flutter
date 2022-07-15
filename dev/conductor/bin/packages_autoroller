@@ -43,4 +43,4 @@ DART_BIN="$REPO_DIR/bin/dart"
 # Ensure pub get has been run in the repo before running the conductor
 (cd "$REPO_DIR/dev/conductor/core"; "$DART_BIN" pub get 1>&2)
 
-exec "$DART_BIN" --enable-asserts "$REPO_DIR/dev/conductor/core/bin/roll_packages.dart" "$@"
+exec "$DART_BIN" --enable-asserts "$REPO_DIR/dev/conductor/core/bin/packages_autoroller.dart" "$@"

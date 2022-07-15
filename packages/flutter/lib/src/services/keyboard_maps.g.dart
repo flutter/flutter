@@ -9,7 +9,9 @@
 // Edit the template dev/tools/gen_keycodes/data/keyboard_maps.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
-import 'keyboard_key.dart';
+import 'keyboard_key.g.dart';
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
 /// Maps Android-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{
@@ -1464,6 +1466,35 @@ const Map<int, PhysicalKeyboardKey> kIosToPhysicalKey = <int, PhysicalKeyboardKe
   0x000000e5: PhysicalKeyboardKey.shiftRight,
   0x000000e6: PhysicalKeyboardKey.altRight,
   0x000000e7: PhysicalKeyboardKey.metaRight,
+};
+
+/// Maps iOS specific string values of nonvisible keys to logical keys
+///
+/// Some unprintable keys on iOS has literal names on their key label, such as
+/// "UIKeyInputEscape". See:
+/// https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
+const Map<String, LogicalKeyboardKey> kIosSpecialLogicalMap = <String, LogicalKeyboardKey>{
+  'UIKeyInputEscape': LogicalKeyboardKey.escape,
+  'UIKeyInputF1': LogicalKeyboardKey.f1,
+  'UIKeyInputF2': LogicalKeyboardKey.f2,
+  'UIKeyInputF3': LogicalKeyboardKey.f3,
+  'UIKeyInputF4': LogicalKeyboardKey.f4,
+  'UIKeyInputF5': LogicalKeyboardKey.f5,
+  'UIKeyInputF6': LogicalKeyboardKey.f6,
+  'UIKeyInputF7': LogicalKeyboardKey.f7,
+  'UIKeyInputF8': LogicalKeyboardKey.f8,
+  'UIKeyInputF9': LogicalKeyboardKey.f9,
+  'UIKeyInputF10': LogicalKeyboardKey.f10,
+  'UIKeyInputF11': LogicalKeyboardKey.f11,
+  'UIKeyInputF12': LogicalKeyboardKey.f12,
+  'UIKeyInputUpArrow': LogicalKeyboardKey.arrowUp,
+  'UIKeyInputDownArrow': LogicalKeyboardKey.arrowDown,
+  'UIKeyInputLeftArrow': LogicalKeyboardKey.arrowLeft,
+  'UIKeyInputRightArrow': LogicalKeyboardKey.arrowRight,
+  'UIKeyInputHome': LogicalKeyboardKey.home,
+  'UIKeyInputEnd': LogicalKeyboardKey.enter,
+  'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
+  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown,
 };
 
 /// A map of iOS key codes which have printable representations, but appear

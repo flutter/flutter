@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Card;
@@ -265,6 +264,18 @@ Matcher moreOrLessEquals(double value, { double epsilon = precisionErrorToleranc
 ///    be used to match [Rect]s as well as other types.
 Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
+}
+
+/// Asserts that two [Matrix4]s are equal, within some tolerated error.
+///
+/// {@macro flutter.flutter_test.moreOrLessEquals}
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [offsetMoreOrLessEquals], which is for [Offset]s.
+Matcher matrixMoreOrLessEquals(Matrix4 value, { double epsilon = precisionErrorTolerance }) {
+  return _IsWithinDistance<Matrix4>(_matrixDistance, value, epsilon);
 }
 
 /// Asserts that two [Offset]s are equal, within some tolerated error.
@@ -1142,6 +1153,14 @@ double _rectDistance(Rect a, Rect b) {
   double delta = math.max<double>((a.left - b.left).abs(), (a.top - b.top).abs());
   delta = math.max<double>(delta, (a.right - b.right).abs());
   delta = math.max<double>(delta, (a.bottom - b.bottom).abs());
+  return delta;
+}
+
+double _matrixDistance(Matrix4 a, Matrix4 b) {
+  double delta = 0.0;
+  for (int i = 0; i < 16; i += 1) {
+    delta = math.max<double>((a[i] - b[i]).abs(), delta);
+  }
   return delta;
 }
 

@@ -14,10 +14,15 @@ import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
-import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 import 'text_input.dart';
+
+export 'dart:ui' show ChannelBuffers;
+
+export 'binary_messenger.dart' show BinaryMessenger;
+export 'hardware_keyboard.dart' show HardwareKeyboard, KeyEventManager;
+export 'restoration.dart' show RestorationManager;
 
 /// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///

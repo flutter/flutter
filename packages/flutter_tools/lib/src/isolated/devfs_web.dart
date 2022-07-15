@@ -843,6 +843,7 @@ class WebDevFS implements DevFS {
         await writeBundle(
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
+          bundle.entryKinds,
         );
       }
     }
