@@ -1,4 +1,4 @@
-Signature: 8b392c7ea8b6ebd1575a6c496e33eea8
+Signature: d29f5119c11c508cf5ee47ad2a5b6049
 
 UNUSED LICENSES:
 
@@ -6581,6 +6581,8 @@ FILE: ../../../third_party/skia/include/core/SkOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
+FILE: ../../../third_party/skia/src/gpu/RectanizerOptimized.cpp
+FILE: ../../../third_party/skia/src/gpu/RectanizerOptimized.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.h
