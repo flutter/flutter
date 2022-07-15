@@ -102,15 +102,6 @@ class LoupeController {
     return true;
   }
 
-  /// The current status of the loupe.
-  ///
-  /// If the loupe is not shown (i.e. the default, or if  [hide] was called recently) [status]
-  /// will be  [AnimationStatus.dismissed].  If the loupe is shown, [status] will be
-  /// [AnimationStatus.completed]. If the loupe is transitioning from [AnimationStatus.dismissed]
-  /// to [AnimationStatus.completed] or visa versa, [status] will be [AnimationStatus.completed] and
-  /// [AnimationStatus.reverse], respectively.
-  ValueNotifier<AnimationStatus> status =
-      ValueNotifier<AnimationStatus>(AnimationStatus.dismissed);
 
   /// Function that returns a function and the other function checks platform to check if the builder should be null
   ///

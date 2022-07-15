@@ -13,7 +13,6 @@ import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
 
 class _MockRenderEditable extends RenderEditable {
-  final String spanText;
 
   _MockRenderEditable(
       {required super.textDirection,
@@ -22,6 +21,7 @@ class _MockRenderEditable extends RenderEditable {
       required super.offset,
       required super.textSelectionDelegate,
       this.spanText = 'Hi Im a span Text'});
+  final String spanText;
 
     @override
     InlineSpan get text => WidgetSpan(
@@ -81,7 +81,7 @@ class _MockTextSelectionDelegate with TextSelectionDelegate {
   void selectAll(SelectionChangedCause cause) {}
 
   @override
-  TextEditingValue get textEditingValue => const TextEditingValue();
+  TextEditingValue get textEditingValue => TextEditingValue.empty;
 
   @override
   void userUpdateTextEditingValue(
@@ -89,9 +89,9 @@ class _MockTextSelectionDelegate with TextSelectionDelegate {
 }
 
 class _MockScrollContext extends ScrollContext {
-  final BuildContext context;
-
   _MockScrollContext(this.context);
+
+  final BuildContext context;
 
   @override
   AxisDirection get axisDirection => AxisDirection.up;

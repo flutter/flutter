@@ -70,13 +70,12 @@ void main() {
             Positioned(
               left: loupePosition.dx,
               top: loupePosition.dy,
-              child: RawLoupe(
-                controller: LoupeController(),
+              child: const RawLoupe(
                 size: loupeSize,
                 focalPoint: loupeFocalPoint,
                 magnificationScale: magnificationScale,
                 decoration:
-                    const LoupeDecoration(opacity: 0.75, shadows: <BoxShadow>[
+                     LoupeDecoration(opacity: 0.75, shadows: <BoxShadow>[
                   BoxShadow(
                       spreadRadius: 10,
                       blurRadius: 10,
@@ -117,12 +116,11 @@ void main() {
       });
 
       testWidgets(
-          'should auto respond to transition messages when no animation controller',
+          'should immediately remove from overlay on no animation controller',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
-          final RawLoupe testLoupe = RawLoupe(
-            controller: loupeController,
-            size: const Size(100, 100),
+          const RawLoupe testLoupe = RawLoupe(
+            size: Size(100, 100),
           );
 
           await tester.pumpWidget(const MaterialApp(
@@ -140,24 +138,24 @@ void main() {
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(loupeController.status.value, AnimationStatus.completed);
+          expect(loupeController.overlayEntry, isNot(isNull));
 
           loupeController.hide();
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(loupeController.status.value, AnimationStatus.dismissed);
+          expect(loupeController.overlayEntry, isNull);
         });
       });
 
       testWidgets(
-          'should only signal complete when animation controller complete',
+          'should update shown based on animation status',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
-          final RawLoupe testLoupe = RawLoupe(
-            controller: loupeController,
-            transitionAnimationController: animationController,
-            size: const Size(100, 100),
+          const RawLoupe testLoupe = RawLoupe(
+
+
+            size: Size(100, 100),
           );
 
           await tester.pumpWidget(const MaterialApp(
@@ -176,24 +174,28 @@ void main() {
           await tester.pump();
 
           // No time has passed, so the animation controller has not completed.
-          expect(loupeController.status.value, AnimationStatus.forward);
+          expect(loupeController.animationController?.status, AnimationStatus.forward);
+          expect(loupeController.shown, true);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(loupeController.status.value, AnimationStatus.completed);
+          expect(loupeController.animationController?.status, AnimationStatus.completed);
+          expect(loupeController.shown, true);
 
           loupeController.hide();
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(loupeController.status.value, AnimationStatus.reverse);
+          expect(loupeController.animationController?.status, AnimationStatus.reverse);
+          expect(loupeController.shown, true);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(loupeController.status.value, AnimationStatus.dismissed);
+          expect(loupeController.animationController?.status, AnimationStatus.dismissed);
+          expect(loupeController.shown, false);
         });
       });
     });
@@ -204,7 +206,7 @@ void main() {
 
     tearDown(() {
       loupeController.overlayEntry?.remove();
-      loupeController.status.value = AnimationStatus.dismissed;
+      loupeController.animationController = null;
       loupeController.overlayEntry = null;
     });
 
@@ -250,10 +252,10 @@ void main() {
           final _MockAnimationController animationController =
               _MockAnimationController();
 
-          final RawLoupe testLoupe = RawLoupe(
-            controller: loupeController,
-            transitionAnimationController: animationController,
-            size: const Size(100, 100),
+          const  RawLoupe testLoupe = RawLoupe(
+
+
+            size: Size(100, 100),
           );
 
           await tester.pumpWidget(const MaterialApp(
@@ -282,47 +284,6 @@ void main() {
           expect(animationController.reverseCalls, 0,
               reason:
                   'should not have called reverse on animation controller due to force remove');
-        });
-      });
-    });
-
-    group('signalShow', () {
-      testWidgets('Should do nothing if loupe already shown',
-          (WidgetTester tester) async {
-        await runFakeAsync((FakeAsync async) async {
-          final _MockAnimationController animationController =
-              _MockAnimationController();
-
-          final RawLoupe testLoupe = RawLoupe(
-            controller: loupeController,
-            transitionAnimationController: animationController,
-            size: const Size(100, 100),
-          );
-
-          await tester.pumpWidget(const MaterialApp(
-            home: Placeholder(),
-          ));
-
-          final BuildContext context =
-              tester.firstElement(find.byType(Placeholder));
-
-          loupeController.show(
-            context: context,
-            builder: (BuildContext context) => testLoupe,
-          );
-
-          WidgetsBinding.instance.scheduleFrame();
-          await tester.pump();
-
-          async.elapse(animationController.duration!);
-          await tester.pumpAndSettle();
-
-          loupeController.signalShow();
-          WidgetsBinding.instance.scheduleFrame();
-          await tester.pump();
-
-          expect(animationController.forwardCalls, 1,
-              reason: 'should have only called forward for the inital show');
         });
       });
     });

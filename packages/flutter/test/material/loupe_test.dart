@@ -31,7 +31,6 @@ void main() {
     final Future<void> loupeShown = loupeController.show(
         context: context,
         builder: (_) => TextEditingLoupe(
-              controller: loupeController,
               loupeSelectionOverlayInfoBearer: infoBearer,
             ));
 
@@ -42,6 +41,12 @@ void main() {
     // Verify that the loupe is shown
     await loupeShown;
   }
+
+  tearDown(() {
+    loupeController.overlayEntry?.remove();
+    loupeController.overlayEntry = null;
+    loupeController.animationController = null;
+  });
 
   group('adaptiveLoupeControllerBuilder', () {
     testWidgets('should return a TextEditingLoupe on Android',

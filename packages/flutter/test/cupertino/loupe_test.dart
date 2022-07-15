@@ -6,28 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _ProxyLoupeController extends LoupeController {
-  int showCalls = 0;
-  int hideCalls = 0;
-
-  @override
-  Future<void> hide({bool removeFromOverlay = true}) async {
-    hideCalls++;
-    super.hide(removeFromOverlay: removeFromOverlay);
-  }
-
-  @override
-  Future<void> signalShow() async {
-    showCalls++;
-    super.signalShow();
-  }
-}
-
 void main() {
   final Offset basicOffset = Offset(CupertinoLoupe.kSize.width / 2,
       CupertinoLoupe.kSize.height - CupertinoLoupe.kVerticalFocalPointOffset);
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 100);
-  final _ProxyLoupeController proxyLoupeController = _ProxyLoupeController();
+  final LoupeController loupeController = LoupeController();
 
   // Note: make sure that your gesture is within threshold of the line,
   // or else the loupe status will stay hidden and this will not complete.
@@ -36,10 +19,10 @@ void main() {
     WidgetTester tester,
     ValueNotifier<LoupeSelectionOverlayInfoBearer> infoBearer,
   ) async {
-    final Future<void> loupeShown = proxyLoupeController.show(
+    final Future<void> loupeShown = loupeController.show(
         context: context,
         builder: (_) => CupertinoTextEditingLoupe(
-              controller: proxyLoupeController,
+              controller: loupeController,
               loupeSelectionOverlayInfoBearer: infoBearer,
             ));
 
@@ -52,12 +35,10 @@ void main() {
   }
 
   tearDown(() async {
-    if (proxyLoupeController.overlayEntry != null) {
-      proxyLoupeController.overlayEntry!.remove();
-      proxyLoupeController.overlayEntry = null;
+    if (loupeController.overlayEntry != null) {
+      loupeController.overlayEntry!.remove();
+      loupeController.overlayEntry = null;
     }
-    proxyLoupeController.hideCalls = 0;
-    proxyLoupeController.showCalls = 0;
   });
 
   group('CupertinoTextEditingLoupe', () {
@@ -221,45 +202,13 @@ void main() {
                 loupeInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
 
-        expect(proxyLoupeController.hideCalls, 1);
-      });
 
-      testWidgets('should hide if gesture is far below the text field',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const MaterialApp(
-            color: Color.fromARGB(7, 0, 129, 90),
-            home: Placeholder(),
-          ),
-        );
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Placeholder));
-
-        final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo =
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
-          currentLineBoundries: reasonableTextField,
-          fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
-          // The tap position is dragBelow units below the text field.
-          globalGesturePosition: Offset(
-              MediaQuery.of(context).size.width / 2, reasonableTextField.top),
-        ));
-
-        // Show the loupe initally, so that we get it in a not hidden state
-        await showCupertinoLoupe(context, tester, loupeInfo);
-
-        // Move the gesture to one that should hide it.
-        loupeInfo.value = LoupeSelectionOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
-            fieldBounds: reasonableTextField,
-            handleRect: reasonableTextField,
-            globalGesturePosition:
-                loupeInfo.value.globalGesturePosition + const Offset(0, 100));
-        await tester.pumpAndSettle();
-
-        expect(proxyLoupeController.hideCalls, 1);
+        expect(
+          find.byType(Opacity).evaluate().first.widget,
+            isA<Opacity>()
+                .having((Opacity opacity) => opacity.opacity, 'opacity', 0));
+        expect(loupeController.overlayEntry, isNotNull);
       });
 
       testWidgets('should re-show if gesture moves back up',
@@ -297,9 +246,11 @@ void main() {
                 loupeInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
 
-        expect(proxyLoupeController.hideCalls, 1);
-        // Reset show calls to avoid counting inital show.
-        proxyLoupeController.showCalls = 0;
+        expect(
+            find.byType(Opacity).evaluate().first.widget,
+            isA<Opacity>()
+                .having((Opacity opacity) => opacity.opacity, 'opacity', 0));
+        expect(loupeController.overlayEntry, isNotNull);
 
         // Return the gesture to one that shows it.
         loupeInfo.value = LoupeSelectionOverlayInfoBearer(
@@ -310,7 +261,11 @@ void main() {
                 reasonableTextField.top));
         await tester.pumpAndSettle();
 
-        expect(proxyLoupeController.showCalls, 1);
+        expect(
+            find.byType(Opacity).evaluate().first.widget,
+            isA<Opacity>()
+                .having((Opacity opacity) => opacity.opacity, 'opacity', 1));
+        expect(loupeController.overlayEntry, isNotNull);
       });
     });
   });

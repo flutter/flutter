@@ -176,7 +176,7 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
       left: _currentAdjustedLoupePosition.dx,
       top: _currentAdjustedLoupePosition.dy,
       child: CupertinoLoupe(
-        ioAnimationController: _ioAnimationController,
+        ioAnimation: _ioAnimation,
         additionalFocalPointOffset: Offset(0, _verticalFocalPointAdjustment),
       ),
     );
@@ -209,7 +209,7 @@ class CupertinoLoupe extends StatelessWidget {
   const CupertinoLoupe({
     super.key,
     this.additionalFocalPointOffset = Offset.zero,
-    this.ioAnimationController,
+    this.ioAnimation,
   });
   // These constants were eyeballed on an iPhone XR iOS v15.5.
 
@@ -229,7 +229,7 @@ class CupertinoLoupe extends StatelessWidget {
       BorderRadius.all(Radius.elliptical(60, 50));
 
   /// This [RawLoupe]'s controller.
-  final AnimationController? ioAnimationController;
+  final Animation<double>? ioAnimation;
 
   /// Any additional focal point offset, applied over the regular focal
   /// point offset defined in [CupertinoLoupe.kVerticalFocalPointOffset].
@@ -241,17 +241,17 @@ class CupertinoLoupe extends StatelessWidget {
         offset: Offset.lerp(
           const Offset(0, -CupertinoLoupe.kVerticalFocalPointOffset),
           Offset.zero,
-          ioAnimationController?.value ?? 1,
+          ioAnimation?.value ?? 1,
         )!,
         child: RawLoupe(
           focalPoint: Offset(
                   0,
                   (CupertinoLoupe.kVerticalFocalPointOffset -
                           CupertinoLoupe.kSize.height / 2) *
-                      (ioAnimationController?.value ?? 1)) +
+                      (ioAnimation?.value ?? 1)) +
               additionalFocalPointOffset,
           decoration: LoupeDecoration(
-            opacity: ioAnimationController?.value ?? 1,
+            opacity: ioAnimation?.value ?? 1,
             shape: const RoundedRectangleBorder(
                 borderRadius: CupertinoLoupe._kBorderRadius,
                 side: BorderSide(color: Color.fromARGB(255, 235, 235, 235))),
