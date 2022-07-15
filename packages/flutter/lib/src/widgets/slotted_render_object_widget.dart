@@ -198,8 +198,8 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
   SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> super.widget);
 
-  final Map<S, Element> _slotToChild = <S, Element>{};
-  Map<Key, S> _keyToSlot = <Key, S>{};
+  Map<S, Element> _slotToChild = <S, Element>{};
+  Map<Key, Element> _keyedChildren = <Key, Element>{};
 
   @override
   SlottedContainerRenderObjectMixin<S> get renderObject => super.renderObject as SlottedContainerRenderObjectMixin<S>;
@@ -241,50 +241,72 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     }(), '${widget.runtimeType}.slots must not change.');
     assert(slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length == slottedMultiChildRenderObjectWidgetMixin.slots.length, 'slots must be unique');
 
-    final Map<Key, S> oldKeyedSlots = _keyToSlot;
-    _keyToSlot = <Key, S>{};
+    final Map<Key, Element> oldKeyedElements = _keyedChildren;
+    _keyedChildren = <Key, Element>{};
+    final Map<S, Element> oldSlotToChild = _slotToChild;
+    _slotToChild = <S, Element>{};
 
-    // New slots for keyed children. It shouldn't be updated in place because
-    // two children could swap slots.
-    final Map<S, Element> slotToKeyedChild = <S, Element>{};
-    final List<MapEntry<S, Widget?>> unkeyedWidgets = <MapEntry<S, Widget?>>[];
+    Map<Key, List<Element>>? debugDuplicatedKeys;
 
     for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
       final Widget? widget = slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot);
       final Key? newWidgetKey = widget?.key;
-      if (newWidgetKey != null) {
-        assert(!_keyToSlot.containsKey(newWidgetKey));
-        _keyToSlot[newWidgetKey] = slot;
-        final S fromSlot = oldKeyedSlots[newWidgetKey] ?? slot;
-        final Element newChild = updateChild(_slotToChild.remove(fromSlot), widget, slot)!;
-        assert(!_slotToChild.containsKey(fromSlot));
-        assert(!slotToKeyedChild.containsKey(slot));
-        slotToKeyedChild[slot] = newChild;
+
+      final Element? oldSlotChild = oldSlotToChild[slot];
+      final Element? oldKeyChild = oldKeyedElements[newWidgetKey];
+
+      // Try to find the slot for the correct Element that `widget` should update.
+      // If key matching fails, resort to `oldSlotChild` from the same slot.
+      final Element? fromElement;
+      if (oldKeyChild != null) {
+        fromElement = oldSlotToChild.remove(oldKeyChild.slot as S);
+      } else if (oldSlotChild?.widget.key == null) {
+        fromElement = oldSlotToChild.remove(slot);
       } else {
-        // A unkeyed new widget shouldn't be used to update the child element
-        // yet, as a keyed widget that appears later in the iteration could
-        // claim that element.
-        unkeyedWidgets.add(MapEntry<S, Widget?>(slot, widget));
+        // The only case we can't use `oldSlotChild` is when its widget has a key.
+        assert(oldSlotChild!.widget.key != newWidgetKey);
+        fromElement = null;
+      }
+      final Element? newChild = updateChild(fromElement, widget, slot);
+
+      if (newChild != null) {
+        _slotToChild[slot] = newChild;
+
+        if (newWidgetKey != null) {
+          assert(() {
+            final Element? existingElement = _keyedChildren[newWidgetKey];
+            if (existingElement != null) {
+              (debugDuplicatedKeys ??= <Key, List<Element>>{})
+                .putIfAbsent(newWidgetKey, () => <Element>[existingElement])
+                .add(newChild);
+            }
+            return true;
+          }());
+          _keyedChildren[newWidgetKey] = newChild;
+        }
       }
     }
-
-    _slotToChild.addAll(slotToKeyedChild);
-    for (final MapEntry<S, Widget?> unkeyedWidget in unkeyedWidgets) {
-      assert(!slotToKeyedChild.containsKey(unkeyedWidget.key));
-      _updateChild(unkeyedWidget.value, unkeyedWidget.key);
-    }
+    oldSlotToChild.values.forEach(deactivateChild);
+    assert(_debugDuplicatedKeys(debugDuplicatedKeys));
   }
 
-  void _updateChild(Widget? widget, S slot) {
-    final Element? oldChild = _slotToChild[slot];
-    assert(oldChild == null || oldChild.slot == slot);
-    final Element? newChild = updateChild(oldChild, widget, slot);
-    if (oldChild != null) {
-      _slotToChild.remove(slot);
+  bool _debugDuplicatedKeys(Map<Key, List<Element>>? debugDuplicatedKeys) {
+    if (debugDuplicatedKeys == null) {
+      return true;
     }
-    if (newChild != null) {
-      _slotToChild[slot] = newChild;
+    for (final MapEntry<Key, List<Element>> duplicatedKey in debugDuplicatedKeys.entries) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Multiple widgets used the same key in ${widget.runtimeType}.'),
+        ErrorDescription(
+          'The key ${duplicatedKey.key} was used by multiple widgets. The parents of those widgets were:\n'
+        ),
+        for (final Element element in duplicatedKey.value) ErrorDescription('  - $element\n'),
+        ErrorDescription(
+          'A key can only be specified on one widget at a time in the same parent widget.',
+        ),
+      ]);
     }
+    return true;
   }
 
   @override
@@ -295,9 +317,10 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderBox child, S slot) {
-    assert(renderObject._slotToChild[slot] == child);
-    renderObject._setChild(null, slot);
-    assert(renderObject._slotToChild[slot] == null);
+    if (renderObject._slotToChild[slot] == child) {
+      renderObject._setChild(null, slot);
+      assert(renderObject._slotToChild[slot] == null);
+    }
   }
 
   @override
