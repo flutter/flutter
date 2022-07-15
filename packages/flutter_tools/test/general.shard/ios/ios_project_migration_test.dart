@@ -6,8 +6,8 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
-import 'package:flutter_tools/src/ios/migrations/deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/host_app_info_plist_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/ios_deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_object_version_migration.dart';
@@ -514,7 +514,7 @@ keep this 3
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+        final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
           project,
           testLogger,
         );
@@ -525,7 +525,7 @@ keep this 3
 
         expect(testLogger.traceText, contains('Xcode project not found, skipping iOS deployment target version migration'));
         expect(testLogger.traceText, contains('AppFrameworkInfo.plist not found, skipping minimum OS version migration'));
-        expect(testLogger.traceText, contains('Podfile not found, skipping global platform version migration'));
+        expect(testLogger.traceText, contains('Podfile not found, skipping global platform iOS version migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -545,7 +545,7 @@ keep this 3
         podfile.writeAsStringSync(podfileFileContents);
         final DateTime podfileLastModified = podfile.lastModifiedSync();
 
-        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+        final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
           project,
           testLogger,
         );
@@ -591,7 +591,7 @@ keep this 3
 platform :ios, '9.0'
 ''');
 
-        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+        final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
           project,
           testLogger,
         );

@@ -7,8 +7,8 @@ import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
 /// Update the minimum iOS deployment version to the minimum allowed by Xcode without causing a warning.
-class DeploymentTargetMigration extends ProjectMigrator {
-  DeploymentTargetMigration(
+class IOSDeploymentTargetMigration extends ProjectMigrator {
+  IOSDeploymentTargetMigration(
     IosProject project,
     super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
@@ -36,7 +36,7 @@ class DeploymentTargetMigration extends ProjectMigrator {
     if (_podfile.existsSync()) {
       processFileLines(_podfile);
     } else {
-      logger.printTrace('Podfile not found, skipping global platform version migration.');
+      logger.printTrace('Podfile not found, skipping global platform iOS version migration.');
     }
 
     return true;
