@@ -769,12 +769,30 @@ void main() {
   }, initializeFlutterRoot: false);
 
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
-    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<AndroidStudioValidator>())));
-    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+    // Note, in production, the provider determines whether to show this via the 
+    final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+    );
+    expect(provider.validators, isNot(contains(isA<AndroidStudioValidator>())));
+    expect(provider.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+    AndroidWorkflow: () => FakeAndroidWorkflow(appliesToHostPlatform: false),
   });
 }
+
+class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
+  FakeAndroidWorkflow({
+    this.canListDevices = true,
+    this.appliesToHostPlatform = true,
+  });
+
+  @override
+  final bool canListDevices;
+
+  @override
+  final bool appliesToHostPlatform;
+}
+
 
 class NoOpDoctor implements Doctor {
   @override
