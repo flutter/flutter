@@ -558,7 +558,6 @@ class EditableText extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckConfiguration,
-    this.misspelledTextStyle,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -622,15 +621,9 @@ class EditableText extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        assert(
-          spellCheckConfiguration == null
-          || spellCheckConfiguration.spellCheckService == null
-          && spellCheckConfiguration.spellCheckSuggestionsHandler == null,
-          'spellCheckEnabled must not be false if spellCheckService or spellCheckSuggestionsHandler specified'
+          spellCheckConfiguration == null || spellCheckConfiguration!.misspelledTextStyle != null,
+          'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired'
        ),
-       assert(
-          misspelledTextStyle == null || spellCheckConfiguration != null,
-          'spellCheckConfiguration must be specified if spell check behavior desired'
-      ),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1456,14 +1449,6 @@ class EditableText extends StatefulWidget {
   /// then spell check is disabled by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@template flutter.widgets.EditableText.misspelledTextStyle}
-  /// Style used to indicate misspelled words.
-  ///
-  /// This should only be specified if spell check is enabled by specifying a
-  /// [spellCheckConfiguraiton], in which case this should not be null.
-  /// {@endtemplate}
-  final TextStyle? misspelledTextStyle;
-
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -1641,7 +1626,6 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('misspelledTextStyle', misspelledTextStyle, defaultValue: null));
   }
 }
 
@@ -1905,10 +1889,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     spellCheckSuggestionsHandler =
       spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler();
 
-    _spellCheckConfiguration =
-      SpellCheckConfiguration(
+    _spellCheckConfiguration = widget.spellCheckConfiguration!.copyWith(
         spellCheckService: spellCheckService,
-        spellCheckSuggestionsHandler: spellCheckSuggestionsHandler,
+        spellCheckSuggestionsHandler: spellCheckSuggestionsHandler
       );
   }
 
@@ -3640,9 +3623,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ],
       );
     }
-    final bool spellCheckEnabled = _spellCheckConfiguration != null &&
-                                     _spellCheckConfiguration!.spellCheckSuggestionsHandler != null &&
-                                     _spellCheckResults != null;
+    final bool spellCheckEnabled = _spellCheckEnabled && _spellCheckResults != null;
     final bool withComposing = !widget.readOnly && _hasFocus;
     if (spellCheckEnabled) {
       // If the composing range is out of range for the current text, ignore it to
@@ -3657,7 +3638,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   _value, 
                   composingRegionOutOfRange,
                   widget.style, 
-                  widget.misspelledTextStyle!, 
+                  _spellCheckConfiguration!.misspelledTextStyle!, 
                   _spellCheckResults!
       );
     }      

@@ -19,6 +19,7 @@ class SpellCheckConfiguration {
   const SpellCheckConfiguration({
     this.spellCheckService,
     this.spellCheckSuggestionsHandler,
+    this.misspelledTextStyle,
   });
 
   /// The service used to fetch spell check results for text input.
@@ -27,6 +28,28 @@ class SpellCheckConfiguration {
   /// The handler used to mark misspelled words in text input and display
   /// a menu of the replacement suggestions for these misspelled words.
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
+
+  /// Style used to indicate misspelled words.
+  ///
+  /// This is nullable to allow style-specific wrappers of [EditableText]
+  /// to infer this, but this must be specified if this configuration is
+  /// provided directly to [EditableText] or its construction will fail with an
+  /// assertion error.
+  final TextStyle? misspelledTextStyle;
+
+  /// Returns a copy of the current [SpellCheckConfiguration] instance with
+  /// specified overrides.
+  SpellCheckConfiguration copyWith({
+    SpellCheckService? spellCheckService,
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler,
+    TextStyle? misspelledTextStyle}) {
+    return SpellCheckConfiguration(
+      spellCheckService: spellCheckService ?? this.spellCheckService,
+      spellCheckSuggestionsHandler:
+        spellCheckSuggestionsHandler ?? this.spellCheckSuggestionsHandler,
+      misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
+    );
+  }
 }
 
 /// Determines how misspelled words are indicated in text input and how

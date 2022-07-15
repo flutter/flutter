@@ -331,7 +331,6 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckConfiguration,
-    TextStyle? misspelledTextStyle,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -392,10 +391,7 @@ class TextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     ))),
-         misspelledTextStyle = spellCheckConfiguration == null
-            ? null
-            : materialMisspelledTextStyle;
+                     )));
 
   /// Controls the text being edited.
   ///
@@ -775,9 +771,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.widgets.EditableText.misspelledTextStyle}
-  final TextStyle? misspelledTextStyle;
-
+  /// The [TextStyle] used to indicate misspelled words in the Material style.
   static const TextStyle materialMisspelledTextStyle =
     const TextStyle(
       decoration: TextDecoration.underline,
@@ -828,7 +822,6 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('misspelledTextStyle', misspelledTextStyle, defaultValue: null));
   }
 }
 
@@ -1160,6 +1153,15 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
     ];
 
+    // Ensure configuration uses Material text style for misspelled words unless
+    // a custom style is specified.
+    final SpellCheckConfiguration? spellCheckConfiguration =
+      widget.spellCheckConfiguration != null
+        ? widget.spellCheckConfiguration!.copyWith(
+            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
+              ?? TextField.materialMisspelledTextStyle)
+        : null;
+
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
     final bool cursorOpacityAnimates;
@@ -1299,8 +1301,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          spellCheckConfiguration: widget.spellCheckConfiguration,
-          misspelledTextStyle: widget.misspelledTextStyle,
+          spellCheckConfiguration: spellCheckConfiguration,
         ),
       ),
     );

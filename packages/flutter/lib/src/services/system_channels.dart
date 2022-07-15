@@ -222,7 +222,7 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
-  /// A JSON [MethodChannel] for handling spell check for text input.
+  /// A [MethodChannel] for handling spell check for text input.
   ///
   /// This channel exposes the spell check framework for supported platforms.
   /// Currently supported on Android only.
@@ -242,7 +242,7 @@ class SystemChannels {
   ///     and the [Locale] for the text to be spell checked with.
   static const MethodChannel spellCheck = OptionalMethodChannel(
       'flutter/spellcheck',
-      JSONMethodCodec(),
+      StandardMethodCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for keyboard events.

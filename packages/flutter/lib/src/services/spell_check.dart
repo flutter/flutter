@@ -181,16 +181,18 @@ class DefaultSpellCheckService implements SpellCheckService {
       return null;
     }
 
-    final List<String> results = rawResults.cast<String>();
     List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
 
-    for (final String result in results) {
-      final List<String> resultParsed = result.split('.');
-      suggestionSpans.add(SuggestionSpan(
+    for (final dynamic result in rawResults) {
+      Map<String, dynamic> resultMap = Map<String,dynamic>.from(result);
+      suggestionSpans.add(
+        SuggestionSpan(
           TextRange(
-              start: int.parse(resultParsed[0]),
-              end: int.parse(resultParsed[1]) + 1),
-          resultParsed[2].split('\n')));
+            start: resultMap['startIndex'],
+            end: resultMap['endIndex']),
+          resultMap['suggestions'].cast<String>(),
+        )
+      );
     }
 
     // Merge current and previous spell check results if between requests,

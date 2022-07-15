@@ -273,7 +273,6 @@ class CupertinoTextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckConfiguration,
-    TextStyle? misspelledTextStyle,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -336,10 +335,7 @@ class CupertinoTextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     ))),
-         misspelledTextStyle = spellCheckConfiguration == null
-            ? null
-            : cupertinoMisspelledTextStyle;
+                     )));
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -438,7 +434,6 @@ class CupertinoTextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckConfiguration,
-    TextStyle? misspelledTextStyle,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -502,10 +497,7 @@ class CupertinoTextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     ))),
-         misspelledTextStyle = spellCheckConfiguration == null
-            ? null
-            : cupertinoMisspelledTextStyle;
+                     )));
 
   /// Controls the text being edited.
   ///
@@ -791,9 +783,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.widgets.EditableText.misspelledTextStyle}
-  final TextStyle? misspelledTextStyle;
-
+  /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
   static const TextStyle cupertinoMisspelledTextStyle =
     const TextStyle(
       decoration: TextDecoration.underline,
@@ -845,7 +835,6 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('misspelledTextStyle', misspelledTextStyle, defaultValue: null));
   }
 }
 
@@ -1250,6 +1239,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       context,
     ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
+    // Ensure configuration uses Cupertino text style for misspelled words unless
+    // a custom style is specified.
+    final SpellCheckConfiguration? spellCheckConfiguration =
+      widget.spellCheckConfiguration != null
+        ? widget.spellCheckConfiguration!.copyWith(
+            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
+              ?? CupertinoTextField.cupertinoMisspelledTextStyle)
+        : null;
+
     final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
@@ -1312,8 +1310,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-            spellCheckConfiguration: widget.spellCheckConfiguration,
-            misspelledTextStyle: widget.misspelledTextStyle,
+            spellCheckConfiguration: spellCheckConfiguration,
           ),
         ),
       ),
