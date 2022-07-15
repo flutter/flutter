@@ -35,7 +35,7 @@ namespace flutter_runner {
 using ViewCallback = std::function<void()>;
 using FlatlandViewCreatedCallback = std::function<void(
     fuchsia::ui::composition::ContentId,
-    fuchsia::ui::composition::ChildViewWatcherPtr child_view_watcher)>;
+    fuchsia::ui::composition::ChildViewWatcherHandle child_view_watcher)>;
 using FlatlandViewIdCallback =
     std::function<void(fuchsia::ui::composition::ContentId)>;
 

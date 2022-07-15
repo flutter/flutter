@@ -358,7 +358,7 @@ void FlatlandExternalViewEmbedder::CreateView(
   FlatlandView new_view = {.transform_id = transform_id,
                            .viewport_id = viewport_id};
   flatland_->flatland()->CreateTransform(new_view.transform_id);
-  fuchsia::ui::composition::ChildViewWatcherPtr child_view_watcher;
+  fuchsia::ui::composition::ChildViewWatcherHandle child_view_watcher;
   new_view.pending_create_viewport_callback =
       [this, transform_id, viewport_id, view_id,
        child_view_watcher_request =

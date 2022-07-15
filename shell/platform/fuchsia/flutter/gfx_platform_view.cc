@@ -19,6 +19,7 @@ GfxPlatformView::GfxPlatformView(
     fuchsia::ui::pointer::MouseSourceHandle mouse_source,
     fuchsia::ui::views::FocuserHandle focuser,
     fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
+    fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry,
     fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
         session_listener_request,
     fit::closure on_session_listener_error_callback,
@@ -44,6 +45,7 @@ GfxPlatformView::GfxPlatformView(
                    std::move(mouse_source),
                    std::move(focuser),
                    std::move(view_ref_focused),
+                   std::move(pointerinjector_registry),
                    std::move(wireframe_enabled_callback),
                    std::move(on_update_view_callback),
                    std::move(on_create_surface_callback),
@@ -295,6 +297,9 @@ bool GfxPlatformView::OnChildViewDisconnected(
       << "}";
   auto call = out.str();
 
+  // A disconnected view cannot listen to pointer events.
+  pointer_injector_delegate_->OnDestroyView(view_id_mapping->second);
+
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
@@ -350,6 +355,7 @@ void GfxPlatformView::OnCreateView(ViewCallback on_view_created,
 
           FML_DCHECK(weak->child_view_ids_.count(resource_id) == 0);
           weak->child_view_ids_[resource_id] = view_id;
+          weak->pointer_injector_delegate_->OnCreateView(view_id);
         });
       };
   on_create_view_callback_(view_id_raw, std::move(on_view_created),
@@ -358,10 +364,10 @@ void GfxPlatformView::OnCreateView(ViewCallback on_view_created,
 
 void GfxPlatformView::OnDisposeView(int64_t view_id_raw) {
   auto on_view_unbound =
-      [weak = weak_factory_.GetWeakPtr(),
+      [weak = weak_factory_.GetWeakPtr(), view_id = view_id_raw,
        platform_task_runner = task_runners_.GetPlatformTaskRunner()](
           scenic::ResourceId resource_id) {
-        platform_task_runner->PostTask([weak, resource_id]() {
+        platform_task_runner->PostTask([weak, resource_id, view_id]() {
           if (!weak) {
             FML_LOG(WARNING)
                 << "ViewHolder unbound from PlatformView after PlatformView"
@@ -371,6 +377,7 @@ void GfxPlatformView::OnDisposeView(int64_t view_id_raw) {
 
           FML_DCHECK(weak->child_view_ids_.count(resource_id) == 1);
           weak->child_view_ids_.erase(resource_id);
+          weak->pointer_injector_delegate_->OnDestroyView(view_id);
         });
       };
   on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));

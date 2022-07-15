@@ -9,6 +9,7 @@ group("fakes") {
 
   public_deps = [
     ":focus",
+    ":pointer",
     "scenic",
   ]
 }
@@ -22,6 +23,19 @@ source_set("focus") {
     "touch_source.h",
     "view_ref_focused.h",
   ]
+
+  deps = [
+    "//build/fuchsia/pkg:sys_cpp_testing",
+    "//flutter/lib/ui",
+    "//flutter/testing",
+    "//third_party/rapidjson",
+  ]
+}
+
+source_set("pointer") {
+  testonly = true
+
+  sources = [ "mock_injector_registry.h" ]
 
   deps = [
     "//build/fuchsia/pkg:sys_cpp_testing",
