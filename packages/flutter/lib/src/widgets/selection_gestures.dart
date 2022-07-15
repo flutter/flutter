@@ -9,6 +9,20 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';//for shiftaware
 import 'package:flutter/widgets.dart';
 
+// BuildContext/Element doesn't have a parent accessor, but it can be
+// simulated with visitAncestorElements. _getParent is needed because
+// context.getElementForInheritedWidgetOfExactType will return itself if it
+// happens to be of the correct type. getParent should be O(1), since we
+// always return false at the first ancestor.
+BuildContext _getParent(BuildContext context) {
+  late final BuildContext parent;
+  context.visitAncestorElements((Element ancestor) {
+    parent = ancestor;
+    return false;
+  });
+  return parent;
+}
+
 /// A widget that creates [GestureRecognizer] bindings to specific intents and
 /// actions for its descendants.
 /// 
@@ -100,6 +114,38 @@ class SelectionGesturesManager extends ChangeNotifier {
   Map<Type, ContextGestureRecognizerFactory> get gestures => _gestures;
   set gestures(Map<Type, ContextGestureRecognizerFactory> gestures) {
     _gestures = gestures;
+  }
+
+  // Visits the SelectionGestures widget ancestors of the given element using
+  // getElementForInheritedWidgetOfExactType.
+  static void _visitGesturesAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
+    InheritedElement? gesturesElement = context.getElementForInheritedWidgetOfExactType<_SelectionGesturesMarker>();
+    while (gesturesElement != null) {
+      if (visitor(gesturesElement) == true) {
+        break;
+      }
+      // _getParent is needed here because
+      // context.getElementForInheritedWidgetOfExactType will return itself if it
+      // happens to be of the correct type.
+      final BuildContext parent = _getParent(gesturesElement);
+      gesturesElement = parent.getElementForInheritedWidgetOfExactType<_SelectionGesturesMarker>();
+    }
+  }
+
+  Map<Type, ContextGestureRecognizerFactory> findNonConflictingAncestorGestures(BuildContext context, Map<Type, ContextGestureRecognizerFactory> childGestures) {
+    final Map<Type,ContextGestureRecognizerFactory> mergedGestures = <Type,ContextGestureRecognizerFactory>{};
+    mergedGestures.addAll(childGestures);
+
+    _visitGesturesAncestors(context, (InheritedElement element) {
+      final _SelectionGesturesMarker gestures = element.widget as _SelectionGesturesMarker;
+      for (final MapEntry<Type, ContextGestureRecognizerFactory> parentGesturesEntry in gestures.manager.gestures.entries) {
+        if (!mergedGestures.containsKey(parentGesturesEntry.key)) {
+          mergedGestures[parentGesturesEntry.key] = parentGesturesEntry.value;
+        }
+      }
+      return false;
+    });
+    return mergedGestures;
   }
 
   @protected

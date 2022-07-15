@@ -1020,6 +1020,122 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
   // AutofillClient implementation end.
 
+  static final ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer> _iOSForcePressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+    (BuildContext context) => ForcePressGestureRecognizer(debugOwner: context),
+    (ForcePressGestureRecognizer instance, BuildContext context) {
+      instance
+        ..onStart = (ForcePressDetails details) {
+          Actions.invoke(
+            context, 
+            ForcePressStartIntent(
+              intents: <Intent>[
+                SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition), //can we call super of gesture recognizer? 
+                SelectionToolbarControlIntent.show(position: details.globalPosition),
+              ], 
+              enabledContext: context,
+            ),
+          );
+        }
+        ..onEnd = (ForcePressDetails details) {/*Should this invoke an empty ForcePressEndIntent for the sake of being overridable?*/};
+    },
+  );
+
+  static final ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer> _iOSLongPressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+    (BuildContext context) => LongPressGestureRecognizer(debugOwner: context),
+    (LongPressGestureRecognizer instance, BuildContext context) {
+      instance
+        ..onLongPressStart = (LongPressStartDetails details) {
+          Actions.invoke(
+            context,
+            LongPressStartIntent(
+              intents: <Intent>[
+                SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+              ],
+              enabledContext: context,
+            ),
+          );
+        }
+        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+          Actions.invoke(
+            context,
+            LongPressStartIntent(
+              intents: <Intent>[
+                SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+              ],
+              enabledContext: context,
+            ),
+          );
+        }
+        ..onLongPressEnd = (LongPressEndDetails details) {/* Should an empty LongPressEndIntent be invoked for the sake of overriding? */};
+    }
+  );
+
+  static final Map<Type, ContextGestureRecognizerFactory> _iOSMaterialGestureDefaults = <Type, ContextGestureRecognizerFactory>{
+    ForcePressGestureRecognizer : _iOSForcePressGestureRecognizer,
+    LongPressGestureRecognizer : _iOSLongPressGestureRecognizer,
+  };
+
+  static final ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer> _commonLongPressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+    (BuildContext context) => LongPressGestureRecognizer(debugOwner: context),
+    (LongPressGestureRecognizer instance, BuildContext context) {
+      instance
+        ..onLongPressStart = (LongPressStartDetails details) {
+          Actions.invoke(
+            context,
+            LongPressStartIntent(
+              intents: <Intent>[
+                SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                const FeedbackRequestIntent(),
+              ],
+              enabledContext: context,
+            ),
+          );
+        }
+        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+          Actions.invoke(
+            context,
+            LongPressStartIntent(
+              intents: <Intent>[
+                SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
+              ],
+              enabledContext: context,
+            ),
+          );
+        }
+        ..onLongPressEnd = (LongPressEndDetails details) {
+          Actions.invoke(
+            context, 
+            LongPressEndIntent(
+              intents: <Intent>[
+                SelectionToolbarControlIntent.show(position: details.globalPosition),
+              ], 
+              enabledContext: context,
+            ),
+          );
+        };
+    }
+  );
+
+  static final Map<Type, ContextGestureRecognizerFactory> _commonMaterialGestureDefaults = <Type, ContextGestureRecognizerFactory>{
+    LongPressGestureRecognizer : _commonLongPressGestureRecognizer,
+  };
+
+  static Map<Type, ContextGestureRecognizerFactory> get _materialDefaultsForPlatform {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return _iOSMaterialGestureDefaults;
+      case TargetPlatform.macOS:
+        // ForcePress is disabled so does not need ForcePressGestureRecognizer
+        // LongPress isnt available on macOS afaik so does not need LongPressGestureRecognizer
+        return <Type, ContextGestureRecognizerFactory>{};
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return _commonMaterialGestureDefaults;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1354,8 +1470,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                   child: child,
                 );
               },
-              child: SelectionGesturesDetector(
-                child: child,
+              child: SelectionGestures(
+                gestures: _materialDefaultsForPlatform,
+                child: SelectionGesturesDetector(              
+                  child: child,
+                ),
               ),
             ),
           ),

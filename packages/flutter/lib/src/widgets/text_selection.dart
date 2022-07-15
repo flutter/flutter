@@ -2257,11 +2257,13 @@ class _SelectionGesturesDetectorState extends State<SelectionGesturesDetector> {
   }
 
   void syncAllGestures(BuildContext context, Map<Type, ContextGestureRecognizerFactory> gestures) {
+    final Map<Type, ContextGestureRecognizerFactory> mergedGestures = manager.findNonConflictingAncestorGestures(context, gestures);
+
     final Map<Type, GestureRecognizer> oldRecognizers = _recognizers!;
     _recognizers = <Type, GestureRecognizer>{};
-    for (final Type type in gestures.keys) {
-      _recognizers![type] = oldRecognizers[type] ?? gestures[type]!.constructor(context);
-      gestures[type]!.initializer(_recognizers![type]!, context);
+    for (final Type type in mergedGestures.keys) {
+      _recognizers![type] = oldRecognizers[type] ?? mergedGestures[type]!.constructor(context);
+      mergedGestures[type]!.initializer(_recognizers![type]!, context);
     }
     for (final Type type in oldRecognizers.keys) {
       if (!_recognizers!.containsKey(type)) {
