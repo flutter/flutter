@@ -388,6 +388,7 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
     _updateSelectionOverlay();
+
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.showToolbar();
       return;
@@ -396,8 +397,6 @@ class TextSelectionOverlay {
     if (buildContextMenu == null) {
       return;
     }
-
-    ContextMenuController.hide();
 
     // If right clicking on desktop, use the right click position as the only
     // anchor.
@@ -411,75 +410,24 @@ class TextSelectionOverlay {
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          ContextMenuController.show(
-            context: context,
-            buildContextMenu: (BuildContext context) {
-              return _SelectionToolbarWrapper(
-                layerLink: _selectionOverlay.toolbarLayerLink,
-                offset: -Rect.fromPoints(
-                  renderBox.localToGlobal(Offset.zero),
-                  renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-                ).topLeft,
-                child: buildContextMenu!(context, renderObject.lastSecondaryTapDownPosition!),
-              );
-            },
-          );
+          _selectionOverlay.showToolbar((BuildContext context) {
+            return buildContextMenu!(context, renderObject.lastSecondaryTapDownPosition!);
+          }, context);
           return;
       }
     }
 
     // Otherwise, calculate the anchors as the upper and lower horizontal center
     // of the selection.
-    ContextMenuController.show(
-      context: context,
-      buildContextMenu: (BuildContext context) {
-        final Rect editingRegion = Rect.fromPoints(
-          renderBox.localToGlobal(Offset.zero),
-          renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-        );
-        final List<TextSelectionPoint> selectionEndpoints = renderObject.getEndpointsForSelection(_selection);
-        final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
-            _getEndGlyphHeight() / 2;
-
-        // If the selected text spans more than 1 line, horizontally center the toolbar.
-        // Derived from both iOS and Android.
-        final double midX = isMultiline
-          ? editingRegion.width / 2
-          : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
-
-        final double lineHeightAtStart = _getStartGlyphHeight();
-        final Offset midpoint = Offset(
-          midX,
-          // The y-coordinate won't be made use of most likely.
-          selectionEndpoints.first.point.dy - lineHeightAtStart,
-        );
-
-        final TextSelectionPoint startTextSelectionPoint = selectionEndpoints[0];
-        final TextSelectionPoint endTextSelectionPoint = selectionEndpoints.length > 1
-          ? selectionEndpoints[1]
-          : selectionEndpoints[0];
-        final double topAmountInEditableRegion =
-            startTextSelectionPoint.point.dy - lineHeightAtStart;
-
-        final Offset anchorAbove = Offset(
-          editingRegion.left + midpoint.dx,
-          math.max(topAmountInEditableRegion, 0) + editingRegion.top,
-        );
-        final Offset anchorBelow = Offset(
-          editingRegion.left + midpoint.dx,
-          editingRegion.top + endTextSelectionPoint.point.dy,
-        );
-
-        return _SelectionToolbarWrapper(
-          layerLink: _selectionOverlay.toolbarLayerLink,
-          offset: -Rect.fromPoints(
-            renderBox.localToGlobal(Offset.zero),
-            renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-          ).topLeft,
-          child: buildContextMenu!(context, anchorAbove, anchorBelow),
-        );
-      },
-    );
+    _selectionOverlay.showToolbar((BuildContext context) {
+      final double startGlyphHeight = _getStartGlyphHeight();
+      final double endGlyphHeight = _getEndGlyphHeight();
+      return buildContextMenu!(
+        context,
+        _selectionOverlay.getAnchorAbove(renderBox, startGlyphHeight, endGlyphHeight),
+        _selectionOverlay.getAnchorBelow(renderBox, startGlyphHeight, endGlyphHeight),
+      );
+    }, context);
   }
 
   /// Updates the overlay after the selection has changed.
@@ -744,10 +692,6 @@ class SelectionOverlay {
     this.onEndHandleDragStart,
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
-    @Deprecated(
-      'Use `buildContextMenu` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
-    )
     this.toolbarVisible,
     required List<TextSelectionPoint> selectionEndpoints,
     required this.selectionControls,
@@ -755,10 +699,6 @@ class SelectionOverlay {
     required this.clipboardStatus,
     required this.startHandleLayerLink,
     required this.endHandleLayerLink,
-    @Deprecated(
-      'Use `buildContextMenu` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
-    )
     required this.toolbarLayerLink,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
@@ -883,10 +823,6 @@ class SelectionOverlay {
   /// itself on and off the screen.
   ///
   /// If this is null the toolbar will always be visible.
-  @Deprecated(
-    'Use `buildContextMenu` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
-  )
   final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.
@@ -904,10 +840,6 @@ class SelectionOverlay {
 
   /// The object supplied to the [CompositedTransformTarget] that wraps the text
   /// field.
-  @Deprecated(
-    'Use `buildContextMenu` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
-  )
   final LayerLink toolbarLayerLink;
 
   /// The objects supplied to the [CompositedTransformTarget] that wraps the
@@ -979,7 +911,7 @@ class SelectionOverlay {
   /// This is useful for displaying toolbars at the mouse right-click locations
   /// in desktop devices.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    "Use `showToolbar`'s `buildContextMenu` parameter instead. "
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Offset? get toolbarLocation => _toolbarLocation;
@@ -1001,6 +933,80 @@ class SelectionOverlay {
 
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
+
+  // TODO(justinmc): This caching is a bit ridiculous for just needing to return
+  // two values.  Just recalculating is preferable.
+  late Offset _anchorAbove;
+  late Offset _anchorBelow;
+  RenderBox? _lastRenderBox;
+  double? _lastStartGlyphHeight;
+  double? _lastEndGlyphHeight;
+  List<TextSelectionPoint>? _lastSelectionEndpoints;
+  void _calculateAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
+    // This caching is simply to avoid recalculating everything for both the top
+    // and bottom anchors.
+    _lastRenderBox = renderBox;
+    _lastStartGlyphHeight = startGlyphHeight;
+    _lastEndGlyphHeight = endGlyphHeight;
+    _lastSelectionEndpoints = selectionEndpoints;
+
+    final Rect editingRegion = Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero),
+      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+    );
+    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
+        endGlyphHeight / 2;
+
+    // If the selected text spans more than 1 line, horizontally center the toolbar.
+    // Derived from both iOS and Android.
+    final double midX = isMultiline
+      ? editingRegion.width / 2
+      : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
+
+    final Offset midpoint = Offset(
+      midX,
+      // The y-coordinate won't be made use of most likely.
+      selectionEndpoints.first.point.dy - startGlyphHeight,
+    );
+
+    final TextSelectionPoint startTextSelectionPoint = selectionEndpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = selectionEndpoints.length > 1
+      ? selectionEndpoints[1]
+      : selectionEndpoints[0];
+    final double topAmountInEditableRegion =
+        startTextSelectionPoint.point.dy - startGlyphHeight;
+
+    _anchorAbove = Offset(
+      editingRegion.left + midpoint.dx,
+      math.max(topAmountInEditableRegion, 0) + editingRegion.top,
+    );
+    _anchorBelow = Offset(
+      editingRegion.left + midpoint.dx,
+      editingRegion.top + endTextSelectionPoint.point.dy,
+    );
+  }
+
+  /// Returns the [Offset] of the upper anchor point of the context menu.
+  Offset getAnchorAbove(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
+    if (renderBox != _lastRenderBox
+        || startGlyphHeight != _lastStartGlyphHeight
+        || endGlyphHeight != _lastEndGlyphHeight
+        || selectionEndpoints != _lastSelectionEndpoints) {
+      _calculateAnchors(renderBox, startGlyphHeight, endGlyphHeight);
+    }
+    return _anchorAbove;
+  }
+
+  /// Returns the [Offset] of the upper anchor point of the context menu.
+  Offset getAnchorBelow(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
+    if (renderBox != _lastRenderBox
+        || startGlyphHeight != _lastStartGlyphHeight
+        || endGlyphHeight != _lastEndGlyphHeight
+        || selectionEndpoints != _lastSelectionEndpoints) {
+      _calculateAnchors(renderBox, startGlyphHeight, endGlyphHeight);
+    }
+    return _anchorBelow;
+  }
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
@@ -1030,22 +1036,39 @@ class SelectionOverlay {
     }
   }
 
-  // TODO(justinmc): Do I really want to deprecate this?  Isn't SelectionOverlay
-  // the non-editable version of TextSelectionOverlay? How am I showing the menu
-  // for global selection?
+  // TODO(justinmc): After removing the deprecations, this buildContextMenu
+  // param will need to be required. Is that really what we want here? Can I
+  // determine the location stuff before _showToolbar is called?
   /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
-  @Deprecated(
-    'Use `ContextMenuController` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
-  )
-  void showToolbar() {
-    if (_toolbar != null) {
+  void showToolbar([WidgetBuilder? buildContextMenu, BuildContext? context]) {
+    if (buildContextMenu == null) {
+      if (_toolbar != null) {
+        return;
+      }
+      _toolbar = OverlayEntry(builder: _buildToolbar);
+      Overlay.of(this.context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
       return;
     }
-    _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
+
+    if (buildContextMenu == null || context == null) {
+      return;
+    }
+
+    ContextMenuController.hide();
+
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    ContextMenuController.show(
+      context: context,
+      buildContextMenu: (BuildContext context) {
+        return _SelectionToolbarWrapper(
+          layerLink: toolbarLayerLink,
+          offset: -renderBox.localToGlobal(Offset.zero),
+          child: buildContextMenu(context),
+        );
+      },
+    );
   }
 
   bool _buildScheduled = false;
@@ -1088,7 +1111,7 @@ class SelectionOverlay {
       _handles![1].remove();
       _handles = null;
     }
-    if (_toolbar != null) {
+    if (_toolbar != null || ContextMenuController.isShown) {
       hideToolbar();
     }
   }
@@ -1099,10 +1122,10 @@ class SelectionOverlay {
   /// To hide the whole overlay, see [hide].
   /// {@endtemplate}
   void hideToolbar() {
+    ContextMenuController.hide();
     if (_toolbar == null) {
       return;
     }
-    // TODO(justinmc): Should this use ContextMenuController if applicable?
     _toolbar?.remove();
     _toolbar = null;
   }

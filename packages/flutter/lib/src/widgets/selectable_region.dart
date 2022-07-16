@@ -22,8 +22,6 @@ import 'overlay.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
-import 'ticker_provider.dart';
-import 'transitions.dart';
 
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.touch,
@@ -610,35 +608,39 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return true;
     }
 
-    // TODO(justinmc): Actually need to calculate the location if it's null.
-    // Similar to what happens in widgets/text_selection.dart.
-    if (location == null) {
-      return false;
-    }
-
     ContextMenuController.hide();
 
-    // If right clicking on desktop, use the right click position as the only
-    /// anchor.
-    ContextMenuController.show(
-      context: context,
-      buildContextMenu: (BuildContext context) {
-        final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
-        return _SelectionToolbarWrapper(
-          layerLink: _toolbarLayerLink,
-          offset: -Rect.fromPoints(
-            renderBox.localToGlobal(Offset.zero),
-            renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-          ).topLeft,
-          child: _SelectableRegionContextMenuButtonDatasBuilder(
-            delegate: this,
-            builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
-              return widget.buildContextMenu!(context, buttonDatas, location);
-            },
-          ),
+    // If given a location, just display the context menu there.
+    if (location != null) {
+      _selectionOverlay!.showToolbar((BuildContext context) {
+        return _SelectableRegionContextMenuButtonDatasBuilder(
+          delegate: this,
+          builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
+            return widget.buildContextMenu!(context, buttonDatas, location);
+          },
         );
-      },
-    );
+      }, context);
+      return true;
+    }
+
+    // Otherwise, calculate the anchors as the upper and lower horizontal center
+    // of the selection.
+    _selectionOverlay!.showToolbar((BuildContext context) {
+      final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
+      final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
+      final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
+      return _SelectableRegionContextMenuButtonDatasBuilder(
+        delegate: this,
+        builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
+          return widget.buildContextMenu!(
+            context,
+            buttonDatas,
+            _selectionOverlay!.getAnchorAbove(renderBox, lineHeightAtStart, endGlyphHeight),
+            _selectionOverlay!.getAnchorBelow(renderBox, lineHeightAtStart, endGlyphHeight),
+          );
+        },
+      );
+    }, context);
 
     return true;
   }
@@ -1829,62 +1831,5 @@ class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
     }
 
     return builder(context, buttonDatas);
-  }
-}
-
-// TODO(justinmc): Currently this fades in but not out on all platforms. It
-// should follow the correct fading behavior for the current platform, then be
-// made public and de-duplicated with widgets/text_selection.dart.
-// https://github.com/flutter/flutter/issues/107732
-/// Wraps the child in the widgets and behavior that are common to all toolbars.
-class _SelectionToolbarWrapper extends StatefulWidget {
-  const _SelectionToolbarWrapper({
-    required this.layerLink,
-    required this.offset,
-    required this.child,
-  }) : assert(layerLink != null),
-       assert(offset != null),
-       assert(child != null);
-
-  final Widget child;
-  final Offset offset;
-  final LayerLink layerLink;
-
-  @override
-  State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
-}
-
-class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  Animation<double> get _opacity => _controller.view;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: Directionality.of(this.context),
-      child: FadeTransition(
-        opacity: _opacity,
-        child: CompositedTransformFollower(
-          link: widget.layerLink,
-          showWhenUnlinked: false,
-          offset: widget.offset,
-          child: widget.child,
-        ),
-      ),
-    );
   }
 }
