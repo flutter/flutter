@@ -5796,8 +5796,7 @@ void main() {
                 const LoupeSelectionOverlayInfoBearer.empty(),
               )),
           isA<Widget>().having(
-              (Widget widget) => widget.key,
-              'built loupe key equal to passed in loupe key',
+              (Widget widget) => widget.key, 'key',
               equals(customLoupe.key)));
     });
 

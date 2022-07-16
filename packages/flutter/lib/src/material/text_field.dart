@@ -330,7 +330,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeControllerBuilder,
+    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeBuilder,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -393,11 +393,11 @@ class TextField extends StatefulWidget {
                        paste: true,
                      )));
 
-  /// A [LoupeControllerWidgetBuilder] for this [TextField].
+  /// A [LoupeBuilder] for this [TextField].
   ///
   /// If null, then no loupe will be built for this text field. By default, builds a
   /// [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on Android.
-  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
+  final LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
   /// Controls the text being edited.
   ///
@@ -1188,6 +1188,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           }
         };
         break;
+
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         forcePressEnabled = false;

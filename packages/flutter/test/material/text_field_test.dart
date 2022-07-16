@@ -11676,7 +11676,7 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      // Double the 'e' to select 'def'.
+      // Double tap the 'e' to select 'def'.
       await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
       await tester.pump(const Duration(milliseconds: 30));
       await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));

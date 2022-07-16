@@ -781,8 +781,8 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.loupe.loupeControllerWidgetBuilder}
-  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
+  /// {@macro flutter.widgets.loupe.loupeBuilder}
+  final LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();

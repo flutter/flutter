@@ -204,7 +204,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeControllerBuilder,
+    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeBuilder,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -430,8 +430,8 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.loupe.loupeControllerWidgetBuilder}
-  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
+  /// {@macro flutter.widgets.loupe.loupeBuilder}
+  final LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();

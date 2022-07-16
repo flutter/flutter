@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 @Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/cupertino.dart';
@@ -13,7 +14,7 @@ void main() {
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 100);
   final LoupeController loupeController = LoupeController();
 
-  // Note: make sure that your gesture is within threshold of the line,
+  // Make sure that your gesture in infoBearer is within the line in infoBearer,
   // or else the loupe status will stay hidden and this will not complete.
   Future<void> showCupertinoLoupe(
     BuildContext context,
@@ -27,11 +28,9 @@ void main() {
               loupeSelectionOverlayInfoBearer: infoBearer,
             ));
 
-    // The loupe will never be shown if we don't pump the animation
     WidgetsBinding.instance.scheduleFrame();
     await tester.pumpAndSettle();
 
-    // Verify that the loupe is shown
     await loupeShown;
   }
 
@@ -203,12 +202,7 @@ void main() {
                 loupeInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
 
-
-
-        expect(
-          find.byType(Opacity).evaluate().first.widget,
-            isA<Opacity>()
-                .having((Opacity opacity) => opacity.opacity, 'opacity', 0));
+        expect(loupeController.shown, false);
         expect(loupeController.overlayEntry, isNotNull);
       });
 
@@ -247,10 +241,7 @@ void main() {
                 loupeInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
 
-        expect(
-            find.byType(Opacity).evaluate().first.widget,
-            isA<Opacity>()
-                .having((Opacity opacity) => opacity.opacity, 'opacity', 0));
+        expect(loupeController.shown, false);
         expect(loupeController.overlayEntry, isNotNull);
 
         // Return the gesture to one that shows it.
@@ -262,10 +253,7 @@ void main() {
                 reasonableTextField.top));
         await tester.pumpAndSettle();
 
-        expect(
-            find.byType(Opacity).evaluate().first.widget,
-            isA<Opacity>()
-                .having((Opacity opacity) => opacity.opacity, 'opacity', 1));
+        expect(loupeController.shown, true);
         expect(loupeController.overlayEntry, isNotNull);
       });
     });

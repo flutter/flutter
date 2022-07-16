@@ -121,7 +121,7 @@ class LoupeSelectionOverlayInfoBearer {
     );
   }
 
-  /// construct an empty [LoupeSelectionOverlayInfoBearer], with all
+  /// Construct an empty [LoupeSelectionOverlayInfoBearer], with all
   /// values set to 0.
   const LoupeSelectionOverlayInfoBearer.empty() :
     globalGesturePosition = Offset.zero,
@@ -326,7 +326,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder,
+    LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -413,7 +413,7 @@ class TextSelectionOverlay {
 
   /// The loupe and toolbar cannot be shown at the same time, and [_loupeController] is
   /// dominant over [_effectiveToolbarVisibility]. `_effectiveToolbarVisibility.value == true &&
-  /// _loupePosition.value != null` is considered an error, and is asserted as such
+  /// _loupeController.shown == true` is considered an error, and is asserted as such
   /// in the [_updateTextSelectionOverlayVisibilities].
   ///
   /// [_loupeController.show] and [_loupeController.hide] should not be called directly, except
@@ -425,12 +425,15 @@ class TextSelectionOverlay {
   /// explicitly passed in null. Otherwise, it will be a builder function that returns
   /// the platform widget, or null, if no loupe is built for the platform.
   final LoupeController? _loupeController;
-  final LoupeControllerWidgetBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? _loupeBuilder;
+  final LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? _loupeBuilder;
 
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
     _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
+
+    assert(!_effectiveToolbarVisibility.value || !(_loupeController?.shown ?? false),
+                'The loupe and the toolbar cannot be shown at the same time.');
   }
 
   /// Whether selection handles are visible.
@@ -458,7 +461,6 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.hideHandles}
   void hideHandles() => _selectionOverlay.hideHandles();
-
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
@@ -572,7 +574,8 @@ class TextSelectionOverlay {
 
   /// Shows the loupe, and hides the toolbar if it was showing when _showLoupe
   /// was called. This is safe to call on platforms not mobile, since
-  /// a loupeBuilder will not be provided on platforms not mobile.
+  /// a loupeBuilder will not be provided, or the loupeBuilder will return null
+  /// on platforms not mobile.
   ///
   /// This is NOT the souce of truth for if the loupe is up or not,
   /// since, for example, the [CupertinoLoupe] is able to hide itself
@@ -604,7 +607,7 @@ class TextSelectionOverlay {
 
   _loupeController!.show(
     context: context,
-    // Android Loupe does not show the handles, but cupertino does.
+    // On Android, the loupe cannot see the handles. On iOS, it can.
     below: defaultTargetPlatform == TargetPlatform.iOS ? null : _selectionOverlay._handles!.first,
     builder: (BuildContext context) => builtLoupe);
   }

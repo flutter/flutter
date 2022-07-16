@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
@@ -54,8 +58,8 @@ class CupertinoTextEditingLoupe extends StatefulWidget {
 
 class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
     with SingleTickerProviderStateMixin {
-  // Initalize to dummy values just incase the inital call to
-  // _determineLoupePositionAndFocalPoint hides, and thus does not
+  // Initalize to dummy values for the event that the inital call to
+  // _determineLoupePositionAndFocalPoint calls hide, and thus does not
   // set these values.
   Offset _currentAdjustedLoupePosition = Offset.zero;
   double _verticalFocalPointAdjustment = 0;
@@ -110,7 +114,7 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
     if (verticalCenterOfCurrentLine -
             textEditingContext.globalGesturePosition.dy <
         CupertinoTextEditingLoupe._kHideIfBelowThreshold) {
-      // only signal a hide if we are currently showing.
+      // Only signal a hide if we are currently showing.
       if (widget.controller.shown) {
         widget.controller.hide(removeFromOverlay: false);
       }
@@ -189,7 +193,7 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
 /// through a given [LoupeController].
 ///
 /// [CupertinoLoupe] is a wrapper around [RawLoupe] that handles styling
-/// and trasitions.
+/// and transitions.
 ///
 /// See also:
 /// * [RawLoupe], the backing implementation.
@@ -198,14 +202,6 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
 /// * [LoupeController], the controller for this loupe.
 class CupertinoLoupe extends StatelessWidget {
   /// Creates a [RawLoupe] in the Cupertino style.
-  ///
-  /// This loupe has a small drag delay and remains within the bounds of
-  /// [MediaQuery]'s size. [CupertinoLoupe] may not position itself exactly
-  /// at the requestedPosition immediately, or at all if any part of the loupe is determined
-  /// to be out of bounds.
-  ///
-  /// The bounds shift is determined by [LoupeController.shiftWithinBounds], where the loupe
-  /// is shifted within the bounds of the screen size.
   const CupertinoLoupe({
     super.key,
     this.additionalFocalPointOffset = Offset.zero,
@@ -214,13 +210,11 @@ class CupertinoLoupe extends StatelessWidget {
   // These constants were eyeballed on an iPhone XR iOS v15.5.
 
   @visibleForTesting
-
   /// The vertical offset, from the center of the loupe,
   /// that the focal point should point to.
   static const double kVerticalFocalPointOffset = -25;
 
   @visibleForTesting
-
   /// The size of the loupe.
   static const Size kSize = Size(82.5, 45);
 
@@ -229,6 +223,9 @@ class CupertinoLoupe extends StatelessWidget {
       BorderRadius.all(Radius.elliptical(60, 50));
 
   /// This [RawLoupe]'s controller.
+  ///
+  /// Since [CupertinoLoupe] has no knowledge of shown / hidden state,
+  /// this animation should be driven by an external actor.
   final Animation<double>? ioAnimation;
 
   /// Any additional focal point offset, applied over the regular focal

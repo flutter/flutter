@@ -8,30 +8,34 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// {@template flutter.widgets.loupe.loupeControllerWidgetBuilder}
+/// {@template flutter.widgets.loupe.loupeBuilder}
 /// A builder that builds a Widget with a [LoupeController].
 ///
-/// the [LoupeController] should be passed into [RawLoupe.controller]. The third paramater
-/// is any additional info passed to the loupe, if desired.
+/// Consuming [controller] or [data] is not required, although if a
+/// Widget intends to have entry or exit animations, it should take
+/// [controller] and provide it an [AnimationController], so that
+/// [LoupeController] can wait before removing it from the overlay.
+///
+/// [data] is a convienence provided incase some data needs to be passed
+/// to the loupe's [OverlayEntry].
 /// {@endtemplate}
-typedef LoupeControllerWidgetBuilder<T> = Widget? Function(
+typedef LoupeBuilder<T> = Widget? Function(
     BuildContext context, LoupeController controller, T data);
 
-/// Controls an instance of a [RawLoupe], if this [LoupeController] is passed to [RawLoupe.controller].
-/// If unattached to any [RawLoupe] (i.e., not passed to a [RawLoupe]), does nothing.
+
+/// [LoupeController]'s main benefit over holding a raw [OverlayEntry] is that
+/// [LoupeController] will handle logic around waiting for a loupe to animate in or out.
 ///
-/// [LoupeController] handles driving [RawLoupe.transitionAnimationController]'s in / out animation
-/// based on calls to show / hide, respectively.
+/// If a loupe chooses to have an entry / exit animation, it should provide the animation
+/// controller to [LoupeController.animationController]. [LoupeController] will then drive
+/// the [AnimationController] and wait for it to be complete before removing it from the
+/// [Overlay].
 ///
-/// To check the status of the loupe, see [LoupeController.status].
+/// To check the status of the loupe, see [LoupeController.shown].
 // TODO(antholeole): This whole paradigm can be removed once portals
 // lands - then the loupe can be controlled though a widget in the tree.
 // https://github.com/flutter/flutter/pull/105335
 class LoupeController {
-  /// If the loupe show / hide is controlled by an animation, then it should be passed here,
-  /// where this [LoupeController] will wait for the animation to complete before removing
-  /// it from the overlay.
-  ///
   /// If there is no in / out animation for the loupe, [animationController] should be left
   /// null.
   LoupeController({this.animationController}) {
@@ -89,6 +93,12 @@ class LoupeController {
   OverlayEntry? overlayEntry;
 
   /// If the loupe is shown or not.
+  ///
+  /// [shown] is:
+  /// - false when nothing is in the overlay
+  /// - false when [animationController] is [AnimationStatus.dismissed].
+  /// - false when [animationController] is animating out.
+  /// and true in all other circumstances.
   bool get shown {
     if (overlayEntry == null) {
       return false;
@@ -103,9 +113,6 @@ class LoupeController {
   }
 
 
-  /// Function that returns a function and the other function checks platform to check if the builder should be null
-  ///
-  ///
   /// Shows the [RawLoupe] that this controller controlls.
   ///
   /// Returns a future that completes when the loupe is fully shown, i.e. done
@@ -115,7 +122,7 @@ class LoupeController {
   /// [overlayEntry] for more details on how to utilize [below].
   ///
   /// If the loupe already exists (i.e. [overlayEntry] != null), then [show] will
-  /// reshow the old overl.
+  /// reshow the old overlay.
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -175,9 +182,9 @@ class LoupeController {
     }
   }
 
-  /// A utility for calculating a new [Rect] from this rect such that
+  /// A utility for calculating a new [Rect] from [rect] such that
   /// [rect] is fully constrained within [bounds], that is, any point
-  /// in the output rect is guaranteed to also be a point in [bounds].
+  /// in the output rect is guaranteed to also be a point contained in [bounds].
   ///
   /// It is a runtime error for [rect].width to be greater than [bounds].width,
   /// and it is also an error for [rect].height to be greater than [bounds].height.
@@ -186,7 +193,7 @@ class LoupeController {
   /// only that the entirety of the output rect is inside [bounds].
   ///
   /// It is perfectly valid for the output rect to have a point along the edge of the
-  /// [bounds]. If the desired output rect requires that no edges are parrellel to edges
+  /// [bounds]. If the desired output rect requires that no edges are parellel to edges
   /// of [bounds], see [Rect.deflate] by 1 on [bounds] to achieve this effect.
   static Rect shiftWithinBounds({
     required Rect rect,
@@ -253,11 +260,6 @@ class LoupeDecoration extends ShapeDecoration {
 /// A loupe can be convienently managed by [LoupeController], which handles
 /// showing and hiding the loupe, with an optional entry / exit animation.
 ///
-/// {@tool snippet}
-/// A custom loupe over an image of dash, with an entry and exit animation:
-///
-/// {@endtool snippet}
-///
 /// See:
 /// * [LoupeController], a controller to handle loupes in an overlay.
 class RawLoupe extends StatelessWidget {
@@ -266,7 +268,7 @@ class RawLoupe extends StatelessWidget {
   /// {@template flutter.widgets.loupe.loupe.invisibility_warning}
   /// By default, this loupe uses the default [LoupeDecoration],
   /// the focal point is directly under the loupe, and there is no magnification:
-  /// This means that a default loupe will be entirely invisible to the user,
+  /// This means that a default loupe will be entirely invisible to the naked eye,
   /// since it is painting exactly what is under it, exactly where it was painted
   /// orignally.
   /// {@endtemplate}
@@ -291,11 +293,10 @@ class RawLoupe extends StatelessWidget {
   /// the size of the magnifier.
   final Size size;
 
-  /// The offset of the loupe from the widget's origin.
+  /// The offset of the loupe from [RawLoupe]'s center.
   ///
-  /// If [focalPoint] is [Offset.zero], the loupe will be positioned
-  /// with it's center directly on the the top-left corner of the draw
-  /// position. The focal point will always be exactly on the draw position.
+  /// If [focalPoint] is [Offset.zero], then the [focalPoint]
+  /// will point directly below this [RawLoupe].
   final Offset focalPoint;
 
   /// An optional widget to posiiton inside the len of the [RawLoupe].
@@ -340,7 +341,7 @@ class RawLoupe extends StatelessWidget {
 
 /// Because backdrop filter will filter any widgets before it, we should
 /// apply the style after (i.e. in a younger sibling) to avoid the loupe
-/// from seeing it's own styling.
+/// from seeing its own styling.
 class _LoupeStyle extends StatelessWidget {
   const _LoupeStyle(this.decoration, {required this.size});
 
@@ -371,7 +372,7 @@ class _LoupeStyle extends StatelessWidget {
 /// entirely covered by the shadow.
 ///
 /// The negative space of the donut is clipped out (the donut hole, outside the donut).
-/// Rhe donut hole is cut out exactly like the shape of the Loupe.
+/// The donut hole is cut out exactly like the shape of the Loupe.
 class _DonutClip extends CustomClipper<Path> {
   _DonutClip({required this.shape});
 
@@ -397,7 +398,7 @@ class _DonutClip extends CustomClipper<Path> {
 }
 
 class _Magnifier extends SingleChildRenderObjectWidget {
-  /// Construct a [_Magnifier],
+  /// Construct a [_Magnifier].
   _Magnifier(
       {super.child,
       ShapeBorder? shape,

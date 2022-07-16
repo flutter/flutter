@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 @Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/cupertino.dart';
@@ -60,7 +61,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeControllerBuilder(
+          TextEditingLoupe.adaptiveLoupeBuilder(
               context,
               LoupeController(),
               ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -79,7 +80,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeControllerBuilder(
+          TextEditingLoupe.adaptiveLoupeBuilder(
               context,
               LoupeController(),
               ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -98,7 +99,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeControllerBuilder(
+          TextEditingLoupe.adaptiveLoupeBuilder(
               context,
               LoupeController(),
               ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -340,8 +341,7 @@ void main() {
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
-        expect(
-            getLoupeAdditionalFocalPoint(tester).dy, greaterThanOrEqualTo(0));
+        expect(getLoupeAdditionalFocalPoint(tester).dy, greaterThanOrEqualTo(0));
       });
     });
 

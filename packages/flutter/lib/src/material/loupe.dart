@@ -14,7 +14,7 @@ import 'package:flutter/src/cupertino/loupe.dart';
 /// {@template widgets.material.loupe.positionRules}
 /// Positions itself based on [loupeSelectionOverlayInfoBearer]. Specifically, follows the
 /// following rules:
-/// - Tracks the gesture, but clamped to the beginning and end of the currently editing line.
+/// - Tracks the gesture's X, but clamped to the beginning and end of the currently editing line.
 /// - Focal point may never contain anything out of bounds.
 /// - Never goes out of bounds vertically; offset until the entire loupe is in the screen. The
 /// focal point, regardless of this transformation, always points to the touch Y.
@@ -27,10 +27,10 @@ class TextEditingLoupe extends StatefulWidget {
   const TextEditingLoupe(
       {super.key, required this.loupeSelectionOverlayInfoBearer});
 
-  /// A [LoupeControllerWidgetBuilder]<[LoupeSelectionOverlayInfoBearer]>
+  /// A [LoupeBuilder]<[LoupeSelectionOverlayInfoBearer]>
   /// that returns a [CupertinoTextEditingLoupe] on iOS, [TextEditingLoupe]
   /// on Android, and null on all other platforms.
-  static Widget? adaptiveLoupeControllerBuilder(
+  static Widget? adaptiveLoupeBuilder(
     BuildContext context,
     LoupeController controller,
     ValueNotifier<LoupeSelectionOverlayInfoBearer>
@@ -51,7 +51,8 @@ class TextEditingLoupe extends StatefulWidget {
     return null;
   }
 
-  /// The duration that the position is animated if [TextEditingLoupe] just jumped between lines.
+  /// The duration that the position is animated if [TextEditingLoupe] just switched
+  /// between lines.
   @visibleForTesting
   static const Duration jumpBetweenLinesAnimationDuration =
       Duration(milliseconds: 70);
@@ -70,14 +71,15 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
   // Should _only_ be null on construction. This is because of the animation logic.
   //
   // {@template flutter.material.materialTextEditingLoupe.loupePosition.nullReason}
-  // animations are added when last_build_y != current_build_y, but this condition
-  // is true on the inital render which is undesired. Thus, this is null for the
+  // animations are added when last_build_y != current_build_y. This condition
+  // is true on the inital render, which would mean that the inital
+  // build would be animated - this is undesired. Thus, this is null for the
   // first frame and the condition becomes [loupePosition != null && last_build_y != this_build_y].
   // {@endtemplate}
   Offset? _loupePosition;
 
   // A timer that unsets itself after an animation duration.
-  // If the timer exists, then the loupe animates it's position -
+  // If the timer exists, then the loupe animates its position -
   // if this timer does not exist, the loupe tracks the gesture (with respect
   // to the positioning rules) directly.
   Timer? _positionShouldBeAnimatedTimer;
@@ -130,14 +132,14 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
         selectionInfo.currentLineBoundries.left,
         selectionInfo.currentLineBoundries.right);
 
-    //place the loupe at the previously calculated X, and the Y should be
+    // Place the loupe at the previously calculated X, and the Y should be
     // exactly at the center of the handle.
     final Rect unadjustedLoupeRect =
         Offset(loupeX, selectionInfo.handleRect.center.dy) - basicLoupeOffset &
             Loupe.kSize;
 
     // Shift the loupe so that, if we are ever out of the screen, we become in bounds.
-    // Note that this probably won't have much an effect on the X, since we already bound
+    // This probably won't have much an effect on the X, since we already bound
     // to the currentLineBoundries, but will shift vertically if the loupe is out of bounds.
     final Rect screenBoundsAdjustedLoupeRect =
         LoupeController.shiftWithinBounds(
@@ -170,8 +172,8 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     }
 
     // Since the previous value is now a global offset (i.e. globalFocalPoint
-    // now points directly to a part of the screen), we must subtract our global offset
-    // so that we now have the shift in the focal point required.
+    // is now a global offset), we must subtract the loupe's global offset
+    // to obtain the relative shift in the focal point.
     final double newRelativeFocalPointX =
         screenBoundsAdjustedLoupeRect.center.dx - newGlobalFocalPointX;
 
@@ -242,12 +244,10 @@ class Loupe extends StatelessWidget {
   });
 
   @visibleForTesting
-
   /// The size of the loupe.
   static const Size kSize = Size(77.37, 37.9);
 
   @visibleForTesting
-
   /// The vertical shift that the loupe should be over the focal point.
   static const double kStandardVerticalFocalPointShift = -18;
   static const Color _filmColor = Color.fromARGB(8, 158, 158, 158);
