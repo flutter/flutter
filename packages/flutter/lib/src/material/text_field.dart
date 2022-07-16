@@ -9,12 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/loupe.dart';
 
 import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'input_decorator.dart';
+import 'loupe.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';

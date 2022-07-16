@@ -8,12 +8,12 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/cupertino/loupe.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
+import 'loupe.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 

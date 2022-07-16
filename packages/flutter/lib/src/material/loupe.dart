@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/src/cupertino/loupe.dart';
 
 /// {@template widgets.material.loupe.loupe}
 /// A [Loupe] positioned by rules dictated by the native Android loupe.
