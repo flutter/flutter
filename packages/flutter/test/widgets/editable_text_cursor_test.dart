@@ -901,7 +901,7 @@ void main() {
 
     expect(editable, paints
       ..rrect(
-      rrect: RRect.fromRectAndRadius(
+        rrect: RRect.fromRectAndRadius(
           const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
           const Radius.circular(2.0),
         ),
