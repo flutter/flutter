@@ -3029,7 +3029,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
@@ -3039,7 +3038,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: hello_world_android__compile
-    scheduler: luci
 
   - name: Mac_arm64_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
@@ -3049,7 +3047,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: hello_world_android__compile
-    scheduler: luci
 
   - name: Mac_android hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
@@ -3059,7 +3056,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: hot_mode_dev_cycle__benchmark
-    scheduler: luci
 
   - name: Mac_android integration_test_test
     recipe: devicelab/devicelab_drone
@@ -3069,7 +3065,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: integration_test_test
-    scheduler: luci
 
   - name: Mac_arm64_android integration_test_test
     recipe: devicelab/devicelab_drone
@@ -3088,7 +3083,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: integration_ui_frame_number
-    scheduler: luci
 
   - name: Mac_android microbenchmarks
     recipe: devicelab/devicelab_drone
@@ -3098,7 +3092,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
-    scheduler: luci
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
@@ -3110,7 +3103,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: run_release_test
-    scheduler: luci
 
   - name: Mac_arm64_android run_release_test
     recipe: devicelab/devicelab_drone
@@ -3122,7 +3114,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: run_release_test
-    scheduler: luci
 
   - name: Mac_android flutter_gallery_mac__start_up
     recipe: devicelab/devicelab_drone
@@ -3132,7 +3123,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: flutter_gallery_mac__start_up
-    scheduler: luci
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -4203,7 +4193,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: basic_material_app_win__compile
-    scheduler: luci
 
   - name: Windows_android channels_integration_test_win
     recipe: devicelab/devicelab_drone
@@ -4213,7 +4202,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: channels_integration_test_win
-    scheduler: luci
 
   - name: Windows_android complex_layout_win__compile
     recipe: devicelab/devicelab_drone
@@ -4227,7 +4215,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Windows_android flavors_test_win
     recipe: devicelab/devicelab_drone
@@ -4238,7 +4225,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: flavors_test_win
-    scheduler: luci
 
   - name: Windows_android flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
@@ -4248,7 +4234,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: flutter_gallery_win__compile
-    scheduler: luci
 
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
     recipe: devicelab/devicelab_drone
@@ -4258,7 +4243,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: hot_mode_dev_cycle_win__benchmark
-    scheduler: luci
 
   - name: Windows_android windows_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -4268,4 +4252,3 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
-    scheduler: luci
