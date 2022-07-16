@@ -2623,13 +2623,17 @@ void main() {
   });
 
   testWidgets('Remove bottom insets delegate', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final TextEditingController textEditingController = TextEditingController();
     final GlobalKey textEditingKey = GlobalKey();
 
+    double? removedBottomInset;
+    expect(removedBottomInset == null, true);
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        key: scaffoldKey,
+        onRemoveBottomInset: (EdgeInsets edgeInsets) {
+          removedBottomInset = edgeInsets.bottom;
+        },
         body: TextField(
           key: textEditingKey,
           controller: textEditingController,
@@ -2637,24 +2641,9 @@ void main() {
       ),
     ));
 
-    await tester.pump();
+    expect(removedBottomInset == 0.0, true);
 
-    // Starts null
-    double? removedBottomInset;
-    scaffoldKey.currentState?.onRemoveBottomInsets = (EdgeInsets edgeInsets) {
-      removedBottomInset = edgeInsets.bottom;
-    };
-    expect(removedBottomInset == null, true);
-
-    // Show the keyboard and it should update the removed bottom inset
-    final Finder textFieldFinder = find.byKey(textEditingKey);
-    await tester.showKeyboard(textFieldFinder);
-    await tester.pump(const Duration(milliseconds: 400));
-
-    // I don't know how to make the keyboard really open here and add the view
-    //  insets, i have tested this in my project and it works, its a simple
-    //  feature that doesn't interact with anything else
-    // expect(removedBottomInset != null, true);
+    // I really don't think its possible to have any bottom inset in the test
   });
 }
 

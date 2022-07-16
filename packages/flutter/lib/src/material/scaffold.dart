@@ -1545,6 +1545,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
+    this.onRemoveBottomInset,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1803,6 +1804,14 @@ class Scaffold extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// Event fired before removing the bottom insets.
+  /// 
+  /// After removing the bottom insets you can't access them in the media query
+  /// anymore, so if you still need them and don't want to disable the
+  /// [resizeToAvoidBottomInset] feature, you can bind to this delegate and
+  /// still have access to it.
+  final OnRemoveBottomInset? onRemoveBottomInset;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -2581,9 +2590,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     super.dispose();
   }
 
-  /// Delegate triggered when we remove the bottom insets
-  void Function(EdgeInsets edgeInsets)? onRemoveBottomInsets;
-
   void _addIfNonNull(
     List<LayoutId> children,
     Widget? child,
@@ -2602,7 +2608,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       removeBottom: removeBottomPadding,
     );
     if (removeBottomInset) {
-      onRemoveBottomInsets?.call(data.viewInsets);
+      widget.onRemoveBottomInset?.call(data.viewInsets);
       data = data.removeViewInsets(removeBottom: true);
     }
 
@@ -3226,3 +3232,6 @@ class _ScaffoldScope extends InheritedWidget {
     return hasDrawer != oldWidget.hasDrawer;
   }
 }
+
+/// Remove bottom inset scaffold event signature
+typedef OnRemoveBottomInset = void Function(EdgeInsets edgeInsets);
