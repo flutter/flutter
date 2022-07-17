@@ -2798,6 +2798,36 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
+
+      testWithoutContext('cannot have empty key', () {
+        const String emptyKeyArbFile = '''
+{
+  "": "value of an empty key"
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(emptyKeyArbFile);
+
+        expect(
+              () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+                (L10nException e) => e.message,
+            'message',
+            contains('Invalid ARB resource name'),
+          )),
+        );
+      });
     });
 
     testWithoutContext('throws when the language code is not supported', () {
