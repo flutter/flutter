@@ -1024,8 +1024,8 @@ void main() {
     final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
     final PlatformViewLayer platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
 
-    expect(textureLayer.supportsRasterization(), true);
-    expect(platformViewLayer.supportsRasterization(), true);
+    expect(textureLayer.supportsRasterization(), false);
+    expect(platformViewLayer.supportsRasterization(), false);
   });
 }
 
