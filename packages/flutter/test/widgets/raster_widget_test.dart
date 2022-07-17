@@ -32,7 +32,7 @@ void main() {
     await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('raster_widget.yellow.png'));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RasterWidget is a repaint boundary when rasterizing', (WidgetTester tester) async {
+  testWidgets('RasterWidget is not a repaint boundary when rasterizing', (WidgetTester tester) async {
     final RasterWidgetController controller = RasterWidgetController(rasterize: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
@@ -47,9 +47,8 @@ void main() {
       ),
     ));
 
-    expect(tester.layers, hasLength(4));
+    expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
-    expect(tester.layers[2], isA<OffsetLayer>());
 
     controller.rasterize = false;
     await tester.pump();
@@ -270,6 +269,111 @@ void main() {
     expect(updatedController.addedListenerCount, 0);
     expect(updatedController.removedListenerCount, 0);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('RenderRasterWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RasterWidget(
+            delegate: delegate,
+            controller: controller,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+
+  testWidgets('RenderRasterWidget throws assertion if platform view is encountered', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RasterWidget(
+            delegate: delegate,
+            controller: controller,
+            child: const SizedBox(
+              width: 100,
+              height: 100,
+              child: TestPlatformView(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<FlutterError>()
+      .having((FlutterError error) => error.message, 'message', contains('RasterWidget used with a child that contains a PlatformView')));
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('RenderRasterWidget does not assert if ignorePlatformViews is true', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RasterWidget(
+            delegate: delegate,
+            controller: controller,
+            ignorePlatformViews: true,
+            child: const SizedBox(
+              width: 100,
+              height: 100,
+              child: TestPlatformView(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('RenderRasterWidget fallbacks to delegate if PlatformView is present', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final TestFallback fallback = TestFallback();
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RasterWidget(
+            delegate: delegate,
+            controller: controller,
+            fallback: fallback,
+            child: const SizedBox(
+              width: 100,
+              height: 100,
+              child: TestPlatformView(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(fallback.calledFallback, 1);
+    expect(delegate.count, 0);
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+}
+
+class TestFallback extends RasterWidgetFallbackDelegate {
+  int calledFallback = 0;
+
+  @override
+  void paintFallback(PaintingContext context, ui.Offset offset, ui.Size size, PaintingContextCallback painter) {
+    calledFallback += 1;
+  }
+
 }
 
 class TestController extends RasterWidgetController {
@@ -321,4 +425,22 @@ class TestDelegate extends RasterWidgetDelegate {
 
   @override
   bool shouldRepaint(covariant RasterWidgetDelegate oldDelegate) => shouldRepaintValue;
+}
+
+
+class TestPlatformView extends SingleChildRenderObjectWidget {
+  const TestPlatformView({super.key});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderTestPlatformView();
+  }
+}
+
+class RenderTestPlatformView extends RenderProxyBox {
+
+  @override
+  void paint(PaintingContext context, ui.Offset offset) {
+    context.addLayer(PlatformViewLayer(rect: offset & size, viewId: 1));
+  }
 }

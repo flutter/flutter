@@ -56,13 +56,16 @@ class RasterWidgetController extends ChangeNotifier {
 ///
 /// Instead, this interface is useful if a generic/reusable widget is being created which
 /// may include a platform view and it needs to handle this transparently. For example, the
-/// framework uses this for the zoom page transition so that users that navigating to a
-/// page with a platform view just works.
+/// framework uses this for the zoom page transition so that navigating to a page shows the same
+/// animation whether or not there is a platform view.
 abstract class RasterWidgetFallbackDelegate {
   /// const constructor so that subclasses can be const.
   const RasterWidgetFallbackDelegate();
 
+  /// Paint the child via [painter], applying any effects that would have been painted
+  /// with the [RasterWidgetDelegate].
   ///
+  /// The [offset] and [size] are the location and dimensions of the render object.
   void paintFallback(PaintingContext context, Offset offset, Size size, PaintingContextCallback painter);
 }
 
@@ -323,7 +326,7 @@ class RenderRasterWidget extends RenderProxyBox {
     // that would conflict with our goals of minimizing painting context.
     // ignore: invalid_use_of_protected_member
     context.stopRecordingIfNeeded();
-    if (!ignorePlatformViews && offsetLayer.containsPlatformView()) {
+    if (!ignorePlatformViews && !offsetLayer.supportsRasterization()) {
       _hitPlatformView = true;
       if (fallback == null) {
         assert(() {
@@ -341,6 +344,11 @@ class RenderRasterWidget extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (size.isEmpty) {
+      _childRaster?.dispose();
+      _childRaster = null;
+      return;
+    }
     if (controller.rasterize) {
       if (_hitPlatformView) {
         fallback?.paintFallback(context, offset, size, super.paint);

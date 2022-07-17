@@ -998,6 +998,35 @@ void main() {
     root.dispose();
     expect(() => callback(), returnsNormally);
   });
+
+  test('Layer types that support rasterization', () {
+    // Supported.
+    final OffsetLayer offsetLayer = OffsetLayer();
+    final OpacityLayer opacityLayer = OpacityLayer();
+    final ClipRectLayer clipRectLayer = ClipRectLayer();
+    final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
+    final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
+    final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
+    final PhysicalModelLayer physicalModelLayer = PhysicalModelLayer();
+    final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
+    final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
+    expect(offsetLayer.supportsRasterization(), true);
+    expect(opacityLayer.supportsRasterization(), true);
+    expect(clipRectLayer.supportsRasterization(), true);
+    expect(clipRRectLayer.supportsRasterization(), true);
+    expect(imageFilterLayer.supportsRasterization(), true);
+    expect(backdropFilterLayer.supportsRasterization(), true);
+    expect(physicalModelLayer.supportsRasterization(), true);
+    expect(colorFilterLayer.supportsRasterization(), true);
+    expect(shaderMaskLayer.supportsRasterization(), true);
+
+    // Unsupported.
+    final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
+    final PlatformViewLayer platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
+
+    expect(textureLayer.supportsRasterization(), true);
+    expect(platformViewLayer.supportsRasterization(), true);
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {

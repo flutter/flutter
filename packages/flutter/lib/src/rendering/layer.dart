@@ -168,9 +168,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   bool _debugMutationsLocked = false;
 
-  /// Whether or not this layer, or any child layers, contains a [PlatformViewLayer].
-  bool containsPlatformView() {
-    return false;
+  /// Whether or not this layer, or any child layers, can be rasterized with
+  /// [Scene.toImage] or [Scene.toImageSync].
+  ///
+  /// If `false`, calling the above methods may yield an image which is
+  /// incomplete.
+  bool supportsRasterization() {
+    return true;
   }
 
   /// Describes the clip that would be applied to contents of this layer,
@@ -882,7 +886,7 @@ class TextureLayer extends Layer {
 
   // TODO(jonahwilliams): remove once https://github.com/flutter/flutter/issues/107576 is fixed.
   @override
-  bool containsPlatformView() {
+  bool supportsRasterization() {
     return true;
   }
 
@@ -937,8 +941,8 @@ class PlatformViewLayer extends Layer {
   final int viewId;
 
   @override
-  bool containsPlatformView() {
-    return true;
+  bool supportsRasterization() {
+    return false;
   }
 
   @override
@@ -1060,13 +1064,13 @@ class ContainerLayer extends Layer {
   bool get hasChildren => _firstChild != null;
 
   @override
-  bool containsPlatformView() {
+  bool supportsRasterization() {
     for (Layer? child = lastChild; child != null; child = child.previousSibling) {
-      if (child.containsPlatformView()) {
-        return true;
+      if (!child.supportsRasterization()) {
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   /// Consider this layer as the root and build a scene (a tree of layers)
