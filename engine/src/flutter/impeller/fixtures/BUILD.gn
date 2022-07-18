@@ -16,7 +16,6 @@ impeller_shaders("shader_fixtures") {
     "impeller.vert",
     "instanced_draw.frag",
     "instanced_draw.vert",
-    "sample.vert",
     "simple.vert",
     "test_texture.frag",
     "test_texture.vert",

@@ -15,6 +15,10 @@
 #include "impeller/playground/backend/gles/playground_impl_gles.h"
 #endif  // IMPELLER_ENABLE_OPENGLES
 
+#if IMPELLER_ENABLE_VULKAN
+#include "impeller/playground/backend/vulkan/playground_impl_vk.h"
+#endif  // IMPELLER_ENABLE_VULKAN
+
 namespace impeller {
 
 std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
@@ -28,6 +32,10 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
     case PlaygroundBackend::kOpenGLES:
       return std::make_unique<PlaygroundImplGLES>();
 #endif  // IMPELLER_ENABLE_OPENGLES
+#if IMPELLER_ENABLE_VULKAN
+    case PlaygroundBackend::kVulkan:
+      return std::make_unique<PlaygroundImplVK>();
+#endif  // IMPELLER_ENABLE_VULKAN
     default:
       FML_CHECK(false) << "Attempted to create playground with backend that "
                           "isn't available or was disabled on this platform: "

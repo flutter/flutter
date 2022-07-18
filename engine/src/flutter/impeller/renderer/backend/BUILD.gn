@@ -14,4 +14,8 @@ group("backend") {
   if (impeller_enable_opengles) {
     public_deps += [ "gles" ]
   }
+
+  if (impeller_enable_vulkan) {
+    public_deps += [ "vulkan" ]
+  }
 }

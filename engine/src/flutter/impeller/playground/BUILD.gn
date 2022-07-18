@@ -33,6 +33,13 @@ impeller_component("playground") {
     ]
   }
 
+  if (impeller_enable_vulkan) {
+    sources += [
+      "backend/vulkan/playground_impl_vk.cc",
+      "backend/vulkan/playground_impl_vk.h",
+    ]
+  }
+
   public_deps = [
     "../entity:entity_shaders",
     "../fixtures:shader_fixtures",

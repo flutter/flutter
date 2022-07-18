@@ -15,6 +15,7 @@ namespace compiler {
 static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
     {"metal-desktop", TargetPlatform::kMetalDesktop},
     {"metal-ios", TargetPlatform::kMetalIOS},
+    {"vulkan", TargetPlatform::kVulkan},
     {"opengl-es", TargetPlatform::kOpenGLES},
     {"opengl-desktop", TargetPlatform::kOpenGLDesktop},
     {"flutter-spirv", TargetPlatform::kFlutterSPIRV},

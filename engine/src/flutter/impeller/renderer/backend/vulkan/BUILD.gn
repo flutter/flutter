@@ -1,0 +1,51 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../../tools/impeller.gni")
+
+impeller_component("vulkan") {
+  sources = [
+    "allocator_vk.cc",
+    "allocator_vk.h",
+    "capabilities_vk.cc",
+    "capabilities_vk.h",
+    "command_buffer_vk.cc",
+    "command_buffer_vk.h",
+    "context_vk.cc",
+    "context_vk.h",
+    "device_buffer_vk.cc",
+    "device_buffer_vk.h",
+    "formats_vk.cc",
+    "formats_vk.h",
+    "pipeline_library_vk.cc",
+    "pipeline_library_vk.h",
+    "pipeline_vk.cc",
+    "pipeline_vk.h",
+    "render_pass_vk.cc",
+    "render_pass_vk.h",
+    "sampler_library_vk.cc",
+    "sampler_library_vk.h",
+    "sampler_vk.cc",
+    "sampler_vk.h",
+    "shader_function_vk.cc",
+    "shader_function_vk.h",
+    "shader_library_vk.cc",
+    "shader_library_vk.h",
+    "surface_vk.cc",
+    "surface_vk.h",
+    "texture_vk.cc",
+    "texture_vk.h",
+    "vertex_descriptor_vk.cc",
+    "vertex_descriptor_vk.h",
+    "vk.h",
+  ]
+
+  public_deps = [
+    "../../:renderer",
+    "../../../blobcat:blobcat_lib",
+    "//flutter/fml",
+    "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
+    "//third_party/vulkan_memory_allocator",
+  ]
+}

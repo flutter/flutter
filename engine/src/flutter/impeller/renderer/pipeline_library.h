@@ -21,6 +21,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   PipelineFuture GetRenderPipeline(
       std::optional<PipelineDescriptor> descriptor);
 
+  virtual bool IsValid() const = 0;
+
   virtual PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor) = 0;
 
  protected:

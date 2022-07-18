@@ -167,6 +167,11 @@ static bool LinkProgram(
 }
 
 // |PipelineLibrary|
+bool PipelineLibraryGLES::IsValid() const {
+  return reactor_ != nullptr;
+}
+
+// |PipelineLibrary|
 PipelineFuture PipelineLibraryGLES::GetRenderPipeline(
     PipelineDescriptor descriptor) {
   if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
@@ -205,6 +210,7 @@ PipelineFuture PipelineLibraryGLES::GetRenderPipeline(
             new PipelineGLES(reactor_ptr, strong_this, descriptor));
         auto program = reactor.GetGLHandle(pipeline->GetProgramHandle());
         if (!program.has_value()) {
+          promise->set_value(nullptr);
           VALIDATION_LOG << "Could not obtain program handle.";
           return;
         }

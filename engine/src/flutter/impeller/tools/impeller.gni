@@ -17,7 +17,10 @@ declare_args() {
   impeller_enable_metal = is_mac || is_ios
 
   # Whether the OpenGLES backend is enabled.
-  impeller_enable_opengles = is_mac || is_linux || is_android || is_win
+  impeller_enable_opengles = is_mac || is_linux || is_android
+
+  # Whether the Vulkan backend is enabled.
+  impeller_enable_vulkan = false
 
   # Whether to use a prebuilt impellerc.
   # If this is the empty string, impellerc will be built.
@@ -35,11 +38,13 @@ declare_args() {
 declare_args() {
   # Whether Impeller shaders are supported on the platform.
   impeller_shaders_supports_platform =
-      impeller_enable_metal || impeller_enable_opengles
+      impeller_enable_metal || impeller_enable_opengles ||
+      impeller_enable_vulkan
 
   # Whether Impeller supports rendering on the platform.
   impeller_supports_rendering =
-      impeller_enable_metal || impeller_enable_opengles
+      impeller_enable_metal || impeller_enable_opengles ||
+      impeller_enable_vulkan
 }
 
 # ------------------------------------------------------------------------------
@@ -493,6 +498,60 @@ template("impeller_shaders_gles") {
   }
 }
 
+template("impeller_shaders_vk") {
+  assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+  assert(defined(invoker.name), "Name of the shader library must be specified.")
+
+  shaders_base_name = string_join("",
+                                  [
+                                    invoker.name,
+                                    "_shaders_vk",
+                                  ])
+  impellerc_vk = "impellerc_$target_name"
+  impellerc(impellerc_vk) {
+    shaders = invoker.shaders
+    sl_file_extension = "vkspv"
+
+    # Metal reflectors generate a superset of information.
+    if (impeller_enable_metal) {
+      intermediates_subdir = "vk"
+    }
+    shader_target_flag = "--vulkan"
+
+    defines = [ "IMPELLER_TARGET_VULKAN" ]
+  }
+
+  vk_lib = "genlib_$target_name"
+  blobcat_library(vk_lib) {
+    shaders =
+        filter_include(get_target_outputs(":$impellerc_vk"), [ "*.vkspv" ])
+    deps = [ ":$impellerc_vk" ]
+  }
+
+  reflect_vk = "reflect_$target_name"
+  impellerc_reflect(reflect_vk) {
+    impellerc_invocation = ":$impellerc_vk"
+  }
+
+  embed_vk_lib = "embed_$target_name"
+  embed_blob(embed_vk_lib) {
+    vk_library_files = get_target_outputs(":$vk_lib")
+    symbol_name = shaders_base_name
+    blob = vk_library_files[0]
+    hdr = "$target_gen_dir/vk/$shaders_base_name.h"
+    cc = "$target_gen_dir/vk/$shaders_base_name.c"
+    deps = [ ":$vk_lib" ]
+  }
+
+  group(target_name) {
+    public_deps = [ ":$embed_vk_lib" ]
+
+    if (!impeller_enable_metal) {
+      public_deps += [ ":$reflect_vk" ]
+    }
+  }
+}
+
 template("impeller_shaders") {
   if (impeller_enable_metal) {
     mtl_shaders = "mtl_$target_name"
@@ -510,6 +569,14 @@ template("impeller_shaders") {
     }
   }
 
+  if (impeller_enable_vulkan) {
+    vk_shaders = "vk_$target_name"
+    impeller_shaders_vk(vk_shaders) {
+      name = invoker.name
+      shaders = invoker.shaders
+    }
+  }
+
   if (!impeller_shaders_supports_platform) {
     not_needed(invoker, "*")
   }
@@ -522,6 +589,10 @@ template("impeller_shaders") {
 
     if (impeller_enable_opengles) {
       public_deps += [ ":$gles_shaders" ]
+    }
+
+    if (impeller_enable_vulkan) {
+      public_deps += [ ":$vk_shaders" ]
     }
   }
 }

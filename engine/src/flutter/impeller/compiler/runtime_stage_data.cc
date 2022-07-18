@@ -58,6 +58,7 @@ static std::optional<fb::TargetPlatform> ToTargetPlatform(
     case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
+    case TargetPlatform::kVulkan:
       return std::nullopt;
     case TargetPlatform::kRuntimeStageMetal:
       return fb::TargetPlatform::kMetal;
