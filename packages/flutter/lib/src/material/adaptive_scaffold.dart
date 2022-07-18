@@ -176,6 +176,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
+  /// Animation from bottom offscreen up onto the screen.
   static AnimatedWidget bottomToTop(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
@@ -186,6 +187,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
+  /// Animation from on the screen down off the screen.
   static AnimatedWidget topToBottom(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
@@ -196,6 +198,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
+  /// Animation from left off the screen into the screen.
   static AnimatedWidget leftOutIn(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
@@ -206,6 +209,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
+  /// Animation from on screen to left off screen.
   static AnimatedWidget leftInOut(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
@@ -216,6 +220,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
+  /// Animation from right off screen to on screen.
   static AnimatedWidget rightOutIn(Widget child, AnimationController animation) {
     return SlideTransition(
       position: Tween<Offset>(
@@ -226,6 +231,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
+  /// Fade in animation.
   static Widget fadeIn(Widget child, AnimationController animation) {
     return FadeTransition(
       opacity: CurvedAnimation(parent: animation, curve: Curves.easeInCubic),
@@ -233,6 +239,7 @@ class AdaptiveScaffold extends StatefulWidget {
     );
   }
 
+  /// Fade out animation.
   static Widget fadeOut(Widget child, AnimationController animation) {
     return FadeTransition(
       opacity: CurvedAnimation(parent: ReverseAnimation(animation), curve: Curves.easeInCubic),
