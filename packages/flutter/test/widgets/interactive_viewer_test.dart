@@ -8,7 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
 import 'gesture_utils.dart';
 
@@ -1269,9 +1269,11 @@ void main() {
     testWidgets('LayoutBuilder is only used for InteractiveViewer.builder', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Center(
-            child: InteractiveViewer(
-              child: const SizedBox(width: 200.0, height: 200.0),
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
             ),
           ),
         ),
@@ -1281,11 +1283,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Center(
-            child: InteractiveViewer.builder(
-              builder: (BuildContext context, Quad viewport) {
-                return const SizedBox(width: 200.0, height: 200.0);
-              },
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer.builder(
+                builder: (BuildContext context, Quad viewport) {
+                  return const SizedBox(width: 200.0, height: 200.0);
+                },
+              ),
             ),
           ),
         ),

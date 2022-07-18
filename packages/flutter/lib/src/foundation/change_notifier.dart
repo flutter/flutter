@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show VoidCallback;
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
-import 'basic_types.dart';
 import 'diagnostics.dart';
 
 export 'dart:ui' show VoidCallback;

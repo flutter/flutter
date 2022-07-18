@@ -393,7 +393,7 @@ abstract class PageTransitionsBuilder {
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
   ///
-  /// The [MaterialPageRoute.buildTransitions] method looks up the current
+  /// The [MaterialPageRoute.buildTransitions] method looks up the
   /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
   /// and delegates to this method with a [PageTransitionsBuilder] based
   /// on the theme's [ThemeData.platform].
@@ -533,7 +533,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// Defines the page transition animations used by [MaterialPageRoute]
 /// for different [TargetPlatform]s.
 ///
-/// The [MaterialPageRoute.buildTransitions] method looks up the current
+/// The [MaterialPageRoute.buildTransitions] method looks up the
 /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
 /// and delegates to [buildTransitions].
 ///

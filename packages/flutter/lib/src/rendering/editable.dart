@@ -4,14 +4,13 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, PlaceholderAlignment, LineMetrics;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, PlaceholderAlignment, TextBox;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'custom_paint.dart';
@@ -113,7 +112,7 @@ class TextSelectionPoint {
 /// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
 /// be checked before calling [movePrevious] and [moveNext], or accessing
 /// [current].
-class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
+class VerticalCaretMovementRun extends Iterator<TextPosition> {
   VerticalCaretMovementRun._(
     this._editable,
     this._lineMetrics,
@@ -187,7 +186,9 @@ class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
     return true;
   }
 
-  @override
+  /// Move back to the previous element.
+  ///
+  /// Returns true and updates [current] if successful.
   bool movePrevious() {
     assert(isValid);
     if (_currentLine <= 0) {
