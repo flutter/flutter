@@ -911,7 +911,7 @@ class SelectionOverlay {
   /// This is useful for displaying toolbars at the mouse right-click locations
   /// in desktop devices.
   @Deprecated(
-    "Use `showToolbar`'s `buildContextMenu` parameter instead. "
+    'Use the `buildContextMenu` parameter in `showToolbar` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Offset? get toolbarLocation => _toolbarLocation;
