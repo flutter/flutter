@@ -775,6 +775,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
     AndroidApk? app,
     bool includePastLogs = false,
   }) {
+    if (onGetLogReader == null) {
+      throw UnimplementedError(
+        'Called getLogReader but no onGetLogReader callback was supplied in the constructor to FakeAndroidDevice.',
+      );
+    }
     return onGetLogReader!();
   }
 
