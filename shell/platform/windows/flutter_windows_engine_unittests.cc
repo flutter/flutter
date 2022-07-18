@@ -374,5 +374,20 @@ TEST(FlutterWindowsEngine, AddPluginRegistrarDestructionCallback) {
   EXPECT_EQ(result2, 2);
 }
 
+TEST(FlutterWindowsEngine, ScheduleFrame) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  bool called = false;
+  modifier.embedder_api().ScheduleFrame =
+      MOCK_ENGINE_PROC(ScheduleFrame, ([&called](auto engine) {
+                         called = true;
+                         return kSuccess;
+                       }));
+
+  engine->ScheduleFrame();
+  EXPECT_TRUE(called);
+}
+
 }  // namespace testing
 }  // namespace flutter
