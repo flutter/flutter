@@ -2,18 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js' as js;
-
+import 'package:js/js.dart';
+import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
+@JS('_flutter')
+external set loader(Object? loader);
+
+@JS('_flutter.loader.didCreateEngineInitializer')
+external set didCreateEngineInitializer(Object? callback);
+
 void main() {
   // Prepare _flutter.loader.didCreateEngineInitializer, so it's ready in the page ASAP.
-  js.context['_flutter'] = js.JsObject.jsify(<String, Object>{
+  loader = js_util.jsify(<String, Object>{
     'loader': <String, Object>{
-      'didCreateEngineInitializer': js.allowInterop(() { print('not mocked'); }),
+      'didCreateEngineInitializer': allowInterop(() { print('not mocked'); }),
     },
   });
   internalBootstrapBrowserTest(() => testMain);
@@ -21,14 +27,14 @@ void main() {
 
 void testMain() {
   test('webOnlyWarmupEngine calls _flutter.loader.didCreateEngineInitializer callback', () async {
-    js.JsObject? engineInitializer;
+    Object? engineInitializer;
 
-    void didCreateEngineInitializerMock (js.JsObject obj) {
+    void didCreateEngineInitializerMock(Object? obj) {
       engineInitializer = obj;
     }
 
     // Prepare the DOM for: _flutter.loader.didCreateEngineInitializer
-    js.context['_flutter']['loader']['didCreateEngineInitializer'] = js.allowInterop(didCreateEngineInitializerMock);
+    didCreateEngineInitializer = allowInterop(didCreateEngineInitializerMock);
 
     // Reset the engine
     engine.debugResetEngineInitializationState();
@@ -40,12 +46,12 @@ void testMain() {
 
     // Check that the object we captured is actually a loader
     expect(engineInitializer, isNotNull);
-    expect(engineInitializer!.hasProperty('initializeEngine'), isTrue, reason: 'Missing FlutterEngineInitializer method: initializeEngine.');
-    expect(engineInitializer!.hasProperty('autoStart'), isTrue, reason: 'Missing FlutterEngineInitializer method: autoStart.');
+    expect(js_util.hasProperty(engineInitializer!, 'initializeEngine'), isTrue, reason: 'Missing FlutterEngineInitializer method: initializeEngine.');
+    expect(js_util.hasProperty(engineInitializer!, 'autoStart'), isTrue, reason: 'Missing FlutterEngineInitializer method: autoStart.');
   });
 
   test('webOnlyWarmupEngine does auto-start when _flutter.loader.didCreateEngineInitializer does not exist', () async {
-    js.context['_flutter']['loader'] = null;
+    loader = null;
 
     bool pluginsRegistered = false;
     bool appRan = false;
