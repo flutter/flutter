@@ -19,7 +19,7 @@ std::string CompilerSkSL::compile() {
   }
 
   options.es = false;
-  options.version = 300;
+  options.version = 100;
   options.vulkan_semantics = false;
   options.enable_420pack_extension = false;
 
@@ -82,7 +82,7 @@ void CompilerSkSL::emit_header() {
 void CompilerSkSL::emit_uniform(const SPIRVariable& var) {
   auto& type = get<SPIRType>(var.basetype);
   add_resource_name(var.self);
-  statement(layout_for_variable(var), variable_decl(var), ";");
+  statement(variable_decl(var), ";");
 
   // The Flutter FragmentProgram implementation passes additional unifroms along
   // with shader uniforms that encode the shader width and height.
@@ -197,6 +197,25 @@ bool CompilerSkSL::emit_uniform_resources() {
       }
     }
   }
+
+  // Sort uniforms by location.
+  auto compare_locations = [this](ID id1, ID id2) {
+    auto& flags1 = get_decoration_bitset(id1);
+    auto& flags2 = get_decoration_bitset(id2);
+    // Put the uniforms with no location after the ones that have a location.
+    if (!flags1.get(DecorationLocation)) {
+      return false;
+    }
+    if (!flags2.get(DecorationLocation)) {
+      return true;
+    }
+    // Sort in increasing order of location.
+    return get_decoration(id1, DecorationLocation) <
+           get_decoration(id2, DecorationLocation);
+  };
+  std::sort(regular_uniforms.begin(), regular_uniforms.end(),
+            compare_locations);
+  std::sort(shader_uniforms.begin(), shader_uniforms.end(), compare_locations);
 
   for (const auto& id : regular_uniforms) {
     auto& var = get<SPIRVariable>(id);

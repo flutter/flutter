@@ -223,6 +223,27 @@ void main() {
     // produces the correct pixels are in the framework.
   });
 
+  test('sksl uniforms are sorted correctly', () async {
+    final Uint8List sksl = await shaderFile(
+      path.join('general_shaders', 'sksl'),
+      'uniforms_sorted.frag.sksl',
+    ).readAsBytes();
+    final FragmentProgram program = await FragmentProgram.compile(
+      raw: sksl.buffer,
+      uniformFloatCount: 32,
+    );
+
+    // The shader will not render green if the compiler doesn't keep the
+    // uniforms in the right order.
+    final Shader shader = program.shader(
+      floatUniforms: Float32List.fromList(
+        List<double>.generate(32, (int i) => i.toDouble()),
+      ),
+    );
+
+    await _expectShaderRendersGreen(shader);
+  });
+
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
   final Map<String, ByteBuffer> supportedGLSLOpShaders = _loadShaders(
     path.join('supported_glsl_op_shaders', 'spirv'),
