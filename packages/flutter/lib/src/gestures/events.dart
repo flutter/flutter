@@ -1035,7 +1035,9 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.tilt,
     super.synthesized,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad),
+  }) : // Dart doesn't support comparing enums with == in const contexts yet.
+       // https://github.com/dart-lang/language/issues/1811
+       assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: false,
          pressure: 0.0,
@@ -1154,7 +1156,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad),
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          pressure: 0.0,
        );
@@ -1299,7 +1301,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad),
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          pressure: 0.0,
        );
@@ -1435,7 +1437,7 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad),
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: true,
          distance: 0.0,
@@ -1552,7 +1554,7 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.platformData,
     super.synthesized,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad),
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: true,
          distance: 0.0,
@@ -1667,7 +1669,7 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad),
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: false,
        );
@@ -1717,7 +1719,7 @@ abstract class PointerSignalEvent extends PointerEvent {
     super.device,
     super.position,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad);
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad));
 }
 
 mixin _CopyPointerScrollEvent on PointerEvent {
@@ -1855,7 +1857,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
     bool? synthesized,
     int? embedderId,
   }) {
-    assert(kind == null || kind == PointerDeviceKind.trackpad);
+    assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomStartEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
@@ -1958,7 +1960,7 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
     double? scale,
     double? rotation,
   }) {
-    assert(kind == null || kind == PointerDeviceKind.trackpad);
+    assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomUpdateEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
@@ -2090,7 +2092,7 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
     bool? synthesized,
     int? embedderId,
   }) {
-    assert(kind == null || kind == PointerDeviceKind.trackpad);
+    assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomEndEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
@@ -2228,7 +2230,7 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : assert(kind != PointerDeviceKind.trackpad),
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: false,
          pressure: 0.0,
