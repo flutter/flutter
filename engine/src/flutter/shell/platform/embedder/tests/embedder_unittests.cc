@@ -952,6 +952,9 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
   builder.SetRenderTargetType(
       EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer);
 
+  // setup the screenshot promise.
+  auto rendered_scene = context.GetNextSceneImage();
+
   fml::CountDownLatch latch(1);
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1051,8 +1054,7 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
 
-  auto rendered_scene = context.GetNextSceneImage();
-
+  // wait for scene to be rendered.
   latch.Wait();
 
   // TODO(https://github.com/flutter/flutter/issues/53784): enable this on all
