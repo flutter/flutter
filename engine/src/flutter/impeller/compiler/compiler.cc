@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "flutter/fml/paths.h"
+#include "impeller/base/allocation.h"
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/includer.h"
 #include "impeller/compiler/logger.h"
@@ -59,6 +60,7 @@ static bool EntryPointMustBeNamedMain(TargetPlatform platform) {
       FML_UNREACHABLE();
     case TargetPlatform::kMetalDesktop:
     case TargetPlatform::kMetalIOS:
+    case TargetPlatform::kVulkan:
     case TargetPlatform::kRuntimeStageMetal:
       return false;
     case TargetPlatform::kFlutterSPIRV:
@@ -79,6 +81,7 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kVulkan:
       compiler = CreateMSLCompiler(ir, source_options);
       break;
     case TargetPlatform::kUnknown:
@@ -148,6 +151,15 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
           shaderc_env_version::shaderc_env_version_vulkan_1_1);
       spirv_options.SetTargetSpirv(
           shaderc_spirv_version::shaderc_spirv_version_1_3);
+      break;
+    case TargetPlatform::kVulkan:
+      spirv_options.SetOptimizationLevel(
+          shaderc_optimization_level::shaderc_optimization_level_performance);
+      spirv_options.SetTargetEnvironment(
+          shaderc_target_env::shaderc_target_env_vulkan,
+          shaderc_env_version::shaderc_env_version_vulkan_1_0);
+      spirv_options.SetTargetSpirv(
+          shaderc_spirv_version::shaderc_spirv_version_1_0);
       break;
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
@@ -262,10 +274,20 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  sl_string_ =
-      std::make_shared<std::string>(sl_compiler.GetCompiler()->compile());
+  // We need to invoke the compiler even if we don't use the SL mapping later
+  // for Vulkan. The reflector needs information that is only valid after a
+  // successful compilation call.
+  auto sl_compilation_result =
+      CreateMappingWithString(sl_compiler.GetCompiler()->compile());
 
-  if (!sl_string_) {
+  // If the target is Vulkan, our shading language is SPIRV which we already
+  // have. If it isn't, we need to invoke the appropriate compiler to compile
+  // the SPIRV to the target SL.
+  sl_mapping_ = source_options.target_platform == TargetPlatform::kVulkan
+                    ? GetSPIRVAssembly()
+                    : sl_compilation_result;
+
+  if (!sl_mapping_) {
     COMPILER_ERROR << "Could not generate SL from SPIRV";
     return;
   }
@@ -299,15 +321,8 @@ std::unique_ptr<fml::Mapping> Compiler::GetSPIRVAssembly() const {
       [result = spv_result_](auto, auto) mutable { result.reset(); });
 }
 
-std::unique_ptr<fml::Mapping> Compiler::GetSLShaderSource() const {
-  if (!sl_string_) {
-    return nullptr;
-  }
-
-  return std::make_unique<fml::NonOwnedMapping>(
-      reinterpret_cast<const uint8_t*>(sl_string_->c_str()),
-      sl_string_->length(),
-      [string = sl_string_](auto, auto) mutable { string.reset(); });
+std::shared_ptr<fml::Mapping> Compiler::GetSLShaderSource() const {
+  return sl_mapping_;
 }
 
 bool Compiler::IsValid() const {

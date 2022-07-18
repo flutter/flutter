@@ -29,6 +29,9 @@ class PipelineLibraryMTL final : public PipelineLibrary {
   PipelineLibraryMTL(id<MTLDevice> device);
 
   // |PipelineLibrary|
+  bool IsValid() const override;
+
+  // |PipelineLibrary|
   PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryMTL);

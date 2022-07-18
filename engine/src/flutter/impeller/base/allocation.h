@@ -46,4 +46,9 @@ std::shared_ptr<fml::Mapping> CreateMappingWithCopy(const uint8_t* contents,
 std::shared_ptr<fml::Mapping> CreateMappingFromAllocation(
     std::shared_ptr<Allocation> allocation);
 
+std::shared_ptr<fml::Mapping> CreateMappingWithString(
+    std::shared_ptr<const std::string> string);
+
+std::shared_ptr<fml::Mapping> CreateMappingWithString(std::string string);
+
 }  // namespace impeller

@@ -25,6 +25,10 @@ config("impeller_public_config") {
     defines += [ "IMPELLER_ENABLE_OPENGLES=1" ]
   }
 
+  if (impeller_enable_vulkan) {
+    defines += [ "IMPELLER_ENABLE_VULKAN=1" ]
+  }
+
   if (impeller_trace_all_gl_calls) {
     defines += [ "IMPELLER_TRACE_ALL_GL_CALLS" ]
   }

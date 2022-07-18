@@ -588,10 +588,12 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
                 ->dimensions(),
             SkISize::Make(6, 2));
 
+#if IMPELLER_SUPPORTS_RENDERING
   ASSERT_EQ(ImageDecoderImpeller::DecompressTexture(descriptor.get(),
                                                     SkISize::Make(6, 2))
                 ->dimensions(),
             SkISize::Make(6, 2));
+#endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {

@@ -173,6 +173,7 @@ bool Main(const fml::CommandLine& command_line) {
       case TargetPlatform::kRuntimeStageMetal:
       case TargetPlatform::kRuntimeStageGLES:
       case TargetPlatform::kSkSL:
+      case TargetPlatform::kVulkan:
         result_file = switches.sl_file_name;
         break;
       case TargetPlatform::kFlutterSPIRV:
