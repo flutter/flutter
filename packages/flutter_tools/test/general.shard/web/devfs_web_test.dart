@@ -1120,7 +1120,6 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     FileSystem fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
-    File dartPluginRegistrant,
   }) async {
     return output;
   }

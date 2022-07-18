@@ -373,7 +373,6 @@ class HotRunner extends ResidentRunner {
             // should only be displayed once.
             suppressErrors: applicationBinary == null,
             checkDartPluginRegistry: true,
-            dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
             outputPath: dillOutputPath,
             packageConfig: debuggingOptions.buildInfo.packageConfig,
             projectRootPath: FlutterProject.current().directory.absolute.path,
