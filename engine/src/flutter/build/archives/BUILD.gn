@@ -194,6 +194,14 @@ if (host_os == "win") {
 
 # Archives Flutter Mac Artifacts
 if (is_mac) {
+  generated_file("snapshot_entitlement_config") {
+    outputs = [ "$target_gen_dir/snapshot_entitlements.txt" ]
+
+    data_keys = [ "snapshot_entitlement_file_path" ]
+
+    deps = [ "//flutter/lib/snapshot:create_macos_gen_snapshots" ]
+  }
+
   group("macos_flutter_framework") {
     deps = [
       "//flutter/shell/platform/darwin/macos:macos_flutter_framework_archive",
@@ -201,7 +209,10 @@ if (is_mac) {
   }
 
   zip_bundle("archive_gen_snapshot") {
-    deps = [ "//flutter/lib/snapshot:create_macos_gen_snapshots" ]
+    deps = [
+      ":snapshot_entitlement_config",
+      "//flutter/lib/snapshot:create_macos_gen_snapshots",
+    ]
     suffix = "-$flutter_runtime_mode"
     if (flutter_runtime_mode == "debug") {
       suffix = ""
@@ -211,6 +222,10 @@ if (is_mac) {
       {
         source = "$root_out_dir/gen_snapshot_$target_cpu"
         destination = "gen_snapshot_$target_cpu"
+      },
+      {
+        source = "$target_gen_dir/snapshot_entitlements.txt"
+        destination = "entitlements.txt"
       },
     ]
   }
