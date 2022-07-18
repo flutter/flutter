@@ -118,7 +118,7 @@ void main() {
       // This test only runs with out-of-process DAP as it's testing _actual_
       // stderr output and that the debug-adapter process terminates, which is
       // not possible when running the DAP Server in-process.
-    }, skip: useInProcessDap);
+    }, skip: useInProcessDap); // [intended] See above.
 
     testWithoutContext('correctly outputs launch errors and terminates', () async {
       final CompileErrorProject project = CompileErrorProject();
