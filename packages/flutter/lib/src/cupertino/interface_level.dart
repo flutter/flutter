@@ -41,12 +41,11 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
   /// visual level.
   const CupertinoUserInterfaceLevel({
-    Key? key,
+    super.key,
     required CupertinoUserInterfaceLevelData data,
-    required Widget child,
+    required super.child,
   }) : assert(data != null),
-      _data = data,
-      super(key: key, child: child);
+      _data = data;
 
   final CupertinoUserInterfaceLevelData _data;
 
@@ -67,8 +66,9 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   static CupertinoUserInterfaceLevelData of(BuildContext context) {
     assert(context != null);
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
-    if (query != null)
+    if (query != null) {
       return query._data;
+    }
     throw FlutterError(
       'CupertinoUserInterfaceLevel.of() called with a context that does not contain a CupertinoUserInterfaceLevel.\n'
       'No CupertinoUserInterfaceLevel ancestor could be found starting from the context that was passed '
@@ -96,8 +96,9 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   static CupertinoUserInterfaceLevelData? maybeOf(BuildContext context) {
     assert(context != null);
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
-    if (query != null)
+    if (query != null) {
       return query._data;
+    }
     return null;
   }
 

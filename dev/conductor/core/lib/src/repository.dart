@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode;
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -29,6 +30,20 @@ class Remote {
   })  : _name = name,
         assert(url != null),
         assert(url != '');
+
+  factory Remote.mirror(String url) {
+    return Remote(
+      name: RemoteName.mirror,
+      url: url,
+    );
+  }
+
+  factory Remote.upstream(String url) {
+    return Remote(
+      name: RemoteName.upstream,
+      url: url,
+    );
+  }
 
   final RemoteName _name;
 
@@ -134,6 +149,37 @@ abstract class Repository {
     return _checkoutDirectory!;
   }
 
+  /// RegExp pattern to parse the output of git ls-remote.
+  ///
+  /// Git output looks like:
+  ///
+  /// 35185330c6af3a435f615ee8ac2fed8b8bb7d9d4        refs/heads/95159-squash
+  /// 6f60a1e7b2f3d2c2460c9dc20fe54d0e9654b131        refs/heads/add-debug-trace
+  /// c1436c42c0f3f98808ae767e390c3407787f1a67        refs/heads/add-recipe-field
+  /// 4d44dca340603e25d4918c6ef070821181202e69        refs/heads/add-release-channel
+  ///
+  /// We are interested in capturing what comes after 'refs/heads/'.
+  static final RegExp _lsRemotePattern = RegExp(r'.*\s+refs\/heads\/([^\s]+)$');
+
+  /// Parse git ls-remote --heads and return branch names.
+  Future<List<String>> listRemoteBranches(String remote) async {
+    final String output = await git.getOutput(
+      <String>['ls-remote', '--heads', remote],
+      'get remote branches',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+
+    final List<String> remoteBranches = <String>[];
+    for (final String line in output.split('\n')) {
+      final RegExpMatch? match = _lsRemotePattern.firstMatch(line);
+      if (match != null) {
+        remoteBranches.add(match.group(1)!);
+      }
+    }
+
+    return remoteBranches;
+  }
+
   /// Ensure the repository is cloned to disk and initialized with proper state.
   Future<void> lazilyInitialize(Directory checkoutDirectory) async {
     if (checkoutDirectory.existsSync()) {
@@ -151,7 +197,7 @@ abstract class Repository {
         upstreamRemote.name,
         '--',
         upstreamRemote.url,
-        checkoutDirectory.path
+        checkoutDirectory.path,
       ],
       'Cloning $name repo',
       workingDirectory: parentDirectory.path,
@@ -302,7 +348,7 @@ abstract class Repository {
         'merge-base',
         '--is-ancestor',
         possibleDescendant,
-        possibleAncestor
+        possibleAncestor,
       ],
       'verify $possibleAncestor is a direct ancestor of $possibleDescendant.',
       allowNonZeroExitCode: true,
@@ -408,8 +454,8 @@ abstract class Repository {
   Future<String> commit(
     String message, {
     bool addFirst = false,
+    String? author,
   }) async {
-    assert(!message.contains("'"));
     final bool hasChanges = (await git.getOutput(
       <String>['status', '--porcelain'],
       'check for uncommitted changes',
@@ -426,8 +472,28 @@ abstract class Repository {
         workingDirectory: (await checkoutDirectory).path,
       );
     }
+    String? authorArg;
+    if (author != null) {
+      if (author.contains('"')) {
+        throw FormatException(
+          'Commit author cannot contain character \'"\', received $author',
+        );
+      }
+      // verify [author] matches git author convention, e.g. "Jane Doe <jane.doe@email.com>"
+      if (!RegExp(r'.+<.*>').hasMatch(author)) {
+        throw FormatException(
+          'Commit author appears malformed: "$author"',
+        );
+      }
+      authorArg = '--author="$author"';
+    }
     await git.run(
-      <String>['commit', "--message='$message'"],
+      <String>[
+        'commit',
+        '--message',
+        message,
+        if (authorArg != null) authorArg,
+      ],
       'commit changes',
       workingDirectory: (await checkoutDirectory).path,
     );
@@ -588,6 +654,29 @@ class FrameworkRepository extends Repository {
       fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
       ...args,
     ]);
+  }
+
+  Future<io.Process> streamFlutter(
+    List<String> args, {
+    void Function(String)? stdoutCallback,
+    void Function(String)? stderrCallback,
+  }) async {
+    await _ensureToolReady();
+    final io.Process process = await processManager.start(<String>[
+      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
+      ...args,
+    ]);
+    process
+        .stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(stdoutCallback ?? stdio.printTrace);
+    process
+        .stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(stderrCallback ?? stdio.printError);
+    return process;
   }
 
   @override

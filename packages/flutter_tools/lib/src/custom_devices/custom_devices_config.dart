@@ -186,7 +186,7 @@ class CustomDevicesConfig {
       _kCustomDevicesConfigKey,
       <dynamic>[
         ...?_getDevicesJsonValue(),
-        config.toJson()
+        config.toJson(),
       ]
     );
   }

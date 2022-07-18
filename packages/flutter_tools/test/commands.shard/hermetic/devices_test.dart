@@ -82,8 +82,8 @@ void main() {
               'fastStart': false,
               'flutterExit': true,
               'hardwareRendering': true,
-              'startPaused': true
-            }
+              'startPaused': true,
+            },
           },
           <String,Object>{
             'name': 'webby',
@@ -99,10 +99,10 @@ void main() {
               'fastStart': false,
               'flutterExit': true,
               'hardwareRendering': true,
-              'startPaused': true
-            }
-          }
-        ]
+              'startPaused': true,
+            },
+          },
+        ],
       );
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),

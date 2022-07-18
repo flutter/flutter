@@ -51,7 +51,7 @@ class FormatCommand extends FlutterCommand {
           if (arg == '--dry-run' || arg == '-n')
             '--output=none'
           else
-            arg
+            arg,
       ]);
     }
 

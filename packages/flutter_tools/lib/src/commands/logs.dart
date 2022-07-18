@@ -46,7 +46,7 @@ class LogsCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device cachedDevice = device!;
-    if (boolArg('clear')) {
+    if (boolArgDeprecated('clear')) {
       cachedDevice.clearLogs();
     }
 

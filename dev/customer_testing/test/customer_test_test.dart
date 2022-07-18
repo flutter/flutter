@@ -32,11 +32,12 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
             <String>['git clone https://github.com/flutter/cocoon.git tests', 'git -C tests checkout abc123']));
     if (Platform.isLinux || Platform.isMacOS) {
       expect(
-          test.tests,
-          containsAllInOrder(<String>[
-            './test_utilities/bin/flutter_test_runner.sh app_flutter',
-            './test_utilities/bin/flutter_test_runner.sh repo_dashboard'
-          ]));
+        test.tests,
+        containsAllInOrder(<String>[
+          './test_utilities/bin/flutter_test_runner.sh app_flutter',
+          './test_utilities/bin/flutter_test_runner.sh repo_dashboard',
+        ]),
+      );
     } else if (Platform.isWindows) {
       expect(test.tests, containsAllInOrder(<String>['.\test_utilities\bin\flutter_test_runner.bat repo_dashboard']));
     }

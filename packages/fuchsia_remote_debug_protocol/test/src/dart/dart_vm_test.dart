@@ -6,9 +6,8 @@ import 'dart:async';
 
 import 'package:fuchsia_remote_debug_protocol/src/dart/dart_vm.dart';
 import 'package:test/fake.dart';
+import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart' as vms;
-
-import '../../common.dart';
 
 void main() {
   group('DartVm.connect', () {

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 int globalGeneration = 0;
 
 class GenerationText extends StatefulWidget {
-  const GenerationText(this.value, { Key? key }) : super(key: key);
+  const GenerationText(this.value, { super.key });
   final int value;
   @override
   State<GenerationText> createState() => _GenerationTextState();

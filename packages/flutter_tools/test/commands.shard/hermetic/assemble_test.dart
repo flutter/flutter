@@ -271,7 +271,7 @@ void main() {
         skipped: false,
         succeeded: true,
         elapsedMilliseconds: 123,
-      )
+      ),
     ];
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File outFile = fileSystem.currentDirectory

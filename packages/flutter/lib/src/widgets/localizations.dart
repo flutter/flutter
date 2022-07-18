@@ -11,7 +11,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
-// class Intl { static String message(String s, { String? name, String? locale }) => ''; }
+// class Intl { Intl._(); static String message(String s, { String? name, String? locale }) => ''; }
 // Future<void> initializeMessages(String locale) => Future<void>.value();
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
@@ -68,8 +68,9 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
   }
 
   // All of the delegate.load() values were synchronous futures, we're done.
-  if (pendingList == null)
+  if (pendingList == null) {
     return SynchronousFuture<Map<Type, dynamic>>(output);
+  }
 
   // Some of delegate.load() values were asynchronous futures. Wait for them.
   return Future.wait<dynamic>(pendingList.map<Future<dynamic>>((_Pending p) => p.futureValue))
@@ -223,14 +224,13 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
 class _LocalizationsScope extends InheritedWidget {
   const _LocalizationsScope({
-    Key? key,
+    super.key,
     required this.locale,
     required this.localizationsState,
     required this.typeToResources,
-    required Widget child,
+    required super.child,
   }) : assert(localizationsState != null),
-       assert(typeToResources != null),
-       super(key: key, child: child);
+       assert(typeToResources != null);
 
   final Locale locale;
   final _LocalizationsState localizationsState;
@@ -339,14 +339,13 @@ class _LocalizationsScope extends InheritedWidget {
 class Localizations extends StatefulWidget {
   /// Create a widget from which localizations (like translated strings) can be obtained.
   Localizations({
-    Key? key,
+    super.key,
     required this.locale,
     required this.delegates,
     this.child,
   }) : assert(locale != null),
        assert(delegates != null),
-       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
-       super(key: key);
+       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -383,8 +382,9 @@ class Localizations extends StatefulWidget {
     Widget? child,
   }) {
     final List<LocalizationsDelegate<dynamic>> mergedDelegates = Localizations._delegatesOf(context);
-    if (delegates != null)
+    if (delegates != null) {
       mergedDelegates.insertAll(0, delegates);
+    }
     return Localizations(
       key: key,
       locale: locale ?? Localizations.localeOf(context),
@@ -498,15 +498,17 @@ class _LocalizationsState extends State<Localizations> {
   }
 
   bool _anyDelegatesShouldReload(Localizations old) {
-    if (widget.delegates.length != old.delegates.length)
+    if (widget.delegates.length != old.delegates.length) {
       return true;
+    }
     final List<LocalizationsDelegate<dynamic>> delegates = widget.delegates.toList();
     final List<LocalizationsDelegate<dynamic>> oldDelegates = old.delegates.toList();
     for (int i = 0; i < delegates.length; i += 1) {
       final LocalizationsDelegate<dynamic> delegate = delegates[i];
       final LocalizationsDelegate<dynamic> oldDelegate = oldDelegates[i];
-      if (delegate.runtimeType != oldDelegate.runtimeType || delegate.shouldReload(oldDelegate))
+      if (delegate.runtimeType != oldDelegate.runtimeType || delegate.shouldReload(oldDelegate)) {
         return true;
+      }
     }
     return false;
   }
@@ -517,8 +519,9 @@ class _LocalizationsState extends State<Localizations> {
     if (widget.locale != old.locale
         || (widget.delegates == null)
         || (widget.delegates != null && old.delegates == null)
-        || (widget.delegates != null && _anyDelegatesShouldReload(old)))
+        || (widget.delegates != null && _anyDelegatesShouldReload(old))) {
       load(widget.locale);
+    }
   }
 
   void load(Locale locale) {
@@ -570,8 +573,9 @@ class _LocalizationsState extends State<Localizations> {
 
   @override
   Widget build(BuildContext context) {
-    if (_locale == null)
+    if (_locale == null) {
       return Container();
+    }
     return Semantics(
       textDirection: _textDirection,
       child: _LocalizationsScope(

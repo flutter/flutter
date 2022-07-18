@@ -126,13 +126,13 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// See also:
 ///
-///  * [showDateRangePicker], which shows a material design date range picker
+///  * [showDateRangePicker], which shows a Material Design date range picker
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-///  * [showTimePicker], which shows a dialog that contains a material design time picker.
+///  * [showTimePicker], which shows a dialog that contains a Material Design time picker.
 ///
 Future<DateTime?> showDatePicker({
   required BuildContext context,
@@ -242,7 +242,7 @@ Future<DateTime?> showDatePicker({
 class DatePickerDialog extends StatefulWidget {
   /// A Material-style date picker dialog.
   DatePickerDialog({
-    Key? key,
+    super.key,
     required DateTime initialDate,
     required DateTime firstDate,
     required DateTime lastDate,
@@ -267,8 +267,7 @@ class DatePickerDialog extends StatefulWidget {
        lastDate = DateUtils.dateOnly(lastDate),
        currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
        assert(initialEntryMode != null),
-       assert(initialCalendarMode != null),
-       super(key: key) {
+       assert(initialCalendarMode != null) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -698,7 +697,6 @@ class _DatePickerHeader extends StatelessWidget {
 
   /// Creates a header for use in a date picker dialog.
   const _DatePickerHeader({
-    Key? key,
     required this.helpText,
     required this.titleText,
     this.titleSemanticsLabel,
@@ -708,8 +706,7 @@ class _DatePickerHeader extends StatelessWidget {
     this.entryModeButton,
   }) : assert(helpText != null),
        assert(orientation != null),
-       assert(isShort != null),
-       super(key: key);
+       assert(isShort != null);
 
   static const double _datePickerHeaderLandscapeWidth = 152.0;
   static const double _datePickerHeaderPortraitHeight = 120.0;
@@ -928,7 +925,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a material design date picker used to
+///  * [showDatePicker], which shows a Material Design date picker used to
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
@@ -1083,7 +1080,7 @@ String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startD
 class DateRangePickerDialog extends StatefulWidget {
   /// A Material-style date range picker dialog.
   const DateRangePickerDialog({
-    Key? key,
+    super.key,
     this.initialDateRange,
     required this.firstDate,
     required this.lastDate,
@@ -1101,7 +1098,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.fieldStartLabelText,
     this.fieldEndLabelText,
     this.restorationId,
-  }) : super(key: key);
+  });
 
   /// The date range that the date range picker starts with when it opens.
   ///
@@ -1445,7 +1442,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
 class _CalendarRangePickerDialog extends StatelessWidget {
   const _CalendarRangePickerDialog({
-    Key? key,
+    super.key,
     required this.selectedStartDate,
     required this.selectedEndDate,
     required this.firstDate,
@@ -1458,7 +1455,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     required this.confirmText,
     required this.helpText,
     this.entryModeButton,
-  }) : super(key: key);
+  });
 
   final DateTime? selectedStartDate;
   final DateTime? selectedEndDate;
@@ -1595,7 +1592,6 @@ const double _maxCalendarWidthPortrait = 480.0;
 class _CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
   _CalendarDateRangePicker({
-    Key? key,
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     required DateTime firstDate,
@@ -1609,8 +1605,7 @@ class _CalendarDateRangePicker extends StatefulWidget {
        assert(lastDate != null),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
-       super(key: key) {
+       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()) {
     assert(
       this.initialStartDate == null || this.initialEndDate == null || !this.initialStartDate!.isAfter(initialEndDate!),
       'initialStartDate must be on or before initialEndDate.',
@@ -1756,7 +1751,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
     return Column(
       children: <Widget>[
-        _DayHeaders(),
+        const _DayHeaders(),
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
           child: _CalendarKeyboardNavigator(
@@ -1796,12 +1791,11 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
 class _CalendarKeyboardNavigator extends StatefulWidget {
   const _CalendarKeyboardNavigator({
-    Key? key,
     required this.child,
     required this.firstDate,
     required this.lastDate,
     required this.initialFocusedDay,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final DateTime firstDate;
@@ -1893,10 +1887,11 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
   int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
     if (textDirection == TextDirection.rtl) {
-      if (traversalDirection == TraversalDirection.left)
+      if (traversalDirection == TraversalDirection.left) {
         traversalDirection = TraversalDirection.right;
-      else if (traversalDirection == TraversalDirection.right)
+      } else if (traversalDirection == TraversalDirection.right) {
         traversalDirection = TraversalDirection.left;
+      }
     }
     return _directionOffset[traversalDirection]!;
   }
@@ -1932,11 +1927,10 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 /// what the currently focused date (if any) should be.
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
-    Key? key,
-    required Widget child,
+    required super.child,
     this.date,
     this.scrollDirection,
-  }) : super(key: key, child: child);
+  });
 
   final DateTime? date;
   final TraversalDirection? scrollDirection;
@@ -1953,6 +1947,8 @@ class _FocusedDate extends InheritedWidget {
 
 
 class _DayHeaders extends StatelessWidget {
+  const _DayHeaders();
+
   /// Builds widgets showing abbreviated days of week. The first widget in the
   /// returned list corresponds to the first day of week for the current locale.
   ///
@@ -1978,8 +1974,9 @@ class _DayHeaders extends StatelessWidget {
       result.add(ExcludeSemantics(
         child: Center(child: Text(weekday, style: headerStyle)),
       ));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
+      if (i == (localizations.firstDayOfWeekIndex - 1) % 7) {
         break;
+      }
     }
     return result;
   }
@@ -2134,7 +2131,6 @@ class _MonthSliverGridLayout extends SliverGridLayout {
 class _MonthItem extends StatefulWidget {
   /// Creates a month item.
   _MonthItem({
-    Key? key,
     required this.selectedDateStart,
     required this.selectedDateEnd,
     required this.currentDate,
@@ -2154,8 +2150,7 @@ class _MonthItem extends StatefulWidget {
        assert(currentDate != null),
        assert(onChanged != null),
        assert(displayedMonth != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+       assert(dragStartBehavior != null);
 
   /// The currently selected start date.
   ///
@@ -2394,8 +2389,9 @@ class _MonthItemState extends State<_MonthItem> {
       // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
       // a leap year.
       final int day = i - dayOffset + 1;
-      if (day > daysInMonth)
+      if (day > daysInMonth) {
         break;
+      }
       if (day < 1) {
         dayItems.add(Container());
       } else {
@@ -2562,7 +2558,6 @@ class _HighlightPainter extends CustomPainter {
 
 class _InputDateRangePickerDialog extends StatelessWidget {
   const _InputDateRangePickerDialog({
-    Key? key,
     required this.selectedStartDate,
     required this.selectedEndDate,
     required this.currentDate,
@@ -2573,7 +2568,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     required this.cancelText,
     required this.helpText,
     required this.entryModeButton,
-  }) : super(key: key);
+  });
 
   final DateTime? selectedStartDate;
   final DateTime? selectedEndDate;
@@ -2688,7 +2683,7 @@ class _InputDateRangePicker extends StatefulWidget {
   /// Creates a row with two text fields configured to accept the start and end dates
   /// of a date range.
   _InputDateRangePicker({
-    Key? key,
+    super.key,
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     required DateTime firstDate,
@@ -2714,8 +2709,7 @@ class _InputDateRangePicker extends StatefulWidget {
        assert(firstDate != null),
        assert(lastDate != null),
        assert(autofocus != null),
-       assert(autovalidate != null),
-       super(key: key);
+       assert(autovalidate != null);
 
   /// The [DateTime] that represents the start of the initial date range selection.
   final DateTime? initialStartDate;

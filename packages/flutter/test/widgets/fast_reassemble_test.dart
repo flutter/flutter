@@ -53,7 +53,7 @@ void main() {
 }
 
 class Foo extends StatefulWidget {
-  const Foo(this.child, {Key? key}) : super(key: key);
+  const Foo(this.child, {super.key});
 
   final Widget child;
   static int count = 0;
@@ -77,7 +77,7 @@ class _FooState extends State<Foo> {
 
 
 class Bar extends StatefulWidget {
-  const Bar(this.child, {Key? key}) : super(key: key);
+  const Bar(this.child, {super.key});
 
   final Widget child;
   static int count = 0;
@@ -100,7 +100,7 @@ class _BarState extends State<Bar> {
 }
 
 class Fizz extends StatefulWidget {
-  const Fizz(this.child, {Key? key}) : super(key: key);
+  const Fizz(this.child, {super.key});
 
   final Widget child;
   static int count = 0;

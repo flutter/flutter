@@ -90,7 +90,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   /// appear as selected. The [groupValue] must be either null or one of the keys
   /// in the [children] map.
   CupertinoSegmentedControl({
-    Key? key,
+    super.key,
     required this.children,
     required this.onValueChanged,
     this.groupValue,
@@ -105,8 +105,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
        assert(
          groupValue == null || children.keys.any((T child) => child == groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
-       ),
-       super(key: key);
+       );
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -304,8 +303,9 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   }
 
   void _onTap(T currentKey) {
-    if (currentKey != _pressedKey)
+    if (currentKey != _pressedKey) {
       return;
+    }
     if (currentKey != widget.groupValue) {
       widget.onValueChanged(currentKey);
     }
@@ -313,20 +313,25 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   }
 
   Color? getTextColor(int index, T currentKey) {
-    if (_selectionControllers[index].isAnimating)
+    if (_selectionControllers[index].isAnimating) {
       return _textColorTween.evaluate(_selectionControllers[index]);
-    if (widget.groupValue == currentKey)
+    }
+    if (widget.groupValue == currentKey) {
       return _unselectedColor;
+    }
     return _selectedColor;
   }
 
   Color? getBackgroundColor(int index, T currentKey) {
-    if (_selectionControllers[index].isAnimating)
+    if (_selectionControllers[index].isAnimating) {
       return _childTweens[index].evaluate(_selectionControllers[index]);
-    if (widget.groupValue == currentKey)
+    }
+    if (widget.groupValue == currentKey) {
       return _selectedColor;
-    if (_pressedKey == currentKey)
+    }
+    if (_pressedKey == currentKey) {
       return _pressedColor;
+    }
     return _unselectedColor;
   }
 
@@ -403,16 +408,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 
 class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   _SegmentedControlRenderWidget({
-    Key? key,
-    List<Widget> children = const <Widget>[],
+    super.key,
+    super.children,
     required this.selectedIndex,
     required this.pressedIndex,
     required this.backgroundColors,
     required this.borderColor,
-  }) : super(
-          key: key,
-          children: children,
-        );
+  });
 
   final int? selectedIndex;
   final int? pressedIndex;

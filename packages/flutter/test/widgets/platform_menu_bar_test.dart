@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -52,7 +51,6 @@ void main() {
         MaterialApp(
           home: Material(
             child: PlatformMenuBar(
-              body: const Center(child: Text('Body')),
               menus: createTestMenus(
                 onActivate: onActivate,
                 onOpen: onOpen,
@@ -64,110 +62,100 @@ void main() {
                   subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
                 },
               ),
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
       );
 
-      expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.setMenu'));
+      expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.setMenus'));
       expect(
         fakeMenuChannel.outgoingCalls.last.arguments,
-        equals(
-          <String, Object?>{
-            '0': <Map<String, Object?>>[
-              <String, Object?>{
-                'id': 2,
-                'label': 'Menu 0',
-                'enabled': true,
-                'children': <Map<String, Object?>>[
-                  <String, Object?>{
-                    'id': 1,
-                    'label': 'Sub Menu 00',
-                    'enabled': true,
-                  }
-                ]
-              },
-              <String, Object?>{
-                'id': 12,
-                'label': 'Menu 1',
-                'enabled': true,
-                'children': <Map<String, Object?>>[
-                  <String, Object?>{
-                    'id': 3,
-                    'label': 'Sub Menu 10',
-                    'enabled': true,
-                  },
-                  <String, Object?>{
-                    'id': 4,
-                    'isDivider': true,
-                  },
-                  <String, Object?>{
-                    'id': 10,
-                    'label': 'Sub Menu 11',
-                    'enabled': true,
-                    'children': <Map<String, Object?>>[
-                      <String, Object?>{
-                        'id': 5,
-                        'label': 'Sub Sub Menu 100',
-                        'enabled': true,
-                        'shortcutTrigger': 97,
-                        'shortcutModifiers': 8
-                      },
-                      <String, Object?>{
-                        'id': 6,
-                        'isDivider': true,
-                      },
-                      <String, Object?>{
-                        'id': 7,
-                        'label': 'Sub Sub Menu 101',
-                        'enabled': true,
-                        'shortcutTrigger': 98,
-                        'shortcutModifiers': 2
-                      },
-                      <String, Object?>{
-                        'id': 8,
-                        'label': 'Sub Sub Menu 102',
-                        'enabled': true,
-                        'shortcutTrigger': 99,
-                        'shortcutModifiers': 4
-                      },
-                      <String, Object?>{
-                        'id': 9,
-                        'label': 'Sub Sub Menu 103',
-                        'enabled': true,
-                        'shortcutTrigger': 100,
-                        'shortcutModifiers': 1
-                      }
-                    ]
-                  },
-                  <String, Object?>{
-                    'id': 11,
-                    'label': 'Sub Menu 12',
-                    'enabled': true,
-                  }
-                ]
-              },
-              <String, Object?>{
-                'id': 14,
-                'label': 'Menu 2',
-                'enabled': true,
-                'children': <Map<String, Object?>>[
-                  <String, Object?>{
-                    'id': 13,
-                    'label': 'Sub Menu 20',
-                    'enabled': false,
-                  }
-                ]
-              },
-              <String, Object?>{
-                'id': 15,
-                'label': 'Menu 3',
-                'enabled': false,
-                'children': <Map<String, Object?>>[],
-              },
-            ],
-          },
-        ),
+        equals(<String, Object?>{
+          '0': <Map<String, Object?>>[
+            <String, Object?>{
+              'id': 2,
+              'label': 'Menu 0',
+              'enabled': true,
+              'children': <Map<String, Object?>>[
+                <String, Object?>{
+                  'id': 1,
+                  'label': 'Sub Menu 00',
+                  'enabled': true,
+                },
+              ],
+            },
+            <String, Object?>{
+              'id': 18,
+              'label': 'Menu 1',
+              'enabled': true,
+              'children': <Map<String, Object?>>[
+                <String, Object?>{
+                  'id': 4,
+                  'label': 'Sub Menu 10',
+                  'enabled': true,
+                },
+                <String, Object?>{'id': 5, 'isDivider': true},
+                <String, Object?>{
+                  'id': 16,
+                  'label': 'Sub Menu 11',
+                  'enabled': true,
+                  'children': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 7,
+                      'label': 'Sub Sub Menu 100',
+                      'enabled': true,
+                      'shortcutTrigger': 97,
+                      'shortcutModifiers': 8,
+                    },
+                    <String, Object?>{'id': 8, 'isDivider': true},
+                    <String, Object?>{
+                      'id': 10,
+                      'label': 'Sub Sub Menu 101',
+                      'enabled': true,
+                      'shortcutTrigger': 98,
+                      'shortcutModifiers': 2,
+                    },
+                    <String, Object?>{'id': 11, 'isDivider': true},
+                    <String, Object?>{
+                      'id': 12,
+                      'label': 'Sub Sub Menu 102',
+                      'enabled': true,
+                      'shortcutTrigger': 99,
+                      'shortcutModifiers': 4,
+                    },
+                    <String, Object?>{'id': 13, 'isDivider': true},
+                    <String, Object?>{
+                      'id': 14,
+                      'label': 'Sub Sub Menu 103',
+                      'enabled': true,
+                      'shortcutTrigger': 100,
+                      'shortcutModifiers': 1,
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 17,
+                  'label': 'Sub Menu 12',
+                  'enabled': true,
+                },
+              ],
+            },
+            <String, Object?>{
+              'id': 20,
+              'label': 'Menu 2',
+              'enabled': true,
+              'children': <Map<String, Object?>>[
+                <String, Object?>{
+                  'id': 19,
+                  'label': 'Sub Menu 20',
+                  'enabled': false,
+                },
+              ],
+            },
+            <String, Object?>{'id': 21, 'label': 'Menu 3', 'enabled': false, 'children': <Map<String, Object?>>[]},
+          ],
+        }),
       );
     });
     testWidgets('asserts when more than one has locked the delegate', (WidgetTester tester) async {
@@ -175,11 +163,11 @@ void main() {
         const MaterialApp(
           home: Material(
             child: PlatformMenuBar(
-              body: PlatformMenuBar(
-                body: SizedBox(),
-                menus: <MenuItem>[],
-              ),
               menus: <MenuItem>[],
+              child: PlatformMenuBar(
+                menus: <MenuItem>[],
+                child: SizedBox(),
+              ),
             ),
           ),
         ),
@@ -192,8 +180,8 @@ void main() {
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
       const PlatformMenuBar menuBar = PlatformMenuBar(
-        body: SizedBox(),
         menus: <MenuItem>[item],
+        child: SizedBox(),
       );
 
       await tester.pumpWidget(
@@ -209,7 +197,7 @@ void main() {
         menuBar.toStringDeep(),
         equalsIgnoringHashCodes(
           'PlatformMenuBar#00000\n'
-          ' └─PlatformMenuItem#00000\n'
+          ' └─PlatformMenuItem#00000(label2)\n'
           '     label: "label2"\n'
           '     shortcut: SingleActivator#00000(keys: Key A)\n'
           '     DISABLED\n',
@@ -318,20 +306,28 @@ List<MenuItem> createTestMenus({
                 ),
               ],
             ),
-            PlatformMenuItem(
-              label: subSubMenu10[1],
-              onSelected: onActivate != null ? () => onActivate(subSubMenu10[1]) : null,
-              shortcut: shortcuts[subSubMenu10[1]],
+            PlatformMenuItemGroup(
+              members: <MenuItem>[
+                PlatformMenuItem(
+                  label: subSubMenu10[1],
+                  onSelected: onActivate != null ? () => onActivate(subSubMenu10[1]) : null,
+                  shortcut: shortcuts[subSubMenu10[1]],
+                ),
+              ],
             ),
             PlatformMenuItem(
               label: subSubMenu10[2],
               onSelected: onActivate != null ? () => onActivate(subSubMenu10[2]) : null,
               shortcut: shortcuts[subSubMenu10[2]],
             ),
-            PlatformMenuItem(
-              label: subSubMenu10[3],
-              onSelected: onActivate != null ? () => onActivate(subSubMenu10[3]) : null,
-              shortcut: shortcuts[subSubMenu10[3]],
+            PlatformMenuItemGroup(
+              members: <MenuItem>[
+                PlatformMenuItem(
+                  label: subSubMenu10[3],
+                  onSelected: onActivate != null ? () => onActivate(subSubMenu10[3]) : null,
+                  shortcut: shortcuts[subSubMenu10[3]],
+                ),
+              ],
             ),
           ],
         ),

@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'data.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -34,7 +35,7 @@ bool _isDigit(String? char) {
   return charCode >= charDigit0 && charCode <= charDigit9;
 }
 
-/// Generates the keyboard_maps.dart files, based on the information in the key
+/// Generates the keyboard_maps.g.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   KeyboardMapsCodeGenerator(super.keyData, super.logicalData);
@@ -176,7 +177,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _windowsKeyCodeMap {
     final OutputLines<int> lines = OutputLines<int>('Windows key code map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      // Letter keys on Windows are not recorded in logical_key_data.json,
+      // Letter keys on Windows are not recorded in logical_key_data.g.json,
       // because they are not used by the embedding. Add them manually.
       final List<int>? keyCodes = entry.windowsValues.isNotEmpty
         ? entry.windowsValues
@@ -246,6 +247,16 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return lines.sortedJoin().trimRight();
   }
 
+  /// This generates the map of iOS key label to logical keys for special keys.
+  String get _iOSSpecialMap {
+    final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
+    kIosSpecialKeyMapping.forEach((String key, String logicalName) {
+      final LogicalKeyEntry entry = logicalData.entryByName(logicalName);
+      lines.add(entry.value, "  '$key': LogicalKeyboardKey.${entry.constantName},");
+    });
+    return lines.join().trimRight();
+  }
+
   /// This generates the map of iOS number pad key codes to logical keys.
   String get _iOSNumpadMap {
     final OutputLines<int> lines = OutputLines<int>('iOS numpad map');
@@ -303,10 +314,10 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to physical keys.
   String get _webPhysicalKeyMap {
-    final OutputLines<String> lines = OutputLines<String>('Web physical key map');
+    final OutputLines<String> lines = OutputLines<String>('Web physical key map', behavior: DeduplicateBehavior.kKeep);
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.name != null) {
-        lines.add(entry.name, "  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
+      for (final String webCodes in entry.webCodes()) {
+        lines.add(entry.name, "  '$webCodes': PhysicalKeyboardKey.${entry.constantName},");
       }
     }
     return lines.sortedJoin().trimRight();
@@ -353,6 +364,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'MACOS_FUNCTION_KEY_MAP': _macOSFunctionKeyMap,
       'MACOS_KEY_CODE_MAP': _macOSKeyCodeMap,
       'IOS_SCAN_CODE_MAP': _iOSScanCodeMap,
+      'IOS_SPECIAL_MAP': _iOSSpecialMap,
       'IOS_NUMPAD_MAP': _iOSNumpadMap,
       'IOS_KEY_CODE_MAP': _iOSKeyCodeMap,
       'GLFW_KEY_CODE_MAP': _glfwKeyCodeMap,

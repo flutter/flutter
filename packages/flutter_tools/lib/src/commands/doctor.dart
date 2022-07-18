@@ -35,7 +35,7 @@ class DoctorCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     globals.flutterVersion.fetchTagsAndUpdate();
     if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
-      final String engineRevision = stringArg('check-for-remote-artifacts')!;
+      final String engineRevision = stringArgDeprecated('check-for-remote-artifacts')!;
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
         final bool success = await globals.doctor?.checkRemoteArtifacts(engineRevision) ?? false;
         if (success) {
@@ -48,7 +48,7 @@ class DoctorCommand extends FlutterCommand {
       }
     }
     final bool success = await globals.doctor?.diagnose(
-      androidLicenses: boolArg('android-licenses'),
+      androidLicenses: boolArgDeprecated('android-licenses'),
       verbose: verbose,
       androidLicenseValidator: androidLicenseValidator,
     ) ?? false;

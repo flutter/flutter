@@ -39,11 +39,6 @@ const String singleEsMessageArbFileString = '''
 {
   "title": "Título"
 }''';
-const String twoEsMessageArbFileString = '''
-{
-  "title": "Título",
-  "subtitle": "Subtitular"
-}''';
 const String singleZhMessageArbFileString = '''
 {
   "title": "标题"
@@ -181,6 +176,32 @@ void main() {
           (L10nException e) => e.message,
           'message',
           contains('Directory does not exist'),
+        )),
+      );
+    });
+
+    testWithoutContext('throws error when arb file does not exist', () {
+      // Set up project directory.
+      fs.currentDirectory
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .createSync(recursive: true);
+
+      // Arb file should be nonexistent in the l10n directory.
+      expect(
+        () => LocalizationsGenerator(
+          fileSystem: fs,
+          projectPathString: './',
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        ),
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains(', does not exist.'),
         )),
       );
     });
@@ -789,7 +810,6 @@ void main() {
       expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''
 HEADER
 
-
 import 'bar.dart';
 
 /// The translations for English (`en`).
@@ -838,6 +858,65 @@ flutter:
               'flutter: generate flag turned on.',
         ),
       );
+    });
+
+    testWithoutContext('blank lines generated nicely', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      // Test without headers.
+      generateLocalizations(
+        fileSystem: fs,
+        options: LocalizationOptions(
+          arbDirectory: Uri.directory(defaultL10nPathString),
+          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+          useSyntheticPackage: false,
+        ),
+        logger: BufferLogger.test(),
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+      );
+
+      expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+import 'app_localizations.dart';
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get title => 'Title';
+}
+''');
+
+    // Test with headers.
+    generateLocalizations(
+      fileSystem: fs,
+      options: LocalizationOptions(
+        header: 'HEADER',
+        arbDirectory: Uri.directory(defaultL10nPathString),
+        outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+        useSyntheticPackage: false,
+      ),
+      logger: BufferLogger.test(),
+      projectDir: fs.currentDirectory,
+      dependenciesDir: fs.currentDirectory,
+    );
+
+    expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+HEADER
+
+import 'app_localizations.dart';
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get title => 'Title';
+}
+''');
     });
   });
 
@@ -913,9 +992,7 @@ flutter:
     });
 
     testWithoutContext(
-      'throws an error attempting to add preferred locales '
-      'when there is no corresponding arb file for that '
-      'locale',
+      'throws an error attempting to add preferred locales when there is no corresponding arb file for that locale',
       () {
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
@@ -1082,6 +1159,38 @@ flutter:
         )),
       );
     });
+
+    testWithoutContext('throws when an empty string is used as a key', () {
+      const String arbFileStringWithEmptyResourceId = '''
+{
+  "market": "MARKET",
+  "": {
+    "description": "This key is invalid"
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en.arb')
+        .writeAsStringSync(arbFileStringWithEmptyResourceId);
+
+      expect(
+        () => LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        ).loadResources(),
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid ARB resource name ""'),
+        )),
+      );
+    });
+
     testWithoutContext('throws when the same locale is detected more than once', () {
       const String secondMessageArbFileString = '''
 {
@@ -2594,6 +2703,39 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
+    });
+
+    testWithoutContext('throws when the language code is not supported', () {
+      const String arbFileWithInvalidCode = '''
+{
+  "@@locale": "invalid",
+  "title": "invalid"
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_invalid.arb')
+        .writeAsStringSync(arbFileWithInvalidCode);
+
+      expect(
+        () {
+          LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: 'app_invalid.arb',
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          )
+            ..loadResources()
+            ..writeOutputFiles(BufferLogger.test());
+        },
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('"invalid" is not a supported language code.'),
+        )),
+      );
     });
   });
 

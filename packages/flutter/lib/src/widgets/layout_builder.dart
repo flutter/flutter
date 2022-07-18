@@ -38,10 +38,9 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   /// The [builder] argument must not be null, and the returned widget should not
   /// be null.
   const ConstrainedLayoutBuilder({
-    Key? key,
+    super.key,
     required this.builder,
-  }) : assert(builder != null),
-       super(key: key);
+  }) : assert(builder != null);
 
   @override
   RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
@@ -55,7 +54,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
 }
 
 class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderObjectElement {
-  _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> widget) : super(widget);
+  _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> super.widget);
 
   @override
   RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
@@ -64,8 +63,9 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (_child != null)
+    if (_child != null) {
       visitor(_child!);
+    }
   }
 
   @override
@@ -184,8 +184,9 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
   LayoutCallback<ConstraintType>? _callback;
   /// Change the layout callback.
   void updateCallback(LayoutCallback<ConstraintType>? value) {
-    if (value == _callback)
+    if (value == _callback) {
       return;
+    }
     _callback = value;
     markNeedsLayout();
   }
@@ -264,10 +265,9 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   ///
   /// The [builder] argument must not be null.
   const LayoutBuilder({
-    Key? key,
-    required LayoutWidgetBuilder builder,
-  }) : assert(builder != null),
-       super(key: key, builder: builder);
+    super.key,
+    required super.builder,
+  }) : assert(builder != null);
 
   @override
   LayoutWidgetBuilder get builder => super.builder;
@@ -324,8 +324,9 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (child != null)
+    if (child != null) {
       return child!.getDistanceToActualBaseline(baseline);
+    }
     return super.computeDistanceToActualBaseline(baseline);
   }
 
@@ -336,8 +337,9 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
+    if (child != null) {
       context.paintChild(child!, offset);
+    }
   }
 
   bool _debugThrowIfNotCheckingIntrinsics() {

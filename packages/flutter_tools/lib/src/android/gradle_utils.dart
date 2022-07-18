@@ -29,9 +29,19 @@ import 'android_sdk.dart';
 // https://kotlinlang.org/docs/gradle.html#plugin-and-versions
 const String templateDefaultGradleVersion = '7.4';
 const String templateAndroidGradlePluginVersion = '7.1.2';
-// TODO(egarciad): Gradle 7 breaks AARs builds: https://github.com/flutter/flutter/issues/101083
-const String templateAndroidGradlePluginVersionForModule = '4.1.0';
+const String templateDefaultGradleVersionForModule = '7.1.2';
 const String templateKotlinGradlePluginVersion = '1.6.10';
+
+// These versions should match the values in flutter.gradle (FlutterExtension).
+// The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
+// using (include_flutter.groovy).
+// The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory
+// `.android` is always regenerated after flutter pub get, so new versions are picked up after a
+// Flutter upgrade.
+const String compileSdkVersion = '31';
+const String minSdkVersion = '16';
+const String targetSdkVersion = '31';
+const String ndkVersion = '21.1.6352462';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 

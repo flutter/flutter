@@ -15,7 +15,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({ Key? key }) : super(key: key);
+  const TestIcon({ super.key });
 
   @override
   TestIconState createState() => TestIconState();
@@ -32,7 +32,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, { Key? key }) : super(key: key);
+  const TestText(this.text, { super.key });
 
   final String text;
 
@@ -88,8 +88,9 @@ void main() {
     void testChildren() {
       expect(find.byKey(leadingKey), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
-      if (hasSubtitle)
+      if (hasSubtitle) {
         expect(find.text('subtitle'), findsOneWidget);
+      }
       expect(find.byKey(trailingKey), findsOneWidget);
     }
 
@@ -109,8 +110,9 @@ void main() {
     void testHorizontalGeometry() {
       expect(leftKey(leadingKey), math.max(16.0, leftPadding));
       expect(left('title'), 56.0 + math.max(16.0, leftPadding));
-      if (hasSubtitle)
+      if (hasSubtitle) {
         expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
+      }
       expect(left('title'), rightKey(leadingKey) + 32.0);
       expect(rightKey(trailingKey), 800.0 - math.max(16.0, rightPadding));
       expect(widthKey(trailingKey), 24.0);
@@ -353,48 +355,6 @@ void main() {
     );
 
     semantics.dispose();
-  });
-
-  testWidgets('ListTile contentPadding', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
-      return MediaQuery(
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: textDirection,
-          child: Material(
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                contentPadding: EdgeInsetsDirectional.only(
-                  start: 10.0,
-                  end: 20.0,
-                  top: 30.0,
-                  bottom: 40.0,
-                ),
-                leading: Text('L'),
-                title: Text('title'),
-                trailing: Text('T'),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    double left(String text) => tester.getTopLeft(find.text(text)).dx;
-    double right(String text) => tester.getTopRight(find.text(text)).dx;
-
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('L'), 10.0); // contentPadding.start = 10
-    expect(right('T'), 780.0); // 800 - contentPadding.end
-
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('T'), 20.0); // contentPadding.end = 20
-    expect(right('L'), 790.0); // 800 - contentPadding.start
   });
 
   testWidgets('ListTile contentPadding', (WidgetTester tester) async {
@@ -1254,7 +1214,6 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(ListTile)));
 
     await tester.pumpWidget(buildApp());
@@ -1459,7 +1418,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1787,7 +1745,6 @@ void main() {
       final Offset listTile = tester.getCenter(find.byKey(tileKey));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(listTile);
       await tester.pumpAndSettle();
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
@@ -2138,4 +2095,354 @@ void main() {
     expect(iconColor(subtitleKey),  Colors.white);
     expect(iconColor(trailingKey), Colors.white);
   });
+
+  testWidgets('ListTile font size', (WidgetTester tester) async {
+    Widget buildFrame({
+      bool dense = false,
+      bool enabled = true,
+      bool selected = false,
+      ListTileStyle? style,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  dense: dense,
+                  enabled: enabled,
+                  selected: selected,
+                  style: style,
+                  leading: const TestText('leading'),
+                  title: const TestText('title'),
+                  subtitle: const TestText('subtitle') ,
+                  trailing: const TestText('trailing'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ListTile - ListTileStyle.list (default).
+    await tester.pumpWidget(buildFrame());
+    RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 16.0);
+    RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 14.0);
+    RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+
+    // ListTile - Densed - ListTileStyle.list (default).
+    await tester.pumpWidget(buildFrame(dense: true));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 13.0);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 12.0);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+
+    // ListTile - ListTileStyle.drawer.
+    await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 14.0);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 14.0);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+
+    // ListTile - Densed - ListTileStyle.drawer.
+    await tester.pumpWidget(buildFrame(dense: true, style: ListTileStyle.drawer));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 13.0);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 12.0);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+  });
+
+  testWidgets('ListTile text color', (WidgetTester tester) async {
+    Widget buildFrame({
+      bool dense = false,
+      bool enabled = true,
+      bool selected = false,
+      ListTileStyle? style,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  dense: dense,
+                  enabled: enabled,
+                  selected: selected,
+                  style: style,
+                  leading: const TestText('leading'),
+                  title: const TestText('title'),
+                  subtitle: const TestText('subtitle') ,
+                  trailing: const TestText('trailing'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    final ThemeData theme = ThemeData();
+
+    // ListTile - ListTileStyle.list (default).
+    await tester.pumpWidget(buildFrame());
+    RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+    RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
+    RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+    RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+
+    // ListTile - ListTileStyle.drawer.
+    await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, theme.textTheme.bodyLarge!.color);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+  });
+
+  testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ListTile().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('ListTile implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ListTile(
+      leading: Text('leading'),
+      title: Text('title'),
+      subtitle: Text('trailing'),
+      trailing: Text('trailing'),
+      isThreeLine: true,
+      dense: true,
+      visualDensity: VisualDensity.standard,
+      shape: RoundedRectangleBorder(),
+      style: ListTileStyle.list,
+      selectedColor: Color(0xff0000ff),
+      iconColor: Color(0xff00ff00),
+      textColor: Color(0xffff0000),
+      contentPadding: EdgeInsets.zero,
+      enabled: false,
+      selected: true,
+      focusColor: Color(0xff00ffff),
+      hoverColor: Color(0xff0000ff),
+      autofocus: true,
+      tileColor: Color(0xffffff00),
+      selectedTileColor: Color(0xff123456),
+      enableFeedback: false,
+      horizontalTitleGap: 4.0,
+      minVerticalPadding: 2.0,
+      minLeadingWidth: 6.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description[0], 'leading: Text');
+    expect(description[1], 'title: Text');
+    expect(description[2], 'subtitle: Text');
+    expect(description[3], 'trailing: Text');
+    expect(description[4], 'isThreeLine: THREE_LINE');
+    expect(description[5], 'dense: true');
+    expect(description[6], equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)'));
+    expect(description[7], 'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)');
+    expect(description[8], 'style: ListTileStyle.list');
+    expect(description[9], 'selectedColor: Color(0xff0000ff)');
+    expect(description[10], 'iconColor: Color(0xff00ff00)');
+    expect(description[11], 'textColor: Color(0xffff0000)');
+    expect(description[12], 'contentPadding: EdgeInsets.zero');
+    expect(description[13], 'enabled: false');
+    expect(description[14], 'selected: true');
+    expect(description[15], 'focusColor: Color(0xff00ffff)');
+    expect(description[16], 'hoverColor: Color(0xff0000ff)');
+    expect(description[17], 'autofocus: true');
+    expect(description[18], 'tileColor: Color(0xffffff00)');
+    expect(description[19], 'selectedTileColor: Color(0xff123456)');
+    expect(description[20], 'enableFeedback: false');
+    expect(description[21], 'horizontalTitleGap: 4.0');
+    expect(description[22], 'minVerticalPadding: 2.0');
+    expect(description[23], 'minLeadingWidth: 6.0');
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('ListTile font size', (WidgetTester tester) async {
+      Widget buildFrame({
+        bool dense = false,
+        bool enabled = true,
+        bool selected = false,
+        ListTileStyle? style,
+      }) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    dense: dense,
+                    enabled: enabled,
+                    selected: selected,
+                    style: style,
+                    leading: const TestText('leading'),
+                    title: const TestText('title'),
+                    subtitle: const TestText('subtitle') ,
+                    trailing: const TestText('trailing'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      // ListTile - ListTileStyle.list (default).
+      await tester.pumpWidget(buildFrame());
+      RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      RenderParagraph title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 16.0);
+      RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 14.0);
+      RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+
+      // ListTile - Densed - ListTileStyle.list (default).
+      await tester.pumpWidget(buildFrame(dense: true));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 13.0);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 12.0);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+
+      // ListTile - ListTileStyle.drawer.
+      await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 14.0);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 14.0);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+
+      // ListTile - Densed - ListTileStyle.drawer.
+      await tester.pumpWidget(buildFrame(dense: true, style: ListTileStyle.drawer));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 13.0);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 12.0);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+    });
+
+    testWidgets('ListTile text color', (WidgetTester tester) async {
+      Widget buildFrame({
+        bool dense = false,
+        bool enabled = true,
+        bool selected = false,
+        ListTileStyle? style,
+      }) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    dense: dense,
+                    enabled: enabled,
+                    selected: selected,
+                    style: style,
+                    leading: const TestText('leading'),
+                    title: const TestText('title'),
+                    subtitle: const TestText('subtitle') ,
+                    trailing: const TestText('trailing'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      final ThemeData theme = ThemeData();
+
+      // ListTile - ListTileStyle.list (default).
+      await tester.pumpWidget(buildFrame());
+      RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
+      RenderParagraph title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.color, theme.textTheme.subtitle1!.color);
+      RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
+      RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
+
+      // ListTile - ListTileStyle.drawer.
+      await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.color, theme.textTheme.subtitle1!.color);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
+    });
+  });
+}
+
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.renderObject(find.descendant(
+    of: find.byType(ListTile),
+    matching: find.text(text),
+  ));
 }

@@ -216,21 +216,21 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    final String inputPathString = stringArg('arb-dir')!; // Has default value, cannot be null.
-    final String? outputPathString = stringArg('output-dir');
-    final String outputFileString = stringArg('output-localization-file')!; // Has default value, cannot be null.
-    final String templateArbFileName = stringArg('template-arb-file')!; // Has default value, cannot be null.
-    final String? untranslatedMessagesFile = stringArg('untranslated-messages-file');
-    final String classNameString = stringArg('output-class')!; // Has default value, cannot be null.
+    final String inputPathString = stringArgDeprecated('arb-dir')!; // Has default value, cannot be null.
+    final String? outputPathString = stringArgDeprecated('output-dir');
+    final String outputFileString = stringArgDeprecated('output-localization-file')!; // Has default value, cannot be null.
+    final String templateArbFileName = stringArgDeprecated('template-arb-file')!; // Has default value, cannot be null.
+    final String? untranslatedMessagesFile = stringArgDeprecated('untranslated-messages-file');
+    final String classNameString = stringArgDeprecated('output-class')!; // Has default value, cannot be null.
     final List<String> preferredSupportedLocales = stringsArg('preferred-supported-locales');
-    final String? headerString = stringArg('header');
-    final String? headerFile = stringArg('header-file');
-    final bool useDeferredLoading = boolArg('use-deferred-loading');
-    final String? inputsAndOutputsListPath = stringArg('gen-inputs-and-outputs-list');
-    final bool useSyntheticPackage = boolArg('synthetic-package');
-    final String? projectPathString = stringArg('project-dir');
-    final bool areResourceAttributesRequired = boolArg('required-resource-attributes');
-    final bool usesNullableGetter = boolArg('nullable-getter');
+    final String? headerString = stringArgDeprecated('header');
+    final String? headerFile = stringArgDeprecated('header-file');
+    final bool useDeferredLoading = boolArgDeprecated('use-deferred-loading');
+    final String? inputsAndOutputsListPath = stringArgDeprecated('gen-inputs-and-outputs-list');
+    final bool useSyntheticPackage = boolArgDeprecated('synthetic-package');
+    final String? projectPathString = stringArgDeprecated('project-dir');
+    final bool areResourceAttributesRequired = boolArgDeprecated('required-resource-attributes');
+    final bool usesNullableGetter = boolArgDeprecated('nullable-getter');
 
     precacheLanguageAndRegionTags();
 

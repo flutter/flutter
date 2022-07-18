@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
@@ -215,8 +216,15 @@ void precacheLanguageAndRegionTags() {
 String describeLocale(String tag) {
   final List<String> subtags = tag.split('_');
   assert(subtags.isNotEmpty);
-  assert(_languages.containsKey(subtags[0]));
-  final String language = _languages[subtags[0]]!;
+  final String languageCode = subtags[0];
+  if (!_languages.containsKey(languageCode)) {
+    throw L10nException(
+      '"$languageCode" is not a supported language code.\n'
+      'See https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry '
+      'for the supported list.',
+    );
+  }
+  final String language = _languages[languageCode]!;
   String output = language;
   String? region;
   String? script;

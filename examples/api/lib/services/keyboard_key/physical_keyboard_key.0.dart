@@ -4,36 +4,34 @@
 
 // Flutter code sample for PhysicalKeyboardKey
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const KeyExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class KeyExampleApp extends StatelessWidget {
+  const KeyExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('PhysicalKeyboardKey Example')),
+        body: const MyPhysicalKeyExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class MyPhysicalKeyExample extends StatefulWidget {
+  const MyPhysicalKeyExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<MyPhysicalKeyExample> createState() => _MyPhysicalKeyExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
 // The node used to request the keyboard focus.
   final FocusNode _focusNode = FocusNode();
 // The message to display.
@@ -48,14 +46,21 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
 // Handles the key events from the RawKeyboardListener and update the
 // _message.
-  void _handleKeyEvent(RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
     setState(() {
       if (event.physicalKey == PhysicalKeyboardKey.keyA) {
         _message = 'Pressed the key next to CAPS LOCK!';
       } else {
-        _message = 'Wrong key.';
+        if (kReleaseMode) {
+          _message = 'Not the key next to CAPS LOCK: Pressed 0x${event.physicalKey.usbHidUsage.toRadixString(16)}';
+        } else {
+          // As the name implies, the debugName will only print useful
+          // information in debug mode.
+          _message = 'Not the key next to CAPS LOCK: Pressed ${event.physicalKey.debugName}';
+        }
       }
     });
+    return event.physicalKey == PhysicalKeyboardKey.keyA ? KeyEventResult.handled : KeyEventResult.ignored;
   }
 
   @override
@@ -66,7 +71,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       alignment: Alignment.center,
       child: DefaultTextStyle(
         style: textTheme.headline4!,
-        child: RawKeyboardListener(
+        child: Focus(
           focusNode: _focusNode,
           onKey: _handleKeyEvent,
           child: AnimatedBuilder(
@@ -77,7 +82,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   onTap: () {
                     FocusScope.of(context).requestFocus(_focusNode);
                   },
-                  child: const Text('Tap to focus'),
+                  child: const Text('Click to focus'),
                 );
               }
               return Text(_message ?? 'Press a key');

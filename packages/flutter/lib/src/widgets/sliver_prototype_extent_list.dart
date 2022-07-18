@@ -35,11 +35,10 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// constrains them to have the same extent as a prototype item along
   /// the main axis.
   const SliverPrototypeExtentList({
-    Key? key,
-    required SliverChildDelegate delegate,
+    super.key,
+    required super.delegate,
     required this.prototypeItem,
-  }) : assert(prototypeItem != null),
-       super(key: key, delegate: delegate);
+  }) : assert(prototypeItem != null);
 
   /// Defines the main axis extent of all of this sliver's children.
   ///
@@ -60,7 +59,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
 }
 
 class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
-  _SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
+  _SliverPrototypeExtentListElement(SliverPrototypeExtentList super.widget);
 
   @override
   _RenderSliverPrototypeExtentList get renderObject => super.renderObject as _RenderSliverPrototypeExtentList;
@@ -80,30 +79,35 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
 
   @override
   void didAdoptChild(RenderBox child) {
-    if (child != renderObject.child)
+    if (child != renderObject.child) {
       super.didAdoptChild(child);
+    }
   }
 
   @override
   void moveRenderObjectChild(RenderBox child, Object oldSlot, Object newSlot) {
-    if (newSlot == _prototypeSlot)
-      assert(false); // There's only one prototype child so it cannot be moved.
-    else
+    if (newSlot == _prototypeSlot) {
+      // There's only one prototype child so it cannot be moved.
+      assert(false);
+    } else {
       super.moveRenderObjectChild(child, oldSlot as int, newSlot as int);
+    }
   }
 
   @override
   void removeRenderObjectChild(RenderBox child, Object slot) {
-    if (renderObject.child == child)
+    if (renderObject.child == child) {
       renderObject.child = null;
-    else
+    } else {
       super.removeRenderObjectChild(child, slot as int);
+    }
   }
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (_prototype != null)
+    if (_prototype != null) {
       visitor(_prototype!);
+    }
     super.visitChildren(visitor);
   }
 
@@ -129,11 +133,13 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   RenderBox? _child;
   RenderBox? get child => _child;
   set child(RenderBox? value) {
-    if (_child != null)
+    if (_child != null) {
       dropChild(_child!);
+    }
     _child = value;
-    if (_child != null)
+    if (_child != null) {
       adoptChild(_child!);
+    }
     markNeedsLayout();
   }
 
@@ -146,28 +152,32 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_child != null)
+    if (_child != null) {
       _child!.attach(owner);
+    }
   }
 
   @override
   void detach() {
     super.detach();
-    if (_child != null)
+    if (_child != null) {
       _child!.detach();
+    }
   }
 
   @override
   void redepthChildren() {
-    if (_child != null)
+    if (_child != null) {
       redepthChild(_child!);
+    }
     super.redepthChildren();
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_child != null)
+    if (_child != null) {
       visitor(_child!);
+    }
     super.visitChildren(visitor);
   }
 

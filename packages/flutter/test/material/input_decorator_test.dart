@@ -97,8 +97,9 @@ TextStyle getLabelStyle(WidgetTester tester) {
 }
 
 InputBorder? getBorder(WidgetTester tester) {
-  if (!tester.any(findBorderPainter()))
+  if (!tester.any(findBorderPainter())) {
     return null;
+  }
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   // ignore: avoid_dynamic_calls
@@ -1294,7 +1295,7 @@ void main() {
     Finder counterFinder = find.byType(Text);
     expect(counterFinder, findsOneWidget);
     final Text counterWidget = tester.widget(counterFinder);
-    expect(counterWidget.data, '0/${maxLength.toString()}');
+    expect(counterWidget.data, '0/$maxLength');
 
     // When counter, counterText, and buildCounter are set, shows the counter
     // widget.
@@ -1309,7 +1310,7 @@ void main() {
       required bool isFocused,
     }) {
       return Text(
-        '${currentLength.toString()} of ${maxLength.toString()}',
+        '$currentLength of $maxLength',
         key: buildCounterKey,
       );
     }
@@ -4321,17 +4322,17 @@ void main() {
     await pumpDecorator(focused: false, empty: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     await pumpDecorator(focused: true);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     await pumpDecorator(focused: true, empty: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     await pumpDecorator(focused: false, enabled: false);
     await tester.pumpAndSettle();
@@ -4341,7 +4342,7 @@ void main() {
     await pumpDecorator(focused: false, empty: false, enabled: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     // Focused and disabled happens with NavigationMode.directional.
     await pumpDecorator(focused: true, enabled: false);
@@ -4352,7 +4353,7 @@ void main() {
     await pumpDecorator(focused: true, empty: false, enabled: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
   });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {

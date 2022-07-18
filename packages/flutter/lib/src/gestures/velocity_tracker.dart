@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'events.dart';
 import 'lsq_solver.dart';
 
-export 'dart:ui' show Offset;
+export 'dart:ui' show Offset, PointerDeviceKind;
 
 /// A velocity in two dimensions.
 @immutable
@@ -53,10 +53,12 @@ class Velocity {
     assert(minValue != null && minValue >= 0.0);
     assert(maxValue != null && maxValue >= 0.0 && maxValue >= minValue);
     final double valueSquared = pixelsPerSecond.distanceSquared;
-    if (valueSquared > maxValue * maxValue)
+    if (valueSquared > maxValue * maxValue) {
       return Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * maxValue);
-    if (valueSquared < minValue * minValue)
+    }
+    if (valueSquared < minValue * minValue) {
       return Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * minValue);
+    }
     return this;
   }
 
@@ -163,8 +165,9 @@ class VelocityTracker {
   /// Adds a position as the given time to the tracker.
   void addPosition(Duration time, Offset position) {
     _index += 1;
-    if (_index == _historySize)
+    if (_index == _historySize) {
       _index = 0;
+    }
     _samples[_index] = _PointAtTime(position, time);
   }
 
@@ -183,8 +186,9 @@ class VelocityTracker {
     int index = _index;
 
     final _PointAtTime? newestSample = _samples[index];
-    if (newestSample == null)
+    if (newestSample == null) {
       return null;
+    }
 
     _PointAtTime previousSample = newestSample;
     _PointAtTime oldestSample = newestSample;
@@ -193,14 +197,16 @@ class VelocityTracker {
     // the samples represent continuous motion.
     do {
       final _PointAtTime? sample = _samples[index];
-      if (sample == null)
+      if (sample == null) {
         break;
+      }
 
       final double age = (newestSample.time - sample.time).inMicroseconds.toDouble() / 1000;
       final double delta = (sample.time - previousSample.time).inMicroseconds.abs().toDouble() / 1000;
       previousSample = sample;
-      if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds)
+      if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds) {
         break;
+      }
 
       oldestSample = sample;
       final Offset position = sample.point;
@@ -249,8 +255,9 @@ class VelocityTracker {
   /// estimate or if the estimated velocity is zero.
   Velocity getVelocity() {
     final VelocityEstimate? estimate = getVelocityEstimate();
-    if (estimate == null || estimate.pixelsPerSecond == Offset.zero)
+    if (estimate == null || estimate.pixelsPerSecond == Offset.zero) {
       return Velocity.zero;
+    }
     return Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
   }
 }
@@ -278,7 +285,7 @@ class VelocityTracker {
 ///   the iOS method that reports the fling velocity when the touch is released.
 class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   /// Create a new IOSScrollViewFlingVelocityTracker.
-  IOSScrollViewFlingVelocityTracker(PointerDeviceKind kind) : super.withKind(kind);
+  IOSScrollViewFlingVelocityTracker(super.kind) : super.withKind();
 
   /// The velocity estimation uses at most 4 `_PointAtTime` samples. The extra
   /// samples are there to make the `VelocityEstimate.offset` sufficiently large
@@ -292,8 +299,9 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   void addPosition(Duration time, Offset position) {
     assert(() {
       final _PointAtTime? previousPoint = _touchSamples[_index];
-      if (previousPoint == null || previousPoint.time <= time)
+      if (previousPoint == null || previousPoint.time <= time) {
         return true;
+      }
       throw FlutterError(
         'The position being added ($position) has a smaller timestamp ($time) '
         'than its predecessor: $previousPoint.',
@@ -342,8 +350,9 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 
     for (int i = 1; i <= _sampleSize; i += 1) {
       oldestNonNullSample = _touchSamples[(_index + i) % _sampleSize];
-      if (oldestNonNullSample != null)
+      if (oldestNonNullSample != null) {
         break;
+      }
     }
 
     if (oldestNonNullSample == null || newestSample == null) {

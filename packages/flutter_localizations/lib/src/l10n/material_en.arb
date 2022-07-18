@@ -368,6 +368,11 @@
     "description": "The audio announcement made when the Drawer is opened."
   },
 
+  "menuBarMenuLabel": "Menu bar menu",
+  "@menuBarMenuLabel": {
+    "description": "The audio announcement made when a MenuBarMenu is opened."
+  },
+
   "popupMenuLabel": "Popup menu",
   "@popupMenuLabel": {
     "description": "The audio announcement made when a PopupMenu is opened."
@@ -496,11 +501,6 @@
     "description": "Part of a keyboard shortcut label for the keyboard key 'Del' (delete) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
   },
 
-  "keyboardKeyEisu": "Eisū",
-  "@keyboardKeyEisu": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Eisū' (eisu) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Only appears on Japanese keyboards, often as 英数."
-  },
-
   "keyboardKeyEject": "Eject",
   "@keyboardKeyEject": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Eject' (eject) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
@@ -521,31 +521,6 @@
     "description": "Part of a keyboard shortcut label for the keyboard key 'Fn' (fn) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
   },
 
-  "keyboardKeyHangulMode": "Hangul Mode",
-  "@keyboardKeyHangulMode": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Hangul Mode' (hangulMode) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Typically only appears on a Korean keyboard."
-  },
-
-  "keyboardKeyHanjaMode": "Hanja Mode",
-  "@keyboardKeyHanjaMode": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Hanja Mode' (hanjaMode) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Typically only appears on a Korean keyboard with the name 한자"
-  },
-
-  "keyboardKeyHankaku": "Hankaku",
-  "@keyboardKeyHankaku": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Hankaku' (hankaku) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Only appears on Japanese keyboards with the name '半角' to switch to half-width mode."
-  },
-
-  "keyboardKeyHiragana": "Hiragana",
-  "@keyboardKeyHiragana": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Hiragana' (hiragana) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Only appears on Japanese keyboards, with the name 'ひらがな' for switching to Hiragana mode."
-  },
-
-  "keyboardKeyHiraganaKatakana": "Hiragana Katakana",
-  "@keyboardKeyHiraganaKatakana": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Hiragana Katakana' (hiraganaKatakana) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Only appears on Japanese keyboards with the name 'ひらがな / カタカナ / ローマ字', to switch between Katakana, Hiragana, and Romanji."
-  },
-
   "keyboardKeyHome": "Home",
   "@keyboardKeyHome": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Home' (home) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
@@ -554,21 +529,6 @@
   "keyboardKeyInsert": "Insert",
   "@keyboardKeyInsert": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Insert' (insert) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
-  },
-
-  "keyboardKeyKanaMode": "Kana Mode",
-  "@keyboardKeyKanaMode": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Kana Mode' (kanaMode) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Usually found on macOS Japanese keyboards with the name 'かな', to switch to Kana mode."
-  },
-
-  "keyboardKeyKanjiMode": "Kanji Mode",
-  "@keyboardKeyKanjiMode": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Kanji Mode' (kanjiMode) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Found only on Japanese keyboards with the name '漢字', to switch to Kanji mode."
-  },
-
-  "keyboardKeyKatakana": "Katakana",
-  "@keyboardKeyKatakana": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Katakana' (katakana) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Found only on Japanese keyboards with the name 'カタカナ', to switch to Katakana mode."
   },
 
   "keyboardKeyMeta": "Meta",
@@ -716,11 +676,6 @@
     "description": "Part of a keyboard shortcut label for the keyboard key 'Print Screen' (printScreen) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
   },
 
-  "keyboardKeyRomaji": "Romaji",
-  "@keyboardKeyRomaji": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Romaji' (romaji) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. Found on a Japanese keyboard with the name 'ローマ字', to switch to Romanji mode."
-  },
-
   "keyboardKeyScrollLock": "Scroll Lock",
   "@keyboardKeyScrollLock": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Scroll Lock' (scrollLock) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
@@ -734,15 +689,5 @@
   "keyboardKeySpace": "Space",
   "@keyboardKeySpace": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Space' (space) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is the space bar key."
-  },
-
-  "keyboardKeyZenkaku": "Zenkaku",
-  "@keyboardKeyZenkaku": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Zenkaku' (zenkaku) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is only found on Japanese keyboards with the name '全角' to switch to Zenkaku mode."
-  },
-
-  "keyboardKeyZenkakuHankaku": "Zenkaku Hankaku",
-  "@keyboardKeyZenkakuHankaku": {
-    "description": "Part of a keyboard shortcut label for the keyboard key 'Zenkaku Hankaku' (zenkakuHankaku) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is only found on Japanese keyboards with the name '半角 / 全角 / 漢字', to switch between modes."
   }
 }

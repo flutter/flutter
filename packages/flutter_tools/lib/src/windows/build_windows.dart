@@ -17,11 +17,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
-import 'install_manifest.dart';
 import 'visual_studio.dart';
-
-/// Update the string when non-backwards compatible changes are made to the UWP template.
-const int kCurrentUwpTemplateVersion = 0;
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
@@ -116,132 +112,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 }
 
-/// Build the Windows UWP project.
-///
-/// Note that this feature is currently unfinished.
-Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildInfo, {
-  String? target,
-  VisualStudio? visualStudioOverride,
-}) async {
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
-  if (!windowsProject.existsSync()) {
-    throwToolExit(
-      'No Windows UWP desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
-      'to learn about adding Windows support to a project.',
-    );
-  }
-  if (windowsProject.projectVersion != kCurrentUwpTemplateVersion) {
-    throwToolExit(
-      'The Windows UWP project template and build process has changed. In order to build '
-      'you must delete the winuwp directory and re-create the project.',
-    );
-  }
-   // Ensure that necessary ephemeral files are generated and up to date.
-  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
-  createPluginSymlinks(windowsProject.parent);
-  await createManifest(
-    buildDirectory: buildDirectory,
-    logger: globals.logger,
-    platform: globals.platform,
-    project: windowsProject,
-    buildInfo: buildInfo,
-    fileSystem: globals.fs,
-  );
-
-  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
-    fileSystem: globals.fs,
-    platform: globals.platform,
-    logger: globals.logger,
-    processManager: globals.processManager,
-  );
-  final String? cmakePath = visualStudio.cmakePath;
-  final String? cmakeGenerator = visualStudio.cmakeGenerator;
-  if (cmakePath == null || cmakeGenerator == null) {
-    throwToolExit('Unable to find suitable Visual Studio toolchain. '
-        'Please run `flutter doctor` for more details.');
-  }
-
-  final String buildModeName = getNameForBuildMode(buildInfo.mode);
-  final Status status = globals.logger.startProgress(
-    'Building Windows UWP application...',
-  );
-  try {
-    // The Cmake re-entrant build does not work for UWP, so the flutter build is
-    // run in advance.
-    await _runFlutterBuild(buildDirectory, buildInfo, target);
-    await _runCmakeGeneration(
-      cmakePath: cmakePath,
-      generator: cmakeGenerator,
-      buildDir: buildDirectory,
-      sourceDir: windowsProject.cmakeFile.parent,
-    );
-    await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
-  } finally {
-    status.cancel();
-  }
-}
-
-const Map<BuildMode, String> _targets = <BuildMode, String>{
-  BuildMode.debug: 'debug_bundle_windows_assets_uwp',
-  BuildMode.profile: 'profile_bundle_windows_assets_uwp',
-  BuildMode.release: 'release_bundle_windows_assets_uwp',
-};
-
-Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, String? targetFile) async {
-  await buildDirectory.create(recursive: true);
-  int result;
-  String? flutterEngine;
-  String? localEngine;
-  final Artifacts artifacts = globals.artifacts!;
-  if (artifacts is LocalEngineArtifacts) {
-    final String engineOutPath = artifacts.engineOutPath;
-    flutterEngine = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    localEngine = globals.fs.path.basename(engineOutPath);
-  }
-  try {
-    final String? buildMode = _targets[buildInfo.mode];
-    result = await globals.processUtils.stream(
-      <String>[
-        globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
-        if (globals.logger.isVerbose)
-          '--verbose',
-        if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
-        if (localEngine != null) '--local-engine=$localEngine',
-        'assemble',
-        '--no-version-check',
-        '--output=build',
-        '-dTargetPlatform=windows-uwp-x64',
-        '-dTrackWidgetCreation=${buildInfo.trackWidgetCreation}',
-        '-dBuildMode=${getNameForBuildMode(buildInfo.mode)}',
-        '-dTargetFile=$targetFile',
-        '-dTreeShakeIcons="${buildInfo.treeShakeIcons}"',
-        '-dDartObfuscation=${buildInfo.dartObfuscation}',
-        if (buildInfo.bundleSkSLPath != null)
-          '-dBundleSkSLPath=${buildInfo.bundleSkSLPath}',
-        if (buildInfo.codeSizeDirectory != null)
-          '-dCodeSizeDirectory=${buildInfo.codeSizeDirectory}',
-        if (buildInfo.splitDebugInfoPath != null)
-          '-dSplitDebugInfo=${buildInfo.splitDebugInfoPath}',
-        if (buildInfo.dartDefines != null && buildInfo.dartDefines.isNotEmpty)
-          '--DartDefines=${encodeDartDefines(buildInfo.dartDefines)}',
-        if (buildInfo.extraGenSnapshotOptions != null && buildInfo.extraGenSnapshotOptions.isNotEmpty)
-          '--ExtraGenSnapshotOptions=${buildInfo.extraGenSnapshotOptions}',
-        if (buildInfo.extraFrontEndOptions != null && buildInfo.extraFrontEndOptions.isNotEmpty)
-          '--ExtraFrontEndOptions=${buildInfo.extraFrontEndOptions}',
-        if (buildMode != null)
-          buildMode,
-      ],
-      trace: true,
-    );
-  } on ArgumentError {
-    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
-  }
-  if (result != 0) {
-    throwToolExit('Unable to generate build files');
-  }
-}
-
 Future<void> _runCmakeGeneration({
   required String cmakePath,
   required String generator,
@@ -298,11 +168,11 @@ Future<void> _runBuild(
         if (install)
           ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)
-          '--verbose'
+          '--verbose',
       ],
       environment: <String, String>{
         if (globals.logger.isVerbose)
-          'VERBOSE_SCRIPT_LOGGING': 'true'
+          'VERBOSE_SCRIPT_LOGGING': 'true',
       },
       trace: true,
       stdoutErrorMatcher: errorMatcher,
@@ -336,7 +206,7 @@ void _writeGeneratedFlutterConfig(
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, environment);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

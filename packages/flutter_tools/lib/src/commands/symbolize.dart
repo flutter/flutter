@@ -68,11 +68,11 @@ class SymbolizeCommand extends FlutterCommand {
     if (argResults?.wasParsed('debug-info') != true) {
       throwToolExit('"--debug-info" is required to symbolize stack traces.');
     }
-    if (!_fileSystem.isFileSync(stringArg('debug-info')!)) {
-      throwToolExit('${stringArg('debug-info')} does not exist.');
+    if (!_fileSystem.isFileSync(stringArgDeprecated('debug-info')!)) {
+      throwToolExit('${stringArgDeprecated('debug-info')} does not exist.');
     }
-    if ((argResults?.wasParsed('input') ?? false) && !_fileSystem.isFileSync(stringArg('input')!)) {
-      throwToolExit('${stringArg('input')} does not exist.');
+    if ((argResults?.wasParsed('input') ?? false) && !_fileSystem.isFileSync(stringArgDeprecated('input')!)) {
+      throwToolExit('${stringArgDeprecated('input')} does not exist.');
     }
     return super.validateCommand();
   }
@@ -84,7 +84,7 @@ class SymbolizeCommand extends FlutterCommand {
 
     // Configure output to either specified file or stdout.
     if (argResults?.wasParsed('output') ?? false) {
-      final File outputFile = _fileSystem.file(stringArg('output'));
+      final File outputFile = _fileSystem.file(stringArgDeprecated('output'));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
@@ -100,12 +100,12 @@ class SymbolizeCommand extends FlutterCommand {
 
     // Configure input from either specified file or stdin.
     if (argResults?.wasParsed('input') ?? false) {
-      input = _fileSystem.file(stringArg('input')).openRead();
+      input = _fileSystem.file(stringArgDeprecated('input')).openRead();
     } else {
       input = _stdio.stdin;
     }
 
-    final Uint8List symbols = _fileSystem.file(stringArg('debug-info')).readAsBytesSync();
+    final Uint8List symbols = _fileSystem.file(stringArgDeprecated('debug-info')).readAsBytesSync();
     await _dwarfSymbolizationService.decode(
       input: input,
       output: output,

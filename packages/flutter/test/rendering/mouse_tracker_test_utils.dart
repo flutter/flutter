@@ -89,16 +89,17 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (event is PointerHoverEvent)
+    if (event is PointerHoverEvent) {
       onHover?.call(event);
+    }
   }
 }
 
 // A hit test entry that can be assigned with a [TestAnnotationTarget] and an
 // optional transform matrix.
 class TestAnnotationEntry extends HitTestEntry<TestAnnotationTarget> {
-  TestAnnotationEntry(TestAnnotationTarget target, [Matrix4? transform])
-    : transform = transform ?? Matrix4.identity(), super(target);
+  TestAnnotationEntry(super.target, [Matrix4? transform])
+    : transform = transform ?? Matrix4.identity();
 
   @override
   final Matrix4 transform;

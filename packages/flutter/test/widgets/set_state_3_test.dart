@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 late ChangerState changer;
 
 class Changer extends StatefulWidget {
-  const Changer(this.child, { Key? key }) : super(key: key);
+  const Changer(this.child, { super.key });
 
   final Widget child;
 
@@ -32,7 +32,7 @@ class ChangerState extends State<Changer> {
 }
 
 class Wrapper extends StatelessWidget {
-  const Wrapper(this.child, { Key? key }) : super(key: key);
+  const Wrapper(this.child, { super.key });
 
   final Widget child;
 
@@ -41,7 +41,7 @@ class Wrapper extends StatelessWidget {
 }
 
 class Leaf extends StatefulWidget {
-  const Leaf({ Key? key }) : super(key: key);
+  const Leaf({ super.key });
   @override
   LeafState createState() => LeafState();
 }

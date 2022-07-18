@@ -70,16 +70,16 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
+    _commandRunner.workingDirectory = stringArgDeprecated('working-directory') ?? Cache.flutterRoot!;
     return _commandRunner.runCommand(
-      force: boolArg('force'),
-      continueFlow: boolArg('continue'),
-      testFlow: stringArg('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(globals.processUtils),
-      flutterVersion: stringArg('working-directory') == null
+      force: boolArgDeprecated('force'),
+      continueFlow: boolArgDeprecated('continue'),
+      testFlow: stringArgDeprecated('working-directory') != null,
+      gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
+      flutterVersion: stringArgDeprecated('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
-      verifyOnly: boolArg('verify-only'),
+      verifyOnly: boolArgDeprecated('verify-only'),
     );
   }
 }
@@ -243,9 +243,9 @@ class UpgradeCommandRunner {
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-      // '@{u}' means upstream HEAD
+      // Get the latest commit revision of the upstream
       final RunResult result = await globals.processUtils.run(
-          <String>[ 'git', 'rev-parse', '--verify', '@{u}'],
+          <String>['git', 'rev-parse', '--verify', kGitTrackingUpstream],
           throwOnError: true,
           workingDirectory: workingDirectory,
       );

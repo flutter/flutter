@@ -156,7 +156,7 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
-        '--enable-web'
+        '--enable-web',
       ]);
 
       expect(

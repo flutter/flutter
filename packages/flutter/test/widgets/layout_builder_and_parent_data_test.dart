@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 class SizeChanger extends StatefulWidget {
   const SizeChanger({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -41,29 +41,17 @@ class SizeChangerState extends State<SizeChanger> {
   }
 }
 
-class Wrapper extends StatelessWidget {
-  const Wrapper({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return child;
-  }
-}
-
 void main() {
   testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
     int frame = 1;
     await tester.pumpWidget(SizeChanger( // when this is triggered, the child LayoutBuilder will build again
       child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return Column(children: <Widget>[Expanded(
-          flex: frame, // this is different after the next pump, so that the parentData has to be applied again
-          child: Container(height: 100.0),
-        )]);
+        return Column(children: <Widget>[
+          Expanded(
+            flex: frame, // this is different after the next pump, so that the parentData has to be applied again
+            child: Container(height: 100.0),
+          ),
+        ]);
       }),
     ));
     frame += 1;

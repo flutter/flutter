@@ -93,7 +93,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    await _validateOptions(stringArg(_kType), stringArg(_kObservatoryUrl));
+    await _validateOptions(stringArgDeprecated(_kType), stringArgDeprecated(_kObservatoryUrl));
     return super.verifyThenRunCommand(commandPath);
   }
 
@@ -101,11 +101,11 @@ class ScreenshotCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     File? outputFile;
     if (argResults?.wasParsed(_kOut) ?? false) {
-      outputFile = globals.fs.file(stringArg(_kOut));
+      outputFile = globals.fs.file(stringArgDeprecated(_kOut));
     }
 
     bool success = true;
-    switch (stringArg(_kType)) {
+    switch (stringArgDeprecated(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);
         break;
@@ -136,7 +136,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<bool> runSkia(File? outputFile) async {
-    final Uri observatoryUrl = Uri.parse(stringArg(_kObservatoryUrl)!);
+    final Uri observatoryUrl = Uri.parse(stringArgDeprecated(_kObservatoryUrl)!);
     final FlutterVmService vmService = await connectToVmService(observatoryUrl, logger: globals.logger);
     final vm_service.Response? skp = await vmService.screenshotSkp();
     if (skp == null) {
@@ -160,7 +160,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<bool> runRasterizer(File? outputFile) async {
-    final Uri observatoryUrl = Uri.parse(stringArg(_kObservatoryUrl)!);
+    final Uri observatoryUrl = Uri.parse(stringArgDeprecated(_kObservatoryUrl)!);
     final FlutterVmService vmService = await connectToVmService(observatoryUrl, logger: globals.logger);
     final vm_service.Response? response = await vmService.screenshot();
     if (response == null) {

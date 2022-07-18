@@ -65,7 +65,7 @@ class MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
               child: _MarqueeText(animation: animation),
               alignment: Alignment.centerLeft,
             ),
-            const FlatButton(child: Text('POP'), onPressed: SystemNavigator.pop),
+            const TextButton(child: Text('POP'), onPressed: SystemNavigator.pop),
           ],
         ),
       ),

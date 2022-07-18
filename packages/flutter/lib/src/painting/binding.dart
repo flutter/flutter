@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show Uint8List;
-import 'dart:ui' as ui show instantiateImageCodec, Codec;
+import 'dart:ui' as ui show instantiateImageCodec, instantiateImageCodecFromBuffer, Codec, ImmutableBuffer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
@@ -81,6 +80,9 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 
   /// Calls through to [dart:ui.instantiateImageCodec] from [ImageCache].
   ///
+  /// This method is deprecated. use [instantiateImageCodecFromBuffer] with an
+  /// [ImmutableBuffer] instance instead of this method.
+  ///
   /// The `cacheWidth` and `cacheHeight` parameters, when specified, indicate
   /// the size to decode the image to.
   ///
@@ -97,6 +99,10 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// unnecessary memory usage for images. Callers that wish to display an image
   /// above its native resolution should prefer scaling the canvas the image is
   /// drawn into.
+  @Deprecated(
+    'Use instantiateImageCodecFromBuffer with an ImmutableBuffer instance instead. '
+    'This feature was deprecated after v2.13.0-1.0.pre.',
+  )
   Future<ui.Codec> instantiateImageCodec(
     Uint8List bytes, {
     int? cacheWidth,
@@ -108,6 +114,44 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     assert(allowUpscaling != null);
     return ui.instantiateImageCodec(
       bytes,
+      targetWidth: cacheWidth,
+      targetHeight: cacheHeight,
+      allowUpscaling: allowUpscaling,
+    );
+  }
+
+  /// Calls through to [dart:ui.instantiateImageCodecFromBuffer] from [ImageCache].
+  ///
+  /// The [buffer] parameter should be an [ui.ImmutableBuffer] instance which can
+  /// be acquired from [ui.ImmutableBuffer.fromUint8List] or [ui.ImmutableBuffer.fromAsset].
+  ///
+  /// The [cacheWidth] and [cacheHeight] parameters, when specified, indicate
+  /// the size to decode the image to.
+  ///
+  /// Both [cacheWidth] and [cacheHeight] must be positive values greater than
+  /// or equal to 1, or null. It is valid to specify only one of `cacheWidth`
+  /// and [cacheHeight] with the other remaining null, in which case the omitted
+  /// dimension will be scaled to maintain the aspect ratio of the original
+  /// dimensions. When both are null or omitted, the image will be decoded at
+  /// its native resolution.
+  ///
+  /// The [allowUpscaling] parameter determines whether the `cacheWidth` or
+  /// [cacheHeight] parameters are clamped to the intrinsic width and height of
+  /// the original image. By default, the dimensions are clamped to avoid
+  /// unnecessary memory usage for images. Callers that wish to display an image
+  /// above its native resolution should prefer scaling the canvas the image is
+  /// drawn into.
+  Future<ui.Codec> instantiateImageCodecFromBuffer(
+    ui.ImmutableBuffer buffer, {
+    int? cacheWidth,
+    int? cacheHeight,
+    bool allowUpscaling = false,
+  }) {
+    assert(cacheWidth == null || cacheWidth > 0);
+    assert(cacheHeight == null || cacheHeight > 0);
+    assert(allowUpscaling != null);
+    return ui.instantiateImageCodecFromBuffer(
+      buffer,
       targetWidth: cacheWidth,
       targetHeight: cacheHeight,
       allowUpscaling: allowUpscaling,

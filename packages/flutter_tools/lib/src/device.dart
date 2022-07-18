@@ -158,7 +158,7 @@ abstract class DeviceManager {
           }, onError: (dynamic error, StackTrace stackTrace) {
             // Return matches from other discoverers even if one fails.
             _logger.printTrace('Ignored error discovering $deviceId: $error');
-          })
+          }),
     ];
 
     // Wait for an exact match, or for all discoverers to return results.
@@ -557,8 +557,8 @@ abstract class Device {
   /// For example, the desktop device classes can use a writer which
   /// copies the files across the local file system.
   DevFSWriter? createDevFSWriter(
-    covariant ApplicationPackage app,
-    String userIdentifier,
+    covariant ApplicationPackage? app,
+    String? userIdentifier,
   ) {
     return null;
   }
@@ -593,7 +593,7 @@ abstract class Device {
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    covariant ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -624,7 +624,7 @@ abstract class Device {
   ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
   Future<bool> stopApp(
-    covariant ApplicationPackage app, {
+    covariant ApplicationPackage? app, {
     String? userIdentifier,
   });
 
@@ -722,7 +722,7 @@ abstract class Device {
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
-      }
+      },
     };
   }
 
@@ -785,6 +785,7 @@ class DebuggingOptions {
     this.webUseSseForInjectedClient = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
+    this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
     this.webLaunchUrl,
     this.vmserviceOutFile,
@@ -792,6 +793,7 @@ class DebuggingOptions {
     this.nullAssertions = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
+    this.uninstallFirst = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -804,10 +806,12 @@ class DebuggingOptions {
       this.webUseSseForInjectedClient = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
+      this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = false,
+      this.uninstallFirst = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -869,6 +873,7 @@ class DebuggingOptions {
     required this.webUseSseForInjectedClient,
     required this.webRunHeadless,
     required this.webBrowserDebugPort,
+    required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
@@ -876,6 +881,7 @@ class DebuggingOptions {
     required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.uninstallFirst,
   });
 
   final bool debuggingEnabled;
@@ -912,6 +918,11 @@ class DebuggingOptions {
   final bool webUseSseForInjectedClient;
   final bool enableImpeller;
 
+  /// Whether the tool should try to uninstall a previously installed version of the app.
+  ///
+  /// This is not implemented for every platform.
+  final bool uninstallFirst;
+
   /// Whether to run the browser in headless mode.
   ///
   /// Some CI environments do not provide a display and fail to launch the
@@ -921,6 +932,9 @@ class DebuggingOptions {
 
   /// The port the browser should use for its debugging protocol.
   final int? webBrowserDebugPort;
+
+  /// Arbitrary browser flags.
+  final List<String> webBrowserFlags;
 
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
@@ -975,6 +989,7 @@ class DebuggingOptions {
     'webUseSseForInjectedClient': webUseSseForInjectedClient,
     'webRunHeadless': webRunHeadless,
     'webBrowserDebugPort': webBrowserDebugPort,
+    'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'vmserviceOutFile': vmserviceOutFile,
@@ -1019,6 +1034,7 @@ class DebuggingOptions {
       webUseSseForInjectedClient: (json['webUseSseForInjectedClient'] as bool?)!,
       webRunHeadless: (json['webRunHeadless'] as bool?)!,
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
+      webBrowserFlags: ((json['webBrowserFlags'] as List<dynamic>?)?.cast<String>())!,
       webEnableExpressionEvaluation: (json['webEnableExpressionEvaluation'] as bool?)!,
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
@@ -1026,6 +1042,7 @@ class DebuggingOptions {
       nullAssertions: (json['nullAssertions'] as bool?)!,
       nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
+      uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
     );
 }
 

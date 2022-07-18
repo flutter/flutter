@@ -10,7 +10,7 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 
 /// Asserts that the given context has a [Material] ancestor.
 ///
-/// Used by many material design widgets to make sure that they are
+/// Used by many Material Design widgets to make sure that they are
 /// only used in contexts where they can print ink onto some material.
 ///
 /// To call this function, use the following pattern, typically in the
@@ -31,7 +31,7 @@ bool debugCheckHasMaterial(BuildContext context) {
         ErrorDescription(
           '${context.widget.runtimeType} widgets require a Material '
           'widget ancestor.\n'
-          'In material design, most widgets are conceptually "printed" on '
+          'In Material Design, most widgets are conceptually "printed" on '
           "a sheet of material. In Flutter's material library, that "
           'material is represented by the Material widget. It is the '
           'Material widget that renders ink splashes, for instance. '
@@ -54,7 +54,7 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// Asserts that the given context has a [Localizations] ancestor that contains
 /// a [MaterialLocalizations] delegate.
 ///
-/// Used by many material design widgets to make sure that they are
+/// Used by many Material Design widgets to make sure that they are
 /// only used in contexts where they have access to localizations.
 ///
 /// To call this function, use the following pattern, typically in the

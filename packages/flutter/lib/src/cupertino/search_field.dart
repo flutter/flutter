@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -9,6 +10,8 @@ import 'colors.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
+
+export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
@@ -21,62 +24,27 @@ import 'text_field.dart';
 /// [controller]. For example, to set the initial value of the text field, use
 /// a [controller] that already contains some text such as:
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This examples shows how to provide initial text to a [CupertinoSearchTextField]
+/// using the [controller] property.
 ///
-/// ```dart
-/// class MyPrefilledSearch extends StatefulWidget {
-///   const MyPrefilledSearch({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
-/// }
-///
-/// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   late TextEditingController _textController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _textController = TextEditingController(text: 'initial text');
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoSearchTextField(controller: _textController);
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/search_field/cupertino_search_field.0.dart **
 /// {@end-tool}
 ///
 /// It is recommended to pass a [ValueChanged<String>] to both [onChanged] and
 /// [onSubmitted] parameters in order to be notified once the value of the
 /// field changes or is submitted by the keyboard:
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This examples shows how to be notified of field changes or submitted text from
+/// a [CupertinoSearchTextField].
 ///
-/// ```dart
-/// class MyPrefilledSearch extends StatefulWidget {
-///   const MyPrefilledSearch({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
-/// }
-///
-/// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoSearchTextField(
-///       onChanged: (String value) {
-///         print('The text has changed to: $value');
-///       },
-///       onSubmitted: (String value) {
-///         print('Submitted text: $value');
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/search_field/cupertino_search_field.1.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/bars/search-bars/>
 class CupertinoSearchTextField extends StatefulWidget {
   /// Creates a [CupertinoTextField] that mimics the look and behavior of
   /// UIKit's `UISearchTextField`.
@@ -130,7 +98,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// To customize the X-Mark (suffix) action, pass a [VoidCallback] to
   /// [onSuffixTap]. This defaults to clearing the text.
   const CupertinoSearchTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.onChanged,
     this.onSubmitted,
@@ -151,6 +119,8 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.smartQuotesType,
+    this.smartDashesType,
     this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
@@ -173,8 +143,7 @@ class CupertinoSearchTextField extends StatefulWidget {
           'Cannot provide both a border radius and a decoration\n'
           'To provide both, use "decoration: BoxDecoration(borderRadius: '
           'borderRadius)"',
-        ),
-        super(key: key);
+        );
 
   /// Controls the text being edited.
   ///
@@ -297,6 +266,52 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
+  /// Whether to allow the platform to automatically format quotes.
+  ///
+  /// This flag only affects iOS, where it is equivalent to [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc).
+  ///
+  /// When set to [SmartQuotesType.enabled], it passes
+  /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
+  /// and when set to [SmartQuotesType.disabled], it passes
+  /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
+  ///
+  /// If set to null, [SmartQuotesType.enabled] will be used.
+  ///
+  /// As an example of what this does, a standard vertical double quote
+  /// character will be automatically replaced by a left or right double quote
+  /// depending on its position in a word.
+  ///
+  /// Defaults to null.
+  ///
+  /// See also:
+  ///
+  ///  * [smartDashesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  final SmartQuotesType? smartQuotesType;
+
+  /// Whether to allow the platform to automatically format dashes.
+  ///
+  /// This flag only affects iOS versions 11 and above, where it is equivalent to [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc).
+  ///
+  /// When set to [SmartDashesType.enabled], it passes
+  /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
+  /// and when set to [SmartDashesType.disabled], it passes
+  /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
+  ///
+  /// If set to null, [SmartDashesType.enabled] will be used.
+  ///
+  /// As an example of what this does, two consecutive hyphen characters will be
+  /// automatically replaced with one en dash, and three consecutive hyphens
+  /// will become one em dash.
+  ///
+  /// Defaults to null.
+  ///
+  /// See also:
+  ///
+  ///  * [smartQuotesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  final SmartDashesType? smartDashesType;
+
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
@@ -367,8 +382,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   void _defaultOnSuffixTap() {
     final bool textChanged = _effectiveController.text.isNotEmpty;
     _effectiveController.clear();
-    if (widget.onChanged != null && textChanged)
+    if (widget.onChanged != null && textChanged) {
       widget.onChanged!(_effectiveController.text);
+    }
   }
 
   @override
@@ -435,6 +451,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       autocorrect: widget.autocorrect,
+      smartQuotesType: widget.smartQuotesType,
+      smartDashesType: widget.smartDashesType,
       textInputAction: TextInputAction.search,
     );
   }

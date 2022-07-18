@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
+import 'implicit_animations.dart';
+import 'media_query.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'pages.dart';
@@ -71,7 +72,6 @@ enum HeroFlightDirection {
   pop,
 }
 
-
 /// A widget that marks its child as being a candidate for
 /// [hero animations](https://flutter.dev/docs/development/ui/animations/hero-animations).
 ///
@@ -116,6 +116,13 @@ enum HeroFlightDirection {
 /// ** See code in examples/api/lib/widgets/heroes/hero.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows [Hero] flight animations using default tween
+/// and custom rect tween.
+///
+/// ** See code in examples/api/lib/widgets/heroes/hero.1.dart **
+/// {@end-tool}
+///
 /// ## Discussion
 ///
 /// Heroes and the [Navigator]'s [Overlay] [Stack] must be axis-aligned for
@@ -129,9 +136,15 @@ enum HeroFlightDirection {
 /// To make the animations look good, it's critical that the widget tree for the
 /// hero in both locations be essentially identical. The widget of the *target*
 /// is, by default, used to do the transition: when going from route A to route
-/// B, route B's hero's widget is placed over route A's hero's widget. If a
-/// [flightShuttleBuilder] is supplied, its output widget is shown during the
-/// flight transition instead.
+/// B, route B's hero's widget is placed over route A's hero's widget. Additionally,
+/// if the [Hero] subtree changes appearance based on an [InheritedWidget] (such
+/// as [MediaQuery] or [Theme]), then the hero animation may have discontinuity
+/// at the start or the end of the animation because route A and route B provides
+/// different such [InheritedWidget]s. Consider providing a custom [flightShuttleBuilder]
+/// to ensure smooth transitions. The default [flightShuttleBuilder] interpolates
+/// [MediaQuery]'s paddings. If your [Hero] widget uses custom [InheritedWidget]s
+/// and displays a discontinuity in the animation, try to provide custom in-flight
+/// transition using [flightShuttleBuilder].
 ///
 /// By default, both route A and route B's heroes are hidden while the
 /// transitioning widget is animating in-flight above the 2 routes.
@@ -160,7 +173,7 @@ class Hero extends StatefulWidget {
   /// The [tag] and [child] parameters must not be null.
   /// The [child] parameter and all of the its descendants must not be [Hero]es.
   const Hero({
-    Key? key,
+    super.key,
     required this.tag,
     this.createRectTween,
     this.flightShuttleBuilder,
@@ -169,8 +182,7 @@ class Hero extends StatefulWidget {
     required this.child,
   }) : assert(tag != null),
        assert(transitionOnUserGestures != null),
-       assert(child != null),
-       super(key: key);
+       assert(child != null);
 
   /// The identifier for this particular hero. If the tag of this hero matches
   /// the tag of a hero on a [PageRoute] that we're navigating to or from, then
@@ -373,8 +385,9 @@ class _HeroState extends State<Hero> {
   // This method can be safely called even when this [Hero] is currently not in
   // a flight.
   void endFlight({ bool keepPlaceholder = false }) {
-    if (keepPlaceholder || _placeholderSize == null)
+    if (keepPlaceholder || _placeholderSize == null) {
       return;
+    }
 
     _placeholderSize = null;
     if (mounted) {
@@ -546,11 +559,9 @@ class _HeroFlight {
           bottom: offsets.bottom,
           left: offsets.left,
           child: IgnorePointer(
-            child: RepaintBoundary(
-              child: FadeTransition(
-                opacity: _heroOpacity,
-                child: child,
-              ),
+            child: FadeTransition(
+              opacity: _heroOpacity,
+              child: child,
             ),
           ),
         );
@@ -587,8 +598,9 @@ class _HeroFlight {
       return;
     }
 
-    if (_scheduledPerformAnimationUpdate)
+    if (_scheduledPerformAnimationUpdate) {
       return;
+    }
 
     // The `navigator` must be non-null here, or the first if clause above would
     // have returned from this method.
@@ -727,10 +739,11 @@ class _HeroFlight {
       );
       shuttle = null;
 
-      if (newManifest.type == HeroFlightDirection.pop)
+      if (newManifest.type == HeroFlightDirection.pop) {
         _proxyAnimation.parent = ReverseAnimation(newManifest.animation);
-      else
+      } else {
         _proxyAnimation.parent = newManifest.animation;
+      }
 
       manifest.fromHero.endFlight(keepPlaceholder: true);
       manifest.toHero.endFlight(keepPlaceholder: true);
@@ -793,8 +806,9 @@ class HeroController extends NavigatorObserver {
     assert(route != null);
     // Don't trigger another flight when a pop is committed as a user gesture
     // back swipe is snapped.
-    if (!navigator!.userGestureInProgress)
+    if (!navigator!.userGestureInProgress) {
       _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
+    }
   }
 
   @override
@@ -815,8 +829,9 @@ class HeroController extends NavigatorObserver {
 
   @override
   void didStopUserGesture() {
-    if (navigator!.userGestureInProgress)
+    if (navigator!.userGestureInProgress) {
       return;
+    }
 
     // When the user gesture ends, if the user horizontal drag gesture initiated
     // the flight (i.e. the back swipe) didn't move towards the pop direction at
@@ -902,11 +917,12 @@ class HeroController extends NavigatorObserver {
     final NavigatorState? navigator = this.navigator;
     final OverlayState? overlay = navigator?.overlay;
     // If the navigator or the overlay was removed before this end-of-frame
-    // callback was called, then don't actually start a transition, and we don'
-    // t have to worry about any Hero widget we might have hidden in a previous
+    // callback was called, then don't actually start a transition, and we don't
+    // have to worry about any Hero widget we might have hidden in a previous
     // flight, or ongoing flights.
-    if (navigator == null || overlay == null)
+    if (navigator == null || overlay == null) {
       return;
+    }
 
     final RenderObject? navigatorRenderObject = navigator.context.findRenderObject();
 
@@ -972,8 +988,9 @@ class HeroController extends NavigatorObserver {
     // This can happen in a route pop transition when a fromHero is no longer
     // mounted, or kept alive by the [KeepAlive] mechanism but no longer visible.
     // TODO(LongCatIsLooong): resume aborted flights: https://github.com/flutter/flutter/issues/72947
-    for (final _HeroState toHero in toHeroes.values)
+    for (final _HeroState toHero in toHeroes.values) {
       toHero.endFlight();
+    }
   }
 
   void _handleFlightEnded(_HeroFlight flight) {
@@ -988,11 +1005,41 @@ class HeroController extends NavigatorObserver {
     BuildContext toHeroContext,
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
-    return toHero.child;
+
+    final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(toHeroContext);
+    final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(fromHeroContext);
+
+    if (toMediaQueryData == null || fromMediaQueryData == null) {
+      return toHero.child;
+    }
+
+    final EdgeInsets fromHeroPadding = fromMediaQueryData.padding;
+    final EdgeInsets toHeroPadding = toMediaQueryData.padding;
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: toMediaQueryData.copyWith(
+            padding: (flightDirection == HeroFlightDirection.push)
+              ? EdgeInsetsTween(
+                  begin: fromHeroPadding,
+                  end: toHeroPadding,
+                ).evaluate(animation)
+              : EdgeInsetsTween(
+                  begin: toHeroPadding,
+                  end: fromHeroPadding,
+                ).evaluate(animation),
+          ),
+          child: toHero.child);
+      },
+    );
   }
 }
 
 /// Enables or disables [Hero]es in the widget subtree.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=AaIASk2u1C0}
 ///
 /// When [enabled] is false, all [Hero] widgets in this subtree will not be
 /// involved in hero animations.
@@ -1004,12 +1051,11 @@ class HeroMode extends StatelessWidget {
   ///
   /// The [child] and [enabled] arguments must not be null.
   const HeroMode({
-    Key? key,
+    super.key,
     required this.child,
     this.enabled = true,
   }) : assert(child != null),
-       assert(enabled != null),
-       super(key: key);
+       assert(enabled != null);
 
   /// The subtree to place inside the [HeroMode].
   final Widget child;

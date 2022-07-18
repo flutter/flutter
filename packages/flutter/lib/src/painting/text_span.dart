@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
-import 'text_style.dart';
 
 /// An immutable span of text.
 ///
@@ -68,7 +67,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   const TextSpan({
     this.text,
     this.children,
-    TextStyle? style,
+    super.style,
     this.recognizer,
     MouseCursor? mouseCursor,
     this.onEnter,
@@ -78,8 +77,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     this.spellOut,
   }) : mouseCursor = mouseCursor ??
          (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
-       assert(!(text == null && semanticsLabel != null)),
-       super(style: style);
+       assert(!(text == null && semanticsLabel != null));
 
   /// The text contained in this span.
   ///
@@ -126,7 +124,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   ///
   /// ```dart
   /// class BuzzingText extends StatefulWidget {
-  ///   const BuzzingText({Key? key}) : super(key: key);
+  ///   const BuzzingText({super.key});
   ///
   ///   @override
   ///   State<BuzzingText> createState() => _BuzzingTextState();
@@ -251,8 +249,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (event is PointerDownEvent)
+    if (event is PointerDownEvent) {
       recognizer?.addPointer(event);
+    }
   }
 
   /// Apply the [style], [text], and [children] of this object to the
@@ -270,8 +269,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
-    if (hasStyle)
+    if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+    }
     if (text != null) {
       try {
         builder.addText(text!);
@@ -296,8 +296,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         );
       }
     }
-    if (hasStyle)
+    if (hasStyle) {
       builder.pop();
+    }
   }
 
   /// Walks this [TextSpan] and its descendants in pre-order and calls [visitor]
@@ -308,13 +309,15 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
-      if (!visitor(this))
+      if (!visitor(this)) {
         return false;
+      }
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        if (!child.visitChildren(visitor))
+        if (!child.visitChildren(visitor)) {
           return false;
+        }
       }
     }
     return true;
@@ -468,32 +471,39 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return RenderComparison.identical;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return RenderComparison.layout;
+    }
     final TextSpan textSpan = other as TextSpan;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
-        (style == null) != (textSpan.style == null))
+        (style == null) != (textSpan.style == null)) {
       return RenderComparison.layout;
+    }
     RenderComparison result = recognizer == textSpan.recognizer ?
       RenderComparison.identical :
       RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
-      if (candidate.index > result.index)
+      if (candidate.index > result.index) {
         result = candidate;
-      if (result == RenderComparison.layout)
+      }
+      if (result == RenderComparison.layout) {
         return result;
+      }
     }
     if (children != null) {
       for (int index = 0; index < children!.length; index += 1) {
         final RenderComparison candidate = children![index].compareTo(textSpan.children![index]);
-        if (candidate.index > result.index)
+        if (candidate.index > result.index) {
           result = candidate;
-        if (result == RenderComparison.layout)
+        }
+        if (result == RenderComparison.layout) {
           return result;
+        }
       }
     }
     return result;
@@ -501,12 +511,15 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
-    if (super != other)
+    }
+    if (super != other) {
       return false;
+    }
     return other is TextSpan
         && other.text == text
         && other.recognizer == recognizer
@@ -544,8 +557,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         defaultValue: null,
       ),
     );
-    if (style == null && text == null && children == null)
+    if (style == null && text == null && children == null) {
       properties.add(DiagnosticsNode.message('(empty)'));
+    }
 
     properties.add(DiagnosticsProperty<GestureRecognizer>(
       'recognizer', recognizer,
@@ -569,8 +583,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null)
+    if (children == null) {
       return const <DiagnosticsNode>[];
+    }
     return children!.map<DiagnosticsNode>((InlineSpan child) {
       // `child` has a non-nullable return type, but might be null when running
       // with weak checking, so we need to null check it anyway (and ignore the

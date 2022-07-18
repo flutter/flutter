@@ -20,7 +20,7 @@ void main() {
   MethodCallHandler? methodCallHandler;
 
   // Only one of `logCursors` and `cursorHandler` should be specified.
-  void _setUpMouseTracker({
+  void setUpMouseTracker({
     required SimpleAnnotationFinder annotationFinder,
     List<_CursorUpdateDetails>? logCursors,
     MethodCallHandler? cursorHandler,
@@ -71,7 +71,7 @@ void main() {
   test('Should work on platforms that does not support mouse cursor', () async {
     const TestAnnotationTarget annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
 
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[annotation],
       cursorHandler: (MethodCall call) async {
         return null;
@@ -89,7 +89,7 @@ void main() {
   test('pointer is added and removed out of any annotations', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
@@ -146,7 +146,7 @@ void main() {
   test('pointer is added and removed in an annotation', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
@@ -204,7 +204,7 @@ void main() {
   test('pointer change caused by new frames', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
@@ -247,7 +247,7 @@ void main() {
   test('The first annotation with non-deferring cursor is used', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
@@ -275,7 +275,7 @@ void main() {
   test('Annotations with deferring cursors are ignored', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
@@ -303,7 +303,7 @@ void main() {
   test('Finding no annotation is equivalent to specifying default cursor', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
@@ -345,7 +345,7 @@ void main() {
   test('Removing a pointer resets it back to the default cursor', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
@@ -375,7 +375,7 @@ void main() {
 
   test('Pointing devices display cursors separately', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) sync* {
         if (position.dx > 200) {
           yield const TestAnnotationTarget(cursor: SystemMouseCursors.forbidden);
@@ -448,9 +448,8 @@ ui.PointerData _pointerData(
 }
 
 class _CursorUpdateDetails extends MethodCall {
-  const _CursorUpdateDetails(String method, Map<String, dynamic> arguments)
-    : assert(arguments != null),
-      super(method, arguments);
+  const _CursorUpdateDetails(super.method, Map<String, dynamic> super.arguments)
+    : assert(arguments != null);
 
   _CursorUpdateDetails.wrap(MethodCall call)
     : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
@@ -464,10 +463,12 @@ class _CursorUpdateDetails extends MethodCall {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(other, this))
+    if (identical(other, this)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _CursorUpdateDetails
         && other.method == method
         && other.arguments.length == arguments.length

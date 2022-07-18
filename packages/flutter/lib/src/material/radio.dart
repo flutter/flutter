@@ -15,7 +15,7 @@ import 'toggleable.dart';
 const double _kOuterRadius = 8.0;
 const double _kInnerRadius = 4.5;
 
-/// A material design radio button.
+/// A Material Design radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group cease to
@@ -55,7 +55,7 @@ const double _kInnerRadius = 4.5;
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.io/design/components/selection-controls.html#radio-buttons>
 class Radio<T> extends StatefulWidget {
-  /// Creates a material design radio button.
+  /// Creates a Material Design radio button.
   ///
   /// The radio button itself does not maintain any state. Instead, when the
   /// radio button is selected, the widget calls the [onChanged] callback. Most
@@ -69,7 +69,7 @@ class Radio<T> extends StatefulWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const Radio({
-    Key? key,
+    super.key,
     required this.value,
     required this.groupValue,
     required this.onChanged,
@@ -86,8 +86,7 @@ class Radio<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : assert(autofocus != null),
-       assert(toggleable != null),
-       super(key: key);
+       assert(toggleable != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -201,7 +200,7 @@ class Radio<T> extends StatefulWidget {
   ///   value: 1,
   ///   groupValue: 1,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }

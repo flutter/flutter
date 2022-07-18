@@ -118,11 +118,21 @@ enum BottomNavigationBarLandscapeLayout {
 ///
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.1.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows [BottomNavigationBar] used in a [Scaffold] Widget with
+/// different interaction patterns. Tapping twice on the first [BottomNavigationBarItem]
+/// uses the [ScrollController] to animate the [ListView] to the top. The second
+/// [BottomNavigationBarItem] shows a Modal Dialog.
+///
+/// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.2.dart **
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomNavigationBarItem]
 ///  * [Scaffold]
 ///  * <https://material.io/design/components/bottom-navigation.html>
+///  * [NavigationBar], this widget's replacement in Material Design 3.
 class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar which is typically used as a
   /// [Scaffold]'s [Scaffold.bottomNavigationBar] argument.
@@ -161,7 +171,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// [BottomNavigationBarType.fixed] and `false` when [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
-    Key? key,
+    super.key,
     required this.items,
     this.onTap,
     this.currentIndex = 0,
@@ -198,8 +208,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       selectedItemColor = selectedItemColor ?? fixedColor,
-       super(key: key);
+       selectedItemColor = selectedItemColor ?? fixedColor;
 
   /// Defines the appearance of the button items that are arrayed within the
   /// bottom navigation bar.
@@ -572,11 +581,10 @@ class _BottomNavigationTile extends StatelessWidget {
 // icon-label column.
 class _Tile extends StatelessWidget {
  const  _Tile({
-    Key? key,
     required this.layout,
     required this.icon,
     required this.label
-  }) : super(key: key);
+  });
 
   final BottomNavigationBarLandscapeLayout layout;
   final Widget icon;
@@ -604,7 +612,6 @@ class _Tile extends StatelessWidget {
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
-    Key? key,
     required this.colorTween,
     required this.animation,
     required this.iconSize,
@@ -613,8 +620,7 @@ class _TileIcon extends StatelessWidget {
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
   }) : assert(selected != null),
-       assert(item != null),
-       super(key: key);
+       assert(item != null);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -650,7 +656,6 @@ class _TileIcon extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   const _Label({
-    Key? key,
     required this.colorTween,
     required this.animation,
     required this.item,
@@ -664,8 +669,7 @@ class _Label extends StatelessWidget {
        assert(selectedLabelStyle != null),
        assert(unselectedLabelStyle != null),
        assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null),
-       super(key: key);
+       assert(showUnselectedLabels != null);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -766,10 +770,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
-    for (final AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers) {
       controller.dispose();
-    for (final _Circle circle in _circles)
+    }
+    for (final _Circle circle in _circles) {
       circle.dispose();
+    }
     _circles.clear();
 
     _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
@@ -829,10 +835,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   void dispose() {
-    for (final AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers) {
       controller.dispose();
-    for (final _Circle circle in _circles)
+    }
+    for (final _Circle circle in _circles) {
       circle.dispose();
+    }
     super.dispose();
   }
 
@@ -888,8 +896,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     } else {
-      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
+      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor) {
         _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
+      }
     }
   }
 
@@ -1054,12 +1063,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 // BottomNavigationBarLandscapeLayout.centered
 class _Bar extends StatelessWidget {
   const _Bar({
-    Key? key,
     required this.child,
     required this.layout,
     required this.elevation,
     required this.color,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final BottomNavigationBarLandscapeLayout layout;
@@ -1158,15 +1166,20 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
-    if (textDirection != oldPainter.textDirection)
+    if (textDirection != oldPainter.textDirection) {
       return true;
-    if (circles == oldPainter.circles)
+    }
+    if (circles == oldPainter.circles) {
       return false;
-    if (circles.length != oldPainter.circles.length)
+    }
+    if (circles.length != oldPainter.circles.length) {
       return true;
-    for (int i = 0; i < circles.length; i += 1)
-      if (circles[i] != oldPainter.circles[i])
+    }
+    for (int i = 0; i < circles.length; i += 1) {
+      if (circles[i] != oldPainter.circles[i]) {
         return true;
+    }
+      }
     return false;
   }
 

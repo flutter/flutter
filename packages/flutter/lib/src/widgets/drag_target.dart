@@ -154,6 +154,11 @@ enum DragAnchor {
 /// user lifts their finger while on top of a [DragTarget], that target is given
 /// the opportunity to accept the [data] carried by the draggable.
 ///
+/// The [ignoringFeedbackPointer] defaults to true, which means that
+/// the [feedback] widget ignores the pointer during hit testing. Similarly,
+/// [ignoringFeedbackSemantics] defaults to true, and the [feedback] also ignores
+/// semantics when building the semantics tree.
+///
 /// On multitouch devices, multiple drags can occur simultaneously because there
 /// can be multiple pointers in contact with the device at once. To limit the
 /// number of simultaneous drags, use the [maxSimultaneousDrags] property. The
@@ -184,7 +189,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const Draggable({
-    Key? key,
+    super.key,
     required this.child,
     required this.feedback,
     this.data,
@@ -207,13 +212,14 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
+    this.ignoringFeedbackPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
-       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
-       super(key: key);
+       assert(ignoringFeedbackPointer != null),
+       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -310,6 +316,14 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool ignoringFeedbackSemantics;
+
+  /// Whether the [feedback] widget is ignored during hit testing.
+  ///
+  /// Regardless of whether this widget is ignored during hit testing, it will
+  /// still consume space during layout and be visible during painting.
+  ///
+  /// Defaults to true.
+  final bool ignoringFeedbackPointer;
 
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
@@ -425,48 +439,32 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const LongPressDraggable({
-    Key? key,
-    required Widget child,
-    required Widget feedback,
-    T? data,
-    Axis? axis,
-    Widget? childWhenDragging,
-    Offset feedbackOffset = Offset.zero,
+    super.key,
+    required super.child,
+    required super.feedback,
+    super.data,
+    super.axis,
+    super.childWhenDragging,
+    super.feedbackOffset,
     @Deprecated(
       'Use dragAnchorStrategy instead. '
       'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
       'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
       'This feature was deprecated after v2.1.0-10.0.pre.',
     )
-    DragAnchor dragAnchor = DragAnchor.child,
-    DragAnchorStrategy? dragAnchorStrategy,
-    int? maxSimultaneousDrags,
-    VoidCallback? onDragStarted,
-    DragUpdateCallback? onDragUpdate,
-    DraggableCanceledCallback? onDraggableCanceled,
-    DragEndCallback? onDragEnd,
-    VoidCallback? onDragCompleted,
+    super.dragAnchor,
+    super.dragAnchorStrategy,
+    super.maxSimultaneousDrags,
+    super.onDragStarted,
+    super.onDragUpdate,
+    super.onDraggableCanceled,
+    super.onDragEnd,
+    super.onDragCompleted,
     this.hapticFeedbackOnStart = true,
-    bool ignoringFeedbackSemantics = true,
+    super.ignoringFeedbackSemantics,
+    super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
-  }) : super(
-    key: key,
-    child: child,
-    feedback: feedback,
-    data: data,
-    axis: axis,
-    childWhenDragging: childWhenDragging,
-    feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor,
-    dragAnchorStrategy: dragAnchorStrategy,
-    maxSimultaneousDrags: maxSimultaneousDrags,
-    onDragStarted: onDragStarted,
-    onDragUpdate: onDragUpdate,
-    onDraggableCanceled: onDraggableCanceled,
-    onDragEnd: onDragEnd,
-    onDragCompleted: onDragCompleted,
-    ignoringFeedbackSemantics: ignoringFeedbackSemantics,
-  );
+  });
 
   /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
@@ -481,8 +479,9 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     return DelayedMultiDragGestureRecognizer(delay: delay)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
-        if (result != null && hapticFeedbackOnStart)
+        if (result != null && hapticFeedbackOnStart) {
           HapticFeedback.selectionClick();
+        }
         return result;
       };
   }
@@ -520,21 +519,24 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   int _activeCount = 0;
 
   void _disposeRecognizerIfInactive() {
-    if (_activeCount > 0)
+    if (_activeCount > 0) {
       return;
+    }
     _recognizer!.dispose();
     _recognizer = null;
   }
 
   void _routePointer(PointerDownEvent event) {
-    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
+    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!) {
       return;
+    }
     _recognizer!.addPointer(event);
   }
 
   _DragAvatar<T>? _startDrag(Offset position) {
-    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
+    if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!) {
       return null;
+    }
     final Offset dragStartPoint;
     if (widget.dragAnchorStrategy == null) {
       switch (widget.dragAnchor) {
@@ -560,6 +562,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
+      ignoringFeedbackPointer: widget.ignoringFeedbackPointer,
       onDragUpdate: (DragUpdateDetails details) {
         if (mounted && widget.onDragUpdate != null) {
           widget.onDragUpdate!(details);
@@ -581,10 +584,12 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
               offset: offset,
           ));
         }
-        if (wasAccepted && widget.onDragCompleted != null)
+        if (wasAccepted && widget.onDragCompleted != null) {
           widget.onDragCompleted!();
-        if (!wasAccepted && widget.onDraggableCanceled != null)
+        }
+        if (!wasAccepted && widget.onDraggableCanceled != null) {
           widget.onDraggableCanceled!(velocity, offset);
+        }
       },
     );
     widget.onDragStarted?.call();
@@ -669,7 +674,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   ///
   /// The [builder] argument must not be null.
   const DragTarget({
-    Key? key,
+    super.key,
     required this.builder,
     this.onWillAccept,
     this.onAccept,
@@ -677,7 +682,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
     this.onLeave,
     this.onMove,
     this.hitTestBehavior = HitTestBehavior.translucent,
-  }) : super(key: key);
+  });
 
   /// Called to build the contents of this widget.
   ///
@@ -735,8 +740,9 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   // because dart doubles and ints are backed by the same kind of object on web.
   // JavaScript does not support integers.
   bool isExpectedDataType(Object? data, Type type) {
-    if (kIsWeb && ((type == int && T == double) || (type == double && T == int)))
+    if (kIsWeb && ((type == int && T == double) || (type == double && T == int))) {
       return false;
+    }
     return data is T?;
   }
 
@@ -758,8 +764,9 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
 
   void didLeave(_DragAvatar<Object> avatar) {
     assert(_candidateAvatars.contains(avatar) || _rejectedAvatars.contains(avatar));
-    if (!mounted)
+    if (!mounted) {
       return;
+    }
     setState(() {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
@@ -769,8 +776,9 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
 
   void didDrop(_DragAvatar<Object> avatar) {
     assert(_candidateAvatars.contains(avatar));
-    if (!mounted)
+    if (!mounted) {
       return;
+    }
     setState(() {
       _candidateAvatars.remove(avatar);
     });
@@ -779,8 +787,9 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   }
 
   void didMove(_DragAvatar<Object> avatar) {
-    if (!mounted)
+    if (!mounted) {
       return;
+    }
     widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
@@ -814,8 +823,10 @@ class _DragAvatar<T extends Object> extends Drag {
     this.onDragUpdate,
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
+    required this.ignoringFeedbackPointer,
   }) : assert(overlayState != null),
        assert(ignoringFeedbackSemantics != null),
+       assert(ignoringFeedbackPointer != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null),
        _position = initialPosition {
@@ -833,6 +844,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final _OnDragEnd? onDragEnd;
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
+  final bool ignoringFeedbackPointer;
 
   _DragTargetState<Object>? _activeTarget;
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
@@ -896,8 +908,9 @@ class _DragAvatar<T extends Object> extends Drag {
     // Enter new targets.
     final _DragTargetState<Object>? newTarget = targets.cast<_DragTargetState<Object>?>().firstWhere(
       (_DragTargetState<Object>? target) {
-        if (target == null)
+        if (target == null) {
           return false;
+        }
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
@@ -920,16 +933,18 @@ class _DragAvatar<T extends Object> extends Drag {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T))
+        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T)) {
           targets.add(metaData);
+        }
       }
     }
     return targets;
   }
 
   void _leaveAllEntered() {
-    for (int i = 0; i < _enteredTargets.length; i += 1)
+    for (int i = 0; i < _enteredTargets.length; i += 1) {
       _enteredTargets[i].didLeave(this);
+    }
     _enteredTargets.clear();
   }
 
@@ -955,6 +970,7 @@ class _DragAvatar<T extends Object> extends Drag {
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
       child: IgnorePointer(
+        ignoring: ignoringFeedbackPointer,
         ignoringSemantics: ignoringFeedbackSemantics,
         child: feedback,
       ),

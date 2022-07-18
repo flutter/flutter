@@ -90,7 +90,7 @@ void main() {
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
-      'mouseCursor: MaterialStateMouseCursor(clickable)'
+      'mouseCursor: MaterialStateMouseCursor(clickable)',
     ]);
   });
 
@@ -362,357 +362,367 @@ void main() {
   });
 
   testWidgets('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.blue,
-    );
-    final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
-      thumbColor: Colors.red.shade500,
-      showValueIndicator: ShowValueIndicator.always,
-      valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
-    );
-    Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
-      return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
-            child: Material(
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: SliderTheme(
-                      data: sliderTheme,
-                      child: Slider(
-                        value: sliderValue,
-                        label: value,
-                        divisions: 3,
-                        onChanged: (double d) { },
+    debugDisableShadows = false;
+    try {
+      final ThemeData theme = ThemeData(
+        platform: TargetPlatform.android,
+        primarySwatch: Colors.blue,
+      );
+      final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
+        thumbColor: Colors.red.shade500,
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+      );
+      Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+        return MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              child: Material(
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: SliderTheme(
+                        data: sliderTheme,
+                        child: Slider(
+                          value: sliderValue,
+                          label: value,
+                          divisions: 3,
+                          onChanged: (double d) { },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp('1'));
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(15.9, -40.0),
+              const Offset(-15.9, -40.0),
+            ],
+            excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
+          ),
       );
+
+      await gesture.up();
+
+      // Test that it expands with a larger label.
+      await tester.pumpWidget(buildApp('1000'));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(35.9, -40.0),
+              const Offset(-35.9, -40.0),
+            ],
+            excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
+          ),
+      );
+      await gesture.up();
+
+      // Test that it avoids the left edge of the screen.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(92.0, -40.0),
+              const Offset(-16.0, -40.0),
+            ],
+            excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-20.1, -40.0)],
+          ),
+      );
+      await gesture.up();
+
+      // Test that it avoids the right edge of the screen.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 1.0));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(16.0, -40.0),
+              const Offset(-92.0, -40.0),
+            ],
+            excludes: <Offset>[const Offset(20.1, -40.0), const Offset(-98.1, -40.0)],
+          ),
+      );
+      await gesture.up();
+
+      // Test that the neck stretches when the text scale gets smaller.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 0.5));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -49.0),
+              const Offset(68.0, -49.0),
+              const Offset(-24.0, -49.0),
+            ],
+            excludes: <Offset>[
+              const Offset(98.0, -32.0),  // inside full size, outside small
+              const Offset(-40.0, -32.0),  // inside full size, outside small
+              const Offset(90.1, -49.0),
+              const Offset(-40.1, -49.0),
+            ],
+          ),
+      );
+      await gesture.up();
+
+      // Test that the neck shrinks when the text scale gets larger.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 2.5));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -38.8),
+              const Offset(92.0, -38.8),
+              const Offset(8.0, -23.0), // Inside large, outside scale=1.0
+              const Offset(-2.0, -23.0), // Inside large, outside scale=1.0
+            ],
+            excludes: <Offset>[
+              const Offset(98.5, -38.8),
+              const Offset(-16.1, -38.8),
+            ],
+          ),
+      );
+      await gesture.up();
+    } finally {
+      debugDisableShadows = true;
     }
-
-    await tester.pumpWidget(buildApp('1'));
-
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
-
-    Offset center = tester.getCenter(find.byType(Slider));
-    TestGesture gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(15.9, -40.0),
-            const Offset(-15.9, -40.0),
-          ],
-          excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
-        ),
-    );
-
-    await gesture.up();
-
-    // Test that it expands with a larger label.
-    await tester.pumpWidget(buildApp('1000'));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(35.9, -40.0),
-            const Offset(-35.9, -40.0),
-          ],
-          excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
-        ),
-    );
-    await gesture.up();
-
-    // Test that it avoids the left edge of the screen.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(92.0, -40.0),
-            const Offset(-16.0, -40.0),
-          ],
-          excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-20.1, -40.0)],
-        ),
-    );
-    await gesture.up();
-
-    // Test that it avoids the right edge of the screen.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 1.0));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(16.0, -40.0),
-            const Offset(-92.0, -40.0),
-          ],
-          excludes: <Offset>[const Offset(20.1, -40.0), const Offset(-98.1, -40.0)],
-        ),
-    );
-    await gesture.up();
-
-    // Test that the neck stretches when the text scale gets smaller.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 0.5));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -49.0),
-            const Offset(68.0, -49.0),
-            const Offset(-24.0, -49.0),
-          ],
-          excludes: <Offset>[
-            const Offset(98.0, -32.0),  // inside full size, outside small
-            const Offset(-40.0, -32.0),  // inside full size, outside small
-            const Offset(90.1, -49.0),
-            const Offset(-40.1, -49.0),
-          ],
-        ),
-    );
-    await gesture.up();
-
-    // Test that the neck shrinks when the text scale gets larger.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 2.5));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -38.8),
-            const Offset(92.0, -38.8),
-            const Offset(8.0, -23.0), // Inside large, outside scale=1.0
-            const Offset(-2.0, -23.0), // Inside large, outside scale=1.0
-          ],
-          excludes: <Offset>[
-            const Offset(98.5, -38.8),
-            const Offset(-16.1, -38.8),
-          ],
-        ),
-    );
-    await gesture.up();
   });
 
   testWidgets('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.blue,
-    );
-    final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
-      thumbColor: Colors.red.shade500,
-      showValueIndicator: ShowValueIndicator.always,
-      valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
-    );
-    Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
-      return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
-            child: Material(
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: SliderTheme(
-                      data: sliderTheme,
-                      child: Slider(
-                        value: sliderValue,
-                        label: value,
-                        divisions: 3,
-                        onChanged: (double d) { },
+    debugDisableShadows = false;
+    try {
+      final ThemeData theme = ThemeData(
+        platform: TargetPlatform.android,
+        primarySwatch: Colors.blue,
+      );
+      final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
+        thumbColor: Colors.red.shade500,
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+      );
+      Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+        return MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              child: Material(
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: SliderTheme(
+                        data: sliderTheme,
+                        child: Slider(
+                          value: sliderValue,
+                          label: value,
+                          divisions: 3,
+                          onChanged: (double d) { },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp('1'));
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(15.9, -40.0),
+              const Offset(-15.9, -40.0),
+            ],
+            excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
+          ),
       );
+
+      await gesture.up();
+
+      // Test that it expands with a larger label.
+      await tester.pumpWidget(buildApp('1000'));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(35.9, -40.0),
+              const Offset(-35.9, -40.0),
+            ],
+            excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
+          ),
+      );
+      await gesture.up();
+
+      // Test that it avoids the left edge of the screen.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(92.0, -40.0),
+              const Offset(-16.0, -40.0),
+            ],
+            excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-20.1, -40.0)],
+          ),
+      );
+      await gesture.up();
+
+      // Test that it avoids the right edge of the screen.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 1.0));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(16.0, -40.0),
+              const Offset(-92.0, -40.0),
+            ],
+            excludes: <Offset>[const Offset(20.1, -40.0), const Offset(-98.1, -40.0)],
+          ),
+      );
+      await gesture.up();
+
+      // Test that the neck stretches when the text scale gets smaller.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 0.5));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -49.0),
+              const Offset(68.0, -49.0),
+              const Offset(-24.0, -49.0),
+            ],
+            excludes: <Offset>[
+              const Offset(98.0, -32.0),  // inside full size, outside small
+              const Offset(-40.0, -32.0),  // inside full size, outside small
+              const Offset(90.1, -49.0),
+              const Offset(-40.1, -49.0),
+            ],
+          ),
+      );
+      await gesture.up();
+
+      // Test that the neck shrinks when the text scale gets larger.
+      await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 2.5));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -38.8),
+              const Offset(92.0, -38.8),
+              const Offset(8.0, -23.0), // Inside large, outside scale=1.0
+              const Offset(-2.0, -23.0), // Inside large, outside scale=1.0
+            ],
+            excludes: <Offset>[
+              const Offset(98.5, -38.8),
+              const Offset(-16.1, -38.8),
+            ],
+          ),
+      );
+      await gesture.up();
+    } finally {
+      debugDisableShadows = true;
     }
-
-    await tester.pumpWidget(buildApp('1'));
-
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
-
-    Offset center = tester.getCenter(find.byType(Slider));
-    TestGesture gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(15.9, -40.0),
-            const Offset(-15.9, -40.0),
-          ],
-          excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-16.1, -40.0)],
-        ),
-    );
-
-    await gesture.up();
-
-    // Test that it expands with a larger label.
-    await tester.pumpWidget(buildApp('1000'));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(35.9, -40.0),
-            const Offset(-35.9, -40.0),
-          ],
-          excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
-        ),
-    );
-    await gesture.up();
-
-    // Test that it avoids the left edge of the screen.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(92.0, -40.0),
-            const Offset(-16.0, -40.0),
-          ],
-          excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-20.1, -40.0)],
-        ),
-    );
-    await gesture.up();
-
-    // Test that it avoids the right edge of the screen.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 1.0));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -40.0),
-            const Offset(16.0, -40.0),
-            const Offset(-92.0, -40.0),
-          ],
-          excludes: <Offset>[const Offset(20.1, -40.0), const Offset(-98.1, -40.0)],
-        ),
-    );
-    await gesture.up();
-
-    // Test that the neck stretches when the text scale gets smaller.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 0.5));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -49.0),
-            const Offset(68.0, -49.0),
-            const Offset(-24.0, -49.0),
-          ],
-          excludes: <Offset>[
-            const Offset(98.0, -32.0),  // inside full size, outside small
-            const Offset(-40.0, -32.0),  // inside full size, outside small
-            const Offset(90.1, -49.0),
-            const Offset(-40.1, -49.0),
-          ],
-        ),
-    );
-    await gesture.up();
-
-    // Test that the neck shrinks when the text scale gets larger.
-    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 2.5));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(
-          color: sliderTheme.valueIndicatorColor,
-          includes: <Offset>[
-            const Offset(0.0, -38.8),
-            const Offset(92.0, -38.8),
-            const Offset(8.0, -23.0), // Inside large, outside scale=1.0
-            const Offset(-2.0, -23.0), // Inside large, outside scale=1.0
-          ],
-          excludes: <Offset>[
-            const Offset(98.5, -38.8),
-            const Offset(-16.1, -38.8),
-          ],
-        ),
-    );
-    await gesture.up();
   });
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
@@ -967,24 +977,29 @@ void main() {
   });
 
   testWidgets('The slider can skip all component painting except the thumb', (WidgetTester tester) async {
-    // Pump a slider with just a thumb.
-    await tester.pumpWidget(_buildApp(
-      ThemeData().sliderTheme.copyWith(
-        trackHeight: 0,
-        overlayShape: SliderComponentShape.noOverlay,
-        tickMarkShape: SliderTickMarkShape.noTickMark,
-        showValueIndicator: ShowValueIndicator.never,
-      ),
-      value: 0.5,
-      divisions: 4,
-    ));
+    debugDisableShadows = false;
+    try {
+      // Pump a slider with just a thumb.
+      await tester.pumpWidget(_buildApp(
+        ThemeData().sliderTheme.copyWith(
+          trackHeight: 0,
+          overlayShape: SliderComponentShape.noOverlay,
+          tickMarkShape: SliderTickMarkShape.noTickMark,
+          showValueIndicator: ShowValueIndicator.never,
+        ),
+        value: 0.5,
+        divisions: 4,
+      ));
 
-    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
-    // Only 1 thumb.
-    expect(material, paintsExactlyCountTimes(#drawRect, 0));
-    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
-    expect(material, paintsExactlyCountTimes(#drawPath, 0));
+      // Only 1 thumb.
+      expect(material, paintsExactlyCountTimes(#drawRect, 0));
+      expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+      expect(material, paintsExactlyCountTimes(#drawPath, 0));
+    } finally {
+      debugDisableShadows = true;
+    }
   });
 
   testWidgets('The slider can skip all component painting except the overlay', (WidgetTester tester) async {
@@ -1113,6 +1128,57 @@ void main() {
 
 
   testWidgets('Default paddle range slider value indicator shape draws correctly', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    try {
+      final ThemeData theme = ThemeData(
+        platform: TargetPlatform.android,
+        primarySwatch: Colors.blue,
+      );
+      final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
+        thumbColor: Colors.red.shade500,
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: const PaddleRangeSliderValueIndicatorShape(),
+      );
+
+      await tester.pumpWidget(_buildRangeApp(sliderTheme));
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      final Offset center = tester.getCenter(find.byType(RangeSlider));
+      final TestGesture gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          // physical model
+          ..rrect()
+          ..rrect(rrect: RRect.fromLTRBAndCorners(
+            24.0, 298.0, 24.0, 302.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ))
+          ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
+          ..rrect(rrect: RRect.fromLTRBAndCorners(
+            24.0, 298.0, 776.0, 302.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ))
+          ..circle(x: 24.0, y: 300.0)
+          ..shadow(elevation: 1.0)
+          ..circle(x: 24.0, y: 300.0)
+          ..shadow(elevation: 6.0)
+          ..circle(x: 24.0, y: 300.0),
+      );
+
+      await gesture.up();
+    } finally {
+      debugDisableShadows = true;
+    }
+  });
+
+  testWidgets('Default paddle range slider value indicator shape draws correctly with debugDisableShadows', (WidgetTester tester) async {
+    debugDisableShadows = true;
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -1134,6 +1200,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        // physical model
+        ..rrect()
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 24.0, 302.0,
           topLeft: const Radius.circular(2.0),
@@ -1146,74 +1214,83 @@ void main() {
           bottomRight: const Radius.circular(2.0),
         ))
         ..circle(x: 24.0, y: 300.0)
-        ..shadow(elevation: 1.0)
+        ..path(strokeWidth: 1.0 * 2.0, color: Colors.black)
         ..circle(x: 24.0, y: 300.0)
-        ..shadow(elevation: 6.0)
+        ..path(strokeWidth: 6.0 * 2.0, color: Colors.black)
         ..circle(x: 24.0, y: 300.0),
     );
 
     await gesture.up();
-
   });
 
   testWidgets('PaddleRangeSliderValueIndicatorShape skips all painting at zero scale', (WidgetTester tester) async {
-    // Pump a slider with just a value indicator.
-    await tester.pumpWidget(_buildRangeApp(
-      ThemeData().sliderTheme.copyWith(
-        trackHeight: 0,
-        rangeValueIndicatorShape: const PaddleRangeSliderValueIndicatorShape(),
-      ),
-      values: const RangeValues(0, 0.5),
-      divisions: 4,
-    ));
+    debugDisableShadows = false;
+    try {
+      // Pump a slider with just a value indicator.
+      await tester.pumpWidget(_buildRangeApp(
+        ThemeData().sliderTheme.copyWith(
+          trackHeight: 0,
+          rangeValueIndicatorShape: const PaddleRangeSliderValueIndicatorShape(),
+        ),
+        values: const RangeValues(0, 0.5),
+        divisions: 4,
+      ));
 
-//    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+      //  final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
-    // Tap the center of the track to kick off the animation of the value indicator.
-    final Offset center = tester.getCenter(find.byType(RangeSlider));
-    final TestGesture gesture = await tester.startGesture(center);
+      // Tap the center of the track to kick off the animation of the value indicator.
+      final Offset center = tester.getCenter(find.byType(RangeSlider));
+      final TestGesture gesture = await tester.startGesture(center);
 
-    // No value indicator path to paint at scale 0.
-    await tester.pump();
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
+      // No value indicator path to paint at scale 0.
+      await tester.pump();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
 
-    // Painting a path for each value indicator.
-    await tester.pump(const Duration(milliseconds: 16));
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+      // Painting a path for each value indicator.
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
 
-    await gesture.up();
+      await gesture.up();
+    } finally {
+      debugDisableShadows = true;
+    }
   });
 
   testWidgets('Default range indicator shape skips all painting at zero scale', (WidgetTester tester) async {
-    // Pump a slider with just a value indicator.
-    await tester.pumpWidget(_buildRangeApp(
-      ThemeData().sliderTheme.copyWith(
-        trackHeight: 0,
-        overlayShape: SliderComponentShape.noOverlay,
-        thumbShape: SliderComponentShape.noThumb,
-        tickMarkShape: SliderTickMarkShape.noTickMark,
-        showValueIndicator: ShowValueIndicator.always,
-      ),
-      values: const RangeValues(0, 0.5),
-      divisions: 4,
-    ));
+    debugDisableShadows = false;
+    try {
+      // Pump a slider with just a value indicator.
+      await tester.pumpWidget(_buildRangeApp(
+        ThemeData().sliderTheme.copyWith(
+          trackHeight: 0,
+          overlayShape: SliderComponentShape.noOverlay,
+          thumbShape: SliderComponentShape.noThumb,
+          tickMarkShape: SliderTickMarkShape.noTickMark,
+          showValueIndicator: ShowValueIndicator.always,
+        ),
+        values: const RangeValues(0, 0.5),
+        divisions: 4,
+      ));
 
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
-    // Tap the center of the track to kick off the animation of the value indicator.
-    final Offset center = tester.getCenter(find.byType(RangeSlider));
-    final TestGesture gesture = await tester.startGesture(center);
+      // Tap the center of the track to kick off the animation of the value indicator.
+      final Offset center = tester.getCenter(find.byType(RangeSlider));
+      final TestGesture gesture = await tester.startGesture(center);
 
-    // No value indicator path to paint at scale 0.
-    await tester.pump();
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
+      // No value indicator path to paint at scale 0.
+      await tester.pump();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
 
-    // Painting a path for each value indicator.
-    await tester.pump(const Duration(milliseconds: 16));
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+      // Painting a path for each value indicator.
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
 
-    await gesture.up();
+      await gesture.up();
+    } finally {
+      debugDisableShadows = true;
+    }
   });
 
   testWidgets('activeTrackRadius is taken into account when painting the border of the active track', (WidgetTester tester) async {
@@ -1246,14 +1323,13 @@ void main() {
   testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-        mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.text),
       )
     ));
 
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Slider)));
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);

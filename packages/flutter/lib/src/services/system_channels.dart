@@ -7,6 +7,8 @@ import 'dart:ui';
 import 'message_codecs.dart';
 import 'platform_channel.dart';
 
+export 'platform_channel.dart' show BasicMessageChannel, MethodChannel;
+
 /// Platform channels used by the Flutter system.
 class SystemChannels {
   // This class is not meant to be instantiated or extended; this constructor
@@ -398,7 +400,7 @@ class SystemChannels {
   /// The following outgoing method is defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `Menu.setMenu`: sends the configuration of the platform menu, including
+  ///  * `Menu.setMenus`: sends the configuration of the platform menu, including
   ///    labels, enable/disable information, and unique integer identifiers for
   ///    each menu item. The configuration is sent as a `Map<String, Object?>`
   ///    encoding the list of top level menu items in window "0", which each

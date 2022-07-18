@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const String tooltipText = 'TIP';
@@ -15,8 +14,9 @@ void main() {
   testWidgets('Tooltip does not build MouseRegion when mouse is detected and in TooltipVisibility with visibility = false', (WidgetTester tester) async {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -45,8 +45,9 @@ void main() {
     const Duration waitDuration = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -85,8 +86,9 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));

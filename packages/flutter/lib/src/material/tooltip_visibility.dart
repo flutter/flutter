@@ -6,10 +6,9 @@ import 'package:flutter/widgets.dart';
 
 class _TooltipVisibilityScope extends InheritedWidget {
   const _TooltipVisibilityScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     required this.visible,
-  }) : super(key: key, child: child);
+  });
 
   final bool visible;
 
@@ -30,10 +29,10 @@ class TooltipVisibility extends StatelessWidget {
   ///
   /// Both arguments must not be null.
   const TooltipVisibility({
-    Key? key,
+    super.key,
     required this.visible,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///

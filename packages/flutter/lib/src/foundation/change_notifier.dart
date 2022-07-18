@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show VoidCallback;
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
-import 'basic_types.dart';
 import 'diagnostics.dart';
+
+export 'dart:ui' show VoidCallback;
 
 /// An object that maintains a list of listeners.
 ///
@@ -119,12 +122,32 @@ class ChangeNotifier implements Listenable {
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
 
-  bool _debugAssertNotDisposed() {
+  /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
+  /// disposed.
+  ///
+  /// {@tool snippet}
+  /// The `debugAssertNotDisposed` function should only be called inside of an
+  /// assert, as in this example.
+  ///
+  /// ```dart
+  /// class MyNotifier with ChangeNotifier {
+  ///   void doUpdate() {
+  ///     assert(ChangeNotifier.debugAssertNotDisposed(this));
+  ///     // ...
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  // This is static and not an instance method because too many people try to
+  // implement ChangeNotifier instead of extending it (and so it is too breaking
+  // to add a method, especially for debug).
+  static bool debugAssertNotDisposed(ChangeNotifier notifier) {
     assert(() {
-      if (_debugDisposed) {
+      if (notifier._debugDisposed) {
         throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
+          'A ${notifier.runtimeType} was used after being disposed.\n'
+          'Once you have called dispose() on a ${notifier.runtimeType}, it '
+          'can no longer be used.',
         );
       }
       return true;
@@ -149,7 +172,7 @@ class ChangeNotifier implements Listenable {
   /// so, stopping that same work.
   @protected
   bool get hasListeners {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     return _count > 0;
   }
 
@@ -181,7 +204,7 @@ class ChangeNotifier implements Listenable {
   ///    the list of closures that are notified when the object changes.
   @override
   void addListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -208,20 +231,23 @@ class ChangeNotifier implements Listenable {
       final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_count, null);
 
       // Listeners before the index are at the same place.
-      for (int i = 0; i < index; i++)
+      for (int i = 0; i < index; i++) {
         newListeners[i] = _listeners[i];
+      }
 
       // Listeners after the index move towards the start of the list.
-      for (int i = index; i < _count; i++)
+      for (int i = index; i < _count; i++) {
         newListeners[i] = _listeners[i + 1];
+      }
 
       _listeners = newListeners;
     } else {
       // When there are more listeners than half the length of the list, we only
       // shift our listeners, so that we avoid to reallocate memory for the
       // whole list.
-      for (int i = index; i < _count; i++)
+      for (int i = index; i < _count; i++) {
         _listeners[i] = _listeners[i + 1];
+      }
       _listeners[_count] = null;
     }
   }
@@ -273,7 +299,7 @@ class ChangeNotifier implements Listenable {
   /// This method should only be called by the object's owner.
   @mustCallSuper
   void dispose() {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(() {
       _debugDisposed = true;
       return true;
@@ -301,9 +327,10 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
-    assert(_debugAssertNotDisposed());
-    if (_count == 0)
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    if (_count == 0) {
       return;
+    }
 
     // To make sure that listeners removed during this iteration are not called,
     // we set them to null, but we don't shrink the list right away.
@@ -422,8 +449,9 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   T get value => _value;
   T _value;
   set value(T newValue) {
-    if (_value == newValue)
+    if (_value == newValue) {
       return;
+    }
     _value = newValue;
     notifyListeners();
   }

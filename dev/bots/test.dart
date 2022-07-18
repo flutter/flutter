@@ -35,7 +35,6 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
-final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
 
@@ -200,6 +199,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
@@ -331,11 +331,14 @@ Future<void> _runTestHarnessTests() async {
     exitWithError(<String>[versionError]);
 }
 
+final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+
 Future<void> _runGeneralToolTests() async {
   await _dartRunTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
+
     // Detect unit test time regressions (poor time delay handling, etc).
     // This overrides the 15 minute default for tools tests.
     // See the README.md and dart_test.yaml files in the flutter_tools package.
@@ -345,7 +348,7 @@ Future<void> _runGeneralToolTests() async {
 
 Future<void> _runCommandsToolTests() async {
   await _dartRunTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    _toolsPath,
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'commands.shard')],
   );
@@ -353,22 +356,30 @@ Future<void> _runCommandsToolTests() async {
 
 Future<void> _runWebToolTests() async {
   await _dartRunTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    _toolsPath,
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'web.shard')],
     includeLocalEngineEnv: true,
   );
 }
 
+Future<void> _runToolHostCrossArchTests() {
+  return _dartRunTest(
+    _toolsPath,
+    // These are integration tests
+    forceSingleCore: true,
+    testPaths: <String>[path.join('test', 'host_cross_arch.shard')],
+  );
+}
+
 Future<void> _runIntegrationToolTests() async {
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
-  final List<String> allTests = Directory(path.join(toolsPath, 'test', 'integration.shard'))
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
       .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
   await _dartRunTest(
-    toolsPath,
+    _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
   );
@@ -588,7 +599,6 @@ Future<void> _flutterBuildWin32(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   assert(Platform.isWindows);
-  await runCommand(flutter, <String>['config', '--enable-windows-desktop']);
   print('${green}Testing Windows build$reset for $cyan$relativePathToApplication$reset...');
   await _flutterBuild(relativePathToApplication, 'Windows', 'windows',
     release: release,
@@ -1073,6 +1083,13 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
+<<<<<<< HEAD
+=======
+    () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
+    () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
+    () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
+    () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
+>>>>>>> 9b4f05dde79a1a9301cf4a97896e3580bcb30ff0
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -1258,7 +1275,7 @@ Future<void> _runFlutterPluginsTests() async {
         'core.longPaths=true',
         'clone',
         'https://github.com/flutter/plugins.git',
-        '.'
+        '.',
       ],
       workingDirectory: checkout.path,
     );
@@ -1319,7 +1336,7 @@ Future<void> _runSkpGeneratorTests() async {
       'core.longPaths=true',
       'clone',
       'https://github.com/flutter/tests.git',
-      '.'
+      '.',
     ],
     workingDirectory: checkout.path,
   );
@@ -1644,7 +1661,7 @@ Future<void> _dartRunTest(String workingDirectory, {
     if (coverage != null)
       '--coverage=$coverage',
     if (perTestTimeout != null)
-      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
+      '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
@@ -1797,31 +1814,6 @@ void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
   environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
 }
 
-Map<String, String> _initGradleEnvironment() {
-  final String? androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
-      ? Platform.environment['ANDROID_SDK_ROOT']
-      : Platform.environment['ANDROID_HOME'];
-  if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
-    print('${red}Could not find Android SDK; set ANDROID_SDK_ROOT.$reset');
-    exit(1);
-  }
-  return <String, String>{
-    'ANDROID_HOME': androidSdkRoot!,
-    'ANDROID_SDK_ROOT': androidSdkRoot,
-  };
-}
-
-final Map<String, String> gradleEnvironment = _initGradleEnvironment();
-
-void deleteFile(String path) {
-  // This is technically a race condition but nobody else should be running
-  // while this script runs, so we should be ok. (Sadly recursive:true does not
-  // obviate the need for existsSync, at least on Windows.)
-  final File file = File(path);
-  if (file.existsSync())
-    file.deleteSync();
-}
-
 enum CiProviders {
   cirrus,
   luci,
@@ -1848,18 +1840,6 @@ CiProviders? get ciProvider {
     return CiProviders.luci;
   }
   return null;
-}
-
-/// Returns the name of the branch being tested.
-String get branchName {
-  switch(ciProvider) {
-    case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_BRANCH']!;
-    case CiProviders.luci:
-      return Platform.environment['LUCI_BRANCH']!;
-    case null:
-      return '';
-  }
 }
 
 /// Checks the given file's contents to determine if they match the allowed

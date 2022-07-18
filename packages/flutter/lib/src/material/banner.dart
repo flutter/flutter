@@ -18,7 +18,7 @@ const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 /// The [ScaffoldMessengerState.showMaterialBanner] function returns a
 /// [ScaffoldFeatureController]. The value of the controller's closed property
 /// is a Future that resolves to a MaterialBannerClosedReason. Applications that need
-/// to know how a material banner was closed can use this value.
+/// to know how a [MaterialBanner] was closed can use this value.
 ///
 /// Example:
 ///
@@ -87,7 +87,7 @@ class MaterialBanner extends StatefulWidget {
   /// The [actions].length must be greater than 0. The [elevation] must be null or
   /// non-negative.
   const MaterialBanner({
-    Key? key,
+    super.key,
     required this.content,
     this.contentTextStyle,
     required this.actions,
@@ -103,8 +103,7 @@ class MaterialBanner extends StatefulWidget {
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(actions != null),
-       assert(forceActionsBelow != null),
-       super(key: key);
+       assert(forceActionsBelow != null);
 
   /// The content of the [MaterialBanner].
   ///
@@ -184,7 +183,7 @@ class MaterialBanner extends StatefulWidget {
 
   // API for ScaffoldMessengerState.showMaterialBanner():
 
-  /// Creates an animation controller useful for driving a material banner's entrance and exit animation.
+  /// Creates an animation controller useful for driving a [MaterialBanner]'s entrance and exit animation.
   static AnimationController createAnimationController({ required TickerProvider vsync }) {
     return AnimationController(
       duration: _materialBannerTransitionDuration,
@@ -333,8 +332,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     // This provides a static banner for backwards compatibility.
-    if (widget.animation == null)
+    if (widget.animation == null) {
       return materialBanner;
+    }
 
     materialBanner = SafeArea(
       child: materialBanner,

@@ -174,7 +174,7 @@ class FlutterTesterDevice extends Device {
         '--disable-service-auth-codes',
       if (debuggingOptions.hasObservatoryPort)
         '--observatory-port=${debuggingOptions.hostVmServicePort}',
-      applicationKernelFilePath
+      applicationKernelFilePath,
     ];
 
     ProtocolDiscovery? observatoryDiscovery;

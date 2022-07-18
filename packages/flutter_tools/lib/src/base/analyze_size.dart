@@ -467,7 +467,7 @@ class _SymbolNode {
   Map<String, Object?> toJson() {
     final Map<String, Object?> json = <String, Object?>{
       'n': name,
-      'value': byteSize
+      'value': byteSize,
     };
     final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[];
     for (final _SymbolNode child in children) {

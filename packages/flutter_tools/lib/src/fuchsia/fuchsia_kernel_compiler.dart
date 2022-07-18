@@ -63,7 +63,7 @@ class FuchsiaKernelCompiler {
       globals.fs.path.join(outDir, '$appName.dil'),
       '--component-name',
       appName,
-      ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath)
+      ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath),
     ];
 
     flags += <String>[
@@ -104,12 +104,12 @@ class FuchsiaKernelCompiler {
       // AOT/JIT:
       if (buildInfo.usesAot) ...<String>[
         '--aot',
-        '--tfa'
+        '--tfa',
       ] else ...<String>[
         '--no-link-platform',
         '--split-output-by-packages',
         '--manifest',
-        manifestPath
+        manifestPath,
       ],
 
       // debug, profile, jit release, release:

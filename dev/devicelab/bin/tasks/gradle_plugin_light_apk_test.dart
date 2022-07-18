@@ -22,7 +22,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--debug',
-              '--target-platform=android-arm'
+              '--target-platform=android-arm',
             ],
           );
         });
@@ -54,7 +54,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--debug',
-              '--target-platform=android-x86'
+              '--target-platform=android-x86',
             ],
           );
         });
@@ -85,7 +85,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--debug',
-              '--target-platform=android-x64'
+              '--target-platform=android-x64',
             ],
           );
         });
@@ -115,7 +115,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--release',
-              '--target-platform=android-arm'
+              '--target-platform=android-arm',
             ],
           );
         });
@@ -143,7 +143,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--release',
-              '--target-platform=android-arm64'
+              '--target-platform=android-arm64',
             ],
           );
         });

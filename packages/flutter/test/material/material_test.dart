@@ -14,7 +14,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
-  const NotifyMaterial({ Key? key }) : super(key: key);
+  const NotifyMaterial({ super.key });
   @override
   Widget build(BuildContext context) {
     const LayoutChangedNotification().dispatch(context);
@@ -927,4 +927,52 @@ void main() {
       );
     });
   });
+
+  testWidgets('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
+    final GlobalKey sizedBoxKey = GlobalKey();
+    final GlobalKey materialKey = GlobalKey();
+    await tester.pumpWidget(Material(
+      key: materialKey,
+      child: Offstage(
+        child: SizedBox(key: sizedBoxKey, width: 20, height: 20),
+      ),
+    ));
+    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!)!;
+
+    final TrackPaintInkFeature tracker = TrackPaintInkFeature(
+      controller: controller,
+      referenceBox: sizedBoxKey.currentContext!.findRenderObject()! as RenderBox,
+    );
+    controller.addInkFeature(tracker);
+    expect(tracker.paintCount, 0);
+
+    // Force a repaint. Since it's offstage, the ink feture should not get painted.
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    expect(tracker.paintCount, 0);
+
+    await tester.pumpWidget(Material(
+      key: materialKey,
+      child: Offstage(
+        offstage: false,
+        child: SizedBox(key: sizedBoxKey, width: 20, height: 20),
+      ),
+    ));
+    // Gets a paint because the global keys have reused the elements and it is
+    // now onstage.
+    expect(tracker.paintCount, 1);
+
+    // Force a repaint again. This time, it gets repainted because it is onstage.
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    expect(tracker.paintCount, 2);
+  });
+}
+
+class TrackPaintInkFeature extends InkFeature {
+  TrackPaintInkFeature({required super.controller, required super.referenceBox});
+
+  int paintCount = 0;
+  @override
+  void paintFeature(Canvas canvas, Matrix4 transform) {
+    paintCount += 1;
+  }
 }

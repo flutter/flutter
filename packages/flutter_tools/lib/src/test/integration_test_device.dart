@@ -8,7 +8,6 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -30,7 +29,7 @@ class IntegrationTestTestDevice implements TestDevice {
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
-  final String userIdentifier;
+  final String? userIdentifier;
 
   ApplicationPackage? _applicationPackage;
   final Completer<void> _finished = Completer<void>();
@@ -51,7 +50,7 @@ class IntegrationTestTestDevice implements TestDevice {
     }
 
     final LaunchResult launchResult = await device.startApp(
-      _applicationPackage!,
+      _applicationPackage,
       mainPath: entrypointPath,
       platformArgs: <String, dynamic>{},
       debuggingOptions: debuggingOptions,

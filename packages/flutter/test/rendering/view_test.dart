@@ -47,6 +47,20 @@ void main() {
       view.configuration = createViewConfiguration(devicePixelRatio: 5.0);
       expect(identical(view.debugLayer, firstLayer), false);
     });
+
+    test('does not replace the root layer unnecessarily when window resize', () {
+      final ui.FlutterView window = TestWindow(window: RendererBinding.instance.window);
+      final RenderView view = RenderView(
+        configuration: createViewConfiguration(size: const Size(100.0, 100.0)),
+        window: window,
+      );
+      final PipelineOwner owner = PipelineOwner();
+      view.attach(owner);
+      view.prepareInitialFrame();
+      final ContainerLayer firstLayer = view.debugLayer!;
+      view.configuration = createViewConfiguration(size: const Size(100.0, 1117.0));
+      expect(identical(view.debugLayer, firstLayer), true);
+    });
   });
 
   test('ViewConfiguration == and hashCode', () {

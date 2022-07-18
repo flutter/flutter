@@ -17,6 +17,26 @@ import 'theme.dart';
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
+///
+/// ## Color palettes
+///
+/// ### Basic Colors
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_basic_colors.png)
+///
+/// ### Active Colors
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_active_colors.png)
+///
+/// ### System Colors
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_1.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_2.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_3.png)
+///
+/// ### Label Colors
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_label_colors.png)
+///
+/// ### Background Colors
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_background_colors.png)
+///
 class CupertinoColors {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
@@ -46,7 +66,7 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [material.Colors.white], the same color, in the material design palette.
+  ///  * [material.Colors.white], the same color, in the Material Design palette.
   ///  * [black], opaque black in the [CupertinoColors] palette.
   static const Color white = Color(0xFFFFFFFF);
 
@@ -56,7 +76,7 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [material.Colors.black], the same color, in the material design palette.
+  ///  * [material.Colors.black], the same color, in the Material Design palette.
   ///  * [white], opaque white in the [CupertinoColors] palette.
   static const Color black = Color(0xFF000000);
 
@@ -908,8 +928,9 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///  * [resolve], which is similar to this function, but returns a
   ///    non-nullable value, and does not allow a null `resolvable` color.
   static Color? maybeResolve(Color? resolvable, BuildContext context) {
-    if (resolvable == null)
+    if (resolvable == null) {
       return null;
+    }
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
@@ -1025,10 +1046,12 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is CupertinoDynamicColor
         && other.value == value
         && other.color == color
@@ -1077,26 +1100,35 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (_debugLabel != null)
+    if (_debugLabel != null) {
       properties.add(MessageProperty('debugLabel', _debugLabel!));
+    }
     properties.add(createCupertinoColorProperty('color', color));
-    if (_isPlatformBrightnessDependent)
+    if (_isPlatformBrightnessDependent) {
       properties.add(createCupertinoColorProperty('darkColor', darkColor));
-    if (_isHighContrastDependent)
+    }
+    if (_isHighContrastDependent) {
       properties.add(createCupertinoColorProperty('highContrastColor', highContrastColor));
-    if (_isPlatformBrightnessDependent && _isHighContrastDependent)
+    }
+    if (_isPlatformBrightnessDependent && _isHighContrastDependent) {
       properties.add(createCupertinoColorProperty('darkHighContrastColor', darkHighContrastColor));
-    if (_isInterfaceElevationDependent)
+    }
+    if (_isInterfaceElevationDependent) {
       properties.add(createCupertinoColorProperty('elevatedColor', elevatedColor));
-    if (_isPlatformBrightnessDependent && _isInterfaceElevationDependent)
+    }
+    if (_isPlatformBrightnessDependent && _isInterfaceElevationDependent) {
       properties.add(createCupertinoColorProperty('darkElevatedColor', darkElevatedColor));
-    if (_isHighContrastDependent && _isInterfaceElevationDependent)
+    }
+    if (_isHighContrastDependent && _isInterfaceElevationDependent) {
       properties.add(createCupertinoColorProperty('highContrastElevatedColor', highContrastElevatedColor));
-    if (_isPlatformBrightnessDependent && _isHighContrastDependent && _isInterfaceElevationDependent)
+    }
+    if (_isPlatformBrightnessDependent && _isHighContrastDependent && _isInterfaceElevationDependent) {
       properties.add(createCupertinoColorProperty('darkHighContrastElevatedColor', darkHighContrastElevatedColor));
+    }
 
-    if (_debugResolveContext != null)
+    if (_debugResolveContext != null) {
       properties.add(DiagnosticsProperty<Element>('last resolved', _debugResolveContext));
+    }
   }
 }
 

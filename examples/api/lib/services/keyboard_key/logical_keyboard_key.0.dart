@@ -8,61 +8,59 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const KeyExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class KeyExampleApp extends StatelessWidget {
+  const KeyExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('Key Handling Example')),
+        body: const MyKeyExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class MyKeyExample extends StatefulWidget {
+  const MyKeyExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<MyKeyExample> createState() => _MyKeyExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-// The node used to request the keyboard focus.
+class _MyKeyExampleState extends State<MyKeyExample> {
+  // The node used to request the keyboard focus.
   final FocusNode _focusNode = FocusNode();
-// The message to display.
+  // The message to display.
   String? _message;
 
-// Focus nodes need to be disposed.
+  // Focus nodes need to be disposed.
   @override
   void dispose() {
     _focusNode.dispose();
     super.dispose();
   }
 
-// Handles the key events from the RawKeyboardListener and update the
-// _message.
-  void _handleKeyEvent(RawKeyEvent event) {
+  // Handles the key events from the Focus widget and updates the
+  // _message.
+  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
     setState(() {
       if (event.logicalKey == LogicalKeyboardKey.keyQ) {
         _message = 'Pressed the "Q" key!';
       } else {
         if (kReleaseMode) {
-          _message =
-              'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
+          _message = 'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
         } else {
-          // The debugName will only print useful information in debug mode.
+          // As the name implies, the debugName will only print useful
+          // information in debug mode.
           _message = 'Not a Q: Pressed ${event.logicalKey.debugName}';
         }
       }
     });
+    return event.logicalKey == LogicalKeyboardKey.keyQ ? KeyEventResult.handled : KeyEventResult.ignored;
   }
 
   @override
@@ -73,7 +71,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       alignment: Alignment.center,
       child: DefaultTextStyle(
         style: textTheme.headline4!,
-        child: RawKeyboardListener(
+        child: Focus(
           focusNode: _focusNode,
           onKey: _handleKeyEvent,
           child: AnimatedBuilder(
@@ -84,7 +82,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   onTap: () {
                     FocusScope.of(context).requestFocus(_focusNode);
                   },
-                  child: const Text('Tap to focus'),
+                  child: const Text('Click to focus'),
                 );
               }
               return Text(_message ?? 'Press a key');

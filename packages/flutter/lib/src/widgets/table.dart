@@ -55,10 +55,12 @@ class TableRow {
   String toString() {
     final StringBuffer result = StringBuffer();
     result.write('TableRow(');
-    if (key != null)
+    if (key != null) {
       result.write('$key, ');
-    if (decoration != null)
+    }
+    if (decoration != null) {
       result.write('$decoration, ');
+    }
     if (children == null) {
       result.write('child list is null');
     } else if (children!.isEmpty) {
@@ -115,7 +117,7 @@ class Table extends RenderObjectWidget {
   /// The [children], [defaultColumnWidth], and [defaultVerticalAlignment]
   /// arguments must not be null.
   Table({
-    Key? key,
+    super.key,
     this.children = const <TableRow>[],
     this.columnWidths,
     this.defaultColumnWidth = const FlexColumnWidth(),
@@ -169,8 +171,7 @@ class Table extends RenderObjectWidget {
        }()),
        _rowDecorations = children.any((TableRow row) => row.decoration != null)
                               ? children.map<Decoration?>((TableRow row) => row.decoration).toList(growable: false)
-                              : null,
-       super(key: key) {
+                              : null {
     assert(() {
       final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children!).toList(growable: false);
       if (debugChildrenHaveDuplicateKeys(this, flatChildren)) {
@@ -282,7 +283,7 @@ class Table extends RenderObjectWidget {
 }
 
 class _TableElement extends RenderObjectElement {
-  _TableElement(Table widget) : super(widget);
+  _TableElement(Table super.widget);
 
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
@@ -369,10 +370,12 @@ class _TableElement extends RenderObjectElement {
         children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren, slots: slots),
       ));
     }
-    while (oldUnkeyedRows.moveNext())
+    while (oldUnkeyedRows.moveNext()) {
       updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
-    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
+    }
+    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list))) {
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
+    }
 
     _children = newChildren;
     _updateRenderObjectChildren();
@@ -399,8 +402,9 @@ class _TableElement extends RenderObjectElement {
   @override
   void visitChildren(ElementVisitor visitor) {
     for (final Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
-      if (!_forgottenChildren.contains(child))
+      if (!_forgottenChildren.contains(child)) {
         visitor(child);
+      }
     }
   }
 
@@ -421,10 +425,10 @@ class _TableElement extends RenderObjectElement {
 class TableCell extends ParentDataWidget<TableCellParentData> {
   /// Creates a widget that controls how a child of a [Table] is aligned.
   const TableCell({
-    Key? key,
+    super.key,
     this.verticalAlignment,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// How this cell is aligned vertically.
   final TableCellVerticalAlignment? verticalAlignment;
@@ -435,8 +439,9 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
       final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -459,8 +464,9 @@ class _TableSlot with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _TableSlot
         && column == other.column
         && row == other.row;

@@ -8,8 +8,11 @@ import 'dart:math' as math;
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 
-import 'text_editing.dart';
 import 'text_input.dart';
+
+export 'package:flutter/foundation.dart' show TargetPlatform;
+
+export 'text_input.dart' show TextEditingValue;
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus
@@ -391,7 +394,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart; // ignore_clamp_double_lint
       return replacedLength - removedLength;
     }
 

@@ -942,7 +942,13 @@ class LocalizationsGenerator {
   @visibleForTesting
   static File templateArbFileFromFileName(String templateArbFileName, Directory inputDirectory) {
     final File templateArbFile = inputDirectory.childFile(templateArbFileName);
-    final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
+    final FileStat templateArbFileStat = templateArbFile.statSync();
+    if (templateArbFileStat.type == FileSystemEntityType.notFound) {
+      throw L10nException(
+        "The 'template-arb-file', $templateArbFile, does not exist."
+      );
+    }
+    final String templateArbFileStatModeString = templateArbFileStat.modeString();
     if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-') {
       throw L10nException(
         "The 'template-arb-file', $templateArbFile, is not readable.\n"
@@ -1044,6 +1050,9 @@ class LocalizationsGenerator {
   }
 
   static bool _isValidGetterAndMethodName(String name) {
+    if (name.isEmpty) {
+      return false;
+    }
     // Public Dart method name must not start with an underscore
     if (name[0] == '_') {
       return false;
@@ -1133,14 +1142,14 @@ class LocalizationsGenerator {
     });
 
     return classFileTemplate
-      .replaceAll('@(header)', header)
+      .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
       .replaceAll('@(language)', describeLocale(locale.toString()))
       .replaceAll('@(baseClass)', className)
       .replaceAll('@(fileName)', fileName)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '');
+      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;\n\n" : '');
   }
 
   String _generateSubclass(
@@ -1265,7 +1274,7 @@ class LocalizationsGenerator {
     final List<String> sortedClassImports = supportedLocales
       .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
       .map((LocaleInfo locale) {
-        final String library = '${fileName}_${locale.toString()}';
+        final String library = '${fileName}_$locale';
         if (useDeferredLoading) {
           return "import '$library.$fileExtension' deferred as $library;";
         } else {
@@ -1284,7 +1293,7 @@ class LocalizationsGenerator {
     );
 
     return fileTemplate
-      .replaceAll('@(header)', header)
+      .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map((Message message) => generateBaseClassMethod(message, _templateArbLocale)).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')

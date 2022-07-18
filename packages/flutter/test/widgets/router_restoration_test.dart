@@ -141,7 +141,7 @@ class _TestRouteInformationProvider extends RouteInformationProvider with Change
 }
 
 class _TestWidget extends StatefulWidget {
-  const _TestWidget({Key? key, this.withInformationProvider = false, this.routerKey}) : super(key: key);
+  const _TestWidget({this.withInformationProvider = false, this.routerKey});
 
   final bool withInformationProvider;
   final Key? routerKey;

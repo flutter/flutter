@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -136,15 +135,15 @@ void main() {
   });
 
   test('Returns null if an error is caught resolving an image', () {
-    Future<ui.Codec> _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+    Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+      return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
     }
     final ErrorImageProvider errorImage = ErrorImageProvider();
-    expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, _basicDecoder)), throwsA(isA<Error>()));
+    expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.loadBuffer(errorImage, basicDecoder)), throwsA(isA<Error>()));
     bool caughtError = false;
     final ImageStreamCompleter? result = imageCache.putIfAbsent(
       errorImage,
-      () => errorImage.load(errorImage, _basicDecoder),
+      () => errorImage.loadBuffer(errorImage, basicDecoder),
       onError: (dynamic error, StackTrace? stackTrace) {
        caughtError = true;
       },
@@ -179,6 +178,10 @@ void main() {
     final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
     })! as TestImageStreamCompleter;
+
+    // Make the image seem live.
+    final ImageStreamListener listener = ImageStreamListener((_, __) {});
+    completer1.addListener(listener);
 
     expect(imageCache.statusForKey(testImage).pending, true);
     expect(imageCache.statusForKey(testImage).live, true);
@@ -331,6 +334,33 @@ void main() {
     expect(imageCache.currentSize, 0);
     expect(imageCache.liveImageCount, 0);
   });
+
+  test('Clearing image cache does not leak live images', () async {
+    imageCache.maximumSize = 1;
+
+    final ui.Image testImage1 = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
+
+    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
+
+    imageCache.putIfAbsent(testImage1, () => completer1);
+    expect(imageCache.statusForKey(testImage1).pending, true);
+    expect(imageCache.statusForKey(testImage1).live, true);
+
+    imageCache.clear();
+    expect(imageCache.statusForKey(testImage1).pending, false);
+    expect(imageCache.statusForKey(testImage1).live, false);
+
+    completer1.testSetImage(testImage1);
+    expect(imageCache.statusForKey(testImage1).keepAlive, false);
+    expect(imageCache.statusForKey(testImage1).live, false);
+
+    imageCache.putIfAbsent(testImage2, () => completer2);
+    expect(imageCache.statusForKey(testImage1).tracked, false); // evicted
+    expect(imageCache.statusForKey(testImage2).tracked, true);
+  });
+
 
   test('Evicting a pending image clears the live image by default', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
@@ -576,4 +606,27 @@ void main() {
     imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('clear does not leave pending images stuck', () async {
+    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+
+    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+    imageCache.putIfAbsent(testImage, () {
+      return completer1;
+    });
+
+    expect(imageCache.statusForKey(testImage).pending, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+    imageCache.clear();
+
+    // No one else is listening to the completer. It should not be considered
+    // live anymore.
+
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, false);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
+  });
 }

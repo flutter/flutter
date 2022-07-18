@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -27,12 +27,12 @@ class MyApp extends StatelessWidget {
 
 class CustomListItem extends StatelessWidget {
   const CustomListItem({
-    Key? key,
+    super.key,
     required this.thumbnail,
     required this.title,
     required this.user,
     required this.viewCount,
-  }) : super(key: key);
+  });
 
   final Widget thumbnail;
   final String title;
@@ -70,11 +70,10 @@ class CustomListItem extends StatelessWidget {
 
 class _VideoDescription extends StatelessWidget {
   const _VideoDescription({
-    Key? key,
     required this.title,
     required this.user,
     required this.viewCount,
-  }) : super(key: key);
+  });
 
   final String title;
   final String user;
@@ -111,7 +110,7 @@ class _VideoDescription extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

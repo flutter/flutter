@@ -7,14 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
-    Key? key,
+    super.key,
     this.firstPanelKey,
     this.secondPanelKey,
     this.canTapOnHeader = false,
     this.expandedHeaderPadding,
     this.dividerColor,
     this.elevation = 2,
-  }) : super(key: key);
+  });
 
   final Key? firstPanelKey;
   final Key? secondPanelKey;
@@ -72,7 +72,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 }
 
 class ExpansionPanelListSemanticsTest extends StatefulWidget {
-  const ExpansionPanelListSemanticsTest({ Key? key, required this.headerKey }) : super(key: key);
+  const ExpansionPanelListSemanticsTest({ super.key, required this.headerKey });
 
   final Key headerKey;
 

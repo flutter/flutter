@@ -20,6 +20,8 @@ class BuildWebCommand extends BuildSubCommand {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();
+    usesBuildNumberOption();
+    usesBuildNameOption();
     addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
     usesDartDefineOption();
     usesWebRendererOption();
@@ -61,7 +63,10 @@ class BuildWebCommand extends BuildSubCommand {
           'The value has to start and end with a slash "/". '
           'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
     );
-
+    argParser.addOption('dart2js-optimization',
+      help: 'Sets the optimization level used for Dart compilation to JavaScript. '
+          'Valid values range from O0 to O4.'
+    );
   }
 
   @override
@@ -85,12 +90,12 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = stringArg('target')!;
+    final String target = stringArgDeprecated('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    final String? baseHref = stringArg('base-href');
+    final String? baseHref = stringArgDeprecated('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
     }
@@ -113,11 +118,12 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      boolArg('csp'),
-      stringArg('pwa-strategy')!,
-      boolArg('source-maps'),
-      boolArg('native-null-assertions'),
+      boolArgDeprecated('csp'),
+      stringArgDeprecated('pwa-strategy')!,
+      boolArgDeprecated('source-maps'),
+      boolArgDeprecated('native-null-assertions'),
       baseHref,
+      stringArgDeprecated('dart2js-optimization'),
     );
     return FlutterCommandResult.success();
   }

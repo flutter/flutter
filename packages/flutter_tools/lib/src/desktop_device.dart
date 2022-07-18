@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -45,7 +44,7 @@ abstract class DesktopDevice extends Device {
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 

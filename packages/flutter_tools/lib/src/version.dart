@@ -17,6 +17,11 @@ import 'globals.dart' as globals;
 
 const String _unknownFrameworkVersion = '0.0.0-unknown';
 
+/// A git shortcut for the branch that is being tracked by the current one.
+///
+/// See `man gitrevisions` for more information.
+const String kGitTrackingUpstream = '@{upstream}';
+
 /// This maps old branch names to the names of branches that replaced them.
 ///
 /// For example, in 2021 we deprecated the "dev" channel and transitioned "dev"
@@ -75,7 +80,7 @@ class FlutterVersion {
       globals.processUtils,
       _workingDirectory,
     );
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, gitRef: _frameworkRevision);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, gitRef: _frameworkRevision);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
@@ -89,7 +94,7 @@ class FlutterVersion {
   /// user explicitly wants to get the version, e.g. for `flutter --version` or
   /// `flutter doctor`.
   void fetchTagsAndUpdate() {
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, fetchTags: true);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, fetchTags: true);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
@@ -106,7 +111,7 @@ class FlutterVersion {
     String? channel = _channel;
     if (channel == null) {
       final String gitChannel = _runGit(
-        'git rev-parse --abbrev-ref --symbolic @{u}',
+        'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
         globals.processUtils,
         _workingDirectory,
       );
@@ -195,19 +200,19 @@ class FlutterVersion {
   /// A date String describing the last framework commit.
   ///
   /// If a git command fails, this will return a placeholder date.
-  String get frameworkCommitDate => _latestGitCommitDate(lenient: true);
+  String get frameworkCommitDate => _gitCommitDate(lenient: true);
 
-  // The date of the latest commit on the given branch. If no branch is
-  // specified, then it is the current local branch.
+  // The date of the given commit hash as [gitRef]. If no hash is specified,
+  // then it is the HEAD of the current local branch.
   //
   // If lenient is true, and the git command fails, a placeholder date is
   // returned. Otherwise, the VersionCheckError exception is propagated.
-  static String _latestGitCommitDate({
-    String? branch,
+  static String _gitCommitDate({
+    String gitRef = 'HEAD',
     bool lenient = false,
   }) {
     final List<String> args = gitLog(<String>[
-      if (branch != null) branch,
+      gitRef,
       '-n',
       '1',
       '--pretty=format:%ad',
@@ -247,7 +252,7 @@ class FlutterVersion {
     DateTime localFrameworkCommitDate;
     try {
       // Don't perform the update check if fetching the latest local commit failed.
-      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate());
+      localFrameworkCommitDate = DateTime.parse(_gitCommitDate());
     } on VersionCheckError {
       return;
     }
@@ -264,51 +269,18 @@ class FlutterVersion {
     ).run();
   }
 
-  /// The name of the temporary git remote used to check for the latest
-  /// available Flutter framework version.
-  ///
-  /// In the absence of bugs and crashes a Flutter developer should never see
-  /// this remote appear in their `git remote` list, but also if it happens to
-  /// persist we do the proper clean-up for extra robustness.
-  static const String _versionCheckRemote = '__flutter_version_check__';
-
   /// The date of the latest framework commit in the remote repository.
   ///
   /// Throws [VersionCheckError] if a git command fails, for example, when the
   /// remote git repository is not reachable due to a network issue.
-  static Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
-    await _removeVersionCheckRemoteIfExists();
+  static Future<String> fetchRemoteFrameworkCommitDate() async {
     try {
-      await _run(<String>[
-        'git',
-        'remote',
-        'add',
-        _versionCheckRemote,
-        globals.flutterGit,
-      ]);
-      await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
-      return _latestGitCommitDate(
-        branch: '$_versionCheckRemote/$branch',
-      );
+      // Fetch upstream branch's commit and tags
+      await _run(<String>['git', 'fetch', '--tags']);
+      return _gitCommitDate(gitRef: kGitTrackingUpstream);
     } on VersionCheckError catch (error) {
-      if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
-        globals.printWarning('Warning: the Flutter git upstream was overridden '
-        'by the environment variable FLUTTER_GIT_URL = ${globals.flutterGit}');
-      }
-      globals.printError(error.toString());
+      globals.printError(error.message);
       rethrow;
-    } finally {
-      await _removeVersionCheckRemoteIfExists();
-    }
-  }
-
-  static Future<void> _removeVersionCheckRemoteIfExists() async {
-    final List<String> remotes = (await _run(<String>['git', 'remote']))
-        .split('\n')
-        .map<String>((String name) => name.trim()) // to account for OS-specific line-breaks
-        .toList();
-    if (remotes.contains(_versionCheckRemote)) {
-      await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
     }
   }
 
@@ -388,7 +360,7 @@ class FlutterVersion {
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
       final DateTime remoteFrameworkCommitDate = DateTime.parse(
-        await FlutterVersion.fetchRemoteFrameworkCommitDate(channel),
+        await FlutterVersion.fetchRemoteFrameworkCommitDate(),
       );
       await versionCheckStamp.store(
         newTimeVersionWasChecked: now,
@@ -728,13 +700,20 @@ class GitTagVersion {
   /// The git tag that is this version's closest ancestor.
   final String? gitTag;
 
-  static GitTagVersion determine(ProcessUtils processUtils, {String? workingDirectory, bool fetchTags = false, String gitRef = 'HEAD'}) {
+  static GitTagVersion determine(
+    ProcessUtils processUtils,
+    Platform platform, {
+    String? workingDirectory,
+    bool fetchTags = false,
+    String gitRef = 'HEAD'
+  }) {
     if (fetchTags) {
       final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
-        _runGit('git fetch ${globals.flutterGit} --tags -f', processUtils, workingDirectory);
+        final String flutterGit = platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+        _runGit('git fetch $flutterGit --tags -f', processUtils, workingDirectory);
       }
     }
     // find all tags attached to the given [gitRef]
@@ -947,11 +926,6 @@ class VersionFreshnessValidator {
 
   /// Execute validations and print warning to [logger] if necessary.
   Future<void> run() async {
-    // Don't perform update checks if we're not on an official channel.
-    if (!kOfficialChannels.contains(version.channel)) {
-      return;
-    }
-
     // Get whether there's a newer version on the remote. This only goes
     // to the server if we haven't checked recently so won't happen on every
     // command.

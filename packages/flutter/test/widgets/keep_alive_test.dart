@@ -10,9 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 class Leaf extends StatefulWidget {
   const Leaf({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
   final Widget child;
   @override
   State<Leaf> createState() => _LeafState();
@@ -272,7 +272,7 @@ void main() {
       '               │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '               │ size: Size(800.0, 600.0)\n'
       '               │ behavior: opaque\n'
-      '               │ listeners: down\n'
+      '               │ listeners: down, panZoomStart\n'
       '               │\n'
       '               └─child: RenderSemanticsAnnotations#00000\n'
       '                 │ needs compositing\n'
@@ -432,7 +432,7 @@ void main() {
       '               │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '               │ size: Size(800.0, 600.0)\n'
       '               │ behavior: opaque\n'
-      '               │ listeners: down\n'
+      '               │ listeners: down, panZoomStart\n'
       '               │\n'
       '               └─child: RenderSemanticsAnnotations#00000\n'
       '                 │ needs compositing\n'

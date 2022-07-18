@@ -10,7 +10,7 @@ void main() {
   testWidgets('Perform an action on CupertinoAlertDialog', (WidgetTester tester) async {
     const String actionText = 'Yes';
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.AlertDialogApp(),
     );
 
     // Launch the CupertinoAlertDialog.

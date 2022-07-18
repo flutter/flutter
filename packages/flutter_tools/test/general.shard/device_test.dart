@@ -222,7 +222,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        nonEphemeralOne
+        nonEphemeralOne,
       ]);
     });
 
@@ -242,7 +242,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        nonEphemeralTwo
+        nonEphemeralTwo,
       ]);
     });
 
@@ -263,7 +263,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        ephemeralOne
+        ephemeralOne,
       ]);
     });
 
@@ -283,7 +283,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        ephemeralTwo
+        ephemeralTwo,
       ]);
     });
 
@@ -307,7 +307,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        nonEphemeralOne
+        nonEphemeralOne,
       ]);
     });
 
@@ -450,7 +450,7 @@ void main() {
       final DeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         deviceDiscoveryOverrides: <DeviceDiscovery>[
-          deviceDiscovery
+          deviceDiscovery,
         ],
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
@@ -476,7 +476,7 @@ void main() {
       final DeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         deviceDiscoveryOverrides: <DeviceDiscovery>[
-          deviceDiscovery
+          deviceDiscovery,
         ],
         logger: BufferLogger.test(),
         terminal: Terminal.test(),

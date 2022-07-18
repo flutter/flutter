@@ -86,22 +86,22 @@ class VMServiceFlutterDriver extends FlutterDriver {
     _log('Connecting to Flutter application at $dartVmServiceUrl');
     final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl, headers);
 
-    Future<vms.IsolateRef?> _waitForRootIsolate() async {
-      bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber.toString();
+    Future<vms.IsolateRef?> waitForRootIsolate() async {
+      bool checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber.toString();
       while (true) {
         final vms.VM vm = await client.getVM();
-        if (vm.isolates!.isEmpty || (isolateNumber != null && !vm.isolates!.any(_checkIsolate))) {
+        if (vm.isolates!.isEmpty || (isolateNumber != null && !vm.isolates!.any(checkIsolate))) {
           await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
           continue;
         }
         return isolateNumber == null
           ? vm.isolates!.first
-          : vm.isolates!.firstWhere(_checkIsolate);
+          : vm.isolates!.firstWhere(checkIsolate);
       }
     }
 
     final vms.IsolateRef isolateRef = (await _warnIfSlow<vms.IsolateRef?>(
-      future: _waitForRootIsolate(),
+      future: waitForRootIsolate(),
       timeout: kUnusuallyLongTimeout,
       message: isolateNumber == null
         ? 'The root isolate is taking an unusually long time to start.'
@@ -321,14 +321,16 @@ class VMServiceFlutterDriver extends FlutterDriver {
         stackTrace,
       );
     }
-    if ((response['isError'] as bool?) ?? false)
+    if ((response['isError'] as bool?) ?? false) {
       throw DriverError('Error in Flutter application: ${response['response']}');
+    }
     return response['response'] as Map<String, dynamic>;
   }
 
   void _logCommunication(String message) {
-    if (_printCommunication)
+    if (_printCommunication) {
       _log(message);
+    }
     if (_logCommunicationToFile) {
       assert(_logFilePathName != null);
       final f.File file = fs.file(_logFilePathName);
@@ -533,8 +535,9 @@ String _getWebSocketUrl(String url) {
     if (uri.pathSegments.isNotEmpty) uri.pathSegments.first,
     'ws',
   ];
-  if (uri.scheme == 'http')
+  if (uri.scheme == 'http') {
     uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
+  }
   return uri.toString();
 }
 

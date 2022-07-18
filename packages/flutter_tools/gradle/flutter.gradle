@@ -426,7 +426,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     /**
      * Compares semantic versions ignoring labels.
-     * 
+     *
      * If the versions are equal (ignoring labels), returns one of the two strings arbitrarily.
      *
      * If minor or patch are omitted (non-conformant to semantic versioning), they are considered zero.
@@ -458,7 +458,10 @@ class FlutterPlugin implements Plugin<Project> {
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
-            int projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
+            int projectCompileSdkVersion = Integer.MAX_VALUE // Default to int max if using a preview version to skip the sdk check.
+            if (project.android.compileSdkVersion.substring(8).isInteger()) { // Stable versions use ints, legacy preview uses string.
+                projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
+            }
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
             String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
@@ -484,7 +487,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-        }  
+        }
     }
 
     /**

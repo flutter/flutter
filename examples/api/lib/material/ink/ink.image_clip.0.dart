@@ -21,7 +21,7 @@ void main() {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key, required this.image}) : super(key: key);
+  const MyStatelessWidget({super.key, required this.image});
 
   final ImageProvider image;
 

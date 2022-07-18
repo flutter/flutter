@@ -80,7 +80,7 @@ Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
             }
             return <Map<String, dynamic>>[
               if (json != null)
-                json as Map<String, dynamic>
+                json as Map<String, dynamic>,
             ];
           })
           .where((Map<String, dynamic> testEvent) => testEvent['type'] == 'print')

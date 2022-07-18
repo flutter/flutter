@@ -300,15 +300,15 @@ class _AllSectionsView extends AnimatedWidget {
       1.0 - ((size.height - minHeight!) /
              (midHeight! - minHeight!)).clamp(0.0, 1.0);
 
-    double _indicatorOpacity(int index) {
+    double indicatorOpacity(int index) {
       return 1.0 - _selectedIndexDelta(index) * 0.5;
     }
 
-    double _titleOpacity(int index) {
+    double titleOpacity(int index) {
       return 1.0 - _selectedIndexDelta(index) * tColumnToRow * 0.5;
     }
 
-    double _titleScale(int index) {
+    double titleScale(int index) {
       return 1.0 - _selectedIndexDelta(index) * tColumnToRow * 0.15;
     }
 
@@ -320,8 +320,8 @@ class _AllSectionsView extends AnimatedWidget {
         id: 'title$index',
         child: SectionTitle(
           section: section,
-          scale: _titleScale(index),
-          opacity: _titleOpacity(index),
+          scale: titleScale(index),
+          opacity: titleOpacity(index),
         ),
       ));
     }
@@ -330,7 +330,7 @@ class _AllSectionsView extends AnimatedWidget {
       children.add(LayoutId(
         id: 'indicator$index',
         child: SectionIndicator(
-          opacity: _indicatorOpacity(index),
+          opacity: indicatorOpacity(index),
         ),
       ));
     }

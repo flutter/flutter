@@ -99,7 +99,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// [CupertinoTextField] class and [CupertinoTextField.borderless],
   /// the constructor.
   CupertinoTextFormFieldRow({
-    Key? key,
+    super.key,
     this.prefix,
     this.padding,
     this.controller,
@@ -132,8 +132,8 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     GestureTapCallback? onTap,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
-    FormFieldSetter<String>? onSaved,
-    FormFieldValidator<String>? validator,
+    super.onSaved,
+    super.validator,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     double cursorWidth = 2.0,
@@ -145,7 +145,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextSelectionControls? selectionControls,
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
-    AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
+    AutovalidateMode super.autovalidateMode = AutovalidateMode.disabled,
     String? placeholder,
     TextStyle? placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,
@@ -175,11 +175,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(maxLength == null || maxLength > 0),
         assert(enableInteractiveSelection != null),
         super(
-          key: key,
           initialValue: controller?.text ?? initialValue ?? '',
-          onSaved: onSaved,
-          validator: validator,
-          autovalidateMode: autovalidateMode,
           builder: (FormFieldState<String> field) {
             final _CupertinoTextFormFieldRowState state =
                 field as _CupertinoTextFormFieldRowState;

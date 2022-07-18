@@ -13,7 +13,7 @@ import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
-  const FirstWidget({ Key? key }) : super(key: key);
+  const FirstWidget({ super.key });
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -29,7 +29,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatefulWidget {
-  const SecondWidget({ Key? key }) : super(key: key);
+  const SecondWidget({ super.key });
   @override
   SecondWidgetState createState() => SecondWidgetState();
 }
@@ -50,7 +50,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ Key? key, required this.targetKey, required this.onException }) : super(key: key);
+  const ThirdWidget({ super.key, required this.targetKey, required this.onException });
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -72,7 +72,7 @@ class ThirdWidget extends StatelessWidget {
 }
 
 class OnTapPage extends StatelessWidget {
-  const OnTapPage({ Key? key, required this.id, this.onTap }) : super(key: key);
+  const OnTapPage({ super.key, required this.id, this.onTap });
 
   final String id;
   final VoidCallback? onTap;
@@ -93,8 +93,7 @@ class OnTapPage extends StatelessWidget {
 }
 
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
-  SlideInOutPageRoute({required WidgetBuilder bodyBuilder, RouteSettings? settings}) : super(
-    settings: settings,
+  SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings}) : super(
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
     transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
         return SlideTransition(
@@ -2760,7 +2759,7 @@ void main() {
       );
     });
 
-    Widget _buildFrame(String action) {
+    Widget buildFrame(String action) {
       const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/' : (BuildContext context) => OnTapPage(
@@ -2780,7 +2779,7 @@ void main() {
       return MaterialApp(routes: routes);
     }
 
-    void _checkException(WidgetTester tester) {
+    void checkException(WidgetTester tester) {
       final dynamic exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
@@ -2796,24 +2795,24 @@ void main() {
     }
 
     testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('push'));
+      await tester.pumpWidget(buildFrame('push'));
       await tester.tap(find.text('push'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('pushReplacement'));
+      await tester.pumpWidget(buildFrame('pushReplacement'));
       await tester.tap(find.text('pushReplacement'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('pushAndRemoveUntil'));
+      await tester.pumpWidget(buildFrame('pushAndRemoveUntil'));
       await tester.tap(find.text('pushAndRemoveUntil'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if page list is empty', (WidgetTester tester) async {
@@ -3877,8 +3876,8 @@ class RouteAnnouncementSpy extends Route<void> {
     this.onDidChangePrevious,
     this.onDidChangeNext,
     this.onDidPopNext,
-    RouteSettings? settings,
-  }) : super(settings: settings);
+    super.settings,
+  });
   final AnnouncementCallBack? onDidChangePrevious;
   final AnnouncementCallBack? onDidChangeNext;
   final AnnouncementCallBack? onDidPopNext;
@@ -3950,8 +3949,9 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }) {
     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
     void handleExitingRoute(RouteTransitionRecord? location) {
-      if (!locationToExitingPageRoute.containsKey(location))
+      if (!locationToExitingPageRoute.containsKey(location)) {
         return;
+      }
 
       final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location]!;
       if (exitingPageRoute.isWaitingForExitingDecision) {
@@ -3984,10 +3984,10 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
 
 class ZeroTransitionPage extends Page<void> {
   const ZeroTransitionPage({
-    LocalKey? key,
-    Object? arguments,
-    required String name,
-  }) : super(key: key, name: name, arguments: arguments);
+    super.key,
+    super.arguments,
+    required String super.name,
+  });
 
   @override
   Route<void> createRoute(BuildContext context) {
@@ -4000,10 +4000,10 @@ class ZeroTransitionPage extends Page<void> {
 
 class TestPage extends Page<void> {
   const TestPage({
-    LocalKey? key,
-    required String name,
-    Object? arguments,
-  }) : super(key: key, name: name, arguments: arguments);
+    super.key,
+    required String super.name,
+    super.arguments,
+  });
 
   @override
   Route<void> createRoute(BuildContext context) {
@@ -4016,10 +4016,9 @@ class TestPage extends Page<void> {
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
   NoAnimationPageRoute({
-    RouteSettings? settings,
+    super.settings,
     required WidgetBuilder pageBuilder
   }) : super(
-         settings: settings,
          transitionDuration: Duration.zero,
          reverseTransitionDuration: Duration.zero,
          pageBuilder: (BuildContext context, __, ___) {
@@ -4029,7 +4028,7 @@ class NoAnimationPageRoute extends PageRouteBuilder<void> {
 }
 
 class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key? key}) : super(key: key);
+  const StatefulTestWidget({super.key});
 
   @override
   State<StatefulTestWidget> createState() => StatefulTestState();
@@ -4064,7 +4063,7 @@ class NavigatorObservation {
 }
 
 class BuilderPage extends Page<void> {
-  const BuilderPage({LocalKey? key, String? name, required this.pageBuilder}) : super(key: key, name: name);
+  const BuilderPage({super.key, super.name, required this.pageBuilder});
 
   final RoutePageBuilder pageBuilder;
 

@@ -7,6 +7,10 @@ import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
 import 'events.dart';
 
+export 'dart:ui' show PointerData;
+
+export 'events.dart' show PointerEvent;
+
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
 //
 // TODO(tongmu): This patch is supposed to be done by embedders. Patching it
@@ -15,14 +19,13 @@ import 'events.dart';
 int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+    case PointerDeviceKind.trackpad:
       return buttons;
     case PointerDeviceKind.touch:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
       return buttons == 0 ? kPrimaryButton : buttons;
     case PointerDeviceKind.unknown:
-    default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-             // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
       // We have no information about the device but we know we never want
       // buttons to be 0 when the pointer is down.
       return buttons == 0 ? kPrimaryButton : buttons;
@@ -209,9 +212,44 @@ class PointerEventConverter {
                     radiusMax: radiusMax,
                     embedderId: datum.embedderId,
                   );
-                default: // ignore: no_default_cases, to allow adding new pointer events to [ui.PointerChange]
-                         // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
-                  throw StateError('Unreachable');
+                case ui.PointerChange.panZoomStart:
+                  return PointerPanZoomStartEvent(
+                    timeStamp: timeStamp,
+                    pointer: datum.pointerIdentifier,
+                    kind: kind,
+                    device: datum.device,
+                    position: position,
+                    embedderId: datum.embedderId,
+                    synthesized: datum.synthesized,
+                  );
+                case ui.PointerChange.panZoomUpdate:
+                  final Offset pan =
+                      Offset(datum.panX, datum.panY) / devicePixelRatio;
+                  final Offset panDelta =
+                      Offset(datum.panDeltaX, datum.panDeltaY) / devicePixelRatio;
+                  return PointerPanZoomUpdateEvent(
+                    timeStamp: timeStamp,
+                    pointer: datum.pointerIdentifier,
+                    kind: kind,
+                    device: datum.device,
+                    position: position,
+                    pan: pan,
+                    panDelta: panDelta,
+                    scale: datum.scale,
+                    rotation: datum.rotation,
+                    embedderId: datum.embedderId,
+                    synthesized: datum.synthesized,
+                  );
+                case ui.PointerChange.panZoomEnd:
+                  return PointerPanZoomEndEvent(
+                    timeStamp: timeStamp,
+                    pointer: datum.pointerIdentifier,
+                    kind: kind,
+                    device: datum.device,
+                    position: position,
+                    embedderId: datum.embedderId,
+                    synthesized: datum.synthesized,
+                  );
               }
             case ui.PointerSignalKind.scroll:
               final Offset scrollDelta =
@@ -225,6 +263,8 @@ class PointerEventConverter {
                 embedderId: datum.embedderId,
               );
             case ui.PointerSignalKind.unknown:
+            default: // ignore: no_default_cases, to allow adding a new [PointerSignalKind]
+                     // TODO(moffatman): Remove after landing https://github.com/flutter/engine/pull/34402
               // This branch should already have 'unknown' filtered out, but
               // we don't want to return anything or miss if someone adds a new
               // enumeration to PointerSignalKind.

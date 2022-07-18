@@ -59,11 +59,10 @@ or
     if (Platform.isWindows)
       'flutter.bat'
     else
-      'flutter'
+      'flutter',
   ]);
-  final bool uwp = targetPlatform.contains('uwp');
   final String bundlePlatform = targetPlatform.startsWith('windows') ? 'windows' : targetPlatform;
-  final String target = '${buildMode}_bundle_${bundlePlatform}_assets${uwp ? '_uwp' : ''}';
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[

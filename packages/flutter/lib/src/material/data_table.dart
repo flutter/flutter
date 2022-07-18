@@ -47,9 +47,14 @@ class DataColumn {
   /// [Icon] (typically using size 18), or a [Row] with an icon and
   /// some text.
   ///
-  /// By default, this widget will only occupy the minimal space. If you want
-  /// it to take the entire remaining space, e.g. when you want to use [Center],
-  /// you can wrap it with an [Expanded].
+  /// The [label] is placed within a [Row] along with the
+  /// sort indicator (if applicable). By default, [label] only occupy minimal
+  /// space. It is recommended to place the label content in an [Expanded] or
+  /// [Flexible] as [label] to control how the content flexes. Otherwise,
+  /// an exception will occur when the available space is insufficient.
+  ///
+  /// By default, [DefaultTextStyle.softWrap] of this subtree will be set to false.
+  /// Use [DefaultTextStyle.merge] to override it if needed.
   ///
   /// The label should not include the sort indicator.
   final Widget label;
@@ -299,7 +304,7 @@ class DataCell {
       onTapCancel != null;
 }
 
-/// A material design data table.
+/// A Material Design data table.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ktTajqbhIcY}
 ///
@@ -372,7 +377,7 @@ class DataTable extends StatelessWidget {
   /// the sort order is ascending, this should be true (the default),
   /// otherwise it should be false.
   DataTable({
-    Key? key,
+    super.key,
     required this.columns,
     this.sortColumnIndex,
     this.sortAscending = true,
@@ -400,8 +405,7 @@ class DataTable extends StatelessWidget {
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
-       _onlyTextColumn = _initOnlyTextColumn(columns),
-       super(key: key);
+       _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
@@ -627,8 +631,9 @@ class DataTable extends StatelessWidget {
     for (int index = 0; index < columns.length; index += 1) {
       final DataColumn column = columns[index];
       if (!column.numeric) {
-        if (result != null)
+        if (result != null) {
           return null;
+        }
         result = index;
       }
     }
@@ -650,8 +655,9 @@ class DataTable extends StatelessWidget {
       onSelectAll!(effectiveChecked);
     } else {
       for (final DataRow row in rows) {
-        if (row.onSelectChanged != null && row.selected != effectiveChecked)
+        if (row.onSelectChanged != null && row.selected != effectiveChecked) {
           row.onSelectChanged!(effectiveChecked);
+        }
       }
     }
   }
@@ -871,8 +877,9 @@ class DataTable extends StatelessWidget {
       ?? theme.dataTableTheme.dataRowColor;
     final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected))
+        if (states.contains(MaterialState.selected)) {
           return theme.colorScheme.primary.withOpacity(0.08);
+        }
         return null;
       },
     );
@@ -1066,23 +1073,16 @@ class DataTable extends StatelessWidget {
 class TableRowInkWell extends InkResponse {
   /// Creates an ink well for a table row.
   const TableRowInkWell({
-    Key? key,
-    Widget? child,
-    GestureTapCallback? onTap,
-    GestureTapCallback? onDoubleTap,
-    GestureLongPressCallback? onLongPress,
-    ValueChanged<bool>? onHighlightChanged,
-    MaterialStateProperty<Color?>? overlayColor,
+    super.key,
+    super.child,
+    super.onTap,
+    super.onDoubleTap,
+    super.onLongPress,
+    super.onHighlightChanged,
+    super.overlayColor,
   }) : super(
-    key: key,
-    child: child,
-    onTap: onTap,
-    onDoubleTap: onDoubleTap,
-    onLongPress: onLongPress,
-    onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
-    overlayColor: overlayColor,
   );
 
   @override
@@ -1105,8 +1105,9 @@ class TableRowInkWell extends InkResponse {
         // TableRowInkWell's coordinate space.
         table.applyPaintTransform(cell, transform);
         final Offset? offset = MatrixUtils.getAsTranslation(transform);
-        if (offset != null)
+        if (offset != null) {
           return rect.shift(-offset);
+        }
       }
       return Rect.zero;
     };
@@ -1121,11 +1122,10 @@ class TableRowInkWell extends InkResponse {
 
 class _SortArrow extends StatefulWidget {
   const _SortArrow({
-    Key? key,
     required this.visible,
     required this.up,
     required this.duration,
-  }) : super(key: key);
+  });
 
   final bool visible;
 
@@ -1170,8 +1170,9 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     _orientationAnimation = _orientationController.drive(_turnTween)
       ..addListener(_rebuild)
       ..addStatusListener(_resetOrientationAnimation);
-    if (widget.visible)
+    if (widget.visible) {
       _orientationOffset = widget.up! ? 0.0 : math.pi;
+    }
   }
 
   void _rebuild() {

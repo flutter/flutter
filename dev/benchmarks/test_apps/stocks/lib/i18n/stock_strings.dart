@@ -97,7 +97,7 @@ abstract class StockStrings {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('en', 'US'),
-    Locale('es')
+    Locale('es'),
   ];
 
   /// Title for the Stocks application

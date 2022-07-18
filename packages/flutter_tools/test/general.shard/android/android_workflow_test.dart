@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
@@ -18,15 +16,15 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  FakeAndroidSdk sdk;
-  Logger logger;
-  MemoryFileSystem fileSystem;
-  FakeProcessManager processManager;
-  FakeStdio stdio;
+  late FakeAndroidSdk sdk;
+  late Logger logger;
+  late MemoryFileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late FakeStdio stdio;
 
   setUp(() {
     sdk = FakeAndroidSdk();
@@ -532,31 +530,31 @@ Review licenses that have not been accepted (y/N)?
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
-  String sdkManagerPath;
+  String? sdkManagerPath;
 
   @override
-  String sdkManagerVersion;
+  String? sdkManagerVersion;
 
   @override
-  String adbPath;
+  String? adbPath;
 
   @override
-  bool licensesAvailable;
+  bool licensesAvailable = false;
 
   @override
-  bool platformToolsAvailable;
+  bool platformToolsAvailable = false;
 
   @override
-  bool cmdlineToolsAvailable;
+  bool cmdlineToolsAvailable = false;
 
   @override
-  Directory directory;
+  Directory directory = MemoryFileSystem.test().directory('/foo/bar');
 
   @override
-  AndroidSdkVersion latestVersion;
+  AndroidSdkVersion? latestVersion;
 
   @override
-  String emulatorPath;
+  String? emulatorPath;
 
   @override
   List<String> validateSdkWellFormed() => <String>[];
@@ -567,10 +565,10 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   @override
-  int sdkLevel;
+  int sdkLevel = 0;
 
   @override
-  Version buildToolsVersion;
+  Version buildToolsVersion = Version(0, 0, 0);
 
   @override
   String get buildToolsVersionName => '';

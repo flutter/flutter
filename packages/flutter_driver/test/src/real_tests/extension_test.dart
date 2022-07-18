@@ -1154,9 +1154,8 @@ void main() {
             height: 0,
             width: 0,
             child: Text('World!', key: Key('widgetTwo')),
-            )
-          ],
-        ),
+          ),
+        ]),
       ),
     );
 

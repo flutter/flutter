@@ -50,7 +50,7 @@ class ABTest {
     final Map<String, dynamic> resultMap = results as Map<String, dynamic>;
     return <String, List<double>> {
       for (String key in resultMap.keys)
-        key: (resultMap[key] as List<dynamic>).cast<double>()
+        key: (resultMap[key] as List<dynamic>).cast<double>(),
     };
   }
 
@@ -153,13 +153,13 @@ class ABTest {
       'Score',
       'Average A', '(noise)',
       'Average B', '(noise)',
-      'Speed-up'
+      'Speed-up',
     ];
     final List<FieldJustification> alignments = <FieldJustification>[
       FieldJustification.LEFT,
       FieldJustification.RIGHT, FieldJustification.LEFT,
       FieldJustification.RIGHT, FieldJustification.LEFT,
-      FieldJustification.CENTER
+      FieldJustification.CENTER,
     ];
 
     final List<int> lengths = List<int>.filled(6, 0);

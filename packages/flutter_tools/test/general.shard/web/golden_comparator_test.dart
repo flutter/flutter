@@ -45,7 +45,7 @@ void main() {
           '--disable-observatory',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
-          'compiler_output'
+          'compiler_output',
         ],
         stdout: '${jsonEncode(expectedResponse)}\n',
         environment: const <String, String>{
@@ -79,7 +79,7 @@ void main() {
           '--disable-observatory',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
-          'compiler_output'
+          'compiler_output',
         ], stdout: '${jsonEncode(expectedResponse)}\n',
       ));
 
@@ -112,7 +112,7 @@ void main() {
           '--disable-observatory',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
-          'compiler_output'
+          'compiler_output',
         ], stdout: '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
       ));
 
@@ -148,7 +148,7 @@ void main() {
           '--disable-observatory',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
-          'compiler_output'
+          'compiler_output',
         ], stdout: '${jsonEncode(expectedResponse1)}\n',
       ));
       processManager.addCommand(FakeCommand(
@@ -157,7 +157,7 @@ void main() {
           '--disable-observatory',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
-          'compiler_output'
+          'compiler_output',
         ], stdout: '${jsonEncode(expectedResponse2)}\n',
       ));
 
@@ -191,7 +191,7 @@ void main() {
           '--disable-observatory',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
-          'compiler_output'
+          'compiler_output',
         ], stdout: '${jsonEncode(expectedResponse)}\n',
         stdin: stdin,
       ));

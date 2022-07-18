@@ -9,9 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset dragUp = Offset(0.0, -150.0);
 
 void main() {
-   testWidgets('Collapse and expand CupertinoSliverNavigationBar changes title position', (WidgetTester tester) async {
+  testWidgets('Collapse and expand CupertinoSliverNavigationBar changes title position', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.SliverNavBarApp(),
     );
 
     // Large title is visible and at lower position.
@@ -23,9 +23,9 @@ void main() {
     expect(tester.getBottomLeft(find.text('Contacts').first).dy, 36.0);
   });
 
-   testWidgets('Middle widget is visible in both collapsed and expanded states', (WidgetTester tester) async {
+  testWidgets('Middle widget is visible in both collapsed and expanded states', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.SliverNavBarApp(),
     );
 
     // Navigate to a page that has both middle and large titles.
@@ -46,9 +46,9 @@ void main() {
     expect(tester.getBottomLeft(find.text('Family').first).dy, 36.0);
   });
 
-   testWidgets('CupertinoSliverNavigationBar with previous route has back button', (WidgetTester tester) async {
+  testWidgets('CupertinoSliverNavigationBar with previous route has back button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.SliverNavBarApp(),
     );
 
     // Navigate to a page that has back button

@@ -544,7 +544,7 @@ Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 
 }
 
 class TestHarness extends StatelessWidget {
-  const TestHarness({Key? key, required this.child, this.height = 100}) : super(key: key);
+  const TestHarness({super.key, required this.child, this.height = 100});
 
   final Widget child;
   final double height;

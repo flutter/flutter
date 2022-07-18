@@ -5,8 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
-import 'dart:ui' show Codec, FrameInfo;
+import 'dart:ui' show Codec, FrameInfo, ImmutableBuffer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -18,8 +17,8 @@ import '../rendering/rendering_tester.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  Future<Codec>  _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+  Future<Codec>  basicDecoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
   late _FakeHttpClient httpClient;
@@ -77,7 +76,7 @@ void main() {
 
     Future<void> loadNetworkImage() async {
       final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-      final ImageStreamCompleter completer = networkImage.load(networkImage, _basicDecoder);
+      final ImageStreamCompleter completer = networkImage.loadBuffer(networkImage, basicDecoder);
       completer.addListener(ImageStreamListener(
         (ImageInfo image, bool synchronousCall) { },
         onError: (dynamic error, StackTrace? stackTrace) {
@@ -189,7 +188,7 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
-  Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
@@ -207,7 +206,7 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, url);
   });

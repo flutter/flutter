@@ -25,7 +25,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a dialog that contains a material design
+///  * [showDatePicker], which shows a dialog that contains a Material Design
 ///    date picker which includes support for text entry of dates.
 ///  * [MaterialLocalizations.parseCompactDate], which is used to parse the text
 ///    input into a [DateTime].
@@ -45,7 +45,7 @@ class InputDatePickerFormField extends StatefulWidget {
   /// [firstDate], [lastDate], and [autofocus] must be non-null.
   ///
   InputDatePickerFormField({
-    Key? key,
+    super.key,
     DateTime? initialDate,
     required DateTime firstDate,
     required DateTime lastDate,
@@ -63,8 +63,7 @@ class InputDatePickerFormField extends StatefulWidget {
        assert(autofocus != null),
        initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
        firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate),
-       super(key: key) {
+       lastDate = DateUtils.dateOnly(lastDate) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
