@@ -13,31 +13,12 @@
 
 namespace flutter {
 
-static void ImageFilter_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&ImageFilter::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageFilter);
 
-#define FOR_EACH_BINDING(V)       \
-  V(ImageFilter, initBlur)        \
-  V(ImageFilter, initDilate)      \
-  V(ImageFilter, initErode)       \
-  V(ImageFilter, initMatrix)      \
-  V(ImageFilter, initColorFilter) \
-  V(ImageFilter, initComposeFilter)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void ImageFilter::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"ImageFilter_constructor", ImageFilter_constructor, 1, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-fml::RefPtr<ImageFilter> ImageFilter::Create() {
-  return fml::MakeRefCounted<ImageFilter>();
+void ImageFilter::Create(Dart_Handle wrapper) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  auto res = fml::MakeRefCounted<ImageFilter>();
+  res->AssociateWithDartWrapper(wrapper);
 }
 
 static const std::array<DlImageSampling, 4> kFilterQualities = {

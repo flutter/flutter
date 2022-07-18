@@ -11,12 +11,6 @@
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
 
-using tonic::DartPersistentValue;
-
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
-
 namespace flutter {
 
 // A handle to an SkCodec object.
@@ -33,8 +27,6 @@ class Codec : public RefCountedDartWrappable<Codec> {
   virtual Dart_Handle getNextFrame(Dart_Handle callback_handle) = 0;
 
   void dispose();
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 };
 
 }  // namespace flutter

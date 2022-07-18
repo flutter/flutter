@@ -11,10 +11,6 @@
 
 using tonic::DartPersistentValue;
 
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
-
 namespace flutter {
 
 // A handle to an SkCodec object.
@@ -25,7 +21,7 @@ class ColorFilter : public RefCountedDartWrappable<ColorFilter> {
   FML_FRIEND_MAKE_REF_COUNTED(ColorFilter);
 
  public:
-  static fml::RefPtr<ColorFilter> Create();
+  static void Create(Dart_Handle wrapper);
 
   void initMode(int color, int blend_mode);
   void initMatrix(const tonic::Float32List& color_matrix);
@@ -38,8 +34,6 @@ class ColorFilter : public RefCountedDartWrappable<ColorFilter> {
   const DlColorFilter* dl_filter() const {
     return (filter_ && filter_->skia_object()) ? filter_.get() : nullptr;
   }
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   std::shared_ptr<const DlColorFilter> filter_;

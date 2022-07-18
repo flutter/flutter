@@ -15,17 +15,6 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, NativeStringAttribute);
 
-#define FOR_EACH_BINDING(V)                           \
-  V(NativeStringAttribute, initLocaleStringAttribute) \
-  V(NativeStringAttribute, initSpellOutStringAttribute)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void NativeStringAttribute::RegisterNatives(
-    tonic::DartLibraryNatives* natives) {
-  natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
 NativeStringAttribute::NativeStringAttribute() {}
 
 NativeStringAttribute::~NativeStringAttribute() {}

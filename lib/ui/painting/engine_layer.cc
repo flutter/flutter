@@ -10,15 +10,9 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-using tonic::ToDart;
-
 namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, EngineLayer);
-
-#define FOR_EACH_BINDING(V) V(EngineLayer, dispose)
-
-DART_BIND_ALL(EngineLayer, FOR_EACH_BINDING)
 
 EngineLayer::EngineLayer(std::shared_ptr<flutter::ContainerLayer> layer)
     : layer_(layer) {}

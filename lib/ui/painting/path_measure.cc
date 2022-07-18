@@ -13,37 +13,16 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-using tonic::ToDart;
-
 namespace flutter {
 
 typedef CanvasPathMeasure PathMeasure;
 
-static void PathMeasure_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&CanvasPathMeasure::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, PathMeasure);
 
-#define FOR_EACH_BINDING(V)  \
-  V(PathMeasure, setPath)    \
-  V(PathMeasure, getLength)  \
-  V(PathMeasure, getPosTan)  \
-  V(PathMeasure, getSegment) \
-  V(PathMeasure, isClosed)   \
-  V(PathMeasure, nextContour)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void CanvasPathMeasure::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"PathMeasure_constructor", PathMeasure_constructor, 3, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-fml::RefPtr<CanvasPathMeasure> CanvasPathMeasure::Create(const CanvasPath* path,
-                                                         bool forceClosed) {
+void CanvasPathMeasure::Create(Dart_Handle wrapper,
+                               const CanvasPath* path,
+                               bool forceClosed) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   fml::RefPtr<CanvasPathMeasure> pathMeasure =
       fml::MakeRefCounted<CanvasPathMeasure>();
   if (path) {
@@ -54,7 +33,7 @@ fml::RefPtr<CanvasPathMeasure> CanvasPathMeasure::Create(const CanvasPath* path,
   } else {
     pathMeasure->path_measure_ = std::make_unique<SkContourMeasureIter>();
   }
-  return pathMeasure;
+  pathMeasure->AssociateWithDartWrapper(wrapper);
 }
 
 CanvasPathMeasure::CanvasPathMeasure() {}

@@ -18,10 +18,6 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, SemanticsUpdate);
 
-#define FOR_EACH_BINDING(V) V(SemanticsUpdate, dispose)
-
-DART_BIND_ALL(SemanticsUpdate, FOR_EACH_BINDING)
-
 void SemanticsUpdate::create(Dart_Handle semantics_update_handle,
                              SemanticsNodeUpdates nodes,
                              CustomAccessibilityActionUpdates actions) {

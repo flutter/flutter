@@ -141,40 +141,22 @@ const int kSForceStrutHeightMask = 1 << kSForceStrutHeightIndex;
 
 }  // namespace
 
-static void ParagraphBuilder_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&ParagraphBuilder::create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
 
-#define FOR_EACH_BINDING(V)           \
-  V(ParagraphBuilder, pushStyle)      \
-  V(ParagraphBuilder, pop)            \
-  V(ParagraphBuilder, addText)        \
-  V(ParagraphBuilder, addPlaceholder) \
-  V(ParagraphBuilder, build)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void ParagraphBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 9, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-fml::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
-    tonic::Int32List& encoded,
-    Dart_Handle strutData,
-    const std::string& fontFamily,
-    const std::vector<std::string>& strutFontFamilies,
-    double fontSize,
-    double height,
-    const std::u16string& ellipsis,
-    const std::string& locale) {
-  return fml::MakeRefCounted<ParagraphBuilder>(encoded, strutData, fontFamily,
-                                               strutFontFamilies, fontSize,
-                                               height, ellipsis, locale);
+void ParagraphBuilder::Create(Dart_Handle wrapper,
+                              Dart_Handle encoded_handle,
+                              Dart_Handle strutData,
+                              const std::string& fontFamily,
+                              const std::vector<std::string>& strutFontFamilies,
+                              double fontSize,
+                              double height,
+                              const std::u16string& ellipsis,
+                              const std::string& locale) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  auto res = fml::MakeRefCounted<ParagraphBuilder>(
+      encoded_handle, strutData, fontFamily, strutFontFamilies, fontSize,
+      height, ellipsis, locale);
+  res->AssociateWithDartWrapper(wrapper);
 }
 
 // returns true if there is a font family defined. Font family is the only
@@ -241,7 +223,7 @@ void decodeStrut(Dart_Handle strut_data,
 }
 
 ParagraphBuilder::ParagraphBuilder(
-    tonic::Int32List& encoded,
+    Dart_Handle encoded_data,
     Dart_Handle strutData,
     const std::string& fontFamily,
     const std::vector<std::string>& strutFontFamilies,
@@ -249,50 +231,55 @@ ParagraphBuilder::ParagraphBuilder(
     double height,
     const std::u16string& ellipsis,
     const std::string& locale) {
-  int32_t mask = encoded[0];
+  int32_t mask = 0;
   txt::ParagraphStyle style;
+  {
+    tonic::Int32List encoded(encoded_data);
 
-  if (mask & kPSTextAlignMask) {
-    style.text_align = static_cast<txt::TextAlign>(encoded[kPSTextAlignIndex]);
-  }
+    mask = encoded[0];
 
-  if (mask & kPSTextDirectionMask) {
-    style.text_direction =
-        static_cast<txt::TextDirection>(encoded[kPSTextDirectionIndex]);
-  }
+    if (mask & kPSTextAlignMask) {
+      style.text_align = txt::TextAlign(encoded[kPSTextAlignIndex]);
+    }
 
-  if (mask & kPSFontWeightMask) {
-    style.font_weight =
-        static_cast<txt::FontWeight>(encoded[kPSFontWeightIndex]);
-  }
+    if (mask & kPSTextDirectionMask) {
+      style.text_direction = txt::TextDirection(encoded[kPSTextDirectionIndex]);
+    }
 
-  if (mask & kPSFontStyleMask) {
-    style.font_style = static_cast<txt::FontStyle>(encoded[kPSFontStyleIndex]);
-  }
+    if (mask & kPSFontWeightMask) {
+      style.font_weight =
+          static_cast<txt::FontWeight>(encoded[kPSFontWeightIndex]);
+    }
 
-  if (mask & kPSFontFamilyMask) {
-    style.font_family = fontFamily;
-  }
+    if (mask & kPSFontStyleMask) {
+      style.font_style =
+          static_cast<txt::FontStyle>(encoded[kPSFontStyleIndex]);
+    }
 
-  if (mask & kPSFontSizeMask) {
-    style.font_size = fontSize;
-  }
+    if (mask & kPSFontFamilyMask) {
+      style.font_family = fontFamily;
+    }
 
-  if (mask & kPSHeightMask) {
-    style.height = height;
-    style.has_height_override = true;
-  }
+    if (mask & kPSFontSizeMask) {
+      style.font_size = fontSize;
+    }
 
-  if (mask & kPSTextHeightBehaviorMask) {
-    style.text_height_behavior = encoded[kPSTextHeightBehaviorIndex];
+    if (mask & kPSHeightMask) {
+      style.height = height;
+      style.has_height_override = true;
+    }
+
+    if (mask & kPSTextHeightBehaviorMask) {
+      style.text_height_behavior = encoded[kPSTextHeightBehaviorIndex];
+    }
+
+    if (mask & kPSMaxLinesMask) {
+      style.max_lines = encoded[kPSMaxLinesIndex];
+    }
   }
 
   if (mask & kPSStrutStyleMask) {
     decodeStrut(strutData, strutFontFamilies, style);
-  }
-
-  if (mask & kPSMaxLinesMask) {
-    style.max_lines = encoded[kPSMaxLinesIndex];
   }
 
   if (mask & kPSEllipsisMask) {
@@ -390,7 +377,7 @@ void decodeFontVariations(Dart_Handle font_variations_data,
   }
 }
 
-void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
+void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
                                  const std::vector<std::string>& fontFamilies,
                                  double fontSize,
                                  double letterSpacing,
