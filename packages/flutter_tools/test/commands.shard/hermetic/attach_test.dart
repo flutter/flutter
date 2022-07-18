@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -22,10 +23,13 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -78,12 +82,15 @@ void main() {
       });
 
       testUsingContext('succeeds with iOS device', () async {
-        final FakeIOSDevice device = FakeIOSDevice();
-        //device.onGetLogReader = () {
-        //  fakeLogReader.addLine('Foo');
-        //  fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
-        //  return fakeLogReader;
-        //};
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
+          },
+        );
 
         testDeviceManager.addDevice(device);
         final Completer<void> completer = Completer<void>();
@@ -106,6 +113,11 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          logger: logger,
+          flutterUsage: TestUsage(),
+        ),
       });
 
       testUsingContext('finds observatory port and forwards', () async {
@@ -783,6 +795,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     DevicePortForwarder? portForwarder,
     DeviceLogReader? logReader,
+    this.onGetLogReader,
   }) : _portForwarder = portForwarder, _logReader = logReader;
 
   final DevicePortForwarder? _portForwarder;
@@ -796,11 +809,20 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final DeviceLogReader? _logReader;
   DeviceLogReader get logReader => _logReader!;
 
+  final DeviceLogReader Function()? onGetLogReader;
+
   @override
   DeviceLogReader getLogReader({
     IOSApp? app,
     bool includePastLogs = false,
-  }) => logReader;
+  }) {
+    if (onGetLogReader == null) {
+      throw UnimplementedError(
+        'Called getLogReader but no onGetLogReader callback was supplied in the constructor to FakeIOSDevice',
+      );
+    }
+    return onGetLogReader!();
+  }
 
   @override
   OverrideArtifacts? get artifactOverrides => null;
@@ -813,4 +835,50 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   final PlatformType platformType = PlatformType.ios;
+}
+
+class FakeMDnsClient extends Fake implements MDnsClient {
+  FakeMDnsClient(this.ptrRecords, this.srvResponse, {
+    this.txtResponse = const <String, List<TxtResourceRecord>>{},
+    this.osErrorOnStart = false,
+  });
+
+  final List<PtrResourceRecord> ptrRecords;
+  final Map<String, List<SrvResourceRecord>> srvResponse;
+  final Map<String, List<TxtResourceRecord>> txtResponse;
+  final bool osErrorOnStart;
+
+  @override
+  Future<void> start({
+    InternetAddress? listenAddress,
+    NetworkInterfacesFactory? interfacesFactory,
+    int mDnsPort = 5353,
+    InternetAddress? mDnsAddress,
+  }) async {
+    if (osErrorOnStart) {
+      throw const OSError('Operation not supported on socket', 102);
+    }
+  }
+
+  @override
+  Stream<T> lookup<T extends ResourceRecord>(
+    ResourceRecordQuery query, {
+    Duration timeout = const Duration(seconds: 5),
+  }) {
+    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsObservatoryDiscovery.dartObservatoryName) {
+      return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
+    }
+    if (T == SrvResourceRecord) {
+      final String key = query.fullyQualifiedName;
+      return Stream<SrvResourceRecord>.fromIterable(srvResponse[key] ?? <SrvResourceRecord>[]) as Stream<T>;
+    }
+    if (T == TxtResourceRecord) {
+      final String key = query.fullyQualifiedName;
+      return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[]) as Stream<T>;
+    }
+    throw UnsupportedError('Unsupported query type $T');
+  }
+
+  @override
+  void stop() {}
 }

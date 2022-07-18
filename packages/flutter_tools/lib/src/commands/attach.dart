@@ -321,12 +321,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     try {
       int? result;
       if (daemon != null) {
-        final ResidentRunner runner = await (createResidentRunner(
+        final ResidentRunner runner = await createResidentRunner(
           observatoryUris: observatoryUri,
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
-        ) as FutureOr<ResidentRunner>);
+        );
         late AppInstance app;
         try {
           app = await daemon.appDomain.launch(
