@@ -480,6 +480,16 @@ config("cxx_version_17") {
   cflags_objcc = cc_std
 }
 
+config("cxx_version_20") {
+  if (is_win) {
+    cc_std = [ "/std:c++20" ]
+  } else {
+    cc_std = [ "-std=c++20" ]
+  }
+  cflags_cc = cc_std
+  cflags_objcc = cc_std
+}
+
 config("compiler_arm_fpu") {
   if (current_cpu == "arm" && !is_ios) {
     cflags = [ "-mfpu=$arm_fpu" ]

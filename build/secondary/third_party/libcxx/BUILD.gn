@@ -4,9 +4,15 @@
 
 config("libcxx_config") {
   defines = [ "_LIBCPP_DISABLE_AVAILABILITY=1" ]
+  include_dirs = [ "//build/secondary/third_party/libcxx/config" ]
+}
+
+config("src_include") {
+  include_dirs = [ "src" ]
 }
 
 source_set("libcxx") {
+
   sources = [
     "src/algorithm.cpp",
     "src/any.cpp",
@@ -25,6 +31,7 @@ source_set("libcxx") {
     "src/future.cpp",
     "src/hash.cpp",
     "src/ios.cpp",
+    "src/ios.instantiations.cpp",
     "src/iostream.cpp",
     "src/locale.cpp",
     "src/memory.cpp",
@@ -45,6 +52,9 @@ source_set("libcxx") {
     "src/valarray.cpp",
     "src/variant.cpp",
     "src/vector.cpp",
+    "src/ryu/d2fixed.cpp",
+    "src/ryu/d2s.cpp",
+    "src/ryu/f2s.cpp",
   ]
 
   deps = [ "//third_party/libcxxabi" ]
@@ -72,6 +82,12 @@ source_set("libcxx") {
   # libcxxabi.
   configs -= [ "//build/config/compiler:no_rtti" ]
   configs += [ "//build/config/compiler:rtti" ]
+
+  # libcxx requires C++20
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_20" ]
+
+  configs += [ ":src_include" ]
 
   if (is_clang) {
     # shared_mutex.cpp and debug.cpp are purposefully in violation.

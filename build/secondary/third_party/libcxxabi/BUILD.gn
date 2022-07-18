@@ -20,7 +20,7 @@ source_set("libcxxabi") {
   public_configs = [ ":libcxxabi_config" ]
 
   defines = [
-    "_LIBCXXABI_NO_EXCEPTIONS",
+    "_LIBCPP_BUILDING_LIBRARY",
     "_LIBCXXABI_BUILDING_LIBRARY",
     "LIBCXXABI_SILENT_TERMINATE",
     "_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
@@ -31,7 +31,9 @@ source_set("libcxxabi") {
   # Compile libcxx ABI using C++11. This replicates the rule in the
   # CMakeLists on the "cxx_abiobjects" target.
   configs -= [ "//build/config/compiler:cxx_version_default" ]
-  configs += [ "//build/config/compiler:cxx_version_11" ]
+  configs += [ "//build/config/compiler:cxx_version_20" ]
+
+  configs += [ "//third_party/libcxx:src_include" ]
 
   # No translation units in the engine are built with exceptions. But, using
   # Objective-C exceptions requires some infrastructure setup for exceptions.
@@ -60,7 +62,6 @@ source_set("libcxxabi") {
     "src/cxa_demangle.cpp",
     "src/cxa_exception_storage.cpp",
     "src/cxa_handlers.cpp",
-    "src/cxa_unexpected.cpp",
     "src/cxa_vector.cpp",
     "src/cxa_virtual.cpp",
     "src/fallback_malloc.cpp",
