@@ -1659,12 +1659,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late SpellCheckConfiguration? _spellCheckConfiguration;
 
-  /// Configuration that determins how spell check will be performed.
+  /// Configuration that determines how spell check will be performed.
+  ///
+  /// This configuration will attempt to provide defaults for the
+  /// [SpellCheckService] and the [SpellCheckSuggestionsHandler] if either are
+  /// left null.
+  ///
+  /// See also:
+  ///  * [DefaultSpellCheckService], the default spell check service.
+  ///  * [DefaultSpellCheckSuggestionsHandler], the default spell check
+  ///    suggestions handler.
   SpellCheckConfiguration? get spellCheckConfiguration => _spellCheckConfiguration;
 
   bool _spellCheckEnabled = false;
 
-  /// {@macro flutter.widgets.EditableText.spellCheckEnabled}
+  /// Whether or not spell check is enabled.
+  ///
+  /// Spell check is enabled when a [SpellCheckConfiguration] has been specified
+  /// for the widget.
   @visibleForTesting
   bool get spellCheckEnabled => _spellCheckEnabled;
 
@@ -3635,13 +3647,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       return _spellCheckConfiguration!.spellCheckSuggestionsHandler!
                 .buildTextSpanWithSpellCheckSuggestions(
-                  _value, 
+                  _value,
                   composingRegionOutOfRange,
-                  widget.style, 
-                  _spellCheckConfiguration!.misspelledTextStyle!, 
+                  widget.style,
+                  _spellCheckConfiguration!.misspelledTextStyle!,
                   _spellCheckResults!
       );
-    }      
+    }
 
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
