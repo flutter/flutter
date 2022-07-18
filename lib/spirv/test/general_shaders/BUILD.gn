@@ -13,6 +13,7 @@ if (enable_unittests) {
     "functions.frag",
     "simple.frag",
     "uniforms.frag",
+    "uniforms_sorted.frag",
   ]
 
   group("general_shaders") {
