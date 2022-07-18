@@ -1980,9 +1980,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler();
 
     _spellCheckConfiguration = widget.spellCheckConfiguration!.copyWith(
-        spellCheckService: spellCheckService,
-        spellCheckSuggestionsHandler: spellCheckSuggestionsHandler
-      );
+      spellCheckService: spellCheckService,
+      spellCheckSuggestionsHandler: spellCheckSuggestionsHandler
+    );
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -3673,7 +3673,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       };
       final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
-
       if (breiflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length) {
