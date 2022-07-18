@@ -6076,7 +6076,7 @@ void main() {
       expect(focusNode.hasPrimaryFocus, isTrue);
     },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb, // The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
+      skip: kIsWeb, // [intended] The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
     );
     testWidgets("Tapping on border doesn't lose focus", (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
