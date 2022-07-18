@@ -433,8 +433,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     ::free(flags_error);
   }
 
-  DartUI::InitForGlobal();
-
   dart::bin::SetExecutableName(settings_.executable_name.c_str());
 
   {

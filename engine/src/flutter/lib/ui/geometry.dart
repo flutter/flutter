@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-// @dart = 2.12
+// @dart = 2.14
 part of dart.ui;
 
 /// Base class for [Size] and [Offset], which are both ways to describe

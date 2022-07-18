@@ -13,6 +13,7 @@
 #include "flutter/flow/layers/physical_shape_layer.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
+#include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/window.h"
@@ -28,65 +29,20 @@ using tonic::ToDart;
 
 namespace flutter {
 
-static void Canvas_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&Canvas::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
 
-#define FOR_EACH_BINDING(V)           \
-  V(Canvas, save)                     \
-  V(Canvas, saveLayerWithoutBounds)   \
-  V(Canvas, saveLayer)                \
-  V(Canvas, restore)                  \
-  V(Canvas, getSaveCount)             \
-  V(Canvas, translate)                \
-  V(Canvas, scale)                    \
-  V(Canvas, rotate)                   \
-  V(Canvas, skew)                     \
-  V(Canvas, transform)                \
-  V(Canvas, getTransform)             \
-  V(Canvas, clipRect)                 \
-  V(Canvas, clipRRect)                \
-  V(Canvas, clipPath)                 \
-  V(Canvas, getLocalClipBounds)       \
-  V(Canvas, getDestinationClipBounds) \
-  V(Canvas, drawColor)                \
-  V(Canvas, drawLine)                 \
-  V(Canvas, drawPaint)                \
-  V(Canvas, drawRect)                 \
-  V(Canvas, drawRRect)                \
-  V(Canvas, drawDRRect)               \
-  V(Canvas, drawOval)                 \
-  V(Canvas, drawCircle)               \
-  V(Canvas, drawArc)                  \
-  V(Canvas, drawPath)                 \
-  V(Canvas, drawImage)                \
-  V(Canvas, drawImageRect)            \
-  V(Canvas, drawImageNine)            \
-  V(Canvas, drawPicture)              \
-  V(Canvas, drawPoints)               \
-  V(Canvas, drawVertices)             \
-  V(Canvas, drawAtlas)                \
-  V(Canvas, drawShadow)
+void Canvas::Create(Dart_Handle wrapper,
+                    PictureRecorder* recorder,
+                    double left,
+                    double top,
+                    double right,
+                    double bottom) {
+  UIDartState::ThrowIfUIOperationsProhibited();
 
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void Canvas::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({{"Canvas_constructor", Canvas_constructor, 6, true},
-                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-fml::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
-                                   double left,
-                                   double top,
-                                   double right,
-                                   double bottom) {
   if (!recorder) {
     Dart_ThrowException(
         ToDart("Canvas constructor called with non-genuine PictureRecorder."));
-    return nullptr;
+    return;
   }
 
   // This call will implicitly initialize the |canvas_| field with an SkCanvas
@@ -101,7 +57,7 @@ fml::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
       recorder->BeginRecording(SkRect::MakeLTRB(left, top, right, bottom)));
   recorder->set_canvas(canvas);
   canvas->display_list_recorder_ = recorder->display_list_recorder();
-  return canvas;
+  canvas->AssociateWithDartWrapper(wrapper);
 }
 
 Canvas::Canvas(SkCanvas* canvas) : canvas_(canvas) {}
@@ -114,8 +70,10 @@ void Canvas::save() {
   }
 }
 
-void Canvas::saveLayerWithoutBounds(const Paint& paint,
-                                    const PaintData& paint_data) {
+void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects,
+                                    Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     bool restore_with_paint =
@@ -130,8 +88,10 @@ void Canvas::saveLayer(double left,
                        double top,
                        double right,
                        double bottom,
-                       const Paint& paint,
-                       const PaintData& paint_data) {
+                       Dart_Handle paint_objects,
+                       Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
   if (display_list_recorder_) {
@@ -195,7 +155,7 @@ void Canvas::transform(const tonic::Float64List& matrix4) {
   }
 }
 
-void Canvas::getTransform(tonic::Float64List& matrix4) {
+void Canvas::getTransform(Dart_Handle matrix4_handle) {
   SkM44 sk_m44 =
       display_list_recorder_
           ? display_list_recorder_->builder()->getTransformFullPerspective()
@@ -203,6 +163,7 @@ void Canvas::getTransform(tonic::Float64List& matrix4) {
   SkScalar m44_values[16];
   // The Float array stored by Dart Matrix4 is in column-major order
   sk_m44.getColMajor(m44_values);
+  auto matrix4 = tonic::Float64List(matrix4_handle);
   for (int i = 0; i < 16; i++) {
     matrix4[i] = m44_values[i];
   }
@@ -237,8 +198,9 @@ void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
   }
 }
 
-void Canvas::getDestinationClipBounds(tonic::Float64List& rect) {
+void Canvas::getDestinationClipBounds(Dart_Handle rect_handle) {
   if (display_list_recorder_) {
+    auto rect = tonic::Float64List(rect_handle);
     SkRect bounds = builder()->getDestinationClipBounds();
     rect[0] = bounds.fLeft;
     rect[1] = bounds.fTop;
@@ -247,8 +209,9 @@ void Canvas::getDestinationClipBounds(tonic::Float64List& rect) {
   }
 }
 
-void Canvas::getLocalClipBounds(tonic::Float64List& rect) {
+void Canvas::getLocalClipBounds(Dart_Handle rect_handle) {
   if (display_list_recorder_) {
+    auto rect = tonic::Float64List(rect_handle);
     SkRect bounds = display_list_recorder_->builder()->getLocalClipBounds();
     rect[0] = bounds.fLeft;
     rect[1] = bounds.fTop;
@@ -267,8 +230,10 @@ void Canvas::drawLine(double x1,
                       double y1,
                       double x2,
                       double y2,
-                      const Paint& paint,
-                      const PaintData& paint_data) {
+                      Dart_Handle paint_objects,
+                      Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawLineFlags);
@@ -276,7 +241,9 @@ void Canvas::drawLine(double x1,
   }
 }
 
-void Canvas::drawPaint(const Paint& paint, const PaintData& paint_data) {
+void Canvas::drawPaint(Dart_Handle paint_objects, Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawPaintFlags);
@@ -294,8 +261,10 @@ void Canvas::drawRect(double left,
                       double top,
                       double right,
                       double bottom,
-                      const Paint& paint,
-                      const PaintData& paint_data) {
+                      Dart_Handle paint_objects,
+                      Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawRectFlags);
@@ -304,8 +273,10 @@ void Canvas::drawRect(double left,
 }
 
 void Canvas::drawRRect(const RRect& rrect,
-                       const Paint& paint,
-                       const PaintData& paint_data) {
+                       Dart_Handle paint_objects,
+                       Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawRRectFlags);
@@ -315,8 +286,10 @@ void Canvas::drawRRect(const RRect& rrect,
 
 void Canvas::drawDRRect(const RRect& outer,
                         const RRect& inner,
-                        const Paint& paint,
-                        const PaintData& paint_data) {
+                        Dart_Handle paint_objects,
+                        Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawDRRectFlags);
@@ -328,8 +301,10 @@ void Canvas::drawOval(double left,
                       double top,
                       double right,
                       double bottom,
-                      const Paint& paint,
-                      const PaintData& paint_data) {
+                      Dart_Handle paint_objects,
+                      Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawOvalFlags);
@@ -340,8 +315,10 @@ void Canvas::drawOval(double left,
 void Canvas::drawCircle(double x,
                         double y,
                         double radius,
-                        const Paint& paint,
-                        const PaintData& paint_data) {
+                        Dart_Handle paint_objects,
+                        Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawCircleFlags);
@@ -356,8 +333,10 @@ void Canvas::drawArc(double left,
                      double startAngle,
                      double sweepAngle,
                      bool useCenter,
-                     const Paint& paint,
-                     const PaintData& paint_data) {
+                     Dart_Handle paint_objects,
+                     Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(),
@@ -371,8 +350,10 @@ void Canvas::drawArc(double left,
 }
 
 void Canvas::drawPath(const CanvasPath* path,
-                      const Paint& paint,
-                      const PaintData& paint_data) {
+                      Dart_Handle paint_objects,
+                      Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (!path) {
     Dart_ThrowException(
@@ -388,9 +369,11 @@ void Canvas::drawPath(const CanvasPath* path,
 Dart_Handle Canvas::drawImage(const CanvasImage* image,
                               double x,
                               double y,
-                              const Paint& paint,
-                              const PaintData& paint_data,
+                              Dart_Handle paint_objects,
+                              Dart_Handle paint_data,
                               int filterQualityIndex) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (!image) {
     return ToDart("Canvas.drawImage called with non-genuine Image.");
@@ -423,9 +406,11 @@ Dart_Handle Canvas::drawImageRect(const CanvasImage* image,
                                   double dst_top,
                                   double dst_right,
                                   double dst_bottom,
-                                  const Paint& paint,
-                                  const PaintData& paint_data,
+                                  Dart_Handle paint_objects,
+                                  Dart_Handle paint_data,
                                   int filterQualityIndex) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (!image) {
     return ToDart("Canvas.drawImageRect called with non-genuine Image.");
@@ -461,9 +446,11 @@ Dart_Handle Canvas::drawImageNine(const CanvasImage* image,
                                   double dst_top,
                                   double dst_right,
                                   double dst_bottom,
-                                  const Paint& paint,
-                                  const PaintData& paint_data,
+                                  Dart_Handle paint_objects,
+                                  Dart_Handle paint_data,
                                   int bitmapSamplingIndex) {
+  Paint paint(paint_objects, paint_data);
+
   FML_DCHECK(paint.isNotNull());
   if (!image) {
     return ToDart("Canvas.drawImageNine called with non-genuine Image.");
@@ -508,10 +495,12 @@ void Canvas::drawPicture(Picture* picture) {
   }
 }
 
-void Canvas::drawPoints(const Paint& paint,
-                        const PaintData& paint_data,
+void Canvas::drawPoints(Dart_Handle paint_objects,
+                        Dart_Handle paint_data,
                         SkCanvas::PointMode point_mode,
                         const tonic::Float32List& points) {
+  Paint paint(paint_objects, paint_data);
+
   static_assert(sizeof(SkPoint) == sizeof(float) * 2,
                 "SkPoint doesn't use floats.");
 
@@ -536,8 +525,10 @@ void Canvas::drawPoints(const Paint& paint,
 
 void Canvas::drawVertices(const Vertices* vertices,
                           DlBlendMode blend_mode,
-                          const Paint& paint,
-                          const PaintData& paint_data) {
+                          Dart_Handle paint_objects,
+                          Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
   if (!vertices) {
     Dart_ThrowException(
         ToDart("Canvas.drawVertices called with non-genuine Vertices."));
@@ -550,20 +541,18 @@ void Canvas::drawVertices(const Vertices* vertices,
   }
 }
 
-Dart_Handle Canvas::drawAtlas(const Paint& paint,
-                              const PaintData& paint_data,
+Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
+                              Dart_Handle paint_data,
                               int filterQualityIndex,
                               CanvasImage* atlas,
-                              tonic::Float32List& transforms,
-                              tonic::Float32List& rects,
-                              tonic::Int32List& colors,
+                              Dart_Handle transforms_handle,
+                              Dart_Handle rects_handle,
+                              Dart_Handle colors_handle,
                               DlBlendMode blend_mode,
-                              tonic::Float32List& cull_rect) {
+                              Dart_Handle cull_rect_handle) {
+  Paint paint(paint_objects, paint_data);
+
   if (!atlas) {
-    transforms.Release();
-    rects.Release();
-    colors.Release();
-    cull_rect.Release();
     return ToDart(
         "Canvas.drawAtlas or Canvas.drawRawAtlas called with "
         "non-genuine Image.");
@@ -572,10 +561,6 @@ Dart_Handle Canvas::drawAtlas(const Paint& paint,
   auto dl_image = atlas->image();
   auto error = dl_image->get_error();
   if (error) {
-    transforms.Release();
-    rects.Release();
-    colors.Release();
-    cull_rect.Release();
     return ToDart(error.value());
   }
 
@@ -588,6 +573,11 @@ Dart_Handle Canvas::drawAtlas(const Paint& paint,
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
+    tonic::Float32List transforms(transforms_handle);
+    tonic::Float32List rects(rects_handle);
+    tonic::Int32List colors(colors_handle);
+    tonic::Float32List cull_rect(cull_rect_handle);
+
     bool with_attributes = paint.sync_to(builder(), kDrawAtlasWithPaintFlags);
     builder()->drawAtlas(
         dl_image, reinterpret_cast<const SkRSXform*>(transforms.data()),
@@ -597,11 +587,6 @@ Dart_Handle Canvas::drawAtlas(const Paint& paint,
         blend_mode, sampling, reinterpret_cast<const SkRect*>(cull_rect.data()),
         with_attributes);
   }
-
-  transforms.Release();
-  rects.Release();
-  colors.Release();
-  cull_rect.Release();
   return Dart_Null();
 }
 

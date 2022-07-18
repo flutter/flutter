@@ -15,8 +15,6 @@
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
-using tonic::ToDart;
-
 namespace flutter {
 
 // Since _FragmentShader is a private class, we can't use
@@ -28,10 +26,6 @@ static const tonic::DartWrapperInfo kDartWrapperInfo_ui_FragmentShader = {
 };
 const tonic::DartWrapperInfo& FragmentShader::dart_wrapper_info_ =
     kDartWrapperInfo_ui_FragmentShader;
-
-void FragmentShader::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({});
-}
 
 std::shared_ptr<DlColorSource> FragmentShader::shader(
     DlImageSampling sampling) {
