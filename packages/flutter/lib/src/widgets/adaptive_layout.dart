@@ -200,7 +200,9 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
     Rect? hinge;
     for (final DisplayFeature e in MediaQuery.of(context).displayFeatures) {
       if (e.type == DisplayFeatureType.hinge || e.type == DisplayFeatureType.fold){
-        hinge = e.bounds;
+        if(e.bounds.left!=0){
+          hinge = e.bounds;
+        }
       }
     }
 
