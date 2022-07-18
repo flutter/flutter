@@ -11910,7 +11910,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(focusNode.hasPrimaryFocus, isTrue);
-    }, variant: TargetPlatformVariant.all());
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: isBrowser, // [intended] On the web, the toolbar isn't rendered by Flutter.
+    );
 
     testWidgets("Tapping on input decorator doesn't lose focus", (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
