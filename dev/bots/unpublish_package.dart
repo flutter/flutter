@@ -17,7 +17,7 @@ import 'dart:io' hide Platform;
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
 
 const String gsBase = 'gs://flutter_infra_release';

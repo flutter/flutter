@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show ProcessSignal, Process;
+import 'dart:io' as io show Process, ProcessSignal;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';

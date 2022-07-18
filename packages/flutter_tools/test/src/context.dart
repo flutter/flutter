@@ -44,7 +44,7 @@ import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
-export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
+export 'fake_process_manager.dart' show FakeCommand, FakeProcessManager, ProcessManager;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>()! as BufferLogger;

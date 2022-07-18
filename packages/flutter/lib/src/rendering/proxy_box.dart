@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
+import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -16,11 +16,11 @@ import 'layout_helper.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
-  PointerEvent,
+  PointerCancelEvent,
   PointerDownEvent,
+  PointerEvent,
   PointerMoveEvent,
-  PointerUpEvent,
-  PointerCancelEvent;
+  PointerUpEvent;
 
 /// A base class for render boxes that resemble their children.
 ///

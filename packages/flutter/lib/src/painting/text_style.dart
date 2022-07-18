@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, FontVariation, TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' as ui show
+  FontFeature,
+  FontVariation,
+  ParagraphStyle,
+  Shadow,
+  StrutStyle,
+  TextHeightBehavior,
+  TextLeadingDistribution,
+  TextStyle,
+  lerpDouble;
 
 import 'package:flutter/foundation.dart';
 

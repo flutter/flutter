@@ -39,7 +39,7 @@ import 'text_selection.dart';
 import 'ticker_provider.dart';
 import 'widget_span.dart';
 
-export 'package:flutter/services.dart' show SelectionChangedCause, TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).

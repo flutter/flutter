@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag, DisplayFeature, DisplayFeatureType, DisplayFeatureState;
+import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType, SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

@@ -7,8 +7,8 @@ import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
   Offset,
-  Size,
   Rect,
+  Size,
   TextAlign,
   TextDirection;
 
