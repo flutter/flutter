@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:js/js.dart' as js;
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -159,7 +158,7 @@ class CustomUrlStrategy extends UrlStrategy {
 
   @override
   ui.VoidCallback addPopStateListener(DomEventListener fn) =>
-      delegate.addPopStateListener(js.allowInterop(fn));
+      delegate.addPopStateListener(allowInterop(fn));
 
   @override
   String getPath() => delegate.getPath();
