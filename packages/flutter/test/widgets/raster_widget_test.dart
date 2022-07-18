@@ -30,6 +30,10 @@ void main() {
         ),
       ),
     ));
+    // Rasterization is not actually complete until a frame has been pumped through
+    // the engine.
+    await tester.pumpAndSettle();
+
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
