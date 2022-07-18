@@ -1589,7 +1589,7 @@ class ListedAction<T extends ListedIntents> extends Action<T> {
   }
 
   @override
-  void invoke(T intent, [BuildContext? context]) {
+  void invoke(T intent) {
     for (final MapEntry<Intent,Action> intentActionPair in _intentActionPairing!.entries) {
       final Action currentAction = intentActionPair.value;
       final Intent currentIntent = intentActionPair.key;

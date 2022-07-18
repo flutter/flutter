@@ -1033,6 +1033,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 SelectionToolbarControlIntent.show(position: details.globalPosition),
               ], 
               enabledContext: context,
+              details: details,
             ),
           );
         }
@@ -1052,17 +1053,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
               ],
               enabledContext: context,
+              details: details,
             ),
           );
         }
         ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
           Actions.invoke(
             context,
-            LongPressStartIntent(
+            LongPressMoveUpdateIntent(
               intents: <Intent>[
                 SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
               ],
               enabledContext: context,
+              details: details,
             ),
           );
         }
@@ -1088,17 +1091,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 const FeedbackRequestIntent(),
               ],
               enabledContext: context,
+              details: details,
             ),
           );
         }
         ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
           Actions.invoke(
             context,
-            LongPressStartIntent(
+            LongPressMoveUpdateIntent(
               intents: <Intent>[
                 SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
               ],
               enabledContext: context,
+              details: details,
             ),
           );
         }
@@ -1110,6 +1115,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 SelectionToolbarControlIntent.show(position: details.globalPosition),
               ], 
               enabledContext: context,
+              details: details,
             ),
           );
         };
@@ -1361,8 +1367,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       LongPressStartIntent : _makeOverridable(ListedAction<LongPressStartIntent>()),
       LongPressMoveUpdateIntent : _makeOverridable(ListedAction<LongPressMoveUpdateIntent>()),
       LongPressEndIntent : _makeOverridable(ListedAction<LongPressEndIntent>()),
-      ForcePressStartIntent : _makeOverridable(ListedAction<ForcePressStartIntent>()),
-      ForcePressEndIntent : _makeOverridable(ListedAction<ForcePressEndIntent>()),
+      ForcePressStartIntent : _makeOverridable(MaterialForcePressStartAction()),
+      ForcePressEndIntent : _makeOverridable(DoNothingAction()),
 
       ExpandSelectionToPositionIntent : SelectionGestureCallbackAction<ExpandSelectionToPositionIntent>(
           onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.expandSelection(intent),
@@ -1501,4 +1507,14 @@ class SelectionGestureCallbackAction<T extends Intent> extends Action<T> {
 
   @override
   bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
+}
+
+class MaterialForcePressStartAction extends ListedAction<ForcePressStartIntent> {
+  @override
+  void onInvoke(ForcePressStartIntent intent) {
+    assert(callingMap != null);
+    final Intent showToolbar = SelectionToolbarControlIntent.show(position: intent.details.globalPosition);
+    callingMap![showToolbar] = Actions.find(intent.enabledContext, intent: showToolbar);
+    super.invoke(intent);
+  }
 }

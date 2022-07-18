@@ -55,6 +55,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectionToolbarControlIntent.show(position: details.globalPosition), //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
                     ],
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               }
@@ -79,6 +80,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                           if (tapCount < 2) const UserOnTapCallbackIntent(),
                         ],
                         enabledContext: context,
+                        details: details,
                       ),
                     );
                   } else {
@@ -91,6 +93,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                           if (tapCount < 2) const UserOnTapCallbackIntent(),
                         ], 
                         enabledContext: context,
+                        details: details,
                       ),
                     );
                   }
@@ -107,6 +110,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
                       ],
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                 }
@@ -129,6 +133,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                           const UserOnTapCallbackIntent(),
                         ], 
                         enabledContext: context,
+                        details: details,
                       ),
                     );
                   } else {
@@ -157,6 +162,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                           const UserOnTapCallbackIntent(),
                         ],
                         enabledContext: context,
+                        details: details,
                       ),
                     );
                   }
@@ -190,6 +196,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         ViewportOffsetOnDragStartControlIntent.save,
                       ],
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                 } else {
@@ -201,6 +208,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         ViewportOffsetOnDragStartControlIntent.save,
                       ],
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                 }
@@ -216,6 +224,8 @@ class DefaultSelectionGestures extends StatelessWidget {
                         SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition),
                       ],
                       enabledContext: context,
+                      updateDetails: updateDetails,
+                      startDetails: startDetails,
                     ),
                   );
                   // Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectPositionIntent, could also use SelectPositionIntent and in selectPosition check if _dragStartViewportOffset is null
@@ -229,6 +239,8 @@ class DefaultSelectionGestures extends StatelessWidget {
                       ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition),
                     ],
                     enabledContext: context,
+                    updateDetails: updateDetails,
+                    startDetails: startDetails,
                   ),
                 );
                 //Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition)); // remove? or ExtentSelectionToDragPositionIntent?
@@ -248,6 +260,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         ViewportOffsetOnDragStartControlIntent.clear,
                       ],
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                   return;
@@ -259,6 +272,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       ViewportOffsetOnDragStartControlIntent.clear,
                     ],
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               };
@@ -278,6 +292,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
                     ], 
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               }
@@ -290,6 +305,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
                     ], 
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               }
@@ -302,6 +318,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectionToolbarControlIntent.show(position: details.globalPosition),
                     ], 
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               };
@@ -321,6 +338,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition),
                     ], 
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               }
@@ -333,6 +351,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectionToolbarControlIntent.show(position: details.globalPosition),
                     ],
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               };
@@ -354,6 +373,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         SelectionToolbarControlIntent.toggle(position: details.globalPosition),
                       ],
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                 }
@@ -385,6 +405,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                               if (tapCount < 2) const UserOnTapCallbackIntent(),
                             ], 
                             enabledContext: context,
+                            details: details,
                           ),
                         );
                       } else {
@@ -397,6 +418,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                               if (tapCount < 2) const UserOnTapCallbackIntent(),
                             ], 
                             enabledContext: context,
+                            details: details,
                           ),
                         );
                       }
@@ -414,6 +436,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                           if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
                         ],
                         enabledContext: context,
+                        details: details,
                       ),
                     );
                   }
@@ -437,6 +460,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                               const UserOnTapCallbackIntent(),
                             ],
                             enabledContext: context,
+                            details: details,
                           ),
                         );
                       } else {
@@ -449,6 +473,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                               const UserOnTapCallbackIntent(),
                             ],
                             enabledContext: context,
+                            details: details,
                           ),
                         );
                       }
@@ -479,6 +504,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         const FeedbackRequestIntent(),
                       ], 
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                 }
@@ -491,6 +517,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
                       ], 
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                 }
@@ -503,6 +530,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                         SelectionToolbarControlIntent.show(position: details.globalPosition),
                       ], 
                       enabledContext: context,
+                      details: details,
                     ),
                   );
                 };
@@ -530,6 +558,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       ViewportOffsetOnDragStartControlIntent.save,
                     ],
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               } else {
@@ -541,6 +570,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       ViewportOffsetOnDragStartControlIntent.save,
                     ],
                     enabledContext: context,
+                    details: details,
                   ),
                 );
               }
@@ -556,6 +586,8 @@ class DefaultSelectionGestures extends StatelessWidget {
                       SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition),
                     ],
                     enabledContext: context,
+                    updateDetails: updateDetails,
+                    startDetails: startDetails,
                   ),
                 );
                 // Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectPositionIntent, could also use SelectPositionIntent and in selectPosition check if _dragStartViewportOffset is null
@@ -569,6 +601,8 @@ class DefaultSelectionGestures extends StatelessWidget {
                     ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition),
                   ],
                   enabledContext: context,
+                  updateDetails: updateDetails,
+                  startDetails: startDetails,
                 ),
               );
             }
@@ -585,6 +619,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       ViewportOffsetOnDragStartControlIntent.clear,
                     ],
                     enabledContext: context,
+                    details: details,
                   ),
                 );
                 return;
@@ -596,6 +631,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                     ViewportOffsetOnDragStartControlIntent.clear,
                   ],
                   enabledContext: context,
+                  details: details,
                 ),
               );
             };
