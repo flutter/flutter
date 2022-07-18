@@ -11,7 +11,7 @@ import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
 
-export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.

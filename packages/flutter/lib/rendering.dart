@@ -22,11 +22,11 @@
 library rendering;
 
 export 'package:flutter/foundation.dart' show
-  VoidCallback,
+  DiagnosticLevel,
   ValueChanged,
   ValueGetter,
   ValueSetter,
-  DiagnosticLevel;
+  VoidCallback;
 export 'package:flutter/semantics.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 

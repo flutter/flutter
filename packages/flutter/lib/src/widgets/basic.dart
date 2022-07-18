@@ -26,8 +26,8 @@ export 'package:flutter/foundation.dart' show
   ValueNotifier;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
-  AlignmentTween,
   AlignmentGeometryTween,
+  AlignmentTween,
   Axis,
   BoxConstraints,
   BoxConstraintsTransform,
@@ -45,7 +45,6 @@ export 'package:flutter/rendering.dart' show
   MainAxisAlignment,
   MainAxisSize,
   MouseCursor,
-  SystemMouseCursors,
   MultiChildLayoutDelegate,
   PaintingContext,
   PointerCancelEvent,
@@ -63,6 +62,7 @@ export 'package:flutter/rendering.dart' show
   ShapeBorderClipper,
   SingleChildLayoutDelegate,
   StackFit,
+  SystemMouseCursors,
   TextOverflow,
   ValueChanged,
   ValueGetter,
