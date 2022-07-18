@@ -20,6 +20,7 @@ class PlaygroundImpl;
 enum class PlaygroundBackend {
   kMetal,
   kOpenGLES,
+  kVulkan,
 };
 
 std::string PlaygroundBackendToString(PlaygroundBackend backend);
@@ -86,7 +87,8 @@ class Playground : public ::testing::TestWithParam<PlaygroundBackend> {
   INSTANTIATE_TEST_SUITE_P(                                             \
       Play, playground,                                                 \
       ::testing::Values(PlaygroundBackend::kMetal,                      \
-                        PlaygroundBackend::kOpenGLES),                  \
+                        PlaygroundBackend::kOpenGLES,                   \
+                        PlaygroundBackend::kVulkan),                    \
       [](const ::testing::TestParamInfo<Playground::ParamType>& info) { \
         return PlaygroundBackendToString(info.param);                   \
       });

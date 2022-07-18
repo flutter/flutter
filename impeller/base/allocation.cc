@@ -108,4 +108,11 @@ std::shared_ptr<fml::Mapping> CreateMappingFromAllocation(
   );
 }
 
+std::shared_ptr<fml::Mapping> CreateMappingWithString(std::string string) {
+  auto buffer = std::make_shared<std::string>(std::move(string));
+  return std::make_unique<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(buffer->c_str()), buffer->length(),
+      [buffer](auto, auto) {});
+}
+
 }  // namespace impeller

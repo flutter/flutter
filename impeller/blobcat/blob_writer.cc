@@ -31,7 +31,7 @@ bool BlobWriter::AddBlobAtPath(const std::string& std_path) {
     return false;
   }
 
-  if (path.extension() != ".gles") {
+  if (path.extension() != ".gles" && path.extension() != ".vkspv") {
     FML_LOG(ERROR) << "File path doesn't have a known shader extension "
                    << path;
     return false;
@@ -43,7 +43,8 @@ bool BlobWriter::AddBlobAtPath(const std::string& std_path) {
   auto shader_type = InferShaderTypefromFileExtension(path.extension());
 
   if (!shader_type.has_value()) {
-    FML_LOG(ERROR) << "Could not infer shader type from file extension.";
+    FML_LOG(ERROR) << "Could not infer shader type from file extension: "
+                   << path.extension().string();
     return false;
   }
 

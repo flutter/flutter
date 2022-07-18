@@ -68,13 +68,19 @@ static id<MTLDepthStencilState> CreateDepthStencilDescriptor(
   return [device newDepthStencilStateWithDescriptor:descriptor];
 }
 
+// |PipelineLibrary|
+bool PipelineLibraryMTL::IsValid() const {
+  return device_ != nullptr;
+}
+
+// |PipelineLibrary|
 PipelineFuture PipelineLibraryMTL::GetRenderPipeline(
     PipelineDescriptor descriptor) {
   if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
     return found->second;
   }
 
-  if (device_ == nil) {
+  if (!IsValid()) {
     return RealizedFuture<std::shared_ptr<Pipeline>>(nullptr);
   }
 

@@ -36,6 +36,8 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
       return "Metal";
     case PlaygroundBackend::kOpenGLES:
       return "OpenGLES";
+    case PlaygroundBackend::kVulkan:
+      return "Vulkan";
   }
   FML_UNREACHABLE();
 }
@@ -96,6 +98,12 @@ static constexpr bool PlatformSupportsBackend(PlaygroundBackend backend) {
 #else   // IMPELLER_ENABLE_OPENGLES
       return false;
 #endif  // IMPELLER_ENABLE_OPENGLES
+    case PlaygroundBackend::kVulkan:
+#if IMPELLER_ENABLE_VULKAN
+      return true;
+#else   // IMPELLER_ENABLE_VULKAN
+      return false;
+#endif  // IMPELLER_ENABLE_VULKAN
   }
   FML_UNREACHABLE();
 }

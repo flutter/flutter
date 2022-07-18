@@ -63,6 +63,8 @@ std::string TargetPlatformToString(TargetPlatform platform) {
       return "OpenGLES";
     case TargetPlatform::kOpenGLDesktop:
       return "OpenGLDesktop";
+    case TargetPlatform::kVulkan:
+      return "Vulkan";
     case TargetPlatform::kRuntimeStageMetal:
       return "RuntimeStageMetal";
     case TargetPlatform::kRuntimeStageGLES:
@@ -111,6 +113,7 @@ bool TargetPlatformNeedsSL(TargetPlatform platform) {
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
     case TargetPlatform::kSkSL:
+    case TargetPlatform::kVulkan:
       return true;
     case TargetPlatform::kUnknown:
     case TargetPlatform::kFlutterSPIRV:
@@ -127,6 +130,7 @@ bool TargetPlatformNeedsReflection(TargetPlatform platform) {
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kVulkan:
       return true;
     case TargetPlatform::kUnknown:
     case TargetPlatform::kFlutterSPIRV:
@@ -210,6 +214,7 @@ spirv_cross::CompilerMSL::Options::Platform TargetPlatformToMSLPlatform(
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kVulkan:
     case TargetPlatform::kUnknown:
       return spirv_cross::CompilerMSL::Options::Platform::macOS;
   }
@@ -248,6 +253,8 @@ std::string TargetPlatformSLExtension(TargetPlatform platform) {
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
       return "glsl";
+    case TargetPlatform::kVulkan:
+      return "vk.spirv";
   }
   FML_UNREACHABLE();
 }
@@ -273,6 +280,7 @@ bool TargetPlatformIsOpenGL(TargetPlatform platform) {
     case TargetPlatform::kUnknown:
     case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kSkSL:
+    case TargetPlatform::kVulkan:
       return false;
   }
   FML_UNREACHABLE();
@@ -290,6 +298,7 @@ bool TargetPlatformIsMetal(TargetPlatform platform) {
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kVulkan:
       return false;
   }
   FML_UNREACHABLE();
