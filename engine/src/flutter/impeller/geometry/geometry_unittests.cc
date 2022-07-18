@@ -904,6 +904,32 @@ TEST(GeometryTest, RectIntersection) {
   }
 }
 
+TEST(GeometryTest, RectIntersectsWithRect) {
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(0, 0, 0, 0);
+    ASSERT_FALSE(a.IntersectsWithRect(b));
+  }
+
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(10, 10, 0, 0);
+    ASSERT_FALSE(a.IntersectsWithRect(b));
+  }
+
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(10, 10, 100, 100);
+    ASSERT_TRUE(a.IntersectsWithRect(b));
+  }
+
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(100, 100, 100, 100);
+    ASSERT_FALSE(a.IntersectsWithRect(b));
+  }
+}
+
 TEST(GeometryTest, RectContainsPoint) {
   {
     // Origin is inclusive
