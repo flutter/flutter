@@ -44,6 +44,11 @@ class DisplayListLayer : public Layer {
     return display_list_raster_cache_item_.get();
   }
 
+  RasterCacheKeyID caching_key_id() const override {
+    return RasterCacheKeyID(display_list()->unique_id(),
+                            RasterCacheKeyType::kDisplayList);
+  }
+
  private:
   std::unique_ptr<DisplayListRasterCacheItem> display_list_raster_cache_item_;
 

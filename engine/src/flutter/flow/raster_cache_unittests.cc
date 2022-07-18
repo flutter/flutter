@@ -5,9 +5,12 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_test_utils.h"
+#include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/testing/mock_raster_cache.h"
+#include "flutter/flow/testing/skia_gpu_object_layer_test.h"
 #include "gtest/gtest.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPoint.h"
@@ -638,12 +641,15 @@ TEST(RasterCache, RasterCacheKeySameType) {
   ASSERT_EQ(map[display_list_third_key], 450);
 
   type = RasterCacheKeyType::kLayerChildren;
-  RasterCacheKey layer_children_first_key(RasterCacheKeyID({1, 2, 3}, type),
-                                          matrix);
-  RasterCacheKey layer_children_second_key(RasterCacheKeyID({2, 3, 1}, type),
-                                           matrix);
-  RasterCacheKey layer_children_third_key(RasterCacheKeyID({3, 2, 1}, type),
-                                          matrix);
+  RasterCacheKeyID foo = RasterCacheKeyID(10, RasterCacheKeyType::kLayer);
+  RasterCacheKeyID bar = RasterCacheKeyID(20, RasterCacheKeyType::kLayer);
+  RasterCacheKeyID baz = RasterCacheKeyID(30, RasterCacheKeyType::kLayer);
+  RasterCacheKey layer_children_first_key(
+      RasterCacheKeyID({foo, bar, baz}, type), matrix);
+  RasterCacheKey layer_children_second_key(
+      RasterCacheKeyID({foo, baz, bar}, type), matrix);
+  RasterCacheKey layer_children_third_key(
+      RasterCacheKeyID({baz, bar, foo}, type), matrix);
   map[layer_children_first_key] = 100;
   map[layer_children_second_key] = 200;
   map[layer_children_third_key] = 300;
@@ -654,45 +660,80 @@ TEST(RasterCache, RasterCacheKeySameType) {
 
 TEST(RasterCache, RasterCacheKeyID_Equal) {
   RasterCacheKeyID first = RasterCacheKeyID(1, RasterCacheKeyType::kLayer);
-  RasterCacheKeyID second =
+  RasterCacheKeyID second = RasterCacheKeyID(2, RasterCacheKeyType::kLayer);
+  RasterCacheKeyID third =
       RasterCacheKeyID(1, RasterCacheKeyType::kLayerChildren);
-  RasterCacheKeyID third = RasterCacheKeyID(2, RasterCacheKeyType::kLayer);
+
   ASSERT_NE(first, second);
   ASSERT_NE(first, third);
   ASSERT_NE(second, third);
 
   RasterCacheKeyID fourth =
-      RasterCacheKeyID({1, 2}, RasterCacheKeyType::kLayer);
+      RasterCacheKeyID({first, second}, RasterCacheKeyType::kLayer);
   RasterCacheKeyID fifth =
-      RasterCacheKeyID({1, 2}, RasterCacheKeyType::kLayerChildren);
+      RasterCacheKeyID({first, second}, RasterCacheKeyType::kLayerChildren);
   RasterCacheKeyID sixth =
-      RasterCacheKeyID({2, 1}, RasterCacheKeyType::kLayerChildren);
+      RasterCacheKeyID({second, first}, RasterCacheKeyType::kLayerChildren);
   ASSERT_NE(fourth, fifth);
   ASSERT_NE(fifth, sixth);
-}
-
-size_t HashIds(std::vector<uint64_t> ids, RasterCacheKeyType type) {
-  std::size_t seed = fml::HashCombine();
-  for (auto id : ids) {
-    fml::HashCombineSeed(seed, id);
-  }
-  return fml::HashCombine(seed, type);
 }
 
 TEST(RasterCache, RasterCacheKeyID_HashCode) {
   uint64_t foo = 1;
   uint64_t bar = 2;
   RasterCacheKeyID first = RasterCacheKeyID(foo, RasterCacheKeyType::kLayer);
-  RasterCacheKeyID second =
-      RasterCacheKeyID({foo, bar}, RasterCacheKeyType::kLayerChildren);
-  RasterCacheKeyID third =
-      RasterCacheKeyID({bar, foo}, RasterCacheKeyType::kLayerChildren);
+  RasterCacheKeyID second = RasterCacheKeyID(bar, RasterCacheKeyType::kLayer);
+  std::size_t first_hash = first.GetHash();
+  std::size_t second_hash = second.GetHash();
 
-  ASSERT_EQ(first.GetHash(), HashIds({foo}, RasterCacheKeyType::kLayer));
-  ASSERT_EQ(second.GetHash(),
-            HashIds({foo, bar}, RasterCacheKeyType::kLayerChildren));
-  ASSERT_EQ(third.GetHash(),
-            HashIds({bar, foo}, RasterCacheKeyType::kLayerChildren));
+  ASSERT_EQ(first_hash, fml::HashCombine(foo, RasterCacheKeyType::kLayer));
+  ASSERT_EQ(second_hash, fml::HashCombine(bar, RasterCacheKeyType::kLayer));
+
+  RasterCacheKeyID third =
+      RasterCacheKeyID({first, second}, RasterCacheKeyType::kLayerChildren);
+  RasterCacheKeyID fourth =
+      RasterCacheKeyID({second, first}, RasterCacheKeyType::kLayerChildren);
+  std::size_t third_hash = third.GetHash();
+  std::size_t fourth_hash = fourth.GetHash();
+
+  ASSERT_EQ(third_hash, fml::HashCombine(RasterCacheKeyID::kDefaultUniqueID,
+                                         RasterCacheKeyType::kLayerChildren,
+                                         first.GetHash(), second.GetHash()));
+  ASSERT_EQ(fourth_hash, fml::HashCombine(RasterCacheKeyID::kDefaultUniqueID,
+                                          RasterCacheKeyType::kLayerChildren,
+                                          second.GetHash(), first.GetHash()));
+
+  // Verify that the cached hash code is correct.
+  ASSERT_EQ(first_hash, first.GetHash());
+  ASSERT_EQ(second_hash, second.GetHash());
+  ASSERT_EQ(third_hash, third.GetHash());
+  ASSERT_EQ(fourth_hash, fourth.GetHash());
+}
+
+using RasterCacheTest = SkiaGPUObjectLayerTest;
+
+TEST_F(RasterCacheTest, RasterCacheKeyID_LayerChildrenIds) {
+  auto layer = std::make_shared<ContainerLayer>();
+
+  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  layer->Add(mock_layer);
+
+  auto display_list = GetSampleDisplayList();
+  auto display_list_layer = std::make_shared<DisplayListLayer>(
+      SkPoint::Make(0.0f, 0.0f),
+      SkiaGPUObject<DisplayList>(display_list, unref_queue()), false, false);
+  layer->Add(display_list_layer);
+
+  auto ids = RasterCacheKeyID::LayerChildrenIds(layer.get()).value();
+  std::vector<RasterCacheKeyID> expected_ids;
+  expected_ids.emplace_back(
+      RasterCacheKeyID(mock_layer->unique_id(), RasterCacheKeyType::kLayer));
+  expected_ids.emplace_back(RasterCacheKeyID(display_list->unique_id(),
+                                             RasterCacheKeyType::kDisplayList));
+  ASSERT_EQ(expected_ids[0], mock_layer->caching_key_id());
+  ASSERT_EQ(expected_ids[1], display_list_layer->caching_key_id());
+  ASSERT_EQ(ids, expected_ids);
 }
 
 }  // namespace testing
