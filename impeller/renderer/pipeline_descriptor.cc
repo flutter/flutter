@@ -38,6 +38,8 @@ std::size_t PipelineDescriptor::GetHash() const {
   fml::HashCombineSeed(seed, depth_attachment_descriptor_);
   fml::HashCombineSeed(seed, front_stencil_attachment_descriptor_);
   fml::HashCombineSeed(seed, back_stencil_attachment_descriptor_);
+  fml::HashCombineSeed(seed, winding_order_);
+  fml::HashCombineSeed(seed, cull_mode_);
   return seed;
 }
 
@@ -53,7 +55,9 @@ bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
          front_stencil_attachment_descriptor_ ==
              other.front_stencil_attachment_descriptor_ &&
          back_stencil_attachment_descriptor_ ==
-             other.back_stencil_attachment_descriptor_;
+             other.back_stencil_attachment_descriptor_ &&
+         winding_order_ == other.winding_order_ &&
+         cull_mode_ == other.cull_mode_;
 }
 
 PipelineDescriptor& PipelineDescriptor::SetLabel(std::string label) {
@@ -207,6 +211,22 @@ PipelineDescriptor::GetBackStencilAttachmentDescriptor() const {
 bool PipelineDescriptor::HasStencilAttachmentDescriptors() const {
   return front_stencil_attachment_descriptor_.has_value() ||
          back_stencil_attachment_descriptor_.has_value();
+}
+
+void PipelineDescriptor::SetCullMode(CullMode mode) {
+  cull_mode_ = mode;
+}
+
+CullMode PipelineDescriptor::GetCullMode() const {
+  return cull_mode_;
+}
+
+void PipelineDescriptor::SetWindingOrder(WindingOrder order) {
+  winding_order_ = order;
+}
+
+WindingOrder PipelineDescriptor::GetWindingOrder() const {
+  return winding_order_;
 }
 
 }  // namespace impeller
