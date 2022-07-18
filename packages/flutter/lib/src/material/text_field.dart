@@ -1374,37 +1374,35 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
       onExit: (PointerExitEvent event) => _handleHover(false),
-      child: IgnorePointer(
-        ignoring: !_isEnabled,
-        child: AnimatedBuilder(
-          animation: controller, // changes the _currentLength
-          builder: (BuildContext context, Widget? child) {
-            return Semantics(
-              maxValueLength: semanticsMaxValueLength,
-              currentValueLength: _currentLength,
-              onTap: widget.readOnly ? null : () {
-                if (!_effectiveController.selection.isValid) {
-                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                }
-                _requestKeyboard();
-              },
-              onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+      child: TapRegion(
+        groupId: tapRegionGroupId,
+        enabled: focusNode.hasPrimaryFocus,
+        child: IgnorePointer(
+          ignoring: !_isEnabled,
+          child: AnimatedBuilder(
+            animation: controller, // changes the _currentLength
+            builder: (BuildContext context, Widget? child) {
+              return Semantics(
+                maxValueLength: semanticsMaxValueLength,
+                currentValueLength: _currentLength,
+                onTap: widget.readOnly ? null : () {
+                  if (!_effectiveController.selection.isValid) {
+                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  }
+                  _requestKeyboard();
+                },
+                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                child: child,
+              );
+            },
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
               child: child,
-            );
-          },
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: child,
+            ),
           ),
         ),
       ),
     );
-    if (focusNode.hasPrimaryFocus) {
-      child = TapRegion(
-        groupId: tapRegionGroupId,
-        child: child,
-      );
-    }
     return child;
   }
 }
