@@ -160,8 +160,7 @@ bool EntityPass::Render(ContentContext& renderer,
     render_pass->SetLabel("EntityPass Root Render Pass");
 
     {
-      auto size_rect =
-          Rect::MakeSize(Size(offscreen_target.GetRenderTargetSize()));
+      auto size_rect = Rect::MakeSize(offscreen_target.GetRenderTargetSize());
       auto contents = std::make_shared<TextureContents>();
       contents->SetPath(PathBuilder{}.AddRect(size_rect).TakePath());
       contents->SetTexture(offscreen_target.GetRenderTargetTexture());
@@ -252,7 +251,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     }
 
     auto subpass_coverage =
-        GetSubpassCoverage(*subpass, Rect::MakeSize(Size(root_pass_size)));
+        GetSubpassCoverage(*subpass, Rect::MakeSize(root_pass_size));
 
     if (backdrop_contents) {
       auto backdrop_coverage = backdrop_contents->GetCoverage(Entity{});
@@ -269,7 +268,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
     if (subpass_coverage.has_value()) {
       subpass_coverage =
-          subpass_coverage->Intersection(Rect::MakeSize(Size(root_pass_size)));
+          subpass_coverage->Intersection(Rect::MakeSize(root_pass_size));
     }
 
     if (!subpass_coverage.has_value()) {

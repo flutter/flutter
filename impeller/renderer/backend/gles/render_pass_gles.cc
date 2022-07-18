@@ -473,7 +473,7 @@ bool RenderPassGLES::EncodeCommands(
 
   auto pass_data = std::make_shared<RenderPassData>();
   pass_data->label = label_;
-  pass_data->viewport.rect = Rect::MakeSize(Size(GetRenderTargetSize()));
+  pass_data->viewport.rect = Rect::MakeSize(GetRenderTargetSize());
 
   //----------------------------------------------------------------------------
   /// Setup color data.

@@ -431,7 +431,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     [encoder setStencilReferenceValue:command.stencil_reference];
 
     auto v = command.viewport.value_or<Viewport>(
-        {.rect = Rect::MakeSize(Size(GetRenderTargetSize()))});
+        {.rect = Rect::MakeSize(GetRenderTargetSize())});
     MTLViewport viewport = {
         .originX = v.rect.origin.x,
         .originY = v.rect.origin.y,

@@ -139,7 +139,7 @@ TEST_P(EntityTest, FilterCoverageRespectsCropRect) {
   // Without the crop rect (default behavior).
   {
     auto actual = filter->GetCoverage({});
-    auto expected = Rect::MakeSize(Size(image->GetSize()));
+    auto expected = Rect::MakeSize(image->GetSize());
 
     ASSERT_TRUE(actual.has_value());
     ASSERT_RECT_NEAR(actual.value(), expected);
@@ -887,7 +887,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
     if (selected_input_type == 0) {
       auto texture = std::make_shared<TextureContents>();
-      auto input_rect = Rect::MakeSize(Size(boston->GetSize()));
+      auto input_rect = Rect::MakeSize(boston->GetSize());
       texture->SetSourceRect(input_rect);
       texture->SetPath(PathBuilder{}.AddRect(input_rect).TakePath());
       texture->SetTexture(boston);
@@ -897,7 +897,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       input_size = input_rect.size;
     } else {
       auto fill = std::make_shared<SolidColorContents>();
-      auto input_rect = Rect::MakeSize(Size(boston->GetSize()));
+      auto input_rect = Rect::MakeSize(boston->GetSize());
       fill->SetColor(input_color);
       fill->SetPath(PathBuilder{}.AddRect(input_rect).TakePath());
 
@@ -934,7 +934,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // unfiltered input.
     Entity cover_entity;
     cover_entity.SetContents(SolidColorContents::Make(
-        PathBuilder{}.AddRect(Rect::MakeSize(Size(input_size))).TakePath(),
+        PathBuilder{}.AddRect(Rect::MakeSize(input_size)).TakePath(),
         cover_color));
     cover_entity.SetTransformation(ctm);
 

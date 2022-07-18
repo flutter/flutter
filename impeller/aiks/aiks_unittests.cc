@@ -459,10 +459,8 @@ TEST_P(AiksTest, CanRenderItalicizedText) {
 
 TEST_P(AiksTest, CanRenderEmojiTextFrame) {
   Canvas canvas;
-  ASSERT_TRUE(RenderTextInCanvas(
-      GetContext(), canvas,
-      "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊",
-      "NotoColorEmoji.ttf"));
+  ASSERT_TRUE(RenderTextInCanvas(GetContext(), canvas, "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊",
+                                 "NotoColorEmoji.ttf"));
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
@@ -839,8 +837,9 @@ TEST_P(AiksTest, DrawRectStrokesRenderCorrectly) {
   paint.stroke_width = 10;
 
   canvas.Translate({100, 100});
-  canvas.DrawPath(PathBuilder{}.AddRect(Rect::MakeSize({100, 100})).TakePath(),
-                  {paint});
+  canvas.DrawPath(
+      PathBuilder{}.AddRect(Rect::MakeSize(Size{100, 100})).TakePath(),
+      {paint});
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
@@ -912,11 +911,11 @@ TEST_P(AiksTest, CanRenderClippedLayers) {
     canvas.SaveLayer({}, Rect::MakeXYWH(50, 50, 100, 100));
 
     // Fill the layer with white.
-    canvas.DrawRect(Rect::MakeSize({400, 400}), {.color = Color::White()});
+    canvas.DrawRect(Rect::MakeSize(Size{400, 400}), {.color = Color::White()});
     // Fill the layer with green, but do so with a color blend that can't be
     // collapsed into the parent pass.
     canvas.DrawRect(
-        Rect::MakeSize({400, 400}),
+        Rect::MakeSize(Size{400, 400}),
         {.color = Color::Green(), .blend_mode = Entity::BlendMode::kColorBurn});
   }
 

@@ -208,7 +208,7 @@ void Canvas::DrawImage(std::shared_ptr<Image> image,
     return;
   }
 
-  const auto source = Rect::MakeSize(Size(image->GetSize()));
+  const auto source = Rect::MakeSize(image->GetSize());
   const auto dest =
       Rect::MakeXYWH(offset.x, offset.y, source.size.width, source.size.height);
 
