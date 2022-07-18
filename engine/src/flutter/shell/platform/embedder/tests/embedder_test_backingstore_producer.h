@@ -31,14 +31,17 @@ class EmbedderTestBackingStoreProducer {
 
   enum class RenderTargetType {
     kSoftwareBuffer,
+    kSoftwareBuffer2,
     kOpenGLFramebuffer,
     kOpenGLTexture,
     kMetalTexture,
     kVulkanImage,
   };
 
-  EmbedderTestBackingStoreProducer(sk_sp<GrDirectContext> context,
-                                   RenderTargetType type);
+  EmbedderTestBackingStoreProducer(
+      sk_sp<GrDirectContext> context,
+      RenderTargetType type,
+      FlutterSoftwarePixelFormat software_pixfmt = kNative32);
   ~EmbedderTestBackingStoreProducer();
 
   bool Create(const FlutterBackingStoreConfig* config,
@@ -54,6 +57,9 @@ class EmbedderTestBackingStoreProducer {
   bool CreateSoftware(const FlutterBackingStoreConfig* config,
                       FlutterBackingStore* backing_store_out);
 
+  bool CreateSoftware2(const FlutterBackingStoreConfig* config,
+                       FlutterBackingStore* backing_store_out);
+
   bool CreateMTLTexture(const FlutterBackingStoreConfig* config,
                         FlutterBackingStore* renderer_out);
 
@@ -62,6 +68,7 @@ class EmbedderTestBackingStoreProducer {
 
   sk_sp<GrDirectContext> context_;
   RenderTargetType type_;
+  FlutterSoftwarePixelFormat software_pixfmt_;
 
 #ifdef SHELL_ENABLE_METAL
   std::unique_ptr<TestMetalContext> test_metal_context_;
