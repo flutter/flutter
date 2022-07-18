@@ -48,7 +48,8 @@ struct TRect {
     return TRect(x, y, width, height);
   }
 
-  constexpr static TRect MakeSize(const TSize<Type>& size) {
+  template <class U>
+  constexpr static TRect MakeSize(const TSize<U>& size) {
     return TRect(0.0, 0.0, size.width, size.height);
   }
 

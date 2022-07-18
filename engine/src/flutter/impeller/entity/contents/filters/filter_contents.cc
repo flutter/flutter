@@ -142,7 +142,7 @@ bool FilterContents::Render(const ContentContext& renderer,
   contents->SetPath(
       PathBuilder{}.AddRect(filter_coverage.value()).GetCurrentPath());
   contents->SetTexture(snapshot.texture);
-  contents->SetSourceRect(Rect::MakeSize(Size(snapshot.texture->GetSize())));
+  contents->SetSourceRect(Rect::MakeSize(snapshot.texture->GetSize()));
 
   Entity e;
   e.SetBlendMode(entity.GetBlendMode());

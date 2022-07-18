@@ -24,7 +24,7 @@ std::optional<Snapshot> TextureFilterInput::GetSnapshot(
 
 std::optional<Rect> TextureFilterInput::GetCoverage(
     const Entity& entity) const {
-  return Rect::MakeSize(Size(texture_->GetSize()))
+  return Rect::MakeSize(texture_->GetSize())
       .TransformBounds(GetTransform(entity));
 }
 

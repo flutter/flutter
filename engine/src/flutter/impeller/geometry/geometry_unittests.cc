@@ -837,6 +837,36 @@ TEST(GeometryTest, CanConvertBetweenDegressAndRadians) {
   }
 }
 
+TEST(GeometryTest, RectMakeSize) {
+  {
+    Size s(100, 200);
+    Rect r = Rect::MakeSize(s);
+    Rect expected = Rect::MakeLTRB(0, 0, 100, 200);
+    ASSERT_RECT_NEAR(r, expected);
+  }
+
+  {
+    ISize s(100, 200);
+    Rect r = Rect::MakeSize(s);
+    Rect expected = Rect::MakeLTRB(0, 0, 100, 200);
+    ASSERT_RECT_NEAR(r, expected);
+  }
+
+  {
+    Size s(100, 200);
+    IRect r = IRect::MakeSize(s);
+    IRect expected = IRect::MakeLTRB(0, 0, 100, 200);
+    ASSERT_EQ(r, expected);
+  }
+
+  {
+    ISize s(100, 200);
+    IRect r = IRect::MakeSize(s);
+    IRect expected = IRect::MakeLTRB(0, 0, 100, 200);
+    ASSERT_EQ(r, expected);
+  }
+}
+
 TEST(GeometryTest, RectUnion) {
   {
     Rect a(100, 100, 100, 100);
