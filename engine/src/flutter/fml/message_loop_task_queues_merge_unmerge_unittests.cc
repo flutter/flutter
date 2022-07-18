@@ -27,7 +27,7 @@ class TestWakeable : public fml::Wakeable {
   WakeUpCall wake_up_call_;
 };
 
-static int CountRemainingTasks(fml::RefPtr<MessageLoopTaskQueues> task_queue,
+static int CountRemainingTasks(fml::MessageLoopTaskQueues* task_queue,
                                const TaskQueueId& queue_id,
                                bool run_invocation = false) {
   const auto now = ChronoTicksSinceEpoch();

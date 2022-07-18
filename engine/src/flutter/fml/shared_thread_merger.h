@@ -57,7 +57,7 @@ class SharedThreadMerger
  private:
   fml::TaskQueueId owner_;
   fml::TaskQueueId subsumed_;
-  fml::RefPtr<fml::MessageLoopTaskQueues> task_queues_;
+  fml::MessageLoopTaskQueues* task_queues_;
   std::mutex mutex_;
   bool enabled_;
 
