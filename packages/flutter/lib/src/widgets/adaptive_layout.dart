@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'slot_layout.dart';
 import 'slot_layout_config.dart';
 import 'ticker_provider.dart';
@@ -194,6 +196,14 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
       notifier.value = chosenWidgets[key]?.key;
     });
 
+
+    Rect? hinge;
+    for (final DisplayFeature e in MediaQuery.of(context).displayFeatures) {
+      if (e.type == DisplayFeatureType.hinge || e.type == DisplayFeatureType.fold){
+        hinge = e.bounds;
+      }
+    }
+
     return CustomMultiChildLayout(
       delegate: _AdaptiveLayoutDelegate(
         slots: slots,
@@ -205,6 +215,7 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
         internalAnimations: widget.internalAnimations,
         horizontalBody: widget.horizontalBody,
         textDirection: Directionality.of(context) == TextDirection.ltr,
+        hinge: hinge,
       ),
       children: entries,
     );
@@ -223,6 +234,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
     required this.internalAnimations,
     required this.horizontalBody,
     required this.textDirection,
+    this.hinge,
   }) : super(relayout: controller);
 
   final Map<String, SlotLayout?> slots;
@@ -234,6 +246,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
   final bool internalAnimations;
   final bool horizontalBody;
   final bool textDirection;
+  final Rect? hinge;
 
   @override
   void performLayout(Size size) {
@@ -297,12 +310,14 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
     final double remainingHeight = size.height - bottomMargin - topMargin;
     final double halfWidth = size.width / 2;
     final double halfHeight = size.height / 2;
+    final double hingeWidth = hinge != null ? hinge!.right - hinge!.left : 0;
 
     if (hasChild(_bodyID) && hasChild(_secondaryBodyID)) {
-      Size currentSize;
+      Size currentBodySize = Size.zero;
+      Size currentSBodySize = Size.zero;
       if (chosenWidgets[_secondaryBodyID] == null || chosenWidgets[_secondaryBodyID]!.builder==null) {
         if(!textDirection) {
-          currentSize = layoutChild(_bodyID, BoxConstraints.tight(Size(remainingWidth, remainingHeight)));
+          currentBodySize = layoutChild(_bodyID, BoxConstraints.tight(Size(remainingWidth, remainingHeight)));
         } else if(horizontalBody){
           double beginWidth;
           if(bodyRatio==null){
@@ -310,7 +325,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
           }else{
             beginWidth = remainingWidth*bodyRatio!;
           }
-          currentSize = layoutChild(_bodyID, BoxConstraints.tight(Size(animatedSize(beginWidth, remainingWidth), remainingHeight)));
+          currentBodySize = layoutChild(_bodyID, BoxConstraints.tight(Size(animatedSize(beginWidth, remainingWidth), remainingHeight)));
         } else {
           double beginHeight;
           if(bodyRatio==null){
@@ -318,7 +333,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
           }else{
             beginHeight = remainingHeight*bodyRatio!;
           }
-          currentSize = layoutChild(_bodyID, BoxConstraints.tight(Size(remainingWidth, animatedSize(beginHeight, remainingHeight))));
+          currentBodySize = layoutChild(_bodyID, BoxConstraints.tight(Size(remainingWidth, animatedSize(beginHeight, remainingHeight))));
         }
         layoutChild(_secondaryBodyID, BoxConstraints.loose(size));
       } else {
@@ -326,13 +341,27 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
           // If body and secondaryBody laid out horizontally
           if (textDirection) {
             // If textDirection is LTR
-            currentSize = layoutChild(
+
+            double finalBodySize;
+            double finalSBodySize;
+            if(hinge!=null){
+              finalBodySize = hinge!.left - leftMargin;
+              finalSBodySize = size.width-(hinge!.left+hingeWidth)-rightMargin;
+            }else if(bodyRatio!=null){
+              finalBodySize = remainingWidth * bodyRatio!;
+              finalSBodySize = remainingWidth * (1 - bodyRatio!);
+            } else {
+              finalBodySize = halfWidth - leftMargin;
+              finalSBodySize = halfWidth - rightMargin;
+            }
+
+            currentBodySize = layoutChild(
               _bodyID,
               BoxConstraints.tight(
                 Size(
                   animatedSize(
                     remainingWidth,
-                    bodyRatio == null ? halfWidth - leftMargin : remainingWidth * bodyRatio!,
+                    finalBodySize,
                   ),
                   remainingHeight,
                 ),
@@ -342,20 +371,34 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
               _secondaryBodyID,
               BoxConstraints.tight(
                 Size(
-                  bodyRatio == null ? halfWidth - rightMargin : remainingWidth * (1 - bodyRatio!),
+                  finalSBodySize,
                   remainingHeight,
                 ),
               ),
             );
           } else {
             // If textDirection is RTL
-            currentSize = layoutChild(
+
+            double finalBodySize;
+            double finalSBodySize;
+            if(hinge!=null){
+              finalBodySize = size.width-(hinge!.left+hingeWidth)-rightMargin;
+              finalSBodySize = hinge!.left - leftMargin;
+            }else if(bodyRatio!=null){
+              finalBodySize = remainingWidth * bodyRatio!;
+              finalSBodySize = remainingWidth * (1 - bodyRatio!);
+            } else {
+              finalBodySize = halfWidth - rightMargin;
+              finalSBodySize = halfWidth - leftMargin;
+            }
+
+            currentSBodySize = layoutChild(
               _secondaryBodyID,
               BoxConstraints.tight(
                 Size(
                   animatedSize(
                     0,
-                    bodyRatio == null ? halfWidth - leftMargin : remainingWidth * (1 - bodyRatio!),
+                    finalSBodySize,
                   ),
                   remainingHeight,
                 ),
@@ -365,7 +408,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
               _bodyID,
               BoxConstraints.tight(
                 Size(
-                  bodyRatio == null ? halfWidth - rightMargin : remainingWidth * bodyRatio!,
+                  finalBodySize,
                   remainingHeight,
                 ),
               ),
@@ -373,7 +416,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
           }
         } else {
           // If body and secondaryBody laid out vertically
-          currentSize = layoutChild(
+          currentBodySize = layoutChild(
             _bodyID,
             BoxConstraints.tight(
               Size(
@@ -396,15 +439,25 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
           );
         }
       }
+      // Handling all positioning for body and secondaryBody
       if (horizontalBody && !textDirection && chosenWidgets[_secondaryBodyID] != null) {
-        positionChild(_bodyID, Offset(leftMargin + currentSize.width, topMargin));
-        positionChild(_secondaryBodyID, Offset(leftMargin, topMargin));
+        if(hinge!=null){
+          positionChild(_bodyID, Offset(currentSBodySize.width + leftMargin + hingeWidth, topMargin));
+          positionChild(_secondaryBodyID, Offset(leftMargin, topMargin));
+        } else {
+          positionChild(_bodyID, Offset(currentSBodySize.width + leftMargin, topMargin));
+          positionChild(_secondaryBodyID, Offset(leftMargin, topMargin));
+        }
       } else {
         positionChild(_bodyID, Offset(leftMargin, topMargin));
         if (horizontalBody) {
-          positionChild(_secondaryBodyID, Offset(leftMargin + currentSize.width, topMargin));
+          if(hinge!=null){
+            positionChild(_secondaryBodyID, Offset(currentBodySize.width + leftMargin + hingeWidth, topMargin));
+          } else {
+            positionChild(_secondaryBodyID, Offset(currentBodySize.width + leftMargin, topMargin));
+          }
         } else {
-          positionChild(_secondaryBodyID, Offset(leftMargin, topMargin + currentSize.height));
+          positionChild(_secondaryBodyID, Offset(leftMargin, topMargin + currentBodySize.height));
         }
       }
     } else if (hasChild(_bodyID)) {
