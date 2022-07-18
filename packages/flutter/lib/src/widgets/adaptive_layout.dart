@@ -30,25 +30,25 @@ class AdaptiveLayout extends StatefulWidget {
     super.key,
   });
 
-  /// The slot placed on the beginning side of the screen
+  /// The slot placed on the beginning side of the screen.
   ///
   /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
   /// [SizedBox] or limit its size by any other method.
   final SlotLayout? primaryNavigation;
 
-  /// The slot placed on the end side of the screen
+  /// The slot placed on the end side of the screen.
   ///
   /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
   /// [SizedBox] or limit its size by any other method.
   final SlotLayout? secondaryNavigation;
 
-  /// The slot placed on the top part of the screen
+  /// The slot placed on the top part of the screen.
   ///
   /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
   /// [SizedBox] or limit its size by any other method.
   final SlotLayout? topNavigation;
 
-  /// The slot placed on the bottom part of the screen
+  /// The slot placed on the bottom part of the screen.
   ///
   /// Note: if using flexibly sized Widgets like [Container], wrap the Widget in a
   /// [SizedBox] or limit its size by any other method.
@@ -64,8 +64,8 @@ class AdaptiveLayout extends StatefulWidget {
 
   /// Defines the fractional ratio of [body] to the [secondaryBody].
   ///
-  /// For example 1 / 3 would mean [body] takes up 1/3 of the available space and
-  /// [secondaryBody] takes up the rest.
+  /// For example 1 / 3 would mean [body] takes up 1/3 of the available space
+  /// and[secondaryBody] takes up the rest.
   ///
   /// If this value is null, the ratio is defined so that the split axis is in
   /// the center of the screen.

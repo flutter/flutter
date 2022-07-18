@@ -22,7 +22,7 @@ class SlotLayout extends StatefulWidget {
     });
 
   /// Given a context and a config, it returns the [SlotLayoutConfig] that will
-  /// be chosen from the config under the context's conditions
+  /// be chosen from the config under the context's conditions.
   static SlotLayoutConfig? pickWidget (BuildContext context,  Map<int, SlotLayoutConfig?> config){
     SlotLayoutConfig? chosenWidget;
     config.forEach((int key, SlotLayoutConfig? value) {

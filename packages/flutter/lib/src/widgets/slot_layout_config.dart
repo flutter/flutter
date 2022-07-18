@@ -9,7 +9,7 @@ import 'framework.dart';
 /// then displays the child with this animation.
 ///
 /// Most commonly used in [LayoutSlot] however it would be functional outside of
-/// this Widget as well
+/// this Widget as well.
 ///
 class SlotLayoutConfig extends StatefulWidget {
   /// Creates a new [SlotLayoutConfig].
@@ -32,7 +32,7 @@ class SlotLayoutConfig extends StatefulWidget {
   /// The animation to be played when the child enters.
   ///
   /// While it is not enforced, the recommended usage for this property is to
-  /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget]
+  /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget].
   final Widget Function(Widget, AnimationController)? inAnimation;
 
   /// A function that takes an [AnimationController] and a [Widget] and returns
@@ -42,7 +42,7 @@ class SlotLayoutConfig extends StatefulWidget {
   /// animated into view, replacing the other Widget.
   ///
   /// While it is not enforced, the recommended usage for this property is to
-  /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget]
+  /// return a Widget of type [AnimatedWidget] or [ImplicitlyAnimatedWidget].
   final Widget Function(Widget, AnimationController)? outAnimation;
 
   /// An empty [SlotLayoutConfig] to be placed in a slot to indicate it is not
