@@ -440,7 +440,7 @@ class SelectableText extends StatefulWidget {
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,
-      buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+      buttonDatas: EditableTextContextMenuButtonDatasBuilder.buttonDatasForToolbarOptions(
         editableTextState,
       ),
     );

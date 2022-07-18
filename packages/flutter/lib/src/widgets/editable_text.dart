@@ -22,6 +22,7 @@ import 'constants.dart';
 import 'context_menu.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
+import 'editable_text_context_menu_button_datas_builder.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
@@ -1719,10 +1720,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
 
-  // TODO(justinmc): Could this be moved out of EditableText and into the
-  // toolbar widgets somewhere? I think it would have to be after the deprecated
-  // buildToolbar is removed.
-  // Otherwise, could it be private as it is on master?
   /// Detects whether the clipboard can paste.
   final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
@@ -2072,7 +2069,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
-        ? TextSelectionToolbarButtonDatasBuilder.canPaste(this)
+        ? EditableTextContextMenuButtonDatasBuilder.canPaste(this)
         : widget.selectionControls?.canPaste(this) ?? false;
     if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
       clipboardStatus!.update();
@@ -3280,7 +3277,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? TextSelectionToolbarButtonDatasBuilder.canCopy(this)
+            ? EditableTextContextMenuButtonDatasBuilder.canCopy(this)
             : copyEnabled && (widget.selectionControls?.canCopy(this) ?? false))
       ? () {
         controls?.handleCopy(this);
@@ -3293,7 +3290,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? TextSelectionToolbarButtonDatasBuilder.canCut(this)
+            ? EditableTextContextMenuButtonDatasBuilder.canCut(this)
             : cutEnabled && (widget.selectionControls?.canCut(this) ?? false))
       ? () {
         controls?.handleCut(this);
@@ -3306,7 +3303,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? TextSelectionToolbarButtonDatasBuilder.canPaste(this)
+            ? EditableTextContextMenuButtonDatasBuilder.canPaste(this)
             : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
         && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
       ? () {

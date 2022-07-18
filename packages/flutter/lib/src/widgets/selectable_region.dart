@@ -29,6 +29,15 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
+/// A function that builds a widget to use as the text selection toolbar with
+/// the given [ContextMenuButtonData]s.
+typedef ButtonDatasToolbarBuilder = Widget Function(
+  BuildContext,
+  List<ContextMenuButtonData>,
+  Offset,
+  [Offset?]
+);
+
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. To enable selection for

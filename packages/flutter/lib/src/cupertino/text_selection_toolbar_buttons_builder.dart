@@ -37,7 +37,7 @@ typedef ContextMenuFromChildrenBuilder = Widget Function(
 ///   with custom button actions and labels.
 /// * [TextSelectionToolbarButtonsBuilder], which is in the Material library and
 ///   builds native-looking buttons for all platforms.
-/// * [TextSelectionToolbarButtonDatasBuilder], which is similar to this class,
+/// * [EditableTextContextMenuButtonDatasBuilder], which is similar to this class,
 ///   but calls its builder with [ContextMenuButtonData]s instead of with fully
 ///   built children Widgets.
 class CupertinoTextSelectionToolbarButtonsBuilder extends StatelessWidget {

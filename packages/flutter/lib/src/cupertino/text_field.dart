@@ -782,7 +782,7 @@ class CupertinoTextField extends StatefulWidget {
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,
       targetPlatform: _cupertinoPlatform,
-      buttonDatas: TextSelectionToolbarButtonDatasBuilder.buttonDatasForToolbarOptions(
+      buttonDatas: EditableTextContextMenuButtonDatasBuilder.buttonDatasForToolbarOptions(
         editableTextState,
         _cupertinoPlatform,
       ),

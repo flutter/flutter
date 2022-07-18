@@ -24,7 +24,7 @@ import 'theme.dart';
 ///   [DefaultTextSelectionToolbar] and passing the given children to
 ///   [DefaultTextSelectionToolbar.children], a default toolbar can be built
 ///   with custom button actions and labels.
-/// * [TextSelectionToolbarButtonDatasBuilder], which is similar to this class,
+/// * [EditableTextContextMenuButtonDatasBuilder], which is similar to this class,
 ///   but calls its builder with [ContextMenuButtonData]s instead of with fully
 ///   built children Widgets.
 /// * [CupertinoTextSelectionToolbarButtonsBuilder], which is the Cupertino

@@ -22,7 +22,7 @@ import 'text_selection_toolbar_buttons_builder.dart';
 ///
 /// See also:
 ///
-/// * [TextSelectionToolbarButtonDatasBuilder], which builds the
+/// * [EditableTextContextMenuButtonDatasBuilder], which builds the
 ///   [ContextMenuButtonData]s.
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextMenuButtonData]s.
@@ -102,7 +102,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
       );
     }
 
-    return TextSelectionToolbarButtonDatasBuilder(
+    return EditableTextContextMenuButtonDatasBuilder(
       editableTextState: editableTextState!,
       targetPlatform: targetPlatform,
       builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {

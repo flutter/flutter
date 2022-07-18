@@ -16,7 +16,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-/// * [TextSelectionToolbarButtonDatasBuilder], which builds the
+/// * [EditableTextContextMenuButtonDatasBuilder], which builds the
 ///   [ContextMenuButtonData]s.
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextMenuButtonData]s.
@@ -88,7 +88,7 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
       );
     }
 
-    return TextSelectionToolbarButtonDatasBuilder(
+    return EditableTextContextMenuButtonDatasBuilder(
       editableTextState: editableTextState!,
       builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
         return _DefaultTextSelectionToolbarFromButtonDatas(
