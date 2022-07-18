@@ -69,6 +69,12 @@ bool ImageMatchesFixture(const std::string& fixture_file_name,
 bool ImageMatchesFixture(const std::string& fixture_file_name,
                          std::future<sk_sp<SkImage>>& scene_image);
 
+bool SurfacePixelDataMatchesBytes(SkSurface* surface,
+                                  const std::vector<uint8_t>& bytes);
+
+bool SurfacePixelDataMatchesBytes(std::future<SkSurface*>& surface_future,
+                                  const std::vector<uint8_t>& bytes);
+
 void FilterMutationsByType(
     const FlutterPlatformViewMutation** mutations,
     size_t count,
