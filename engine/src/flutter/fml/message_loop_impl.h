@@ -64,7 +64,7 @@ class MessageLoopImpl : public Wakeable,
   MessageLoopImpl();
 
  private:
-  fml::RefPtr<MessageLoopTaskQueues> task_queue_;
+  fml::MessageLoopTaskQueues* task_queue_;
   TaskQueueId queue_id_;
 
   std::atomic_bool terminated_;

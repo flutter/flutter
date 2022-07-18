@@ -62,12 +62,11 @@ enum class FlushType {
 /// This also wakes up the loop at the required times.
 /// \see fml::MessageLoop
 /// \see fml::Wakeable
-class MessageLoopTaskQueues
-    : public fml::RefCountedThreadSafe<MessageLoopTaskQueues> {
+class MessageLoopTaskQueues {
  public:
   // Lifecycle.
 
-  static fml::RefPtr<MessageLoopTaskQueues> GetInstance();
+  static MessageLoopTaskQueues* GetInstance();
 
   TaskQueueId CreateTaskQueue();
 
@@ -152,9 +151,6 @@ class MessageLoopTaskQueues
 
   fml::TimePoint GetNextWakeTimeUnlocked(TaskQueueId queue_id) const;
 
-  static std::mutex creation_mutex_;
-  static fml::RefPtr<MessageLoopTaskQueues> instance_;
-
   mutable std::mutex queue_mutex_;
   std::map<TaskQueueId, std::unique_ptr<TaskQueueEntry>> queue_entries_;
 
@@ -162,8 +158,6 @@ class MessageLoopTaskQueues
 
   std::atomic_int order_;
 
-  FML_FRIEND_MAKE_REF_COUNTED(MessageLoopTaskQueues);
-  FML_FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopTaskQueues);
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(MessageLoopTaskQueues);
 };
 
