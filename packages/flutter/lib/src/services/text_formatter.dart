@@ -212,18 +212,30 @@ class _TextEditingValueAccumulator {
   }
 }
 
-/// A [TextInputFormatter] that prevents the insertion of characters
-/// matching (or not matching) a particular pattern.
+/// A [TextInputFormatter] that prevents the insertion of characters matching
+/// (or not matching) a particular pattern, by replacing the characters with the
+/// given [replacementString].
 ///
 /// Instances of filtered characters found in the new [TextEditingValue]s
-/// will be replaced with the [replacementString] which defaults to the empty
+/// will be replaced by the [replacementString] which defaults to the empty
 /// string.
 ///
-/// Since this formatter only removes characters from the text, it attempts to
-/// preserve the existing [TextEditingValue.selection] to values it would now
-/// fall at with the removed characters.
+/// A [FilteringTextInputFormatter] also tries to preserve the existing
+/// [TextEditingValue.selection] and [TextEditingValue.composing], and adjusts
+/// them accordingly if text within either of these ranges is replaced.
+///
+/// This formatter is typically used to match potentially recurring [Pattern]s
+/// in the new [TextEditingValue], and it never completely rejects the new
+/// [TextEditingValue] and falls back to the current [TextEditingValue] when the
+/// given [filterPattern] fails to match. As a result, [RegExp]s with positional
+/// matchers (notably, `^` or `$`) often produce somewhat surprising results
+/// when used in a [FilteringTextInputFormatter], since such [RegExp]s usually
+/// act as predicates on the entire string. To prevent the user from entering
+/// new content based on a predicate on the new [TextEditingValue], consider
+/// using a different [TextInputFormatter] such as:
+/// `TextInputFormatter.withFunction((oldValue, newValue) => regExp.hasMatch(newValue.text) ? newValue : oldValue)`.
 class FilteringTextInputFormatter extends TextInputFormatter {
-  /// Creates a formatter that prevents the insertion of characters
+  /// Creates a formatter that replaces the insertion of characters
   /// based on a filter pattern.
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
