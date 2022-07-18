@@ -10,6 +10,7 @@
 #include "display_list/display_list_tile_mode.h"
 #include "gtest/gtest.h"
 #include "third_party/imgui/imgui.h"
+#include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
 
@@ -294,18 +295,23 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
   auto callback = [&]() {
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({400, 100});
-      ImGui::SetNextWindowPos({300, 650});
+      ImGui::SetNextWindowPos({10, 10});
     }
 
     static float sigma[] = {10, 10};
     static bool use_bounds = true;
     static bool draw_circle = true;
+    static bool add_clip = true;
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat2("Sigma", sigma, 0, 100);
+    ImGui::NewLine();
+    ImGui::TextWrapped(
+        "If everything is working correctly, none of the options below should "
+        "impact the filter's appearance.");
     ImGui::Checkbox("Use SaveLayer bounds", &use_bounds);
     ImGui::Checkbox("Draw child element", &draw_circle);
+    ImGui::Checkbox("Add pre-clip", &add_clip);
     ImGui::End();
 
     flutter::DisplayListBuilder builder;
@@ -319,8 +325,15 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     std::optional<SkRect> bounds;
     if (use_bounds) {
       auto [p1, p2] = IMPELLER_PLAYGROUND_LINE(
-          Point(250, 150), Point(800, 600), 20, Color::White(), Color::White());
+          Point(350, 150), Point(800, 600), 20, Color::White(), Color::White());
       bounds = SkRect::MakeLTRB(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    // Insert a clip to test that the backdrop filter handles stencil depths > 0
+    // correctly.
+    if (add_clip) {
+      builder.clipRect(SkRect::MakeLTRB(0, 0, 99999, 99999),
+                       SkClipOp::kIntersect, true);
     }
 
     builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(200, 200),

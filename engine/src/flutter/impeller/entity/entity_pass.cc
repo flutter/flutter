@@ -379,6 +379,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
     backdrop_entity.SetContents(std::move(backdrop_contents));
     backdrop_entity.SetTransformation(
         Matrix::MakeTranslation(Vector3(parent_position - position)));
+    backdrop_entity.SetStencilDepth(stencil_depth_floor);
 
     render_element(backdrop_entity);
   }
