@@ -585,6 +585,9 @@ void cd(dynamic directory) {
 
 Directory get flutterDirectory => Directory.current.parent.parent;
 
+// TODO (kaushik) : this is currently not discoverable, can we set an env var?
+Directory get openpayDirectory => Directory.current.parent.parent;
+
 String requireEnvVar(String name) {
   final String? value = Platform.environment[name];
 

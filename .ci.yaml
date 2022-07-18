@@ -2251,6 +2251,18 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
 
+  - name: Linux_android openpay_benchmarks__scroll_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      openpay: true
+      tags: >
+        ["devicelab", "android", "linux", "openpay"]
+      task_name: openpay_benchmarks__scroll_perf
+    scheduler: luci
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
