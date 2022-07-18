@@ -77,6 +77,37 @@ void main() {
         fakeLogReader.dispose();
       });
 
+      testUsingContext('succeeds with iOS device', () async {
+        final FakeIOSDevice device = FakeIOSDevice();
+        //device.onGetLogReader = () {
+        //  fakeLogReader.addLine('Foo');
+        //  fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+        //  return fakeLogReader;
+        //};
+
+        testDeviceManager.addDevice(device);
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
+            // The "Observatory URL on device" message is output by the ProtocolDiscovery when it found the observatory.
+            completer.complete();
+          }
+        });
+        final Future<void> task = createTestCommandRunner(AttachCommand()).run(<String>['attach']);
+        await completer.future;
+
+        expect(portForwarder.devicePort, devicePort);
+        expect(portForwarder.hostPort, hostPort);
+
+        await fakeLogReader.dispose();
+        await expectLoggerInterruptEndsTask(task, logger);
+        await loggerSubscription.cancel();
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+      });
+
       testUsingContext('finds observatory port and forwards', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
@@ -749,15 +780,21 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
-  FakeIOSDevice();
+  FakeIOSDevice({
+    DevicePortForwarder? portForwarder,
+    DeviceLogReader? logReader,
+  }) : _portForwarder = portForwarder, _logReader = logReader;
+
+  final DevicePortForwarder? _portForwarder;
 
   @override
-  DevicePortForwarder get portForwarder => throw UnimplementedError('getter portForwarder not implemented');
+  DevicePortForwarder get portForwarder => _portForwarder!;
 
   @override
   DartDevelopmentService get dds => throw UnimplementedError('getter dds not implemented');
 
-  DeviceLogReader get logReader => throw UnimplementedError('getter logReader not implemented');
+  final DeviceLogReader? _logReader;
+  DeviceLogReader get logReader => _logReader!;
 
   @override
   DeviceLogReader getLogReader({
