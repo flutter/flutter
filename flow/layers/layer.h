@@ -375,6 +375,9 @@ class Layer {
 
   uint64_t unique_id() const { return unique_id_; }
 
+  virtual RasterCacheKeyID caching_key_id() const {
+    return RasterCacheKeyID(unique_id_, RasterCacheKeyType::kLayer);
+  }
   virtual const ContainerLayer* as_container_layer() const { return nullptr; }
   virtual const DisplayListLayer* as_display_list_layer() const {
     return nullptr;

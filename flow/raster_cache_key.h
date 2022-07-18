@@ -22,28 +22,43 @@ enum class RasterCacheKeyType { kLayer, kDisplayList, kLayerChildren };
 
 class RasterCacheKeyID {
  public:
-  RasterCacheKeyID(uint16_t id, RasterCacheKeyType type)
-      : ids_({id}), type_(type) {}
+  static constexpr uint64_t kDefaultUniqueID = 0;
 
-  RasterCacheKeyID(const std::vector<uint64_t> ids, RasterCacheKeyType type)
-      : ids_(ids), type_(type) {}
+  RasterCacheKeyID(uint64_t unique_id, RasterCacheKeyType type)
+      : unique_id_(unique_id), type_(type) {}
 
-  const std::vector<uint64_t>& ids() const { return ids_; }
+  RasterCacheKeyID(std::vector<RasterCacheKeyID> child_ids,
+                   RasterCacheKeyType type)
+      : unique_id_(kDefaultUniqueID),
+        type_(type),
+        child_ids_(std::move(child_ids)) {}
+
+  uint64_t unique_id() const { return unique_id_; }
 
   RasterCacheKeyType type() const { return type_; }
 
-  static std::optional<std::vector<uint64_t>> LayerChildrenIds(Layer* layer);
+  const std::vector<RasterCacheKeyID>& child_ids() const { return child_ids_; }
+
+  static std::optional<std::vector<RasterCacheKeyID>> LayerChildrenIds(
+      const Layer* layer);
 
   std::size_t GetHash() const {
-    std::size_t seed = fml::HashCombine();
-    for (auto id : ids_) {
-      fml::HashCombineSeed(seed, id);
+    if (cached_hash_) {
+      return cached_hash_.value();
     }
-    return fml::HashCombine(seed, type_);
+    std::size_t seed = fml::HashCombine();
+    fml::HashCombineSeed(seed, unique_id_);
+    fml::HashCombineSeed(seed, type_);
+    for (auto& child_id : child_ids_) {
+      fml::HashCombineSeed(seed, child_id.GetHash());
+    }
+    cached_hash_ = seed;
+    return seed;
   }
 
   bool operator==(const RasterCacheKeyID& other) const {
-    return type_ == other.type_ && ids_ == other.ids_;
+    return unique_id_ == other.unique_id_ && type_ == other.type_ &&
+           GetHash() == other.GetHash() && child_ids_ == other.child_ids_;
   }
 
   bool operator!=(const RasterCacheKeyID& other) const {
@@ -51,16 +66,20 @@ class RasterCacheKeyID {
   }
 
  private:
-  const std::vector<uint64_t> ids_;
+  const uint64_t unique_id_;
   const RasterCacheKeyType type_;
+  const std::vector<RasterCacheKeyID> child_ids_;
+  mutable std::optional<std::size_t> cached_hash_;
 };
 
 enum class RasterCacheKeyKind { kLayerMetrics, kDisplayListMetrics };
 
 class RasterCacheKey {
  public:
-  RasterCacheKey(uint64_t id, RasterCacheKeyType type, const SkMatrix& ctm)
-      : RasterCacheKey(RasterCacheKeyID(id, type), ctm) {}
+  RasterCacheKey(uint64_t unique_id,
+                 RasterCacheKeyType type,
+                 const SkMatrix& ctm)
+      : RasterCacheKey(RasterCacheKeyID(unique_id, type), ctm) {}
 
   RasterCacheKey(RasterCacheKeyID id, const SkMatrix& ctm)
       : id_(std::move(id)), matrix_(ctm) {
@@ -69,7 +88,6 @@ class RasterCacheKey {
   }
 
   const RasterCacheKeyID& id() const { return id_; }
-  RasterCacheKeyType type() const { return id_.type(); }
   const SkMatrix& matrix() const { return matrix_; }
 
   RasterCacheKeyKind kind() const {
