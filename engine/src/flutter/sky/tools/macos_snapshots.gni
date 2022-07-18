@@ -41,5 +41,8 @@ template("macos_gen_snapshots") {
       "--arch",
       invoker.arch,
     ]
+    metadata = {
+      snapshot_entitlement_file_path = [ "gen_snapshot_${invoker.arch}" ]
+    }
   }
 }
