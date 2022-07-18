@@ -186,7 +186,7 @@ struct TRect {
   }
 
   constexpr bool IntersectsWithRect(const TRect& o) const {
-    return Interesection(o).has_value();
+    return Intersection(o).has_value();
   }
 };
 
