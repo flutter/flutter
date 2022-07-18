@@ -108,20 +108,6 @@ struct Command {
   ///
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   //----------------------------------------------------------------------------
-  /// The orientation of vertices of the front-facing polygons. This usually
-  /// matters when culling is enabled.
-  ///
-  /// @see         `cull_mode`
-  ///
-  WindingOrder winding = WindingOrder::kClockwise;
-  //----------------------------------------------------------------------------
-  /// How to control culling of polygons. The orientation of front-facing
-  /// polygons is controlled via the `winding` parameter.
-  ///
-  /// @see         `winding`
-  ///
-  CullMode cull_mode = CullMode::kNone;
-  //----------------------------------------------------------------------------
   /// The reference value to use in stenciling operations. Stencil configuration
   /// is part of pipeline setup and can be read from the pipelines descriptor.
   ///

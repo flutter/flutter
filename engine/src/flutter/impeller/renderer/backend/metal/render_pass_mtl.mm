@@ -408,14 +408,13 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
       auto_pop_debug_marker.Release();
     }
 
-    if (target_sample_count !=
-        command.pipeline->GetDescriptor().GetSampleCount()) {
+    const auto& pipeline_desc = command.pipeline->GetDescriptor();
+    if (target_sample_count != pipeline_desc.GetSampleCount()) {
       VALIDATION_LOG << "Pipeline for command and the render target disagree "
                         "on sample counts (target was "
                      << static_cast<uint64_t>(target_sample_count)
                      << " but pipeline wanted "
-                     << static_cast<uint64_t>(
-                            command.pipeline->GetDescriptor().GetSampleCount())
+                     << static_cast<uint64_t>(pipeline_desc.GetSampleCount())
                      << ").";
       return false;
     }
@@ -424,10 +423,11 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
         PipelineMTL::Cast(*command.pipeline).GetMTLRenderPipelineState());
     pass_bindings.SetDepthStencilState(
         PipelineMTL::Cast(*command.pipeline).GetMTLDepthStencilState());
-    [encoder setFrontFacingWinding:command.winding == WindingOrder::kClockwise
+    [encoder setFrontFacingWinding:pipeline_desc.GetWindingOrder() ==
+                                           WindingOrder::kClockwise
                                        ? MTLWindingClockwise
                                        : MTLWindingCounterClockwise];
-    [encoder setCullMode:ToMTLCullMode(command.cull_mode)];
+    [encoder setCullMode:ToMTLCullMode(pipeline_desc.GetCullMode())];
     [encoder setStencilReferenceValue:command.stencil_reference];
 
     auto v = command.viewport.value_or<Viewport>(

@@ -239,7 +239,6 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
         cmd.viewport = viewport;
         cmd.scissor = impeller::IRect(clip_rect);
 
-        cmd.winding = impeller::WindingOrder::kClockwise;
         cmd.pipeline = bd->pipeline;
         VS::BindUniformBuffer(cmd, vtx_uniforms);
         FS::BindTex(cmd, bd->font_texture, bd->sampler);

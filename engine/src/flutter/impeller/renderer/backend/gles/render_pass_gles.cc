@@ -319,7 +319,7 @@ struct RenderPassData {
     //--------------------------------------------------------------------------
     /// Setup culling.
     ///
-    switch (command.cull_mode) {
+    switch (pipeline.GetDescriptor().GetCullMode()) {
       case CullMode::kNone:
         gl.Disable(GL_CULL_FACE);
         break;
@@ -335,7 +335,7 @@ struct RenderPassData {
     //--------------------------------------------------------------------------
     /// Setup winding order.
     ///
-    switch (command.winding) {
+    switch (pipeline.GetDescriptor().GetWindingOrder()) {
       case WindingOrder::kClockwise:
         gl.FrontFace(GL_CW);
         break;
