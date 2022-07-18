@@ -146,8 +146,6 @@ class _TextSelectionToolbarItemData {
   final VoidCallback onPressed;
 }
 
-// TODO(justinmc): Remove when the deprecated method
-// MaterialTextSelectionControls.buildToolbar is removed.
 // The highest level toolbar widget, built directly by buildToolbar.
 class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({

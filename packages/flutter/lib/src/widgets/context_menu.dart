@@ -254,9 +254,9 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   }
 
   /// Returns true if the given [EditableTextState] supports paste.
-  static bool canPaste(EditableTextState editableTextState, ClipboardStatus? clipboardStatus) {
+  static bool canPaste(EditableTextState editableTextState) {
     return !editableTextState.widget.readOnly
-        && clipboardStatus == ClipboardStatus.pasteable;
+        && editableTextState.clipboardStatus?.value == ClipboardStatus.pasteable;
   }
 
   /// Returns true if the given [EditableTextState] supports select all.
@@ -313,7 +313,7 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
           type: ContextMenuButtonType.copy,
         ),
       if (toolbarOptions.paste && editableTextState.clipboardStatus != null
-          && TextSelectionToolbarButtonDatasBuilder.canPaste(editableTextState, editableTextState.clipboardStatus!.value))
+          && TextSelectionToolbarButtonDatasBuilder.canPaste(editableTextState))
         ContextMenuButtonData(
           onPressed: () {
             editableTextState.pasteText(SelectionChangedCause.toolbar);
@@ -365,7 +365,6 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
       builder: (BuildContext context, ClipboardStatus clipboardStatus) {
         final bool canPaste = TextSelectionToolbarButtonDatasBuilder.canPaste(
           widget.editableTextState,
-          clipboardStatus,
         );
         // If there are no buttons to be shown, don't render anything.
         if (!_canCut && !_canCopy && !canPaste && !_canSelectAll) {
@@ -415,8 +414,6 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
   }
 }
 
-// TODO(justinmc): Should this be public? Currently it might be a little bit too
-// tied into EditableText's nullable clipboardStatus. Maybe that can be moved?
 /// A widget builder wrapper of [ClipboardStatusNotifier].
 ///
 /// Runs the given [builder] with the current [ClipboardStatus]. If the
