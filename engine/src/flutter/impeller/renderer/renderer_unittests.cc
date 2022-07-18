@@ -111,6 +111,7 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   ASSERT_TRUE(context);
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
+  desc->SetCullMode(CullMode::kBackFace);
   desc->SetSampleCount(SampleCount::kCount4);
   auto pipeline =
       context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
@@ -194,7 +195,6 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
 
     cmd.primitive_type = PrimitiveType::kTriangle;
-    cmd.cull_mode = CullMode::kBackFace;
     if (!pass.AddCommand(std::move(cmd))) {
       return false;
     }
@@ -483,7 +483,6 @@ TEST_P(RendererTest, TheImpeller) {
                          {Point(0, size.height)},
                          {Point(size.width, size.height)}});
     cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
-    cmd.cull_mode = CullMode::kNone;
 
     VS::FrameInfo vs_uniform;
     vs_uniform.mvp = Matrix::MakeOrthographic(size);
