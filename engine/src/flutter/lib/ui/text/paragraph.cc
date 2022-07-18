@@ -13,31 +13,9 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-using tonic::ToDart;
-
 namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
-
-#define FOR_EACH_BINDING(V)             \
-  V(Paragraph, width)                   \
-  V(Paragraph, height)                  \
-  V(Paragraph, longestLine)             \
-  V(Paragraph, minIntrinsicWidth)       \
-  V(Paragraph, maxIntrinsicWidth)       \
-  V(Paragraph, alphabeticBaseline)      \
-  V(Paragraph, ideographicBaseline)     \
-  V(Paragraph, didExceedMaxLines)       \
-  V(Paragraph, layout)                  \
-  V(Paragraph, paint)                   \
-  V(Paragraph, getWordBoundary)         \
-  V(Paragraph, getLineBoundary)         \
-  V(Paragraph, getRectsForRange)        \
-  V(Paragraph, getRectsForPlaceholders) \
-  V(Paragraph, getPositionForOffset)    \
-  V(Paragraph, computeLineMetrics)
-
-DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
 Paragraph::Paragraph(std::unique_ptr<txt::Paragraph> paragraph)
     : m_paragraph(std::move(paragraph)) {}

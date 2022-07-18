@@ -10,6 +10,7 @@
 
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
@@ -20,8 +21,10 @@ class SemanticsUpdateBuilder
   FML_FRIEND_MAKE_REF_COUNTED(SemanticsUpdateBuilder);
 
  public:
-  static fml::RefPtr<SemanticsUpdateBuilder> create() {
-    return fml::MakeRefCounted<SemanticsUpdateBuilder>();
+  static void Create(Dart_Handle wrapper) {
+    UIDartState::ThrowIfUIOperationsProhibited();
+    auto res = fml::MakeRefCounted<SemanticsUpdateBuilder>();
+    res->AssociateWithDartWrapper(wrapper);
   }
 
   ~SemanticsUpdateBuilder() override;
@@ -68,8 +71,6 @@ class SemanticsUpdateBuilder
                           int overrideId);
 
   void build(Dart_Handle semantics_update_handle);
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit SemanticsUpdateBuilder();

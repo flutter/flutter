@@ -21,26 +21,7 @@ void pushStringAttributes(
   }
 }
 
-static void SemanticsUpdateBuilder_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&SemanticsUpdateBuilder::create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, SemanticsUpdateBuilder);
-
-#define FOR_EACH_BINDING(V)                     \
-  V(SemanticsUpdateBuilder, updateNode)         \
-  V(SemanticsUpdateBuilder, updateCustomAction) \
-  V(SemanticsUpdateBuilder, build)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void SemanticsUpdateBuilder::RegisterNatives(
-    tonic::DartLibraryNatives* natives) {
-  natives->Register({{"SemanticsUpdateBuilder_constructor",
-                      SemanticsUpdateBuilder_constructor, 1, true},
-                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
 
 SemanticsUpdateBuilder::SemanticsUpdateBuilder() = default;
 

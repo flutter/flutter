@@ -7,14 +7,11 @@
 
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/rrect.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/volatile_path_tracker.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
 #include "third_party/tonic/typed_data/typed_list.h"
-
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
 
 namespace flutter {
 
@@ -24,21 +21,18 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
 
  public:
   ~CanvasPath() override;
-  static fml::RefPtr<CanvasPath> CreateNew() {
-    return fml::MakeRefCounted<CanvasPath>();
-  }
 
-  static fml::RefPtr<CanvasPath> Create(Dart_Handle path_handle) {
+  static void CreateFrom(Dart_Handle path_handle, const SkPath& src) {
     auto path = fml::MakeRefCounted<CanvasPath>();
     path->AssociateWithDartWrapper(path_handle);
-    return path;
+    path->tracked_path_->path = src;
   }
 
-  static fml::RefPtr<CanvasPath> CreateFrom(Dart_Handle path_handle,
-                                            const SkPath& src) {
-    fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
-    path->tracked_path_->path = src;
-    return path;
+  static fml::RefPtr<CanvasPath> Create(Dart_Handle wrapper) {
+    UIDartState::ThrowIfUIOperationsProhibited();
+    auto res = fml::MakeRefCounted<CanvasPath>();
+    res->AssociateWithDartWrapper(wrapper);
+    return res;
   }
 
   int getFillType();
@@ -91,20 +85,26 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   void addPolygon(const tonic::Float32List& points, bool close);
   void addRRect(const RRect& rrect);
   void addPath(CanvasPath* path, double dx, double dy);
+
   void addPathWithMatrix(CanvasPath* path,
                          double dx,
                          double dy,
-                         tonic::Float64List& matrix4);
+                         Dart_Handle matrix4_handle);
+
   void extendWithPath(CanvasPath* path, double dx, double dy);
+
   void extendWithPathAndMatrix(CanvasPath* path,
                                double dx,
                                double dy,
-                               tonic::Float64List& matrix4);
+                               Dart_Handle matrix4_handle);
+
   void close();
   void reset();
   bool contains(double x, double y);
   void shift(Dart_Handle path_handle, double dx, double dy);
-  void transform(Dart_Handle path_handle, tonic::Float64List& matrix4);
+
+  void transform(Dart_Handle path_handle, Dart_Handle matrix4_handle);
+
   tonic::Float32List getBounds();
   bool op(CanvasPath* path1, CanvasPath* path2, int operation);
   void clone(Dart_Handle path_handle);
@@ -112,8 +112,6 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   const SkPath& path() const { return tracked_path_->path; }
 
   size_t GetAllocationSize() const override;
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   CanvasPath();

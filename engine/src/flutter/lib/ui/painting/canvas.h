@@ -13,13 +13,10 @@
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/lib/ui/painting/vertices.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 #include "third_party/tonic/typed_data/typed_list.h"
-
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
 
 namespace flutter {
 class CanvasImage;
@@ -29,22 +26,26 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   FML_FRIEND_MAKE_REF_COUNTED(Canvas);
 
  public:
-  static fml::RefPtr<Canvas> Create(PictureRecorder* recorder,
-                                    double left,
-                                    double top,
-                                    double right,
-                                    double bottom);
+  static void Create(Dart_Handle wrapper,
+                     PictureRecorder* recorder,
+                     double left,
+                     double top,
+                     double right,
+                     double bottom);
 
   ~Canvas() override;
 
   void save();
-  void saveLayerWithoutBounds(const Paint& paint, const PaintData& paint_data);
+  void saveLayerWithoutBounds(Dart_Handle paint_objects,
+                              Dart_Handle paint_data);
+
   void saveLayer(double left,
                  double top,
                  double right,
                  double bottom,
-                 const Paint& paint,
-                 const PaintData& paint_data);
+                 Dart_Handle paint_objects,
+                 Dart_Handle paint_data);
+
   void restore();
   int getSaveCount();
 
@@ -53,7 +54,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   void rotate(double radians);
   void skew(double sx, double sy);
   void transform(const tonic::Float64List& matrix4);
-  void getTransform(tonic::Float64List& matrix4);
+  void getTransform(Dart_Handle matrix4_handle);
 
   void clipRect(double left,
                 double top,
@@ -63,41 +64,49 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                 bool doAntiAlias = true);
   void clipRRect(const RRect& rrect, bool doAntiAlias = true);
   void clipPath(const CanvasPath* path, bool doAntiAlias = true);
-  void getDestinationClipBounds(tonic::Float64List& rect);
-  void getLocalClipBounds(tonic::Float64List& rect);
+  void getDestinationClipBounds(Dart_Handle rect_handle);
+  void getLocalClipBounds(Dart_Handle rect_handle);
 
   void drawColor(SkColor color, DlBlendMode blend_mode);
+
   void drawLine(double x1,
                 double y1,
                 double x2,
                 double y2,
-                const Paint& paint,
-                const PaintData& paint_data);
-  void drawPaint(const Paint& paint, const PaintData& paint_data);
+                Dart_Handle paint_objects,
+                Dart_Handle paint_data);
+
+  void drawPaint(Dart_Handle paint_objects, Dart_Handle paint_data);
+
   void drawRect(double left,
                 double top,
                 double right,
                 double bottom,
-                const Paint& paint,
-                const PaintData& paint_data);
+                Dart_Handle paint_objects,
+                Dart_Handle paint_data);
+
   void drawRRect(const RRect& rrect,
-                 const Paint& paint,
-                 const PaintData& paint_data);
+                 Dart_Handle paint_objects,
+                 Dart_Handle paint_data);
+
   void drawDRRect(const RRect& outer,
                   const RRect& inner,
-                  const Paint& paint,
-                  const PaintData& paint_data);
+                  Dart_Handle paint_objects,
+                  Dart_Handle paint_data);
+
   void drawOval(double left,
                 double top,
                 double right,
                 double bottom,
-                const Paint& paint,
-                const PaintData& paint_data);
+                Dart_Handle paint_objects,
+                Dart_Handle paint_data);
+
   void drawCircle(double x,
                   double y,
                   double radius,
-                  const Paint& paint,
-                  const PaintData& paint_data);
+                  Dart_Handle paint_objects,
+                  Dart_Handle paint_data);
+
   void drawArc(double left,
                double top,
                double right,
@@ -105,17 +114,20 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                double startAngle,
                double sweepAngle,
                bool useCenter,
-               const Paint& paint,
-               const PaintData& paint_data);
+               Dart_Handle paint_objects,
+               Dart_Handle paint_data);
+
   void drawPath(const CanvasPath* path,
-                const Paint& paint,
-                const PaintData& paint_data);
+                Dart_Handle paint_objects,
+                Dart_Handle paint_data);
+
   Dart_Handle drawImage(const CanvasImage* image,
                         double x,
                         double y,
-                        const Paint& paint,
-                        const PaintData& paint_data,
+                        Dart_Handle paint_objects,
+                        Dart_Handle paint_data,
                         int filterQualityIndex);
+
   Dart_Handle drawImageRect(const CanvasImage* image,
                             double src_left,
                             double src_top,
@@ -125,9 +137,10 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                             double dst_top,
                             double dst_right,
                             double dst_bottom,
-                            const Paint& paint,
-                            const PaintData& paint_data,
+                            Dart_Handle paint_objects,
+                            Dart_Handle paint_data,
                             int filterQualityIndex);
+
   Dart_Handle drawImageNine(const CanvasImage* image,
                             double center_left,
                             double center_top,
@@ -137,9 +150,10 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                             double dst_top,
                             double dst_right,
                             double dst_bottom,
-                            const Paint& paint,
-                            const PaintData& paint_data,
+                            Dart_Handle paint_objects,
+                            Dart_Handle paint_data,
                             int bitmapSamplingIndex);
+
   void drawPicture(Picture* picture);
 
   // The paint argument is first for the following functions because Paint
@@ -147,25 +161,25 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   // Float32List, we cannot re-enter the VM to unwrap objects. That means we
   // either need to process the paint argument first.
 
-  void drawPoints(const Paint& paint,
-                  const PaintData& paint_data,
+  void drawPoints(Dart_Handle paint_objects,
+                  Dart_Handle paint_data,
                   SkCanvas::PointMode point_mode,
                   const tonic::Float32List& points);
 
   void drawVertices(const Vertices* vertices,
                     DlBlendMode blend_mode,
-                    const Paint& paint,
-                    const PaintData& paint_data);
+                    Dart_Handle paint_objects,
+                    Dart_Handle paint_data);
 
-  Dart_Handle drawAtlas(const Paint& paint,
-                        const PaintData& paint_data,
+  Dart_Handle drawAtlas(Dart_Handle paint_objects,
+                        Dart_Handle paint_data,
                         int filterQualityIndex,
                         CanvasImage* atlas,
-                        tonic::Float32List& transforms,
-                        tonic::Float32List& rects,
-                        tonic::Int32List& colors,
+                        Dart_Handle transforms_handle,
+                        Dart_Handle rects_handle,
+                        Dart_Handle colors_handle,
                         DlBlendMode blend_mode,
-                        tonic::Float32List& cull_rect);
+                        Dart_Handle cull_rect_handle);
 
   void drawShadow(const CanvasPath* path,
                   SkColor color,
@@ -174,8 +188,6 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
 
   SkCanvas* canvas() const { return canvas_; }
   void Invalidate();
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit Canvas(SkCanvas* canvas);

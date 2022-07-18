@@ -21,14 +21,6 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
-#define FOR_EACH_BINDING(V) \
-  V(Picture, toImage)       \
-  V(Picture, toImageSync)   \
-  V(Picture, dispose)       \
-  V(Picture, GetAllocationSize)
-
-DART_BIND_ALL(Picture, FOR_EACH_BINDING)
-
 fml::RefPtr<Picture> Picture::Create(
     Dart_Handle dart_handle,
     flutter::SkiaGPUObject<DisplayList> display_list) {

@@ -14,28 +14,12 @@ namespace flutter {
 typedef CanvasGradient
     Gradient;  // Because the C++ name doesn't match the Dart name.
 
-static void Gradient_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&CanvasGradient::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, Gradient);
 
-#define FOR_EACH_BINDING(V) \
-  V(Gradient, initLinear)   \
-  V(Gradient, initRadial)   \
-  V(Gradient, initSweep)    \
-  V(Gradient, initTwoPointConical)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void CanvasGradient::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({{"Gradient_constructor", Gradient_constructor, 1, true},
-                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-fml::RefPtr<CanvasGradient> CanvasGradient::Create() {
-  return fml::MakeRefCounted<CanvasGradient>();
+void CanvasGradient::Create(Dart_Handle wrapper) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  auto res = fml::MakeRefCounted<CanvasGradient>();
+  res->AssociateWithDartWrapper(wrapper);
 }
 
 void CanvasGradient::initLinear(const tonic::Float32List& end_points,

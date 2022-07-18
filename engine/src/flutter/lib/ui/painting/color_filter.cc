@@ -14,29 +14,12 @@
 
 namespace flutter {
 
-static void ColorFilter_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&ColorFilter::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, ColorFilter);
 
-#define FOR_EACH_BINDING(V)             \
-  V(ColorFilter, initMode)              \
-  V(ColorFilter, initMatrix)            \
-  V(ColorFilter, initSrgbToLinearGamma) \
-  V(ColorFilter, initLinearToSrgbGamma)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void ColorFilter::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"ColorFilter_constructor", ColorFilter_constructor, 1, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-fml::RefPtr<ColorFilter> ColorFilter::Create() {
-  return fml::MakeRefCounted<ColorFilter>();
+void ColorFilter::Create(Dart_Handle wrapper) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  auto res = fml::MakeRefCounted<ColorFilter>();
+  res->AssociateWithDartWrapper(wrapper);
 }
 
 void ColorFilter::initMode(int color, int blend_mode) {

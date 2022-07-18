@@ -20,56 +20,41 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImmutableBuffer);
 
-#define FOR_EACH_BINDING(V)   \
-  V(ImmutableBuffer, dispose) \
-  V(ImmutableBuffer, length)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
 ImmutableBuffer::~ImmutableBuffer() {}
 
-void ImmutableBuffer::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({{"ImmutableBuffer_init", ImmutableBuffer::init, 3, true},
-                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-  natives->Register({{"ImmutableBuffer_initFromAsset",
-                      ImmutableBuffer::initFromAsset, 3, true},
-                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-void ImmutableBuffer::init(Dart_NativeArguments args) {
-  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 2);
+Dart_Handle ImmutableBuffer::init(Dart_Handle buffer_handle,
+                                  Dart_Handle data,
+                                  Dart_Handle callback_handle) {
   if (!Dart_IsClosure(callback_handle)) {
-    Dart_SetReturnValue(args, tonic::ToDart("Callback must be a function"));
-    return;
+    return tonic::ToDart("Callback must be a function");
   }
 
-  Dart_Handle buffer_handle = Dart_GetNativeArgument(args, 0);
-  tonic::Uint8List data = tonic::Uint8List(Dart_GetNativeArgument(args, 1));
+  tonic::Uint8List dataList = tonic::Uint8List(data);
 
-  auto sk_data = MakeSkDataWithCopy(data.data(), data.num_elements());
-  data.Release();
+  auto sk_data = MakeSkDataWithCopy(dataList.data(), dataList.num_elements());
+  dataList.Release();
   auto buffer = fml::MakeRefCounted<ImmutableBuffer>(sk_data);
   buffer->AssociateWithDartWrapper(buffer_handle);
   tonic::DartInvoke(callback_handle, {Dart_TypeVoid()});
+
+  return Dart_Null();
 }
 
-void ImmutableBuffer::initFromAsset(Dart_NativeArguments args) {
+Dart_Handle ImmutableBuffer::initFromAsset(Dart_Handle buffer_handle,
+                                           Dart_Handle asset_name_handle,
+                                           Dart_Handle callback_handle) {
   UIDartState::ThrowIfUIOperationsProhibited();
-  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 2);
   if (!Dart_IsClosure(callback_handle)) {
-    Dart_SetReturnValue(args, tonic::ToDart("Callback must be a function"));
-    return;
+    return tonic::ToDart("Callback must be a function");
   }
-  Dart_Handle asset_name_handle = Dart_GetNativeArgument(args, 1);
+
   uint8_t* chars = nullptr;
   intptr_t asset_length = 0;
   Dart_Handle result =
       Dart_StringToUTF8(asset_name_handle, &chars, &asset_length);
   if (Dart_IsError(result)) {
-    Dart_SetReturnValue(args, tonic::ToDart("Asset must be valid UTF8"));
-    return;
+    return tonic::ToDart("Asset name must be valid UTF8");
   }
-  Dart_Handle immutable_buffer = Dart_GetNativeArgument(args, 0);
 
   std::string asset_name = std::string{reinterpret_cast<const char*>(chars),
                                        static_cast<size_t>(asset_length)};
@@ -80,16 +65,16 @@ void ImmutableBuffer::initFromAsset(Dart_NativeArguments args) {
                                                     ->GetAssetManager();
   std::unique_ptr<fml::Mapping> data = asset_manager->GetAsMapping(asset_name);
   if (data == nullptr) {
-    Dart_SetReturnValue(args, tonic::ToDart("Asset not found"));
-    return;
+    return tonic::ToDart("Asset not found");
   }
 
   auto size = data->GetSize();
   const void* bytes = static_cast<const void*>(data->GetMapping());
   auto sk_data = MakeSkDataWithCopy(bytes, size);
   auto buffer = fml::MakeRefCounted<ImmutableBuffer>(sk_data);
-  buffer->AssociateWithDartWrapper(immutable_buffer);
+  buffer->AssociateWithDartWrapper(buffer_handle);
   tonic::DartInvoke(callback_handle, {tonic::ToDart(size)});
+  return Dart_Null();
 }
 
 size_t ImmutableBuffer::GetAllocationSize() const {
