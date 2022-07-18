@@ -16,7 +16,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('RasterWidget can rasterize child', (WidgetTester tester) async {
     final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final Key key = UniqueKey();
     await tester.pumpWidget(RepaintBoundary(
+      key: key,
       child: Center(
         child: RasterWidget(
           controller: controller,
@@ -28,8 +30,7 @@ void main() {
         ),
       ),
     ));
-
-    await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('raster_widget.yellow.png'));
+    await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RasterWidget is not a repaint boundary when rasterizing', (WidgetTester tester) async {
