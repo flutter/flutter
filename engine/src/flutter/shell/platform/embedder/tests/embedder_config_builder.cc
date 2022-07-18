@@ -366,13 +366,14 @@ FlutterCompositor& EmbedderConfigBuilder::GetCompositor() {
 }
 
 void EmbedderConfigBuilder::SetRenderTargetType(
-    EmbedderTestBackingStoreProducer::RenderTargetType type) {
+    EmbedderTestBackingStoreProducer::RenderTargetType type,
+    FlutterSoftwarePixelFormat software_pixfmt) {
   auto& compositor = context_.GetCompositor();
   // TODO(wrightgeorge): figure out a better way of plumbing through the
   // GrDirectContext
   compositor.SetBackingStoreProducer(
       std::make_unique<EmbedderTestBackingStoreProducer>(
-          compositor.GetGrContext(), type));
+          compositor.GetGrContext(), type, software_pixfmt));
 }
 
 UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {
