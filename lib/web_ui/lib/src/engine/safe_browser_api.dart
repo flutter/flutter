@@ -12,7 +12,6 @@
 library browser_api;
 
 import 'dart:async';
-import 'dart:js' as js;
 import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -25,12 +24,14 @@ import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'vector_math.dart';
 
+export 'package:js/js.dart' show allowInterop;
+
 /// Creates JavaScript object populated with [properties].
 ///
 /// This is equivalent to writing `{}` in plain JavaScript.
 Object createPlainJsObject([Map<String, Object?>? properties]) {
   if (properties != null) {
-    return js.JsObject.jsify(properties);
+    return js_util.jsify(properties);
   } else {
     return js_util.newObject<Object>();
   }
@@ -68,11 +69,6 @@ T setJsProperty<T>(Object object, String name, T value) {
     ' - Ensure that the property is safe then add it to _safeJsProperties set.',
   );
   return js_util.setProperty<T>(object, name, value);
-}
-
-/// Wraps function [f] to be callable from JavaScript.
-F allowInterop<F extends Function>(F f) {
-  return js.allowInterop<F>(f);
 }
 
 /// Converts a JavaScript `Promise` into Dart [Future].

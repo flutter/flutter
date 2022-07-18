@@ -13,7 +13,7 @@
 library canvaskit_api;
 
 import 'dart:async';
-import 'dart:js' as js;
+import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -2275,7 +2275,7 @@ abstract class Collector {
 class ProductionCollector implements Collector {
   ProductionCollector() {
     _skObjectFinalizationRegistry =
-        SkObjectFinalizationRegistry(js.allowInterop((SkDeletable deletable) {
+        SkObjectFinalizationRegistry(allowInterop((SkDeletable deletable) {
       // This is called when GC decides to collect the wrapper object and
       // notify us, which may happen after the object is already deleted
       // explicitly, e.g. when its ref count drops to zero. When that happens
@@ -2530,6 +2530,28 @@ extension SkPartialImageInfoExtension on SkPartialImageInfo {
   external int get width;
 }
 
+/// Helper interop methods for [patchCanvasKitModule].
+@JS()
+external set _flutterWebCachedModule(Object? module);
+
+@JS()
+external Object? get _flutterWebCachedModule;
+
+@JS()
+external set _flutterWebCachedExports(Object? exports);
+
+@JS()
+external Object? get _flutterWebCachedExports;
+
+@JS('Object')
+external Object get objectConstructor;
+
+@JS()
+external Object? get exports;
+
+@JS()
+external Object? get module;
+
 /// Monkey-patch the top-level `module` and `exports` objects so that
 /// CanvasKit doesn't attempt to register itself as an anonymous module.
 ///
@@ -2553,40 +2575,39 @@ extension SkPartialImageInfoExtension on SkPartialImageInfo {
 void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
   // First check if `exports` and `module` are already defined. If so, then
   // CommonJS is being used, and we shouldn't have any problems.
-  final js.JsFunction objectConstructor = js.context['Object'] as js.JsFunction;
-  if (js.context['exports'] == null) {
-    final js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
+  if (exports == null) {
+    final Object? exportsAccessor = js_util.jsify(<String, dynamic>{
       'get': allowInterop(() {
         if (domDocument.currentScript == canvasKitScript) {
-          return js.JsObject(objectConstructor);
+          return objectConstructor;
         } else {
-          return js.context['_flutterWebCachedExports'];
+          return _flutterWebCachedExports;
         }
       }),
       'set': allowInterop((dynamic value) {
-        js.context['_flutterWebCachedExports'] = value;
+        _flutterWebCachedExports = value;
       }),
       'configurable': true,
     });
-    objectConstructor.callMethod(
-        'defineProperty', <dynamic>[js.context, 'exports', exportsAccessor]);
+    js_util.callMethod(objectConstructor,
+        'defineProperty', <dynamic>[domWindow, 'exports', exportsAccessor]);
   }
-  if (js.context['module'] == null) {
-    final js.JsObject moduleAccessor = js.JsObject.jsify(<String, dynamic>{
+  if (module == null) {
+    final Object? moduleAccessor = js_util.jsify(<String, dynamic>{
       'get': allowInterop(() {
         if (domDocument.currentScript == canvasKitScript) {
-          return js.JsObject(objectConstructor);
+          return objectConstructor;
         } else {
-          return js.context['_flutterWebCachedModule'];
+          return _flutterWebCachedModule;
         }
       }),
       'set': allowInterop((dynamic value) {
-        js.context['_flutterWebCachedModule'] = value;
+        _flutterWebCachedModule = value;
       }),
       'configurable': true,
     });
-    objectConstructor.callMethod(
-        'defineProperty', <dynamic>[js.context, 'module', moduleAccessor]);
+    js_util.callMethod(objectConstructor,
+        'defineProperty', <dynamic>[domWindow, 'module', moduleAccessor]);
   }
   domDocument.head!.appendChild(canvasKitScript);
 }
