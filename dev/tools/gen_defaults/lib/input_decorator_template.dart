@@ -70,7 +70,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get iconColor => ${componentColor("md.comp.filled-text-field.leading-icon")};
-  
+
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if(states.contains(MaterialState.error)) {
@@ -93,7 +93,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     }
     return ${componentColor('md.comp.filled-text-field.leading-icon')};
   });
-  
+
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if(states.contains(MaterialState.error)) {

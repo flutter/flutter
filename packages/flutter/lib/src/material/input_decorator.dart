@@ -4503,7 +4503,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get iconColor => Theme.of(context).colorScheme.onSurfaceVariant;
-  
+
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if(states.contains(MaterialState.error)) {
@@ -4526,7 +4526,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     }
     return Theme.of(context).colorScheme.onSurfaceVariant;
   });
-  
+
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if(states.contains(MaterialState.error)) {
@@ -4600,4 +4600,3 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 }
 
 // END GENERATED TOKEN PROPERTIES - InputDecorator
-
