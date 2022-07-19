@@ -956,7 +956,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
               'Path $absPath contains invalid characters in "\'#!\$^&*=|,;<>?". '
               'Please rename your directory so as to not include any of these characters '
               'and retry.'
-        ));
+        ),
+    );
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
