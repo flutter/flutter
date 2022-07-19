@@ -9,8 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'simulation.dart';
 import 'utils.dart';
 
-export 'tolerance.dart' show Tolerance;
-
 /// Structure that describes a spring's constants.
 ///
 /// Used to configure a [SpringSimulation].

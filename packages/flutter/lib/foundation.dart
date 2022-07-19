@@ -14,6 +14,7 @@ export 'dart:io' show HttpClientResponse;
 export 'dart:typed_data' show ByteData, Endian, Float32List, Float64List, Int32List, Int64List, Uint8List;
 export 'dart:ui' show Brightness, PlatformDispatcher, SingletonFlutterWindow, VoidCallback;
 
+// extra-imports
 export 'package:meta/meta.dart' show
   factory,
   immutable,
