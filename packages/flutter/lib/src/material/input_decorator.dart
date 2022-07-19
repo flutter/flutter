@@ -1956,7 +1956,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.hintColor;
   }
 
-  Color _getDefaultBorderColor(ThemeData themeData) {
+  Color _getDefaultM2BorderColor(ThemeData themeData) {
     if (isFocused) {
       return themeData.colorScheme.primary;
     }
@@ -1971,7 +1971,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return enabledColor;
   }
 
-  Color _getFillColor(ThemeData themeData) {
+  Color _getFillColor(ThemeData themeData, InputDecorationTheme defaults) {
     if (decoration!.filled != true) { // filled == null same as filled == false
       return Colors.transparent;
     }
@@ -1979,19 +1979,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return MaterialStateProperty.resolveAs(decoration!.fillColor!, materialState);
     }
 
-    // dark theme: 10% white (enabled), 5% white (disabled)
-    // light theme: 4% black (enabled), 2% black (disabled)
-    const Color darkEnabled = Color(0x1AFFFFFF);
-    const Color darkDisabled = Color(0x0DFFFFFF);
-    const Color lightEnabled = Color(0x0A000000);
-    const Color lightDisabled = Color(0x05000000);
+    return decoration!.enabled ? defaults.fillColor!: defaults.disabledFillColor!;
 
-    switch (themeData.brightness) {
-      case Brightness.dark:
-        return decoration!.enabled ? darkEnabled : darkDisabled;
-      case Brightness.light:
-        return decoration!.enabled ? lightEnabled : lightDisabled;
-    }
   }
 
   Color _getHoverColor(ThemeData themeData) {
@@ -2001,35 +1990,19 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return decoration!.hoverColor ?? themeData.inputDecorationTheme.hoverColor ?? themeData.hoverColor;
   }
 
-  Color _getIconColor(ThemeData themeData) {
-    Color resolveIconColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
-        return themeData.disabledColor;
-      }
-
-      if (states.contains(MaterialState.focused)) {
-        return themeData.colorScheme.primary;
-      }
-
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return Colors.white70;
-        case Brightness.light:
-          return Colors.black45;
-      }
-    }
+  Color _getIconColor(ThemeData themeData, InputDecorationTheme defaults) {
     return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
-      ?? MaterialStateProperty.resolveWith(resolveIconColor).resolve(materialState);
+      ?? MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
-  Color _getPrefixIconColor(ThemeData themeData) {
+  Color _getPrefixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
     return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
-      ?? _getIconColor(themeData);
+      ?? MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
-  Color _getSuffixIconColor(ThemeData themeData) {
+  Color _getSuffixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
     return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
-      ?? _getIconColor(themeData);
+      ?? MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
 
   // True if the label will be shown and the hint will not.
@@ -2047,7 +2020,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
-  TextStyle _getInlineLabelStyle(ThemeData themeData) {
+  TextStyle _getInlineLabelStyle(ThemeData themeData,InputDecorationTheme defaults) {
+    if (themeData.useMaterial3) {
+      return MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState) ;
+    }
     final TextStyle defaultStyle = TextStyle(
       color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor,
     );
@@ -2078,13 +2054,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(style);
   }
 
-  TextStyle _getFloatingLabelStyle(ThemeData themeData) {
+  TextStyle _getFloatingLabelStyle(ThemeData themeData,InputDecorationTheme defaults) {
     TextStyle getFallbackTextStyle() {
       final Color color = decoration!.errorText != null
         ? decoration!.errorStyle?.color ?? themeData.errorColor
         : _getActiveColor(themeData);
 
-      return TextStyle(color: decoration!.enabled ? color : themeData.disabledColor)
+      final TextStyle defaultTextStyle = themeData.useMaterial3
+        ? MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState)
+        : TextStyle(color: decoration!.enabled ? color : themeData.disabledColor) ;
+
+      return defaultTextStyle
         .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
     }
 
@@ -2098,12 +2078,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(style);
   }
 
-  TextStyle _getHelperStyle(ThemeData themeData) {
+  TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
+    if (themeData.useMaterial3) {
+      return MaterialStateProperty.resolveAs(defaults.helperStyle!, materialState) ;
+    }
     final Color color = decoration!.enabled ? themeData.hintColor : Colors.transparent;
     return themeData.textTheme.caption!.copyWith(color: color).merge(MaterialStateProperty.resolveAs(decoration!.helperStyle, materialState));
   }
 
-  TextStyle _getErrorStyle(ThemeData themeData) {
+  TextStyle _getErrorStyle(ThemeData themeData, InputDecorationTheme defaults) {
+    if (themeData.useMaterial3) {
+      return MaterialStateProperty.resolveAs(defaults.helperStyle!, materialState) ;
+    }
     final Color color = decoration!.enabled ? themeData.errorColor : Colors.transparent;
     return themeData.textTheme.caption!.copyWith(color: color).merge(decoration!.errorStyle);
   }
@@ -2117,7 +2103,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     };
   }
 
-  InputBorder _getDefaultBorder(ThemeData themeData) {
+  InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationTheme defaults) {
     final InputBorder border =  MaterialStateProperty.resolveAs(decoration!.border, materialState)
       ?? const UnderlineInputBorder();
 
@@ -2129,10 +2115,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return border;
     }
 
+    if (themeData.useMaterial3) {
+      if (decoration!.filled!) {
+        return border.copyWith(
+          borderSide: MaterialStateProperty.resolveAs(defaults.activeIndicatorBorder, materialState),
+        );
+      }
+      else {
+        return border.copyWith(
+          borderSide: MaterialStateProperty.resolveAs(defaults.outLineBorder, materialState),
+        );
+      }
+    }
+
     final Color borderColor;
     if (decoration!.enabled || isFocused) {
       borderColor = decoration!.errorText == null
-        ? _getDefaultBorderColor(themeData)
+        ? _getDefaultM2BorderColor(themeData)
         : themeData.errorColor;
     } else {
       borderColor = ((decoration!.filled ?? false) && !(decoration!.border?.isOutline ?? false))
@@ -2153,7 +2152,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle labelStyle = _getInlineLabelStyle(themeData);
+    final InputDecorationTheme defaults =
+      Theme.of(context).useMaterial3 ? _InputDecoratorDefaultsM3(context) :  _InputDecoratorDefaultsM2(context);
+
+    final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
     final TextBaseline textBaseline = labelStyle.textBaseline!;
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData);
@@ -2181,13 +2183,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else {
       border = isError ? decoration!.errorBorder : decoration!.enabledBorder;
     }
-    border ??= _getDefaultBorder(themeData);
+    border ??= _getDefaultBorder(themeData, defaults);
 
     final Widget container = _BorderContainer(
       border: border,
       gap: _borderGap,
       gapAnimation: _floatingLabelController.view,
-      fillColor: _getFillColor(themeData),
+      fillColor: _getFillColor(themeData, defaults),
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
     );
@@ -2202,7 +2204,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           duration:_kTransitionDuration,
           curve: _kTransitionCurve,
           style: widget._labelShouldWithdraw
-            ? _getFloatingLabelStyle(themeData)
+            ? _getFloatingLabelStyle(themeData, defaults)
             : labelStyle,
           child: decoration!.label ?? Text(
             decoration!.labelText!,
@@ -2238,7 +2240,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         padding: const EdgeInsetsDirectional.only(end: 16.0),
         child: IconTheme.merge(
           data: IconThemeData(
-            color: _getIconColor(themeData),
+            color: _getIconColor(themeData, defaults),
             size: iconSize,
           ),
           child: decoration!.icon!,
@@ -2258,7 +2260,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           ),
           child: IconTheme.merge(
             data: IconThemeData(
-              color: _getPrefixIconColor(themeData),
+              color: _getPrefixIconColor(themeData, defaults),
               size: iconSize,
             ),
             child: decoration!.prefixIcon!,
@@ -2279,7 +2281,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           ),
           child: IconTheme.merge(
             data: IconThemeData(
-              color: _getSuffixIconColor(themeData),
+              color: _getSuffixIconColor(themeData, defaults),
               size: iconSize,
             ),
             child: decoration!.suffixIcon!,
@@ -2290,10 +2292,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget helperError = _HelperError(
       textAlign: textAlign,
       helperText: decoration!.helperText,
-      helperStyle: _getHelperStyle(themeData),
+      helperStyle: _getHelperStyle(themeData, defaults),
       helperMaxLines: decoration!.helperMaxLines,
       errorText: decoration!.errorText,
-      errorStyle: _getErrorStyle(themeData),
+      errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration!.errorMaxLines,
     );
 
@@ -2306,7 +2308,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         liveRegion: isFocused,
         child: Text(
           decoration!.counterText!,
-          style: _getHelperStyle(themeData).merge(MaterialStateProperty.resolveAs(decoration!.counterStyle, materialState)),
+          style: _getHelperStyle(themeData, defaults).merge(MaterialStateProperty.resolveAs(decoration!.counterStyle, materialState)),
           overflow: TextOverflow.ellipsis,
           semanticsLabel: decoration!.semanticCounterText,
         ),
@@ -3736,6 +3738,7 @@ class InputDecorationTheme with Diagnosticable {
   /// The values of [isDense], [isCollapsed], [filled], [floatingLabelAlignment],
   /// and [border] must not be null.
   const InputDecorationTheme({
+    this.inputStyle,
     this.labelStyle,
     this.floatingLabelStyle,
     this.helperStyle,
@@ -3756,6 +3759,9 @@ class InputDecorationTheme with Diagnosticable {
     this.counterStyle,
     this.filled = false,
     this.fillColor,
+    this.disabledFillColor,
+    this.activeIndicatorBorder,
+    this.outLineBorder,
     this.focusColor,
     this.hoverColor,
     this.errorBorder,
@@ -3771,6 +3777,9 @@ class InputDecorationTheme with Diagnosticable {
        assert(floatingLabelAlignment != null),
        assert(filled != null),
        assert(alignLabelWithHint != null);
+
+  /// The style to use for input text in [Textfield].
+  final TextStyle? inputStyle;
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
   final TextStyle? labelStyle;
@@ -3939,6 +3948,16 @@ class InputDecorationTheme with Diagnosticable {
   /// [InputBorder.getOuterPath], which is filled if [filled] is
   /// true and bordered per the [border].
   final Color? fillColor;
+
+  /// The color to fill the decoration's container with, if [filled] is true and
+  /// the text field is disabled.
+  final Color? disabledFillColor;
+
+  /// The borderSide of the OutlineInputBorder with `color` and `weight`.
+  final BorderSide? outLineBorder;
+
+  /// The borderSide of the UnderlineInputBorder with `color` and `weight`.
+  final BorderSide? activeIndicatorBorder;
 
   /// The color to blend with the decoration's [fillColor] with, if [filled] is
   /// true and the container has the input focus.
@@ -4139,6 +4158,7 @@ class InputDecorationTheme with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationTheme copyWith({
+    TextStyle? inputStyle,
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
     TextStyle? helperStyle,
@@ -4159,6 +4179,9 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? counterStyle,
     bool? filled,
     Color? fillColor,
+    Color? disabledFillColor,
+    BorderSide? activeIndicatorBorder,
+    BorderSide? outLineBorder,
     Color? focusColor,
     Color? hoverColor,
     InputBorder? errorBorder,
@@ -4171,6 +4194,7 @@ class InputDecorationTheme with Diagnosticable {
     BoxConstraints? constraints,
   }) {
     return InputDecorationTheme(
+      inputStyle: inputStyle ?? this.inputStyle,
       labelStyle: labelStyle ?? this.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
       helperStyle: helperStyle ?? this.helperStyle,
@@ -4191,6 +4215,9 @@ class InputDecorationTheme with Diagnosticable {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
+      disabledFillColor: disabledFillColor ?? this.disabledFillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? this.activeIndicatorBorder,
+      outLineBorder: outLineBorder ?? this.outLineBorder,
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       errorBorder: errorBorder ?? this.errorBorder,
@@ -4227,6 +4254,9 @@ class InputDecorationTheme with Diagnosticable {
     filled,
     Object.hash(
       fillColor,
+      disabledFillColor,
+      activeIndicatorBorder,
+      outLineBorder,
       focusColor,
       hoverColor,
       errorBorder,
@@ -4269,6 +4299,9 @@ class InputDecorationTheme with Diagnosticable {
         && other.floatingLabelAlignment == floatingLabelAlignment
         && other.filled == filled
         && other.fillColor == fillColor
+        && other.disabledFillColor == disabledFillColor
+        && other.activeIndicatorBorder == activeIndicatorBorder
+        && other.outLineBorder == outLineBorder
         && other.focusColor == focusColor
         && other.hoverColor == hoverColor
         && other.errorBorder == errorBorder
@@ -4306,6 +4339,9 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
     properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
     properties.add(ColorProperty('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
+    properties.add(ColorProperty('disabledFillColor', disabledFillColor, defaultValue: defaultTheme.disabledFillColor));
+    properties.add(DiagnosticsProperty<BorderSide>('activeIndicatorBorder', activeIndicatorBorder, defaultValue: defaultTheme.activeIndicatorBorder));
+    properties.add(DiagnosticsProperty<BorderSide>('outLineBorder', outLineBorder, defaultValue: defaultTheme.outLineBorder));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultTheme.focusColor));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultTheme.hoverColor));
     properties.add(DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
@@ -4318,3 +4354,255 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: defaultTheme.constraints));
   }
 }
+
+class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
+  const _InputDecoratorDefaultsM2(this.context)
+      : super();
+
+  final BuildContext context;
+
+  @override
+  TextStyle? get inputStyle => Theme.of(context).textTheme.subtitle1;
+
+  @override
+  Color? get fillColor {
+    // dark theme: 10% white
+    // light theme: 4% black
+    switch (Theme.of(context).brightness) {
+      case Brightness.dark: return const Color(0x1AFFFFFF);
+      case Brightness.light:return const Color(0x0A000000) ;
+    }
+  }
+
+  @override
+  Color? get disabledFillColor {
+    // dark theme: 5% white
+    // light theme: 2% black
+    switch (Theme.of(context).brightness) {
+      case Brightness.dark:
+        return const Color(0x0DFFFFFF);
+      case Brightness.light:
+        return const Color(0x05000000) ;
+    }
+  }
+
+  @override
+  Color? get iconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+      return Theme.of(context).disabledColor;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return Theme.of(context).colorScheme.primary;
+    }
+    switch (Theme.of(context).brightness) {
+      case Brightness.dark:
+        return Colors.white70;
+      case Brightness.light:
+        return Colors.black45;
+    }
+  });
+
+  @override
+  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+      return Theme.of(context).disabledColor;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return Theme.of(context).colorScheme.primary;
+    }
+    switch (Theme.of(context).brightness) {
+      case Brightness.dark:
+        return Colors.white70;
+      case Brightness.light:
+        return Colors.black45;
+    }
+  });
+
+  @override
+  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+      return Theme.of(context).disabledColor;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return Theme.of(context).colorScheme.primary;
+    }
+    switch (Theme.of(context).brightness) {
+      case Brightness.dark:
+        return Colors.white70;
+      case Brightness.light:
+        return Colors.black45;
+    }
+  });
+
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - InputDecorator
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+// Generated version v0_101
+class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
+  const _InputDecoratorDefaultsM3(this.context)
+    : super();
+
+  final BuildContext context;
+
+  @override
+  Color? get fillColor => Theme.of(context).colorScheme.surfaceVariant;
+
+  @override
+  Color? get disabledFillColor => Theme.of(context).colorScheme.onSurface.withOpacity(0.04);
+
+  @override
+  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.hovered)) {
+          return BorderSide(color: Theme.of(context).colorScheme.onErrorContainer);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return BorderSide(color: Theme.of(context).colorScheme.error);
+        }
+        return BorderSide(color: Theme.of(context).colorScheme.error);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: Theme.of(context).colorScheme.onSurface);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return BorderSide(color: Theme.of(context).colorScheme.primary);
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+      }
+      return BorderSide(color: Theme.of(context).colorScheme.onSurfaceVariant);
+    });
+
+  @override
+  BorderSide? get outLineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.hovered)) {
+          return BorderSide(color: Theme.of(context).colorScheme.onErrorContainer);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return BorderSide(color: Theme.of(context).colorScheme.error);
+        }
+        return BorderSide(color: Theme.of(context).colorScheme.error);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: Theme.of(context).colorScheme.onSurface);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0);
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+      }
+      return BorderSide(color: Theme.of(context).colorScheme.outline);
+    });
+
+  @override
+  Color? get iconColor => Theme.of(context).colorScheme.onSurfaceVariant;
+  
+  @override
+  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if(states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return Theme.of(context).colorScheme.onSurfaceVariant;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return Theme.of(context).colorScheme.onSurfaceVariant;
+      }
+      return Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+    if (states.contains(MaterialState.disabled)) {
+      return Theme.of(context).colorScheme.onSurface.withOpacity(0.38);
+    }
+    return Theme.of(context).colorScheme.onSurfaceVariant;
+  });
+  
+  @override
+  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if(states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return Theme.of(context).colorScheme.onErrorContainer;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return Theme.of(context).colorScheme.error;
+      }
+      return Theme.of(context).colorScheme.error;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+    if (states.contains(MaterialState.disabled)) {
+      return Theme.of(context).colorScheme.onSurface.withOpacity(0.38);
+    }
+    return Theme.of(context).colorScheme.onSurfaceVariant;
+  });
+
+  @override
+  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle= Theme.of(context).textTheme.bodyLarge ?? const TextStyle();
+    if(states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color:Theme.of(context).colorScheme.onErrorContainer);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
+      }
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurfaceVariant);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.primary);
+    }
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+    }
+    return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurfaceVariant);
+  });
+
+  @override
+  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle= Theme.of(context).textTheme.bodySmall ?? const TextStyle();
+    if(states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
+      }
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurfaceVariant);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurfaceVariant);
+    }
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+    }
+    return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurfaceVariant);
+  });
+}
+
+// END GENERATED TOKEN PROPERTIES - InputDecorator
+
+//@override
+//TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((states) => Theme.of(context).textTheme.bodySmall!) ;
