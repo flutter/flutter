@@ -251,8 +251,8 @@ class _OverlayEntryWidget extends StatefulWidget {
 
 /// A location in a particular [Overlay].
 ///
-/// An [OverlayInfo] is an immutable object that can be typically uniquely
-/// identified by the [Overlay] and the [OverlayEntry] it associates with.
+/// An [OverlayInfo] is an immutable object that uniquely identifies the
+/// [Overlay] and the [OverlayEntry] it associates with.
 @immutable
 class OverlayInfo {
   const OverlayInfo._(this._overlayEntryState, this._overlayRenderObject);
@@ -262,7 +262,8 @@ class OverlayInfo {
   /// The underlying [RenderObject] of the [Overlay].
   final _RenderTheatre _overlayRenderObject;
 
-  /// The closest [OverlayInfo] that encloses the given context.
+  /// Returns an opaque identifier of the closest [OverlayEntry] the given
+  /// context belongs to.
   ///
   /// The widget subtree associated with the given `context` will be notified
   /// when it is moved to a different [Overlay] or a different [OverlayEntry].
@@ -300,8 +301,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   @override
   void didUpdateWidget(_OverlayEntryWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // OverlayState's build method always return a RenderObjectWidget _Theatre,
-    // so it's safe to assume state equality == render object equality.
+    // OverlayState's build method always returns a RenderObjectWidget _Theatre,
+    // so it's safe to assume that state equality implies render object equality.
     if (oldWidget.overlayState != widget.overlayState) {
       overlayInfo = OverlayInfo._(this, context.findAncestorRenderObjectOfType<_RenderTheatre>()!);
     }
@@ -1130,8 +1131,8 @@ class _OverlayPortalElement extends RenderObjectElement {
   @override
   void forgetChild(Element child) {
     // The _overlayChild Element does not have a key because the _DeferredLayout
-    // widget does not take a Key, so only the regular _child can be taken by
-    // global key reparenting.
+    // widget does not take a Key, so only the regular _child can be taken
+    // during global key reparenting.
     assert(child == _child);
     _child = null;
     super.forgetChild(child);
@@ -1167,8 +1168,8 @@ class _OverlayPortalElement extends RenderObjectElement {
     // different overlay entry, the overlay child is inserted in the right
     // position in the overlay's child list.
     //
-    // This is also a workaround for the !renderObject.attached assert located
-    // in the `RenderObjectElement.deactive()` method.
+    // This is also a workaround for the !renderObject.attached assert in the
+    // `RenderObjectElement.deactive()` method.
     if (box != null) {
       removeRenderObjectChild(box, widget.overlayInfo);
     }
@@ -1237,8 +1238,8 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 
 // A RenderProxyBox that defers its layout until its `_layoutParent` is laid out.
 //
-// This RenderObject is a child RenderObject of a _RenderTheatre. It guarantees
-// that:
+// This RenderObject must be a child RenderObject of a _RenderTheatre. It
+// guarantees that:
 //
 // 1. It's a relayout boundary. And it never dirties its parent _RenderTheatre
 //    or its _layoutParent.
@@ -1428,10 +1429,8 @@ class _RenderDeferredLayoutBox extends RenderProxyBox {
 // A RenderProxyBox that makes sure its `deferredLayoutChild` has a greater
 // depth than itself.
 //
-// Its `_deferredLayoutChild` is guaranteed to have a greater depth than this
-// RenderObject itself. As a result PipelineOwner will never layout relayout
-// boundaries from `deferredLayoutChild`'s subtree before this render object,
-// if `_deferredLayoutChild` is marked dirty.
+// This render object guarantees that its `_deferredLayoutChild` will have a
+// greater depth than this RenderObject itself.
 class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   _RenderDeferredLayoutBox? _deferredLayoutChild;
 
@@ -1440,7 +1439,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     super.redepthChildren();
     final _RenderDeferredLayoutBox? child = _deferredLayoutChild;
     // If child is not attached, this method will be invoked by child's real
-    // parent.
+    // parent when it's attached.
     if (child != null && child.attached) {
       assert(child.attached);
       redepthChild(child);
