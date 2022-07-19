@@ -102,14 +102,6 @@ class ShapeDecoration extends Decoration {
           shape = const CircleBorder();
         }
         break;
-      case BoxShape.oval:
-        if (source.border != null) {
-          assert(source.border!.isUniform);
-          shape = OvalBorder(side: source.border!.top);
-        } else {
-          shape = const OvalBorder();
-        }
-        break;
       case BoxShape.rectangle:
         if (source.borderRadius != null) {
           assert(source.border == null || source.border!.isUniform);

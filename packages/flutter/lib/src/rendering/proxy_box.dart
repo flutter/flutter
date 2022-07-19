@@ -2018,8 +2018,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     switch (_shape) {
       case BoxShape.rectangle:
         return (borderRadius ?? BorderRadius.zero).toRRect(rect);
-      case BoxShape.oval:
-        return RRect.fromRectAndRadius(rect, Radius.elliptical(rect.width, rect.height));
       case BoxShape.circle:
         return RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }

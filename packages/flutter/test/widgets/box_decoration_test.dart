@@ -102,19 +102,6 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Ovals can have uniform borders', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Container(
-        padding: const EdgeInsets.all(50.0),
-        decoration: BoxDecoration(
-          shape: BoxShape.oval,
-          border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
-          color: Colors.teal[600],
-        ),
-      ),
-    );
-  });
-
   testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
     const Key key = Key('outerContainer');
     await tester.pumpWidget(

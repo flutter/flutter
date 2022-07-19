@@ -38,16 +38,6 @@ enum BoxShape {
   ///  * [CircleBorder], the equivalent [ShapeBorder].
   circle,
 
-  /// An oval centered in the middle of the box into which the [Border] or
-  /// [BoxDecoration] is painted. The oval is drawn such that it touches
-  /// the edges of the box.
-  ///
-  /// See also:
-  ///
-  ///  * [OvalBorder], the equivalent [ShapeBorder].
-  ///  * [ClipOval], a widget that clips its child using an oval.
-  oval,
-
   // Don't add more, instead create a new ShapeBorder.
 }
 
@@ -267,23 +257,6 @@ abstract class BoxBorder extends ShapeBorder {
     canvas.drawCircle(rect.center, radius, paint);
   }
 
-  static void _paintUniformBorderWithOval(Canvas canvas, Rect rect, BorderSide side) {
-    assert(side.style != BorderStyle.none);
-    final Rect rectToBeDrawn;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        rectToBeDrawn = rect.deflate(side.width / 2.0);
-        break;
-      case StrokeAlign.center:
-        rectToBeDrawn = rect;
-        break;
-      case StrokeAlign.outside:
-        rectToBeDrawn = rect.inflate(side.width / 2.0);
-        break;
-    }
-    canvas.drawOval(rectToBeDrawn, side.toPaint());
-  }
-
   static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
     final double width = side.width;
@@ -300,6 +273,7 @@ abstract class BoxBorder extends ShapeBorder {
         rectToBeDrawn = rect.inflate(width / 2.0);
         break;
     }
+
     canvas.drawRect(rectToBeDrawn, paint);
   }
 }
@@ -594,10 +568,6 @@ class Border extends BoxBorder {
               assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
               break;
-            case BoxShape.oval:
-              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
-              BoxBorder._paintUniformBorderWithOval(canvas, rect, top);
-              break;
             case BoxShape.rectangle:
               if (borderRadius != null) {
                 BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
@@ -624,20 +594,15 @@ class Border extends BoxBorder {
       return true;
     }());
     assert(() {
-      switch (shape) {
-        case BoxShape.circle:
-        case BoxShape.oval:
-          final String errorShape = (shape == BoxShape.circle) ? 'a circle' : 'an oval';
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('A Border can only be drawn as $errorShape if it is uniform.'),
-            ErrorDescription('The following is not uniform:'),
-            if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
-            if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
-            if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
-            if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
-          ]);
-        case BoxShape.rectangle:
-          break;
+      if (shape != BoxShape.rectangle) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A Border can only be drawn as a circle if it is uniform.'),
+          ErrorDescription('The following is not uniform:'),
+          if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
+          if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
+          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+          if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
+        ]);
       }
       return true;
     }());
@@ -960,10 +925,6 @@ class BorderDirectional extends BoxBorder {
             case BoxShape.circle:
               assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
-              break;
-            case BoxShape.oval:
-              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
-              BoxBorder._paintUniformBorderWithOval(canvas, rect, top);
               break;
             case BoxShape.rectangle:
               if (borderRadius != null) {

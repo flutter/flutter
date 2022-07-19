@@ -23,7 +23,7 @@ import 'image_provider.dart';
 ///
 /// The box has a [border], a body, and may cast a [boxShadow].
 ///
-/// The [shape] of the box can be a circle, an oval or a rectangle. If it is a rectangle,
+/// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
 /// then the [borderRadius] property controls the roundness of the corners.
 ///
 /// The body of the box is painted in layers. The bottom-most layer is the
@@ -78,7 +78,7 @@ class BoxDecoration extends Decoration {
   /// * If [border] is null, this decoration does not paint a border.
   /// * If [borderRadius] is null, this decoration uses more efficient background
   ///   painting commands. The [borderRadius] argument must be null if [shape] is
-  ///   [BoxShape.circle] or [BoxShape.oval].
+  ///   [BoxShape.circle].
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
   /// * If [backgroundBlendMode] is null, this decoration paints with [BlendMode.srcOver]
@@ -126,14 +126,14 @@ class BoxDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(shape == BoxShape.rectangle || borderRadius == null); // Can't have a border radius if you're a circle or an oval.
+    assert(shape != BoxShape.circle || borderRadius == null); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
 
   /// The color to fill in the background of the box.
   ///
   /// The color is filled into the [shape] of the box (e.g., either a rectangle,
-  /// potentially with a [borderRadius], or a circle/oval).
+  /// potentially with a [borderRadius], or a circle).
   ///
   /// This is ignored if [gradient] is non-null.
   ///
@@ -142,9 +142,9 @@ class BoxDecoration extends Decoration {
 
   /// An image to paint above the background [color] or [gradient].
   ///
-  /// If [shape] is [BoxShape.circle] or [BoxShape.oval] then the image is
-  /// clipped to the circle's boundary; if [borderRadius] is non-null
-  /// then the image is clipped to the given radii.
+  /// If [shape] is [BoxShape.circle] then the image is clipped to the circle's
+  /// boundary; if [borderRadius] is non-null then the image is clipped to the
+  /// given radii.
   final DecorationImage? image;
 
   /// A border to draw above the background [color], [gradient], or [image].
@@ -196,14 +196,14 @@ class BoxDecoration extends Decoration {
   /// The shape to fill the background [color], [gradient], and [image] into and
   /// to cast as the [boxShadow].
   ///
-  /// If this is [BoxShape.circle] or [BoxShape.oval], then [borderRadius] is ignored.
+  /// If this is [BoxShape.circle] then [borderRadius] is ignored.
   ///
   /// The [shape] cannot be interpolated; animating between two [BoxDecoration]s
   /// with different [shape]s will result in a discontinuity in the rendering.
   /// To interpolate between two shapes, consider using [ShapeDecoration] and
   /// different [ShapeBorder]s; in particular, [CircleBorder] instead of
-  /// [BoxShape.circle], [OvalBorder] instead of [BoxShape.oval] and
-  /// [RoundedRectangleBorder] instead of [BoxShape.rectangle].
+  /// [BoxShape.circle] and [RoundedRectangleBorder] instead of
+  /// [BoxShape.rectangle].
   ///
   /// {@macro flutter.painting.BoxDecoration.clip}
   final BoxShape shape;
@@ -219,8 +219,6 @@ class BoxDecoration extends Decoration {
         final double radius = rect.shortestSide / 2.0;
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         return Path()..addOval(square);
-      case BoxShape.oval:
-        return Path()..addOval(rect);
       case BoxShape.rectangle:
         if (borderRadius != null) {
           return Path()..addRRect(borderRadius!.resolve(textDirection).toRRect(rect));
@@ -381,9 +379,6 @@ class BoxDecoration extends Decoration {
         final Offset center = size.center(Offset.zero);
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
-      case BoxShape.oval:
-        final RRect bounds = RRect.fromRectAndRadius(Offset.zero & size, Radius.elliptical(size.width, size.height));
-        return bounds.contains(position);
     }
   }
 
@@ -435,9 +430,6 @@ class _BoxDecorationPainter extends BoxPainter {
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
         break;
-      case BoxShape.oval:
-        canvas.drawOval(rect, paint);
-        break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius == null) {
           canvas.drawRect(rect, paint);
@@ -479,10 +471,6 @@ class _BoxDecorationPainter extends BoxPainter {
         final double radius = rect.shortestSide / 2.0;
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         clipPath = Path()..addOval(square);
-        break;
-      case BoxShape.oval:
-        assert(_decoration.borderRadius == null);
-        clipPath = Path()..addOval(rect);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null) {
