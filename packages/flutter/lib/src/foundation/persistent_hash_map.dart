@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// A collection of key/value pairs, from which you can retrieve a value
-/// using its associated key.
+/// A collection of key/value pairs which provides efficient retrieval of
+/// value by key.
 ///
 /// This class implements a persistent map: extending this map with a new
 /// key/value pair does not modify an existing instance but instead creates a
 /// new instance.
 ///
-/// Unlike [Map] this class does not support `null` as a key value and
+/// Unlike [Map], this class does not support `null` as a key value and
 /// implements only a functionality needed for a specific use case at the
 /// core of the framework.
 ///
@@ -23,7 +23,7 @@
 ///  * [Clojure's `PersistentHashMap`](https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/PersistentHashMap.java).
 ///
 class PersistentHashMap<K extends Object, V> {
-  /// An an empty hash map.
+  /// Creates an empty hash map.
   const PersistentHashMap.empty() : this._(null);
 
   const PersistentHashMap._(this._root);
@@ -98,8 +98,7 @@ class _FullNode extends _TrieNode {
   _TrieNode put(int bitIndex, Object key, int keyHash, Object? value) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
     final _TrieNode node = _unsafeCast<_TrieNode?>(descendants[index]) ?? _CompressedNode.empty;
-    final _TrieNode newNode = node.put(
-        bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
+    final _TrieNode newNode = node.put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
     return identical(newNode, node)
         ? this
         : _FullNode(_copy(descendants)..[index] = newNode);
