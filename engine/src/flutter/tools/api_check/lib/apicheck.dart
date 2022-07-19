@@ -165,7 +165,7 @@ List<String> _getBlockStartingWith({
 void visitUIUnits(String flutterRoot, AstVisitor<void> visitor) {
   String uiRoot = '$flutterRoot/lib/ui';
   final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags2(
-    sdkLanguageVersion: Version.parse('2.12.0'),
+    sdkLanguageVersion: Version.parse('2.17.0'),
     flags: <String>['non-nullable'],
   );
   final ParseStringResult uiResult = parseFile(path: '$uiRoot/ui.dart', featureSet: analyzerFeatures);
