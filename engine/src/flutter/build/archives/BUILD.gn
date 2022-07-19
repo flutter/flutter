@@ -167,6 +167,25 @@ if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
   }
 }
 
+# If there is no prebuilt sdk, create the dart sdk archive from the built sdk.
+if (build_engine_artifacts && !flutter_prebuilt_dart_sdk) {
+  zip_bundle_from_file("dart_sdk_archive") {
+    deps = [ "//third_party/dart:create_sdk" ]
+    output = "dart-sdk-$full_target_platform_name.zip"
+    if (is_mac) {
+      # Mac artifacts sometimes use mac and sometimes darwin. Standardizing the
+      # names will require changes in the list of artifacts the tool is downloading.
+      output = "dart-sdk-darwin-$target_cpu.zip"
+    }
+    files = [
+      {
+        source = rebase_path("$root_build_dir/dart-sdk")
+        destination = "dart-sdk"
+      },
+    ]
+  }
+}
+
 # Archives Flutter Web SDK
 if (!is_fuchsia) {
   group("flutter_web_sdk") {
