@@ -9,7 +9,6 @@
 
 import 'dart:collection' show LinkedHashMap;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 export 'package:flutter/services.dart' show

@@ -7,7 +7,6 @@ import 'dart:developer' as developer;
 import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';

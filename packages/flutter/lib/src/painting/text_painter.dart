@@ -15,7 +15,6 @@ import 'dart:ui' as ui show
   TextHeightBehavior,
   TextStyle;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';

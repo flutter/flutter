@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show TextRange;
+import 'dart:ui' show TextPosition, TextRange;
 
 import 'text_editing.dart';
-
-export 'dart:ui' show TextPosition, TextRange;
-
-export 'text_editing.dart' show TextSelection;
 
 /// A read-only interface for accessing visual information about the
 /// implementing text.

@@ -6,11 +6,6 @@ import 'package:flutter/gestures.dart';
 
 import 'mouse_cursor.dart';
 
-export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
-export 'package:flutter/gestures.dart' show PointerEnterEvent, PointerExitEvent, PointerHoverEvent;
-
-export 'mouse_cursor.dart' show MouseCursor;
-
 /// Signature for listening to [PointerEnterEvent] events.
 ///
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].

@@ -7,7 +7,6 @@ import 'dart:io';
 import 'dart:ui' as ui show Codec, ImmutableBuffer;
 import 'dart:ui' show Locale, Size, TextDirection;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'

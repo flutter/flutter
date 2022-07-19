@@ -10,10 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 import 'system_channels.dart';
 
-export 'dart:ui' show Brightness, Color;
-
-export 'binding.dart' show SystemUiChangeCallback;
-
 /// Specifies a particular device orientation.
 ///
 /// To determine which values correspond to which orientations, first position

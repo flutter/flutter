@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 

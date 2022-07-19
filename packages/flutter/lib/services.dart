@@ -10,6 +10,10 @@
 /// library.
 library services;
 
+export 'dart:ui' show ChannelBuffers, Color, FontWeight, ImmutableBuffer, KeyData, PlatformMessageResponseCallback, Rect, Size, TextAffinity, TextAlign, TextDirection, TextPosition, TextRange;
+
+export 'package:flutter/gestures.dart';
+
 export 'src/services/asset_bundle.dart';
 export 'src/services/autofill.dart';
 export 'src/services/binary_messenger.dart';
