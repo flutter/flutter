@@ -1,4 +1,4 @@
-Signature: 05e72557482e98d3774170ad9464ef10
+Signature: f97c00a8c84976e13292fa6973483629
 
 UNUSED LICENSES:
 
@@ -712,8 +712,6 @@ FILE: ../../../third_party/skia/OWNERS.android
 FILE: ../../../third_party/skia/WORKSPACE.bazel
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
-FILE: ../../../third_party/skia/build/fuchsia/skqp/skqp.cmx
-FILE: ../../../third_party/skia/build/fuchsia/skqp/test_manifest.json
 FILE: ../../../third_party/skia/demos.skia.org/demos/hello_world/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/main.js
@@ -5646,6 +5644,7 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetComputeShaderMainParams
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsTrivialExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/text/StrikeForGPU.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.cpp
