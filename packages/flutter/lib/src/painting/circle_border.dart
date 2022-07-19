@@ -65,7 +65,7 @@ class CircleBorder extends OutlinedBorder {
     if (a is CircleBorder) {
       return CircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t)!,
+        eccentricity: clampDouble(ui.lerpDouble(a.eccentricity, eccentricity, t)!, 0.0, 1.0),
       );
     }
     return super.lerpFrom(a, t);
@@ -76,7 +76,7 @@ class CircleBorder extends OutlinedBorder {
     if (b is CircleBorder) {
       return CircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        eccentricity: ui.lerpDouble(eccentricity, b.eccentricity, t)!,
+        eccentricity: clampDouble(ui.lerpDouble(eccentricity, b.eccentricity, t)!, 0.0, 1.0),
       );
     }
     return super.lerpTo(b, t);

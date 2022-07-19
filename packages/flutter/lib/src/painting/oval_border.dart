@@ -35,13 +35,24 @@ class OvalBorder extends CircleBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is CircleBorder) {
+    if (a is OvalBorder) {
       return OvalBorder(
         side: BorderSide.lerp(a.side, side, t),
-        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t)!,
+        eccentricity: clampDouble(ui.lerpDouble(a.eccentricity, eccentricity, t)!, 0.0, 1.0),
       );
     }
     return super.lerpFrom(a, t);
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    if (b is OvalBorder) {
+      return OvalBorder(
+        side: BorderSide.lerp(side, b.side, t),
+        eccentricity: clampDouble(ui.lerpDouble(eccentricity, b.eccentricity, t)!, 0.0, 1.0),
+      );
+    }
+    return super.lerpTo(b, t);
   }
 
   @override
