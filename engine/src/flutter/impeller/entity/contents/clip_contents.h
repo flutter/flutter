@@ -29,7 +29,7 @@ class ClipContents final : public Contents {
 
   // |Contents|
   bool ShouldRender(const Entity& entity,
-                    const RenderPass& pass) const override;
+                    const ISize& target_size) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -54,7 +54,7 @@ class ClipRestoreContents final : public Contents {
 
   // |Contents|
   bool ShouldRender(const Entity& entity,
-                    const RenderPass& pass) const override;
+                    const ISize& target_size) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,

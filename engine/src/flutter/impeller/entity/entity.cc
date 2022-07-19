@@ -41,8 +41,8 @@ std::optional<Rect> Entity::GetCoverage() const {
   return contents_->GetCoverage(*this);
 }
 
-bool Entity::ShouldRender(const RenderPass& pass) const {
-  return contents_->ShouldRender(*this, pass);
+bool Entity::ShouldRender(const ISize& target_size) const {
+  return contents_->ShouldRender(*this, target_size);
 }
 
 void Entity::SetContents(std::shared_ptr<Contents> contents) {
