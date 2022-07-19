@@ -620,23 +620,49 @@ enum KeyDataTransitMode {
 
 /// The assumbled information corresponding to a native key message.
 ///
-/// While Flutter's [KeyEvent]s are created from key messages from the native
-/// platform, every native message might result in multiple [KeyEvent]s. For
-/// example, this might happen in order to synthesize missed modifier key
-/// presses or releases.
+/// Native key messages, that is physically pressing or releasing
+/// keyboard keys, are translated into two different event streams in Flutter:
 ///
-/// A [KeyMessage] bundles all information related to a native key message
-/// together for the convenience of propagation on the [FocusNode] tree.
+///  * The [KeyEvent] stream, represented by [KeyMessage.events] (recommended).
+///  * The [RawKeyEvent] stream, represented by [KeyMessage.rawEvent] (legacy,
+///    to be deprecated).
 ///
-/// When dispatched to handlers or listeners, or propagated through the
-/// [FocusNode] tree, all handlers or listeners belonging to a node are
-/// executed regardless of their [KeyEventResult], and all results are combined
-/// into the result of the node using [combineKeyEventResults]. Empty [events]
-/// or [rawEvent] should be considered as a result of [KeyEventResult.ignored].
+/// Either the [KeyEvent] stream or the [RawKeyEvent] stream alone provides a
+/// complete description of the keyboard actions. Because they have different
+/// event models, Flutter dispatches both streams simultaneously before
+/// the transition is completed. And [KeyMessage] is used to bundles all
+/// information related to a native key message together for the convenience of
+/// propagation.
 ///
-/// In very rare cases, a native key message might not result in a [KeyMessage].
-/// For example, key messages for Fn key are ignored on macOS for the
-/// convenience of cross-platform code.
+/// Typically, an application only needs to process either [KeyMessage.events]
+/// or [KeyMessage.rawEvent], not both. For example, when handling a
+/// [KeyMessage], simply handle each of [KeyMessage.events] independently.
+///
+/// In advanced cases, a widget needs to process both streams at the same time.
+/// For example, [FocusNode] has an `onKey` that dispatches [RawKeyEvent]s and
+/// an `onKeyEvent` that dispatches [KeyEvent]s. To processes a [KeyMessage],
+/// it first calls `onKeyEvent` with each [KeyEvent] of [events], and then
+/// `onKey` with [rawEvent]. All callbacks are invoked regardless of their
+/// [KeyEventResult]. Their results are combined into the result of the node
+/// using [combineKeyEventResults].
+///
+/// {@tool snippet}
+/// ```dart
+/// void handleMessage(FocusNode node, KeyMessage message) {
+///   final List<KeyEventResult> results = <KeyEventResult>[];
+///   if (node.onKeyEvent != null) {
+///     for (final KeyEvent event in message.events) {
+///       results.add(node.onKeyEvent!(node, event));
+///     }
+///   }
+///   if (node.onKey != null && message.rawEvent != null) {
+///     results.add(node.onKey!(node, message.rawEvent!));
+///   }
+///   final KeyEventResult result = combineKeyEventResults(results);
+///   // Progress based on `result`...
+/// }
+/// ```
+/// {@end-tool}
 @immutable
 class KeyMessage {
   /// Create a [KeyMessage] by providing all information.
@@ -704,6 +730,7 @@ typedef KeyMessageHandler = bool Function(KeyMessage message);
 ///
 /// [KeyEventManager] is typically created, owned, and invoked by
 /// [ServicesBinding].
+///
 class KeyEventManager {
   /// Create an instance.
   ///
@@ -712,53 +739,52 @@ class KeyEventManager {
 
   /// The global entrance to handle all key events sent to Flutter.
   ///
-  /// Key messages received from the platform are sent to [RawKeyboard]'s
-  /// listeners, [HardwareKeyboard]'s handlers, and this handler
-  /// [keyMessageHandler], all of them regardless of each one's result. These
-  /// results are combined and returned to the platform. If any handlers return
-  /// true, then this event will not be propagated to the text input system or
-  /// other native components. See below for detailed introduction of event
-  /// results.
+  /// For most common applications, which use [WidgetsBinding], this field is
+  /// set by the focus system (see `FocusManger`) on startup with a function
+  /// that dispatches incoming events to the focus system, including
+  /// [FocusNode.onKey], [FocusNode.onKeyEvent], and shortcuts. In this case,
+  /// the application does not need to read, assign, or invoke this value.
   ///
-  /// For most common applications, which use [WidgetsBinding], this field
-  /// is set by the focus system (see `FocusManger`) on startup, and should not
-  /// be assigned or read manually. In this case, this [keyMessageHandler] will
-  /// take care of everything related to the focus system, including
-  /// [FocusNode.onKey], [FocusNode.onKeyEvent], and shortcuts.
+  /// For advanced uses, the application can "patch" this callback. See below
+  /// for details.
   ///
-  /// ## Event result
+  /// ## Handlers and event results
   ///
-  /// Roughly speaking, each native key event might go through the following few
-  /// stages:
+  /// Roughly speaking, Flutter processes each native key event with the
+  /// following phases:
   ///
-  /// 1. Pre-filtering, such as IME.
-  /// 2. Flutter framework, including [RawKeyboard] and [HardwareKeyboard].
+  /// 1. Platform-side pre-filtering, sometimes used for IME.
+  /// 2. The key event system.
   /// 3. The text input system.
   /// 4. Other native components (possibly non-Flutter).
   ///
-  /// Each stage can choose to _handle_ the event, preventing it from being
-  /// propagated to the next stage. This is called the "event result". This
+  /// Each phase will conclude into a boolean called "event result". If the
+  /// result is true, this phase _handles_ the event and prevents the event
+  /// from being propagated to the next phase. And vice versa. This mechanism
   /// allows shortcuts such as "Ctrl-C" to not generate a text "C" in the text
   /// field, or shortcuts that are not handled by any components to trigger
   /// special alerts (such as the "bonk" noise on macOS).
   ///
-  /// The event result of stage 2 _Flutter framework_ is composed of the
-  /// following parts:
+  /// In the second phase "the key event system", the event is dispatched
+  /// to several destinations: [RawKeyboard]'s listeners, raw keyboard
+  /// listeners, [HardwareKeyboard]'s handlers, and [keyMessageHandler].
+  /// All destinations will always receive the event regardless of the handlers'
+  /// results. If any handler's result is true, then the overall result of the
+  /// second phase is true.
   ///
-  /// - [HardwareKeyboard]'s handlers (see [[HardwareKeyboard.addHandler]).
-  /// - [keyMessageHandler].
+  /// See also:
   ///
-  /// These handlers will always be called regardless of each one's results.
-  /// The result from these handlers are combined. If any of the handlers claim
-  /// to handle the event, the overall result of stage 2 will be "event
-  /// handled".
+  ///  * [RawKeyboard.addListener], which adds a raw keyboard listener.
+  ///  * [RawKeyboardListener], which is also implemented by adding a raw
+  ///    keyboard listener.
+  ///  * [HardwareKeyboard.addHandler], which adds a hardware keyboard handler.
   ///
   /// ## Advanced usages: Manual assignment or patching
   ///
   /// If you are not using the focus system to manage focus, set this
   /// attribute to a [KeyMessageHandler] that returns true if the propagation
   /// on the platform should not be continued. If this field is null, key events
-  /// will be assumed to not have been handled by Flutter.
+  /// will be assumed to not have been handled by Flutter, a result of "false".
   ///
   /// Even if you are using the focus system, you might also want to do more
   /// than the focus system allows. In these cases, you can _patch_
@@ -778,9 +804,10 @@ class KeyEventManager {
   /// This example shows how to process key events that are not handled by any
   /// focus handlers (such as shortcuts) by patching [keyMessageHandler].
   ///
-  /// Try to type something in the first text field. These key presses are not
+  /// The app prints out any key events that are not handled by the app body.
+  /// Try typing something in the first text field. These key presses are not
   /// handled by shorcuts and will be sent to the fallback handler and printed
-  /// out. Now try to press text shortcuts, such as Ctrl+A. The KeyA press is
+  /// out. Now try some text shortcuts, such as Ctrl+A. The KeyA press is
   /// handled as a shortcut, therefore not sent to the fallback handler and not
   /// printed out.
   ///

@@ -52,7 +52,7 @@ class FallbackDemoState extends State<FallbackDemo> {
       child: Container(
         decoration: BoxDecoration(border: Border.all(color: Colors.red)),
         padding: const EdgeInsets.all(10),
-        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 200),
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 400),
         child: Column(
           children: <Widget>[
             const Text('This area handles key pressses that are unhandled by any shortcuts by displaying them below. '

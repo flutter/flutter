@@ -1463,15 +1463,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
-  @override
-  void dispose() {
-    if (ServicesBinding.instance.keyEventManager.keyMessageHandler == _handleKeyMessage) {
-      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
-      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
-    }
-    super.dispose();
-  }
-
   /// Provides convenient access to the current [FocusManager] singleton from
   /// the [WidgetsBinding] instance.
   static FocusManager get instance => WidgetsBinding.instance.focusManager;
