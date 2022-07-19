@@ -21,7 +21,7 @@ import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import 'visual_studio.dart';
 
-// These characters appear to be fine: @%()-+_{}[]`~
+/// These characters appear to be fine: @%()-+_{}[]`~
 const String badCharacters = r"'#!$^&*=|,;<>?";
 
 /// Builds the Windows project using msbuild.

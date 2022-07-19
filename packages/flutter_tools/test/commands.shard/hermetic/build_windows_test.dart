@@ -936,6 +936,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Usage: () => usage,
   });
 
+  /// Confirms that running for Windows in a directory with a
+  /// bad caracter (' in this case) throws the desired error message
   testUsingContext('Test bad path characters', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
