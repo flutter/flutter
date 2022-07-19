@@ -936,8 +936,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Usage: () => usage,
   });
 
-  /// Confirms that running for Windows in a directory with a
-  /// bad caracter (' in this case) throws the desired error message
+  // Confirms that running for Windows in a directory with a
+  // bad caracter (' in this case) throws the desired error message
   testUsingContext('Test bad path characters', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
@@ -948,11 +948,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     setUpMockCoreProjectFiles();
 
     expect(
-        createTestCommandRunner(command)
-            .run(const <String>['windows', '--no-pub']),
+        createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
         throwsToolExit(
-            message:
-                'Path $absPath contains invalid characters in "\'#!\$^&*=|,;<>?"'));
+          message:
+              'Path $absPath contains invalid characters in "\'#!\$^&*=|,;<>?". '
+              'Please rename your directory so as to not include any of these characters '
+              'and retry.'
+        ));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,

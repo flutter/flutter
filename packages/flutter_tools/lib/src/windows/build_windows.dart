@@ -19,7 +19,7 @@ import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import 'visual_studio.dart';
 
-/// These characters appear to be fine: @%()-+_{}[]`~
+// These characters appear to be fine: @%()-+_{}[]`~
 const String badCharacters = r"'#!$^&*=|,;<>?";
 
 /// Builds the Windows project using msbuild.
@@ -33,7 +33,9 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       .any((int i) => projectPath.contains(String.fromCharCode(i)));
   if (badPath) {
     throwToolExit(
-        'Path $projectPath contains invalid characters in "$badCharacters"');
+      'Path $projectPath contains invalid characters in "$badCharacters". '
+      'Please rename your directory so as to not include any of these characters '
+      'and retry.');
   }
 
   if (!windowsProject.cmakeFile.existsSync()) {
