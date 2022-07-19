@@ -126,35 +126,33 @@ class AdaptiveScaffold extends StatefulWidget {
     Widget? trailing,
     NavigationRailLabelType labelType = NavigationRailLabelType.none,
   }) {
-    if(extended && width == 72) {
+    if (extended && width == 72) {
       width = 150;
     }
-    return Builder(
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            width: width,
-            height: MediaQuery.of(context).size.height,
-            child: NavigationRail(
-              labelType: labelType,
-              leading: leading,
-              trailing: trailing,
-              backgroundColor: backgroundColor,
-              extended: extended,
-              selectedIndex: selectedIndex,
-              destinations: <NavigationRailDestination>[
-                for (NavigationDestination destination in destinations)
-                  NavigationRailDestination(
-                    label: Text(destination.label),
-                    icon: destination.icon,
-                  )
-              ],
-            ),
+    return Builder(builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+          width: width,
+          height: MediaQuery.of(context).size.height,
+          child: NavigationRail(
+            labelType: labelType,
+            leading: leading,
+            trailing: trailing,
+            backgroundColor: backgroundColor,
+            extended: extended,
+            selectedIndex: selectedIndex,
+            destinations: <NavigationRailDestination>[
+              for (NavigationDestination destination in destinations)
+                NavigationRailDestination(
+                  label: Text(destination.label),
+                  icon: destination.icon,
+                )
+            ],
           ),
-        );
-      }
-    );
+        ),
+      );
+    });
   }
 
   /// Public helper method to be used for creating a [BottomNavigationBar] from
@@ -254,12 +252,20 @@ class AdaptiveScaffold extends StatefulWidget {
 class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   @override
   Widget build(BuildContext context) {
-    List<WidgetBuilder?>? bodyList = <WidgetBuilder?>[widget.smallBody ?? widget.body, widget.body, widget.largeBody ?? widget.body];
-    List<WidgetBuilder?>? secondaryBodyList = <WidgetBuilder?>[widget.smallSecondaryBody ?? widget.secondaryBody, widget.secondaryBody, widget.largeSecondaryBody ?? widget.secondaryBody];
-    if(bodyList.every((WidgetBuilder? e) => e==null)) {
+    List<WidgetBuilder?>? bodyList = <WidgetBuilder?>[
+      widget.smallBody ?? widget.body,
+      widget.body,
+      widget.largeBody ?? widget.body
+    ];
+    List<WidgetBuilder?>? secondaryBodyList = <WidgetBuilder?>[
+      widget.smallSecondaryBody ?? widget.secondaryBody,
+      widget.secondaryBody,
+      widget.largeSecondaryBody ?? widget.secondaryBody
+    ];
+    if (bodyList.every((WidgetBuilder? e) => e == null)) {
       bodyList = null;
     }
-    if(secondaryBodyList.every((WidgetBuilder? e) => e==null)) {
+    if (secondaryBodyList.every((WidgetBuilder? e) => e == null)) {
       secondaryBodyList = null;
     }
 

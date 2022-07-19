@@ -9,24 +9,21 @@ import 'media_query.dart';
 import 'slot_layout_config.dart';
 import 'ticker_provider.dart';
 
-/// A Widget that takes a mapping of [SlotLayoutConfig]s to breakpoints and returns a chosen
-/// Widget based on the current screen size.
+/// A Widget that takes a mapping of [SlotLayoutConfig]s to breakpoints and
+/// returns a chosen Widget based on the current screen size.
 ///
 /// Commonly used with [AdaptiveLayout] but also functional on its own.
 
 class SlotLayout extends StatefulWidget {
   /// Creates a [SlotLayout] widget.
-  const SlotLayout({
-    required this.config,
-    super.key
-    });
+  const SlotLayout({required this.config, super.key});
 
   /// Given a context and a config, it returns the [SlotLayoutConfig] that will
   /// be chosen from the config under the context's conditions.
-  static SlotLayoutConfig? pickWidget (BuildContext context,  Map<int, SlotLayoutConfig?> config){
+  static SlotLayoutConfig? pickWidget(BuildContext context, Map<int, SlotLayoutConfig?> config) {
     SlotLayoutConfig? chosenWidget;
     config.forEach((int key, SlotLayoutConfig? value) {
-      if(MediaQuery.of(context).size.width > key){
+      if (MediaQuery.of(context).size.width > key) {
         chosenWidget = value;
       }
     });
@@ -41,7 +38,7 @@ class SlotLayout extends StatefulWidget {
   State<SlotLayout> createState() => _SlotLayoutState();
 }
 
-class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateMixin{
+class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   SlotLayoutConfig? chosenWidget;
   ValueNotifier<Key> changedWidget = ValueNotifier<Key>(const Key(''));
@@ -71,33 +68,31 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     chosenWidget = SlotLayout.pickWidget(context, widget.config);
     bool hasAnimation = false;
-    if(chosenWidget!=null){
+    if (chosenWidget != null) {
       changedWidget.value = chosenWidget!.key!;
     }
     return AnimatedSwitcher(
-      duration:const Duration(milliseconds:1000),
-      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-        final Stack elements = Stack(
-          children: <Widget>[
-            if(hasAnimation) ...previousChildren.where((Widget element) => element.key!=currentChild!.key),
-            if (currentChild != null) currentChild,
-          ],
-        );
-        return elements;
-      },
-
-      transitionBuilder: (Widget child, Animation<double> animation){
-        final SlotLayoutConfig configChild = child as SlotLayoutConfig;
-        if(child.key == chosenWidget?.key){
-          return (configChild.inAnimation!=null)? child.inAnimation!(child, _controller) : child;
-        }else{
-          if(configChild.outAnimation!=null && configChild!=null){
-            hasAnimation = true;
+        duration: const Duration(milliseconds: 1000),
+        layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+          final Stack elements = Stack(
+            children: <Widget>[
+              if (hasAnimation) ...previousChildren.where((Widget element) => element.key != currentChild!.key),
+              if (currentChild != null) currentChild,
+            ],
+          );
+          return elements;
+        },
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          final SlotLayoutConfig configChild = child as SlotLayoutConfig;
+          if (child.key == chosenWidget?.key) {
+            return (configChild.inAnimation != null) ? child.inAnimation!(child, _controller) : child;
+          } else {
+            if (configChild.outAnimation != null && configChild != null) {
+              hasAnimation = true;
+            }
+            return (configChild.outAnimation != null) ? child.outAnimation!(child, _controller) : child;
           }
-          return (configChild.outAnimation!=null)? child.outAnimation!(child, _controller) : child;
-        }
-      },
-      child: chosenWidget ?? SlotLayoutConfig.empty()
-    );
+        },
+        child: chosenWidget ?? SlotLayoutConfig.empty());
   }
 }

@@ -47,7 +47,7 @@ class SlotLayoutConfig extends StatefulWidget {
 
   /// An empty [SlotLayoutConfig] to be placed in a slot to indicate it is not
   /// used.
-  static SlotLayoutConfig empty(){
+  static SlotLayoutConfig empty() {
     return const SlotLayoutConfig(key: Key(''), builder: null);
   }
 
@@ -58,7 +58,7 @@ class SlotLayoutConfig extends StatefulWidget {
 class _SlotLayoutConfigState extends State<SlotLayoutConfig> {
   @override
   Widget build(BuildContext context) {
-    if(widget.builder!=null){
+    if (widget.builder != null) {
       return widget.builder!(context);
     } else {
       return const SizedBox.shrink();

@@ -10,12 +10,10 @@ import 'slot_layout.dart';
 import 'slot_layout_config.dart';
 import 'ticker_provider.dart';
 
-
 /// A parent Widget takes in multiple [SlotLayout] components and places them
 /// into their appropriate positions on the screen.
 
 class AdaptiveLayout extends StatefulWidget {
-
   /// Creates an [AdaptiveLayout] widget.
   const AdaptiveLayout({
     this.primaryNavigation,
@@ -86,6 +84,7 @@ class AdaptiveLayout extends StatefulWidget {
   @override
   State<AdaptiveLayout> createState() => _AdaptiveLayoutState();
 }
+
 const String _primaryNavigationID = 'primaryNavigation';
 const String _secondaryNavigationID = 'secondaryNavigation';
 const String _topNavigationID = 'topNavigation';
@@ -98,10 +97,10 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
 
   late Map<String, SlotLayoutConfig?> chosenWidgets = <String, SlotLayoutConfig?>{};
   Map<String, Size?> slotSizes = <String, Size?>{
-      _primaryNavigationID: Size.zero,
-      _secondaryNavigationID: Size.zero,
-      _topNavigationID: Size.zero,
-      _bottomNavigationID: Size.zero,
+    _primaryNavigationID: Size.zero,
+    _secondaryNavigationID: Size.zero,
+    _topNavigationID: Size.zero,
+    _bottomNavigationID: Size.zero,
   };
 
   Map<String, ValueNotifier<Key?>> notifiers = <String, ValueNotifier<Key?>>{
@@ -121,7 +120,6 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
     _bodyID: false,
     _secondaryBodyID: false,
   };
-
 
   @override
   void initState() {
@@ -145,11 +143,11 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
       });
     });
 
-     _controller.addStatusListener((AnimationStatus status) {
-        if(status == AnimationStatus.completed){
-          isAnimating.updateAll((_,__) => false);
-        }
-     });
+    _controller.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        isAnimating.updateAll((_, __) => false);
+      }
+    });
 
     super.initState();
   }
@@ -196,11 +194,10 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
       notifier.value = chosenWidgets[key]?.key;
     });
 
-
     Rect? hinge;
     for (final DisplayFeature e in MediaQuery.of(context).displayFeatures) {
-      if (e.type == DisplayFeatureType.hinge || e.type == DisplayFeatureType.fold){
-        if(e.bounds.left!=0){
+      if (e.type == DisplayFeatureType.hinge || e.type == DisplayFeatureType.fold) {
+        if (e.bounds.left != 0) {
           hinge = e.bounds;
         }
       }
@@ -252,14 +249,13 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-
     double leftMargin = 0;
     double topMargin = 0;
     double rightMargin = 0;
     double bottomMargin = 0;
 
     double animatedSize(double begin, double end) {
-      if(isAnimating[_secondaryBodyID]!){
+      if (isAnimating[_secondaryBodyID]!) {
         return internalAnimations
             ? Tween<double>(begin: begin, end: end)
                 .animate(CurvedAnimation(parent: controller, curve: Curves.easeInOutCubic))
@@ -272,21 +268,21 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
     if (hasChild(_topNavigationID)) {
       final Size childSize = layoutChild(_topNavigationID, BoxConstraints.loose(size));
       updateSize(_topNavigationID, childSize);
-      final Size currentSize = Tween<Size>(begin:slotSizes[_topNavigationID], end:childSize).animate(controller).value;
+      final Size currentSize = Tween<Size>(begin: slotSizes[_topNavigationID], end: childSize).animate(controller).value;
       positionChild(_topNavigationID, Offset.zero);
       topMargin += currentSize.height;
     }
     if (hasChild(_bottomNavigationID)) {
       final Size childSize = layoutChild(_bottomNavigationID, BoxConstraints.loose(size));
       updateSize(_bottomNavigationID, childSize);
-      final Size currentSize = Tween<Size>(begin:slotSizes[_bottomNavigationID], end:childSize).animate(controller).value;
+      final Size currentSize = Tween<Size>(begin: slotSizes[_bottomNavigationID], end: childSize).animate(controller).value;
       positionChild(_bottomNavigationID, Offset(0, size.height - currentSize.height));
       bottomMargin += currentSize.height;
     }
     if (hasChild(_primaryNavigationID)) {
       final Size childSize = layoutChild(_primaryNavigationID, BoxConstraints.loose(size));
       updateSize(_primaryNavigationID, childSize);
-      final Size currentSize = Tween<Size>(begin:slotSizes[_primaryNavigationID], end:childSize).animate(controller).value;
+      final Size currentSize = Tween<Size>(begin: slotSizes[_primaryNavigationID], end: childSize).animate(controller).value;
       if (textDirection) {
         positionChild(_primaryNavigationID, Offset(leftMargin, topMargin));
         leftMargin += currentSize.width;
@@ -298,7 +294,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
     if (hasChild(_secondaryNavigationID)) {
       final Size childSize = layoutChild(_secondaryNavigationID, BoxConstraints.loose(size));
       updateSize(_secondaryNavigationID, childSize);
-      final Size currentSize = Tween<Size>(begin:slotSizes[_secondaryNavigationID], end:childSize).animate(controller).value;
+      final Size currentSize = Tween<Size>(begin: slotSizes[_secondaryNavigationID], end: childSize).animate(controller).value;
       if (textDirection) {
         positionChild(_secondaryNavigationID, Offset(size.width - currentSize.width, topMargin));
         rightMargin += currentSize.width;
@@ -317,25 +313,27 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
     if (hasChild(_bodyID) && hasChild(_secondaryBodyID)) {
       Size currentBodySize = Size.zero;
       Size currentSBodySize = Size.zero;
-      if (chosenWidgets[_secondaryBodyID] == null || chosenWidgets[_secondaryBodyID]!.builder==null) {
-        if(!textDirection) {
+      if (chosenWidgets[_secondaryBodyID] == null || chosenWidgets[_secondaryBodyID]!.builder == null) {
+        if (!textDirection) {
           currentBodySize = layoutChild(_bodyID, BoxConstraints.tight(Size(remainingWidth, remainingHeight)));
-        } else if(horizontalBody){
+        } else if (horizontalBody) {
           double beginWidth;
-          if(bodyRatio==null){
-            beginWidth = halfWidth-leftMargin;
-          }else{
-            beginWidth = remainingWidth*bodyRatio!;
+          if (bodyRatio == null) {
+            beginWidth = halfWidth - leftMargin;
+          } else {
+            beginWidth = remainingWidth * bodyRatio!;
           }
-          currentBodySize = layoutChild(_bodyID, BoxConstraints.tight(Size(animatedSize(beginWidth, remainingWidth), remainingHeight)));
+          currentBodySize = layoutChild(
+              _bodyID, BoxConstraints.tight(Size(animatedSize(beginWidth, remainingWidth), remainingHeight)));
         } else {
           double beginHeight;
-          if(bodyRatio==null){
-            beginHeight = halfHeight-topMargin;
-          }else{
-            beginHeight = remainingHeight*bodyRatio!;
+          if (bodyRatio == null) {
+            beginHeight = halfHeight - topMargin;
+          } else {
+            beginHeight = remainingHeight * bodyRatio!;
           }
-          currentBodySize = layoutChild(_bodyID, BoxConstraints.tight(Size(remainingWidth, animatedSize(beginHeight, remainingHeight))));
+          currentBodySize = layoutChild(
+              _bodyID, BoxConstraints.tight(Size(remainingWidth, animatedSize(beginHeight, remainingHeight))));
         }
         layoutChild(_secondaryBodyID, BoxConstraints.loose(size));
       } else {
@@ -346,10 +344,10 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
 
             double finalBodySize;
             double finalSBodySize;
-            if(hinge!=null){
+            if (hinge != null) {
               finalBodySize = hinge!.left - leftMargin;
-              finalSBodySize = size.width-(hinge!.left+hingeWidth)-rightMargin;
-            }else if(bodyRatio!=null){
+              finalSBodySize = size.width - (hinge!.left + hingeWidth) - rightMargin;
+            } else if (bodyRatio != null) {
               finalBodySize = remainingWidth * bodyRatio!;
               finalSBodySize = remainingWidth * (1 - bodyRatio!);
             } else {
@@ -383,10 +381,10 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
 
             double finalBodySize;
             double finalSBodySize;
-            if(hinge!=null){
-              finalBodySize = size.width-(hinge!.left+hingeWidth)-rightMargin;
+            if (hinge != null) {
+              finalBodySize = size.width - (hinge!.left + hingeWidth) - rightMargin;
               finalSBodySize = hinge!.left - leftMargin;
-            }else if(bodyRatio!=null){
+            } else if (bodyRatio != null) {
               finalBodySize = remainingWidth * bodyRatio!;
               finalSBodySize = remainingWidth * (1 - bodyRatio!);
             } else {
@@ -443,7 +441,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
       }
       // Handling all positioning for body and secondaryBody
       if (horizontalBody && !textDirection && chosenWidgets[_secondaryBodyID] != null) {
-        if(hinge!=null){
+        if (hinge != null) {
           positionChild(_bodyID, Offset(currentSBodySize.width + leftMargin + hingeWidth, topMargin));
           positionChild(_secondaryBodyID, Offset(leftMargin, topMargin));
         } else {
@@ -453,7 +451,7 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
       } else {
         positionChild(_bodyID, Offset(leftMargin, topMargin));
         if (horizontalBody) {
-          if(hinge!=null){
+          if (hinge != null) {
             positionChild(_secondaryBodyID, Offset(currentBodySize.width + leftMargin + hingeWidth, topMargin));
           } else {
             positionChild(_secondaryBodyID, Offset(currentBodySize.width + leftMargin, topMargin));
@@ -471,13 +469,15 @@ class _AdaptiveLayoutDelegate extends MultiChildLayoutDelegate {
   }
 
   void updateSize(String id, Size childSize) {
-    if(slotSizes[id] != childSize){
+    if (slotSizes[id] != childSize) {
       void listener(AnimationStatus status) {
-        if((status == AnimationStatus.completed || status == AnimationStatus.dismissed) && slotSizes[id] != childSize){
+        if ((status == AnimationStatus.completed || status == AnimationStatus.dismissed) &&
+            slotSizes[id] != childSize) {
           slotSizes.update(id, (Size? value) => childSize);
         }
         controller.removeStatusListener(listener);
       }
+
       controller.addStatusListener(listener);
     }
   }
