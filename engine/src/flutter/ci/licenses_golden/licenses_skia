@@ -1,4 +1,4 @@
-Signature: 9a7dd2642f5fd4d1e356e74842dc48d4
+Signature: e58fcde999ccc1341b246dc6f46e30c7
 
 UNUSED LICENSES:
 
@@ -2445,9 +2445,7 @@ FILE: ../../../third_party/skia/src/shaders/gradients/SkLinearGradient.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkLinearGradient.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkRadialGradient.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkSweepGradient.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/SkSweepGradient.h
 FILE: ../../../third_party/skia/src/shaders/gradients/SkTwoPointConicalGradient.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/SkTwoPointConicalGradient.h
 FILE: ../../../third_party/skia/src/utils/SkFloatUtils.h
 FILE: ../../../third_party/skia/src/utils/SkNullCanvas.cpp
 FILE: ../../../third_party/skia/src/utils/win/SkDWriteFontFileStream.cpp
