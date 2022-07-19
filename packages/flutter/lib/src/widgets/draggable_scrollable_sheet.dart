@@ -509,8 +509,8 @@ class _DraggableSheetExtent {
   // this because we don't want to snap away from an initial or programmatically set size.
   bool hasDragged;
 
-  // Used to determine if the sheet move to the new initial size on changes of
-  // size.
+  // Used to determine if the sheet should move to the new initial size when it
+  // changes.
   // We need both `hasChanged` and `hasDragged` to achieve the following
   // behavior:
   //   1. The sheet should only snap following user drags (as opposed to
