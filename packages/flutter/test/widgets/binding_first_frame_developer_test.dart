@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer' as developer;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

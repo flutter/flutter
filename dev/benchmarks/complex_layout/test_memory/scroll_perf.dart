@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:complex_layout/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// The speed, in pixels per second, that the drag gestures should end with.

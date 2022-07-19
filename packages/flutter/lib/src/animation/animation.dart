@@ -7,10 +7,6 @@ import 'package:flutter/foundation.dart';
 
 import 'tween.dart';
 
-export 'dart:ui' show VoidCallback;
-
-export 'tween.dart' show Animatable;
-
 // Examples can assume:
 // late AnimationController _controller;
 

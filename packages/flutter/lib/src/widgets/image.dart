@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io' show File;
 
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'basic.dart';

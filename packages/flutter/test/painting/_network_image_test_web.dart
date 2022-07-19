@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:html' as html;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
 import 'package:flutter_test/flutter_test.dart';

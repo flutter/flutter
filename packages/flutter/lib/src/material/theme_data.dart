@@ -5,7 +5,6 @@
 import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 
 import 'app_bar_theme.dart';
 import 'banner_theme.dart';

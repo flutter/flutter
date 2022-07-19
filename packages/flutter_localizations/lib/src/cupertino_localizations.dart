@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'l10n/generated_cupertino_localizations.dart';

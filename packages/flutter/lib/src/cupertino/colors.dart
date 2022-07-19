@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, Color;
-
-import '../../foundation.dart';
 import '../widgets/basic.dart';
 import '../widgets/framework.dart';
 import '../widgets/media_query.dart';

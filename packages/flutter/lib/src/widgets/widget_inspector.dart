@@ -20,7 +20,6 @@ import 'dart:ui' as ui
         Vertices;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'app.dart';
 import 'basic.dart';

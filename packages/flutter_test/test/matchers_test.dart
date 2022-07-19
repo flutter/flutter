@@ -5,7 +5,6 @@
 // flutter_ignore_for_file: golden_tag (see analyze.dart)
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';

@@ -4,7 +4,6 @@
 
 import 'dart:html' as html;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/dart2js.dart';
 

@@ -9,7 +9,6 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';

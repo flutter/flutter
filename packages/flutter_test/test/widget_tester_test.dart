@@ -8,8 +8,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use

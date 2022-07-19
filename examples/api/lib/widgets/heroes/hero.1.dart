@@ -5,7 +5,6 @@
 // Flutter code sample for Hero
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 void main() {
   // Slow down time to see Hero flight animation.

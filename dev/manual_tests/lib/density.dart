@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 
 final Map<int, Color> m2SwatchColors = <int, Color>{
   50: const Color(0xfff2e7fe),

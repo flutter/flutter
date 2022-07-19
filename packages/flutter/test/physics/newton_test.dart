@@ -8,8 +8,6 @@
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter_test/flutter_test.dart';

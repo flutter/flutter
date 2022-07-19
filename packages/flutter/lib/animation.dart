@@ -160,8 +160,10 @@
 ///    explicit [Animation] to animate their properties.
 library animation;
 
-// AnimationController can throw TickerCanceled
-export 'package:flutter/scheduler.dart' show TickerCanceled;
+export 'dart:ui' show Color, Offset, Rect, Size;
+
+export 'package:flutter/physics.dart';
+export 'package:flutter/scheduler.dart';
 
 export 'src/animation/animation.dart';
 export 'src/animation/animation_controller.dart';

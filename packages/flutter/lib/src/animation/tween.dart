@@ -6,12 +6,9 @@ import 'dart:ui' show Color, Rect, Size;
 
 import 'package:flutter/foundation.dart';
 
+import 'animation.dart';
 import 'animations.dart';
-
-export 'dart:ui' show Color, Rect, Size;
-
-export 'animation.dart' show Animation;
-export 'curves.dart' show Curve;
+import 'curves.dart';
 
 // Examples can assume:
 // late Animation<Offset> _animation;

@@ -4,8 +4,6 @@
 
 import 'tween.dart';
 
-export 'tween.dart' show Animatable;
-
 // Examples can assume:
 // late AnimationController myAnimationController;
 

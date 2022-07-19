@@ -9,7 +9,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 class NonStopVSync implements TickerProvider {
   const NonStopVSync();

@@ -4,7 +4,6 @@
 
 import 'dart:collection' show HashMap, SplayTreeMap;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'automatic_keep_alive.dart';
