@@ -2184,7 +2184,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController!.stop();
           _onFloatingCursorResetTick();
         }
-        // Stop cursor blinking and making it visable.
+        // Stop cursor blinking and making it visible.
         _stopCursorBlink(resetCharTicks: false);
         _cursorBlinkOpacityController.value = 1.0;
         // We want to send in points that are centered around a (0,0) origin, so
@@ -2207,7 +2207,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
         break;
       case FloatingCursorDragState.End:
-        // Resume cursor blinking
+        // Resume cursor blinking.
         _startCursorBlink();
         // We skip animation if no update has happened.
         if (_lastTextPosition != null && _lastBoundedOffset != null) {
