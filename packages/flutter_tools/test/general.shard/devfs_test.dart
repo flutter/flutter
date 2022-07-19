@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -223,6 +224,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.syncedBytes, 5);
@@ -262,6 +264,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, false);
@@ -302,6 +305,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -344,6 +348,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       devFSWriter: localDevFSWriter,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -393,6 +398,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       devFSWriter: writer,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -466,6 +472,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -551,6 +558,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       bundle: FakeBundle(),
+      shaderCompiler: const FakeShaderCompiler(),
     );
     expect(report1.success, true);
     logger.messages.clear();
@@ -564,6 +572,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       bundle: FakeBundle(),
+      shaderCompiler: const FakeShaderCompiler(),
     );
     expect(report2.success, true);
 
@@ -702,4 +711,16 @@ class AnsweringFakeProcess implements io.Process {
 
   @override
   int get pid => 42;
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
 }

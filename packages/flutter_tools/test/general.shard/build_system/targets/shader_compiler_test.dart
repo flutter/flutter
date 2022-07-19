@@ -57,6 +57,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
+        target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
       ),
       true,
     );
@@ -89,6 +90,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
+        target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
       ),
       true,
     );
@@ -119,6 +121,7 @@ void main() {
       () => shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
+        target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
       ),
       throwsA(isA<ShaderCompilerException>()),
     );

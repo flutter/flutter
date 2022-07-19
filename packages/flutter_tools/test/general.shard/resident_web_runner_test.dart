@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -1222,6 +1223,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
     @required String dillOutputPath,
+    @required DevelopmentShaderCompiler shaderCompiler,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,

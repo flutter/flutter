@@ -13,9 +13,11 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -721,6 +723,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: 'out.dill',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -832,6 +835,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: '',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -1122,5 +1126,17 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
   }) async {
     return output;
+  }
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
   }
 }

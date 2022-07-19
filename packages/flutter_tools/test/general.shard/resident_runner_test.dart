@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -2298,7 +2299,7 @@ class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceE
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, { Stream<Uri> observatoryUris })
-    : super(device, buildInfo: BuildInfo.debug) {
+    : super(device, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler()) {
     _observatoryUris = observatoryUris;
   }
 
@@ -2422,7 +2423,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     BuildInfo buildInfo,
     ResidentCompiler residentCompiler,
     this.fakeDevFS,
-  ) : super(device, buildInfo: buildInfo, generator: residentCompiler);
+  ) : super(device, buildInfo: buildInfo, generator: residentCompiler, developmentShaderCompiler: const FakeShaderCompiler());
 
   @override
   Future<void> connect({
@@ -2616,6 +2617,7 @@ class FakeDevFS extends Fake implements DevFS {
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
     @required String dillOutputPath,
+    @required DevelopmentShaderCompiler shaderCompiler,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
@@ -2625,5 +2627,17 @@ class FakeDevFS extends Fake implements DevFS {
     String projectRootPath,
   }) async {
     return nextUpdateReport;
+  }
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
   }
 }

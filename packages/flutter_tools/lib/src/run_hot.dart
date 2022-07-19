@@ -247,6 +247,7 @@ class HotRunner extends ResidentRunner {
 
     for (final FlutterDevice? device in flutterDevices) {
       await device!.initLogReader();
+      device.developmentShaderCompiler.configureCompiler(device.targetPlatform!, debuggingOptions.enableImpeller);
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
@@ -495,6 +496,7 @@ class HotRunner extends ResidentRunner {
   void _resetDirtyAssets() {
     for (final FlutterDevice? device in flutterDevices) {
       device!.devFS!.assetPathsToEvict.clear();
+      device.devFS!.shaderPathsToEvict.clear();
     }
   }
 
@@ -1026,7 +1028,7 @@ class HotRunner extends ResidentRunner {
   Future<void> evictDirtyAssets() async {
     final List<Future<Map<String, dynamic>?>> futures = <Future<Map<String, dynamic>>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty) {
+      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -1060,7 +1062,17 @@ class HotRunner extends ResidentRunner {
             )
         );
       }
+      for (final String assetPath in device.devFS!.assetPathsToEvict) {
+        futures.add(
+          device.vmService!
+            .flutterEvictShader(
+              assetPath,
+              isolateId: views.first.uiIsolate!.id!,
+            )
+        );
+      }
       device.devFS!.assetPathsToEvict.clear();
+      device.devFS!.shaderPathsToEvict.clear();
     }
     await Future.wait<Map<String, Object?>?>(futures);
   }
