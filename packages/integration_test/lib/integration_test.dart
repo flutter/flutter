@@ -8,7 +8,6 @@ import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;

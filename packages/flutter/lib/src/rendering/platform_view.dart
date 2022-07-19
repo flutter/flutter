@@ -5,7 +5,6 @@
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';

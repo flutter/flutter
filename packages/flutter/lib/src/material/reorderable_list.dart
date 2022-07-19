@@ -4,7 +4,6 @@
 
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 

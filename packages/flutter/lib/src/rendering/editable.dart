@@ -8,7 +8,6 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, Placehol
 
 import 'package:characters/characters.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'custom_paint.dart';

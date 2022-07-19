@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

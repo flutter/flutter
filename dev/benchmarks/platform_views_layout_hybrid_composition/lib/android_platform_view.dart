@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 class AndroidPlatformView extends StatelessWidget {
   /// Creates a platform view for Android, which is rendered as a

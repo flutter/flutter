@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';

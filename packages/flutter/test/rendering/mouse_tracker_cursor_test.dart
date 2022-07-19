@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'mouse_tracker_test_utils.dart';

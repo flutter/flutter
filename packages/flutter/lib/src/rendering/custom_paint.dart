@@ -4,7 +4,6 @@
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 
 import 'box.dart';

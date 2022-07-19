@@ -8,7 +8,6 @@ import 'dart:ui' show AccessibilityFeatures, AppLifecycleState, FrameTiming, Loc
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 
 import 'app.dart';
 import 'debug.dart';

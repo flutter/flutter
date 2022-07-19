@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';

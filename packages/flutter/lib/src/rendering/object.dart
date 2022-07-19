@@ -6,7 +6,6 @@ import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 

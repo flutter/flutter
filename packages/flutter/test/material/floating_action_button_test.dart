@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 
 @TestOn('!chrome')
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

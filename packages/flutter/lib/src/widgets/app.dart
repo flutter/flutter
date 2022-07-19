@@ -5,7 +5,6 @@
 import 'dart:collection' show HashMap;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'banner.dart';

@@ -8,8 +8,6 @@ import 'package:flutter/services.dart' show SystemChannels;
 
 import 'semantics_event.dart' show AnnounceSemanticsEvent, TooltipSemanticsEvent;
 
-export 'dart:ui' show TextDirection;
-
 /// Allows access to the platform's accessibility services.
 ///
 /// Events sent by this service are handled by the platform-specific

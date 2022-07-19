@@ -13,7 +13,12 @@
 /// and is used by the platform-specific accessibility services.
 library semantics;
 
+// extra-imports
 export 'dart:ui' show LocaleStringAttribute, SpellOutStringAttribute;
+
+export 'dart:ui' show AccessibilityFeatures, SemanticsAction, SemanticsFlag, SemanticsUpdateBuilder, StringAttribute;
+
+export 'package:flutter/services.dart';
 
 export 'src/semantics/binding.dart';
 export 'src/semantics/debug.dart';

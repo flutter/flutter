@@ -8,9 +8,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

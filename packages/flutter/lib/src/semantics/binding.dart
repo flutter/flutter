@@ -8,8 +8,6 @@ import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 
-export 'dart:ui' show AccessibilityFeatures, SemanticsUpdateBuilder;
-
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(zanderso): move the remaining semantic related bindings here.
 mixin SemanticsBinding on BindingBase {

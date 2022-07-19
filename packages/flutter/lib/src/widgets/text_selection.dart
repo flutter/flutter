@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'binding.dart';

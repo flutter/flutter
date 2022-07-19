@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'binding.dart';

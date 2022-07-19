@@ -8,7 +8,6 @@
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
 
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
