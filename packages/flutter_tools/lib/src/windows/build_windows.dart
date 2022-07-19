@@ -20,7 +20,7 @@ import '../migrations/cmake_custom_command_migration.dart';
 import 'visual_studio.dart';
 
 // These characters appear to be fine: @%()-+_{}[]`~
-const String badCharacters = r"'#!$^&*=|,;<>?";
+const String _kBadCharacters = r"'#!$^&*=|,;<>?";
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
@@ -32,13 +32,14 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   // In the directories. This check produces more meaningful error messages
   // on failure as pertains to https://github.com/flutter/flutter/issues/104802
   final String projectPath = windowsProject.parent.directory.absolute.path;
-  final bool badPath = badCharacters.runes
+  final bool badPath = _kBadCharacters.runes
       .any((int i) => projectPath.contains(String.fromCharCode(i)));
   if (badPath) {
     throwToolExit(
-      'Path $projectPath contains invalid characters in "$badCharacters". '
+      'Path $projectPath contains invalid characters in "$_kBadCharacters". '
       'Please rename your directory so as to not include any of these characters '
-      'and retry.');
+      'and retry.',
+    );
   }
 
   if (!windowsProject.cmakeFile.existsSync()) {
