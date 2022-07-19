@@ -346,6 +346,7 @@ class SecondaryTapUpIntent extends ListedIntents {
   /// Creates a [SecondaryTapUpIntent].
   const SecondaryTapUpIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [TapUpDetails] corresponding to a [TapGestureRecognizer.onSecondaryTapUp] event.
   final TapUpDetails details;
 }
 
@@ -361,6 +362,7 @@ class SecondaryTapDownIntent extends ListedIntents {
   /// Creates a [SecondaryTapDownIntent].
   const SecondaryTapDownIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [TapDownDetails] corresponding to a [TapGestureRecognizer.onSecondaryTapDown] event.
   final TapDownDetails details;
 }
 
@@ -370,6 +372,7 @@ class ShiftTapDownIntent extends ListedIntents {
   /// Creates a [ShiftTapDownIntent].
   const ShiftTapDownIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [TapDownDetails] corresponding to a [TapGestureRecognizer.onTapDown] event.
   final TapDownDetails details;
 }
 
@@ -378,6 +381,7 @@ class TapDownIntent extends ListedIntents {
   /// Creates a [TapDownIntent].
   const TapDownIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [TapDownDetails] corresponding to a [TapGestureRecognizer.onTapDown] event.
   final TapDownDetails details;
 }
 
@@ -386,6 +390,7 @@ class DoubleTapDownIntent extends ListedIntents {
   /// Creates a [DoubleTapDownIntent].
   const DoubleTapDownIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [TapDownDetails] corresponding to a [TapGestureRecognizer.onTapDown] event.
   final TapDownDetails details;
 }
 
@@ -394,6 +399,7 @@ class TapUpIntent extends ListedIntents {
   /// Creates a [TapUpIntent].
   const TapUpIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [TapUpDetails] corresponding to a [TapGestureRecognizer.onTapUp] event.
   final TapUpDetails details;
 }
 
@@ -403,6 +409,7 @@ class ShiftTapUpIntent extends ListedIntents {
   /// Creates a [ShiftTapUpIntent].
   const ShiftTapUpIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [TapUpDetails] corresponding to a [TapGestureRecognizer.onTapUp] event.
   final TapUpDetails details;
 }
 
@@ -418,6 +425,7 @@ class DragTapDownIntent extends ListedIntents {
   /// Creates a [DragTapDownIntent].
   const DragTapDownIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [DragDownDetails] corresponding to a [DragGestureRecognizer.onDown] event.
   final DragDownDetails details;
 }
 
@@ -426,6 +434,7 @@ class DragStartIntent extends ListedIntents {
   /// Creates a [DragStartIntent].
   const DragStartIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [DragStartDetails] corresponding to a [DragGestureRecognizer.onStart] event.
   final DragStartDetails details;
 }
 
@@ -435,6 +444,7 @@ class ShiftTappingOnDragStartIntent extends ListedIntents {
   /// Creates a [ShiftTappingOnDragStartIntent].
   const ShiftTappingOnDragStartIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [DragStartDetails] corresponding to a [DragGestureRecognizer.onStart] event.
   final DragStartDetails details;
 }
 
@@ -443,7 +453,10 @@ class DragUpdateIntent extends ListedIntents {
   /// Creates a [DragUpdateIntent].
   const DragUpdateIntent({required super.intents, required super.enabledContext, required this.updateDetails, required this.startDetails});
 
+  /// The [DragUpdateDetails] corresponding to a [DragGestureRecognizer.onUpdate] event.
   final DragUpdateDetails updateDetails;
+
+  /// The [DragStartDetails] corresponding to a [DragGestureRecognizer.onStart] event.
   final DragStartDetails startDetails;
 }
 
@@ -453,7 +466,10 @@ class ShiftTappingOnDragUpdateIntent extends ListedIntents {
   /// Creates a [ShiftTappingOnDragUpdateIntent].
   const ShiftTappingOnDragUpdateIntent({required super.intents, required super.enabledContext, required this.updateDetails, required this.startDetails});
 
+  /// The [DragUpdateDetails] corresponding to a [DragGestureRecognizer.onUpdate] event.
   final DragUpdateDetails updateDetails;
+
+  /// The [DragStartDetails] corresponding to a [DragGestureRecognizer.onStart] event.
   final DragStartDetails startDetails;
 }
 
@@ -462,6 +478,7 @@ class DragEndIntent extends ListedIntents {
   /// Creates a [DragEndIntent].
   const DragEndIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [DragEndDetails] corresponding to a [DragGestureRecognizer.onEnd] event.
   final DragEndDetails details;
 }
 
@@ -471,6 +488,7 @@ class ShiftTappingOnDragEndIntent extends ListedIntents {
   /// Creates a [ShiftTappingOnDragEndIntent].
   const ShiftTappingOnDragEndIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [DragEndDetails] corresponding to a [DragGest ureRecognizer.onEnd] event.
   final DragEndDetails details;
 }
 
@@ -479,6 +497,7 @@ class LongPressStartIntent extends ListedIntents {
   /// Create a [LongPressStartIntent].
   const LongPressStartIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [LongPressStartDetails] corresponding to a [LongPressGestureRecognizer.onLongPressStart] event.
   final LongPressStartDetails details;
 }
 
@@ -487,6 +506,7 @@ class LongPressMoveUpdateIntent extends ListedIntents {
   /// Creates a [LongPressMoveUpdateIntent].
   const LongPressMoveUpdateIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [LongPressMoveUpdateDetails] corresponding to a [LongPressGestureRecognizer.onLongPressMoveUpdate] event.
   final LongPressMoveUpdateDetails details;
 }
 
@@ -495,6 +515,7 @@ class LongPressEndIntent extends ListedIntents {
   /// Creates a [LongPressEndIntent].
   const LongPressEndIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [LongPressEndDetails] corresponding to a [LongPressGestureRecognizer.onLongPressEnd] event.
   final LongPressEndDetails details;
 }
 
@@ -503,6 +524,7 @@ class ForcePressStartIntent extends ListedIntents {
   /// Creates a [ForcePressStartIntent].
   const ForcePressStartIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [ForcePressDetails] corresponding to a [ForcePressGestureRecognizer.onStart] event.
   final ForcePressDetails details;
 }
 
@@ -511,6 +533,7 @@ class ForcePressEndIntent extends ListedIntents {
   /// Creates a [ForcePressEndIntent].
   const ForcePressEndIntent({required super.intents, required super.enabledContext, required this.details});
 
+  /// The [ForcePressDetails] corresponding to a [ForcePressGestureRecognizer.onEnd] event.
   final ForcePressDetails details;
 }
 
