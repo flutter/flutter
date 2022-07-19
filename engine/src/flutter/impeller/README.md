@@ -186,3 +186,4 @@ To your `AndroidManifest.xml` file, add under the `<application>` tag:
 * [How to Enable Metal Validation for Command Line Apps.](docs/metal_validation.md)
 * [How Impeller Works Around The Lack of Uniform Buffers in Open GL ES 2.0.](docs/ubo_gles2.md)
 * [Guidance for writing efficient shaders](docs/shader_optimization.md)
+* [How color blending works in Impeller](docs/blending.md)
