@@ -28,6 +28,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     bool enableDds = true,
     super.enableAuthCodes,
     super.logger,
+    super.onError,
   })  : _enableDds = enableDds,
         // Always disable in the DAP layer as it's handled in the spawned
         // 'flutter' process.
