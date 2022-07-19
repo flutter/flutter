@@ -577,7 +577,7 @@ class FlutterDevice {
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
-        shaderCompiler: device!.developmentShaderCompiler,
+        shaderCompiler: developmentShaderCompiler,
       );
     } on DevFSException {
       devFSStatus.cancel();
