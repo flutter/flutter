@@ -7,7 +7,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-export 'dart:ui' show SemanticsFlag, SemanticsAction;
+export 'dart:ui' show SemanticsAction, SemanticsFlag;
 export 'package:flutter/rendering.dart' show SemanticsData;
 
 const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest) from the package:flutter/rendering.dart library to see what the semantics tree looks like.';

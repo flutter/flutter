@@ -1779,7 +1779,7 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 590.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
@@ -2612,7 +2612,7 @@ void main() {
     // Go without throw.
   });
 
-  testWidgets('Track offset respects padding', (WidgetTester tester) async {
+  testWidgets('Track offset respects MediaQuery padding', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106834
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -2640,7 +2640,39 @@ void main() {
       find.byType(RawScrollbar),
       paints
         ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 550.0)) // track
-        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0))
+        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0)) // thumb
+    ); // thumb
+  });
+
+  testWidgets('RawScrollbar.padding replaces MediaQueryData.padding', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.all(50.0),
+              ),
+              child: RawScrollbar(
+                controller: scrollController,
+                minThumbLength: 21,
+                minOverscrollLength: 8,
+                thumbVisibility: true,
+                padding: const EdgeInsets.all(100),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(width: 1000.0, height: 50000.0),
+                ),
+              ),
+            )
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 500.0)) // track
+          ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 121.0)) // thumb
     ); // thumb
   });
 }

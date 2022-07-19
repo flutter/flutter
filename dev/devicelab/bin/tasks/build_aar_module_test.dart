@@ -12,10 +12,6 @@ import 'package:path/path.dart' as path;
 
 final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
 
-
-final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-
 /// Tests that AARs can be built on module projects.
 Future<void> main() async {
   await task(() async {

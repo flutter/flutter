@@ -2029,7 +2029,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
-    if (_drawerOpened.value != isOpened) {
+    if (_drawerOpened.value != isOpened && _drawerKey.currentState != null) {
       setState(() {
         _drawerOpened.value = isOpened;
       });
@@ -2038,7 +2038,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    if (_endDrawerOpened.value != isOpened) {
+    if (_endDrawerOpened.value != isOpened && _endDrawerKey.currentState != null) {
       setState(() {
         _endDrawerOpened.value = isOpened;
       });

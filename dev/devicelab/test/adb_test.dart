@@ -145,8 +145,6 @@ CommandArgs cmd({
   );
 }
 
-typedef ExitErrorFactory = dynamic Function();
-
 @immutable
 class CommandArgs {
   const CommandArgs({ required this.command, this.arguments, this.environment });

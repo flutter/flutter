@@ -34,8 +34,6 @@ Element? findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
   return result;
 }
 
-final RegExp materialIconAssetNameColorExtractor = RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
-
 void checkIconColor(WidgetTester tester, String label, Color color) {
   final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile)!;
   final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;

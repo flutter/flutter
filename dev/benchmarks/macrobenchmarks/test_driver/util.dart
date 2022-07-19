@@ -52,10 +52,10 @@ void macroPerfTest(
       }
 
       timeline = await driver.traceAction(() async {
-      final Future<void> durationFuture = Future<void>.delayed(duration);
-      if (driverOps != null) {
-        await driverOps(driver);
-      }
+        final Future<void> durationFuture = Future<void>.delayed(duration);
+        if (driverOps != null) {
+          await driverOps(driver);
+        }
         await durationFuture;
       });
     });
