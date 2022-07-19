@@ -618,9 +618,9 @@ enum KeyDataTransitMode {
   keyDataThenRawKeyData,
 }
 
-/// The assumbled information corresponding to a native key message.
+/// The assembled information converted from a native key message.
 ///
-/// Native key messages, that is physically pressing or releasing
+/// Native key messages, meaning physically pressing or releasing
 /// keyboard keys, are translated into two different event streams in Flutter:
 ///
 ///  * The [KeyEvent] stream, represented by [KeyMessage.events] (recommended).
@@ -628,11 +628,12 @@ enum KeyDataTransitMode {
 ///    to be deprecated).
 ///
 /// Either the [KeyEvent] stream or the [RawKeyEvent] stream alone provides a
-/// complete description of the keyboard actions. Because they have different
-/// event models, Flutter dispatches both streams simultaneously before
-/// the transition is completed. And [KeyMessage] is used to bundles all
-/// information related to a native key message together for the convenience of
-/// propagation.
+/// complete description of the keyboard messages, but in different event
+/// models. Flutter is still transitioning from the legacy model to the new
+/// model, therefore dispatches both streams simultaneously before the
+/// transition is completed. [KeyMessage] is therefore used to bundles the
+/// stream segments of both models from a native key message together for the
+/// convenience of propagation.
 ///
 /// Typically, an application only needs to process either [KeyMessage.events]
 /// or [KeyMessage.rawEvent], not both. For example, when handling a
