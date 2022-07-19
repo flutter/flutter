@@ -15,25 +15,6 @@ namespace flutter {
 IOSContextMetalSkia::IOSContextMetalSkia(MsaaSampleCount msaa_samples) : IOSContext(msaa_samples) {
   darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetal>{
       [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice]};
-
-  if (!darwin_context_metal_) {
-    return;
-  }
-
-  main_command_queue_.reset([darwin_context_metal_.get().commandQueue retain]);
-
-  CVMetalTextureCacheRef texture_cache_raw = NULL;
-  auto cv_return = CVMetalTextureCacheCreate(kCFAllocatorDefault,  // allocator
-                                             NULL,  // cache attributes (NULL default)
-                                             darwin_context_metal_.get().device,  // metal device
-                                             NULL,  // texture attributes (NULL default)
-                                             &texture_cache_raw  // [out] cache
-  );
-  if (cv_return != kCVReturnSuccess) {
-    FML_DLOG(ERROR) << "Could not create Metal texture cache.";
-    return;
-  }
-  texture_cache_.Reset(texture_cache_raw);
 }
 
 IOSContextMetalSkia::~IOSContextMetalSkia() = default;
