@@ -19,7 +19,7 @@ const Set<String> _kObjectMembers = <String>{
 
 CompilationUnit _parseAndCheckDart(String path) {
   final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags2(
-    sdkLanguageVersion: Version.parse('2.12.0'),
+    sdkLanguageVersion: Version.parse('2.17.0'),
     flags: <String>['non-nullable'],
   );
   if (!analyzerFeatures.isEnabled(Feature.non_nullable)) {
