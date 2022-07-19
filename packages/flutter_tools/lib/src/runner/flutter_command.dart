@@ -603,10 +603,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
-          'Use `const String.fromEnvironment("DEFINE_CONFIG_JSON_RAW_VALUE")` '
+          'Use `const String.fromEnvironment("dart_define_from_file_raw_values")` '
           'can get all config json file raw (base64 encode,you need base64 decode when you use) value. '
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors;the key is json filed key,get value is json value.',
+          'int.fromEnvironment, and double.fromEnvironment constructors;the key is json filed key,get value is json value (no need for base64).',
       valueHelp: 'use-define-config.json'
     );
   }
