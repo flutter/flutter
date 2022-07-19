@@ -101,9 +101,8 @@ class DraggableScrollableController extends ChangeNotifier {
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
   ///
-  /// The sheet will not snap after calling [animateTo] even if it is not at a
-  /// snap point and [DraggableScrollableSheet.snap] is true. Snapping only
-  /// occurs after user drags.
+  /// The sheet will not snap after calling [animateTo] even if [DraggableScrollSheet.snap]
+  /// is true. Snapping only occurs after user drags.
   ///
   /// When calling [animateTo] in widget tests, `await`ing the returned
   /// [Future] may cause the test to hang and timeout. Instead, use
@@ -155,9 +154,8 @@ class DraggableScrollableController extends ChangeNotifier {
   /// is currently animating (e.g. responding to a user fling), that animation is
   /// canceled as well.
   ///
-  /// The sheet will not snap after calling [jumpTo] even if it is not at a snap
-  /// point and [DraggableScrollableSheet.snap] is true. Snapping only occurs
-  /// after user drags.
+  /// The sheet will not snap after calling [jumpTo] even if [DraggableScrollSheet.snap]
+  /// is true. Snapping only occurs after user drags.
   void jumpTo(double size) {
     _assertAttached();
     assert(size >= 0 && size <= 1);
@@ -240,6 +238,10 @@ class DraggableScrollableController extends ChangeNotifier {
 /// during a drag, set [snap] to `true`. The sheet will snap between
 /// [minChildSize] and [maxChildSize]. Use [snapSizes] to add more sizes for
 /// the sheet to snap between.
+///
+/// The snapping effect is only applied on user drags. Programmatically
+/// manipulating the sheet size via [DraggableScrollableController.animteTo] or
+/// [DraggableScrollableController.jumpTo] will ignore [snap] and [snapSizes].
 ///
 /// By default, the widget will expand its non-occupied area to fill available
 /// space in the parent. If this is not desired, e.g. because the parent wants
@@ -351,6 +353,9 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// If the user's finger was still moving when they lifted it, the widget will
   /// snap to the next snap size (see [snapSizes]) in the direction of the drag.
   /// If their finger was still, the widget will snap to the nearest snap size.
+  ///
+  /// Snapping is not applied when the sheet is programmatically moved by
+  /// calling [DraggableScrollableController.animateTo] or [DraggableScrollableController.jumpTo].
   ///
   /// Rebuilding the sheet with snap newly enabled will immediately trigger a
   /// snap unless the sheet has not yet been dragged away from
