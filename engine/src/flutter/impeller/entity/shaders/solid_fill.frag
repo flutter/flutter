@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-in vec4 color;
+uniform FragInfo {
+  vec4 color;
+}
+frag_info;
 
 out vec4 frag_color;
 
 void main() {
-  frag_color = color;
+  frag_color = frag_info.color;
 }

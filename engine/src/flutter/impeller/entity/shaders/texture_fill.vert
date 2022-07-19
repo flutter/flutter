@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-uniform FrameInfo {
+uniform VertInfo {
   mat4 mvp;
-  float alpha;
-} frame_info;
+}
+vert_info;
 
-in vec2 vertices;
+in vec2 position;
 in vec2 texture_coords;
 
 out vec2 v_texture_coords;
-out float v_alpha;
 
 void main() {
-  gl_Position = frame_info.mvp * vec4(vertices, 0.0, 1.0);
+  gl_Position = vert_info.mvp * vec4(position, 0.0, 1.0);
   v_texture_coords = texture_coords;
-  v_alpha = frame_info.alpha;
 }

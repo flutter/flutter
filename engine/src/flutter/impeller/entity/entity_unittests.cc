@@ -708,6 +708,8 @@ TEST_P(EntityTest, BlendingModeOptions) {
                          Rect rect, Color color,
                          Entity::BlendMode blend_mode) -> bool {
       using VS = SolidFillPipeline::VertexShader;
+      using FS = SolidFillPipeline::FragmentShader;
+
       VertexBufferBuilder<VS::PerVertexData> vtx_builder;
       {
         auto r = rect.GetLTRB();
@@ -729,12 +731,16 @@ TEST_P(EntityTest, BlendingModeOptions) {
       cmd.BindVertices(
           vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
-      VS::FrameInfo frame_info;
+      VS::VertInfo frame_info;
       frame_info.mvp =
           Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
-      frame_info.color = color.Premultiply();
-      VS::BindFrameInfo(cmd,
-                        pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+      VS::BindVertInfo(cmd,
+                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+
+      FS::FragInfo frag_info;
+      frag_info.color = color.Premultiply();
+      FS::BindFragInfo(cmd,
+                       pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
       cmd.primitive_type = PrimitiveType::kTriangle;
 
