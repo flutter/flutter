@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-in vec4 stroke_color;
+uniform FragInfo {
+  vec4 color;
+}
+frag_info;
+
 in float v_pen_down;
 
 out vec4 frag_color;
 
 void main() {
-  frag_color = stroke_color * floor(v_pen_down);
+  frag_color = frag_info.color * floor(v_pen_down);
 }

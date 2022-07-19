@@ -45,12 +45,17 @@ bool ClipContents::Render(const ContentContext& renderer,
                           const Entity& entity,
                           RenderPass& pass) const {
   using VS = ClipPipeline::VertexShader;
+  using FS = ClipPipeline::FragmentShader;
 
-  VS::FrameInfo info;
-  // The color really doesn't matter.
-  info.color = Color::SkyBlue();
+  VS::VertInfo info;
 
   Command cmd;
+
+  FS::FragInfo frag_info;
+  // The color really doesn't matter.
+  frag_info.color = Color::SkyBlue();
+  FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
+
   auto options = OptionsFromPassAndEntity(pass, entity);
   cmd.stencil_reference = entity.GetStencilDepth();
   options.stencil_compare = CompareFunction::kEqual;
@@ -69,7 +74,7 @@ bool ClipContents::Render(const ContentContext& renderer,
       cmd.BindVertices(std::move(vertices));
 
       info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
-      VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+      VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
       cmd.pipeline = renderer.GetClipPipeline(options);
       pass.AddCommand(cmd);
@@ -95,7 +100,7 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
              entity.GetTransformation();
-  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+  VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
   pass.AddCommand(std::move(cmd));
   return true;
@@ -123,6 +128,7 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
                                  const Entity& entity,
                                  RenderPass& pass) const {
   using VS = ClipPipeline::VertexShader;
+  using FS = ClipPipeline::FragmentShader;
 
   Command cmd;
   cmd.label = "Restore Clip";
@@ -145,12 +151,14 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
   });
   cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
-  VS::FrameInfo info;
-  // The color really doesn't matter.
-  info.color = Color::SkyBlue();
+  VS::VertInfo info;
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+  VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
-  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+  FS::FragInfo frag_info;
+  // The color really doesn't matter.
+  frag_info.color = Color::SkyBlue();
+  FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
   pass.AddCommand(std::move(cmd));
   return true;
