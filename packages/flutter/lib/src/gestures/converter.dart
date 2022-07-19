@@ -216,7 +216,6 @@ class PointerEventConverter {
                   return PointerPanZoomStartEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     embedderId: datum.embedderId,
@@ -230,7 +229,6 @@ class PointerEventConverter {
                   return PointerPanZoomUpdateEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     pan: pan,
@@ -244,7 +242,6 @@ class PointerEventConverter {
                   return PointerPanZoomEndEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     embedderId: datum.embedderId,
