@@ -57,8 +57,8 @@ enum _FilledButtonVariant { filled, tonal }
 /// See also:
 ///
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
-///  * [OutlinedButton], a [TextButton] with a border outline.
-///  * [TextButton], a simple flat button without a shadow.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class FilledButton extends ButtonStyleButton {
@@ -227,9 +227,6 @@ class FilledButton extends ButtonStyleButton {
     final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
       : _FilledButtonDefaultOverlay(foreground);
-    final MaterialStateProperty<double>? elevationValue = (elevation == null)
-      ? null
-      : _FilledButtonDefaultElevation(elevation);
     final MaterialStateProperty<MouseCursor?>? mouseCursor =
       (enabledMouseCursor == null && disabledMouseCursor == null)
         ? null
@@ -242,7 +239,7 @@ class FilledButton extends ButtonStyleButton {
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
-      elevation: elevationValue,
+      elevation: ButtonStyleButton.allOrNull(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
       fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
@@ -390,33 +387,9 @@ class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Dia
       return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.24);
+      return overlay.withOpacity(0.12);
     }
     return null;
-  }
-}
-
-@immutable
-class _FilledButtonDefaultElevation extends MaterialStateProperty<double> with Diagnosticable {
-  _FilledButtonDefaultElevation(this.elevation);
-
-  final double elevation;
-
-  @override
-  double resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return 0;
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return elevation + 2;
-    }
-    if (states.contains(MaterialState.focused)) {
-      return elevation + 2;
-    }
-    if (states.contains(MaterialState.pressed)) {
-      return elevation + 6;
-    }
-    return elevation;
   }
 }
 

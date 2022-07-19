@@ -54,9 +54,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [FilledButton], a filled button that doesn't elevate when pressed.
-///  * [TextButton], a simple flat button without a shadow.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
