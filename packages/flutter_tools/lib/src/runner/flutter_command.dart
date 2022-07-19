@@ -1146,7 +1146,7 @@ abstract class FlutterCommand extends Command<void> {
       if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
         final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
         defineConfigJsonMap=json.decode(configJsonRaw) as Map<String, dynamic>;
-        defineConfigJsonMap['${FlutterOptions.kDartDefineFromFileOption}_raw_values']= base64Encode(utf8.encode(configJsonRaw));
+        defineConfigJsonMap['dart_define_from_file_raw_values']= base64Encode(utf8.encode(configJsonRaw));
         defineConfigJsonMap.forEach((String key,dynamic value) {
           dartDefines.add('$key=$value');
         });
