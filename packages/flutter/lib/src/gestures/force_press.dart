@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+
+import 'arena.dart';
 import 'events.dart';
 import 'recognizer.dart';
-
-export 'dart:ui' show Offset, PointerDeviceKind;
-
-export 'events.dart' show PointerDownEvent, PointerEvent;
 
 enum _ForceState {
   // No pointer has touched down and the detector is ready for a pointer down to occur.

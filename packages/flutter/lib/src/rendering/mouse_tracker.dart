@@ -8,13 +8,9 @@
 // ignore_for_file: prefer_collection_literals
 
 import 'dart:collection' show LinkedHashMap;
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-
-import 'object.dart';
 
 export 'package:flutter/services.dart' show
   MouseCursor,

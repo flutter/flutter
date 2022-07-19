@@ -6,8 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-export 'dart:ui' show FlutterView;
-
 /// The device specific gesture settings scaled into logical pixels.
 ///
 /// This configuration can be retrieved from the window, or more commonly from a

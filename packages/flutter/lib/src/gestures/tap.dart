@@ -3,20 +3,15 @@
 // found in the LICENSE file.
 
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
-
-export 'dart:ui' show Offset, PointerDeviceKind;
-
-export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
-export 'package:vector_math/vector_math_64.dart' show Matrix4;
-
-export 'arena.dart' show GestureDisposition;
-export 'events.dart' show PointerCancelEvent, PointerDownEvent, PointerEvent, PointerUpEvent;
 
 /// Details for [GestureTapDownCallback], such as position.
 ///

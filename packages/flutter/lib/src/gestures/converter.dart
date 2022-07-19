@@ -4,12 +4,9 @@
 
 
 import 'dart:ui' as ui show PointerChange, PointerData, PointerSignalKind;
+import 'dart:ui';
 
 import 'events.dart';
-
-export 'dart:ui' show PointerData;
-
-export 'events.dart' show PointerEvent;
 
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
 //

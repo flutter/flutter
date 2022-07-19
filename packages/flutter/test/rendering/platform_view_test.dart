@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';

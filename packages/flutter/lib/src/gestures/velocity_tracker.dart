@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
 import 'lsq_solver.dart';
-
-export 'dart:ui' show Offset, PointerDeviceKind;
 
 /// A velocity in two dimensions.
 @immutable

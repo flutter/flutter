@@ -4,8 +4,6 @@
 
 import 'drag_details.dart';
 
-export 'drag_details.dart' show DragEndDetails, DragUpdateDetails;
-
 /// Interface for objects that receive updates about drags.
 ///
 /// This interface is used in various ways. For example,

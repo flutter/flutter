@@ -11,13 +11,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'constants.dart';
 import 'gesture_settings.dart';
 
-export 'dart:ui' show Offset, PointerDeviceKind;
-
-export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
-export 'package:vector_math/vector_math_64.dart' show Matrix4;
-
-export 'gesture_settings.dart' show DeviceGestureSettings;
-
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
 /// behavior of "primary operation".
 ///

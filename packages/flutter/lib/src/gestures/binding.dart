@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
+import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 
@@ -17,16 +18,6 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 import 'pointer_signal_resolver.dart';
 import 'resampler.dart';
-
-export 'dart:ui' show Offset;
-
-export 'package:flutter/foundation.dart' show DiagnosticsNode, InformationCollector;
-
-export 'arena.dart' show GestureArenaManager;
-export 'events.dart' show PointerEvent;
-export 'hit_test.dart' show HitTestEntry, HitTestResult, HitTestTarget;
-export 'pointer_router.dart' show PointerRouter;
-export 'pointer_signal_resolver.dart' show PointerSignalResolver;
 
 typedef _HandleSampleTimeChangedCallback = void Function();
 

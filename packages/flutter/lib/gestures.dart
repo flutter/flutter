@@ -7,6 +7,11 @@
 /// To use, import `package:flutter/gestures.dart`.
 library gestures;
 
+export 'dart:ui' show FlutterView, Offset, PointerData, PointerDeviceKind;
+
+export 'package:flutter/foundation.dart';
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
 export 'src/gestures/arena.dart';
 export 'src/gestures/binding.dart';
 export 'src/gestures/constants.dart';
