@@ -4,7 +4,6 @@
 
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'text_theme.dart';

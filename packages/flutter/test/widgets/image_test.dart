@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 

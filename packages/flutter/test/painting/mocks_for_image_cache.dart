@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo extends ImageInfo {

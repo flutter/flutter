@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-
-import 'basic_types.dart';
 
 /// How a box should be inscribed into another box.
 ///

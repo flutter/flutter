@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 

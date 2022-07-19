@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show Codec;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 /// An image provider implementation for testing that is using a [ui.Codec]

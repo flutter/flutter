@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'android_platform_view.dart';
 import 'future_data_handler.dart';

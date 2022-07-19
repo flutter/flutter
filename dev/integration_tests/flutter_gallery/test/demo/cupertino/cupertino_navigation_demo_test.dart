@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gallery/demo/cupertino/cupertino_navigation_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 

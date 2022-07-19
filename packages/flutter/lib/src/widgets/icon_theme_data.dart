@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'framework.dart' show BuildContext;

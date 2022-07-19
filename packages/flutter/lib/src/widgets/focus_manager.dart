@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 
 import 'binding.dart';
 import 'focus_scope.dart';

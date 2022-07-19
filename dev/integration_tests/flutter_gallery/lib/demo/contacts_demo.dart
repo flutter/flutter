@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
   const _ContactCategory({ this.icon, this.children });

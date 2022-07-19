@@ -6,8 +6,6 @@ import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder;
 
-import 'package:flutter/services.dart';
-
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';

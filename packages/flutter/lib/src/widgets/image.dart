@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show File;
 
 import 'package:flutter/semantics.dart';
 

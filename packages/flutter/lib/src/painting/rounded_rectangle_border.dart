@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
 import 'circle_border.dart';

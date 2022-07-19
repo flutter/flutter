@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart' show clampDouble;
-import 'basic_types.dart';
 
 /// Position a child box within a container box, either above or below a target
 /// point.

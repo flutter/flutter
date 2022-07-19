@@ -12,6 +12,7 @@ import 'dart:ui' as ui show
   TextLeadingDistribution,
   TextStyle,
   lerpDouble;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 

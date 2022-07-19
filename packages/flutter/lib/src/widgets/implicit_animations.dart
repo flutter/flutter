@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';

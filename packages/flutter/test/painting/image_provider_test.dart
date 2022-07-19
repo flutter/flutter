@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:file/memory.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';

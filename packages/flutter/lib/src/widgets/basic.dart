@@ -21,7 +21,7 @@ export 'package:flutter/foundation.dart' show
   Listenable,
   TargetPlatform,
   ValueNotifier;
-export 'package:flutter/painting.dart';
+export 'package:flutter/painting.dart' hide Image;
 export 'package:flutter/rendering.dart' show
   AlignmentGeometryTween,
   AlignmentTween,

@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter_test/flutter_test.dart';

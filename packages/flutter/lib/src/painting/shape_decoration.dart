@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'borders.dart';
 import 'box_border.dart';
 import 'box_decoration.dart';

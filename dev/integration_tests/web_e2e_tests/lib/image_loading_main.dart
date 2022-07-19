@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 final Completer<void> _assetImageCompleter = Completer<void>();
 final Completer<void> _networkImageCompleter = Completer<void>();

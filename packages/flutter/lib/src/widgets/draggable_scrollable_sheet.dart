@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
-
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';

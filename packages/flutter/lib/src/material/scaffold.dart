@@ -7,7 +7,6 @@ import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';

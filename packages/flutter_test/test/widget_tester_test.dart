@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports

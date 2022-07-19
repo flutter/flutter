@@ -14,6 +14,7 @@ import 'dart:ui' as ui show
   PlaceholderAlignment,
   TextHeightBehavior,
   TextStyle;
+import 'dart:ui';
 
 import 'package:flutter/services.dart';
 
@@ -22,8 +23,6 @@ import 'inline_span.dart';
 import 'placeholder_span.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
-
-export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_style.dart, as well as the

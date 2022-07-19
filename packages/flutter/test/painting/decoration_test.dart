@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui' as ui show ColorFilter, Image;
 
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

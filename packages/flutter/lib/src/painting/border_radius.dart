@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'dart:ui';
 
-import 'basic_types.dart';
+import 'package:flutter/foundation.dart';
 
 /// Base class for [BorderRadius] that allows for text-direction aware resolution.
 ///

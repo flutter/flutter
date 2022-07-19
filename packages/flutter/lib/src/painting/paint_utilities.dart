@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-
-import 'basic_types.dart';
+import 'dart:ui';
 
 /// Draw a line between two points, which cuts diagonally back and forth across
 /// the line that connects the two points.

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 

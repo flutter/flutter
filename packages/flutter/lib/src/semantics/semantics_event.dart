@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 /// An event sent by the application to notify interested listeners that

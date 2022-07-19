@@ -5,8 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/foundation.dart';
-
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';

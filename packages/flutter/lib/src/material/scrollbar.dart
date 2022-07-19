@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 
 import 'color_scheme.dart';
 import 'material_state.dart';

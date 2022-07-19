@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter/services.dart';
-
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';

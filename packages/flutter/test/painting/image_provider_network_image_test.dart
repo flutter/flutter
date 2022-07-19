@@ -7,7 +7,6 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show Codec, FrameInfo, ImmutableBuffer;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show PlaceholderAlignment;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
 import 'text_span.dart';

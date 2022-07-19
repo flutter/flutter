@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 

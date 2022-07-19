@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
-import 'basic_types.dart';
 import 'borders.dart';
 
 /// A shape with a notch in its outline.

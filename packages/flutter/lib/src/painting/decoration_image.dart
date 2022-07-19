@@ -4,11 +4,11 @@
 
 import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
+import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 
 import 'alignment.dart';
-import 'basic_types.dart';
 import 'binding.dart';
 import 'borders.dart';
 import 'box_fit.dart';
