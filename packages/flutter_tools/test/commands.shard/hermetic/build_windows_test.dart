@@ -21,22 +21,24 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String flutterRoot = r'C:\flutter';
-const String buildFilePath = r'C:\windows\CMakeLists.txt';
-const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-const String _cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String buildFilePath = r'windows\CMakeLists.txt';
+const String visualStudioPath =
+    r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
+const String _cmakePath = visualStudioPath +
+    r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 const String _defaultGenerator = 'Visual Studio 16 2019';
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
     'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
-    'FLUTTER_ROOT': flutterRoot,
-    'USERPROFILE': '/',
+  'FLUTTER_ROOT': flutterRoot,
+  'USERPROFILE': '/',
   }
 );
 final Platform notWindowsPlatform = FakePlatform(
   environment: <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
+  'FLUTTER_ROOT': flutterRoot,
   }
 );
 
@@ -80,7 +82,7 @@ void main() {
       command: <String>[
         _cmakePath,
         '-S',
-        fileSystem.path.dirname(buildFilePath),
+        fileSystem.path.absolute(fileSystem.path.dirname(buildFilePath)),
         '-B',
         r'build\windows',
         '-G',
@@ -140,8 +142,8 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
-      'to learn about adding Windows support to a project.'));
+                'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+                'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
@@ -301,9 +303,9 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       buildCommand('Release'),
     ]);
     fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
-      .createSync(recursive: true);
+        .createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
-      .createSync(recursive: true);
+        .createSync(recursive: true);
 
     // Relevant portions of an incorrectly generated project, with some
     // irrelevant details removed for length.
@@ -389,10 +391,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 </Project>
 ''';
     final File assembleProject = fileSystem.currentDirectory
-      .childDirectory('build')
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childFile('flutter_assemble.vcxproj');
+        .childDirectory('build')
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childFile('flutter_assemble.vcxproj');
     assembleProject.createSync(recursive: true);
     assembleProject.writeAsStringSync(fakeBadProjectContent);
 
@@ -403,22 +405,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     final List<String> projectLines = assembleProject.readAsLinesSync();
 
     const String commandBase = r'"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" '
-      r'-E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64';
+        r'-E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64';
     // The duplicate commands will still be present, but with the order matching
     // the condition order (cycling through the configurations), rather than
     // three copies of Debug, then three copies of Profile, then three copies
     // of Release.
     expect(projectLines, containsAllInOrder(<String>[
-      '$commandBase Debug\r',
-      '$commandBase Profile\r',
-      '$commandBase Release\r',
-      '$commandBase Debug\r',
-      '$commandBase Profile\r',
-      '$commandBase Release\r',
-      '$commandBase Debug\r',
-      '$commandBase Profile\r',
-      '$commandBase Release\r',
-    ]));
+          '$commandBase Debug\r',
+          '$commandBase Profile\r',
+          '$commandBase Release\r',
+          '$commandBase Debug\r',
+          '$commandBase Profile\r',
+          '$commandBase Release\r',
+          '$commandBase Debug\r',
+          '$commandBase Profile\r',
+          '$commandBase Release\r',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -437,31 +439,31 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       buildCommand('Release'),
     ]);
     fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
-      .createSync(recursive: true);
+        .createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
-      .createSync(recursive: true);
+        .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
-        '--track-widget-creation',
-        '--obfuscate',
-        '--tree-shake-icons',
-        '--enable-experiment=non-nullable',
-        r'--split-debug-info=C:\foo\',
-        '--dart-define=foo=a',
-        '--dart-define=bar=b',
-        r'--bundle-sksl-path=foo\bar.sksl.json',
-        r'--target=lib\other.dart',
+      'windows',
+      '--no-pub',
+      '--track-widget-creation',
+      '--obfuscate',
+      '--tree-shake-icons',
+      '--enable-experiment=non-nullable',
+      r'--split-debug-info=C:\foo\',
+      '--dart-define=foo=a',
+      '--dart-define=bar=b',
+      r'--bundle-sksl-path=foo\bar.sksl.json',
+      r'--target=lib\other.dart',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
@@ -470,25 +472,25 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     // Backslashes are escaped in the file, which is why this uses both raw
     // strings and double backslashes.
     expect(configLines, containsAll(<String>[
-      r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
-      r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
-      r'set(FLUTTER_VERSION "1.0.0" PARENT_SCOPE)',
-      r'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
-      r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
-      r'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-      r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
-      r'  "DART_OBFUSCATION=true"',
-      r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
-      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
-      r'  "SPLIT_DEBUG_INFO=C:\\foo\\"',
-      r'  "TRACK_WIDGET_CREATION=true"',
-      r'  "TREE_SHAKE_ICONS=true"',
-      r'  "FLUTTER_ROOT=C:\\flutter"',
-      r'  "PROJECT_DIR=C:\\"',
-      r'  "FLUTTER_TARGET=lib\\other.dart"',
-      r'  "BUNDLE_SKSL_PATH=foo\\bar.sksl.json"',
-    ]));
+          r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
+          r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
+          r'set(FLUTTER_VERSION "1.0.0" PARENT_SCOPE)',
+          r'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
+          r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
+          r'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
+          r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
+          r'  "DART_OBFUSCATION=true"',
+          r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+          r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
+          r'  "SPLIT_DEBUG_INFO=C:\\foo\\"',
+          r'  "TRACK_WIDGET_CREATION=true"',
+          r'  "TREE_SHAKE_ICONS=true"',
+          r'  "FLUTTER_ROOT=C:\\flutter"',
+          r'  "PROJECT_DIR=C:\\"',
+          r'  "FLUTTER_TARGET=lib\\other.dart"',
+          r'  "BUNDLE_SKSL_PATH=foo\\bar.sksl.json"',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -557,28 +559,28 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
+      'windows',
+      '--no-pub',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
-    ]));
+          'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -599,30 +601,30 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=4',
+      'windows',
+      '--no-pub',
+      '--build-name=1.2.3',
+      '--build-number=4',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
-    ]));
+          'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -647,29 +649,29 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
+      'windows',
+      '--no-pub',
+      '--build-name=1.2.3',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_VERSION "1.2.3" PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-    ]));
+          'set(FLUTTER_VERSION "1.2.3" PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -694,29 +696,29 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
-        '--build-number=4',
+      'windows',
+      '--no-pub',
+      '--build-number=4',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
-    ]));
+          'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -741,30 +743,30 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=4',
+      'windows',
+      '--no-pub',
+      '--build-name=1.2.3',
+      '--build-number=4',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
-    ]));
+          'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -785,34 +787,34 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=hello',
+      'windows',
+      '--no-pub',
+      '--build-name=1.2.3',
+      '--build-number=hello',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_VERSION "1.2.3+hello" PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-    ]));
+          'set(FLUTTER_VERSION "1.2.3+hello" PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
+        ]));
 
     expect(testLogger.warningText, contains(
-      'Warning: build identifier hello in version 1.2.3+hello is not numeric and '
-      'cannot be converted into a Windows build version number. Defaulting to 0.\n'
+            'Warning: build identifier hello in version 1.2.3+hello is not numeric and '
+            'cannot be converted into a Windows build version number. Defaulting to 0.\n'
       'This may cause issues with Windows installers.'
     ));
   }, overrides: <Type, Generator>{
@@ -835,34 +837,34 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     await createTestCommandRunner(command).run(
       const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=4.5',
+      'windows',
+      '--no-pub',
+      '--build-name=1.2.3',
+      '--build-number=4.5',
       ]
     );
 
     final File cmakeConfig = fileSystem.currentDirectory
-      .childDirectory('windows')
-      .childDirectory('flutter')
-      .childDirectory('ephemeral')
-      .childFile('generated_config.cmake');
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
 
     expect(cmakeConfig, exists);
 
     final List<String> configLines = cmakeConfig.readAsLinesSync();
 
     expect(configLines, containsAll(<String>[
-      'set(FLUTTER_VERSION "1.2.3+4.5" PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-      'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-    ]));
+          'set(FLUTTER_VERSION "1.2.3+4.5" PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+          'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
+        ]));
 
     expect(testLogger.warningText, contains(
-      'Warning: build identifier 4.5 in version 1.2.3+4.5 is not numeric and '
-      'cannot be converted into a Windows build version number. Defaulting to 0.\n'
+            'Warning: build identifier 4.5 in version 1.2.3+4.5 is not numeric and '
+            'cannot be converted into a Windows build version number. Defaulting to 0.\n'
       'This may cause issues with Windows installers.'
     ));
   }, overrides: <Type, Generator>{
@@ -923,8 +925,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
     expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(usage.events, contains(
-       const TestUsageEvent('code-size-analysis', 'windows'),
-    ));
+          const TestUsageEvent('code-size-analysis', 'windows'),
+        ));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -933,12 +935,34 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
     Usage: () => usage,
   });
+
+  testUsingContext('Test bad path characters', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    fileSystem.currentDirectory = fileSystem.directory("test_'path")
+      ..createSync();
+    final String absPath = fileSystem.currentDirectory.absolute.path;
+    setUpMockCoreProjectFiles();
+
+    expect(
+        createTestCommandRunner(command)
+            .run(const <String>['windows', '--no-pub']),
+        throwsToolExit(
+            message:
+                'Path $absPath contains invalid characters in "\'#!\$^&*=|,;<>?"'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
 }
 
 class FakeVisualStudio extends Fake implements VisualStudio {
   FakeVisualStudio({
     this.cmakePath = _cmakePath,
-    this.cmakeGenerator = 'Visual Studio 16 2019',
+      this.cmakeGenerator = 'Visual Studio 16 2019',
     this.displayVersion = '17.0.0'
   });
 

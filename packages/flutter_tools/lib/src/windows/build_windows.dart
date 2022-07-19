@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -19,17 +21,28 @@ import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import 'visual_studio.dart';
 
+// These characters appear to be fine: @%()-+_{}[]`~
+const String badCharacters = r"'#!$^&*=|,;<>?";
+
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String? target,
   VisualStudio? visualStudioOverride,
   SizeAnalyzer? sizeAnalyzer,
 }) async {
+  final String projectPath = windowsProject.parent.directory.absolute.path;
+  final bool badPath = badCharacters.runes
+      .any((int i) => projectPath.contains(String.fromCharCode(i)));
+  if (badPath) {
+    throwToolExit(
+        'Path $projectPath contains invalid characters in "$badCharacters"');
+  }
+
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
-      'to learn about adding Windows support to a project.');
+        'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+        'to learn about adding Windows support to a project.');
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
@@ -46,11 +59,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   createPluginSymlinks(windowsProject.parent);
 
   final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
-    fileSystem: globals.fs,
-    platform: globals.platform,
-    logger: globals.logger,
-    processManager: globals.processManager,
-  );
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        logger: globals.logger,
+        processManager: globals.processManager,
+      );
   final String? cmakePath = visualStudio.cmakePath;
   final String? cmakeGenerator = visualStudio.cmakeGenerator;
   if (cmakePath == null || cmakeGenerator == null) {
@@ -80,9 +93,9 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('snapshot.$arch.json');
+        .childFile('snapshot.$arch.json');
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('trace.$arch.json');
+        .childFile('trace.$arch.json');
     final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
@@ -94,7 +107,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs
-        .directory(globals.fsUtils.homeDirPath)
+          .directory(globals.fsUtils.homeDirPath)
         .childDirectory('.flutter-devtools'), 'windows-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
@@ -105,8 +118,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     // DevTools expects a file path relative to the .flutter-devtools/ dir.
     final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
     globals.printStatus(
-      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'flutter pub global activate devtools; flutter pub global run devtools '
+        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+        'flutter pub global activate devtools; flutter pub global run devtools '
       '--appSizeBase=$relativeAppSizePath'
     );
   }
@@ -222,12 +235,12 @@ void _writeGeneratedFlutterConfig(
 // dropping VS 2022 support.
 void _fixBrokenCmakeGeneration(Directory buildDirectory) {
   final File assembleProject = buildDirectory
-    .childDirectory('flutter')
-    .childFile('flutter_assemble.vcxproj');
+      .childDirectory('flutter')
+      .childFile('flutter_assemble.vcxproj');
   if (assembleProject.existsSync()) {
     // E.g.: <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     final RegExp commandRegex = RegExp(
-      r'<Command Condition=.*\(Configuration\)\|\$\(Platform\).==.(Debug|Profile|Release)\|');
+        r'<Command Condition=.*\(Configuration\)\|\$\(Platform\).==.(Debug|Profile|Release)\|');
     // E.g.: [...]/flutter_tools/bin/tool_backend.bat windows-x64 Debug
     final RegExp assembleCallRegex = RegExp(
       r'^.*/tool_backend\.bat windows[^ ]* (Debug|Profile|Release)');
@@ -249,7 +262,7 @@ void _fixBrokenCmakeGeneration(Directory buildDirectory) {
             // (e.g., the project path).
             final int badConfigIndex = line.lastIndexOf(assembleCallMatch.group(1)!);
             final String correctedLine = line.replaceFirst(
-              callConfig, lastCommandConditionConfig, badConfigIndex);
+                callConfig, lastCommandConditionConfig, badConfigIndex);
             newProjectContents.writeln('$correctedLine\r');
             continue;
           }
