@@ -37,7 +37,7 @@ std::optional<Rect> ClipContents::GetCoverage(const Entity& entity) const {
 };
 
 bool ClipContents::ShouldRender(const Entity& entity,
-                                const RenderPass& pass) const {
+                                const ISize& target_size) const {
   return true;
 }
 
@@ -120,7 +120,7 @@ std::optional<Rect> ClipRestoreContents::GetCoverage(
 };
 
 bool ClipRestoreContents::ShouldRender(const Entity& entity,
-                                       const RenderPass& pass) const {
+                                       const ISize& target_size) const {
   return true;
 }
 
