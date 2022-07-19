@@ -513,18 +513,18 @@ class _DraggableSheetExtent {
   final VoidCallback onSizeChanged;
   double availablePixels;
 
-  // Used to disable snapping until the user has dragged on the sheet. We do
-  // this because we don't want to snap away from an initial or programmatically set size.
+  // Used to disable snapping until the user has dragged on the sheet.
   bool hasDragged;
 
-  // Used to determine if the sheet should move to the new initial size when it
+  // Used to determine if the sheet should move to a new initial size when it
   // changes.
   // We need both `hasChanged` and `hasDragged` to achieve the following
   // behavior:
   //   1. The sheet should only snap following user drags (as opposed to
-  //      programmatic sheet changes).
+  //      programmatic sheet changes). See docs for `animateTo` and `jumpTo`.
   //   2. The sheet should move to a new initial child size on rebuild iff the
-  //      sheet has not changed, either by drag or programmatic control.
+  //      sheet has not changed, either by drag or programmatic control. See
+  //      docs for `initialChildSize`.
   bool hasChanged;
 
   bool get isAtMin => minSize >= _currentSize.value;
