@@ -23,7 +23,7 @@ import 'circle_border.dart';
 ///  * [Border], which, when used with [BoxDecoration], can also describe an oval.
 class OvalBorder extends CircleBorder {
   /// Create an oval border.
-  const OvalBorder({ super.side, super.eccentricity = 1.0});
+  const OvalBorder({ super.side, super.eccentricity = 1.0 });
 
   @override
   ShapeBorder scale(double t) => OvalBorder(side: side.scale(t), eccentricity: eccentricity);
