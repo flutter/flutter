@@ -120,6 +120,7 @@ class DraggableScrollableController extends ChangeNotifier {
     _attachedController!.position.goIdle();
     // This disables any snapping until the next user interaction with the sheet.
     _attachedController!.extent.hasDragged = false;
+    _attachedController!.extent.hasChanged = true;
     _attachedController!.extent.startActivity(onCanceled: () {
       // Don't stop the controller if it's already finished and may have been disposed.
       if (animationController.isAnimating) {
@@ -156,6 +157,7 @@ class DraggableScrollableController extends ChangeNotifier {
     _attachedController!.extent.startActivity(onCanceled: () {});
     _attachedController!.position.goIdle();
     _attachedController!.extent.hasDragged = false;
+    _attachedController!.extent.hasChanged = true;
     _attachedController!.extent.updateSize(size, _attachedController!.position.context.notificationContext!);
   }
 
@@ -477,6 +479,7 @@ class _DraggableSheetExtent {
     this.snapAnimationDuration,
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
+    bool? hasChanged,
   })  : assert(minSize != null),
         assert(maxSize != null),
         assert(initialSize != null),
@@ -487,7 +490,8 @@ class _DraggableSheetExtent {
         _currentSize = (currentSize ?? ValueNotifier<double>(initialSize))
           ..addListener(onSizeChanged),
         availablePixels = double.infinity,
-        hasDragged = hasDragged ?? false;
+        hasDragged = hasDragged ?? false,
+        hasChanged = hasChanged ?? false;
 
   VoidCallback? _cancelActivity;
 
@@ -504,6 +508,16 @@ class _DraggableSheetExtent {
   // Used to disable snapping until the user has dragged on the sheet. We do
   // this because we don't want to snap away from an initial or programmatically set size.
   bool hasDragged;
+
+  // Used to determine if the sheet move to the new initial size on changes of
+  // size.
+  // We need both `hasChanged` and `hasDragged` to achieve the following
+  // behavior:
+  //   1. The sheet should only snap following user drags (as opposed to
+  //      programmatic sheet changes.
+  //   2. The sheet should move to a new initial position on rebuild iff the
+  //      sheet has not changed, either by drag or programmatic control.
+  bool hasChanged;
 
   bool get isAtMin => minSize >= _currentSize.value;
   bool get isAtMax => maxSize <= _currentSize.value;
@@ -538,6 +552,7 @@ class _DraggableSheetExtent {
     // The user has interacted with the sheet, set `hasDragged` to true so that
     // we'll snap if applicable.
     hasDragged = true;
+    hasChanged = true;
     if (availablePixels == 0) {
       return;
     }
@@ -590,11 +605,13 @@ class _DraggableSheetExtent {
       snapAnimationDuration: snapAnimationDuration,
       initialSize: initialSize,
       onSizeChanged: onSizeChanged,
-      // Use the possibly updated initialSize if the user hasn't dragged yet.
-      currentSize: ValueNotifier<double>(hasDragged
+      // Set the current size to the possibly updated initial size if the sheet
+      // hasn't changed yet.
+      currentSize: ValueNotifier<double>(hasChanged
           ? clampDouble(_currentSize.value, minSize, maxSize)
           : initialSize),
       hasDragged: hasDragged,
+      hasChanged: hasChanged,
     );
   }
 }
@@ -785,6 +802,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
   void reset() {
     extent._cancelActivity?.call();
     extent.hasDragged = false;
+    extent.hasChanged = false;
     // jumpTo can result in trying to replace semantics during build.
     // Just animate really fast.
     // Avoid doing it at all if the offset is already 0.0.
