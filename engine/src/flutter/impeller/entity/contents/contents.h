@@ -47,6 +47,8 @@ class Contents {
       const ContentContext& renderer,
       const Entity& entity) const;
 
+  virtual bool ShouldRender(const Entity& entity, const RenderPass& pass) const;
+
  protected:
 
  private:

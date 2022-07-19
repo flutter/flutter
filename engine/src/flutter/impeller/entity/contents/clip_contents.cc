@@ -33,8 +33,13 @@ void ClipContents::SetClipOperation(Entity::ClipOperation clip_op) {
 }
 
 std::optional<Rect> ClipContents::GetCoverage(const Entity& entity) const {
-  return path_.GetTransformedBoundingBox(entity.GetTransformation());
+  return std::nullopt;
 };
+
+bool ClipContents::ShouldRender(const Entity& entity,
+                                const RenderPass& pass) const {
+  return true;
+}
 
 bool ClipContents::Render(const ContentContext& renderer,
                           const Entity& entity,
@@ -108,6 +113,11 @@ std::optional<Rect> ClipRestoreContents::GetCoverage(
     const Entity& entity) const {
   return std::nullopt;
 };
+
+bool ClipRestoreContents::ShouldRender(const Entity& entity,
+                                       const RenderPass& pass) const {
+  return true;
+}
 
 bool ClipRestoreContents::Render(const ContentContext& renderer,
                                  const Entity& entity,
