@@ -9,8 +9,6 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'diagnostics.dart';
 
-export 'dart:ui' show VoidCallback;
-
 /// An object that maintains a list of listeners.
 ///
 /// The listeners are typically used to notify clients that the object has been
