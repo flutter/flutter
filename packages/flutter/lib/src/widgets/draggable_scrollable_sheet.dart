@@ -86,8 +86,8 @@ class DraggableScrollableController extends ChangeNotifier {
     return _attachedController!.extent.pixelsToSize(pixels);
   }
 
-  /// Animates the attached sheet from its current size to [size] to the
-  /// provided new `size`, a fractional value of the parent container's height.
+  /// Animates the attached sheet from its current size to the given [size], a
+  /// fractional value of the parent container's height.
   ///
   /// Any active sheet animation is canceled. If the sheet's internal scrollable
   /// is currently animating (e.g. responding to a user fling), that animation is
@@ -100,6 +100,10 @@ class DraggableScrollableController extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
+  ///
+  /// The sheet will not snap after calling [animateTo] even if it is not at a
+  /// snap point and [DraggableScrollableSheet.snap] is true. Snapping only
+  /// occurs after user drags.
   ///
   /// When calling [animateTo] in widget tests, `await`ing the returned
   /// [Future] may cause the test to hang and timeout. Instead, use
@@ -150,6 +154,10 @@ class DraggableScrollableController extends ChangeNotifier {
   /// Any active sheet animation is canceled. If the sheet's inner scrollable
   /// is currently animating (e.g. responding to a user fling), that animation is
   /// canceled as well.
+  ///
+  /// The sheet will not snap after calling [jumpTo] even if it is not at a snap
+  /// point and [DraggableScrollableSheet.snap] is true. Snapping only occurs
+  /// after user drags.
   void jumpTo(double size) {
     _assertAttached();
     assert(size >= 0 && size <= 1);
@@ -308,9 +316,9 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// The initial fractional value of the parent container's height to use when
   /// displaying the widget.
   ///
-  /// Rebuilding the sheet with a new [initialChildSize] will only move the
-  /// the sheet to the new value if the sheet has not yet been dragged since it
-  /// was first built or since the last call to [DraggableScrollableActuator.reset].
+  /// Rebuilding the sheet with a new [initialChildSize] will move its current
+  /// size to the new initial size if the sheet hadn't been moved since the
+  /// its first build or last call to [DraggableScrollableActuator.reset].
   ///
   /// The default value is `0.5`.
   final double initialChildSize;
@@ -514,8 +522,8 @@ class _DraggableSheetExtent {
   // We need both `hasChanged` and `hasDragged` to achieve the following
   // behavior:
   //   1. The sheet should only snap following user drags (as opposed to
-  //      programmatic sheet changes.
-  //   2. The sheet should move to a new initial position on rebuild iff the
+  //      programmatic sheet changes).
+  //   2. The sheet should move to a new initial child size on rebuild iff the
   //      sheet has not changed, either by drag or programmatic control.
   bool hasChanged;
 
