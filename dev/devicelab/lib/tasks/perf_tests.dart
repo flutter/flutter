@@ -384,6 +384,13 @@ TaskFunction createColorFilterCachePerfE2ETest() {
   ).run;
 }
 
+TaskFunction createColorFilterWithUnstableChildPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/color_filter_with_unstable_child_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createRasterCacheUseMemoryPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
