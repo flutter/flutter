@@ -206,14 +206,14 @@ abstract class ContextGestureRecognizerFactory<T extends GestureRecognizer> {
   }
 }
 
-typedef ConsecutiveSelectionTapGestureTapDownCallback = void Function(TapDownDetails details, int tapCount);
-typedef ConsecutiveSelectionTapGestureTapUpCallback = void Function(TapUpDetails details, int tapCount);
+typedef ConsecutiveTapGestureTapDownCallback = void Function(TapDownDetails details, int tapCount);
+typedef ConsecutiveTapGestureTapUpCallback = void Function(TapUpDetails details, int tapCount);
 
-class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer {
+class ConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a consecutive tap gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  SelectionConsecutiveTapGestureRecognizer({ super.debugOwner, super.supportedDevices });
+  ConsecutiveTapGestureRecognizer({ super.debugOwner, super.supportedDevices });
 
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.
@@ -231,7 +231,7 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
   ///  * [onTertiaryTapDown], a similar callback but for a tertiary button.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onTapDown], which exposes this callback.
-  ConsecutiveSelectionTapGestureTapDownCallback? onTapDown;
+  ConsecutiveTapGestureTapDownCallback? onTapDown;
 
   /// A pointer has stopped contacting the screen at a particular location,
   /// which is recognized as a tap of a primary button.
@@ -248,7 +248,7 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
   ///  * [onTertiaryTapUp], a similar callback but for a tertiary button.
   ///  * [TapUpDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onTapUp], which exposes this callback.
-  ConsecutiveSelectionTapGestureTapUpCallback? onTapUp;
+  ConsecutiveTapGestureTapUpCallback? onTapUp;
 
   /// A pointer has stopped contacting the screen, which is recognized as a tap
   /// of a primary button.

@@ -1355,6 +1355,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       ShiftTapDownIntent : _makeOverridable(ListedAction<ShiftTapDownIntent>()),
       TapDownIntent : _makeOverridable(ListedAction<TapDownIntent>()),
       DoubleTapDownIntent : _makeOverridable(ListedAction<DoubleTapDownIntent>()),
+      TripleTapDownIntent : _makeOverridable(ListedAction<TripleTapDownIntent>()),
       TapUpIntent : _makeOverridable(ListedAction<TapUpIntent>()),
       TapCancelIntent : _makeOverridable(ListedAction<TapUpIntent>()),
       DragTapDownIntent : _makeOverridable(ListedAction<DragTapDownIntent>()),
@@ -1393,6 +1394,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onInvoke: (KeyboardRequestIntent intent) => _requestKeyboard(),
           enabledPredicate: (KeyboardRequestIntent intent) => widget.selectionEnabled,
         ),
+      ),
+      SelectAllTextIntent : SelectionGestureCallbackAction<SelectAllTextIntent>(
+        onInvoke: (SelectAllTextIntent intent) => _editableText!.selectAll(intent.cause),
+        enabledPredicate: (SelectAllTextIntent intent) => widget.selectionEnabled,
       ),
       SelectDragPositionIntent : SelectionGestureCallbackAction<SelectDragPositionIntent>(
         onInvoke: (SelectDragPositionIntent intent) => _editableText!.selectDragPosition(intent),

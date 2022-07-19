@@ -40,9 +40,9 @@ class DefaultSelectionGestures extends StatelessWidget {
     }.contains);
   }
 
-  static final ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer> _iOSMacTapGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer>(
-          (BuildContext context) => SelectionConsecutiveTapGestureRecognizer(debugOwner: context),
-          (SelectionConsecutiveTapGestureRecognizer instance, BuildContext context) {
+  static final ContextGestureRecognizerFactoryWithHandlers<ConsecutiveTapGestureRecognizer> _iOSMacTapGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<ConsecutiveTapGestureRecognizer>(
+          (BuildContext context) => ConsecutiveTapGestureRecognizer(debugOwner: context),
+          (ConsecutiveTapGestureRecognizer instance, BuildContext context) {
             instance
               ..onSecondaryTapUp = (TapUpDetails details) {
                 print('onSecondaryTapUp');
@@ -107,6 +107,22 @@ class DefaultSelectionGestures extends StatelessWidget {
                     DoubleTapDownIntent(
                       intents: <Intent>[
                         SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                        if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
+                      ],
+                      enabledContext: context,
+                      details: details,
+                    ),
+                  );
+                }
+
+                if (tapCount == 3) {
+                  final bool showToolbar = details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus;
+                  print('TripleTapDown');
+                  Actions.invoke(
+                    context, 
+                    TripleTapDownIntent(
+                      intents: <Intent>[
+                        SelectAllTextIntent(SelectionChangedCause.tap),
                         if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
                       ],
                       enabledContext: context,
@@ -359,9 +375,9 @@ class DefaultSelectionGestures extends StatelessWidget {
   );
 
   static final Map<Type, ContextGestureRecognizerFactory> _commonGestures = {
-    TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer>(
-            (BuildContext context) => SelectionConsecutiveTapGestureRecognizer(debugOwner: context),
-            (SelectionConsecutiveTapGestureRecognizer instance, BuildContext context) {
+    TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<ConsecutiveTapGestureRecognizer>(
+            (BuildContext context) => ConsecutiveTapGestureRecognizer(debugOwner: context),
+            (ConsecutiveTapGestureRecognizer instance, BuildContext context) {
               instance
                 ..onSecondaryTapUp = (TapUpDetails details) {
                   print('onSecondaryTapUp');
@@ -433,6 +449,22 @@ class DefaultSelectionGestures extends StatelessWidget {
                       DoubleTapDownIntent(
                         intents: <Intent>[
                           SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                          if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
+                        ],
+                        enabledContext: context,
+                        details: details,
+                      ),
+                    );
+                  }
+
+                  if (tapCount == 3) {
+                    final bool showToolbar = details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus;
+                    print('TripleTapDown');
+                    Actions.invoke(
+                      context, 
+                      TripleTapDownIntent(
+                        intents: <Intent>[
+                          SelectAllTextIntent(SelectionChangedCause.tap),
                           if (showToolbar) SelectionToolbarControlIntent.show(position: details.globalPosition)
                         ],
                         enabledContext: context,

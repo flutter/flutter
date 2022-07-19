@@ -394,6 +394,15 @@ class DoubleTapDownIntent extends ListedIntents {
   final TapDownDetails details;
 }
 
+/// An [Intent] that represents a gesture interaction when the primary button is pressed down three times.
+class TripleTapDownIntent extends ListedIntents {
+  /// Creates a [TripleTapDownIntent].
+  const TripleTapDownIntent({required super.intents, required super.enabledContext, required this.details});
+
+  /// The [TapDownDetails] corresponding to a [TapGestureRecognizer.onTapDown] event.
+  final TapDownDetails details;
+}
+
 /// An [Intent] that represents a gesture interaction when the primary button is released.
 class TapUpIntent extends ListedIntents {
   /// Creates a [TapUpIntent].
