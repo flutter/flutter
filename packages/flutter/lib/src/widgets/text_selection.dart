@@ -957,32 +957,24 @@ class SelectionOverlay {
     final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
         endGlyphHeight / 2;
 
-    // If the selected text spans more than 1 line, horizontally center the toolbar.
-    // Derived from both iOS and Android.
-    final double midX = isMultiline
-      ? editingRegion.width / 2
-      : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
-
-    final Offset midpoint = Offset(
-      midX,
-      // The y-coordinate won't be made use of most likely.
-      selectionEndpoints.first.point.dy - startGlyphHeight,
+    final Rect selectionRect = Rect.fromLTRB(
+      isMultiline
+          ? editingRegion.left
+          : editingRegion.left + selectionEndpoints.first.point.dx,
+      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
+      isMultiline
+          ? editingRegion.right
+          : editingRegion.left + selectionEndpoints.last.point.dx,
+      editingRegion.top + selectionEndpoints.last.point.dy,
     );
-
-    final TextSelectionPoint startTextSelectionPoint = selectionEndpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = selectionEndpoints.length > 1
-      ? selectionEndpoints[1]
-      : selectionEndpoints[0];
-    final double topAmountInEditableRegion =
-        startTextSelectionPoint.point.dy - startGlyphHeight;
 
     _anchorAbove = Offset(
-      editingRegion.left + midpoint.dx,
-      math.max(topAmountInEditableRegion, 0) + editingRegion.top,
+      selectionRect.left + selectionRect.width / 2,
+      selectionRect.top.clamp(editingRegion.top, editingRegion.bottom),
     );
     _anchorBelow = Offset(
-      editingRegion.left + midpoint.dx,
-      editingRegion.top + endTextSelectionPoint.point.dy,
+      _anchorAbove.dx,
+      selectionRect.bottom.clamp(editingRegion.top, editingRegion.bottom),
     );
   }
 

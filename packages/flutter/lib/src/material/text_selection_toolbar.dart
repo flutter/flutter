@@ -165,8 +165,8 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   // changed and saved values are no longer relevant. This should be called in
   // setState or another context where a rebuild is happening.
   void _reset() {
-    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes in
-    // order to cause it to rebuild. This lets it recalculate its
+    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes
+    // in order to cause it to rebuild. This lets it recalculate its
     // saved width for the new set of children, and it prevents AnimatedSize
     // from animating the size change.
     _containerKey = UniqueKey();
