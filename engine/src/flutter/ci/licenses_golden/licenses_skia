@@ -1,4 +1,4 @@
-Signature: 02711903ff423ce1e611bb7a122b5285
+Signature: c29dd0176278c03ac0322f37159023ab
 
 UNUSED LICENSES:
 
@@ -1056,6 +1056,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/tr
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/canvaskit_gold/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/compile_wasm_gm_tests/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/fm_driver/BUILD.bazel
@@ -5545,6 +5546,7 @@ FILE: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/include/sksl/SkSLVersion.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/bazel_build.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/canvaskit_gold/canvaskit_gold.go
 FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
 FILE: ../../../third_party/skia/src/core/SkCapabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkCombinationBuilder.cpp
@@ -6580,8 +6582,6 @@ FILE: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
-FILE: ../../../third_party/skia/src/gpu/RectanizerOptimized.cpp
-FILE: ../../../third_party/skia/src/gpu/RectanizerOptimized.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.h
