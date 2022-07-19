@@ -4,6 +4,7 @@
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("display_list") {
@@ -197,7 +198,16 @@ source_set("display_list_benchmarks_source") {
   }
 
   # iOS and Fuchsia don't support OpenGL
-  if (!is_fuchsia && !is_ios) {
+  _enable_gl_benchmarks = !is_fuchsia && !is_ios
+
+  # TODO (https://github.com/flutter/flutter/issues/107357):
+  # impeller_enable_vulkan currently requires skia to not use VMA, which inturn
+  # causes linkage problems with swiftshader.
+  if (impeller_enable_vulkan) {
+    _enable_gl_benchmarks = false
+  }
+
+  if (_enable_gl_benchmarks) {
     defines += [ "ENABLE_OPENGL_BENCHMARKS" ]
     sources += [
       "display_list_benchmarks_gl.cc",

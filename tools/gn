@@ -526,6 +526,11 @@ def to_gn_args(args):
   if args.prebuilt_impellerc is not None:
     gn_args['impeller_use_prebuilt_impellerc'] = args.prebuilt_impellerc
 
+  # Vulkan support is WIP, see: https://github.com/flutter/flutter/issues/107357
+  if args.enable_impeller_vulkan:
+    gn_args['impeller_enable_vulkan'] = True
+    gn_args['skia_use_vma'] = False
+
   # ANGLE is exclusively used for:
   #  - Windows at runtime
   #  - Non-fuchsia host unit tests (is_host_build evaluates to false).
@@ -848,6 +853,13 @@ def parse_args(args):
       type=str,
       help='Absolute path to a prebuilt impellerc. ' +
       'Do not use this outside of CI or with impellerc from a different engine version.'
+  )
+  parser.add_argument(
+      '--enable-impeller-vulkan',
+      default=False,
+      action='store_true',
+      help='Enables WIP impeller support for vulkan. ' +
+      'https://github.com/flutter/flutter/issues/107357'
   )
 
   # Sanitizers.
