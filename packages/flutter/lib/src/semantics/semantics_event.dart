@@ -8,6 +8,18 @@ import 'package:flutter/painting.dart';
 
 export 'dart:ui' show TextDirection;
 
+/// Determines the politeness setting of aria live in Flutter web.
+///
+/// It is used to set the priority with which screen reader should treat updates to live regions.
+enum AriaLivePolitenessSetting {
+  /// The screen reader will speak changes whenever the user is idle.
+  polite,
+
+  /// It will interrupt any announcement a screen reader is currently making to notify
+  /// the user about the change. It should only be used for time-sensitive/critical notifications.
+  assertive,
+}
+
 /// An event sent by the application to notify interested listeners that
 /// something happened to the user interface (e.g. a view scrolled).
 ///
@@ -71,7 +83,7 @@ abstract class SemanticsEvent {
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection, this.assertiveAnnouncement)
+  const AnnounceSemanticsEvent(this.message, this.textDirection, this.ariaLivePolitenessSetting)
     : assert(message != null),
       assert(textDirection != null),
       super('announce');
@@ -86,16 +98,15 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   /// This property must not be null.
   final TextDirection textDirection;
 
-  /// Determines whether aria announcement needs to be 'polite' or 'assertive' in Flutter web
-  /// Default mode is 'assertive'. Set to false for 'polite'
-  final bool? assertiveAnnouncement;
+  /// Determines whether aria announcement needs to be 'polite' or 'assertive' in Flutter web.
+  final AriaLivePolitenessSetting ariaLivePolitenessSetting;
 
   @override
   Map<String, dynamic> getDataMap() {
     return <String, dynamic>{
       'message': message,
       'textDirection': textDirection.index,
-      'assertiveAnnouncement': assertiveAnnouncement,
+      'ariaLivePolitenessSetting': ariaLivePolitenessSetting.index,
     };
   }
 }
