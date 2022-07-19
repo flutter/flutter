@@ -1975,7 +1975,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
     }
 
-    return decoration!.enabled ? defaults.fillColor!: defaults.disabledFillColor!;
+    return decoration.enabled ? defaults.fillColor!: defaults.disabledFillColor!;
   }
 
   Color _getHoverColor(ThemeData themeData) {
@@ -2015,7 +2015,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
-  TextStyle _getInlineLabelStyle(ThemeData themeData,InputDecorationTheme defaults) {
+  TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
     if (themeData.useMaterial3) {
       return MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState) ;
     }
@@ -2049,7 +2049,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(style);
   }
 
-  TextStyle _getFloatingLabelStyle(ThemeData themeData,InputDecorationTheme defaults) {
+  TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
     TextStyle getFallbackTextStyle() {
       final Color color = decoration.errorText != null
         ? decoration.errorStyle?.color ?? themeData.errorColor
@@ -2057,11 +2057,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
       final TextStyle defaultTextStyle = themeData.useMaterial3
         ? MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState)
-        : TextStyle(color: decoration!.enabled ? color : themeData.disabledColor) ;
+        : TextStyle(color: decoration.enabled ? color : themeData.disabledColor) ;
 
       return defaultTextStyle
         .merge(decoration.floatingLabelStyle ?? decoration.labelStyle);
-
     }
 
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState)
@@ -2073,7 +2072,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(getFallbackTextStyle())
       .merge(style);
   }
-
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
     if (themeData.useMaterial3) {
@@ -2087,9 +2085,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (themeData.useMaterial3) {
       return MaterialStateProperty.resolveAs(defaults.helperStyle!, materialState) ;
     }
-    final Color color = decoration!.enabled ? themeData.errorColor : Colors.transparent;
-    return themeData.textTheme.caption!.copyWith(color: color).merge(decoration!.errorStyle);
-
+    final Color color = decoration.enabled ? themeData.errorColor : Colors.transparent;
+    return themeData.textTheme.caption!.copyWith(color: color).merge(decoration.errorStyle);
   }
 
   Set<MaterialState> get materialState {
@@ -2115,7 +2112,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     if (themeData.useMaterial3) {
-      if (decoration!.filled!) {
+      if (decoration.filled!) {
         return border.copyWith(
           borderSide: MaterialStateProperty.resolveAs(defaults.activeIndicatorBorder, materialState),
         );
@@ -2128,7 +2125,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     final Color borderColor;
-
     if (decoration.enabled || isFocused) {
       borderColor = decoration.errorText == null
         ? _getDefaultM2BorderColor(themeData)
@@ -2309,7 +2305,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         liveRegion: isFocused,
         child: Text(
           decoration.counterText!,
-          style: _getHelperStyle(themeData, defaults).merge(MaterialStateProperty.resolveAs(decoration!.counterStyle, materialState)),
+          style: _getHelperStyle(themeData, defaults).merge(MaterialStateProperty.resolveAs(decoration.counterStyle, materialState)),
           overflow: TextOverflow.ellipsis,
           semanticsLabel: decoration.semanticCounterText,
         ),
@@ -4605,5 +4601,3 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
 // END GENERATED TOKEN PROPERTIES - InputDecorator
 
-//@override
-//TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((states) => Theme.of(context).textTheme.bodySmall!) ;
