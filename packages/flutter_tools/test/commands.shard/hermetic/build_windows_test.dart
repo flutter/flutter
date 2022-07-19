@@ -937,7 +937,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   });
 
   // Confirms that running for Windows in a directory with a
-  // bad caracter (' in this case) throws the desired error message
+  // bad character (' in this case) throws the desired error message
+  // If the issue https://github.com/flutter/flutter/issues/104802 ever
+  // is resolved on the VS side, we can allow these paths again
   testUsingContext('Test bad path characters', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
