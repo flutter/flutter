@@ -63,7 +63,12 @@ void MessageLoopDarwin::Run() {
 
 void MessageLoopDarwin::Terminate() {
   running_ = false;
-  CFRunLoopStop(loop_);
+
+  // Ensure that the CFRunLoop remains alive through the end of this function
+  // even if the loop's thread exits and drops its reference to the loop.
+  CFRef<CFRunLoopRef> local_loop(loop_);
+
+  CFRunLoopStop(local_loop);
 }
 
 void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
