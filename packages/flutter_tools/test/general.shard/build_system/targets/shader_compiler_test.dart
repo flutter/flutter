@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
+const String fragDir = '/shaders';
 const String fragPath = '/shaders/my_shader.frag';
 const String notFragPath = '/shaders/not_a_frag.file';
 const String outputPath = '/output/shaders/my_shader.spv';
@@ -40,6 +41,7 @@ void main() {
           '--spirv=$outputPath',
           '--input=$fragPath',
           '--input-type=frag',
+          '--include=$fragDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -72,6 +74,7 @@ void main() {
           '--spirv=$outputPath',
           '--input=$notFragPath',
           '--input-type=frag',
+          '--include=$fragDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -104,6 +107,7 @@ void main() {
           '--spirv=$outputPath',
           '--input=$notFragPath',
           '--input-type=frag',
+          '--include=$fragDir',
         ],
         exitCode: 1,
       ),

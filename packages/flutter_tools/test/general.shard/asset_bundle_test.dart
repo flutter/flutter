@@ -397,6 +397,7 @@ flutter:
     late Artifacts artifacts;
     late String impellerc;
     late Directory output;
+    late String assetsPath;
     late String shaderPath;
     late String outputPath;
 
@@ -408,8 +409,9 @@ flutter:
       fileSystem.file(impellerc).createSync(recursive: true);
 
       output = fileSystem.directory('asset_output')..createSync(recursive: true);
-      shaderPath = fileSystem.path.join('assets', 'shader.frag');
-      outputPath = fileSystem.path.join(output.path, 'assets', 'shader.frag');
+      assetsPath = 'assets';
+      shaderPath = fileSystem.path.join(assetsPath, 'shader.frag');
+      outputPath = fileSystem.path.join(output.path, assetsPath, 'shader.frag');
       fileSystem.file(shaderPath).createSync(recursive: true);
     });
 
@@ -445,6 +447,7 @@ flutter:
             '--spirv=$outputPath',
             '--input=/$shaderPath',
             '--input-type=frag',
+            '--include=/$assetsPath',
           ],
           onRun: () {
             fileSystem.file(outputPath).createSync(recursive: true);
