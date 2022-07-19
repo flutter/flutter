@@ -1132,6 +1132,14 @@ TEST_P(EntityTest, SolidFillShouldRenderIsCorrect) {
         PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath());
     ASSERT_TRUE(fill->ShouldRender(Entity{}, {100, 100}));
   }
+
+  // With paint cover.
+  {
+    auto fill = std::make_shared<SolidColorContents>();
+    fill->SetColor(Color::CornflowerBlue());
+    fill->SetCover(true);
+    ASSERT_TRUE(fill->ShouldRender(Entity{}, {100, 100}));
+  }
 }
 
 TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {

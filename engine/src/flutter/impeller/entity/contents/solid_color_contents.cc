@@ -41,6 +41,11 @@ std::optional<Rect> SolidColorContents::GetCoverage(
   return path_.GetTransformedBoundingBox(entity.GetTransformation());
 };
 
+bool SolidColorContents::ShouldRender(const Entity& entity,
+                                      const ISize& target_size) const {
+  return cover_ || Contents::ShouldRender(entity, target_size);
+}
+
 VertexBuffer SolidColorContents::CreateSolidFillVertices(const Path& path,
                                                          HostBuffer& buffer) {
   using VS = SolidFillPipeline::VertexShader;

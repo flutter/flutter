@@ -42,6 +42,10 @@ class SolidColorContents final : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
+  bool ShouldRender(const Entity& entity,
+                    const ISize& target_size) const override;
+
+  // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
