@@ -1056,12 +1056,13 @@ TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
 }
 
 TEST_P(EntityTest, DrawVerticesSolidColorTrianglesWithoutIndex) {
-  std::vector<Point> points = {Point(0, 0), Point(0, 1), Point(1, 0)};
+  std::vector<Point> points = {Point(100, 300), Point(200, 100),
+                               Point(300, 300)};
   std::vector<uint16_t> indexes;
   std::vector<Color> colors = {Color::White(), Color::White(), Color::White()};
 
   Vertices vertices = Vertices(points, indexes, colors, VertexMode::kTriangle,
-                               Rect(0, 0, 4, 4));
+                               Rect(100, 100, 300, 300));
 
   std::shared_ptr<VerticesContents> contents =
       std::make_shared<VerticesContents>(vertices);

@@ -769,8 +769,8 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
           Point(60, 300), Point(600, 300), 20, Color::Red(), Color::Red());
 
       auto screen_to_canvas = canvas.GetCurrentTransformation().Invert();
-      Point point_a = screen_to_canvas * handle_a;
-      Point point_b = screen_to_canvas * handle_b;
+      Point point_a = screen_to_canvas * handle_a * GetContentScale();
+      Point point_b = screen_to_canvas * handle_b * GetContentScale();
 
       Point middle = (point_a + point_b) / 2;
       auto radius = point_a.GetDistance(middle);
@@ -798,8 +798,10 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
 }
 
 TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
-  auto callback = [](AiksContext& renderer, RenderTarget& render_target) {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     Canvas canvas;
+    canvas.Scale(GetContentScale());
+
     Paint alpha;
     alpha.color = Color::Red().WithAlpha(0.5);
 
