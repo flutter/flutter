@@ -34,8 +34,6 @@ class IOSContextMetalSkia final : public IOSContext {
 
  private:
   fml::scoped_nsobject<FlutterDarwinContextMetal> darwin_context_metal_;
-  fml::scoped_nsprotocol<id<MTLCommandQueue>> main_command_queue_;
-  fml::CFRef<CVMetalTextureCacheRef> texture_cache_;
 
   // |IOSContext|
   sk_sp<GrDirectContext> CreateResourceContext() override;
