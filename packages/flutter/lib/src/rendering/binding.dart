@@ -4,6 +4,7 @@
 
 import 'dart:developer';
 
+import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
@@ -12,8 +13,6 @@ import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
 import 'view.dart';
-
-export 'package:flutter/gestures.dart' show HitTestResult;
 
 // Examples can assume:
 // late BuildContext context;

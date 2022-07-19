@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 
 import 'box.dart';

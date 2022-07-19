@@ -4,8 +4,9 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/painting.dart';
+
 import 'box.dart';
-import 'object.dart';
 import 'sliver.dart';
 import 'sliver_fixed_extent_list.dart';
 

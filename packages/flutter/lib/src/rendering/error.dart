@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
 
+import 'package:flutter/painting.dart';
+
 import 'box.dart';
 import 'object.dart';
 

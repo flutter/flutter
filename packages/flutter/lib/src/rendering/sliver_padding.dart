@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/painting.dart';
+
 import 'debug.dart';
 import 'object.dart';
 import 'sliver.dart';

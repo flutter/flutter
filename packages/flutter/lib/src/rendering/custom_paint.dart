@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:ui';
 
 import 'package:flutter/semantics.dart';
 

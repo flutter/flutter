@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
-import 'basic.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_notification.dart';

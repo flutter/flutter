@@ -4,10 +4,8 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AccessibilityFeatures, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'app.dart';
 import 'debug.dart';

@@ -5,19 +5,13 @@
 import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
-
-export 'package:flutter/gestures.dart' show
-  PointerCancelEvent,
-  PointerDownEvent,
-  PointerEvent,
-  PointerMoveEvent,
-  PointerUpEvent;
 
 /// A base class for render boxes that resemble their children.
 ///

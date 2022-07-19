@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show Color;
 
 import 'package:flutter/animation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'layer.dart';
 import 'object.dart';

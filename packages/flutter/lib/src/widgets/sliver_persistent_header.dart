@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart' show TickerProvider;
 
 import 'framework.dart';
 import 'scroll_position.dart';

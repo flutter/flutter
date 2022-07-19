@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, PlaceholderAlignment, TextBox;
 
 import 'package:characters/characters.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 
 import 'box.dart';

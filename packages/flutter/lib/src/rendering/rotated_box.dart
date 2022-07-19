@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
+
+import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'layer.dart';

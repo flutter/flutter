@@ -11,10 +11,6 @@ import 'dart:collection' show LinkedHashMap;
 
 import 'package:flutter/services.dart';
 
-export 'package:flutter/services.dart' show
-  MouseCursor,
-  SystemMouseCursors;
-
 /// Signature for searching for [MouseTrackerAnnotation]s at the given offset.
 ///
 /// It is used by the [MouseTracker] to fetch annotations for the mouse

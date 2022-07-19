@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart' show EnginePhase, TestDefaultBinaryMessengerBinding, fail;
 
 export 'package:flutter/foundation.dart' show FlutterError, FlutterErrorDetails;

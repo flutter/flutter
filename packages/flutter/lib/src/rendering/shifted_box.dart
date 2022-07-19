@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/painting.dart';
+
 import 'box.dart';
 import 'debug.dart';
 import 'debug_overflow_indicator.dart';

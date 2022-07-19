@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Color;
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'layer.dart';

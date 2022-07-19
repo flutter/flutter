@@ -5,13 +5,10 @@
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
 
 import 'box.dart';
 import 'object.dart';
-
-export 'package:flutter/painting.dart' show
-  BoxFit,
-  ImageRepeat;
 
 /// An image in the render tree.
 ///

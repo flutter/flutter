@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/painting.dart';
+
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';

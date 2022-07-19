@@ -12,23 +12,6 @@ import 'package:flutter/semantics.dart';
 import 'debug.dart';
 import 'layer.dart';
 
-export 'package:flutter/foundation.dart' show
-  DiagnosticPropertiesBuilder,
-  DiagnosticsNode,
-  DiagnosticsProperty,
-  DoubleProperty,
-  EnumProperty,
-  ErrorDescription,
-  ErrorHint,
-  ErrorSummary,
-  FlagProperty,
-  FlutterError,
-  InformationCollector,
-  IntProperty,
-  StringProperty;
-export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
-export 'package:flutter/painting.dart';
-
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
 /// Some render objects wish to store data on their children, such as the

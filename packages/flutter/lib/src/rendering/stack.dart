@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/painting.dart';
+
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';

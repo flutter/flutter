@@ -5,6 +5,8 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/painting.dart';
+
 import 'box.dart';
 import 'object.dart';
 import 'table_border.dart';
