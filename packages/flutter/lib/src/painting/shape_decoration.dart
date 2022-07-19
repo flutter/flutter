@@ -16,7 +16,6 @@ import 'decoration_image.dart';
 import 'edge_insets.dart';
 import 'gradient.dart';
 import 'image_provider.dart';
-import 'oval_border.dart';
 import 'rounded_rectangle_border.dart';
 
 /// An immutable description of how to paint an arbitrary shape.
