@@ -19,7 +19,6 @@ import 'dart:ui' as ui
         SceneBuilder,
         Vertices;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 

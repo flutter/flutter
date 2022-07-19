@@ -5,7 +5,6 @@
 import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'alignment.dart';

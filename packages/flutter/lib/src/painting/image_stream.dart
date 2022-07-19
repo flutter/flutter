@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ui' as ui show Codec, FrameInfo, Image;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 /// A [dart:ui.Image] object with its corresponding scale.

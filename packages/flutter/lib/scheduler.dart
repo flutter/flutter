@@ -13,6 +13,11 @@
 /// For example, an idle-task is only executed when no animation is running.
 library scheduler;
 
+export 'dart:developer' show Flow;
+export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback;
+
+export 'package:flutter/foundation.dart';
+
 export 'src/scheduler/binding.dart';
 export 'src/scheduler/debug.dart';
 export 'src/scheduler/priority.dart';

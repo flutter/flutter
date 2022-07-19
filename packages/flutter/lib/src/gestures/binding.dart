@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'arena.dart';

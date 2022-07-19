@@ -4,7 +4,6 @@
 
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'image_stream.dart';
