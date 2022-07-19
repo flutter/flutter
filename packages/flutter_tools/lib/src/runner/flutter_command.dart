@@ -106,7 +106,7 @@ class FlutterOptions {
   static const String kSplitDebugInfoOption = 'split-debug-info';
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
-  static const String kDefineConfigJsonFileOption = 'define-config-json-file';
+  static const String kDartDefineFromFileOption = 'dart-define-from-file';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
@@ -601,7 +601,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void useDefineConfigJsonFile() {
     argParser.addOption(
-      FlutterOptions.kDefineConfigJsonFileOption,
+      FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
           'Use `const String.fromEnvironment("DEFINE_CONFIG_JSON_RAW_VALUE")` '
           'can get all config json file raw (base64 encode,you need base64 decode when you use) value. '
@@ -1141,12 +1141,12 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     Map<String, dynamic>? defineConfigJsonMap;
-    if (argParser.options.containsKey(FlutterOptions.kDefineConfigJsonFileOption)) {
-      final String? configJsonPath = stringArgDeprecated(FlutterOptions.kDefineConfigJsonFileOption);
+    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
+      final String? configJsonPath = stringArgDeprecated(FlutterOptions.kDartDefineFromFileOption);
       if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
         final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
         defineConfigJsonMap=json.decode(configJsonRaw) as Map<String, dynamic>;
-        defineConfigJsonMap['DEFINE_CONFIG_JSON_RAW_VALUE']= base64Encode(utf8.encode(configJsonRaw));
+        defineConfigJsonMap['${FlutterOptions.kDartDefineFromFileOption}_raw_values']= base64Encode(utf8.encode(configJsonRaw));
         defineConfigJsonMap.forEach((String key,dynamic value) {
           dartDefines.add('$key=$value');
         });
