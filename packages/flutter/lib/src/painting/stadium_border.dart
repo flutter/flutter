@@ -364,8 +364,10 @@ class _StadiumToCircleBorder extends OutlinedBorder {
 
   @override
   String toString() {
-    return 'StadiumBorder($side, ${(circleness * 100).toStringAsFixed(1)}% '
-           'of the way to being a CircleBorder)';
+    if (eccentricity != 0.0) {
+      return 'StadiumBorder($side, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder that is ${(eccentricity * 100).toStringAsFixed(1)}% oval)';
+    }
+    return 'StadiumBorder($side, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder)';
   }
 }
 
