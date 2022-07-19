@@ -278,7 +278,7 @@ class KernelCompiler {
 
     String? dartPluginRegistrantUri;
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
-      final dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
+      final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
       dartPluginRegistrantUri = packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
         toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     }
