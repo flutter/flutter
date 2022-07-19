@@ -363,7 +363,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
                                    stencil_depth_floor);
 
     auto pass = pass_context.GetRenderPass(pass_depth);
-    if (!element_entity.ShouldRender(*pass)) {
+    if (!element_entity.ShouldRender(pass->GetRenderTargetSize())) {
       return true;  // Nothing to render.
     }
 

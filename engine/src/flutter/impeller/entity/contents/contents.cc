@@ -58,11 +58,10 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
 }
 
 bool Contents::ShouldRender(const Entity& entity,
-                            const RenderPass& pass) const {
+                            const ISize& target_size) const {
   auto coverage = GetCoverage(entity);
   return coverage.has_value() &&
-         Rect::MakeSize(Size(pass.GetRenderTargetSize()))
-             .IntersectsWithRect(coverage.value());
+         Rect::MakeSize(target_size).IntersectsWithRect(coverage.value());
 }
 
 }  // namespace impeller

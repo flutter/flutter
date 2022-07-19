@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
@@ -1111,6 +1112,41 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
 
     auto coverage = fill->GetCoverage({});
     ASSERT_FALSE(coverage.has_value());
+  }
+}
+
+TEST_P(EntityTest, SolidFillShouldRenderIsCorrect) {
+  // No path.
+  {
+    auto fill = std::make_shared<SolidColorContents>();
+    fill->SetColor(Color::CornflowerBlue());
+    ASSERT_FALSE(fill->ShouldRender(Entity{}, {100, 100}));
+  }
+
+  // With path.
+  {
+    auto fill = std::make_shared<SolidColorContents>();
+    fill->SetColor(Color::CornflowerBlue());
+    fill->SetPath(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath());
+    ASSERT_TRUE(fill->ShouldRender(Entity{}, {100, 100}));
+  }
+}
+
+TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
+  // Clip.
+  {
+    auto clip = std::make_shared<ClipContents>();
+    ASSERT_TRUE(clip->ShouldRender(Entity{}, {100, 100}));
+    clip->SetPath(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath());
+    ASSERT_TRUE(clip->ShouldRender(Entity{}, {100, 100}));
+  }
+
+  // Clip restore.
+  {
+    auto restore = std::make_shared<ClipRestoreContents>();
+    ASSERT_TRUE(restore->ShouldRender(Entity{}, {100, 100}));
   }
 }
 
