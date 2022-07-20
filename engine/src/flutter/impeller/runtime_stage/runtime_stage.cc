@@ -85,7 +85,9 @@ RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
     desc.name = i->name()->str();
     desc.location = i->location();
     desc.type = ToType(i->type());
-    desc.dimensions = RuntimeUniformDimensions{i->rows(), i->columns()};
+    desc.dimensions = RuntimeUniformDimensions{
+        static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
+    desc.bit_width = i->bit_width();
     uniforms_.emplace_back(std::move(desc));
   }
 
