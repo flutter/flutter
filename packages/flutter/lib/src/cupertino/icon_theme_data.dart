@@ -10,13 +10,14 @@ import 'colors.dart';
 /// using [IconTheme.of].
 class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// Creates a [CupertinoIconThemeData].
-  ///
-  /// The opacity applies to both explicit and default icon colors. The value
-  /// is clamped between 0.0 and 1.0.
   const CupertinoIconThemeData({
+    super.size,
+    super.fill,
+    super.weight,
+    super.grade,
+    super.opticalSize,
     super.color,
     super.opacity,
-    super.size,
     super.shadows,
   });
 
@@ -31,15 +32,23 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// the new values.
   @override
   CupertinoIconThemeData copyWith({
+    double? size,
+    double? fill,
+    double? weight,
+    double? grade,
+    double? opticalSize,
     Color? color,
     double? opacity,
-    double? size,
     List<Shadow>? shadows,
   }) {
     return CupertinoIconThemeData(
+      size: size ?? this.size,
+      fill: fill ?? this.fill,
+      weight: weight ?? this.weight,
+      grade: grade ?? this.grade,
+      opticalSize: opticalSize ?? this.opticalSize,
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
-      size: size ?? this.size,
       shadows: shadows ?? this.shadows,
     );
   }
