@@ -12,7 +12,7 @@ import 'floating_action_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
-import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
+import 'scaffold.dart';
 import 'scrollbar.dart';
 import 'theme.dart';
 import 'theme_data.dart';

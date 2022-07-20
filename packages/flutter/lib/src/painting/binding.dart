@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Codec, ImmutableBuffer, instantiateImageCodec, instantiateImageCodecFromBuffer;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show ServicesBinding;
+
+import 'package:flutter/services.dart';
 
 import 'image_cache.dart';
 import 'shader_warm_up.dart';

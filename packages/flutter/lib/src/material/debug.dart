@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 import 'material_localizations.dart';
-import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
+import 'scaffold.dart';
 
 /// Asserts that the given context has a [Material] ancestor.
 ///

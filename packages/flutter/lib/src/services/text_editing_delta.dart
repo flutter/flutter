@@ -7,7 +7,7 @@ import 'dart:ui' show TextAffinity, TextRange;
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
-import 'text_input.dart' show TextEditingValue;
+import 'text_input.dart';
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {

@@ -6,7 +6,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/painting.dart';
 
-import 'framework.dart' show BuildContext;
+import 'framework.dart';
 
 /// Defines the size, font variations, color, opacity, and shadows of icons.
 ///

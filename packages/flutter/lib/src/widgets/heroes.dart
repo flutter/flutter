@@ -13,7 +13,7 @@ import 'navigator.dart';
 import 'overlay.dart';
 import 'pages.dart';
 import 'routes.dart';
-import 'ticker_provider.dart' show TickerMode;
+import 'ticker_provider.dart';
 import 'transitions.dart';
 
 /// Signature for a function that takes two [Rect] instances and returns a

@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
-import 'binding.dart' show WidgetsBinding;
+import 'binding.dart';
 import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';

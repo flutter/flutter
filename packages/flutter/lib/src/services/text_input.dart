@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
-import 'clipboard.dart' show Clipboard;
+import 'clipboard.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';

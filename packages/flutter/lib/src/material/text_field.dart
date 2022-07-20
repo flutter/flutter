@@ -13,7 +13,7 @@ import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
-import 'selectable_text.dart' show iOSHorizontalOffset;
+import 'selectable_text.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 import 'theme_data.dart';

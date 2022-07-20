@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart';
 
 /// Position a child box within a container box, either above or below a target
 /// point.

@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 
 import 'binary_messenger.dart';
 import 'binding.dart';
-import 'debug.dart' show debugProfilePlatformChannels;
+import 'debug.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 

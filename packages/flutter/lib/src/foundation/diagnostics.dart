@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'math.dart' show clampDouble;
+import 'math.dart';
 import 'object.dart';
 
 // Examples can assume:

@@ -11,7 +11,7 @@ import 'debug.dart';
 import 'debug_overflow_indicator.dart';
 import 'layer.dart';
 import 'object.dart';
-import 'stack.dart' show RelativeRect;
+import 'stack.dart';
 
 /// Signature for a function that transforms a [BoxConstraints] to another
 /// [BoxConstraints].
