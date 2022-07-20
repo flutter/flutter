@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/dart_ui.h"
 
+#include <mutex>
 #include <string_view>
 
 #include "flutter/common/settings.h"
@@ -281,14 +282,14 @@ typedef CanvasPath Path;
   V(SemanticsUpdateBuilder, updateNode, 36)            \
   V(SemanticsUpdate, dispose, 1)
 
-#define FFI_FUNCTION_INSERT(FUNCTION, ARGS)   \
-  function_dispatchers.insert(std::make_pair( \
-      std::string_view(#FUNCTION),            \
-      reinterpret_cast<void*>(                \
+#define FFI_FUNCTION_INSERT(FUNCTION, ARGS)     \
+  g_function_dispatchers.insert(std::make_pair( \
+      std::string_view(#FUNCTION),              \
+      reinterpret_cast<void*>(                  \
           tonic::FfiDispatcher<void, decltype(&FUNCTION), &FUNCTION>::Call)));
 
 #define FFI_METHOD_INSERT(CLASS, METHOD, ARGS)                                 \
-  function_dispatchers.insert(                                                 \
+  g_function_dispatchers.insert(                                               \
       std::make_pair(std::string_view(#CLASS "::" #METHOD),                    \
                      reinterpret_cast<void*>(                                  \
                          tonic::FfiDispatcher<CLASS, decltype(&CLASS::METHOD), \
@@ -296,17 +297,15 @@ typedef CanvasPath Path;
 
 namespace {
 
-std::unordered_map<std::string_view, void*> function_dispatchers;
+std::once_flag g_dispatchers_init_flag;
+std::unordered_map<std::string_view, void*> g_function_dispatchers;
 
 void* ResolveFfiNativeFunction(const char* name, uintptr_t args) {
-  auto it = function_dispatchers.find(name);
-  return (it != function_dispatchers.end()) ? it->second : nullptr;
+  auto it = g_function_dispatchers.find(name);
+  return (it != g_function_dispatchers.end()) ? it->second : nullptr;
 }
 
 void InitDispatcherMap() {
-  if (!function_dispatchers.empty()) {
-    return;
-  }
   FFI_FUNCTION_LIST(FFI_FUNCTION_INSERT)
   FFI_METHOD_LIST(FFI_METHOD_INSERT)
 }
@@ -314,7 +313,7 @@ void InitDispatcherMap() {
 }  // anonymous namespace
 
 void DartUI::InitForIsolate(const Settings& settings) {
-  InitDispatcherMap();
+  std::call_once(g_dispatchers_init_flag, InitDispatcherMap);
 
   auto dart_ui = Dart_LookupLibrary(ToDart("dart:ui"));
   if (Dart_IsError(dart_ui)) {
