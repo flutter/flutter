@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,7 +11,7 @@ import 'package:path/path.dart' as p;
 
 Future<ProcessResult> runGit(
   List<String> args, {
-  String processWorkingDir,
+  String? processWorkingDir,
 }) async {
   return Process.run(
     'git',
@@ -54,8 +52,8 @@ Future<PointsAndDate> parse(String jsonFileName) async {
   final List<FlutterEngineMetricPoint> points = <FlutterEngineMetricPoint>[];
   for (final MetricPoint rawPoint in rawPoints) {
     points.add(FlutterEngineMetricPoint(
-      rawPoint.tags[kNameKey],
-      rawPoint.value,
+      rawPoint.tags[kNameKey]!,
+      rawPoint.value!,
       gitRevision,
       moreTags: rawPoint.tags,
     ));
@@ -70,13 +68,13 @@ Future<FlutterDestination> connectFlutterDestination() async {
   final bool isTesting = env['IS_TESTING'] == 'true';
   if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
     return FlutterDestination.makeFromAccessToken(
-      File(env[kTokenPath]).readAsStringSync(),
-      env[kGcpProject],
+      File(env[kTokenPath]!).readAsStringSync(),
+      env[kGcpProject]!,
       isTesting: isTesting,
     );
   }
   return FlutterDestination.makeFromCredentialsJson(
-    jsonDecode(Platform.environment['BENCHMARK_GCP_CREDENTIALS'])
+    jsonDecode(Platform.environment['BENCHMARK_GCP_CREDENTIALS']!)
         as Map<String, dynamic>,
     isTesting: isTesting,
   );
