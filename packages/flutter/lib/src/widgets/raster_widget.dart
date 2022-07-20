@@ -374,7 +374,7 @@ class _RasterDefaultDelegate implements RasterWidgetDelegate {
 
   @override
   void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
-    final Rect src = Rect.fromLTWH(offset.dx, offset.dy, image.width.toDouble(), image.height.toDouble());
+    final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
       ..filterQuality = FilterQuality.low;
