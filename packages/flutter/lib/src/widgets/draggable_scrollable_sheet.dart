@@ -101,7 +101,7 @@ class DraggableScrollableController extends ChangeNotifier {
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
   ///
-  /// The sheet will not snap after calling [animateTo] even if [DraggableScrollSheet.snap]
+  /// The sheet will not snap after calling [animateTo] even if [DraggableScrollableSheet.snap]
   /// is true. Snapping only occurs after user drags.
   ///
   /// When calling [animateTo] in widget tests, `await`ing the returned
@@ -154,7 +154,7 @@ class DraggableScrollableController extends ChangeNotifier {
   /// is currently animating (e.g. responding to a user fling), that animation is
   /// canceled as well.
   ///
-  /// The sheet will not snap after calling [jumpTo] even if [DraggableScrollSheet.snap]
+  /// The sheet will not snap after calling [jumpTo] even if [DraggableScrollableSheet.snap]
   /// is true. Snapping only occurs after user drags.
   void jumpTo(double size) {
     _assertAttached();
@@ -240,7 +240,7 @@ class DraggableScrollableController extends ChangeNotifier {
 /// the sheet to snap between.
 ///
 /// The snapping effect is only applied on user drags. Programmatically
-/// manipulating the sheet size via [DraggableScrollableController.animteTo] or
+/// manipulating the sheet size via [DraggableScrollableController.animateTo] or
 /// [DraggableScrollableController.jumpTo] will ignore [snap] and [snapSizes].
 ///
 /// By default, the widget will expand its non-occupied area to fill available
