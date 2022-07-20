@@ -98,10 +98,11 @@ class PubDependencies extends ArtifactSet {
       return false;
     }
     for (final Package package in packageConfig.packages) {
+      final Directory dir = fileSystem.directory(package.root);
       final String pubSpecPath = fileSystem.path.join(package.root.path, 'pubspec.yaml');
       // check if pubspec.yaml file or lib/ directory is present
       if (!fileSystem.file(pubSpecPath).existsSync()) {
-        _logger.printStatus(package.root.path + 'a0');
+        _logger.printStatus(dir.childFile('pubspec.yaml').existsSync().toString() + 'a0');
         _logger.printStatus(package.packageUriRoot.toString() + 'a1');
         _logger.printStatus('$pubSpecPath, d0');
         _logger.printStatus('${package.name}, d1');
