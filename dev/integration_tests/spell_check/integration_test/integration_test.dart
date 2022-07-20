@@ -175,7 +175,8 @@ Future<void> main() async {
 
     expect(spellCheckSuggestionSpans, isNull);
 
-    // The first request has still not completed, so no text should be saved as of now.
+    // We expect it to be rare for the first request to complete before the
+    // second, so no text should be saved as of now.
     expect(defaultSpellCheckService.lastSavedText, null);
   });
 }

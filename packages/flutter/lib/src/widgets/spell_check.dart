@@ -37,6 +37,14 @@ class SpellCheckConfiguration {
   /// assertion error.
   final TextStyle? misspelledTextStyle;
 
+  /// A [SpellCheckConfiguration] that indicates a text input widget does not
+  /// wish to enable spell check.
+  static const SpellCheckConfiguration disabled = SpellCheckConfiguration(
+    spellCheckService: null,
+    spellCheckSuggestionsHandler: null,
+    misspelledTextStyle: null,
+  );
+
   /// Returns a copy of the current [SpellCheckConfiguration] instance with
   /// specified overrides.
   SpellCheckConfiguration copyWith({
@@ -102,6 +110,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     SuggestionSpan adjustedSpan;
     String currentSpanText;
     String newSpanText;
+    bool currentSpanValid = false;
     bool foundCurrentSpan = false;
     RegExp regex;
 
@@ -117,7 +126,13 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       try {
         newSpanText = newText.substring(
             currentSpan.range.start + offset, currentSpan.range.end + offset);
+        currentSpanValid = true;
+      } catch (e) {
+        // currentSpan is invalid and needs to be searched for in newText.
+        currentSpanValid = false;
+      }
 
+      if (currentSpanValid) {
         if (newSpanText == currentSpanText) {
           foundCurrentSpan = true;
           searchStart = currentSpan.range.end + offset;
@@ -128,10 +143,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           );
           correctedSpellCheckResults.add(adjustedSpan);
         }
-      } catch (e) {
-        // currentSpan is invalid and needs to be searched for in newText.
       }
-
       if (!foundCurrentSpan) {
         regex = RegExp('\\b$currentSpanText\\b');
         foundIndex = newText.substring(searchStart).indexOf(regex);

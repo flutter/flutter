@@ -272,7 +272,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckConfiguration,
+    this.spellCheckConfiguration = SpellCheckConfiguration.disabled,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -433,7 +433,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckConfiguration,
+    this.spellCheckConfiguration = SpellCheckConfiguration.disabled,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -781,6 +781,9 @@ class CupertinoTextField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  ///
+  /// If the misspelled [TextStyle] is not specified in this configuration,
+  /// then [cupertinoMisspelledTextStyle] is used by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
 
   /// The [TextStyle] used to indicate misspelled words in the Cupertino style.

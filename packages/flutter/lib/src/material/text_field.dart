@@ -330,7 +330,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckConfiguration,
+    this.spellCheckConfiguration = SpellCheckConfiguration.disabled,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -769,6 +769,9 @@ class TextField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  ///
+  /// If the misspelled [TextStyle] is not specified in this configuration,
+  /// then [materialMisspelledTextStyle] is used by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
 
   /// The [TextStyle] used to indicate misspelled words in the Material style.
@@ -776,7 +779,7 @@ class TextField extends StatefulWidget {
     const TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: Colors.red,
-      decorationStyle: TextDecorationStyle.wavy
+      decorationStyle: TextDecorationStyle.wavy,
   );
 
   @override

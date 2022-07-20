@@ -638,7 +638,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckConfiguration,
+    this.spellCheckConfiguration = SpellCheckConfiguration.disabled,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -703,7 +703,7 @@ class EditableText extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        assert(
           spellCheckConfiguration == null || spellCheckConfiguration!.misspelledTextStyle != null,
-          'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired'
+          'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
        ),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
@@ -1515,19 +1515,21 @@ class EditableText extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
-  /// Configuration that details how spell check performed.
+  /// Configuration that details how spell check should be performed.
   ///
   /// Specifies the [SpellCheckService] used to spell check text input, the
   /// [SpellCheckSuggestionsHandler] used to style text with misspelled words,
   /// and the [TextStyle] that handler uses to indicate misspelled words.
-  /// {@endtemplate}
   ///
-  /// If the [SpellCheckService] is left null, the [DefaultSpellCheckService] if
+  /// If the [SpellCheckService] is left null, the [DefaultSpellCheckService] is
   /// used if the platform is supported. It is currently supported only on
   /// Android. If the [SpellCheckSuggestionsHandler] is left null, the
   /// [DefaultSpellCheckSuggestionsHandler] is used. If neither the
   /// [SpellCheckService] nor the [SpellCheckSuggestionsHandler] is specified,
   /// then spell check is disabled by default.
+  ///
+  /// If this configuration is left null, then spell check is diabled by default.
+  /// {@endtemplate}
   final SpellCheckConfiguration? spellCheckConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
@@ -1961,7 +1963,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
 
     // Spell check setup
-    if (widget.spellCheckConfiguration == null) {
+    if (widget.spellCheckConfiguration == SpellCheckConfiguration.disabled) {
       return;
     }
 
@@ -1972,7 +1974,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(
       spellCheckService != null
       || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined,
-      'spellCheckService must be specified for this platform because no default service available'
+      'spellCheckService must be specified for this platform because no default service available',
     );
 
     spellCheckService = spellCheckService ?? DefaultSpellCheckService();
@@ -1981,7 +1983,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _spellCheckConfiguration = widget.spellCheckConfiguration!.copyWith(
       spellCheckService: spellCheckService,
-      spellCheckSuggestionsHandler: spellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler: spellCheckSuggestionsHandler,
     );
   }
 
@@ -3714,7 +3716,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   composingRegionOutOfRange,
                   widget.style,
                   _spellCheckConfiguration!.misspelledTextStyle!,
-                  _spellCheckResults!
+                  _spellCheckResults!,
       );
     }
 

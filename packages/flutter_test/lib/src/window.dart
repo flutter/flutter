@@ -733,6 +733,11 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
     _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
   }
+  /// Deletes existing value that determines whether or not a native spell check
+  /// service is defined and returns to the real value.
+  void clearNativeSpellCheckServiceDefined() {
+    _nativeSpellCheckServiceDefinedTestValue = null;
+  }
 
   @override
   bool get brieflyShowPassword => _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
@@ -895,6 +900,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
     clearLocalesTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
+    clearNativeSpellCheckServiceDefined();
   }
 
   @override

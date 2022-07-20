@@ -12566,7 +12566,7 @@ void main() {
           final EditableTextState state =
             tester.state<EditableTextState>(find.byType(EditableText));
           expect(state.spellCheckEnabled, isFalse);
-        });
+      });
 
     testWidgets(
         'Error thrown when spell check configuration defined without specifying misspelled text style',
@@ -12581,12 +12581,12 @@ void main() {
                     backgroundCursorColor: Colors.grey,
                     cursorOpacityAnimates: true,
                     autofillHints: null,
-                    spellCheckConfiguration: SpellCheckConfiguration()
+                    spellCheckConfiguration: SpellCheckConfiguration(),
                 );
               },
-              throwsAssertionError
+              throwsAssertionError,
           );
-        });
+      });
 
     testWidgets(
         'Spell check configured properly when spell check enabled without specified spell check service and handler',
@@ -12617,13 +12617,14 @@ void main() {
           expect(state.spellCheckEnabled, isTrue);
           expect(
             state.spellCheckConfiguration!.spellCheckService.runtimeType,
-            equals(DefaultSpellCheckService)
+            equals(DefaultSpellCheckService),
           );
           expect(
             state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
-            equals(DefaultSpellCheckSuggestionsHandler)
+            equals(DefaultSpellCheckSuggestionsHandler),
           );
-        });
+         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+      });
 
     testWidgets(
         'Spell check configured properly with specified spell check service and handler',
@@ -12656,13 +12657,13 @@ void main() {
             tester.state<EditableTextState>(find.byType(EditableText));
           expect(
             state.spellCheckConfiguration!.spellCheckService.runtimeType,
-            equals(FakeSpellCheckService)
+            equals(FakeSpellCheckService),
           );
           expect(
             state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
-            equals(FakeSpellCheckSuggestionsHandler)
+            equals(FakeSpellCheckSuggestionsHandler),
           );
-        });
+      });
 
     testWidgets(
         'Error thrown when spell check enabled but no default spell check service available',
@@ -12686,7 +12687,8 @@ void main() {
               ));
 
           expect(tester.takeException(), isA<AssertionError>());
-        });
+          tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+      });
   });
 }
 
