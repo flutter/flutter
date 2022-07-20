@@ -124,7 +124,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/107101
     final List<ScrollDirection> receivedResult = <ScrollDirection>[];
     const List<ScrollDirection> expectedReverseResult = <ScrollDirection>[ScrollDirection.reverse, ScrollDirection.idle];
-    const List<ScrollDirection> expectedFrowardResult = <ScrollDirection>[ScrollDirection.forward, ScrollDirection.idle];
+    const List<ScrollDirection> expectedForwardResult = <ScrollDirection>[ScrollDirection.forward, ScrollDirection.idle];
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -170,7 +170,7 @@ void main() {
     await tester.drag(find.text('Item 29'), const Offset(0.0, 20.0));
     await tester.pump();
 
-    expect(receivedResult, expectedFrowardResult);
+    expect(receivedResult, expectedForwardResult);
   });
 
   testWidgets('NestedScrollView respects clipBehavior', (WidgetTester tester) async {
