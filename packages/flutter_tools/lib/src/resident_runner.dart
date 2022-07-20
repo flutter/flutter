@@ -578,6 +578,7 @@ class FlutterDevice {
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
         shaderCompiler: developmentShaderCompiler,
+        dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
       );
     } on DevFSException {
       devFSStatus.cancel();

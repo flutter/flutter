@@ -3,17 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows header', (WidgetTester tester) async {
+  testWidgets('shows header', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoFormSection(
+          child: CupertinoListSection(
             header: const Text('Header'),
-            children: <Widget>[CupertinoTextFormFieldRow()],
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
           ),
         ),
       ),
@@ -22,13 +23,15 @@ void main() {
     expect(find.text('Header'), findsOneWidget);
   });
 
-  testWidgets('Shows footer', (WidgetTester tester) async {
+  testWidgets('shows footer', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoFormSection(
+          child: CupertinoListSection(
             footer: const Text('Footer'),
-            children: <Widget>[CupertinoTextFormFieldRow()],
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
           ),
         ),
       ),
@@ -37,12 +40,14 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
   });
 
-  testWidgets('Shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
+  testWidgets('shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoFormSection(
-            children: <Widget>[CupertinoTextFormFieldRow()],
+          child: CupertinoListSection(
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
           ),
         ),
       ),
@@ -54,14 +59,14 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgets('Shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
+  testWidgets('shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoFormSection(
-            children: <Widget>[
-              CupertinoTextFormFieldRow(),
-              CupertinoTextFormFieldRow(),
+          child: CupertinoListSection(
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+              CupertinoListTile(title: Text('CupertinoListTile')),
             ],
           ),
         ),
@@ -75,12 +80,14 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgets('Does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoFormSection.insetGrouped(
-            children: <Widget>[CupertinoTextFormFieldRow()],
+          child: CupertinoListSection.insetGrouped(
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
           ),
         ),
       ),
@@ -93,15 +100,14 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgets('Does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        restorationScopeId: 'App',
         home: Center(
-          child: CupertinoFormSection.insetGrouped(
-            children: <Widget>[
-              CupertinoTextFormFieldRow(),
-              CupertinoTextFormFieldRow(),
+          child: CupertinoListSection.insetGrouped(
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+              CupertinoListTile(title: Text('CupertinoListTile')),
             ],
           ),
         ),
@@ -115,7 +121,7 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgets('Sets background color for section', (WidgetTester tester) async {
+  testWidgets('sets background color for section', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
 
     await tester.pumpWidget(
@@ -123,28 +129,30 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: CupertinoFormSection(
+          child: CupertinoListSection(
             backgroundColor: backgroundColor,
-            children: <Widget>[CupertinoTextFormFieldRow()],
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
           ),
         ),
       ),
     );
 
-    final DecoratedBox decoratedBox =
-        tester.widget(find.byType(DecoratedBox).first);
-    final BoxDecoration boxDecoration =
-        decoratedBox.decoration as BoxDecoration;
+    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).first);
+    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgets('Setting clipBehavior clips children section', (WidgetTester tester) async {
+  testWidgets('setting clipBehavior clips children section', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoFormSection(
+          child: CupertinoListSection(
             clipBehavior: Clip.antiAlias,
-            children: <Widget>[CupertinoTextFormFieldRow()],
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
           ),
         ),
       ),
@@ -153,18 +161,19 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgets('Not setting clipBehavior does not produce a RenderClipRRect object', (WidgetTester tester) async {
+  testWidgets('not setting clipBehavior does not clip children section', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoFormSection(
-            children: <Widget>[CupertinoTextFormFieldRow()],
+          child: CupertinoListSection(
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
           ),
         ),
       ),
     );
 
-    final Iterable<RenderClipRRect> renderClips = tester.allRenderObjects.whereType<RenderClipRRect>();
-    expect(renderClips, isEmpty);
+    expect(find.byType(ClipRRect), findsNothing);
   });
 }

@@ -159,6 +159,7 @@ class ShaderCompiler {
       '--spirv=$outputPath',
       '--input=${input.path}',
       '--input-type=frag',
+      '--include=${input.parent.path}',
     ];
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;

@@ -801,6 +801,7 @@ class WebDevFS implements DevFS {
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,
+    File? dartPluginRegistrant,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -868,6 +869,7 @@ class WebDevFS implements DevFS {
       packageConfig: packageConfig,
       projectRootPath: projectRootPath,
       fs: globals.fs,
+      dartPluginRegistrant: dartPluginRegistrant,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport();
