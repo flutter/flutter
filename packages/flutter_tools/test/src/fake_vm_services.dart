@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
 
 /// A fake implementation of a vm_service that mocks the JSON-RPC request
 /// and response structure.

@@ -21,7 +21,7 @@ import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
 
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(
@@ -970,7 +970,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             || cause == SelectionChangedCause.drag) {
           _editableText?.bringIntoView(selection.extent);
         }
-        return;
+        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
@@ -978,7 +978,21 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         if (cause == SelectionChangedCause.drag) {
           _editableText?.bringIntoView(selection.extent);
         }
-        return;
+        break;
+    }
+
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        if (cause == SelectionChangedCause.drag) {
+          _editableText?.hideToolbar();
+        }
+        break;
     }
   }
 

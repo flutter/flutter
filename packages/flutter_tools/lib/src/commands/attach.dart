@@ -215,7 +215,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<FlutterCommandResult> runCommand() async {
     await _validateArguments();
 
-    final Device device = await (findTargetDevice() as FutureOr<Device>);
+    final Device? device = await findTargetDevice();
+
+    if (device == null) {
+      throwToolExit('Did not find any valid target devices.');
+    }
 
     final Artifacts? overrideArtifacts = device.artifactOverrides ?? globals.artifacts;
     await context.run<void>(
@@ -272,7 +276,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
         final Uri? uriFromMdns =
           await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
-            appId!,
+            appId,
             device,
             usesIpv6: usesIpv6,
             deviceVmservicePort: deviceVmservicePort,
@@ -317,12 +321,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     try {
       int? result;
       if (daemon != null) {
-        final ResidentRunner runner = await (createResidentRunner(
+        final ResidentRunner runner = await createResidentRunner(
           observatoryUris: observatoryUri,
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
-        ) as FutureOr<ResidentRunner>);
+        );
         late AppInstance app;
         try {
           app = await daemon.appDomain.launch(
@@ -351,12 +355,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         return;
       }
       while (true) {
-        final ResidentRunner runner = await (createResidentRunner(
+        final ResidentRunner runner = await createResidentRunner(
           observatoryUris: observatoryUri,
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
-        ) as FutureOr<ResidentRunner>);
+        );
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler? terminalHandler;
         unawaited(onAppStart.future.whenComplete(() {
@@ -400,7 +404,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
   }
 
-  Future<ResidentRunner?> createResidentRunner({
+  Future<ResidentRunner> createResidentRunner({
     required Stream<Uri> observatoryUris,
     required Device device,
     required FlutterProject flutterProject,
@@ -452,7 +456,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 }
 
 class HotRunnerFactory {
-  HotRunner? build(
+  HotRunner build(
     List<FlutterDevice> devices, {
     required String target,
     required DebuggingOptions debuggingOptions,
