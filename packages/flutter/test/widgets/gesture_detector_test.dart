@@ -915,7 +915,7 @@ void main() {
     panDelta = null;
     didEndPan = false;
 
-    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.trackpad);
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.stylus);
 
     // Non-matching device should not lead to any callbacks.
     expect(didStartPan, isFalse);
