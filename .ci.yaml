@@ -1364,6 +1364,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: color_filter_cache_perf__e2e_summary
 
+  - name: Linux_android color_filter_with_unstable_child_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: color_filter_with_unstable_child_perf__e2e_summary
+
   - name: Linux_android raster_cache_use_memory_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
