@@ -620,7 +620,7 @@ enum KeyDataTransitMode {
 
 /// The assembled information converted from a native key message.
 ///
-/// Native key messages, meaning physically pressing or releasing
+/// Native key messages, produced by physically pressing or releasing
 /// keyboard keys, are translated into two different event streams in Flutter:
 ///
 ///  * The [KeyEvent] stream, represented by [KeyMessage.events] (recommended).
@@ -630,14 +630,14 @@ enum KeyDataTransitMode {
 /// Either the [KeyEvent] stream or the [RawKeyEvent] stream alone provides a
 /// complete description of the keyboard messages, but in different event
 /// models. Flutter is still transitioning from the legacy model to the new
-/// model, therefore dispatches both streams simultaneously before the
-/// transition is completed. [KeyMessage] is therefore used to bundles the
+/// model, therefore it dispatches both streams simultaneously until the
+/// transition is completed. [KeyMessage] is used to bundle the
 /// stream segments of both models from a native key message together for the
 /// convenience of propagation.
 ///
-/// Typically, an application only needs to process either [KeyMessage.events]
-/// or [KeyMessage.rawEvent], not both. For example, when handling a
-/// [KeyMessage], simply handle each of [KeyMessage.events] independently.
+/// Typically, an application either processes [KeyMessage.events]
+/// or [KeyMessage.rawEvent], not both. For example, handling a
+/// [KeyMessage], means handling each event in [KeyMessage.events].
 ///
 /// In advanced cases, a widget needs to process both streams at the same time.
 /// For example, [FocusNode] has an `onKey` that dispatches [RawKeyEvent]s and
@@ -738,9 +738,9 @@ class KeyEventManager {
   /// This is typically only called by [ServicesBinding].
   KeyEventManager(this._hardwareKeyboard, this._rawKeyboard);
 
-  /// The global entrance to handle all key events sent to Flutter.
+  /// The global entrance which handles all key events sent to Flutter.
   ///
-  /// For most common applications, which use [WidgetsBinding], this field is
+  /// Typical applications use [WidgetsBinding], where this field is
   /// set by the focus system (see `FocusManger`) on startup with a function
   /// that dispatches incoming events to the focus system, including
   /// [FocusNode.onKey], [FocusNode.onKeyEvent], and shortcuts. In this case,
@@ -759,19 +759,19 @@ class KeyEventManager {
   /// 3. The text input system.
   /// 4. Other native components (possibly non-Flutter).
   ///
-  /// Each phase will conclude into a boolean called "event result". If the
+  /// Each phase will conclude with a boolean called an "event result". If the
   /// result is true, this phase _handles_ the event and prevents the event
   /// from being propagated to the next phase. And vice versa. This mechanism
   /// allows shortcuts such as "Ctrl-C" to not generate a text "C" in the text
   /// field, or shortcuts that are not handled by any components to trigger
   /// special alerts (such as the "bonk" noise on macOS).
   ///
-  /// In the second phase "the key event system", the event is dispatched
-  /// to several destinations: [RawKeyboard]'s listeners, raw keyboard
-  /// listeners, [HardwareKeyboard]'s handlers, and [keyMessageHandler].
+  /// In the second phase, known as "the key event system", the event is dispatched
+  /// to several destinations: [RawKeyboard]'s listeners, 
+  /// [HardwareKeyboard]'s handlers, and [keyMessageHandler].
   /// All destinations will always receive the event regardless of the handlers'
   /// results. If any handler's result is true, then the overall result of the
-  /// second phase is true.
+  /// second phase is true, and event propagation is stopped.
   ///
   /// See also:
   ///
@@ -793,11 +793,11 @@ class KeyEventManager {
   /// tasks and calls the original callback in between (or not at all.)
   ///
   /// Patching [keyMessageHandler] can not be reverted. You should always assume
-  /// that other component might haved patch it before you and after you.
+  /// that another component might haved patched it before you and after you.
   /// This means that you might want to write your own global notification
   /// manager, which callbacks can be added to and removed from.
   ///
-  /// You should not patch [keyMessageHandler] until `FocusManager` has assigned
+  /// You should not patch [keyMessageHandler] until the `FocusManager` has assigned
   /// its callback. This is assured during any time within the widget lifecycle
   /// (such as `initState`), or after calling `WidgetManager.instance`.
   ///
@@ -809,7 +809,7 @@ class KeyEventManager {
   /// Try typing something in the first text field. These key presses are not
   /// handled by shorcuts and will be sent to the fallback handler and printed
   /// out. Now try some text shortcuts, such as Ctrl+A. The KeyA press is
-  /// handled as a shortcut, therefore not sent to the fallback handler and not
+  /// handled as a shortcut, and is not sent to the fallback handler and so is not
   /// printed out.
   ///
   /// ** See code in examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
