@@ -36,11 +36,13 @@ public class ScreenshotUtil {
       out = socket.getOutputStream();
     }
 
-    synchronized void writeFile(String name, byte[] fileContent) throws IOException {
-      final ByteBuffer buffer = ByteBuffer.allocate(name.length() + fileContent.length + 8);
+    synchronized void writeFile(String name, byte[] fileContent, int pixelCount)
+        throws IOException {
+      final ByteBuffer buffer = ByteBuffer.allocate(name.length() + fileContent.length + 12);
       // See ScreenshotBlobTransformer#bind in screenshot_transformer.dart for consumer side.
       buffer.putInt(name.length());
       buffer.putInt(fileContent.length);
+      buffer.putInt(pixelCount);
       buffer.put(name.getBytes());
       buffer.put(fileContent);
       final byte[] bytes = buffer.array();
@@ -92,12 +94,13 @@ public class ScreenshotUtil {
    * @param filename The file name.
    * @param fileContent The file content.
    */
-  public static synchronized void writeFile(@NonNull String filename, @NonNull byte[] fileContent) {
+  public static synchronized void writeFile(
+      @NonNull String filename, @NonNull byte[] fileContent, int pixelCount) {
     if (executor != null && conn != null) {
       executor.execute(
           () -> {
             try {
-              conn.writeFile(filename, fileContent);
+              conn.writeFile(filename, fileContent, pixelCount);
             } catch (IOException e) {
               throw new RuntimeException(e);
             }
@@ -123,8 +126,9 @@ public class ScreenshotUtil {
     if (bitmap == null) {
       throw new RuntimeException("failed to capture screenshot");
     }
+    int pixelCount = bitmap.getWidth() * bitmap.getHeight();
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-    ScreenshotUtil.writeFile(captureName, out.toByteArray());
+    ScreenshotUtil.writeFile(captureName, out.toByteArray(), pixelCount);
   }
 }

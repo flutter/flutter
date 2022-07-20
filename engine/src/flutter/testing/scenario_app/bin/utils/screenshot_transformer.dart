@@ -8,13 +8,16 @@ import 'dart:typed_data';
 
 /// A screenshot from the Android emulator.
 class Screenshot {
-  Screenshot(this.filename, this.fileContent);
+  Screenshot(this.filename, this.fileContent, this.pixelCount);
 
   /// The name of the screenshot.
   final String filename;
 
   /// The binary content of the screenshot.
   final Uint8List fileContent;
+
+  /// The number of pixels in the screenshot.
+  final int pixelCount;
 }
 
 /// Takes the input stream and transforms it into [Screenshot]s.
@@ -28,7 +31,7 @@ class ScreenshotBlobTransformer extends StreamTransformerBase<Uint8List, Screens
     await for (final Uint8List blob in stream) {
       pending.add(blob);
 
-      if (pending.length < 8) {
+      if (pending.length < 12) {
         continue;
       }
 
@@ -41,9 +44,12 @@ class ScreenshotBlobTransformer extends StreamTransformerBase<Uint8List, Screens
       off += 4;
       final int fcontentLen = byteData.getInt32(off);
       off += 4;
+      final int pixelCount = byteData.getInt32(off);
+      off += 4;
 
       assert(fnameLen > 0);
       assert(fcontentLen > 0);
+      assert(pixelCount > 0);
 
       if (pending.length < off + fnameLen) {
         continue;
@@ -60,7 +66,7 @@ class ScreenshotBlobTransformer extends StreamTransformerBase<Uint8List, Screens
       pending.clear();
       pending.add(bytes.buffer.asUint8List(off));
 
-      yield Screenshot('$filename.png', fileContent);
+      yield Screenshot('$filename.png', fileContent, pixelCount);
     }
   }
 }
