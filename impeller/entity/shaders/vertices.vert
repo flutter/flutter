@@ -6,12 +6,12 @@ uniform FrameInfo {
   mat4 mvp;
 } frame_info;
 
-in vec2 point;
-in vec4 vertex_color;
+in vec2 position;
+in vec4 color;
 
-out vec4 color;
+out vec4 v_color;
 
 void main() {
-  gl_Position = frame_info.mvp * vec4(point, 0.0, 1.0);
-  color = vertex_color;
+  gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
+  v_color = color;
 }

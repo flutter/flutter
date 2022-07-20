@@ -20,7 +20,7 @@ enum class VertexMode {
 
 class Vertices {
  public:
-  Vertices(std::vector<Point> points,
+  Vertices(std::vector<Point> positions,
            std::vector<uint16_t> indices,
            std::vector<Color> colors,
            VertexMode vertex_mode,
@@ -28,24 +28,28 @@ class Vertices {
 
   ~Vertices();
 
-  std::optional<Rect> GetBoundingBox() const { return bounds_; };
+  bool IsValid() const;
+
+  std::optional<Rect> GetBoundingBox() const;
 
   std::optional<Rect> GetTransformedBoundingBox(const Matrix& transform) const;
 
-  const std::vector<Point>& GetPoints() const { return points_; }
+  const std::vector<Point>& GetPositions() const;
 
-  const std::vector<uint16_t>& GetIndices() const { return indices_; }
+  const std::vector<uint16_t>& GetIndices() const;
 
-  const std::vector<Color>& GetColors() const { return colors_; }
+  const std::vector<Color>& GetColors() const;
 
-  VertexMode GetMode() const { return vertex_mode_; }
+  VertexMode GetMode() const;
 
  private:
-  std::vector<Point> points_;
+  std::vector<Point> positions_;
   std::vector<uint16_t> indices_;
   std::vector<Color> colors_;
   VertexMode vertex_mode_;
   Rect bounds_;
+
+  void NormalizeIndices();
 };
 
 }  // namespace impeller
