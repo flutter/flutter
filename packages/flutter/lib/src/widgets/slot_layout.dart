@@ -86,7 +86,6 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
         },
         transitionBuilder: (Widget child, Animation<double> animation) {
           final SlotLayoutConfig configChild = child as SlotLayoutConfig;
-          print(configChild.outAnimation);
           if (child.key == chosenWidget?.key) {
             return (configChild.inAnimation != null) ? child.inAnimation!(child, _controller) : child;
           } else {
