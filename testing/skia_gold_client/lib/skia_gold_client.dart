@@ -185,11 +185,11 @@ class SkiaGoldClient {
   /// ```
   ///
   /// [differentPixelsRate] is the fraction of accepted pixels to be wrong in the range [0.0, 1.0].
-  /// Defaults to 0.1. A value of 0.1 means that 10% of the pixels are allowed to change.
+  /// Defaults to 0.01. A value of 0.01 means that 1% of the pixels are allowed to change.
   Future<void> addImg(
     String testName,
     File goldenFile, {
-    double differentPixelsRate = 0.1,
+    double differentPixelsRate = 0.01,
     int pixelColorDelta = 0,
     required int screenshotSize,
   }) async {
