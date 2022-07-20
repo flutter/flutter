@@ -22,6 +22,8 @@
 
 library cupertino;
 
+export 'package:flutter/widgets.dart';
+
 export 'src/cupertino/activity_indicator.dart';
 export 'src/cupertino/app.dart';
 export 'src/cupertino/bottom_tab_bar.dart';
@@ -62,4 +64,3 @@ export 'src/cupertino/text_selection_toolbar_button.dart';
 export 'src/cupertino/text_theme.dart';
 export 'src/cupertino/theme.dart';
 export 'src/cupertino/thumb_painter.dart';
-export 'widgets.dart';
