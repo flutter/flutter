@@ -31,6 +31,11 @@ void main() {
       binding.defaultTestTimeout = const test_package.Timeout(Duration(minutes: 5));
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
     });
+
+    test('allows setting pointerEventSource to TestBindingEventSource.test', () {
+      binding.pointerEventSource = TestBindingEventSource.test;
+      expect(binding.pointerEventSource, TestBindingEventSource.test);
+    });
   });
 
   // The next three tests must run in order -- first using `test`, then `testWidgets`, then `test` again.
