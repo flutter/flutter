@@ -108,7 +108,7 @@ class DlVertices {
     ///
     /// Vertices are always required. Optional texture coordinates
     /// and optional colors are reserved depending on the |Flags|.
-    /// Optional indices will be reserved iff the index_count is
+    /// Optional indices will be reserved if the index_count is
     /// positive (>0).
     ///
     /// The caller must provide all data that is promised by the

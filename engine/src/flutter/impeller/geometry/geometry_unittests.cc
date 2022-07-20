@@ -1233,7 +1233,7 @@ TEST(GeometryTest, VerticesConstructorAndGetters) {
                                Rect(0, 0, 4, 4));
 
   ASSERT_EQ(vertices.GetBoundingBox().value(), Rect(0, 0, 4, 4));
-  ASSERT_EQ(vertices.GetPoints(), points);
+  ASSERT_EQ(vertices.GetPositions(), points);
   ASSERT_EQ(vertices.GetIndices(), indices);
   ASSERT_EQ(vertices.GetColors(), colors);
   ASSERT_EQ(vertices.GetMode(), VertexMode::kTriangle);
