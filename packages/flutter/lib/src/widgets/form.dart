@@ -194,15 +194,13 @@ class FormState extends State<Form> {
     return !hasError;
   }
 
-  /// Validates every [FormField] that is a descendant of this [Form], and
-  /// returns the list of invalid fields, or an empty list if there are none.
+  /// Checks every [FormField] that is a descendant of this [Form] if `hasError` is true,
+  /// and returns the list of invalid fields, or an empty list if there are none.
   ///
-  /// The form will rebuild to report the results.
-  List<FormFieldState<dynamic>> invalidFields() {
-    _hasInteractedByUser = true;
-    _forceRebuild();
+  /// The form will not be rebuilt.
+  List<FormFieldState<dynamic>> get invalidFields {
     return _fields
-        .where((FormFieldState<dynamic> field) => !field.validate())
+        .where((FormFieldState<dynamic> field) => field.hasError)
         .toList();
   }
 }
