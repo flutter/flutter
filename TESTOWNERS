@@ -243,6 +243,9 @@
 /dev/integration_tests/android_embedding_v2_smoke_test @blasten @flutter/android
 /dev/integration_tests/release_smoke_test @blasten @flutter/android
 
+## OpenPay tests
+/dev/devicelab/bin/tasks/Linux_android openpay_benchmarks__scroll_perf @iskakaushik @flutter/engine
+
 ## Shards tests
 # TODO(keyonghan): add files/paths for below framework host only testss.
 # https://github.com/flutter/flutter/issues/82068
