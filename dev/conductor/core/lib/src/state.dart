@@ -16,22 +16,22 @@ const String kStateFileName = '.flutter_conductor_state.json';
 const String betaPostReleaseMsg = """
   'Ensure the following post release steps are complete:',
   '\t 1. Post announcement to discord',
-  '\t\t Discord: ${globals.discordReleaseChannel}',
+  '\t\t Discord: ${globals.kDiscordReleaseChannel}',
   '\t 2. Post announcement flutter release hotline chat room',
-  '\t\t Chatroom: ${globals.flutterReleaseHotline}',
+  '\t\t Chatroom: ${globals.kFlutterReleaseHotline}',
 """;
 
 const String stablePostReleaseMsg = """
   'Ensure the following post release steps are complete:',
   '\t 1. Update hotfix to stable wiki following documentation best practices',
-  '\t\t Wiki link: ${globals.hotfixToStableWiki}',
-  '\t\t Best practices: ${globals.hotfixDocumentationBestPractices}',
+  '\t\t Wiki link: ${globals.kHotfixToStableWiki}',
+  '\t\t Best practices: ${globals.kHotfixDocumentationBestPractices}',
   '\t 2. Post announcement to flutter-announce group',
-  '\t\t Flutter Announce: ${globals.flutterAnnounceGroup}',
+  '\t\t Flutter Announce: ${globals.kFlutterAnnounceGroup}',
   '\t 3. Post announcement to discord',
-  '\t\t Discord: ${globals.discordReleaseChannel}',
+  '\t\t Discord: ${globals.kDiscordReleaseChannel}',
   '\t 4. Post announcement flutter release hotline chat room',
-  '\t\t Chatroom: ${globals.flutterReleaseHotline}',
+  '\t\t Chatroom: ${globals.kFlutterReleaseHotline}',
 """;
 
 String luciConsoleLink(String channel, String groupName) {
@@ -77,7 +77,11 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
   buffer.writeln(
+<<<<<<< HEAD
       '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
+=======
+      '\tPost-submit cocoon dashboard: ${globals.kCocoonDashboard}');
+>>>>>>> 03e8836dca (prefix global constants with k to fit style guide)
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
@@ -95,8 +99,12 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
+<<<<<<< HEAD
   buffer.writeln(
       '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
+=======
+  buffer.writeln('\tPost-submit cocoon dashboard: ${globals.kCocoonDashboard}');
+>>>>>>> 03e8836dca (prefix global constants with k to fit style guide)
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln(
         '${state.framework.cherrypicks.length} Framework Cherrypicks:');
