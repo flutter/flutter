@@ -46,12 +46,41 @@ class RasterWidgetController extends ChangeNotifier {
   }
 }
 
+/// A delegate which the [RasterWidget] can use to fallback to regular rendering
+/// if a platform view is present in the layer tree.
+///
+/// Consumers of [RasterWidget] should almost never use this delegate. For the most part,
+/// the raster widget only functions as a performance improvement. If a platform view is
+/// present, the performance improving qualities aren't possible and using this API is
+/// pointless.
+///
+/// Instead, this interface is useful if a generic/reusable widget is being created which
+/// may include a platform view and it needs to handle this transparently. For example, the
+/// framework uses this for the zoom page transition so that navigating to a page shows the same
+/// animation whether or not there is a platform view.
+abstract class RasterWidgetFallbackDelegate {
+  /// const constructor so that subclasses can be const.
+  const RasterWidgetFallbackDelegate();
+
+  /// Paint the child via [painter], applying any effects that would have been painted
+  /// with the [RasterWidgetDelegate].
+  ///
+  /// The [offset] and [size] are the location and dimensions of the render object.
+  void paintFallback(PaintingContext context, Offset offset, Size size, PaintingContextCallback painter);
+}
+
 /// A widget that replaces its child with a rasterized version of the child.
 ///
 /// By default, the child is drawn as is. The default [delegate] simply scales
 /// down the image by the current device pixel ratio and paints it into the
 /// canvas. How this image is drawn can be customized by providing a new
 /// subclass of [RasterWidgetDelegate] to the [delegate] argument.
+///
+/// Caveats:
+///
+/// The contents of platform views cannot be captured by a raster
+/// widget. If a platform view is encountered, then nothing will be rendered unless
+/// [ignorePlatformViews] is `true` or a [fallback] delegate is provided.
 ///
 /// This widget is not supported on the HTML backend of Flutter for the web.
 class RasterWidget extends SingleChildRenderObjectWidget {
@@ -61,6 +90,8 @@ class RasterWidget extends SingleChildRenderObjectWidget {
   const RasterWidget({
     super.key,
     this.delegate = const _RasterDefaultDelegate(),
+    this.fallback,
+    this.ignorePlatformViews = false,
     required this.controller,
     required super.child
   });
@@ -73,11 +104,22 @@ class RasterWidget extends SingleChildRenderObjectWidget {
   /// The controller that determines when to display the children as an image.
   final RasterWidgetController controller;
 
+  /// A fallback delegate which is used if the child layers contains a platform view.
+  final RasterWidgetFallbackDelegate? fallback;
+
+  /// Whether the raster widget will ignore platform views in child layers.
+  ///
+  /// Defaults to `false`, which causes an error to be thrown if a platform view
+  /// is encountered.
+  final bool ignorePlatformViews;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderRasterWidget(
       delegate: delegate,
       controller: controller,
+      fallback: fallback,
+      ignorePlatformViews: ignorePlatformViews,
       devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
     );
   }
@@ -87,6 +129,8 @@ class RasterWidget extends SingleChildRenderObjectWidget {
     renderObject
       ..delegate = delegate
       ..controller = controller
+      ..fallback = fallback
+      ..ignorePlatformViews = ignorePlatformViews
       ..devicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0;
   }
 }
@@ -107,19 +151,19 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// [RasterWidget] paints the child image. This must account for the fact that the image
   /// width and height will be given in physical pixels, while the image must be painted with
   /// device independent pixels. That is, the width and height of the image is the widget and
-  /// height of the provided `area`, multiplied by the `pixelRatio`:
+  /// height of the provided `size`, multiplied by the `pixelRatio`:
   ///
   /// ```dart
-  /// void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
-  ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-  ///   final Rect dst = Rect.fromLTWH(0, 0, area.width, area.height);
+  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+  ///   final Rect src = Rect.fromLTWH(offset.dx, offset.dy, image.width.toDouble(), image.height.toDouble());
+  ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   ///   final Paint paint = Paint()
   ///     ..filterQuality = FilterQuality.low;
   ///   context.canvas.drawImageRect(image, src, dst, paint);
   /// }
   /// ```
   /// {@end-tool}
-  void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio);
+  void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio);
 
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderRasterWidget] object, or any time that a new
@@ -155,11 +199,13 @@ class RenderRasterWidget extends RenderProxyBox {
     required RasterWidgetDelegate delegate,
     required double devicePixelRatio,
     required RasterWidgetController controller,
+    required bool ignorePlatformViews,
+    RasterWidgetFallbackDelegate? fallback,
   }) : _delegate = delegate,
        _devicePixelRatio = devicePixelRatio,
-       _controller = controller {
-    _currentlyRepaintBoundary = controller.rasterize;
-  }
+       _controller = controller,
+       _fallback = fallback,
+       _ignorePlatformViews = ignorePlatformViews;
 
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
@@ -209,8 +255,32 @@ class RenderRasterWidget extends RenderProxyBox {
     }
   }
 
+  /// A fallback delegate which is used if the child layers contains a platform view.
+  RasterWidgetFallbackDelegate? get fallback => _fallback;
+  RasterWidgetFallbackDelegate? _fallback;
+  set fallback(RasterWidgetFallbackDelegate? value) {
+    if (value == fallback) {
+      return;
+    }
+    _fallback = value;
+    markNeedsPaint();
+  }
+
+  /// Whether the raster widget will ignore platform views in child layers.
+  bool get ignorePlatformViews => _ignorePlatformViews;
+  bool _ignorePlatformViews;
+  set ignorePlatformViews(bool value) {
+    if (value == ignorePlatformViews) {
+      return;
+    }
+    _ignorePlatformViews = value;
+    if (ignorePlatformViews) {
+      _hitPlatformView = false;
+    }
+    markNeedsPaint();
+  }
+
   ui.Image? _childRaster;
-  bool _currentlyRepaintBoundary = false;
 
   @override
   void attach(covariant PipelineOwner owner) {
@@ -238,20 +308,17 @@ class RenderRasterWidget extends RenderProxyBox {
   }
 
   void _onRasterValueChanged() {
-    final bool wasRepaintBoundary = _currentlyRepaintBoundary;
-    _currentlyRepaintBoundary = controller.rasterize;
-    if (_currentlyRepaintBoundary != wasRepaintBoundary) {
-      markNeedsCompositingBitsUpdate();
-    }
     _childRaster?.dispose();
     _childRaster = null;
     markNeedsPaint();
   }
 
+  bool _hitPlatformView = false;
+
   // Paint [child] with this painting context, then convert to a raster and detach all
   // children from this layer.
-  ui.Image _paintAndDetachToImage() {
-    final OffsetLayer offsetLayer = layer! as OffsetLayer;
+  ui.Image? _paintAndDetachToImage(PaintingContext originalContext) {
+    final OffsetLayer offsetLayer = OffsetLayer();
     final PaintingContext context = PaintingContext(offsetLayer, Offset.zero & size);
     super.paint(context, Offset.zero);
     // This ignore is here because this method is protected by the `PaintingContext`. Adding a new
@@ -259,19 +326,40 @@ class RenderRasterWidget extends RenderProxyBox {
     // that would conflict with our goals of minimizing painting context.
     // ignore: invalid_use_of_protected_member
     context.stopRecordingIfNeeded();
+    if (!ignorePlatformViews && !offsetLayer.supportsRasterization()) {
+      _hitPlatformView = true;
+      if (fallback == null) {
+        assert(() {
+          throw FlutterError(
+            'RasterWidget used with a child that contains a PlatformView.'
+          );
+        }());
+      }
+      return null;
+    }
     final ui.Image image = offsetLayer.toImageSync(Offset.zero & size, pixelRatio: devicePixelRatio);
-    offsetLayer.removeAllChildren();
+    offsetLayer.dispose();
     return image;
   }
 
   @override
-  bool get isRepaintBoundary => child != null && _currentlyRepaintBoundary;
-
-  @override
   void paint(PaintingContext context, Offset offset) {
+    if (size.isEmpty) {
+      _childRaster?.dispose();
+      _childRaster = null;
+      return;
+    }
     if (controller.rasterize) {
-      _childRaster ??= _paintAndDetachToImage();
-      delegate.paint(context, offset & size, _childRaster!, devicePixelRatio);
+      if (_hitPlatformView) {
+        fallback?.paintFallback(context, offset, size, super.paint);
+      } else {
+        _childRaster ??= _paintAndDetachToImage(context);
+        if (_childRaster == null && _hitPlatformView) {
+          fallback?.paintFallback(context, offset, size, super.paint);
+        } else {
+          delegate.paint(context, offset, size, _childRaster!, devicePixelRatio);
+        }
+      }
       return;
     }
     _childRaster?.dispose();
@@ -285,9 +373,9 @@ class _RasterDefaultDelegate implements RasterWidgetDelegate {
   const _RasterDefaultDelegate();
 
   @override
-  void paint(PaintingContext context, Rect area, ui.Image image, double pixelRatio) {
-    final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-    final Rect dst = Rect.fromLTWH(0, 0, area.width, area.height);
+  void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+    final Rect src = Rect.fromLTWH(offset.dx, offset.dy, image.width.toDouble(), image.height.toDouble());
+    final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
       ..filterQuality = FilterQuality.low;
     context.canvas.drawImageRect(image, src, dst, paint);

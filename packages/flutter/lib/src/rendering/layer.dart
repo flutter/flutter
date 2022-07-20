@@ -168,6 +168,15 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   bool _debugMutationsLocked = false;
 
+  /// Whether or not this layer, or any child layers, can be rasterized with
+  /// [Scene.toImage] or [Scene.toImageSync].
+  ///
+  /// If `false`, calling the above methods may yield an image which is
+  /// incomplete.
+  bool supportsRasterization() {
+    return true;
+  }
+
   /// Describes the clip that would be applied to contents of this layer,
   /// if any.
   Rect? describeClipBounds() => null;
@@ -875,6 +884,12 @@ class TextureLayer extends Layer {
   /// The identity of the backend texture.
   final int textureId;
 
+  // TODO(jonahwilliams): remove once https://github.com/flutter/flutter/issues/107576 is fixed.
+  @override
+  bool supportsRasterization() {
+    return false;
+  }
+
   /// When true the texture will not be updated with new frames.
   ///
   /// This is used for resizing embedded Android views: when resizing there
@@ -924,6 +939,11 @@ class PlatformViewLayer extends Layer {
   ///
   /// A UIView with this identifier must have been created by [PlatformViewsService.initUiKitView].
   final int viewId;
+
+  @override
+  bool supportsRasterization() {
+    return false;
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder) {
@@ -1042,6 +1062,16 @@ class ContainerLayer extends Layer {
 
   /// Returns whether this layer has at least one child layer.
   bool get hasChildren => _firstChild != null;
+
+  @override
+  bool supportsRasterization() {
+    for (Layer? child = lastChild; child != null; child = child.previousSibling) {
+      if (!child.supportsRasterization()) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.

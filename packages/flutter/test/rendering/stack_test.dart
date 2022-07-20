@@ -145,6 +145,34 @@ void main() {
       expect(diagnosticNodes[2].name, 'child 3');
       expect(diagnosticNodes[2].style, DiagnosticsTreeStyle.sparse);
     });
+
+    test('debugDescribeChildren handles a null index', () {
+      final RenderBox child1 = RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      );
+      final RenderBox child2 = RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      );
+      final RenderBox child3 = RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      );
+
+      final RenderBox stack = RenderIndexedStack(
+        index: null,
+        children: <RenderBox>[child1, child2, child3],
+      );
+
+      final List<DiagnosticsNode> diagnosticNodes = stack.debugDescribeChildren();
+
+      expect(diagnosticNodes[0].name, 'child 1');
+      expect(diagnosticNodes[0].style, DiagnosticsTreeStyle.offstage);
+
+      expect(diagnosticNodes[1].name, 'child 2');
+      expect(diagnosticNodes[1].style, DiagnosticsTreeStyle.offstage);
+
+      expect(diagnosticNodes[2].name, 'child 3');
+      expect(diagnosticNodes[2].style, DiagnosticsTreeStyle.offstage);
+    });
   });
 
   test('Stack in Flex can layout with no children', () {

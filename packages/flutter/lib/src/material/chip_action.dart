@@ -149,7 +149,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _TokenDefaultsM3(context, isEnabled)
+      ? _ActionChipDefaultsM3(context, isEnabled)
       : null;
     return RawChip(
       defaultProperties: defaults,
@@ -178,15 +178,17 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - ActionChip
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_101
-class _TokenDefaultsM3 extends ChipThemeData {
-  const _TokenDefaultsM3(this.context, this.isEnabled)
+// Token database version: v0_101
+
+class _ActionChipDefaultsM3 extends ChipThemeData {
+  const _ActionChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
@@ -248,4 +250,4 @@ class _TokenDefaultsM3 extends ChipThemeData {
   )!;
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - ActionChip
