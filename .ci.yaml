@@ -2615,7 +2615,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: module_test_ios
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2675,7 +2674,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: plugin_lint_mac
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3029,7 +3027,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3039,7 +3036,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3049,7 +3045,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
-    scheduler: luci
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
@@ -3059,7 +3054,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: channels_integration_test_ios
-    scheduler: luci
 
   - name: Mac_ios complex_layout_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3073,7 +3067,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3087,7 +3080,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3101,7 +3093,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     bringup: true # Flaky https://github.com/flutter/flutter/issues/102230
@@ -3131,7 +3122,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: route_test_ios
-    scheduler: luci
 
   - name: Mac_ios flavors_test_ios
     recipe: devicelab/devicelab_drone
@@ -3141,7 +3131,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios
-    scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3151,7 +3140,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__compile
-    scheduler: luci
 
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3161,7 +3149,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: flutter_gallery_ios__compile
-    scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3171,7 +3158,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3181,7 +3167,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_view_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3191,7 +3176,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hello_world_ios__compile
-    scheduler: luci
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3201,7 +3185,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hello_world_ios__compile
-    scheduler: luci
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -3213,7 +3196,6 @@ targets:
     runIf:
       - dev/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -3225,7 +3207,6 @@ targets:
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
       - dev/**
-    scheduler: luci
 
   - name: Mac_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
@@ -3235,7 +3216,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
@@ -3245,7 +3225,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
@@ -3255,7 +3234,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_frame_number
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_keyboard_resize
     recipe: devicelab/devicelab_drone
@@ -3265,7 +3243,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_keyboard_resize
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_screenshot
     recipe: devicelab/devicelab_drone
@@ -3275,7 +3252,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_screenshot
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
@@ -3285,7 +3261,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_textfield
-    scheduler: luci
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
@@ -3295,7 +3270,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_app_with_extensions_test
-    scheduler: luci
 
   - name: Mac_arm64_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
@@ -3305,7 +3279,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
-    scheduler: luci
 
   - name: Mac_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
@@ -3315,7 +3288,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_content_validation_test
-    scheduler: luci
 
   - name: Mac_arm64_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
@@ -3325,7 +3297,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: ios_content_validation_test
-    scheduler: luci
 
   - name: Mac_ios ios_defines_test
     recipe: devicelab/devicelab_drone
@@ -3335,7 +3306,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_defines_test
-    scheduler: luci
 
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone
@@ -3345,7 +3315,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_platform_view_tests
-    scheduler: luci
 
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
@@ -3355,7 +3324,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: large_image_changer_perf_ios
-    scheduler: luci
 
   - name: Mac_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -3365,7 +3333,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: macos_chrome_dev_mode
-    scheduler: luci
 
   - name: Mac_arm64_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -3375,7 +3342,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: macos_chrome_dev_mode
-    scheduler: luci
 
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
@@ -3385,7 +3351,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
-    scheduler: luci
 
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
@@ -3395,7 +3360,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_ios__transition_perf
-    scheduler: luci
 
   - name: Mac_ios new_gallery_impeller_ios__transition_perf
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96401
@@ -3424,7 +3388,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channel_sample_test_ios
-    scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_swift
     recipe: devicelab/devicelab_drone
@@ -3434,7 +3397,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channel_sample_test_swift
-    scheduler: luci
 
   - name: Mac_ios platform_channels_benchmarks_ios
     recipe: devicelab/devicelab_drone
@@ -3444,7 +3406,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channels_benchmarks_ios
-    scheduler: luci
 
   - name: Mac_ios platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
@@ -3454,7 +3415,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_interaction_test_ios
-    scheduler: luci
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3464,7 +3424,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_view_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3474,7 +3433,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3484,7 +3442,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: post_backdrop_filter_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios simple_animation_perf_ios
     recipe: devicelab/devicelab_drone
@@ -3494,7 +3451,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: simple_animation_perf_ios
-    scheduler: luci
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
@@ -3504,7 +3460,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
-    scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3514,7 +3469,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -3528,7 +3482,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: native_ui_tests_macos
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3566,7 +3519,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac_arm64_ios run_release_test_macos
     recipe: devicelab/devicelab_drone
@@ -3581,7 +3533,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Windows build_tests_1_3
     recipe: flutter/flutter_drone
@@ -3646,7 +3597,6 @@ targets:
       validation_name: Customer testing
       tags: >
         ["framework", "hostonly"]
-    scheduler: luci
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
