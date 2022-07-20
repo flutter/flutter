@@ -10,6 +10,7 @@ import 'color_scheme.dart';
 import 'material.dart';
 import 'progress_indicator_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;

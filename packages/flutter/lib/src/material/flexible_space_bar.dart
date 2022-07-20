@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// The collapsing effect while the space bar collapses from its full size.
 enum CollapseMode {

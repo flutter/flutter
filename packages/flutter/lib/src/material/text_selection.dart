@@ -12,6 +12,7 @@ import 'text_selection_theme.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kHandleSize = 22.0;
 

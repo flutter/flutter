@@ -18,6 +18,7 @@ import 'ink_decoration.dart';
 import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A Material Design data table that shows data using multiple pages.
 ///

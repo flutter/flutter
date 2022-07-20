@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'debug.dart';
 import 'divider.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 

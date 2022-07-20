@@ -12,6 +12,7 @@ import 'ink_highlight.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// An ink feature that displays a [color] "splash" in response to a user
 /// gesture that can be confirmed or canceled.

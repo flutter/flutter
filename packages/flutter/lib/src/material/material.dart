@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'elevation_overlay.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
 ///

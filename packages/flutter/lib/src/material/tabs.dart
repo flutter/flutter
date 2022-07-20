@@ -19,6 +19,7 @@ import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;

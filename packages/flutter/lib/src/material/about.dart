@@ -28,6 +28,7 @@ import 'scrollbar.dart';
 import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] that shows an about box.
 ///

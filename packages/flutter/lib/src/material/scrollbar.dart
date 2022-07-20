@@ -8,6 +8,7 @@ import 'color_scheme.dart';
 import 'material_state.dart';
 import 'scrollbar_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kScrollbarThickness = 8.0;
 const double _kScrollbarThicknessWithTrack = 12.0;

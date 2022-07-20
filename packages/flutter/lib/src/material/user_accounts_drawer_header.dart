@@ -13,6 +13,7 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 class _AccountPictures extends StatelessWidget {
   const _AccountPictures({

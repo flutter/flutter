@@ -21,6 +21,7 @@ import 'scaffold.dart';
 import 'tabs.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 const double _kMaxTitleTextScaleFactor = 1.34; // TODO(perc): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.

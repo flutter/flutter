@@ -25,6 +25,7 @@ import 'material.dart';
 import 'snack_bar.dart';
 import 'snack_bar_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // late TabController tabController;

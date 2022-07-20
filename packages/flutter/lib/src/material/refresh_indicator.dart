@@ -11,6 +11,7 @@ import 'debug.dart';
 import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // The over-scroll distance that moves the indicator to its maximum
 // displacement, as a percentage of the scrollable's container extent.

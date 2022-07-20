@@ -16,6 +16,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 /// Defines the layout and behavior of a [BottomNavigationBar].

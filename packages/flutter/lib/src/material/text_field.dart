@@ -16,8 +16,7 @@ import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
-
-export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
+import 'theme_data.dart';
 
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(

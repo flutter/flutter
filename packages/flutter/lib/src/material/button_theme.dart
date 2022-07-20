@@ -10,7 +10,7 @@ import 'constants.dart';
 import 'material_button.dart';
 import 'material_state.dart';
 import 'theme.dart';
-import 'theme_data.dart' show MaterialTapTargetSize;
+import 'theme_data.dart';
 
 /// Used with [ButtonTheme] and [ButtonThemeData] to define a button's base
 /// colors, and the defaults for the button's minimum size, internal padding,

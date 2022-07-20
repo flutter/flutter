@@ -52,8 +52,6 @@ import 'toggle_buttons_theme.dart';
 import 'tooltip_theme.dart';
 import 'typography.dart';
 
-export 'package:flutter/services.dart' show Brightness;
-
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
 /// Typically used for custom colors. To use, subclass [ThemeExtension],

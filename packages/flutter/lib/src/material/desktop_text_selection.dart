@@ -12,6 +12,7 @@ import 'material_localizations.dart';
 import 'text_button.dart';
 import 'text_selection_toolbar.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarWidth = 222.0;

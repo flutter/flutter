@@ -9,6 +9,7 @@ import 'divider.dart';
 import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;

@@ -10,6 +10,7 @@ import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'text_selection.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// An eyeballed value that moves the cursor slightly left of where it is
 /// rendered for text on Android so its positioning more accurately matches the

@@ -12,6 +12,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // RangeValues _rangeValues = const RangeValues(0.3, 0.7);

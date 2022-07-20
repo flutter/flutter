@@ -20,6 +20,8 @@
 ///    for the Material 3 specification.
 library material;
 
+export 'package:flutter/widgets.dart';
+
 export 'src/material/about.dart';
 export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
@@ -169,4 +171,3 @@ export 'src/material/tooltip_theme.dart';
 export 'src/material/tooltip_visibility.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
-export 'widgets.dart';

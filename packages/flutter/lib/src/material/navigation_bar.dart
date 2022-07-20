@@ -14,6 +14,7 @@ import 'material_state.dart';
 import 'navigation_bar_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 /// Material 3 Navigation Bar component.
