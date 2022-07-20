@@ -15,8 +15,6 @@ import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 
-export 'scroll_activity.dart' show ScrollHoldController;
-
 /// The policy to use when applying the `alignment` parameter of
 /// [ScrollPosition.ensureVisible].
 enum ScrollPositionAlignmentPolicy {

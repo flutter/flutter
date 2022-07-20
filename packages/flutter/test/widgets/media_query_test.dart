@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
+import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide ViewConfiguration;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

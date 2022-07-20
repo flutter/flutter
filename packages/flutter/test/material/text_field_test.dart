@@ -17,7 +17,6 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, WindowPadding;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';

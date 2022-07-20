@@ -13,60 +13,6 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'widget_span.dart';
 
-export 'package:flutter/animation.dart';
-export 'package:flutter/foundation.dart' show
-  ChangeNotifier,
-  FlutterErrorDetails,
-  Listenable,
-  TargetPlatform,
-  ValueNotifier;
-export 'package:flutter/painting.dart' hide Image;
-export 'package:flutter/rendering.dart' show
-  AlignmentGeometryTween,
-  AlignmentTween,
-  Axis,
-  BoxConstraints,
-  BoxConstraintsTransform,
-  CrossAxisAlignment,
-  CustomClipper,
-  CustomPainter,
-  CustomPainterSemantics,
-  DecorationPosition,
-  FlexFit,
-  FlowDelegate,
-  FlowPaintingContext,
-  FractionalOffsetTween,
-  HitTestBehavior,
-  LayerLink,
-  MainAxisAlignment,
-  MainAxisSize,
-  MouseCursor,
-  MultiChildLayoutDelegate,
-  PaintingContext,
-  PointerCancelEvent,
-  PointerCancelEventListener,
-  PointerDownEvent,
-  PointerDownEventListener,
-  PointerEvent,
-  PointerMoveEvent,
-  PointerMoveEventListener,
-  PointerUpEvent,
-  PointerUpEventListener,
-  RelativeRect,
-  SemanticsBuilderCallback,
-  ShaderCallback,
-  ShapeBorderClipper,
-  SingleChildLayoutDelegate,
-  StackFit,
-  SystemMouseCursors,
-  TextOverflow,
-  ValueChanged,
-  ValueGetter,
-  WrapAlignment,
-  WrapCrossAlignment;
-export 'package:flutter/services.dart' show
-  AssetBundle;
-
 // Examples can assume:
 // class TestWidget extends StatelessWidget { const TestWidget({super.key}); @override Widget build(BuildContext context) => const Placeholder(); }
 // late WidgetTester tester;

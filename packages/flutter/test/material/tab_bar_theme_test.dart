@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const String _tab1Text = 'tab 1';

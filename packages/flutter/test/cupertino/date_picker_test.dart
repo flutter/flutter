@@ -14,7 +14,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // A number of the hit tests below say "warnIfMissed: false". This is because

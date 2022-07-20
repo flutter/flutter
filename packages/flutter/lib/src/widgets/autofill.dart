@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'framework.dart';
 
-export 'package:flutter/services.dart' show AutofillHints;
+import 'framework.dart';
 
 /// Predefined autofill context clean up actions.
 enum AutofillContextAction {

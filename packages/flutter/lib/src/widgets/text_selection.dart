@@ -19,8 +19,6 @@ import 'overlay.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
-export 'package:flutter/services.dart' show TextSelectionDelegate;
-
 /// A duration that controls how often the drag selection update callback is
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../widgets/basic.dart';
-import '../widgets/framework.dart';
-import '../widgets/media_query.dart';
+import 'package:flutter/widgets.dart';
+
 import 'interface_level.dart';
 import 'theme.dart';
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show DebugSemanticsDumpOrder, debugDumpLayerTree, debugDumpRenderTree, debugDumpSemanticsTree;
 
 import 'i18n/stock_strings.dart';
 import 'stock_data.dart';

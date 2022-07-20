@@ -9,7 +9,6 @@
 @Tags(<String>['no-shuffle'])
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'data_table_test_utils.dart';

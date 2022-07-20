@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 /// Slots used for the children of [Diagonal] and [RenderDiagonal].
 enum DiagonalSlot {

@@ -4,7 +4,6 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 
 /// An interface for widgets that can return the size this widget would prefer

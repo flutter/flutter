@@ -8,44 +8,6 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-export 'package:flutter/gestures.dart' show
-  DragDownDetails,
-  DragEndDetails,
-  DragStartDetails,
-  DragUpdateDetails,
-  ForcePressDetails,
-  GestureDragCancelCallback,
-  GestureDragDownCallback,
-  GestureDragEndCallback,
-  GestureDragStartCallback,
-  GestureDragUpdateCallback,
-  GestureForcePressEndCallback,
-  GestureForcePressPeakCallback,
-  GestureForcePressStartCallback,
-  GestureForcePressUpdateCallback,
-  GestureLongPressCallback,
-  GestureLongPressEndCallback,
-  GestureLongPressMoveUpdateCallback,
-  GestureLongPressStartCallback,
-  GestureLongPressUpCallback,
-  GestureScaleEndCallback,
-  GestureScaleStartCallback,
-  GestureScaleUpdateCallback,
-  GestureTapCallback,
-  GestureTapCancelCallback,
-  GestureTapDownCallback,
-  GestureTapUpCallback,
-  LongPressEndDetails,
-  LongPressMoveUpdateDetails,
-  LongPressStartDetails,
-  ScaleEndDetails,
-  ScaleStartDetails,
-  ScaleUpdateDetails,
-  TapDownDetails,
-  TapUpDetails,
-  Velocity;
-export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
-
 // Examples can assume:
 // late bool _lights;
 // void setState(VoidCallback fn) { }

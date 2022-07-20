@@ -6,7 +6,6 @@
 // tree.
 
 import 'package:flutter/material.dart'; // Imported just for its color palette.
-import 'package:flutter/rendering.dart';
 
 // Material design colors. :p
 List<Color> _kColors = <Color>[

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
@@ -16,18 +18,6 @@ import 'placeholder.dart';
 import 'scroll_aware_image_provider.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
-
-export 'package:flutter/painting.dart' show
-  AssetImage,
-  ExactAssetImage,
-  FileImage,
-  FilterQuality,
-  ImageConfiguration,
-  ImageInfo,
-  ImageProvider,
-  ImageStream,
-  MemoryImage,
-  NetworkImage;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).

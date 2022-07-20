@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 
+import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
 import 'inherited_model.dart';
 

@@ -28,8 +28,6 @@ import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
 
-export 'dart:ui' show Locale;
-
 /// The signature of [WidgetsApp.localeListResolutionCallback].
 ///
 /// A [LocaleListResolutionCallback] is responsible for computing the locale of the app's

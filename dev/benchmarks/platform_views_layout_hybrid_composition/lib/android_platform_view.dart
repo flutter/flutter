@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class AndroidPlatformView extends StatelessWidget {
   /// Creates a platform view for Android, which is rendered as a

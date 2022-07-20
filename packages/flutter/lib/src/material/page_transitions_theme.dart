@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
 
 import 'colors.dart';
 import 'theme.dart';

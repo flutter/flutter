@@ -7,8 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-export 'package:flutter/services.dart' show RestorationBucket;
-
 /// Creates a new scope for restoration IDs used by descendant widgets to claim
 /// [RestorationBucket]s.
 ///

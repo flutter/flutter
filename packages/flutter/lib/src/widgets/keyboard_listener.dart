@@ -8,8 +8,6 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 
-export 'package:flutter/services.dart' show KeyEvent;
-
 /// A widget that calls a callback whenever the user presses or releases a key
 /// on a keyboard.
 ///

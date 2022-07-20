@@ -11,11 +11,6 @@ import 'basic.dart';
 import 'framework.dart';
 import 'selection_container.dart';
 
-export 'package:flutter/rendering.dart' show
-  SliverGridDelegate,
-  SliverGridDelegateWithFixedCrossAxisCount,
-  SliverGridDelegateWithMaxCrossAxisExtent;
-
 // Examples can assume:
 // late SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
 

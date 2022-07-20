@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/rendering.dart';
+
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';

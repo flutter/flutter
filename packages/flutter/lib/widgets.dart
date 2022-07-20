@@ -12,11 +12,12 @@
 ///    for a catalog of commonly-used Flutter widgets.
 library widgets;
 
-export 'package:characters/characters.dart';
-export 'package:vector_math/vector_math_64.dart' show Matrix4;
+export 'dart:ui' show DisplayFeature;
 
-export 'foundation.dart' show UniqueKey;
-export 'rendering.dart' show TextSelectionHandleType;
+export 'package:characters/characters.dart';
+export 'package:flutter/rendering.dart' hide Flow, Image;
+export 'package:vector_math/vector_math_64.dart' show Quad;
+
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';

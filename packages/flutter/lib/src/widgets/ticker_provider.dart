@@ -6,8 +6,6 @@ import 'package:flutter/scheduler.dart';
 
 import 'framework.dart';
 
-export 'package:flutter/scheduler.dart' show TickerProvider;
-
 /// Enables or disables tickers (and thus animation controllers) in the widget
 /// subtree.
 ///

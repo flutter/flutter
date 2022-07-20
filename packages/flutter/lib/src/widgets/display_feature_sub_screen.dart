@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show DisplayFeature, DisplayFeatureState;
 
+import 'package:flutter/painting.dart';
+
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';

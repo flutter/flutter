@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:clock/clock.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'all_elements.dart';

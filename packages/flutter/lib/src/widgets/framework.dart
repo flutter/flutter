@@ -15,20 +15,6 @@ import 'inherited_model.dart';
 import 'notification_listener.dart';
 import 'widget_inspector.dart';
 
-export 'package:flutter/foundation.dart' show
-  factory,
-  immutable,
-  mustCallSuper,
-  optionalTypeArgs,
-  protected,
-  required,
-  visibleForTesting;
-export 'package:flutter/foundation.dart' show ErrorDescription, ErrorHint, ErrorSummary, FlutterError, debugPrint, debugPrintStack;
-export 'package:flutter/foundation.dart' show ValueChanged, ValueGetter, ValueSetter, VoidCallback;
-export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsNode;
-export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
-export 'package:flutter/rendering.dart' show RenderBox, RenderObject, debugDumpLayerTree, debugDumpRenderTree;
-
 // Examples can assume:
 // late BuildContext context;
 // void setState(VoidCallback fn) { }

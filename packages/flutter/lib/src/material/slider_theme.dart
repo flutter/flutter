@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' show Path, lerpDouble;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';

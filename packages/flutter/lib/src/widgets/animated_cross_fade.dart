@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/animation.dart';
+import 'package:flutter/painting.dart';
+
 import 'animated_size.dart';
 import 'basic.dart';
 import 'focus_scope.dart';

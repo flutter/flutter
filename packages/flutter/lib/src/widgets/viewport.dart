@@ -9,10 +9,6 @@ import 'debug.dart';
 import 'framework.dart';
 import 'scroll_notification.dart';
 
-export 'package:flutter/rendering.dart' show
-  AxisDirection,
-  GrowthDirection;
-
 /// A widget that is bigger on the inside.
 ///
 /// [Viewport] is the visual workhorse of the scrolling machinery. It displays a

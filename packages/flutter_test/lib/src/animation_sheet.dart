@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 /// Records the frames of an animating widget, and later displays the frames as a

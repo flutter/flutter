@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:clock/clock.dart';
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:test_api/expect.dart' show fail;

@@ -11,8 +11,6 @@ import 'container.dart';
 import 'framework.dart';
 import 'text.dart';
 
-export 'package:flutter/rendering.dart' show RelativeRect;
-
 /// A widget that rebuilds when the given [Listenable] changes value.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=LKKgYpC-EPQ}

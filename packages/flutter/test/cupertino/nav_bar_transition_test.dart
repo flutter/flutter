@@ -10,7 +10,6 @@
 @Tags(<String>['no-shuffle'])
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> startTransitionBetween(

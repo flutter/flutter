@@ -4,7 +4,6 @@
 
 import 'dart:math';
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'activity_indicator.dart';

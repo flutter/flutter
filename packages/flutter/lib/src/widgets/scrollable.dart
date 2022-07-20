@@ -29,8 +29,6 @@ import 'selection_container.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
-export 'package:flutter/physics.dart' show Tolerance;
-
 /// Signature used by [Scrollable] to build the viewport through which the
 /// scrollable content is displayed.
 typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset position);
