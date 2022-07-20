@@ -1673,6 +1673,7 @@ Future<void> _checkConsumerDependencies() async {
       print(result.stderr as Object);
       exit(result.exitCode);
     }
+    print('Package name: $package');
     final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
     final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
       for (final Map<String, Object?> package in (rawJson['packages']! as List<Object?>).cast<Map<String, Object?>>())
