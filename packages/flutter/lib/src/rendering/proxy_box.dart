@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
+import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -16,11 +16,11 @@ import 'layout_helper.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
-  PointerEvent,
+  PointerCancelEvent,
   PointerDownEvent,
+  PointerEvent,
   PointerMoveEvent,
-  PointerUpEvent,
-  PointerCancelEvent;
+  PointerUpEvent;
 
 /// A base class for render boxes that resemble their children.
 ///
@@ -883,15 +883,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
-
-  @override
-  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
-    assert(_alpha != 255);
-    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
-    updatedLayer.alpha = _alpha;
-    return updatedLayer;
-  }
+  bool get alwaysNeedsCompositing => child != null && (_alpha > 0 && _alpha < 255);
 
   int _alpha;
 
@@ -949,19 +941,26 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
+    if (child == null) {
+      return;
     }
+    if (_alpha == 0) {
+      // No need to keep the layer. We'll create a new one if necessary.
+      layer = null;
+      return;
+    }
+    if (_alpha == 255) {
+      // No need to keep the layer. We'll create a new one if necessary.
+      layer = null;
+      return super.paint(context, offset);
+    }
+
+    assert(needsCompositing);
+    layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -2605,6 +2604,13 @@ class RenderTransform extends RenderProxyBox {
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
+          // if the matrix is singular the children would be compressed to a line or
+          // single point, instead short-circuit and paint nothing.
+          final double det = transform.determinant();
+          if (det == 0 || !det.isFinite) {
+            layer = null;
+            return;
+          }
           layer = context.pushTransform(
             needsCompositing,
             offset,

@@ -180,6 +180,32 @@ void main() {
       );
     });
 
+    testWithoutContext('throws error when arb file does not exist', () {
+      // Set up project directory.
+      fs.currentDirectory
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .createSync(recursive: true);
+
+      // Arb file should be nonexistent in the l10n directory.
+      expect(
+        () => LocalizationsGenerator(
+          fileSystem: fs,
+          projectPathString: './',
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        ),
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains(', does not exist.'),
+        )),
+      );
+    });
+
     group('className should only take valid Dart class names', () {
       setUp(() {
         _standardFlutterDirectoryL10nSetup(fs);
@@ -966,9 +992,7 @@ class AppLocalizationsEn extends AppLocalizations {
     });
 
     testWithoutContext(
-      'throws an error attempting to add preferred locales '
-      'when there is no corresponding arb file for that '
-      'locale',
+      'throws an error attempting to add preferred locales when there is no corresponding arb file for that locale',
       () {
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
@@ -1135,6 +1159,38 @@ class AppLocalizationsEn extends AppLocalizations {
         )),
       );
     });
+
+    testWithoutContext('throws when an empty string is used as a key', () {
+      const String arbFileStringWithEmptyResourceId = '''
+{
+  "market": "MARKET",
+  "": {
+    "description": "This key is invalid"
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en.arb')
+        .writeAsStringSync(arbFileStringWithEmptyResourceId);
+
+      expect(
+        () => LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        ).loadResources(),
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid ARB resource name ""'),
+        )),
+      );
+    });
+
     testWithoutContext('throws when the same locale is detected more than once', () {
       const String secondMessageArbFileString = '''
 {

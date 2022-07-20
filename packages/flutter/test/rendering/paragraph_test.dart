@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, Paragraph;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -324,24 +324,6 @@ void main() {
 
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
-
-  test('one character clip test', () {
-    // Regressing test for https://github.com/flutter/flutter/issues/99140
-    final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        text: '7',
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 60.0),
-      ),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    );
-
-    // Lay out in a narrow box to force clipping.
-    // The text width is 60 bigger than the constraints width.
-    layout(paragraph, constraints: BoxConstraints.tight(const Size(50.0, 200.0)));
-
-    expect(paragraph.debugNeedsClipping, true);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
   test('maxLines', () {
