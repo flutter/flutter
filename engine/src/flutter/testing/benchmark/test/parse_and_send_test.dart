@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-
 import 'dart:io';
 
 import 'package:litetest/litetest.dart';
@@ -27,8 +25,7 @@ void main() {
     expect(sha1re.hasMatch(gitLog[0]), true);
 
     // Check that gitLog[1] is an int
-    final int secondsSinceEpoch = int.tryParse(gitLog[1]);
-    expect(secondsSinceEpoch, isNotNull);
+    final int secondsSinceEpoch = int.parse(gitLog[1]);
 
     // Check that gitLog[1] is a sensible Unix Epoch
     final int millisecondsSinceEpoch = secondsSinceEpoch * 1000;
