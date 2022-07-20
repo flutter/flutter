@@ -66,15 +66,13 @@ void main() {
   });
 
   group('MigrateRevisions', () {
-    testUsingContext('extracts revisions', () async {
+    testUsingContext('extracts revisions underpopulated metadata', () async {
       MigrateRevisions revisions = MigrateRevisions(
         context: context,
         baseRevision: oldSdkRevision,
         allowFallbackBaseRevision: true,
         platforms: <SupportedPlatform>[SupportedPlatform.android, SupportedPlatform.ios],
       );
-
-      print(context.flutterProject.directory.childFile('.metadata').readAsStringSync());
 
       expect(revisions.revisionsList, <String>[oldSdkRevision]);
       expect(revisions.fallbackRevision, oldSdkRevision);
@@ -87,7 +85,7 @@ void main() {
       expect(revisions.config.platformConfigs.containsKey(SupportedPlatform.ios), true);
     });
 
-    testUsingContext('extracts revisions', () async {
+    testUsingContext('extracts revisions full metadata', () async {
       MigrateRevisions revisions = MigrateRevisions(
         context: context,
         baseRevision: oldSdkRevision,
@@ -96,6 +94,8 @@ void main() {
       );
 
       File metadataFile = context.flutterProject.directory.childFile('.metadata');
+      metadataFile.deleteSync();
+      metadataFile.createSync(recursive: true);
       metadataFile.writeAsStringSync('''
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
@@ -424,15 +424,15 @@ migration:
          google()
 -        jcenter()
 +        mavenCentral()
-     }
- 
+     }'''));
+      expect(diffResults['android/build.gradle']!.diff, contains(r'''
      dependencies {
 -        classpath 'com.android.tools.build:gradle:3.2.1'
 +        classpath 'com.android.tools.build:gradle:7.1.2'
 +        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
      }
- }
- 
+ }'''));
+      expect(diffResults['android/build.gradle']!.diff, contains(r'''
  allprojects {
      repositories {
          google()
@@ -440,7 +440,7 @@ migration:
 +        mavenCentral()
      }
  }'''));
-            expect(diffResults['android/app/src/main/AndroidManifest.xml']!.diff, contains(r'''
+      expect(diffResults['android/app/src/main/AndroidManifest.xml']!.diff, contains(r'''
 @@ -1,39 +1,34 @@
  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="com.example.base">
