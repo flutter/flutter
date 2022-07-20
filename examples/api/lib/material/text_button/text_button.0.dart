@@ -69,8 +69,8 @@ class MyStatelessWidget extends StatelessWidget {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.all(16.0),
-                    primary: Colors.white,
                     textStyle: const TextStyle(fontSize: 20),
                   ),
                   onPressed: () {},

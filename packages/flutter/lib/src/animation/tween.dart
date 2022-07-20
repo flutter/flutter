@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Size, Rect;
+import 'dart:ui' show Color, Rect, Size;
 
 import 'package:flutter/foundation.dart';
 
-import 'animation.dart';
 import 'animations.dart';
-import 'curves.dart';
+
+export 'dart:ui' show Color, Rect, Size;
+
+export 'animation.dart' show Animation;
+export 'curves.dart' show Curve;
 
 // Examples can assume:
 // late Animation<Offset> _animation;

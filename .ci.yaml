@@ -38,7 +38,7 @@ platform_properties:
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       os: Linux
-      device_os: "N"
+      device_type: "msm8952"
   linux_samsung_s10:
     properties:
       dependencies: >-
@@ -67,7 +67,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: x86
-      device_os: N
+      device_type: "msm8952"
   mac_arm64_android:
     properties:
       dependencies: >-
@@ -77,7 +77,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: arm64
-      device_os: N
+      device_type: "msm8952"
   mac_ios:
     properties:
       dependencies: >-
@@ -120,7 +120,7 @@ platform_properties:
             {"dependency": "open_jdk", "version": "11"}
           ]
       os: Windows-10
-      device_os: N
+      device_type: "msm8952"
 
 targets:
   - name: Linux analyze
@@ -131,6 +131,21 @@ targets:
         ["framework","hostonly"]
       validation: analyze
       validation_name: Analyze
+
+  - name: Linux packages_autoroller
+    presubmit: false
+    recipe: pub_autoroller/pub_autoroller
+    timeout: 30
+    enabled_branches:
+      # Don't run this on release branches
+      - master
+    properties:
+      tags: >
+        ["framework","hostonly"]
+      dependencies: >-
+          [
+            {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
+          ]
 
   - name: Linux android views
     recipe: flutter/android_views
@@ -885,7 +900,6 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -906,7 +920,6 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -927,7 +940,6 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -948,7 +960,6 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -969,7 +980,6 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -990,7 +1000,6 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1011,7 +1020,6 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1032,7 +1040,6 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1053,7 +1060,6 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1073,7 +1079,6 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1093,7 +1098,6 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1113,7 +1117,6 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1133,7 +1136,6 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1153,7 +1155,6 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1173,7 +1174,6 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1193,7 +1193,6 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1214,7 +1213,6 @@ targets:
       subshard: web
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -1229,7 +1227,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
-    scheduler: luci
 
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
@@ -1239,7 +1236,6 @@ targets:
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: android_defines_test
-    scheduler: luci
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -1249,7 +1245,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_obfuscate_test
-    scheduler: luci
 
   - name: Linux_android android_semantics_integration_test
     recipe: devicelab/devicelab_drone
@@ -1259,7 +1254,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_semantics_integration_test
-    scheduler: luci
 
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
@@ -1269,7 +1263,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_stack_size_test
-    scheduler: luci
 
   - name: Linux_android android_view_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1279,7 +1272,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_view_scroll_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android animated_image_gc_perf
     recipe: devicelab/devicelab_drone
@@ -1289,7 +1281,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: animated_image_gc_perf
-    scheduler: luci
 
   - name: Linux_android animated_complex_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1308,7 +1299,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: animated_placeholder_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android backdrop_filter_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1318,7 +1308,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: backdrop_filter_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1328,7 +1317,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: backdrop_filter_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android basic_material_app_android__compile
     recipe: devicelab/devicelab_drone
@@ -1338,7 +1326,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: basic_material_app_android__compile
-    scheduler: luci
 
   - name: Linux_android channels_integration_test
     recipe: devicelab/devicelab_drone
@@ -1348,7 +1335,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: channels_integration_test
-    scheduler: luci
 
   - name: Linux_android clipper_cache_perf__e2e_summary
     bringup: true
@@ -1359,7 +1345,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: clipper_cache_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android color_filter_and_fade_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1369,7 +1354,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: color_filter_and_fade_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android color_filter_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1379,7 +1363,15 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: color_filter_cache_perf__e2e_summary
-    scheduler: luci
+
+  - name: Linux_android raster_cache_use_memory_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: raster_cache_use_memory_perf__e2e_summary
 
   - name: Linux_android shader_mask_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1389,7 +1381,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: shader_mask_cache_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android complex_layout_android__compile
     recipe: devicelab/devicelab_drone
@@ -1403,7 +1394,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android complex_layout_android__scroll_smoothness
     recipe: devicelab/devicelab_drone
@@ -1417,7 +1407,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android complex_layout_scroll_perf__devtools_memory
     recipe: devicelab/devicelab_drone
@@ -1431,7 +1420,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android complex_layout_scroll_perf__memory
     recipe: devicelab/devicelab_drone
@@ -1445,7 +1433,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1459,7 +1446,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_samsung_s10 complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1473,7 +1459,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android complex_layout_semantics_perf
     recipe: devicelab/devicelab_drone
@@ -1487,7 +1472,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android complex_layout__start_up
     recipe: devicelab/devicelab_drone
@@ -1501,7 +1485,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1511,7 +1494,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: cubic_bezier_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1521,7 +1503,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
-    scheduler: luci
 
   - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1531,7 +1512,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: cubic_bezier_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android cull_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1541,7 +1521,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: cull_opacity_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1551,7 +1530,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: cull_opacity_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android devtools_profile_start_test
     recipe: devicelab/devicelab_drone
@@ -1561,7 +1539,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: devtools_profile_start_test
-    scheduler: luci
 
   - name: Linux_android drive_perf_debug_warning
     recipe: devicelab/devicelab_drone
@@ -1571,7 +1548,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: drive_perf_debug_warning
-    scheduler: luci
 
   - name: Linux_android embedded_android_views_integration_test
     recipe: devicelab/devicelab_drone
@@ -1581,7 +1557,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: embedded_android_views_integration_test
-    scheduler: luci
 
   - name: Linux_android external_ui_integration_test
     recipe: devicelab/devicelab_drone
@@ -1591,7 +1566,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: external_ui_integration_test
-    scheduler: luci
 
   - name: Linux_android fading_child_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1601,7 +1575,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: fading_child_animation_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android fast_scroll_heavy_gridview__memory
     recipe: devicelab/devicelab_drone
@@ -1611,7 +1584,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: fast_scroll_heavy_gridview__memory
-    scheduler: luci
 
   - name: Linux_android fast_scroll_large_images__memory
     recipe: devicelab/devicelab_drone
@@ -1621,7 +1593,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: fast_scroll_large_images__memory
-    scheduler: luci
 
   - name: Linux_android flavors_test
     recipe: devicelab/devicelab_drone
@@ -1631,7 +1602,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flavors_test
-    scheduler: luci
 
   - name: Linux_android flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
@@ -1641,7 +1611,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_engine_group_performance
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
     recipe: devicelab/devicelab_drone
@@ -1651,7 +1620,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__back_button_memory
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__image_cache_memory
     recipe: devicelab/devicelab_drone
@@ -1661,7 +1629,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__image_cache_memory
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__memory_nav
     recipe: devicelab/devicelab_drone
@@ -1671,7 +1638,6 @@ targets:
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: flutter_gallery__memory_nav
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__start_up
     recipe: devicelab/devicelab_drone
@@ -1681,7 +1647,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__start_up
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
@@ -1691,7 +1656,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__start_up_delayed
-    scheduler: luci
 
   - name: Linux_android flutter_gallery_android__compile
     recipe: devicelab/devicelab_drone
@@ -1701,7 +1665,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_android__compile
-    scheduler: luci
 
   - name: Linux_android flutter_gallery_v2_chrome_run_test
     recipe: devicelab/devicelab_drone
@@ -1711,7 +1674,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_v2_chrome_run_test
-    scheduler: luci
 
   - name: Linux_android flutter_gallery_v2_web_compile_test
     recipe: devicelab/devicelab_drone
@@ -1721,7 +1683,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_v2_web_compile_test
-    scheduler: luci
 
   - name: Linux_android flutter_test_performance
     recipe: devicelab/devicelab_drone
@@ -1731,7 +1692,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_test_performance
-    scheduler: luci
 
   - name: Linux_android flutter_view__start_up
     recipe: devicelab/devicelab_drone
@@ -1741,7 +1701,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_view__start_up
-    scheduler: luci
 
   - name: Linux_android frame_policy_delay_test_android
     recipe: devicelab/devicelab_drone
@@ -1751,7 +1710,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: frame_policy_delay_test_android
-    scheduler: luci
 
   - name: Linux_android fullscreen_textfield_perf
     recipe: devicelab/devicelab_drone
@@ -1761,7 +1719,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: fullscreen_textfield_perf
-    scheduler: luci
 
   - name: Linux_android fullscreen_textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1771,7 +1728,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: fullscreen_textfield_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android hello_world__memory
     recipe: devicelab/devicelab_drone
@@ -1781,7 +1737,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: hello_world__memory
-    scheduler: luci
 
   - name: Linux_android home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1791,7 +1746,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: home_scroll_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
@@ -1802,7 +1756,6 @@ targets:
       task_name: hot_mode_dev_cycle_linux__benchmark
     runIf:
       - dev/**
-    scheduler: luci
 
   - name: Linux_android hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
@@ -1812,7 +1765,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: hybrid_android_views_integration_test
-    scheduler: luci
 
   - name: Linux_android image_list_jit_reported_duration
     recipe: devicelab/devicelab_drone
@@ -1822,7 +1774,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: image_list_jit_reported_duration
-    scheduler: luci
 
   - name: Linux_android imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1832,7 +1783,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_samsung_s10 imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -1842,7 +1792,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android image_list_reported_duration
     recipe: devicelab/devicelab_drone
@@ -1852,7 +1801,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: image_list_reported_duration
-    scheduler: luci
 
   - name: Linux_android integration_ui_driver
     recipe: devicelab/devicelab_drone
@@ -1862,7 +1810,6 @@ targets:
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: integration_ui_driver
-    scheduler: luci
 
   - name: Linux_android integration_ui_keyboard_resize
     recipe: devicelab/devicelab_drone
@@ -1872,7 +1819,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: integration_ui_keyboard_resize
-    scheduler: luci
 
   - name: Linux_android integration_ui_screenshot
     recipe: devicelab/devicelab_drone
@@ -1882,7 +1828,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: integration_ui_screenshot
-    scheduler: luci
 
   - name: Linux_android integration_ui_textfield
     recipe: devicelab/devicelab_drone
@@ -1892,7 +1837,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: integration_ui_textfield
-    scheduler: luci
 
   - name: Linux_android large_image_changer_perf_android
     recipe: devicelab/devicelab_drone
@@ -1902,7 +1846,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: large_image_changer_perf_android
-    scheduler: luci
 
   - name: Linux_android linux_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -1912,7 +1855,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: linux_chrome_dev_mode
-    scheduler: luci
 
   - name: Linux_android multi_widget_construction_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1922,7 +1864,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: multi_widget_construction_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android list_text_layout_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1932,8 +1873,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_perf__e2e_summary
-    scheduler: luci
-    bringup: true
 
   - name: Linux_android list_text_layout_impeller_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1943,11 +1882,8 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_impeller_perf__e2e_summary
-    scheduler: luci
-    bringup: true
 
   - name: Linux_android new_gallery__crane_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/105611
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1955,7 +1891,16 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: new_gallery__crane_perf
-    scheduler: luci
+
+  - name: Linux_android old_gallery__transition_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: old_gallery__transition_perf
 
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -1965,7 +1910,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: new_gallery__transition_perf
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -1975,7 +1919,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone
@@ -1985,7 +1928,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_e2e
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone
@@ -1995,7 +1937,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_hybrid
-    scheduler: luci
 
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
@@ -2005,7 +1946,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_with_semantics
-    scheduler: luci
 
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2015,7 +1955,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_sksl_warmup__transition_perf
-    scheduler: luci
 
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
     recipe: devicelab/devicelab_drone
@@ -2025,7 +1964,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_sksl_warmup__transition_perf_e2e
-    scheduler: luci
 
   - name: Linux_samsung_s10 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2035,7 +1973,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: new_gallery__transition_perf
-    scheduler: luci
 
   - name: Linux_android new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2046,7 +1983,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: new_gallery_impeller__transition_perf
-    scheduler: luci
 
   - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2057,7 +1993,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: new_gallery_impeller__transition_perf
-    scheduler: luci
 
   - name: Linux_android picture_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2067,7 +2002,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: picture_cache_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -2077,7 +2011,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: picture_cache_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android android_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -2087,7 +2020,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
@@ -2097,7 +2029,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: platform_channels_benchmarks
-    scheduler: luci
 
   - name: Linux_android platform_channel_sample_test
     recipe: devicelab/devicelab_drone
@@ -2107,7 +2038,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: platform_channel_sample_test
-    scheduler: luci
 
   - name: Linux_android platform_interaction_test
     recipe: devicelab/devicelab_drone
@@ -2117,7 +2047,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: platform_interaction_test
-    scheduler: luci
 
   - name: Linux_android platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -2127,7 +2056,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: platform_views_scroll_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_samsung_s10 platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -2137,7 +2065,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: platform_views_scroll_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android platform_view__start_up
     recipe: devicelab/devicelab_drone
@@ -2147,7 +2074,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: platform_view__start_up
-    scheduler: luci
 
   - name: Linux_android routing_test
     recipe: devicelab/devicelab_drone
@@ -2157,7 +2083,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: routing_test
-    scheduler: luci
 
   - name: Linux_android service_extensions_test
     recipe: devicelab/devicelab_drone
@@ -2167,7 +2092,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: service_extensions_test
-    scheduler: luci
 
   - name: Linux_android textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2177,7 +2101,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: textfield_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_samsung_s10 textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -2187,7 +2110,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: textfield_perf__timeline_summary
-    scheduler: luci
 
   - name: Linux_android tiles_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -2201,7 +2123,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Linux_android web_size__compile_test
     recipe: devicelab/devicelab_drone
@@ -2211,7 +2132,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: web_size__compile_test
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2221,7 +2141,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: opacity_peephole_one_rect_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2231,7 +2150,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: opacity_peephole_col_of_rows_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2241,7 +2159,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: opacity_peephole_opacity_of_grid_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2251,7 +2168,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: opacity_peephole_grid_of_opacity_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_fade_transition_text_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2261,7 +2177,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2271,7 +2186,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2281,7 +2195,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2300,10 +2213,8 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: gradient_consistent_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android gradient_static_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2311,7 +2222,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: gradient_static_perf__e2e_summary
-    scheduler: luci
 
   - name: Linux_android android_choreographer_do_frame_test
     recipe: devicelab/devicelab_drone
@@ -2321,7 +2231,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
-    scheduler: luci
 
   - name: Linux_android android_lifecycles_test
     bringup: true
@@ -2332,7 +2241,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
-    scheduler: luci
 
   - name: Staging_build_linux analyze
     presubmit: false
@@ -2393,7 +2301,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: build_ios_framework_module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2401,6 +2308,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_arm64_ios build_ios_framework_module_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/105609
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2413,7 +2321,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac build_tests_1_4
     recipe: flutter/flutter_drone
@@ -2433,7 +2340,6 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Mac build_tests_2_4
     recipe: flutter/flutter_drone
@@ -2453,7 +2359,6 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Mac build_tests_3_4
     recipe: flutter/flutter_drone
@@ -2473,7 +2378,6 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Mac build_tests_4_4
     recipe: flutter/flutter_drone
@@ -2493,7 +2397,6 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Mac customer_testing
     recipe: flutter/flutter
@@ -2504,7 +2407,6 @@ targets:
       validation_name: Customer testing
       tags: >
         ["framework", "hostonly"]
-    scheduler: luci
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -2518,7 +2420,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: dart_plugin_registry_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2537,7 +2438,6 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter/**
@@ -2567,7 +2467,6 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter/**
@@ -2593,7 +2492,6 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter/**
@@ -2619,7 +2517,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: gradle_plugin_bundle_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -2637,7 +2534,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_custom_host_app_name_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2656,7 +2552,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_host_with_custom_build_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2675,7 +2570,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2696,7 +2590,20 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_test_ios
-    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64_ios module_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
+      task_name: module_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2717,7 +2624,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_dependencies_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2738,7 +2644,25 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_lint_mac
-    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - packages/integration_test/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64_ios plugin_lint_mac
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "arm64ruby", "version": "version:311_3"}
+        ]
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
+      task_name: plugin_lint_mac
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2758,7 +2682,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2779,7 +2702,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_test_ios
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2825,7 +2747,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2851,7 +2772,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2877,7 +2797,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2903,7 +2822,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2924,7 +2842,6 @@ targets:
       subshard: commands
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Mac tool_tests_general
     recipe: flutter/flutter_drone
@@ -2940,7 +2857,6 @@ targets:
       subshard: general
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2963,7 +2879,6 @@ targets:
         ["framework", "hostonly", "shard"]
       validation: verify_binaries_codesigned
       validation_name: Verify binaries codesigned
-    scheduler: luci
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
@@ -2980,7 +2895,6 @@ targets:
       subshard: web
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2999,7 +2913,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
@@ -3009,7 +2922,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: hello_world_android__compile
-    scheduler: luci
 
   - name: Mac_arm64_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
@@ -3019,7 +2931,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: hello_world_android__compile
-    scheduler: luci
 
   - name: Mac_android hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
@@ -3029,7 +2940,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: hot_mode_dev_cycle__benchmark
-    scheduler: luci
 
   - name: Mac_android integration_test_test
     recipe: devicelab/devicelab_drone
@@ -3039,7 +2949,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: integration_test_test
-    scheduler: luci
 
   - name: Mac_arm64_android integration_test_test
     recipe: devicelab/devicelab_drone
@@ -3058,7 +2967,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: integration_ui_frame_number
-    scheduler: luci
 
   - name: Mac_android microbenchmarks
     recipe: devicelab/devicelab_drone
@@ -3068,10 +2976,10 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
-    scheduler: luci
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     runIf:
       - dev/**
     timeout: 60
@@ -3079,7 +2987,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: run_release_test
-    scheduler: luci
 
   - name: Mac_arm64_android run_release_test
     recipe: devicelab/devicelab_drone
@@ -3091,7 +2998,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: run_release_test
-    scheduler: luci
 
   - name: Mac_android flutter_gallery_mac__start_up
     recipe: devicelab/devicelab_drone
@@ -3101,7 +3007,6 @@ targets:
       tags: >
         ["devicelab", "android", "mac"]
       task_name: flutter_gallery_mac__start_up
-    scheduler: luci
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3111,7 +3016,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3121,7 +3025,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3131,7 +3034,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
-    scheduler: luci
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
@@ -3141,7 +3043,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: channels_integration_test_ios
-    scheduler: luci
 
   - name: Mac_ios complex_layout_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3155,7 +3056,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3169,7 +3069,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3183,7 +3082,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     bringup: true # Flaky https://github.com/flutter/flutter/issues/102230
@@ -3194,10 +3092,9 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios external_ui_integration_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/103057
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3205,7 +3102,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: external_ui_integration_test_ios
-    scheduler: luci
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
@@ -3215,7 +3111,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: route_test_ios
-    scheduler: luci
 
   - name: Mac_ios flavors_test_ios
     recipe: devicelab/devicelab_drone
@@ -3225,7 +3120,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios
-    scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3235,7 +3129,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__compile
-    scheduler: luci
 
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3245,7 +3138,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: flutter_gallery_ios__compile
-    scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3255,7 +3147,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3265,7 +3156,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_view_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3275,7 +3165,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hello_world_ios__compile
-    scheduler: luci
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3285,7 +3174,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hello_world_ios__compile
-    scheduler: luci
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -3297,7 +3185,6 @@ targets:
     runIf:
       - dev/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -3309,7 +3196,6 @@ targets:
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
       - dev/**
-    scheduler: luci
 
   - name: Mac_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
@@ -3319,7 +3205,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
@@ -3329,7 +3214,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
@@ -3339,7 +3223,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_frame_number
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_keyboard_resize
     recipe: devicelab/devicelab_drone
@@ -3349,7 +3232,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_keyboard_resize
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_screenshot
     recipe: devicelab/devicelab_drone
@@ -3359,7 +3241,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_screenshot
-    scheduler: luci
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
@@ -3369,7 +3250,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_textfield
-    scheduler: luci
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
@@ -3379,7 +3259,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_app_with_extensions_test
-    scheduler: luci
 
   - name: Mac_arm64_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
@@ -3389,7 +3268,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
-    scheduler: luci
 
   - name: Mac_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
@@ -3399,7 +3277,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_content_validation_test
-    scheduler: luci
 
   - name: Mac_arm64_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
@@ -3409,7 +3286,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: ios_content_validation_test
-    scheduler: luci
 
   - name: Mac_ios ios_defines_test
     recipe: devicelab/devicelab_drone
@@ -3419,7 +3295,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_defines_test
-    scheduler: luci
 
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone
@@ -3429,7 +3304,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_platform_view_tests
-    scheduler: luci
 
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
@@ -3439,7 +3313,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: large_image_changer_perf_ios
-    scheduler: luci
 
   - name: Mac_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -3449,7 +3322,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: macos_chrome_dev_mode
-    scheduler: luci
 
   - name: Mac_arm64_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -3459,7 +3331,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: macos_chrome_dev_mode
-    scheduler: luci
 
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
@@ -3469,7 +3340,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
-    scheduler: luci
 
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
@@ -3479,7 +3349,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_ios__transition_perf
-    scheduler: luci
 
   - name: Mac_ios new_gallery_impeller_ios__transition_perf
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96401
@@ -3490,7 +3359,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_impeller_ios__transition_perf
-    scheduler: luci
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3500,7 +3368,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
@@ -3510,7 +3377,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channel_sample_test_ios
-    scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_swift
     recipe: devicelab/devicelab_drone
@@ -3520,7 +3386,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channel_sample_test_swift
-    scheduler: luci
 
   - name: Mac_ios platform_channels_benchmarks_ios
     recipe: devicelab/devicelab_drone
@@ -3530,7 +3395,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channels_benchmarks_ios
-    scheduler: luci
 
   - name: Mac_ios platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
@@ -3540,7 +3404,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_interaction_test_ios
-    scheduler: luci
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3550,7 +3413,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_view_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3560,7 +3422,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3570,7 +3431,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: post_backdrop_filter_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios simple_animation_perf_ios
     recipe: devicelab/devicelab_drone
@@ -3580,10 +3440,8 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: simple_animation_perf_ios
-    scheduler: luci
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/95582
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3591,7 +3449,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
-    scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3601,7 +3458,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -3615,12 +3471,25 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: native_ui_tests_macos
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+
+  - name: Mac native_platform_view_ui_tests_ios
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "13a233"}
+        ]
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: native_platform_view_ui_tests_ios
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
@@ -3639,7 +3508,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Mac_arm64_ios run_release_test_macos
     recipe: devicelab/devicelab_drone
@@ -3654,7 +3522,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-    scheduler: luci
 
   - name: Windows build_tests_1_3
     recipe: flutter/flutter_drone
@@ -3673,7 +3540,6 @@ targets:
       subshard: "1_3"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Windows build_tests_2_3
     recipe: flutter/flutter_drone
@@ -3692,7 +3558,6 @@ targets:
       subshard: "2_3"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Windows build_tests_3_3
     recipe: flutter/flutter_drone
@@ -3711,7 +3576,6 @@ targets:
       subshard: "3_3"
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
 
   - name: Windows customer_testing
     recipe: flutter/flutter
@@ -3722,7 +3586,6 @@ targets:
       validation_name: Customer testing
       tags: >
         ["framework", "hostonly"]
-    scheduler: luci
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -3736,7 +3599,6 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -3765,7 +3627,6 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -3791,7 +3652,6 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -3818,7 +3678,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: gradle_plugin_bundle_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -3836,7 +3695,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
-    scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
@@ -3851,7 +3709,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_custom_host_app_name_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3871,7 +3728,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_host_with_custom_build_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3891,12 +3747,24 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+
+  - name: Windows platform_channel_sample_test_windows
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: platform_channel_sample_test_windows
 
   - name: Windows plugin_dependencies_test
     recipe: devicelab/devicelab_drone
@@ -3911,7 +3779,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_dependencies_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3931,7 +3798,6 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3956,7 +3822,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3981,7 +3846,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4006,7 +3870,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4031,7 +3894,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4056,7 +3918,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4081,7 +3942,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4102,7 +3962,6 @@ targets:
       subshard: commands
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4123,7 +3982,6 @@ targets:
       subshard: general
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4145,7 +4003,6 @@ targets:
       subshard: web
       tags: >
         ["framework", "hostonly", "shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4163,7 +4020,6 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_home_scroll_perf__timeline_summary
-    scheduler: luci
 
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
@@ -4173,7 +4029,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: basic_material_app_win__compile
-    scheduler: luci
 
   - name: Windows_android channels_integration_test_win
     recipe: devicelab/devicelab_drone
@@ -4183,7 +4038,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: channels_integration_test_win
-    scheduler: luci
 
   - name: Windows_android complex_layout_win__compile
     recipe: devicelab/devicelab_drone
@@ -4197,17 +4051,16 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-    scheduler: luci
 
   - name: Windows_android flavors_test_win
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/107681
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: flavors_test_win
-    scheduler: luci
 
   - name: Windows_android flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
@@ -4217,7 +4070,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: flutter_gallery_win__compile
-    scheduler: luci
 
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
     recipe: devicelab/devicelab_drone
@@ -4227,7 +4079,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: hot_mode_dev_cycle_win__benchmark
-    scheduler: luci
 
   - name: Windows_android windows_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -4237,4 +4088,3 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
-    scheduler: luci

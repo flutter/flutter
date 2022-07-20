@@ -8,6 +8,7 @@
 
 @TestOn('!chrome')
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -5050,5 +5051,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Regular Text', skipOffstage: false), findsOneWidget);
     expect(find.byType(SelectableText, skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/71389
+
+    const TextStyle textStyle = TextStyle(color: Color(0xff00ff00), fontSize: 12.0);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SelectableText.rich(
+          TextSpan(
+            text: 'Abcd',
+            style: textStyle,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.fontSize, textStyle.fontSize);
   });
 }

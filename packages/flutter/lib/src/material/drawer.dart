@@ -111,8 +111,9 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// ```
 /// {@end-tool}
 ///
-/// An open drawer can be closed by calling [Navigator.pop]. For example
-/// a drawer item might close the drawer when tapped:
+/// An open drawer may be closed with a swipe to close gesture, pressing the
+/// the escape key, by tapping the scrim, or by calling pop route function such as
+/// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
 ///
 /// ```dart
 /// ListTile(
@@ -682,7 +683,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    return ListTileTheme(
+    return ListTileTheme.merge(
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),
     );

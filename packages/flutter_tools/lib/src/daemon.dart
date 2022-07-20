@@ -301,7 +301,7 @@ class DaemonConnection {
   }
 
   /// Sends an error response to the other end of the connection.
-  void sendErrorResponse(Object id, Object error, StackTrace trace) {
+  void sendErrorResponse(Object id, Object? error, StackTrace trace) {
     _daemonStreams.send(<String, Object?>{
       'id': id,
       'error': error,

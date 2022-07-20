@@ -9,7 +9,9 @@
 // Edit the template dev/tools/gen_keycodes/data/keyboard_maps.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
-import 'keyboard_key.dart';
+import 'keyboard_key.g.dart';
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
 /// Maps Android-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{
@@ -1466,6 +1468,35 @@ const Map<int, PhysicalKeyboardKey> kIosToPhysicalKey = <int, PhysicalKeyboardKe
   0x000000e7: PhysicalKeyboardKey.metaRight,
 };
 
+/// Maps iOS specific string values of nonvisible keys to logical keys
+///
+/// Some unprintable keys on iOS has literal names on their key label, such as
+/// "UIKeyInputEscape". See:
+/// https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
+const Map<String, LogicalKeyboardKey> kIosSpecialLogicalMap = <String, LogicalKeyboardKey>{
+  'UIKeyInputEscape': LogicalKeyboardKey.escape,
+  'UIKeyInputF1': LogicalKeyboardKey.f1,
+  'UIKeyInputF2': LogicalKeyboardKey.f2,
+  'UIKeyInputF3': LogicalKeyboardKey.f3,
+  'UIKeyInputF4': LogicalKeyboardKey.f4,
+  'UIKeyInputF5': LogicalKeyboardKey.f5,
+  'UIKeyInputF6': LogicalKeyboardKey.f6,
+  'UIKeyInputF7': LogicalKeyboardKey.f7,
+  'UIKeyInputF8': LogicalKeyboardKey.f8,
+  'UIKeyInputF9': LogicalKeyboardKey.f9,
+  'UIKeyInputF10': LogicalKeyboardKey.f10,
+  'UIKeyInputF11': LogicalKeyboardKey.f11,
+  'UIKeyInputF12': LogicalKeyboardKey.f12,
+  'UIKeyInputUpArrow': LogicalKeyboardKey.arrowUp,
+  'UIKeyInputDownArrow': LogicalKeyboardKey.arrowDown,
+  'UIKeyInputLeftArrow': LogicalKeyboardKey.arrowLeft,
+  'UIKeyInputRightArrow': LogicalKeyboardKey.arrowRight,
+  'UIKeyInputHome': LogicalKeyboardKey.home,
+  'UIKeyInputEnd': LogicalKeyboardKey.enter,
+  'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
+  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown,
+};
+
 /// A map of iOS key codes which have printable representations, but appear
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
@@ -2211,6 +2242,7 @@ const Map<String, LogicalKeyboardKey> kWebToLogicalKey = <String, LogicalKeyboar
   'EndCall': LogicalKeyboardKey.endCall,
   'Enter': LogicalKeyboardKey.enter,
   'EraseEof': LogicalKeyboardKey.eraseEof,
+  'Esc': LogicalKeyboardKey.escape,
   'Escape': LogicalKeyboardKey.escape,
   'ExSel': LogicalKeyboardKey.exSel,
   'Execute': LogicalKeyboardKey.execute,
@@ -2459,14 +2491,9 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Backquote': PhysicalKeyboardKey.backquote,
   'Backslash': PhysicalKeyboardKey.backslash,
   'Backspace': PhysicalKeyboardKey.backspace,
-  'BassBoost': PhysicalKeyboardKey.bassBoost,
   'BracketLeft': PhysicalKeyboardKey.bracketLeft,
   'BracketRight': PhysicalKeyboardKey.bracketRight,
-  'BrightnessAuto': PhysicalKeyboardKey.brightnessAuto,
   'BrightnessDown': PhysicalKeyboardKey.brightnessDown,
-  'BrightnessMaximum': PhysicalKeyboardKey.brightnessMaximum,
-  'BrightnessMinimum': PhysicalKeyboardKey.brightnessMinimum,
-  'BrightnessToggle': PhysicalKeyboardKey.brightnessToggle,
   'BrightnessUp': PhysicalKeyboardKey.brightnessUp,
   'BrowserBack': PhysicalKeyboardKey.browserBack,
   'BrowserFavorites': PhysicalKeyboardKey.browserFavorites,
@@ -2476,10 +2503,6 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'BrowserSearch': PhysicalKeyboardKey.browserSearch,
   'BrowserStop': PhysicalKeyboardKey.browserStop,
   'CapsLock': PhysicalKeyboardKey.capsLock,
-  'ChannelDown': PhysicalKeyboardKey.channelDown,
-  'ChannelUp': PhysicalKeyboardKey.channelUp,
-  'Close': PhysicalKeyboardKey.close,
-  'ClosedCaptionToggle': PhysicalKeyboardKey.closedCaptionToggle,
   'Comma': PhysicalKeyboardKey.comma,
   'ContextMenu': PhysicalKeyboardKey.contextMenu,
   'ControlLeft': PhysicalKeyboardKey.controlLeft,
@@ -2504,7 +2527,7 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Enter': PhysicalKeyboardKey.enter,
   'Equal': PhysicalKeyboardKey.equal,
   'Escape': PhysicalKeyboardKey.escape,
-  'Exit': PhysicalKeyboardKey.exit,
+  'Esc': PhysicalKeyboardKey.escape,
   'F1': PhysicalKeyboardKey.f1,
   'F10': PhysicalKeyboardKey.f10,
   'F11': PhysicalKeyboardKey.f11,
@@ -2566,14 +2589,11 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Help': PhysicalKeyboardKey.help,
   'Home': PhysicalKeyboardKey.home,
   'Hyper': PhysicalKeyboardKey.hyper,
-  'Info': PhysicalKeyboardKey.info,
   'Insert': PhysicalKeyboardKey.insert,
   'IntlBackslash': PhysicalKeyboardKey.intlBackslash,
   'IntlRo': PhysicalKeyboardKey.intlRo,
   'IntlYen': PhysicalKeyboardKey.intlYen,
   'KanaMode': PhysicalKeyboardKey.kanaMode,
-  'KbdIllumDown': PhysicalKeyboardKey.kbdIllumDown,
-  'KbdIllumUp': PhysicalKeyboardKey.kbdIllumUp,
   'KeyA': PhysicalKeyboardKey.keyA,
   'KeyB': PhysicalKeyboardKey.keyB,
   'KeyC': PhysicalKeyboardKey.keyC,
@@ -2609,25 +2629,13 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'LaunchApp1': PhysicalKeyboardKey.launchApp1,
   'LaunchApp2': PhysicalKeyboardKey.launchApp2,
   'LaunchAssistant': PhysicalKeyboardKey.launchAssistant,
-  'LaunchAudioBrowser': PhysicalKeyboardKey.launchAudioBrowser,
-  'LaunchCalendar': PhysicalKeyboardKey.launchCalendar,
-  'LaunchContacts': PhysicalKeyboardKey.launchContacts,
   'LaunchControlPanel': PhysicalKeyboardKey.launchControlPanel,
-  'LaunchDocuments': PhysicalKeyboardKey.launchDocuments,
-  'LaunchInternetBrowser': PhysicalKeyboardKey.launchInternetBrowser,
-  'LaunchKeyboardLayout': PhysicalKeyboardKey.launchKeyboardLayout,
   'LaunchMail': PhysicalKeyboardKey.launchMail,
-  'LaunchPhone': PhysicalKeyboardKey.launchPhone,
   'LaunchScreenSaver': PhysicalKeyboardKey.launchScreenSaver,
-  'LaunchSpreadsheet': PhysicalKeyboardKey.launchSpreadsheet,
-  'LaunchWordProcessor': PhysicalKeyboardKey.launchWordProcessor,
-  'LockScreen': PhysicalKeyboardKey.lockScreen,
-  'LogOff': PhysicalKeyboardKey.logOff,
   'MailForward': PhysicalKeyboardKey.mailForward,
   'MailReply': PhysicalKeyboardKey.mailReply,
   'MailSend': PhysicalKeyboardKey.mailSend,
   'MediaFastForward': PhysicalKeyboardKey.mediaFastForward,
-  'MediaLast': PhysicalKeyboardKey.mediaLast,
   'MediaPause': PhysicalKeyboardKey.mediaPause,
   'MediaPlay': PhysicalKeyboardKey.mediaPlay,
   'MediaPlayPause': PhysicalKeyboardKey.mediaPlayPause,
@@ -2641,7 +2649,6 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'MetaRight': PhysicalKeyboardKey.metaRight,
   'MicrophoneMuteToggle': PhysicalKeyboardKey.microphoneMuteToggle,
   'Minus': PhysicalKeyboardKey.minus,
-  'New': PhysicalKeyboardKey.newKey,
   'NonConvert': PhysicalKeyboardKey.nonConvert,
   'NumLock': PhysicalKeyboardKey.numLock,
   'Numpad0': PhysicalKeyboardKey.numpad0,
@@ -2671,7 +2678,6 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'NumpadMultiply': PhysicalKeyboardKey.numpadMultiply,
   'NumpadParenLeft': PhysicalKeyboardKey.numpadParenLeft,
   'NumpadParenRight': PhysicalKeyboardKey.numpadParenRight,
-  'NumpadSignChange': PhysicalKeyboardKey.numpadSignChange,
   'NumpadSubtract': PhysicalKeyboardKey.numpadSubtract,
   'Open': PhysicalKeyboardKey.open,
   'PageDown': PhysicalKeyboardKey.pageDown,
@@ -2680,15 +2686,11 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Pause': PhysicalKeyboardKey.pause,
   'Period': PhysicalKeyboardKey.period,
   'Power': PhysicalKeyboardKey.power,
-  'Print': PhysicalKeyboardKey.print,
   'PrintScreen': PhysicalKeyboardKey.printScreen,
   'PrivacyScreenToggle': PhysicalKeyboardKey.privacyScreenToggle,
-  'ProgramGuide': PhysicalKeyboardKey.programGuide,
   'Props': PhysicalKeyboardKey.props,
   'Quote': PhysicalKeyboardKey.quote,
-  'Redo': PhysicalKeyboardKey.redo,
   'Resume': PhysicalKeyboardKey.resume,
-  'Save': PhysicalKeyboardKey.save,
   'ScrollLock': PhysicalKeyboardKey.scrollLock,
   'Select': PhysicalKeyboardKey.select,
   'SelectTask': PhysicalKeyboardKey.selectTask,
@@ -2699,20 +2701,12 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Slash': PhysicalKeyboardKey.slash,
   'Sleep': PhysicalKeyboardKey.sleep,
   'Space': PhysicalKeyboardKey.space,
-  'SpeechInputToggle': PhysicalKeyboardKey.speechInputToggle,
-  'SpellCheck': PhysicalKeyboardKey.spellCheck,
   'Super': PhysicalKeyboardKey.superKey,
   'Suspend': PhysicalKeyboardKey.suspend,
   'Tab': PhysicalKeyboardKey.tab,
   'Turbo': PhysicalKeyboardKey.turbo,
   'Undo': PhysicalKeyboardKey.undo,
-  'UsbErrorRollOver': PhysicalKeyboardKey.usbErrorRollOver,
-  'UsbErrorUndefined': PhysicalKeyboardKey.usbErrorUndefined,
-  'UsbPostFail': PhysicalKeyboardKey.usbPostFail,
-  'UsbReserved': PhysicalKeyboardKey.usbReserved,
   'WakeUp': PhysicalKeyboardKey.wakeUp,
-  'ZoomIn': PhysicalKeyboardKey.zoomIn,
-  'ZoomOut': PhysicalKeyboardKey.zoomOut,
   'ZoomToggle': PhysicalKeyboardKey.zoomToggle,
 };
 

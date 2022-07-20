@@ -7,9 +7,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'message_codec.dart';
 import 'message_codecs.dart';
 import 'system_channels.dart';
+
+export 'dart:typed_data' show Uint8List;
 
 typedef _BucketVisitor = void Function(RestorationBucket bucket);
 

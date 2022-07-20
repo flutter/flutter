@@ -12,7 +12,7 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
-// bool _isSelected;
+// bool _isSelected = true;
 
 enum _SwitchListTileType { material, adaptive }
 
@@ -46,6 +46,34 @@ enum _SwitchListTileType { material, adaptive }
 /// The switch is shown on the right by default in left-to-right languages (i.e.
 /// in the [ListTile.trailing] slot) which can be changed using [controlAffinity].
 /// The [secondary] widget is placed in the [ListTile.leading] slot.
+///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [SwitchListTile] itself but by the [Material] widget ancestor. In this
+/// case, one can wrap a [Material] widget around the [SwitchListTile], e.g.:
+///
+/// {@tool snippet}
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: SwitchListTile(
+///       tileColor: Colors.red,
+///       title: const Text('SwitchListTile with red background'),
+///       value: true,
+///       onChanged:(bool? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ## Performance considerations when wrapping [SwitchListTile] with [Material]
+///
+/// Wrapping a large number of [SwitchListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [SwitchListTile]s that require it
+/// or include a common [Material] ancestor where possible.
 ///
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
@@ -217,6 +245,7 @@ class SwitchListTile extends StatelessWidget {
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
+  /// {@tool snippet}
   /// ```dart
   /// SwitchListTile(
   ///   value: _isSelected,
@@ -225,9 +254,10 @@ class SwitchListTile extends StatelessWidget {
   ///       _isSelected = newValue;
   ///     });
   ///   },
-  ///   title: Text('Selection'),
+  ///   title: const Text('Selection'),
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.

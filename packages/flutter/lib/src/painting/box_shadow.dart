@@ -28,8 +28,8 @@ import 'debug.dart';
 class BoxShadow extends ui.Shadow {
   /// Creates a box shadow.
   ///
-  /// By default, the shadow is solid black with zero [offset], [blurRadius],
-  /// and [spreadRadius].
+  /// By default, the shadow is solid black with zero [offset], zero [blurRadius],
+  /// zero [spreadRadius], and [BlurStyle.normal].
   const BoxShadow({
     super.color,
     super.offset,
@@ -145,5 +145,5 @@ class BoxShadow extends ui.Shadow {
   int get hashCode => Object.hash(color, offset, blurRadius, spreadRadius, blurStyle);
 
   @override
-  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}), $blurStyle';
+  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}, $blurStyle)';
 }

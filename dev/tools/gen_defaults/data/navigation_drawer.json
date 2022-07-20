@@ -1,5 +1,5 @@
 {
-  "version": "v0_99",
+  "version": "v0_101",
 
   "md.comp.navigation-drawer.active.focus.icon.color": "onSecondaryContainer",
   "md.comp.navigation-drawer.active.focus.label-text.color": "onSecondaryContainer",
@@ -44,7 +44,5 @@
   "md.comp.navigation-drawer.large-badge-label.text-style": "labelLarge",
   "md.comp.navigation-drawer.modal.container.elevation": "md.sys.elevation.level1",
   "md.comp.navigation-drawer.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
-  "md.comp.navigation-drawer.scrim.color": "md.ref.palette.neutral-variant20",
-  "md.comp.navigation-drawer.scrim.opacity": 0.4,
   "md.comp.navigation-drawer.standard.container.elevation": "md.sys.elevation.level0"
 }

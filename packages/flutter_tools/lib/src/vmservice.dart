@@ -99,7 +99,7 @@ typedef CompileExpression = Future<String> Function(
 /// A method that pulls an SkSL shader from the device and writes it to a file.
 ///
 /// The name of the file returned as a result.
-typedef GetSkSLMethod = Future<String> Function();
+typedef GetSkSLMethod = Future<String?> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
@@ -265,7 +265,14 @@ Future<vm_service.VmService> setUpVmService(
   }
   if (skSLMethod != null) {
     vmService.registerServiceCallback('flutterGetSkSL', (Map<String, Object?> params) async {
-      final String filename = await skSLMethod();
+      final String? filename = await skSLMethod();
+      if (filename == null) {
+        return <String, Object>{
+          'result': <String, Object>{
+            'type': 'Success',
+          },
+        };
+      }
       return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
@@ -281,6 +288,9 @@ Future<vm_service.VmService> setUpVmService(
     // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
+      // TODO(srawlins): Fix this static issue,
+      // https://github.com/flutter/flutter/issues/105750.
+      // ignore: body_might_complete_normally_catch_error
       .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
     );
   }
