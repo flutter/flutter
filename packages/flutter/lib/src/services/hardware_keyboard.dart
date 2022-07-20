@@ -647,7 +647,6 @@ enum KeyDataTransitMode {
 /// [KeyEventResult]. Their results are combined into the result of the node
 /// using [combineKeyEventResults].
 ///
-/// {@tool snippet}
 /// ```dart
 /// void handleMessage(FocusNode node, KeyMessage message) {
 ///   final List<KeyEventResult> results = <KeyEventResult>[];
@@ -663,7 +662,6 @@ enum KeyDataTransitMode {
 ///   // Progress based on `result`...
 /// }
 /// ```
-/// {@end-tool}
 @immutable
 class KeyMessage {
   /// Create a [KeyMessage] by providing all information.
@@ -731,7 +729,6 @@ typedef KeyMessageHandler = bool Function(KeyMessage message);
 ///
 /// [KeyEventManager] is typically created, owned, and invoked by
 /// [ServicesBinding].
-///
 class KeyEventManager {
   /// Create an instance.
   ///
@@ -741,9 +738,9 @@ class KeyEventManager {
   /// The global entrance which handles all key events sent to Flutter.
   ///
   /// Typical applications use [WidgetsBinding], where this field is
-  /// set by the focus system (see `FocusManger`) on startup with a function
-  /// that dispatches incoming events to the focus system, including
-  /// [FocusNode.onKey], [FocusNode.onKeyEvent], and shortcuts. In this case,
+  /// set by the focus system (see `FocusManger`) on startup to a function that
+  /// dispatches incoming events to the focus system, including
+  /// `FocusNode.onKey`, `FocusNode.onKeyEvent`, and `Shortcuts`. In this case,
   /// the application does not need to read, assign, or invoke this value.
   ///
   /// For advanced uses, the application can "patch" this callback. See below
@@ -761,13 +758,13 @@ class KeyEventManager {
   ///
   /// Each phase will conclude with a boolean called an "event result". If the
   /// result is true, this phase _handles_ the event and prevents the event
-  /// from being propagated to the next phase. And vice versa. This mechanism
-  /// allows shortcuts such as "Ctrl-C" to not generate a text "C" in the text
-  /// field, or shortcuts that are not handled by any components to trigger
-  /// special alerts (such as the "bonk" noise on macOS).
+  /// from being propagated to the next phase. This mechanism allows shortcuts
+  /// such as "Ctrl-C" to not generate a text "C" in the text field, or
+  /// shortcuts that are not handled by any components to trigger special alerts
+  /// (such as the "bonk" noise on macOS).
   ///
   /// In the second phase, known as "the key event system", the event is dispatched
-  /// to several destinations: [RawKeyboard]'s listeners, 
+  /// to several destinations: [RawKeyboard]'s listeners,
   /// [HardwareKeyboard]'s handlers, and [keyMessageHandler].
   /// All destinations will always receive the event regardless of the handlers'
   /// results. If any handler's result is true, then the overall result of the
@@ -789,8 +786,8 @@ class KeyEventManager {
   ///
   /// Even if you are using the focus system, you might also want to do more
   /// than the focus system allows. In these cases, you can _patch_
-  /// [keyMessageHandler] by assigning it with a callback that performs your
-  /// tasks and calls the original callback in between (or not at all.)
+  /// [keyMessageHandler] by setting it to a callback that performs your tasks
+  /// and calls the original callback in between (or not at all.)
   ///
   /// Patching [keyMessageHandler] can not be reverted. You should always assume
   /// that another component might haved patched it before you and after you.
@@ -803,14 +800,14 @@ class KeyEventManager {
   ///
   /// {@tool dartpad}
   /// This example shows how to process key events that are not handled by any
-  /// focus handlers (such as shortcuts) by patching [keyMessageHandler].
+  /// focus handler (such as `Shortcuts`) by patching [keyMessageHandler].
   ///
   /// The app prints out any key events that are not handled by the app body.
   /// Try typing something in the first text field. These key presses are not
-  /// handled by shorcuts and will be sent to the fallback handler and printed
+  /// handled by `Shorcuts` and will be sent to the fallback handler and printed
   /// out. Now try some text shortcuts, such as Ctrl+A. The KeyA press is
-  /// handled as a shortcut, and is not sent to the fallback handler and so is not
-  /// printed out.
+  /// handled as a shortcut, and is not sent to the fallback handler and so is
+  /// not printed out.
   ///
   /// ** See code in examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
   /// {@end-tool}
