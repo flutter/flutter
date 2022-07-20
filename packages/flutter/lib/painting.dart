@@ -49,6 +49,7 @@ export 'src/painting/image_stream.dart';
 export 'src/painting/inline_span.dart';
 export 'src/painting/matrix_utils.dart';
 export 'src/painting/notched_shapes.dart';
+export 'src/painting/oval_border.dart';
 export 'src/painting/paint_utilities.dart';
 export 'src/painting/placeholder_span.dart';
 export 'src/painting/rounded_rectangle_border.dart';

@@ -1525,19 +1525,15 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
       return false;
     }
 
-    if (
-      borderRadius == null &&
+    if (borderRadius == null &&
       shape == BoxShape.rectangle &&
-      !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
-    ) {
+      !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)) {
       return false;
     }
 
-    if (
-      borderRadius == null &&
+    if (borderRadius == null &&
       shape == BoxShape.circle &&
-      !assertCircle(shapeClipper, matchState)
-    ) {
+      !assertCircle(shapeClipper, matchState)) {
       return false;
     }
 
