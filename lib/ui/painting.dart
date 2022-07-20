@@ -4079,6 +4079,26 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
     ));
   }
 
+  static Map<String, WeakReference<FragmentProgram>> _shaderRegistry =
+      <String, WeakReference<FragmentProgram>>{};
+
+  // TODO(zra): Document custom shaders on the website and add a link to it
+  // here. https://github.com/flutter/flutter/issues/107929.
+  /// Creates a fragment program from the asset with key [assetKey].
+  ///
+  /// The asset must be a file produced as the output of the `impellerc`
+  /// compiler. The constructed object should then be reused via the [shader]
+  /// method to create [Shader] objects that can be used by [Shader.paint].
+  static FragmentProgram fromAsset(String assetKey) {
+    FragmentProgram? program = _shaderRegistry[assetKey]?.target;
+    if (program == null) {
+      program = FragmentProgram._fromAsset(assetKey);
+      _shaderRegistry[assetKey] = WeakReference<FragmentProgram>(program);
+    }
+
+    return program;
+  }
+
   @pragma('vm:entry-point')
   FragmentProgram._({
     ByteBuffer? spirv,
@@ -4103,6 +4123,31 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
     }
   }
 
+  @pragma('vm:entry-point')
+  FragmentProgram._fromAsset(String assetKey) {
+    _constructor();
+    _initFromAsset(assetKey);
+  }
+
+  static void _reinitializeShader(String assetKey) {
+    // If a shader for the assent isn't already registered, then there's no
+    // need to reinitialize it. The new shader will be loaded and initialized
+    // the next time the program access it.
+    final WeakReference<FragmentProgram>? programRef = _shaderRegistry == null
+      ? null
+      : _shaderRegistry[assetKey];
+    if (programRef == null) {
+      return;
+    }
+
+    final FragmentProgram? program = programRef.target;
+    if (program == null) {
+      return;
+    }
+
+    program._initFromAsset(assetKey);
+  }
+
   late final int _uniformFloatCount;
   late final int _samplerCount;
 
@@ -4111,6 +4156,9 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
 
   @FfiNative<Void Function(Pointer<Void>, Handle, Bool)>('FragmentProgram::init')
   external void _init(String sksl, bool debugPrint);
+
+  @FfiNative<Void Function(Pointer<Void>, Handle)>('FragmentProgram::initFromAsset')
+  external void _initFromAsset(String assetKey);
 
   /// Constructs a [Shader] object suitable for use by [Paint.shader] with
   /// the given uniforms.

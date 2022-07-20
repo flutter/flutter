@@ -21,7 +21,9 @@ if (enable_unittests) {
   }
 
   group("test") {
+    testonly = true
     deps = [
+      ":fixtures",
       ":sksl_ink_sparkle",
       ":spirv_ink_sparkle",
       "//flutter/lib/spirv/test/exception_shaders:spirv_compile_exception_shaders",
@@ -42,5 +44,18 @@ if (enable_unittests) {
     shader_target_flag = "--sksl"
     intermediates_subdir = "sksl"
     sl_file_extension = "sksl"
+  }
+
+  impellerc("iplr_ink_sparkle") {
+    shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
+    shader_target_flag = "--sksl"
+    intermediates_subdir = "iplr"
+    sl_file_extension = "iplr"
+  }
+
+  test_fixtures("fixtures") {
+    deps = [ ":iplr_ink_sparkle" ]
+    fixtures = get_target_outputs(":iplr_ink_sparkle")
+    dest = "$root_gen_dir/flutter/lib/ui"
   }
 }
