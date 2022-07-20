@@ -3149,6 +3149,7 @@ targets:
       task_name: flutter_gallery_ios__start_up
 
   - name: Mac_ios flutter_view_ios__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/108024
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
