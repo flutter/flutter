@@ -2464,6 +2464,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     @required FileSystem fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File dartPluginRegistrant,
   }) async {
     didSuppressErrors = suppressErrors;
     return nextOutput ?? const CompilerOutput('foo.dill', 0, <Uri>[]);
@@ -2623,6 +2624,7 @@ class FakeDevFS extends Fake implements DevFS {
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String projectRootPath,
+    File dartPluginRegistrant,
   }) async {
     return nextUpdateReport;
   }
