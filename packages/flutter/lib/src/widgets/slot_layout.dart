@@ -4,8 +4,8 @@
 
 import 'animated_switcher.dart';
 import 'basic.dart';
+import 'breakpoint.dart';
 import 'framework.dart';
-import 'media_query.dart';
 import 'slot_layout_config.dart';
 import 'ticker_provider.dart';
 
@@ -20,10 +20,10 @@ class SlotLayout extends StatefulWidget {
 
   /// Given a context and a config, it returns the [SlotLayoutConfig] that will
   /// be chosen from the config under the context's conditions.
-  static SlotLayoutConfig? pickWidget(BuildContext context, Map<int, SlotLayoutConfig?> config) {
+  static SlotLayoutConfig? pickWidget(BuildContext context, Map<Breakpoint, SlotLayoutConfig?> config) {
     SlotLayoutConfig? chosenWidget;
-    config.forEach((int key, SlotLayoutConfig? value) {
-      if (MediaQuery.of(context).size.width > key) {
+    config.forEach((Breakpoint key, SlotLayoutConfig? value) {
+      if (key.isActive(context)) {
         chosenWidget = value;
       }
     });
@@ -33,7 +33,7 @@ class SlotLayout extends StatefulWidget {
   /// The mapping that is used to determine what Widget to display at what point.
   ///
   /// The int represents screen width.
-  final Map<int, SlotLayoutConfig?> config;
+  final Map<Breakpoint, SlotLayoutConfig?> config;
   @override
   State<SlotLayout> createState() => _SlotLayoutState();
 }
@@ -70,6 +70,8 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
     bool hasAnimation = false;
     if (chosenWidget != null) {
       changedWidget.value = chosenWidget!.key!;
+    } else {
+      changedWidget.value = const Key('');
     }
     return AnimatedSwitcher(
         duration: const Duration(milliseconds: 1000),
@@ -84,6 +86,7 @@ class _SlotLayoutState extends State<SlotLayout> with SingleTickerProviderStateM
         },
         transitionBuilder: (Widget child, Animation<double> animation) {
           final SlotLayoutConfig configChild = child as SlotLayoutConfig;
+          print(configChild.outAnimation);
           if (child.key == chosenWidget?.key) {
             return (configChild.inAnimation != null) ? child.inAnimation!(child, _controller) : child;
           } else {

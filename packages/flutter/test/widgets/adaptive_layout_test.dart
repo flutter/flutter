@@ -5,6 +5,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class TestBreakpoint0 extends Breakpoint{
+  @override
+  bool isActive(BuildContext context) {
+    return MediaQuery.of(context).size.width>=0;
+  }
+}
+class TestBreakpoint400 extends Breakpoint{
+  @override
+  bool isActive(BuildContext context) {
+    return MediaQuery.of(context).size.width>400;
+  }
+}
+class TestBreakpoint800 extends Breakpoint{
+  @override
+  bool isActive(BuildContext context) {
+    return MediaQuery.of(context).size.width>800;
+  }
+}
+
 void main() {
   testWidgets('slot layout dislays correct item of config based on screen width', (WidgetTester tester) async {
     MediaQuery slot(double width) {
@@ -13,10 +32,10 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: SlotLayout(
-            config: <int, SlotLayoutConfig>{
-              0: SlotLayoutConfig(key: const Key('0'), builder: (_) => const SizedBox()),
-              400: SlotLayoutConfig(key: const Key('400'), builder: (_) => const SizedBox()),
-              800: SlotLayoutConfig(key: const Key('800'), builder: (_) => const SizedBox()),
+            config: <Breakpoint, SlotLayoutConfig>{
+              TestBreakpoint0(): SlotLayoutConfig(key: const Key('0'), builder: (_) => const SizedBox()),
+              TestBreakpoint400(): SlotLayoutConfig(key: const Key('400'), builder: (_) => const SizedBox()),
+              TestBreakpoint800(): SlotLayoutConfig(key: const Key('800'), builder: (_) => const SizedBox()),
             },
           ),
         ),
@@ -52,51 +71,45 @@ void main() {
           textDirection: TextDirection.ltr,
           child: AdaptiveLayout(
             primaryNavigation: SlotLayout(
-              config: <int, SlotLayoutConfig>{
-                0: SlotLayoutConfig(key: const Key('pnav'), builder: on),
-                400: SlotLayoutConfig(key: const Key('pnav1'), builder: on),
-                800: SlotLayoutConfig(key: const Key('pnav2'), builder: on),
-                1000: SlotLayoutConfig(key: const Key('pnav3'), builder: on),
+              config: <Breakpoint, SlotLayoutConfig>{
+                TestBreakpoint0(): SlotLayoutConfig(key: const Key('pnav'), builder: on),
+                TestBreakpoint400(): SlotLayoutConfig(key: const Key('pnav1'), builder: on),
+                TestBreakpoint800(): SlotLayoutConfig(key: const Key('pnav2'), builder: on),
               },
             ),
             secondaryNavigation: SlotLayout(
-              config: <int, SlotLayoutConfig>{
-                0: SlotLayoutConfig(key: const Key('snav'), builder: on),
-                400: SlotLayoutConfig(key: const Key('snav1'), builder: on),
-                800: SlotLayoutConfig(key: const Key('snav2'), builder: on),
-                1000: SlotLayoutConfig(key: const Key('snav3'), builder: on),
+              config: <Breakpoint, SlotLayoutConfig>{
+                TestBreakpoint0(): SlotLayoutConfig(key: const Key('snav'), builder: on),
+                TestBreakpoint400(): SlotLayoutConfig(key: const Key('snav1'), builder: on),
+                TestBreakpoint800(): SlotLayoutConfig(key: const Key('snav2'), builder: on),
               },
             ),
             topNavigation: SlotLayout(
-              config: <int, SlotLayoutConfig>{
-                0: SlotLayoutConfig(key: const Key('tnav'), builder: on),
-                400: SlotLayoutConfig(key: const Key('tnav1'), builder: on),
-                800: SlotLayoutConfig(key: const Key('tnav2'), builder: on),
-                1000: SlotLayoutConfig(key: const Key('tnav3'), builder: on),
+              config: <Breakpoint, SlotLayoutConfig>{
+                TestBreakpoint0(): SlotLayoutConfig(key: const Key('tnav'), builder: on),
+                TestBreakpoint400(): SlotLayoutConfig(key: const Key('tnav1'), builder: on),
+                TestBreakpoint800(): SlotLayoutConfig(key: const Key('tnav2'), builder: on),
               },
             ),
             bottomNavigation: SlotLayout(
-              config: <int, SlotLayoutConfig>{
-                0: SlotLayoutConfig(key: const Key('bnav'), builder: on),
-                400: SlotLayoutConfig(key: const Key('bnav1'), builder: on),
-                800: SlotLayoutConfig(key: const Key('bnav2'), builder: on),
-                1000: SlotLayoutConfig(key: const Key('bnav3'), builder: on),
+              config: <Breakpoint, SlotLayoutConfig>{
+                TestBreakpoint0(): SlotLayoutConfig(key: const Key('bnav'), builder: on),
+                TestBreakpoint400(): SlotLayoutConfig(key: const Key('bnav1'), builder: on),
+                TestBreakpoint800(): SlotLayoutConfig(key: const Key('bnav2'), builder: on),
               },
             ),
             body: SlotLayout(
-              config: <int, SlotLayoutConfig>{
-                0: SlotLayoutConfig(key: const Key('b'), builder: (_) => Container(color: Colors.red)),
-                400: SlotLayoutConfig(key: const Key('b1'), builder: (_) => Container(color: Colors.red)),
-                800: SlotLayoutConfig(key: const Key('b2'), builder: (_) => Container(color: Colors.red)),
-                1000: SlotLayoutConfig(key: const Key('b3'), builder: (_) => Container(color: Colors.red)),
+              config: <Breakpoint, SlotLayoutConfig>{
+                TestBreakpoint0(): SlotLayoutConfig(key: const Key('b'), builder: (_) => Container(color: Colors.red)),
+                TestBreakpoint400(): SlotLayoutConfig(key: const Key('b1'), builder: (_) => Container(color: Colors.red)),
+                TestBreakpoint800(): SlotLayoutConfig(key: const Key('b2'), builder: (_) => Container(color: Colors.red)),
               },
             ),
             secondaryBody: SlotLayout(
-              config: <int, SlotLayoutConfig>{
-                0: SlotLayoutConfig(key: const Key('sb'), builder: (_) => Container(color: Colors.blue)),
-                400: SlotLayoutConfig(key: const Key('sb1'), builder: (_) => Container(color: Colors.blue)),
-                800: SlotLayoutConfig(key: const Key('sb2'), builder: (_) => Container(color: Colors.blue)),
-                1000: SlotLayoutConfig(key: const Key('sb3'), builder: (_) => Container(color: Colors.blue)),
+              config: <Breakpoint, SlotLayoutConfig>{
+                TestBreakpoint0(): SlotLayoutConfig(key: const Key('sb'), builder: (_) => Container(color: Colors.blue)),
+                TestBreakpoint400(): SlotLayoutConfig(key: const Key('sb1'), builder: (_) => Container(color: Colors.blue)),
+                TestBreakpoint800(): SlotLayoutConfig(key: const Key('sb2'), builder: (_) => Container(color: Colors.blue)),
               },
             ),
           ),
@@ -159,14 +172,14 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: SlotLayout(
-            config: <int, SlotLayoutConfig>{
-              0: SlotLayoutConfig(
+            config: <Breakpoint, SlotLayoutConfig>{
+              TestBreakpoint0(): SlotLayoutConfig(
                 inAnimation: leftOutIn,
                 outAnimation: leftInOut,
                 key: const Key('0'),
                 builder: (_) => const SizedBox(width: 10, height: 10),
               ),
-              400: SlotLayoutConfig(
+              TestBreakpoint400(): SlotLayoutConfig(
                 inAnimation: leftOutIn,
                 outAnimation: leftInOut,
                 key: const Key('400'),
@@ -215,10 +228,18 @@ void main() {
     expect(tester.getBottomRight(b), const Offset(200, 790));
     expect(tester.getTopLeft(sb), const Offset(200, 10));
     expect(tester.getBottomRight(sb), const Offset(390, 790));
+    //
+    //
+    //
+    //TODO
+    //
+    //
+    //
+
   });
-  // testWidgets('adaptive layout correct layout when body vertical', (WidgetTester tester) async {});
-  // testWidgets('adaptive layout correct layout when rtl', (WidgetTester tester) async {});
-  // testWidgets('adaptive layout correct layout when body ratio not default', (WidgetTester tester) async {});
-  // testWidgets('adaptive layout does not animate when animations off', (WidgetTester tester) async {});
-  // testWidgets('slot layout can tolerate rapid changes in breakpoints', (WidgetTester tester) async {});
+  testWidgets('adaptive layout correct layout when body vertical', (WidgetTester tester) async {});
+  testWidgets('adaptive layout correct layout when rtl', (WidgetTester tester) async {});
+  testWidgets('adaptive layout correct layout when body ratio not default', (WidgetTester tester) async {});
+  testWidgets('adaptive layout does not animate when animations off', (WidgetTester tester) async {});
+  testWidgets('slot layout can tolerate rapid changes in breakpoints', (WidgetTester tester) async {});
 }

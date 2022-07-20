@@ -33,6 +33,7 @@ export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
 export 'src/widgets/bottom_navigation_bar_item.dart';
+export 'src/widgets/breakpoint.dart';
 export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';

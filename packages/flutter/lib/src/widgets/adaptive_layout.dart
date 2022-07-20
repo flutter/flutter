@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 import 'basic.dart';
+import 'breakpoint.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'slot_layout.dart';
@@ -179,7 +180,7 @@ class _AdaptiveLayoutState extends State<AdaptiveLayout> with TickerProviderStat
       chosenWidgets.update(
         key,
         (SlotLayoutConfig? val) => val,
-        ifAbsent: () => SlotLayout.pickWidget(context, value?.config ?? <int, SlotLayoutConfig?>{}),
+        ifAbsent: () => SlotLayout.pickWidget(context, value?.config ?? <Breakpoint, SlotLayoutConfig?>{}),
       );
     });
     final List<Widget> entries = slots.entries

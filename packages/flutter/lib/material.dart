@@ -43,6 +43,7 @@ export 'src/material/button_bar_theme.dart';
 export 'src/material/button_style.dart';
 export 'src/material/button_style_button.dart';
 export 'src/material/button_theme.dart';
+export 'src/material/breakpoints.dart';
 export 'src/material/calendar_date_picker.dart';
 export 'src/material/card.dart';
 export 'src/material/card_theme.dart';

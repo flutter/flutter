@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'bottom_navigation_bar.dart';
+import 'breakpoints.dart';
 import 'colors.dart';
 import 'navigation_bar.dart';
 import 'navigation_rail.dart';
@@ -23,7 +24,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.secondaryBody,
     this.largeSecondaryBody,
     this.bodyRatio,
-    this.breakpoints = const <int>[0, 480, 1024],
+    this.breakpoints = const <Breakpoint>[Breakpoints.small, Breakpoints.medium, Breakpoints.large],
     this.offsetAnimations = true,
     this.internalAnimations = true,
     this.horizontalBody = true,
@@ -93,7 +94,7 @@ class AdaptiveScaffold extends StatefulWidget {
   /// until the value at the next index.
   ///
   /// Defaults to [0, 480, 1024].
-  final List<int> breakpoints;
+  final List<Breakpoint> breakpoints;
 
   /// Whether or not the developer wants display animations.
   ///
@@ -277,16 +278,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         internalAnimations: widget.internalAnimations && widget.offsetAnimations,
         primaryNavigation: widget.destinations != null && widget.selectedIndex != null
             ? SlotLayout(
-                config: <int, SlotLayoutConfig>{
+                config: <Breakpoint, SlotLayoutConfig>{
                   widget.breakpoints[0]: SlotLayoutConfig(
-                    outAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftInOut : null,
-                    key: const Key('primaryNavigation0'),
-                    builder: (_) => const SizedBox(
-                      width: 0,
-                      height: 0,
-                    ),
-                  ),
-                  widget.breakpoints[1]: SlotLayoutConfig(
                     inAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftOutIn : null,
                     key: const Key('primaryNavigation1'),
                     builder: (_) => SizedBox(
@@ -298,7 +291,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       ),
                     ),
                   ),
-                  widget.breakpoints[2]: SlotLayoutConfig(
+                  widget.breakpoints[1]: SlotLayoutConfig(
                     inAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftOutIn : null,
                     key: const Key('primaryNavigation2'),
                     builder: (_) => SizedBox(
@@ -316,7 +309,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             : null,
         bottomNavigation: widget.destinations != null && widget.selectedIndex != null
             ? SlotLayout(
-                config: <int, SlotLayoutConfig>{
+                config: <Breakpoint, SlotLayoutConfig>{
                   widget.breakpoints[0]: SlotLayoutConfig(
                     inAnimation: widget.offsetAnimations ? AdaptiveScaffold.bottomToTop : null,
                     key: const Key('botnav1'),
@@ -325,11 +318,6 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       selectedItemColor: Colors.black,
                       items: widget.destinations!.map(_toBottomNavItem).toList(),
                     ),
-                  ),
-                  widget.breakpoints[1]: SlotLayoutConfig(
-                    outAnimation: widget.offsetAnimations ? AdaptiveScaffold.topToBottom : null,
-                    key: const Key('botnavnone'),
-                    builder: (_) => const SizedBox(width: 0, height: 0),
                   ),
                 },
               )
@@ -343,7 +331,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   SlotLayout? _createSlotFromProperties(List<WidgetBuilder?>? list, String name) {
     return list != null
         ? SlotLayout(
-            config: <int, SlotLayoutConfig?>{
+            config: <Breakpoint, SlotLayoutConfig?>{
               for (MapEntry<int, WidgetBuilder?> entry in list.asMap().entries)
                 if (entry.key == 0 || list[entry.key] != list[entry.key - 1])
                   widget.breakpoints[entry.key]: (entry.value != null)
