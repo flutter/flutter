@@ -331,6 +331,7 @@ std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
         uniform_description.type = spir_type.basetype;
         uniform_description.rows = spir_type.vecsize;
         uniform_description.columns = spir_type.columns;
+        uniform_description.bit_width = spir_type.width;
         data->AddUniformDescription(std::move(uniform_description));
       });
   return data;

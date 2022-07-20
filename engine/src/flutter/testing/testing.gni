@@ -246,10 +246,19 @@ template("dart_snapshot") {
 # Arguments:
 #
 #     fixtures (required): The list of fixtures to copy.
+#
+#     dest (optional): When specified, the fixtures are placed under an
+#                      'assets' subdirectory of this path rather than an
+#                      'assets' subdirectory of target_gen_dir.
 template("copy_fixtures") {
   testonly = true
 
   assert(defined(invoker.fixtures), "The test fixtures must be specified.")
+
+  dest = target_gen_dir
+  if (defined(invoker.dest)) {
+    dest = invoker.dest
+  }
 
   has_fixtures = false
   foreach(fixture, invoker.fixtures) {
@@ -259,7 +268,7 @@ template("copy_fixtures") {
   if (has_fixtures) {
     copy(target_name) {
       sources = invoker.fixtures
-      outputs = [ "$target_gen_dir/assets/{{source_file_part}}" ]
+      outputs = [ "$dest/assets/{{source_file_part}}" ]
       forward_variables_from(invoker, [ "deps" ])
     }
   } else {
@@ -289,8 +298,21 @@ template("copy_fixtures") {
 #     dart_main (optional): The path to the main Dart file. If specified, it is
 #                           snapshotted.
 #
-#     use_target_as_artifact_prefix(optional): If true, adds the target name as prefix of the kernel and AOT ELF snapshot filename.
+#     use_target_as_artifact_prefix(optional): If true, adds the target name as
+#         prefix of the kernel and AOT ELF snapshot filename.
+#
+#     dest (optional): When specified, the fixtures are placed under an
+#                      'assets' subdirectory of this path rather than an
+#                      'assets' subdirectory of target_gen_dir.
 template("test_fixtures") {
+  dest = target_gen_dir
+  if (defined(invoker.dest)) {
+    dest = invoker.dest
+  }
+
+  # Not all paths use 'dest'
+  not_needed([ "dest" ])
+
   # Even if no fixtures are present, the location of the fixtures directory
   # must always be known to tests.
   fixtures_location_target_name = "_fl_$target_name"
@@ -298,7 +320,7 @@ template("test_fixtures") {
     if (is_fuchsia) {
       assets_dir = "/pkg/data/assets"
     } else {
-      assets_dir = "$target_gen_dir/assets"
+      assets_dir = "$dest/assets"
     }
   }
   test_deps = [ ":$fixtures_location_target_name" ]
@@ -309,6 +331,7 @@ template("test_fixtures") {
     copy_fixtures_target_name = "_cf_$target_name"
     copy_fixtures(copy_fixtures_target_name) {
       fixtures = invoker.fixtures
+      dest = dest
       forward_variables_from(invoker, [ "deps" ])
     }
     test_public_deps += [ ":$copy_fixtures_target_name" ]

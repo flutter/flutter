@@ -15,6 +15,7 @@ enum Stage:byte {
 enum TargetPlatform:byte {
   kMetal,
   kOpenGLES,
+  kSkSL,
 }
 
 enum UniformDataType:uint32 {
@@ -37,6 +38,7 @@ table UniformDescription {
   name: string;
   location: uint64;
   type: UniformDataType;
+  bit_width: uint64;
   rows: uint64;
   columns: uint64;
 }

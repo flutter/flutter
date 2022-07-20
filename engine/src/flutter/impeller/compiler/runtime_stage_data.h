@@ -21,6 +21,7 @@ struct UniformDescription {
   spirv_cross::SPIRType::BaseType type = spirv_cross::SPIRType::BaseType::Float;
   size_t rows = 0u;
   size_t columns = 0u;
+  size_t bit_width = 0u;
 };
 
 class RuntimeStageData {

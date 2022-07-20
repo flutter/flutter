@@ -55,11 +55,12 @@ static std::optional<fb::TargetPlatform> ToTargetPlatform(
     case TargetPlatform::kMetalDesktop:
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kFlutterSPIRV:
-    case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kVulkan:
       return std::nullopt;
+    case TargetPlatform::kSkSL:
+      return fb::TargetPlatform::kSkSL;
     case TargetPlatform::kRuntimeStageMetal:
       return fb::TargetPlatform::kMetal;
     case TargetPlatform::kRuntimeStageGLES:
@@ -155,6 +156,7 @@ std::shared_ptr<fml::Mapping> RuntimeStageData::CreateMapping() const {
       return nullptr;
     }
     desc->type = uniform_type.value();
+    desc->bit_width = uniform.bit_width;
 
     runtime_stage.uniforms.emplace_back(std::move(desc));
   }

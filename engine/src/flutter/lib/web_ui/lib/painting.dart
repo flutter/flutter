@@ -845,6 +845,10 @@ class FragmentProgram {
     throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
   }
 
+  static FragmentProgram fromAsset(String assetKey) {
+    throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
+  }
+
   FragmentProgram._();
 
   Shader shader({

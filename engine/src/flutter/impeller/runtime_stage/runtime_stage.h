@@ -40,7 +40,10 @@ struct RuntimeUniformDescription {
   size_t location = 0u;
   RuntimeUniformType type = kFloat;
   RuntimeUniformDimensions dimensions;
+  size_t bit_width;
 };
+
+size_t SizeOfRuntimeUniformType(RuntimeUniformType type);
 
 class RuntimeStage {
  public:
