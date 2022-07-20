@@ -12,6 +12,7 @@
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
+#include "impeller/renderer/vertex_buffer.h"
 
 namespace impeller {
 
@@ -28,10 +29,27 @@ void VerticesContents::SetColor(Color color) {
   color_ = color.Premultiply();
 }
 
+void VerticesContents::SetBlendMode(Entity::BlendMode blend_mode) {
+  blend_mode_ = blend_mode;
+}
+
+static PrimitiveType GetPrimitiveType(const Vertices& vertices) {
+  switch (vertices.GetMode()) {
+    case VertexMode::kTriangle:
+      return PrimitiveType::kTriangle;
+    case VertexMode::kTriangleStrip:
+      return PrimitiveType::kTriangleStrip;
+  }
+}
+
 bool VerticesContents::Render(const ContentContext& renderer,
                               const Entity& entity,
                               RenderPass& pass) const {
-  using VS = VerticesVertexShader;
+  if (!vertices_.IsValid()) {
+    return true;
+  }
+
+  using VS = VerticesPipeline::VertexShader;
 
   const auto coverage_rect = vertices_.GetBoundingBox();
 
@@ -43,42 +61,36 @@ bool VerticesContents::Render(const ContentContext& renderer,
     return true;
   }
 
-  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-  std::vector<Point> points = vertices_.GetPoints();
-  std::vector<uint16_t> indices = vertices_.GetIndices();
-  // TODO: colors are currently unused, must be blended with
-  // paint color based on provided blend mode.
-  std::vector<Color> colors = vertices_.GetColors();
-  VertexMode mode = vertices_.GetMode();
-
-  if (indices.size() == 0) {
-    for (size_t i = 0; i < points.size(); i += 1) {
-      VS::PerVertexData data;
-      data.point = points[i];
-      data.vertex_color = color_;
-      vertex_builder.AppendVertex(data);
-    }
-  } else {
-    for (size_t i = 0; i < indices.size(); i += 1) {
-      VS::PerVertexData data;
-      data.point = points[indices[i]];
-      data.vertex_color = color_;
-      vertex_builder.AppendVertex(data);
+  std::vector<VS::PerVertexData> vertex_data;
+  {
+    const auto& positions = vertices_.GetPositions();
+    const auto& colors = vertices_.GetColors();
+    for (size_t i = 0; i < positions.size(); i++) {
+      vertex_data.push_back(VS::PerVertexData{
+          .position = positions[i],
+          // TODO(108047): Blend these colors together when available. Use
+          //               colors[i] as the destination and color_ as the
+          //               source. Always use color_ when vertex colors are not
+          //               supplied.
+          .color = i < colors.size() ? colors[i] : color_,
+      });
     }
   }
 
-  PrimitiveType primitiveType;
-  switch (mode) {
-    case VertexMode::kTriangle:
-      primitiveType = PrimitiveType::kTriangle;
-      break;
-    case VertexMode::kTriangleStrip:
-      primitiveType = PrimitiveType::kTriangleStrip;
-      break;
-  }
+  size_t total_vtx_bytes = vertex_data.size() * sizeof(VS::PerVertexData);
+  size_t total_idx_bytes = vertices_.GetIndices().size() * sizeof(uint16_t);
 
-  if (!vertex_builder.HasVertices()) {
-    return true;
+  auto buffer = renderer.GetContext()->GetTransientsAllocator()->CreateBuffer(
+      StorageMode::kHostVisible, total_vtx_bytes + total_idx_bytes);
+
+  if (!buffer->CopyHostBuffer(reinterpret_cast<uint8_t*>(vertex_data.data()),
+                              Range{0, total_vtx_bytes}, 0)) {
+    return false;
+  }
+  if (!buffer->CopyHostBuffer(reinterpret_cast<uint8_t*>(const_cast<uint16_t*>(
+                                  vertices_.GetIndices().data())),
+                              Range{0, total_idx_bytes}, total_vtx_bytes)) {
+    return false;
   }
 
   auto& host_buffer = pass.GetTransientsBuffer();
@@ -91,8 +103,14 @@ bool VerticesContents::Render(const ContentContext& renderer,
   cmd.pipeline =
       renderer.GetVerticesPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.primitive_type = primitiveType;
-  cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
+  cmd.primitive_type = GetPrimitiveType(vertices_);
+  cmd.BindVertices({
+      .vertex_buffer = {.buffer = buffer, .range = Range{0, total_vtx_bytes}},
+      .index_buffer = {.buffer = buffer,
+                       .range = Range{total_vtx_bytes, total_idx_bytes}},
+      .index_count = vertices_.GetIndices().size(),
+      .index_type = IndexType::k16bit,
+  });
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   pass.AddCommand(std::move(cmd));
 

@@ -306,11 +306,12 @@ void Canvas::DrawTextFrame(TextFrame text_frame, Point position, Paint paint) {
 }
 
 void Canvas::DrawVertices(Vertices vertices,
-                          Entity::BlendMode mode,
+                          Entity::BlendMode blend_mode,
                           Paint paint) {
   std::shared_ptr<VerticesContents> contents =
       std::make_shared<VerticesContents>(std::move(vertices));
   contents->SetColor(paint.color);
+  contents->SetBlendMode(blend_mode);
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());
