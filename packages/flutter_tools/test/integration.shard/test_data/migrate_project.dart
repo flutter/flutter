@@ -6,23 +6,13 @@
 
 import 'dart:io';
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../test_utils.dart';
 import 'project.dart';
 
-import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/flutter_project_metadata.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/migrate/migrate_compute.dart';
-import 'package:flutter_tools/src/migrate/migrate_result.dart';
-import 'package:flutter_tools/src/migrate/migrate_utils.dart';
-import 'package:flutter_tools/src/project.dart';
-
-import '../test_utils.dart';
 
 class MigrateProject extends Project {
   MigrateProject(this.version, {this.vanilla = true, this.main});
@@ -108,7 +98,6 @@ class MigrateProject extends Project {
     ], workingDirectory: dir.path);
 
     if (Platform.isWindows) {
-      print('swin');
       await processManager.run(<String>[
         'robocopy',
         tempDir.path,
@@ -144,7 +133,6 @@ class MigrateProject extends Project {
         '.cipd',
       ], workingDirectory: dir.path);
 
-      final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
       await processManager.run(<String>[
         'chmod',
         '+w',

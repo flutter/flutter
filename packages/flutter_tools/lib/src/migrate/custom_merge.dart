@@ -30,8 +30,8 @@ abstract class CustomMerge {
 /// See `FlutterProjectMetadata`.
 class MetadataCustomMerge extends CustomMerge {
   MetadataCustomMerge({
-    required Logger logger,
-  }) : super(logger: logger, localPath: '.metadata');
+    required super.logger,
+  }) : super(localPath: '.metadata');
 
   @override
   MergeResult merge(File current, File base, File target) {

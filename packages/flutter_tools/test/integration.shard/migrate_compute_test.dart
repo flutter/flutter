@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_compute.dart';
@@ -21,7 +19,6 @@ import 'test_utils.dart';
 
 void main() {
   late FileSystem fileSystem;
-  late File manifestFile;
   late BufferLogger logger;
   late MigrateUtils utils;
   late MigrateContext context;
@@ -67,7 +64,7 @@ void main() {
 
   group('MigrateRevisions', () {
     testUsingContext('extracts revisions underpopulated metadata', () async {
-      MigrateRevisions revisions = MigrateRevisions(
+      final MigrateRevisions revisions = MigrateRevisions(
         context: context,
         baseRevision: oldSdkRevision,
         allowFallbackBaseRevision: true,
@@ -86,14 +83,14 @@ void main() {
     });
 
     testUsingContext('extracts revisions full metadata', () async {
-      MigrateRevisions revisions = MigrateRevisions(
+      final MigrateRevisions revisions = MigrateRevisions(
         context: context,
         baseRevision: oldSdkRevision,
         allowFallbackBaseRevision: true,
         platforms: <SupportedPlatform>[SupportedPlatform.android, SupportedPlatform.ios],
       );
 
-      File metadataFile = context.flutterProject.directory.childFile('.metadata');
+      final File metadataFile = context.flutterProject.directory.childFile('.metadata');
       metadataFile.deleteSync();
       metadataFile.createSync(recursive: true);
       metadataFile.writeAsStringSync('''
@@ -144,7 +141,6 @@ migration:
     - 'blah.dart'
     - 'ios/Runner.xcodeproj/project.pbxproj'
 ''', flush: true);
-      print(context.flutterProject.directory.childFile('.metadata').readAsStringSync());
 
       expect(revisions.revisionsList, <String>[oldSdkRevision]);
       expect(revisions.fallbackRevision, oldSdkRevision);
@@ -188,13 +184,12 @@ migration:
       final Directory targetDir = createResolvedTempDirectorySync('target_dir.');
       context.migrateResult.generatedTargetTemplateDirectory = targetDir;
       workingDir.createSync(recursive: true);
-      MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
+      final MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
         path: null,
         directory: targetDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
 
       await targetProject.createProject(
@@ -212,13 +207,12 @@ migration:
       final Directory baseDir = createResolvedTempDirectorySync('base_dir.');
       context.migrateResult.generatedBaseTemplateDirectory = baseDir;
       workingDir.createSync(recursive: true);
-      MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
+      final MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
         path: null,
         directory: baseDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
 
       await baseProject.createProject(
@@ -247,21 +241,19 @@ migration:
       context.migrateResult.generatedBaseTemplateDirectory = baseDir;
       workingDir.createSync(recursive: true);
 
-      MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
+      final MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
         path: 'some_existing_base_path',
         directory: baseDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
-      MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
+      final MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
         path: 'some_existing_target_path',
         directory: targetDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
 
       await baseProject.createProject(
@@ -301,21 +293,19 @@ migration:
       context.migrateResult.generatedBaseTemplateDirectory = baseDir;
       workingDir.createSync(recursive: true);
 
-      MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
+      final MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
         path: null,
         directory: baseDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
-      MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
+      final MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
         path: null,
         directory: targetDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
 
       await baseProject.createProject(
@@ -344,76 +334,76 @@ migration:
       expect(targetDir.childFile('pubspec.yaml').existsSync(), true);
       expect(targetDir.childDirectory('android').childFile('build.gradle').existsSync(), true);
 
-      Map<String, DiffResult> diffResults = await baseProject.diff(context, targetProject);
+      final Map<String, DiffResult> diffResults = await baseProject.diff(context, targetProject);
       context.migrateResult.diffMap.addAll(diffResults);
       expect(diffResults.length, 62);
 
-      List<String> expectedFiles = <String>[
-        '.metadata'
-        'ios/Runner.xcworkspace/contents.xcworkspacedata'
-        'ios/Runner/AppDelegate.h'
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png'
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png'
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md'
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json'
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png'
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png'
-        'ios/Runner/Base.lproj/LaunchScreen.storyboard'
-        'ios/Runner/Base.lproj/Main.storyboard'
-        'ios/Runner/main.m'
-        'ios/Runner/AppDelegate.m'
-        'ios/Runner/Info.plist'
-        'ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata'
-        'ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme'
-        'ios/Flutter/Debug.xcconfig'
-        'ios/Flutter/Release.xcconfig'
-        'ios/Flutter/AppFrameworkInfo.plist'
-        'pubspec.yaml'
-        '.gitignore'
-        'android/base_android.iml'
-        'android/app/build.gradle'
-        'android/app/src/main/res/mipmap-mdpi/ic_launcher.png'
-        'android/app/src/main/res/mipmap-hdpi/ic_launcher.png'
-        'android/app/src/main/res/drawable/launch_background.xml'
-        'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png'
-        'android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png'
-        'android/app/src/main/res/values/styles.xml'
-        'android/app/src/main/res/mipmap-xhdpi/ic_launcher.png'
-        'android/app/src/main/AndroidManifest.xml'
-        'android/app/src/main/java/com/example/base/MainActivity.java'
-        'android/local.properties'
-        'android/gradle/wrapper/gradle-wrapper.jar'
-        'android/gradle/wrapper/gradle-wrapper.properties'
-        'android/gradlew'
-        'android/build.gradle'
-        'android/gradle.properties'
-        'android/gradlew.bat'
-        'android/settings.gradle'
-        'base.iml'
-        '.idea/runConfigurations/main_dart.xml'
-        '.idea/libraries/Dart_SDK.xml'
-        '.idea/libraries/KotlinJavaRuntime.xml'
-        '.idea/libraries/Flutter_for_Android.xml'
-        '.idea/workspace.xml'
-        '.idea/modules.xml'
+      final List<String> expectedFiles = <String>[
+        '.metadata',
+        'ios/Runner.xcworkspace/contents.xcworkspacedata',
+        'ios/Runner/AppDelegate.h',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png',
+        'ios/Runner/Base.lproj/LaunchScreen.storyboard',
+        'ios/Runner/Base.lproj/Main.storyboard',
+        'ios/Runner/main.m',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/Info.plist',
+        'ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata',
+        'ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+        'ios/Flutter/Debug.xcconfig',
+        'ios/Flutter/Release.xcconfig',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'pubspec.yaml',
+        '.gitignore',
+        'android/base_android.iml',
+        'android/app/build.gradle',
+        'android/app/src/main/res/mipmap-mdpi/ic_launcher.png',
+        'android/app/src/main/res/mipmap-hdpi/ic_launcher.png',
+        'android/app/src/main/res/drawable/launch_background.xml',
+        'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
+        'android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png',
+        'android/app/src/main/res/values/styles.xml',
+        'android/app/src/main/res/mipmap-xhdpi/ic_launcher.png',
+        'android/app/src/main/AndroidManifest.xml',
+        'android/app/src/main/java/com/example/base/MainActivity.java',
+        'android/local.properties',
+        'android/gradle/wrapper/gradle-wrapper.jar',
+        'android/gradle/wrapper/gradle-wrapper.properties',
+        'android/gradlew',
+        'android/build.gradle',
+        'android/gradle.properties',
+        'android/gradlew.bat',
+        'android/settings.gradle',
+        'base.iml',
+        '.idea/runConfigurations/main_dart.xml',
+        '.idea/libraries/Dart_SDK.xml',
+        '.idea/libraries/KotlinJavaRuntime.xml',
+        '.idea/libraries/Flutter_for_Android.xml',
+        '.idea/workspace.xml',
+        '.idea/modules.xml',
       ];
-      for (String expectedFile in expectedFiles) {
-        diffResults.containsKey(expectedFile);
+      for (final String expectedFile in expectedFiles) {
+        expect(diffResults.containsKey(expectedFile), true);
       }
       // Spot check diffs on key files:
       expect(diffResults['android/build.gradle']!.diff, contains(r'''
@@ -507,21 +497,19 @@ migration:
       context.migrateResult.generatedBaseTemplateDirectory = baseDir;
       workingDir.createSync(recursive: true);
 
-      MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
+      final MigrateBaseFlutterProject baseProject = MigrateBaseFlutterProject(
         path: null,
         directory: baseDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
-      MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
+      final MigrateTargetFlutterProject targetProject = MigrateTargetFlutterProject(
         path: null,
         directory: targetDir,
         name: 'base',
         androidLanguage: 'java',
         iosLanguage: 'objc',
-        platformWhitelist: null,
       );
 
       await baseProject.createProject(
@@ -597,7 +585,6 @@ migration:
       expect(context.migrateResult.mergeResults[9].hasConflict, false);
       expect(context.migrateResult.mergeResults[10].hasConflict, false);
       expect(context.migrateResult.mergeResults[11].hasConflict, false);
-
     });
   });
 }

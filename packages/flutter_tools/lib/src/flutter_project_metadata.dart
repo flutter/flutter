@@ -151,8 +151,7 @@ class FlutterProjectMetadata {
     if (outputFile == null) {
       // In-memory FlutterProjectMetadata instances requires an output file to
       // be passed or specified in the constructor.
-      throw FileSystemException('No outputFile specified to write .metadata to. Initialize with a file or provide one when writing.');
-      return;
+      throw const FileSystemException('No outputFile specified to write .metadata to. Initialize with a file or provide one when writing.');
     }
     outputFile
       ..createSync(recursive: true)

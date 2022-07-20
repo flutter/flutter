@@ -105,10 +105,10 @@ project_type: app
     const String testBaseRevision = 'testanas9anlnq9ba7bjhavan3kma';
     MigrateConfig config = MigrateConfig(
       platformConfigs: <SupportedPlatform, MigratePlatformConfig>{
-        SupportedPlatform.android: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.ios: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.root: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.windows: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.android: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision, platform: SupportedPlatform.android),
+        SupportedPlatform.ios: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision, platform: SupportedPlatform.ios),
+        SupportedPlatform.root: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision, platform: SupportedPlatform.root),
+        SupportedPlatform.windows: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision, platform: SupportedPlatform.windows),
       },
       unmanagedFiles: <String>[
         'lib/main.dart',

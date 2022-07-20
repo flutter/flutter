@@ -44,7 +44,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(target, flush: true);
 
-      final MergeResult result = merger.merge(currentFile, baseFile, targetFile);
+      final StringMergeResult result = merger.merge(currentFile, baseFile, targetFile) as StringMergeResult;
       expect(result.mergedString, '''
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
@@ -129,7 +129,7 @@ migration:
         ..createSync(recursive: true)
         ..writeAsStringSync(target, flush: true);
 
-      final MergeResult result = merger.merge(currentFile, baseFile, targetFile);
+      final StringMergeResult result = merger.merge(currentFile, baseFile, targetFile) as StringMergeResult;
       expect(result.mergedString, '''
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
@@ -232,7 +232,7 @@ migration:
         ..createSync(recursive: true)
         ..writeAsStringSync(target, flush: true);
 
-      final MergeResult result = merger.merge(currentFile, baseFile, targetFile);
+      final StringMergeResult result = merger.merge(currentFile, baseFile, targetFile) as StringMergeResult;
       expect(result.mergedString, '''
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.

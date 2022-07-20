@@ -4,7 +4,6 @@
 
 import '../base/file_system.dart';
 import 'migrate_utils.dart';
-import 'migrate_compute.dart';
 
 /// Class that holds all results and generated directories from a computeMigration run.
 ///

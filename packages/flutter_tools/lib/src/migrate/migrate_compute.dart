@@ -6,13 +6,10 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../cache.dart';
-import '../commands/migrate.dart';
 import '../flutter_project_metadata.dart';
 import '../project.dart';
 import '../version.dart';
 import 'custom_merge.dart';
-import 'migrate_manifest.dart';
 import 'migrate_result.dart';
 import 'migrate_utils.dart';
 
