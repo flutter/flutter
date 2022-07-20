@@ -2257,7 +2257,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      openpay: true
+      openpay: "true"
       tags: >
         ["devicelab", "android", "linux", "openpay"]
       task_name: openpay_benchmarks__scroll_perf
