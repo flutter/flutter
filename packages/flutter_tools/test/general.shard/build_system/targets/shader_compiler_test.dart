@@ -32,7 +32,7 @@ void main() {
     fileSystem.file(notFragPath).createSync(recursive: true);
   });
 
-  testWithoutContext('compileShader invokes impellerc for .frag files', () async {
+  testWithoutContext('compileShader invokes impellerc for .frag files and spirv target', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -59,12 +59,118 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+        target: ShaderTarget.spirv,
       ),
       true,
     );
     expect(fileSystem.file(outputPath).existsSync(), true);
   });
+
+  testWithoutContext('compileShader invokes impellerc for .frag files and metal ios target', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--metal-ios',
+          '--spirv=$outputPath.spirv',
+          '--sl=$outputPath',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+        ],
+        onRun: () {
+          fileSystem.file(outputPath).createSync(recursive: true);
+        },
+      ),
+    ]);
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+
+    expect(
+      await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        target: ShaderTarget.impelleriOS,
+      ),
+      true,
+    );
+    expect(fileSystem.file(outputPath).existsSync(), true);
+  });
+
+  testWithoutContext('compileShader invokes impellerc for .frag files and opengl es', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--metal-ios',
+          '--spirv=$outputPath.spirv',
+          '--sl=$outputPath',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+        ],
+        onRun: () {
+          fileSystem.file(outputPath).createSync(recursive: true);
+        },
+      ),
+    ]);
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+
+    expect(
+      await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        target: ShaderTarget.impellerAndroid,
+      ),
+      true,
+    );
+    expect(fileSystem.file(outputPath).existsSync(), true);
+  });
+
+  testWithoutContext('compileShader invokes impellerc for .frag files and sksl', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--spirv=$outputPath.spirv',
+          '--sl=$outputPath',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+        ],
+        onRun: () {
+          fileSystem.file(outputPath).createSync(recursive: true);
+        },
+      ),
+    ]);
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+
+    expect(
+      await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        target: ShaderTarget.impellerAndroid,
+      ),
+      true,
+    );
+    expect(fileSystem.file(outputPath).existsSync(), true);
+  });
+
 
   testWithoutContext('compileShader invokes impellerc for non-.frag files', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -93,7 +199,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+        target: ShaderTarget.spirv,
       ),
       true,
     );
@@ -125,7 +231,7 @@ void main() {
       () => shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+        target: ShaderTarget.spirv,
       ),
       throwsA(isA<ShaderCompilerException>()),
     );

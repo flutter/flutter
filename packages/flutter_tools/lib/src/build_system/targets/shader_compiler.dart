@@ -19,9 +19,14 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  impellerAndroid,
-  impelleriOS,
-  sksl,
+  spirv('--flutter-spirv'),
+  impellerAndroid('--opengl-es'),
+  impelleriOS('--metal-ios'),
+  sksl('--sksl');
+
+  const ShaderTarget(this.target);
+
+  final String target;
 }
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
@@ -152,11 +157,11 @@ class ShaderCompiler {
 
     final List<String> cmd = <String>[
       impellerc.path,
-      // TODO(zanderso): When impeller is enabled, the correct flags for the
-      // target backend will need to be passed.
-      // https://github.com/flutter/flutter/issues/102853
-      '--flutter-spirv',
-      '--spirv=$outputPath',
+      target.target,
+      if (target == ShaderTarget.spirv)
+        '--spirv=$outputPath'
+      else
+        ...<String>['--sl=$outputPath.iplr', '--spirv=$outputPath.spriv',],
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
@@ -170,6 +175,9 @@ class ShaderCompiler {
         'Shader compilation of "${input.path}" to "$outputPath" '
         'failed with exit code $code.',
       );
+    }
+    if (target != ShaderTarget.spirv) {
+      input.fileSystem.file('$outputPath.iplr').copySync(outputPath);
     }
 
     return true;
