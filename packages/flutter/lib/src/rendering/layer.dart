@@ -890,7 +890,7 @@ class TextureLayer extends Layer {
   // TODO(jonahwilliams): remove once https://github.com/flutter/flutter/issues/107576 is fixed.
   @override
   bool supportsRasterization() {
-    return true;
+    return false;
   }
 
   /// When true the texture will not be updated with new frames.
