@@ -944,6 +944,7 @@ class RawScrollbar extends StatefulWidget {
     this.scrollbarOrientation,
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
+    this.padding,
     @Deprecated(
       'Use thumbVisibility instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
@@ -1366,6 +1367,13 @@ class RawScrollbar extends StatefulWidget {
   /// Must not be null and defaults to 0.
   final double crossAxisMargin;
 
+  /// The insets by which the scrollbar thumb and track should be padded.
+  ///
+  /// When null, the inherited [MediaQueryData.padding] is used.
+  ///
+  /// Defaults to null.
+  final EdgeInsets? padding;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -1593,7 +1601,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
-      ..padding = MediaQuery.of(context).padding
+      ..padding = widget.padding ?? MediaQuery.of(context).padding
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
       ..shape = widget.shape
