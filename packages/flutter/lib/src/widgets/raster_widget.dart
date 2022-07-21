@@ -32,7 +32,7 @@ enum RasterizeMode {
   /// the children are not rasterized and the [RasterWidgetFallbackDelegate],
   /// if provided, is used to draw the children.
   ///
-  /// 
+  ///
   fallback,
 }
 
