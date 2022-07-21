@@ -47,14 +47,14 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 // that doesn't apply here.
 // ignore: deprecated_member_use
 export 'package:test_api/test_api.dart' hide
-  test,
-  group,
-  setUpAll,
-  tearDownAll,
-  setUp,
-  tearDown,
   expect,
-  isInstanceOf;
+  group,
+  isInstanceOf,
+  setUp,
+  setUpAll,
+  tearDown,
+  tearDownAll,
+  test;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);

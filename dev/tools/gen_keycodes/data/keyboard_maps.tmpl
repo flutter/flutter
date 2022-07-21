@@ -78,6 +78,15 @@ const Map<int, PhysicalKeyboardKey> kIosToPhysicalKey = <int, PhysicalKeyboardKe
 @@@IOS_SCAN_CODE_MAP@@@
 };
 
+/// Maps iOS specific string values of nonvisible keys to logical keys
+///
+/// Some unprintable keys on iOS has literal names on their key label, such as
+/// "UIKeyInputEscape". See:
+/// https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
+const Map<String, LogicalKeyboardKey> kIosSpecialLogicalMap = <String, LogicalKeyboardKey>{
+@@@IOS_SPECIAL_MAP@@@
+};
+
 /// A map of iOS key codes which have printable representations, but appear
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
