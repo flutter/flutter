@@ -263,7 +263,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// is provided, then the padding's effect will not be visible.
   ///
   /// When null, the horizontal padding defaults to 16.0 on both sides.
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The text style of the popup menu item.
   ///
