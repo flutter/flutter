@@ -107,10 +107,13 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       }
 
       // Find all conflicts
-      final List<Conflict> conflicts = findConflicts(lines);
+      final List<Conflict> conflicts = findConflicts(lines, localPath);
 
       // Prompt developer
-      await promptDeveloperSelectAction(conflicts, lines, localPath);
+      FlutterCommandResult? promptResult = await promptDeveloperSelectAction(conflicts, lines, localPath);
+      if (promptResult != null) {
+        return promptResult;
+      }
 
       final bool result = await verifyAndCommit(conflicts, lines, file, localPath);
       if (!result) {
@@ -121,7 +124,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   }
 
   /// Parses the lines of a file and extracts a list of Conflicts.
-  List<Conflict> findConflicts(List<String> lines) {
+  List<Conflict> findConflicts(List<String> lines, String localPath) {
     // Find all conflicts
     final List<Conflict> conflicts = <Conflict>[];
     Conflict currentConflict = Conflict.empty();
@@ -133,10 +136,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
         currentConflict.dividerLine = lineNumber;
       } else if (line.contains(_conflictEndMarker)) {
         currentConflict.endLine = lineNumber;
-        assert(
-          (currentConflict.startLine == null || currentConflict.dividerLine == null || currentConflict.startLine! < currentConflict.dividerLine!) &&
-          (currentConflict.dividerLine == null || currentConflict.endLine == null || currentConflict.dividerLine! < currentConflict.endLine!)
-        );
+        if (!(currentConflict.startLine == null || currentConflict.dividerLine == null || currentConflict.startLine! < currentConflict.dividerLine!) ||
+            !(currentConflict.dividerLine == null || currentConflict.endLine == null || currentConflict.dividerLine! < currentConflict.endLine!)) {
+          throw StateError('Invalid merge conflict detected in $localPath: Improperly ordered conflict markers.');
+        }
         conflicts.add(currentConflict);
         currentConflict = Conflict.empty();
       }
@@ -146,11 +149,11 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
   /// Display a detected conflict and prompt the developer on whether to accept the original lines, new lines,
   /// or skip handling the conflict.
-  Future<void> promptDeveloperSelectAction(List<Conflict> conflicts, List<String> lines, String localPath) async {
+  Future<FlutterCommandResult?> promptDeveloperSelectAction(List<Conflict> conflicts, List<String> lines, String localPath) async {
     final int contextLineCount = int.parse(stringArg('context-lines')!);
     for (final Conflict conflict in conflicts) {
       if (!conflict.isValid) {
-        conflict.keepOriginal = null;
+        conflict.selection = ConflictSelection.skip;
         continue;
       }
       // Print the conflict for reference
@@ -181,9 +184,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       // Select action
       String selection = 's';
       selection = await terminal.promptForCharInput(
-        <String>['o', 'n', 's'],
+        <String>['o', 'n', 's', 'q'],
         logger: logger,
-        prompt: 'Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually?',
+        prompt: 'Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit.',
         defaultChoiceIndex: 2,
       );
 
@@ -197,11 +200,16 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
           break;
         }
         case 's': {
-          conflict.skip();
+          conflict.chooseSkip();
           break;
+        }
+        case 'q': {
+          logger.printStatus('Exiting wizard. You may continue where you left off by re-running the command.', newline: true);
+          return const FlutterCommandResult(ExitStatus.success);
         }
       }
     }
+    return null;
   }
 
   /// Prints a summary of the changes selected and prompts the developer to commit, abandon, or retry
@@ -215,42 +223,45 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
     String result = '';
     int lastPrintedLine = 0;
-    bool hasChanges = false;
+    bool hasChanges = false; // don't unecessarily write file if no changes were made.
     for (final Conflict conflict in conflicts) {
       if (!conflict.isValid) {
         continue;
       }
-      if (conflict.keepOriginal != null) {
-        hasChanges = true; // don't unecessarily write file if no changes were made.
+      if (conflict.selection != ConflictSelection.skip) {
+        hasChanges = true; // only skip results in no changes
       }
       for (int lineNumber = lastPrintedLine; lineNumber < conflict.startLine!; lineNumber++) {
         result += '${lines[lineNumber]}\n';
       }
-      if (conflict.keepOriginal == null) {
-        // Skipped this conflict. Add all lines.
-        for (int lineNumber = conflict.startLine!; lineNumber <= conflict.endLine!; lineNumber++) {
-          result += '${lines[lineNumber]}\n';
-        }
-        skipCount++;
-      } else if (conflict.keepOriginal!) {
-        // Keeping original lines
-        for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
-          result += '${lines[lineNumber]}\n';
-        }
-        originalCount++;
-      } else {
-        // Keeping new lines
-        for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
-          result += '${lines[lineNumber]}\n';
-        }
-        newCount++;
+      switch(conflict.selection) {
+        case ConflictSelection.skip:
+          // Skipped this conflict. Add all lines.
+          for (int lineNumber = conflict.startLine!; lineNumber <= conflict.endLine!; lineNumber++) {
+            result += '${lines[lineNumber]}\n';
+          }
+          skipCount++;
+          break;
+        case ConflictSelection.keepOriginal:
+          // Keeping original lines
+          for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
+            result += '${lines[lineNumber]}\n';
+          }
+          originalCount++;
+          break;
+        case ConflictSelection.keepNew:
+          // Keeping new lines
+          for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
+            result += '${lines[lineNumber]}\n';
+          }
+          newCount++;
+          break;
       }
       lastPrintedLine = (conflict.endLine! + 1).clamp(0, lines.length);
     }
     for (int lineNumber = lastPrintedLine; lineNumber < lines.length; lineNumber++) {
       result += '${lines[lineNumber]}\n';
     }
-    result.trim();
 
     // Display conflict summary for this file and confirm with user if the changes should be commited.
     final bool confirm = boolArg('confirm-commit') ?? true;
@@ -294,29 +305,35 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   }
 }
 
+enum ConflictSelection {
+  keepOriginal,
+  keepNew,
+  skip,
+}
+
 /// Simple data class that represents a conflict in a file and tracks what the developer chose to do with it.
 class Conflict {
-  Conflict(this.startLine, this.dividerLine, this.endLine);
+  Conflict(this.startLine, this.dividerLine, this.endLine) : selection = ConflictSelection.skip;
 
-  Conflict.empty();
+  Conflict.empty() : selection = ConflictSelection.skip;
 
   int? startLine;
   int? dividerLine;
   int? endLine;
 
-  bool? keepOriginal;
+  ConflictSelection selection;
 
   bool get isValid => startLine != null && dividerLine != null && endLine != null;
 
   void chooseOriginal() {
-    keepOriginal = true;
+    selection = ConflictSelection.keepOriginal;
   }
 
-  void skip() {
-    keepOriginal = null;
+  void chooseSkip() {
+    selection = ConflictSelection.skip;
   }
 
   void chooseNew() {
-    keepOriginal = false;
+    selection = ConflictSelection.keepNew;
   }
 }

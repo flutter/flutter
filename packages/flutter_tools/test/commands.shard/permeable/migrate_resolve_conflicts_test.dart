@@ -133,7 +133,7 @@ Cyan = Original lines.  Green = New lines.
   7    hi'''));
     expect(logger.statusText, contains('''
 Conflict in conflict_file.
-Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: n
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit. [o|n|s|q]: n
 
 
 Conflicts in conflict_file complete.
@@ -206,7 +206,7 @@ Cyan = Original lines.  Green = New lines.
   7    hi'''));
     expect(logger.statusText, contains('''
 Conflict in conflict_file.
-Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: n
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit. [o|n|s|q]: n
 
 
 Conflicts in conflict_file complete.
@@ -279,7 +279,7 @@ Cyan = Original lines.  Green = New lines.
   7    hi'''));
     expect(logger.statusText, contains('''
 Conflict in conflict_file.
-Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: o
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit. [o|n|s|q]: o
 
 
 Conflicts in conflict_file complete.
@@ -412,7 +412,7 @@ Cyan = Original lines.  Green = New lines.
   7    hi'''));
     expect(logger.statusText, contains('''
 Conflict in conflict_file.
-Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: o
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit. [o|n|s|q]: o
 
 
 Conflicts in conflict_file complete.
@@ -496,7 +496,7 @@ Cyan = Original lines.  Green = New lines.
   7    hi'''));
     expect(logger.statusText, contains('''
 Conflict in conflict_file.
-Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: n
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit. [o|n|s|q]: n
 
 
 Conflicts in conflict_file complete.
@@ -520,7 +520,7 @@ Cyan = Original lines.  Green = New lines.
   8    hi'''));
     expect(logger.statusText, contains('''
 Conflict in conflict_file2.
-Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: o
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit. [o|n|s|q]: o
 
 
 Conflicts in conflict_file2 complete.
@@ -604,7 +604,7 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
 Cyan = Original lines.  Green = New lines.'''));
     expect(logger.statusText, contains('''
 Conflict in conflict_file.
-Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: n
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? Or to exit the wizard, (q)uit. [o|n|s|q]: n
 
 
 Conflicts in conflict_file complete.
