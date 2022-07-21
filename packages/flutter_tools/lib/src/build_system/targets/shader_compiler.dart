@@ -161,7 +161,7 @@ class ShaderCompiler {
       if (target == ShaderTarget.spirv)
         '--spirv=$outputPath'
       else
-        ...<String>['--sl=$outputPath.iplr', '--spirv=$outputPath.spriv',],
+        ...<String>['--sl=$outputPath.iplr', '--spirv=$outputPath.spirv',],
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
@@ -178,6 +178,8 @@ class ShaderCompiler {
     }
     if (target != ShaderTarget.spirv) {
       input.fileSystem.file('$outputPath.iplr').copySync(outputPath);
+      input.fileSystem.file('$outputPath.iplr').deleteSync();
+      input.fileSystem.file('$outputPath.spirv').deleteSync();
     }
 
     return true;
