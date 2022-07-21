@@ -181,7 +181,7 @@ abstract class RasterWidgetFallbackDelegate {
 ///
 /// ```dart
 /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
-///   final radians = 0.5; // Could be driven by an animation.
+///   const double radians = 0.5; // Could be driven by an animation.
 ///   final Matrix4 transform = Matrix4.rotationZ(radians);
 ///   context.canvas.transform(transform.storage);
 ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
