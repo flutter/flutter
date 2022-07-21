@@ -53,9 +53,23 @@ DisplayList::~DisplayList() {
 }
 
 void DisplayList::ComputeBounds() {
-  DisplayListBoundsCalculator calculator(&bounds_cull_);
+  RectBoundsAccumulator accumulator;
+  DisplayListBoundsCalculator calculator(accumulator, &bounds_cull_);
   Dispatch(calculator);
-  bounds_ = calculator.bounds();
+  if (calculator.is_unbounded()) {
+    FML_LOG(INFO) << "returning partial bounds for unbounded DisplayList";
+  }
+  bounds_ = accumulator.bounds();
+}
+
+void DisplayList::ComputeRTree() {
+  RTreeBoundsAccumulator accumulator;
+  DisplayListBoundsCalculator calculator(accumulator, &bounds_cull_);
+  Dispatch(calculator);
+  if (calculator.is_unbounded()) {
+    FML_LOG(INFO) << "returning partial rtree for unbounded DisplayList";
+  }
+  rtree_ = accumulator.rtree();
 }
 
 void DisplayList::Dispatch(Dispatcher& dispatcher,
