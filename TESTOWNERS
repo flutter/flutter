@@ -85,6 +85,7 @@
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf__e2e_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/openpay_benchmarks__scroll_perf.dart @iskakaushik @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
@@ -242,9 +243,6 @@
 /dev/integration_tests/abstract_method_smoke_test @blasten @flutter/android
 /dev/integration_tests/android_embedding_v2_smoke_test @blasten @flutter/android
 /dev/integration_tests/release_smoke_test @blasten @flutter/android
-
-## OpenPay tests
-/dev/devicelab/bin/tasks/openpay_benchmarks__scroll_perf.dart @iskakaushik @flutter/engine
 
 ## Shards tests
 # TODO(keyonghan): add files/paths for below framework host only testss.

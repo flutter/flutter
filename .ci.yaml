@@ -49,6 +49,16 @@ platform_properties:
         ]
       os: Linux
       device_type: "SM-G973U1"
+  linux_samsung_a02:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "open_jdk", "version": "11"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      os: Linux
+      device_type: "SM-A025V"
   mac:
     properties:
       dependencies: >-
@@ -2251,7 +2261,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
 
-  - name: Linux_android openpay_benchmarks__scroll_perf
+  - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2259,7 +2269,7 @@ targets:
     properties:
       openpay: "true"
       tags: >
-        ["devicelab", "android", "linux", "openpay"]
+        ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
       task_name: openpay_benchmarks__scroll_perf
     scheduler: luci
 
