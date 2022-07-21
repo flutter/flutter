@@ -30,8 +30,9 @@ class SemanticsService {
   /// For example a camera application can use this method to make accessibility
   /// announcements regarding objects in the viewfinder.
   ///
-  /// The third argument adds an optional setting to determine the assertiveness level.
-  /// If not specified, the mode will be 'assertive'.
+  /// The assertiveness level of the announcement can be determined by setting [assertivenessSetting].
+  /// Currently, this is only supported by the web engine and has no effect on other platforms.
+  /// The default mode is 'assertive' which means it will interrupt any existing annoucement.
   static Future<void> announce(String message, TextDirection textDirection, {Assertiveness assertivenessSetting = Assertiveness.assertive}) async {
     final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(message, textDirection, assertivenessSetting);
     await SystemChannels.accessibility.send(event.toMap());

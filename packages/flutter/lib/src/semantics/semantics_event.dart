@@ -101,6 +101,9 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   final TextDirection textDirection;
 
   /// Determines whether the announcement should interrupt any existing announcement, or queue after it.
+  ///
+  /// On the web this option uses the aria-live level to set the assertiveness of the announcement.
+  /// On iOS, Android, Windows, Linux, macOS, and Fuchsia this option currently has no effect.
   final Assertiveness assertivenessSetting;
 
   @override
