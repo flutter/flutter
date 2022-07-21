@@ -2017,8 +2017,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
     final TextStyle defaultStyle = themeData.useMaterial3
       ? MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState)
-      :
-    TextStyle(
+      : TextStyle(
           color: decoration.enabled ? themeData.hintColor : themeData.disabledColor,
         );
 

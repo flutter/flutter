@@ -4442,7 +4442,7 @@ void main() {
 
     await pumpDecorator(focused: false);
     await tester.pumpAndSettle();
-    final labelSize= useMaterial3 ? const Size(70, 14) : const Size(80, 16);
+    final Size labelSize= useMaterial3 ? const Size(70, 14) : const Size(80, 16);
     expect(getLabelRect(tester).topLeft, equals(Offset(12, useMaterial3 ? 21 : 20)));
     expect(getLabelRect(tester).size, equals(labelSize));
 
