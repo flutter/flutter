@@ -4126,7 +4126,10 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   FragmentProgram._fromAsset(String assetKey) {
     _constructor();
-    _initFromAsset(assetKey);
+    final String result = _initFromAsset(assetKey);
+    if (result.isNotEmpty) {
+      throw result;
+    }
   }
 
   static void _reinitializeShader(String assetKey) {
@@ -4145,7 +4148,10 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
       return;
     }
 
-    program._initFromAsset(assetKey);
+    final result = program._initFromAsset(assetKey);
+    if (result.isNotEmpty) {
+      throw result;
+    }
   }
 
   late final int _uniformFloatCount;
@@ -4157,8 +4163,8 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   @FfiNative<Void Function(Pointer<Void>, Handle, Bool)>('FragmentProgram::init')
   external void _init(String sksl, bool debugPrint);
 
-  @FfiNative<Void Function(Pointer<Void>, Handle)>('FragmentProgram::initFromAsset')
-  external void _initFromAsset(String assetKey);
+  @FfiNative<Handle Function(Pointer<Void>, Handle)>('FragmentProgram::initFromAsset')
+  external String _initFromAsset(String assetKey);
 
   /// Constructs a [Shader] object suitable for use by [Paint.shader] with
   /// the given uniforms.
