@@ -176,9 +176,9 @@ abstract class RasterWidgetFallbackDelegate {
 /// effects.
 ///
 /// {@tool snippet}
-/// 
+///
 /// The following method shows how to efficiently rotate the child raster.
-/// 
+///
 /// ```dart
 /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
 ///   final radians = 0.5; // Could be driven by an animation.

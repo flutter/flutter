@@ -219,7 +219,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          preferRasterization: false,
+          preferRasterization: preferRasterization,
           child: child,
         );
       },
@@ -230,7 +230,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomExitTransition(
           animation: animation,
-          preferRasterization: false,
+          preferRasterization: preferRasterization,
           reverse: true,
           child: child,
         );
@@ -244,7 +244,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            preferRasterization: false,
+            preferRasterization: preferRasterization,
             reverse: true,
             child: child,
           );
@@ -256,7 +256,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomExitTransition(
             animation: animation,
-            preferRasterization: false,
+            preferRasterization: preferRasterization,
             child: child,
           );
         },
