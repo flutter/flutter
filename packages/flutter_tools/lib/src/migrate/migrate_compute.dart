@@ -14,9 +14,8 @@ import 'migrate_result.dart';
 import 'migrate_utils.dart';
 
 // This defines files and directories that should be skipped regardless
-// of gitignore and config settings
+// of gitignore and config settings. Using `/` as a stand-in for path separator.
 const List<String> _skippedFiles = <String>[
-  'lib/main.dart', // Almost always user owned.
   'ios/Runner.xcodeproj/project.pbxproj', // Xcode managed configs that may not merge cleanly.
   'README.md', // changes to this shouldn't be overwritten since is is user owned.
 ];
@@ -27,20 +26,26 @@ const List<String> _skippedDirectories = <String>[
   'lib', // Files here are always user owned and we don't want to overwrite their apps.
   'test', // Files here are typically user owned and flutter-side changes are not relevant.
   'assets', // Common directory for user assets.
+  'build' // Build artifacts
 ];
 
-bool _skipped(String localPath, {Set<String?>? blacklistPrefixes}) {
+bool _skipped(String localPath, FileSystem fileSystem, {Set<String>? blacklistPrefixes}) {
+  for (final String path in _skippedFiles) {
+    if (path.replaceAll('/', fileSystem.path.separator) == localPath) {
+      return true;
+    }
+  }
   if (_skippedFiles.contains(localPath)) {
     return true;
   }
   for (final String dir in _skippedDirectories) {
-    if (localPath.startsWith('$dir/')) {
+    if (localPath.startsWith('${dir.replaceAll('/', fileSystem.path.separator)}${fileSystem.path.separator}')) {
       return true;
     }
   }
   if (blacklistPrefixes != null) {
-    for (final String? prefix in blacklistPrefixes) {
-      if (localPath.startsWith('${prefix!}/')) {
+    for (final String prefix in blacklistPrefixes) {
+      if (localPath.startsWith('${prefix}${fileSystem.path.separator}')) {
         return true;
       }
     }
@@ -98,7 +103,7 @@ class MigrateContext {
 
   MigrateResult migrateResult;
   FlutterProject flutterProject;
-  Set<String?> blacklistPrefixes;
+  Set<String> blacklistPrefixes;
   Logger logger;
   bool verbose;
   FileSystem fileSystem;
@@ -168,7 +173,7 @@ abstract class MigrateFlutterProject {
       }
       final File thisFile = entity.absolute;
       final String localPath = getLocalPath(thisFile.path, directory.absolute.path, context.fileSystem);
-      if (_skipped(localPath, blacklistPrefixes: context.blacklistPrefixes)) {
+      if (_skipped(localPath, context.fileSystem, blacklistPrefixes: context.blacklistPrefixes)) {
         continue;
       }
       if (await context.migrateUtils.isGitIgnored(thisFile.absolute.path, directory.absolute.path)) {
@@ -208,7 +213,7 @@ abstract class MigrateFlutterProject {
       }
       final File otherFile = entity.absolute;
       final String localPath = getLocalPath(otherFile.path, other.directory.absolute.path, context.fileSystem);
-      if (directory.childFile(localPath).existsSync() || _skipped(localPath, blacklistPrefixes: context.blacklistPrefixes)) {
+      if (directory.childFile(localPath).existsSync() || _skipped(localPath, context.fileSystem, blacklistPrefixes: context.blacklistPrefixes)) {
         continue;
       }
       if (await context.migrateUtils.isGitIgnored(otherFile.absolute.path, other.directory.absolute.path)) {
@@ -268,7 +273,7 @@ abstract class MigrateFlutterProject {
       missingAlwaysMigrateFiles.remove(localPath);
       if (context.migrateResult.diffMap.containsKey(localPath) && context.migrateResult.diffMap[localPath]!.diffType == DiffType.ignored ||
           await context.migrateUtils.isGitIgnored(currentFile.path, context.flutterProject.directory.absolute.path) ||
-          _skipped(localPath, blacklistPrefixes: context.blacklistPrefixes) ||
+          _skipped(localPath, context.fileSystem, blacklistPrefixes: context.blacklistPrefixes) ||
           _skippedMerge(localPath)) {
         continue;
       }
@@ -393,7 +398,7 @@ abstract class MigrateFlutterProject {
     // Add files that are in the target, marked as always migrate, and missing in the current project.
     for (final String localPath in missingAlwaysMigrateFiles) {
       final File targetTemplateFile = context.migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
-      if (targetTemplateFile.existsSync() && !_skipped(localPath, blacklistPrefixes: context.blacklistPrefixes)) {
+      if (targetTemplateFile.existsSync() && !_skipped(localPath, context.fileSystem, blacklistPrefixes: context.blacklistPrefixes)) {
         context.migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
       }
     }

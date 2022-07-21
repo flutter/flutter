@@ -83,13 +83,6 @@ void main() {
     });
 
     testUsingContext('extracts revisions full metadata', () async {
-      final MigrateRevisions revisions = MigrateRevisions(
-        context: context,
-        baseRevision: oldSdkRevision,
-        allowFallbackBaseRevision: true,
-        platforms: <SupportedPlatform>[SupportedPlatform.android, SupportedPlatform.ios],
-      );
-
       final File metadataFile = context.flutterProject.directory.childFile('.metadata');
       metadataFile.deleteSync();
       metadataFile.createSync(recursive: true);
@@ -141,6 +134,13 @@ migration:
     - 'blah.dart'
     - 'ios/Runner.xcodeproj/project.pbxproj'
 ''', flush: true);
+
+      final MigrateRevisions revisions = MigrateRevisions(
+        context: context,
+        baseRevision: oldSdkRevision,
+        allowFallbackBaseRevision: true,
+        platforms: <SupportedPlatform>[SupportedPlatform.android, SupportedPlatform.ios],
+      );
 
       expect(revisions.revisionsList, <String>[oldSdkRevision]);
       expect(revisions.fallbackRevision, oldSdkRevision);

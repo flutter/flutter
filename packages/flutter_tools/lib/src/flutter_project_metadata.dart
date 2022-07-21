@@ -75,7 +75,7 @@ class FlutterProjectMetadata {
   FlutterProjectMetadata(File file, Logger logger) : _metadataFile = file,
                                                      _logger = logger,
                                                      migrateConfig = MigrateConfig() {
-    if (!_metadataFile!.existsSync()) {
+    if (!_metadataFile.existsSync()) {
       _logger.printTrace('No .metadata file found at ${_metadataFile!.path}.');
       // Create a default empty metadata.
       return;
@@ -86,7 +86,7 @@ class FlutterProjectMetadata {
     } on YamlException {
       // Handled in _validate below.
     }
-    if (yamlRoot == null || yamlRoot is! YamlMap) {
+    if (yamlRoot is! YamlMap) {
       _logger.printTrace('.metadata file at ${_metadataFile!.path} was empty or malformed.');
       return;
     }
@@ -111,7 +111,7 @@ class FlutterProjectMetadata {
 
   /// Creates a FlutterProjectMetadata by explicitly providing all values.
   FlutterProjectMetadata.explicit({
-    File? file,
+    required File file,
     required String? versionRevision,
     required String? versionChannel,
     required FlutterProjectType? projectType,
@@ -140,7 +140,8 @@ class FlutterProjectMetadata {
 
   final Logger _logger;
 
-  final File? _metadataFile;
+  final File _metadataFile;
+  File get file => _metadataFile;
 
   /// Writes the .migrate_config file in the provided project directory's platform subdirectory.
   ///
@@ -176,7 +177,7 @@ ${migrateConfig.getOutputFileString()}''';
 
   void populate({
     List<SupportedPlatform>? platforms,
-    Directory? projectDirectory,
+    required Directory projectDirectory,
     String? currentRevision,
     String? createRevision,
     bool create = true,
@@ -204,7 +205,7 @@ ${migrateConfig.getOutputFileString()}''';
   }
 
   /// Performs a biased 3-way-merge between a current user-owned metadata file, a base version, and a target.
-  static FlutterProjectMetadata merge(
+  factory FlutterProjectMetadata.merge(
     FlutterProjectMetadata current,
     FlutterProjectMetadata base,
     FlutterProjectMetadata target,
@@ -222,6 +223,7 @@ ${migrateConfig.getOutputFileString()}''';
       logger,
     );
     final FlutterProjectMetadata output = FlutterProjectMetadata.explicit(
+      file: current.file,
       versionRevision: versionRevision,
       versionChannel: versionChannel,
       projectType: projectType,
@@ -265,16 +267,14 @@ class MigrateConfig {
   /// to reflect the project.
   void populate({
     List<SupportedPlatform>? platforms,
-    Directory? projectDirectory,
+    required Directory projectDirectory,
     String? currentRevision,
     String? createRevision,
     bool create = true,
     bool update = true,
     required Logger logger,
   }) {
-    final FlutterProject flutterProject = projectDirectory == null ||
-        FlutterProject.current().directory.path == projectDirectory.path ?
-        FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
 
     for (final SupportedPlatform platform in platforms) {
@@ -353,6 +353,9 @@ migration:
   }
 
   /// Performs a biased 3-way merge on current, base, and target MigrateConfigs.
+  ///
+  /// The base is the common ancestor config, while the target is a newly generated
+  /// config modern config. Current is the existing config in the project. 
   ///
   /// This merge is biased such that the results are consistent with the
   /// way project migration occurs such as not updating create_revision.
