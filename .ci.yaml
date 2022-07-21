@@ -2282,7 +2282,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
       task_name: openpay_benchmarks__scroll_perf
-    scheduler: luci
 
   - name: Staging_build_linux analyze
     presubmit: false
