@@ -846,7 +846,9 @@ void main() {
   });
 
   test('Ensure certain event types are allowed', () {
+    // Regression test for https://github.com/flutter/flutter/issues/107962
     expect(const PointerHoverEvent(kind: PointerDeviceKind.trackpad), isNotNull);
+
     // The test passes if it compiles.
   });
 
