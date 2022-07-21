@@ -69,7 +69,7 @@ Future<void> main() async {
 
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(
-        spellCheckSuggestionSpans.length,
+        spellCheckSuggestionSpans!.length,
         equals(misspelledWordRanges.length)
         );
 
@@ -137,7 +137,7 @@ Future<void> main() async {
 
   testWidgets('EditableText spell checks when text is entered and spell check enabled', (WidgetTester tester) async {
     const TextStyle style = TextStyle();
-    const TextStyle misspelledTextStyle = TextField.materialMisspelledTextStyle,
+    const TextStyle misspelledTextStyle = TextField.materialMisspelledTextStyle;
 
     await tester.pumpWidget(const MyApp());
 

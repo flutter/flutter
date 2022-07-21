@@ -109,7 +109,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     SuggestionSpan currentSpan;
     SuggestionSpan adjustedSpan;
     String currentSpanText;
-    String newSpanText;
+    String newSpanText = '';
     bool currentSpanValid = false;
     bool foundCurrentSpan = false;
     RegExp regex;
@@ -132,19 +132,15 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         currentSpanValid = false;
       }
 
-      if (currentSpanValid) {
-        if (newSpanText == currentSpanText) {
-          foundCurrentSpan = true;
-          searchStart = currentSpan.range.end + offset;
-          adjustedSpan = SuggestionSpan(
-              TextRange(
-                  start: currentSpan.range.start + offset, end: searchStart),
-              currentSpan.suggestions
-          );
-          correctedSpellCheckResults.add(adjustedSpan);
-        }
-      }
-      if (!foundCurrentSpan) {
+      if (currentSpanValid && newSpanText == currentSpanText) {
+        searchStart = currentSpan.range.end + offset;
+        adjustedSpan = SuggestionSpan(
+            TextRange(
+                start: currentSpan.range.start + offset, end: searchStart),
+            currentSpan.suggestions
+        );
+        correctedSpellCheckResults.add(adjustedSpan);
+      } else {
         regex = RegExp('\\b$currentSpanText\\b');
         foundIndex = newText.substring(searchStart).indexOf(regex);
 
