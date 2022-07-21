@@ -85,7 +85,7 @@ bool Main(const fml::CommandLine& command_line) {
   if (TargetPlatformNeedsSL(options.target_platform)) {
     auto sl_file_name = std::filesystem::absolute(
         std::filesystem::current_path() / switches.sl_file_name);
-    const bool is_runtime_stage_data = HasSuffix(switches.sl_file_name, "iplr");
+    const bool is_runtime_stage_data = switches.iplr;
     if (is_runtime_stage_data) {
       auto reflector = compiler.GetReflector();
       if (reflector == nullptr) {

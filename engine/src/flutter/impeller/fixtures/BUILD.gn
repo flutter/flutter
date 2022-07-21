@@ -26,6 +26,7 @@ impellerc("runtime_stages") {
   shaders = [ "ink_sparkle.frag" ]
   sl_file_extension = "iplr"
   shader_target_flag = "--runtime-stage-metal"
+  iplr = true
 }
 
 test_fixtures("file_fixtures") {

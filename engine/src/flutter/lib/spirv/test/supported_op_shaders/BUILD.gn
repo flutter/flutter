@@ -66,6 +66,7 @@ if (enable_unittests) {
     shader_target_flag = "--sksl"
     intermediates_subdir = "iplr"
     sl_file_extension = "iplr"
+    iplr = true
   }
 
   test_fixtures("fixtures") {
