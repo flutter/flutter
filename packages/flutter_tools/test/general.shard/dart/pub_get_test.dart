@@ -611,7 +611,7 @@ void main() {
       );
     });
     expect(logger.errorText, isEmpty);
-    expect(error, 'test failed unexpectedly: Exception: pub get failed (69; no message)');
+    expect(error, contains('test failed unexpectedly: Exception: pub get failed'));
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -643,9 +643,19 @@ void main() {
       botDetector: const BotDetectorAlwaysNo(),
       processManager: processManager,
     );
+    const String toolExitMessage = '''
+pub get failed
+command: "bin/cache/dart-sdk/bin/dart __deprecated_pub --verbosity=warning get --no-precompile"
+pub env: {
+  "FLUTTER_ROOT": "",
+  "PUB_ENVIRONMENT": "flutter_cli:flutter_tests",
+}
+exit code: 66
+last line of pub output: "err3"
+''';
     await expectLater(
       () => pub.get(context: PubContext.flutterTests),
-      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', toolExitMessage)),
     );
     expect(logger.statusText,
       'Running "flutter pub get" in /...\n'

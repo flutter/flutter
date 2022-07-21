@@ -266,17 +266,10 @@ class _DefaultPub implements Pub {
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
       status?.cancel();
       if (exception is io.ProcessException) {
-        final StringBuffer buffer = StringBuffer(exception.message);
+        final StringBuffer buffer = StringBuffer('${exception.message}\n');
         buffer.writeln('Working directory: "$directory"');
         final Map<String, String> env = await _createPubEnvironment(context, flutterRootOverride);
-        if (env.entries.isNotEmpty) {
-          buffer.writeln('pub env: {');
-          for (final MapEntry<String, String> entry in env.entries) {
-            buffer.writeln('  "${entry.key}": "${entry.value}",');
-          }
-          buffer.writeln('}');
-        }
-
+        buffer.write(_stringifyPubEnv(env));
         throw io.ProcessException(
           exception.executable,
           exception.arguments,
@@ -296,6 +289,20 @@ class _DefaultPub implements Pub {
       generatedDirectory,
       generateSyntheticPackage,
     );
+  }
+
+  // For surfacing pub env in crash reporting
+  String _stringifyPubEnv(Map<String, String> map, {String prefix = 'pub env'}) {
+    if (map.isEmpty) {
+      return '';
+    }
+    final StringBuffer buffer = StringBuffer();
+    buffer.writeln('$prefix: {');
+    for (final MapEntry<String, String> entry in map.entries) {
+      buffer.writeln('  "${entry.key}": "${entry.value}",');
+    }
+    buffer.writeln('}');
+    return buffer.toString();
   }
 
   @override
@@ -330,13 +337,15 @@ class _DefaultPub implements Pub {
     int attempts = 0;
     int duration = 1;
     int code;
+    final List<String> pubCommand = _pubCommand(arguments);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
     while (true) {
       attempts += 1;
       code = await _processUtils.stream(
-        _pubCommand(arguments),
+        pubCommand,
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
-        environment: await _createPubEnvironment(context, flutterRootOverride),
+        environment: pubEnvironment,
       );
       String? message;
       if (retry) {
@@ -372,7 +381,15 @@ class _DefaultPub implements Pub {
     ).send();
 
     if (code != 0) {
-      throwToolExit('$failureMessage ($code; $lastPubMessage)', exitCode: code);
+      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      buffer.writeln('command: "${pubCommand.join(' ')}"');
+      buffer.write(_stringifyPubEnv(pubEnvironment));
+      buffer.writeln('exit code: $code');
+      buffer.writeln('last line of pub output: "${lastPubMessage.trim()}"');
+      throwToolExit(
+        buffer.toString(),
+        exitCode: code,
+      );
     }
   }
 
