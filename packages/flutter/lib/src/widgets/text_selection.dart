@@ -970,11 +970,11 @@ class SelectionOverlay {
 
     _anchorAbove = Offset(
       selectionRect.left + selectionRect.width / 2,
-      selectionRect.top.clamp(editingRegion.top, editingRegion.bottom),
+      clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
     );
     _anchorBelow = Offset(
       _anchorAbove.dx,
-      selectionRect.bottom.clamp(editingRegion.top, editingRegion.bottom),
+      clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
     );
   }
 
