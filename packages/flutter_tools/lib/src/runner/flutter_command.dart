@@ -107,6 +107,7 @@ class FlutterOptions {
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
+  static const String kEnableDartDefineFromFileRawValue = 'enable-dart-define-from-file-raw-value';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
@@ -603,11 +604,14 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
-          'Use `const String.fromEnvironment("dart_define_from_file_raw_values")` '
-          'can get all config json file raw (base64 encode,you need base64 decode when you use) value. '
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors;the key is json filed key,get value is json value (no need for base64).',
+          'int.fromEnvironment, and double.fromEnvironment constructors;the key is json filed key, the value is json value.',
       valueHelp: 'use-define-config.json'
+    );
+    argParser.addFlag(
+      FlutterOptions.kEnableDartDefineFromFileRawValue,
+      help: 'This is a switch to indicate if you want all raw json data from ${FlutterOptions.kDartDefineFromFileOption}. '
+          'Use const String.fromEnvironment("DEFINE_CONFIG_JSON_RAW_VALUE") can get all config json file raw value.',
     );
   }
 
@@ -1144,12 +1148,18 @@ abstract class FlutterCommand extends Command<void> {
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final String? configJsonPath = stringArgDeprecated(FlutterOptions.kDartDefineFromFileOption);
       if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
+        String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
+        configJsonRaw=configJsonRaw.replaceAll(r'\n',r'\\n');
         defineConfigJsonMap=json.decode(configJsonRaw) as Map<String, dynamic>;
-        defineConfigJsonMap['dart_define_from_file_raw_values']= base64Encode(utf8.encode(configJsonRaw));
+        if (argParser.options.containsKey(FlutterOptions.kEnableDartDefineFromFileRawValue)) {
+          if(boolArgDeprecated(FlutterOptions.kEnableDartDefineFromFileRawValue)){
+            defineConfigJsonMap[kDefineConfigJsonRawValue] = jsonEncode(defineConfigJsonMap).replaceAll(r'\\n',r'\n');
+          }
+        }
         defineConfigJsonMap.forEach((String key,dynamic value) {
           dartDefines.add('$key=$value');
         });
+
       }
     }
 
