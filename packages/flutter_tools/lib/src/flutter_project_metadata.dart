@@ -359,7 +359,7 @@ migration:
   ///
   /// This merge is biased such that the results are consistent with the
   /// way project migration occurs such as not updating create_revision.
-  static MigrateConfig merge(MigrateConfig current, MigrateConfig base, MigrateConfig target, Logger logger) {
+  factory MigrateConfig merge(MigrateConfig current, MigrateConfig base, MigrateConfig target, Logger logger) {
     // Create the superset of current and target platforms with baseRevision updated to be that of target.
     final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
     for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry in current.platformConfigs.entries) {
