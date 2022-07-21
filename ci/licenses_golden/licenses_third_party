@@ -1,4 +1,4 @@
-Signature: ab8b9f10e3519ff22430e603902cc12e
+Signature: d7d515555c74c005f5b1e8763a135006
 
 UNUSED LICENSES:
 
@@ -12789,6 +12789,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/symbol_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/timer_impl.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/typed_data_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/uri_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/io_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/async/deferred_load.dart
 FILE: ../../../third_party/dart/sdk/lib/async/schedule_microtask.dart
 FILE: ../../../third_party/dart/sdk/lib/async/stream.dart
