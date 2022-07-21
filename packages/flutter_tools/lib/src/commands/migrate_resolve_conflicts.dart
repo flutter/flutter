@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
@@ -164,7 +166,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       logger.printStatus(' = New lines.\n', newline: true);
 
       // Print the conflict for reference
-      for (int lineNumber = (conflict.startLine! - contextLineCount).abs(); lineNumber < conflict.startLine!; lineNumber++) {
+      for (int lineNumber = max(conflict.startLine! - contextLineCount, 0); lineNumber < conflict.startLine!; lineNumber++) {
         printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.grey);
       }
       printConflictLine(lines[conflict.startLine!], conflict.startLine!);

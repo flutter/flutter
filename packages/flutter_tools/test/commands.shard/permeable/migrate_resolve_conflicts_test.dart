@@ -125,6 +125,8 @@ flutter:
     expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    hello
+  1    wow a bunch of lines
   2    <<<<<<<
   3    original
   4    =======
@@ -198,6 +200,8 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    hello
+  1    wow a bunch of lines
   2    <<<<<<<
   3    original
   4    =======
@@ -271,6 +275,8 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    hello
+  1    wow a bunch of lines
   2    <<<<<<<
   3    original
   4    =======
@@ -344,6 +350,8 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    hello
+  1    wow a bunch of lines
   2    <<<<<<<
   3    original
   4    =======
@@ -404,6 +412,8 @@ Cyan = Original lines.  Green = New lines.
     expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    hello
+  1    wow a bunch of lines
   2    <<<<<<<
   3    original
   4    =======
@@ -488,6 +498,8 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    hello
+  1    wow a bunch of lines
   2    <<<<<<<
   3    original
   4    =======
@@ -510,6 +522,7 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
         expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    MoreConflicts
   1    <<<<<<<
   2    original
   3    multiple
@@ -591,6 +604,8 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     expect(logger.statusText, contains('''
 Cyan = Original lines.  Green = New lines.
 
+  0    hello
+  1    wow a bunch of lines
   2    <<<<<<<
   3    original
   4    =======
