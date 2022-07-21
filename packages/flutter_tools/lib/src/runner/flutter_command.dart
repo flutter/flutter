@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
-import '../convert.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -20,6 +19,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
