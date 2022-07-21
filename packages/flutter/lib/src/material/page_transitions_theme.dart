@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:vector_math/vector_math_64.dart' show Vector4;
 
 import 'colors.dart';
 import 'theme.dart';
@@ -199,7 +198,8 @@ class _ZoomPageTransition extends StatelessWidget {
   /// will be used.
   ///
   /// Notably, this improves performance by disabling animations on both the outgoing and
-  /// incoming route.
+  /// incoming route. This also implies that ink-splashes or similar animations will
+  /// not animate during the transition.
   final bool preferRasterization;
 
   /// The widget below this widget in the tree.
@@ -219,7 +219,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          preferRasterization: preferRasterization,
+          preferRasterization: false,
           child: child,
         );
       },
@@ -230,7 +230,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomExitTransition(
           animation: animation,
-          preferRasterization: preferRasterization,
+          preferRasterization: false,
           reverse: true,
           child: child,
         );
@@ -244,7 +244,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            preferRasterization: preferRasterization,
+            preferRasterization: false,
             reverse: true,
             child: child,
           );
@@ -256,7 +256,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomExitTransition(
             animation: animation,
-            preferRasterization: preferRasterization,
+            preferRasterization: false,
             child: child,
           );
         },
@@ -334,6 +334,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       scale: scaleTransition,
       animation: widget.animation,
     );
+    controller.fallback = !allowRasterization;
     super.initState();
   }
 
@@ -351,6 +352,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
         animation: widget.animation,
       );
     }
+    controller.fallback = !allowRasterization;
     super.didUpdateWidget(oldWidget);
   }
 
@@ -364,40 +366,11 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
 
   @override
   Widget build(BuildContext context) {
-    if (allowRasterization) {
-      return RasterWidget(
-        delegate: delegate,
-        controller: controller,
-        fallback: delegate,
-        child: widget.child,
-      );
-    }
-    return AnimatedBuilder(
-      animation: widget.animation,
-      builder: (BuildContext context, Widget? child) {
-        double scrimOpacity = 0;
-        // The transition's scrim opacity only increases on the forward transition.
-        // In the reverse transition, the opacity should always be 0.0.
-        //
-        // Therefore, we need to only apply the scrim opacity animation when
-        // the transition is running forwards.
-        //
-        // The reason that we check that the animation's status is not `completed`
-        // instead of checking that it is `forward` is that this allows
-        // the interrupted reversal of the forward transition to smoothly fade
-        // the scrim away. This prevents a disjointed removal of the scrim.
-        if (!widget.reverse && widget.animation.status != AnimationStatus.completed) {
-          scrimOpacity = _scrimOpacityTween.evaluate(widget.animation)!;
-        }
-        return ColoredBox(
-          color: Colors.black.withOpacity(scrimOpacity),
-          child: child,
-        );
-      },
-      child: ScaleTransition(
-        scale: scaleTransition,
-        child: FadeTransition(opacity: fadeTransition, child: widget.child),
-      ),
+    return RasterWidget(
+      delegate: delegate,
+      controller: controller,
+      fallback: delegate,
+      child: widget.child,
     );
   }
 }
@@ -463,6 +436,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       fade: fadeTransition,
       scale: scaleTransition,
     );
+    controller.fallback = !allowRasterization;
     super.initState();
   }
 
@@ -479,6 +453,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
         scale: scaleTransition,
       );
     }
+    controller.fallback = !allowRasterization;
     super.didUpdateWidget(oldWidget);
   }
 
@@ -492,20 +467,11 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
 
   @override
   Widget build(BuildContext context) {
-    if (allowRasterization) {
-      return RasterWidget(
-        delegate: delegate,
-        controller: controller,
-        fallback: delegate,
-        child: widget.child,
-      );
-    }
-    return ScaleTransition(
-      scale: scaleTransition,
-      child: FadeTransition(
-        opacity: fadeTransition,
-        child: widget.child,
-      ),
+    return RasterWidget(
+      delegate: delegate,
+      controller: controller,
+      fallback: delegate,
+      child: widget.child,
     );
   }
 }
@@ -796,10 +762,10 @@ void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
   if (scale == 1.0) {
     return;
   }
-  transform.setDiagonal(Vector4(scale, scale, 1, 1));
-  final double dx = (size.width - (size.width * scale)).abs() / 2;
-  final double dy = (size.height - (size.height * scale)).abs() / 2;
-  transform.translate(dx, dy);
+  transform.scale(scale, scale);
+  final double dx = ((size.width * scale) - size.width) / 2;
+  final double dy = ((size.height * scale) - size.height) / 2;
+  transform.translate(-dx, -dy);
 }
 
 mixin _ZoomTransitionBase {
@@ -821,7 +787,7 @@ mixin _ZoomTransitionBase {
          fadeTransition.value == 1.0)) {
         controller.rasterize = false;
       } else {
-        controller.rasterize = allowRasterization;
+        controller.rasterize = true;
       }
   }
 
@@ -833,12 +799,11 @@ mixin _ZoomTransitionBase {
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        controller.rasterize = allowRasterization;
+        controller.rasterize = true;
         break;
     }
   }
 }
-
 
 class _ZoomEnterTransitionDelegate extends RasterWidgetDelegate implements RasterWidgetFallbackDelegate {
   _ZoomEnterTransitionDelegate({
@@ -858,8 +823,8 @@ class _ZoomEnterTransitionDelegate extends RasterWidgetDelegate implements Raste
   final Animation<double> fade;
 
   final Matrix4 _transform = Matrix4.zero();
-  OpacityLayer? _oldOpacity;
-  TransformLayer? _oldTransform;
+  final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
+  final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
   void _drawScrim(PaintingContext context, Offset offset, Size size) {
     double scrimOpacity = 0.0;
@@ -889,9 +854,9 @@ class _ZoomEnterTransitionDelegate extends RasterWidgetDelegate implements Raste
   void paintFallback(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
     _drawScrim(context, offset, size);
     _updateScaledTransform(_transform, scale.value, size);
-    _oldTransform = context.pushTransform(true, Offset.zero, _transform, (PaintingContext context, Offset offset) {
-      _oldOpacity = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _oldOpacity);
-    }, oldLayer: _oldTransform);
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+      _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
+    }, oldLayer: _transformHandler.layer);
   }
 
   @override
@@ -905,8 +870,8 @@ class _ZoomEnterTransitionDelegate extends RasterWidgetDelegate implements Raste
     animation.removeListener(notifyListeners);
     scale.removeListener(notifyListeners);
     fade.removeListener(notifyListeners);
-    _oldOpacity?.dispose();
-    _oldTransform?.dispose();
+    _opacityHandle.layer = null;
+    _transformHandler.layer = null;
     super.dispose();
   }
 
@@ -933,8 +898,8 @@ class _ZoomExitTransitionDelegate extends RasterWidgetDelegate implements Raster
   final Animation<double> scale;
   final Animation<double> fade;
   final Matrix4 _transform = Matrix4.zero();
-  OpacityLayer? _oldOpacity;
-  TransformLayer? _oldTransform;
+  final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
+  final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
   @override
   void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
@@ -944,9 +909,9 @@ class _ZoomExitTransitionDelegate extends RasterWidgetDelegate implements Raster
   @override
   void paintFallback(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
     _updateScaledTransform(_transform, scale.value, size);
-    _oldTransform = context.pushTransform(true, Offset.zero, Matrix4.identity(), (PaintingContext context, Offset offset) {
-      _oldOpacity = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _oldOpacity);
-    }, oldLayer: _oldTransform);
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+      _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
+    }, oldLayer: _transformHandler.layer);
   }
 
   @override
@@ -956,8 +921,8 @@ class _ZoomExitTransitionDelegate extends RasterWidgetDelegate implements Raster
 
   @override
   void dispose() {
-    _oldOpacity?.dispose();
-    _oldTransform?.dispose();
+    _opacityHandle.layer = null;
+    _transformHandler.layer = null;
     scale.removeListener(notifyListeners);
     fade.removeListener(notifyListeners);
     super.dispose();

@@ -369,6 +369,31 @@ void main() {
     expect(fallback.calledFallback, 1);
     expect(delegate.count, 0);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('RenderRasterWidget fallbacks to delegate if controller enables fallback', (WidgetTester tester) async {
+    final TestDelegate delegate = TestDelegate();
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true, fallback: true);
+    final TestFallback fallback = TestFallback();
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RasterWidget(
+            delegate: delegate,
+            controller: controller,
+            fallback: fallback,
+            child: const SizedBox(
+              width: 100,
+              height: 100,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(fallback.calledFallback, 1);
+    expect(delegate.count, 0);
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
 class TestFallback extends RasterWidgetFallbackDelegate {

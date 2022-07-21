@@ -23,8 +23,10 @@ class RasterWidgetController extends ChangeNotifier {
   ///
   /// By default, [rasterize] is `false` and cannot be `null`.
   RasterWidgetController({
-    bool rasterize = false
-  }) : _rasterize = rasterize;
+    bool rasterize = false,
+    bool fallback = false,
+  }) : _rasterize = rasterize,
+       _fallback = fallback;
 
   /// Reset the raster held by any listening [RasterWidget].
   ///
@@ -44,29 +46,24 @@ class RasterWidgetController extends ChangeNotifier {
     _rasterize = value;
     notifyListeners();
   }
-}
 
-/// A delegate which the [RasterWidget] can use to fallback to regular rendering
-/// if a platform view is present in the layer tree.
-///
-/// Consumers of [RasterWidget] should almost never use this delegate. For the most part,
-/// the raster widget only functions as a performance improvement. If a platform view is
-/// present, the performance improving qualities aren't possible and using this API is
-/// pointless.
-///
-/// Instead, this interface is useful if a generic/reusable widget is being created which
-/// may include a platform view and it needs to handle this transparently. For example, the
-/// framework uses this for the zoom page transition so that navigating to a page shows the same
-/// animation whether or not there is a platform view.
-abstract class RasterWidgetFallbackDelegate {
-  /// const constructor so that subclasses can be const.
-  const RasterWidgetFallbackDelegate();
-
-  /// Paint the child via [painter], applying any effects that would have been painted
-  /// with the [RasterWidgetDelegate].
+  /// Whether the raster widget should use the provided [RasterWidgetFallbackDelegate]
+  /// to render.
   ///
-  /// The [offset] and [size] are the location and dimensions of the render object.
-  void paintFallback(PaintingContext context, Offset offset, Size size, PaintingContextCallback painter);
+  /// Defaults to `false`. Generally, this should only be used if it is known
+  /// that the current platform does not support the raster widget.
+  ///
+  /// Setting this to `true` on a raster widget that does not have a fallback
+  /// delegate will cause an exception to be thrown.
+  bool get fallback => _fallback;
+  bool _fallback;
+  set fallback(bool value) {
+    if (value == fallback) {
+      return;
+    }
+    _fallback = value;
+    notifyListeners();
+  }
 }
 
 /// A widget that replaces its child with a rasterized version of the child.
@@ -79,8 +76,14 @@ abstract class RasterWidgetFallbackDelegate {
 /// Caveats:
 ///
 /// The contents of platform views cannot be captured by a raster
-/// widget. If a platform view is encountered, then nothing will be rendered unless
-/// [ignorePlatformViews] is `true` or a [fallback] delegate is provided.
+/// widget. If a platform view is encountered, then by default an error
+/// is thrown. If [ignorePlatformViews] is true, the rasterization is used
+/// without the platform view included. This may result in an incomplete picture,
+/// but may be a reasonable choice if the platform view is only incidentally included
+/// in a scene. Alternatively, if a [fallback] is provided and a platform view is
+/// detected, then the fallback is used to render the scene instead of the
+/// raster. This is only intended for the rare case when a raster widget
+/// cannot know if a child will have a platform view.
 ///
 /// This widget is not supported on the HTML backend of Flutter for the web.
 class RasterWidget extends SingleChildRenderObjectWidget {
@@ -135,6 +138,29 @@ class RasterWidget extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A delegate which the [RasterWidget] can use to fallback to regular rendering
+/// if a platform view is present in the layer tree.
+///
+/// Consumers of [RasterWidget] should almost never use this delegate. For the most part,
+/// the raster widget only functions as a performance improvement. If a platform view is
+/// present, the performance improving qualities aren't possible and using this API is
+/// pointless.
+///
+/// Instead, this interface is useful if a generic/reusable widget is being created which
+/// may include a platform view and it needs to handle this transparently. For example, the
+/// framework uses this for the zoom page transition so that navigating to a page shows the same
+/// animation whether or not there is a platform view.
+abstract class RasterWidgetFallbackDelegate {
+  /// const constructor so that subclasses can be const.
+  const RasterWidgetFallbackDelegate();
+
+  /// Paint the child via [painter], applying any effects that would have been painted
+  /// with the [RasterWidgetDelegate].
+  ///
+  /// The [offset] and [size] are the location and dimensions of the render object.
+  void paintFallback(PaintingContext context, Offset offset, Size size, PaintingContextCallback painter);
+}
+
 /// A delegate used to draw the image representing the rasterized child.
 abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// Called whenever the [image] that represents a [RasterWidget]s child should be painted.
@@ -165,7 +191,7 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// {@end-tool}
   void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio);
 
-  /// Called whenever a new instance of the custom painter delegate class is
+  /// Called whenever a new instance of the raster widget delegate class is
   /// provided to the [RenderRasterWidget] object, or any time that a new
   /// [RasterWidgetDelegate] object is created with a new instance of the
   /// delegate class (which amounts to the same thing, because the latter is
@@ -314,6 +340,7 @@ class RenderRasterWidget extends RenderProxyBox {
   }
 
   bool _hitPlatformView = false;
+  bool get _useFallback => _hitPlatformView || _controller.fallback;
 
   // Paint [child] with this painting context, then convert to a raster and detach all
   // children from this layer.
@@ -350,11 +377,11 @@ class RenderRasterWidget extends RenderProxyBox {
       return;
     }
     if (controller.rasterize) {
-      if (_hitPlatformView) {
+      if (_useFallback) {
         fallback?.paintFallback(context, offset, size, super.paint);
       } else {
         _childRaster ??= _paintAndDetachToImage(context);
-        if (_childRaster == null && _hitPlatformView) {
+        if (_childRaster == null && _useFallback) {
           fallback?.paintFallback(context, offset, size, super.paint);
         } else {
           delegate.paint(context, offset, size, _childRaster!, devicePixelRatio);

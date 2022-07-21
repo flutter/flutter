@@ -173,6 +173,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// If `false`, calling the above methods may yield an image which is
   /// incomplete.
+  ///
+  /// This value is not allowed to change during the lifetime of the
+  /// layer object.
   bool supportsRasterization() {
     return true;
   }
