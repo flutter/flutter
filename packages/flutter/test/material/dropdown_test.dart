@@ -195,6 +195,30 @@ Widget buildFrame({
   );
 }
 
+Widget buildDropdownWithHint({
+  required AlignmentDirectional alignment,
+  required bool isExpanded,
+  bool enableSelectedItemBuilder = false,
+}){
+  return buildFrame(
+    mediaSize: const Size(800, 600),
+    itemHeight: 100.0,
+    alignment: alignment,
+    isExpanded: isExpanded,
+    selectedItemBuilder: enableSelectedItemBuilder
+      ? (BuildContext context) {
+          return menuItems.map<Widget>((String item) {
+            return Container(
+              color: const Color(0xff00ff00),
+              child: Text(item),
+            );
+          }).toList();
+        }
+      : null,
+    hint: const Text('hint'),
+  );
+}
+
 class TestApp extends StatefulWidget {
   const TestApp({
     super.key,
@@ -3657,155 +3681,225 @@ void main() {
   });
 
   testWidgets('DropdownButton hint alignment', (WidgetTester tester) async {
-    final Key buttonKey = UniqueKey();
     const String hintText = 'hint';
 
-    // DropdownButton with `isExpanded: false` (default)
     // AlignmentDirectional.centerStart (default)
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
-      hint: const Text(hintText)),
-    );
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.centerStart,
+      isExpanded: false,
+    ));
     expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
     expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.topStart
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
-      itemHeight: 100.0,
-      hint: const Text(hintText)),
-    );
+      isExpanded: false,
+    ));
     expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
     expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.bottomStart
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
-      itemHeight: 100.0,
-      hint: const Text(hintText)),
-    );
+      isExpanded: false,
+    ));
     expect(tester.getBottomLeft(find.text(hintText)).dx, 348.0);
     expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
     // AlignmentDirectional.center
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
-      itemHeight: 100.0,
-      hint: const Text(hintText)),
-    );
+      isExpanded: false,
+    ));
     expect(tester.getCenter(find.text(hintText)).dx, 388.0);
     expect(tester.getCenter(find.text(hintText)).dy, 300.0);
     // AlignmentDirectional.topEnd
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
-      itemHeight: 100.0,
-      hint: const Text(hintText)),
-    );
+      isExpanded: false,
+    ));
     expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
     expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.centerEnd
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
-      itemHeight: 100.0,
-      hint: const Text(hintText)),
-    );
+      isExpanded: false,
+    ));
     expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
     expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
-    // AlignmentDirectional.topEnd
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
+    // AlignmentDirectional.bottomEnd
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
-      itemHeight: 100.0,
-      hint: const Text(hintText)),
-    );
+      isExpanded: false,
+    ));
     expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
     expect(tester.getTopRight(find.text(hintText)).dy, 334.0);
 
     // DropdownButton with `isExpanded: true`
     // AlignmentDirectional.centerStart (default)
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.centerStart,
       isExpanded: true,
-      hint: const Text(hintText)),
-    );
+    ));
     expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
     expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.topStart
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
-      isExpanded: true,
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
-      hint: const Text(hintText)),
-    );
+      isExpanded: true,
+    ));
     expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
     expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.bottomStart
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
-      isExpanded: true,
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
-      hint: const Text(hintText)),
-    );
+      isExpanded: true,
+    ));
     expect(tester.getBottomLeft(find.text(hintText)).dx, 0.0);
     expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
     // AlignmentDirectional.center
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
-      isExpanded: true,
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
-      hint: const Text(hintText)),
-    );
+      isExpanded: true,
+    ));
     expect(tester.getCenter(find.text(hintText)).dx, 388.0);
     expect(tester.getCenter(find.text(hintText)).dy, 300.0);
     // AlignmentDirectional.topEnd
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
-      isExpanded: true,
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
-      hint: const Text(hintText)),
-    );
+      isExpanded: true,
+    ));
     expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
     expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.centerEnd
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
-      isExpanded: true,
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
-      hint: const Text(hintText)),
-    );
+      isExpanded: true,
+    ));
     expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
     expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
-    await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
-      mediaSize: const Size(800, 600),
-      itemHeight: 100.0,
-      isExpanded: true,
+    await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
-      hint: const Text(hintText)),
-    );
+      isExpanded: true,
+    ));
+    expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
+  });
+
+  testWidgets('DropdownButton hint alignment with selectedItemBuilder', (WidgetTester tester) async {
+    const String hintText = 'hint';
+
+    // AlignmentDirectional.centerStart (default)
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.centerStart,
+      isExpanded: false,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.topStart
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.topStart,
+      isExpanded: false,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.bottomStart
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.bottomStart,
+      isExpanded: false,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    // AlignmentDirectional.center
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.center,
+      isExpanded: false,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    // AlignmentDirectional.topEnd
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.topEnd,
+      isExpanded: false,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.centerEnd
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.centerEnd,
+      isExpanded: false,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.bottomEnd
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.bottomEnd,
+      isExpanded: false,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 334.0);
+
+    // DropdownButton with `isExpanded: true`
+    // AlignmentDirectional.centerStart (default)
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.centerStart,
+      isExpanded: true,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.topStart
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.topStart,
+      isExpanded: true,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.bottomStart
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.bottomStart,
+      isExpanded: true,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    // AlignmentDirectional.center
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.center,
+      isExpanded: true,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    // AlignmentDirectional.topEnd
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.topEnd,
+      isExpanded: true,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.centerEnd
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.centerEnd,
+      isExpanded: true,
+      enableSelectedItemBuilder: true,
+    ));
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.bottomEnd
+    await tester.pumpWidget(buildDropdownWithHint(
+      alignment: AlignmentDirectional.bottomEnd,
+      isExpanded: true,
+      enableSelectedItemBuilder: true,
+    ));
     expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
     expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
   });

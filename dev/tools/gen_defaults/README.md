@@ -15,10 +15,10 @@ dart dev/tools/gen_defaults/bin/gen_defaults.dart
 There is a template file for every component that needs defaults from
 the token database. These templates are implemented as subclasses of
 `TokenTemplate`. This base class provides some utilities and a structure
-for adding a new chunk of generated code to the bottom of a given file.
+for adding a new block of generated code to the bottom of a given file.
 
 Templates need to override the `generate` method to provide the generated
-code chunk as a string. The tokens are represented as a `Map<String, dynamic>`
+code block as a string. The tokens are represented as a `Map<String, dynamic>`
 that is loaded from `data/material-tokens.json`. Templates can look up
 whatever properties are needed in this structure to provide the properties
 needed for the component.

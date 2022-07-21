@@ -2122,6 +2122,41 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
+  testWidgets('showDialog throws a friendly user message when context is not active', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/12467
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: Text('Test')),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Test'));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(),
+      ),
+    );
+
+    Object? error;
+    try {
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext innerContext) {
+          return const AlertDialog(title: Text('Title'));
+        },
+      );
+    } catch(exception) {
+      error = exception;
+    }
+
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    if (error is FlutterError) {
+      final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
+      expect(summary.toString(), 'This BuildContext is no longer valid.');
+    }
+  });
+
   group('showDialog avoids overlapping display features', () {
     testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(

@@ -32,8 +32,6 @@ late final String dart;
 /// The path to the `pub` executable; set at the top of `main`
 late final String pub;
 
-final String pubCache = path.join(flutterRoot, '.pub-cache');
-
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter analyze. For example, you might want to call this
 /// script with the parameter --dart-sdk to use custom dart sdk.
