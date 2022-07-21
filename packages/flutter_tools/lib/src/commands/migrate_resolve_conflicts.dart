@@ -112,7 +112,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       final List<Conflict> conflicts = findConflicts(lines, localPath);
 
       // Prompt developer
-      FlutterCommandResult? promptResult = await promptDeveloperSelectAction(conflicts, lines, localPath);
+      final FlutterCommandResult? promptResult = await promptDeveloperSelectAction(conflicts, lines, localPath);
       if (promptResult != null) {
         return promptResult;
       }
