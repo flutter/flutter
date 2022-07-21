@@ -33,8 +33,6 @@ typedef ToolbarButtonWidgetBuilder = Widget Function(
   List<ContextMenuButtonData> buttonDatas,
 );
 
-// TODO(justinmc): Instead of 2 anchors, take a Rect? Or that's not enough
-// info because selection is not always a Rect?
 /// A function that builds a widget to use as the text selection toolbar for
 /// [EditableText].
 ///
