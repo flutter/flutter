@@ -10,6 +10,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/display_list_rtree.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -338,42 +339,125 @@ class ClipBoundsDispatchHelper : public virtual Dispatcher,
 
 class BoundsAccumulator {
  public:
-  void accumulate(const SkPoint& p) { accumulate(p.fX, p.fY); }
-  void accumulate(SkScalar x, SkScalar y) {
-    if (min_x_ > x) {
-      min_x_ = x;
-    }
-    if (min_y_ > y) {
-      min_y_ = y;
-    }
-    if (max_x_ < x) {
-      max_x_ = x;
-    }
-    if (max_y_ < y) {
-      max_y_ = y;
-    }
-  }
-  void accumulate(const SkRect& r) {
-    if (r.fLeft < r.fRight && r.fTop < r.fBottom) {
-      accumulate(r.fLeft, r.fTop);
-      accumulate(r.fRight, r.fBottom);
-    }
-  }
+  /// function definition for modifying the bounds of a rectangle
+  /// during a restore operation. The function is used primarily
+  /// to account for the bounds impact of an ImageFilter on a
+  /// saveLayer on a per-rect basis. The implementation may apply
+  /// this function at whatever granularity it can manage easily
+  /// (for example, a Rect accumulator might apply it to the entire
+  /// local bounds being restored, whereas an RTree accumulator might
+  /// apply it individually to each element in the local RTree).
+  ///
+  /// The function will do a best faith attempt at determining the
+  /// modified bounds and store the results in the supplied |dest|
+  /// rectangle and return true. If the function is unable to
+  /// accurately determine the modifed bounds, it will set the
+  /// |dest| rectangle to a copy of the input bounds (or a best
+  /// guess) and return false to indicate that the bounds should not
+  /// be trusted.
+  typedef bool BoundsModifier(const SkRect& original, SkRect* dest);
 
-  bool is_empty() const { return min_x_ >= max_x_ || min_y_ >= max_y_; }
-  bool is_not_empty() const { return min_x_ < max_x_ && min_y_ < max_y_; }
+  virtual void accumulate(const SkRect& r) = 0;
+
+  virtual bool is_empty() const = 0;
+  virtual bool is_not_empty() const = 0;
+
+  /// Save aside the rects/bounds currently being accumulated and start
+  /// accumulating a new set of rects/bounds. When restore is called,
+  /// some additional modifications may be applied to these new bounds
+  /// before they are accumulated back into the surrounding bounds.
+  virtual void save() = 0;
+
+  /// Restore to the previous accumulation and incorporate the bounds of
+  /// the primitives that were recorded since the last save (if needed).
+  virtual void restore() = 0;
+
+  /// Restore the previous set of accumulation rects/bounds and accumulate
+  /// the current rects/bounds that were accumulated since the most recent
+  /// call to |save| into them with modifications specified by the |map|
+  /// parameter and clipping to the clip parameter if it is not null.
+  ///
+  /// The indicated map function is applied to the various rects and bounds
+  /// that have been accumulated in this save/restore cycle before they
+  /// are then accumulated into the previous accumulations. The granularity
+  /// of the application of the map function to the rectangles that were
+  /// accumulated during the save period is left up to the implementation.
+  ///
+  /// This method will return true if the map function returned true on
+  /// every single invocation. A false return value means that the
+  /// bounds accumulated during this restore may not be trusted (as
+  /// determined by the map function).
+  ///
+  /// If there are no saved accumulations to restore to, this method will
+  /// NOP ignoring the map function and the optional clip entirely.
+  virtual bool restore(
+      std::function<bool(const SkRect& original, SkRect& modified)> map,
+      const SkRect* clip = nullptr) = 0;
+};
+
+class RectBoundsAccumulator final : public virtual BoundsAccumulator {
+ public:
+  void accumulate(SkScalar x, SkScalar y) { rect_.accumulate(x, y); }
+  void accumulate(const SkPoint& p) { rect_.accumulate(p.fX, p.fY); }
+  void accumulate(const SkRect& r) override;
+
+  bool is_empty() const override { return rect_.is_empty(); }
+  bool is_not_empty() const override { return rect_.is_not_empty(); }
+
+  void save() override;
+  void restore() override;
+  bool restore(std::function<bool(const SkRect&, SkRect&)> mapper,
+               const SkRect* clip) override;
 
   SkRect bounds() const {
-    return (max_x_ >= min_x_ && max_y_ >= min_y_)
-               ? SkRect::MakeLTRB(min_x_, min_y_, max_x_, max_y_)
-               : SkRect::MakeEmpty();
+    FML_DCHECK(saved_rects_.empty());
+    return rect_.bounds();
   }
 
  private:
-  SkScalar min_x_ = std::numeric_limits<SkScalar>::infinity();
-  SkScalar min_y_ = std::numeric_limits<SkScalar>::infinity();
-  SkScalar max_x_ = -std::numeric_limits<SkScalar>::infinity();
-  SkScalar max_y_ = -std::numeric_limits<SkScalar>::infinity();
+  class AccumulationRect {
+   public:
+    AccumulationRect();
+
+    void accumulate(SkScalar x, SkScalar y);
+
+    bool is_empty() const { return min_x_ >= max_x_ || min_y_ >= max_y_; }
+    bool is_not_empty() const { return min_x_ < max_x_ && min_y_ < max_y_; }
+
+    SkRect bounds() const;
+
+   private:
+    SkScalar min_x_;
+    SkScalar min_y_;
+    SkScalar max_x_;
+    SkScalar max_y_;
+  };
+
+  void pop_and_accumulate(SkRect& layer_bounds, const SkRect* clip);
+
+  AccumulationRect rect_;
+  std::vector<AccumulationRect> saved_rects_;
+};
+
+class RTreeBoundsAccumulator final : public virtual BoundsAccumulator {
+ public:
+  void accumulate(const SkRect& r) override;
+
+  bool is_empty() const override;
+  bool is_not_empty() const override;
+
+  void save() override;
+  void restore() override;
+
+  bool restore(
+      std::function<bool(const SkRect& original, SkRect& modified)> map,
+      const SkRect* clip = nullptr) override;
+
+  sk_sp<DlRTree> rtree() const;
+
+ private:
+  std::vector<SkRect> rects_;
+  std::vector<size_t> saved_offsets_;
 };
 
 // This class implements all rendering methods and computes a liberal
@@ -394,7 +478,8 @@ class DisplayListBoundsCalculator final
   // queried using |isUnbounded| if an alternate plan is available
   // for such cases.
   // The flag should never be set if a cull_rect is provided.
-  explicit DisplayListBoundsCalculator(const SkRect* cull_rect = nullptr);
+  explicit DisplayListBoundsCalculator(BoundsAccumulator& accumulator,
+                                       const SkRect* cull_rect = nullptr);
 
   void setStrokeCap(DlStrokeCap cap) override;
   void setStrokeJoin(DlStrokeJoin join) override;
@@ -489,17 +574,8 @@ class DisplayListBoundsCalculator final
     return layer_infos_.front()->is_unbounded();
   }
 
-  SkRect bounds() const {
-    FML_DCHECK(layer_infos_.size() == 1);
-    if (is_unbounded()) {
-      FML_LOG(INFO) << "returning partial bounds for unbounded DisplayList";
-    }
-    return accumulator_->bounds();
-  }
-
  private:
-  // current accumulator based on saveLayer history
-  BoundsAccumulator* accumulator_;
+  BoundsAccumulator& accumulator_;
 
   // A class that remembers the information kept for a single
   // |save| or |saveLayer|.
@@ -510,25 +586,12 @@ class DisplayListBoundsCalculator final
    public:
     // Construct a LayerData to push on the save stack for a |save|
     // or |saveLayer| call.
-    // The |outer| parameter is the |BoundsAccumulator| that was
-    // in use by the stream before this layer was pushed on the
-    // stack and should be returned when this layer is popped off
-    // the stack.
     // Some saveLayer calls will process their bounds by a
     // |DlImageFilter| when they are restored, but for most
     // saveLayer (and all save) calls the filter will be null.
-    explicit LayerData(BoundsAccumulator* outer,
-                       std::shared_ptr<DlImageFilter> filter = nullptr)
-        : outer_(outer), filter_(filter), is_unbounded_(false) {}
+    explicit LayerData(std::shared_ptr<DlImageFilter> filter = nullptr)
+        : filter_(filter), is_unbounded_(false) {}
     ~LayerData() = default;
-
-    // The accumulator to use while this layer is put in play by
-    // a |save| or |saveLayer|
-    BoundsAccumulator* layer_accumulator() { return &layer_accumulator_; }
-
-    // The accumulator to use after this layer is removed from play
-    // via |restore|
-    BoundsAccumulator* restore_accumulator() { return outer_; }
 
     // The filter to apply to the layer bounds when it is restored
     std::shared_ptr<DlImageFilter> filter() { return filter_; }
@@ -563,9 +626,12 @@ class DisplayListBoundsCalculator final
     // the layer will have one last chance to flag an unbounded state.
     bool is_unbounded() const { return is_unbounded_; }
 
+    bool map_bounds(const SkRect& input, SkRect* output) {
+      *output = input;
+      return true;
+    }
+
    private:
-    BoundsAccumulator layer_accumulator_;
-    BoundsAccumulator* outer_;
     std::shared_ptr<DlImageFilter> filter_;
     bool is_unbounded_;
 
