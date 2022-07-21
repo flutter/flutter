@@ -162,6 +162,35 @@ abstract class RasterWidgetFallbackDelegate {
 }
 
 /// A delegate used to draw the image representing the rasterized child.
+///
+/// The delegate can call [notifyListeners] to have the raster widget
+/// re-paint (re-using the same raster). This allows animations to be connected
+/// to the raster and performed without re-rasterization of children. For
+/// certain scale or perspective changing transforms, such as a rotation, this
+/// can be significantly faster than performing the same animation at the
+/// widget level.
+///
+/// By default, the [RasterWidget] includes a delegate that draws the child raster
+/// exactly as the child widgets would have been drawn. Nevertheless, this can
+/// also be used to efficiently transform the child raster and apply complex paint
+/// effects.
+///
+/// {@tool snippet}
+/// 
+/// The following method shows how to efficiently rotate the child raster.
+/// 
+/// ```dart
+/// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+///   final radians = 0.5; // Could be driven by an animation.
+///   final Matrix4 transform = Matrix4.rotationZ(radians);
+///   context.canvas.transform(transform.storage);
+///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+///   final Paint paint = Paint()
+///     ..filterQuality = FilterQuality.low;
+///   context.canvas.drawImageRect(image, src, dst, paint);
+/// }
+/// ```
 abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// Called whenever the [image] that represents a [RasterWidget]s child should be painted.
   ///
@@ -181,7 +210,7 @@ abstract class RasterWidgetDelegate extends ChangeNotifier {
   ///
   /// ```dart
   /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
-  ///   final Rect src = Rect.fromLTWH(offset.dx, offset.dy, image.width.toDouble(), image.height.toDouble());
+  ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
   ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   ///   final Paint paint = Paint()
   ///     ..filterQuality = FilterQuality.low;
@@ -344,7 +373,7 @@ class RenderRasterWidget extends RenderProxyBox {
 
   // Paint [child] with this painting context, then convert to a raster and detach all
   // children from this layer.
-  ui.Image? _paintAndDetachToImage(PaintingContext originalContext) {
+  ui.Image? _paintAndDetachToImage() {
     final OffsetLayer offsetLayer = OffsetLayer();
     final PaintingContext context = PaintingContext(offsetLayer, Offset.zero & size);
     super.paint(context, Offset.zero);
@@ -380,7 +409,7 @@ class RenderRasterWidget extends RenderProxyBox {
       if (_useFallback) {
         fallback?.paintFallback(context, offset, size, super.paint);
       } else {
-        _childRaster ??= _paintAndDetachToImage(context);
+        _childRaster ??= _paintAndDetachToImage();
         if (_childRaster == null && _useFallback) {
           fallback?.paintFallback(context, offset, size, super.paint);
         } else {
