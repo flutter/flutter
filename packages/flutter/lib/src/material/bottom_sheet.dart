@@ -361,7 +361,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   }) : assert(isScrollControlled != null),
        assert(enableDrag != null);
 
-  final _ModalBottomSheetRoute<T>? route;
+  final ModalBottomSheetRoute<T>? route;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -453,8 +453,69 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 }
 
-class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
-  _ModalBottomSheetRoute({
+
+/// Shows a modal Material Design bottom sheet.
+///
+/// A modal bottom sheet is an alternative to a menu or a dialog and prevents
+/// the user from interacting with the rest of the app.
+///
+/// A closely related widget is a persistent bottom sheet, which shows
+/// information that supplements the primary content of the app without
+/// preventing the user from interacting with the app. Persistent bottom sheets
+/// can be created and displayed with the [showBottomSheet] function or the
+/// [ScaffoldState.showBottomSheet] method.
+///
+/// The `isScrollControlled` parameter specifies whether this is a route for
+/// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
+/// to have a bottom sheet that has a scrollable child such as a [ListView] or
+/// a [GridView] and have the bottom sheet be draggable, you should set this
+/// parameter to true.
+///
+/// The `useRootNavigator` parameter ensures that the root navigator is used to
+/// display the [BottomSheet] when set to `true`. This is useful in the case
+/// that a modal [BottomSheet] needs to be displayed above all other content
+/// but the caller is inside another [Navigator].
+///
+/// The [isDismissible] parameter specifies whether the bottom sheet will be
+/// dismissed when user taps on the scrim.
+///
+/// The [enableDrag] parameter specifies whether the bottom sheet can be
+/// dragged up and down and dismissed by swiping downwards.
+///
+/// The [useSafeArea] parameter specifies whether a SafeArea is inserted. Defaults to false.
+/// If false, no SafeArea is added and the top padding is consumed using MediaQuery.removePadding.
+///
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
+/// [constraints] and [transitionAnimationController]
+/// parameters can be passed in to customize the appearance and behavior of
+/// modal bottom sheets (see the documentation for these on [BottomSheet]
+/// for more details).
+///
+/// The [transitionAnimationController] controls the bottom sheet's entrance and
+/// exit animations. It's up to the owner of the controller to call
+/// [AnimationController.dispose] when the controller is no longer needed.
+///
+/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
+/// sheet. This is particularly useful in the case that a user wants to observe
+/// [PopupRoute]s within a [NavigatorObserver].
+///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
+/// See also:
+///
+///  * [showModalBottomSheet], which is a way to display a ModalBottomSheetRoute.
+///  * [BottomSheet], which becomes the parent of the widget returned by the
+///    function passed as the `builder` argument to [showModalBottomSheet].
+///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
+///    non-modal bottom sheets.
+///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
+///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
+///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
+class ModalBottomSheetRoute<T> extends PopupRoute<T> {
+  /// Shows a modal Material Design bottom sheet.
+  ModalBottomSheetRoute({
     this.builder,
     required this.capturedThemes,
     this.barrierLabel,
@@ -716,7 +777,7 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMaterialLocalizations(context));
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-  return navigator.push(_ModalBottomSheetRoute<T>(
+  return navigator.push(ModalBottomSheetRoute<T>(
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
@@ -806,3 +867,4 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     transitionAnimationController: transitionAnimationController,
   );
 }
+
