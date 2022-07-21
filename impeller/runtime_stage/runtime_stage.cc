@@ -65,9 +65,6 @@ RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
     return;
   }
   if (!fb::RuntimeStageBufferHasIdentifier(payload_->GetMapping())) {
-    VALIDATION_LOG
-        << "Impeller Runtime stage has invalid magic. Perhaps the stage "
-           "information is for the incorrect backend or the data is corrupted?";
     return;
   }
   auto runtime_stage = fb::GetRuntimeStage(payload_->GetMapping());
