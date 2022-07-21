@@ -24,6 +24,7 @@ struct Switches {
   std::string source_file_name;
   SourceType input_type;
   std::string sl_file_name;
+  bool iplr;
   std::string spirv_file_name;
   std::string reflection_json_name;
   std::string reflection_header_name;
