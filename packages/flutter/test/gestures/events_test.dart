@@ -844,6 +844,15 @@ void main() {
       expect(event.synthesized, empty.synthesized);
     });
   });
+
+  test('Ensure certain event types are allowed', () {
+    expect(const PointerHoverEvent(kind: PointerDeviceKind.trackpad), isNotNull);
+    // The test passes if it compiles.
+  });
+
+  test('Ensure certain event types are not allowed', () {
+    expect(() => PointerDownEvent(kind: PointerDeviceKind.trackpad), throwsAssertionError);
+  });
 }
 
 void _expectTransformedEvent({
