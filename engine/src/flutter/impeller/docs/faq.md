@@ -47,3 +47,18 @@
     been sanity checks to ensure that the Impeller API can be ported to WASM and
     also that Impeller shaders can be [compiled to WGSL](https://github.com/chinmaygarde/wgsl_sandbox)
     for eventual WebGPU support.
+* How will Impeller affect the way in which Flutter applications are created and
+  packaged?
+  * It won't.
+  * Impeller, like Skia, is an implementation detail of the Flutter Engine.
+    Using a different rendering package will not affect the way in which the
+    Flutter Engine is used.
+  * Like with Skia today, none of Impellers symbols will be exposed from the
+    Flutter Engine dynamic library.
+  * The binary size overhead of Impeller is around 100 KB per architecture. This
+    includes all precompiled shaders.
+  * Impeller is compiled into the Flutter engine. It is currently behind a flag
+    as development progresses.
+* How do I enable Impeller to try it out myself?
+  * See the instructions in the README on how to [try Impeller in
+    Flutter](https://github.com/flutter/engine/tree/main/impeller#try-impeller-in-flutter).
