@@ -19,11 +19,11 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-    await SemanticsService.announce('announcement 1', TextDirection.ltr, AriaLivePolitenessSetting.polite);
+    await SemanticsService.announce('announcement 1', TextDirection.ltr, assertivenessSetting: Assertiveness.polite);
     await SemanticsService.announce('announcement 2', TextDirection.rtl);
     expect(log, equals(<Map<String, dynamic>>[
-      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1, 'ariaLivePolitenessSetting': 0}},
-      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0, 'ariaLivePolitenessSetting': 1}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1, 'assertivenessSetting': 0}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0, 'assertivenessSetting': 1}},
     ]));
   });
 }

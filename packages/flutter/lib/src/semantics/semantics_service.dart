@@ -6,7 +6,7 @@ import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
-import 'semantics_event.dart' show AnnounceSemanticsEvent, AriaLivePolitenessSetting, TooltipSemanticsEvent;
+import 'semantics_event.dart' show AnnounceSemanticsEvent, Assertiveness, TooltipSemanticsEvent;
 
 export 'dart:ui' show TextDirection;
 
@@ -30,11 +30,10 @@ class SemanticsService {
   /// For example a camera application can use this method to make accessibility
   /// announcements regarding objects in the viewfinder.
   ///
-  /// The third argument adds an optional setting for flutter web.
-  /// It determines the politeness setting of aria live.
-  /// The default mode is 'assertive'.
-  static Future<void> announce(String message, TextDirection textDirection, [AriaLivePolitenessSetting ariaLivePolitenessSetting = AriaLivePolitenessSetting.assertive]) async {
-    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(message, textDirection, ariaLivePolitenessSetting);
+  /// The third argument adds an optional setting to determine the assertiveness level.
+  /// If not specified, the mode will be 'assertive'.
+  static Future<void> announce(String message, TextDirection textDirection, {Assertiveness assertivenessSetting = Assertiveness.assertive}) async {
+    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(message, textDirection, assertivenessSetting);
     await SystemChannels.accessibility.send(event.toMap());
   }
 

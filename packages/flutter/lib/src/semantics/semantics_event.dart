@@ -8,15 +8,17 @@ import 'package:flutter/painting.dart';
 
 export 'dart:ui' show TextDirection;
 
-/// Determines the politeness setting of aria live in Flutter web.
+/// Determines the assertiveness level of the accessibility announcement.
 ///
-/// It is used to set the priority with which screen reader should treat updates to live regions.
-enum AriaLivePolitenessSetting {
-  /// The screen reader will speak changes whenever the user is idle.
+/// It is used to set the priority with which assistive technology should treat announcements.
+enum Assertiveness {
+  /// The assistive technology will speak changes whenever the user is idle.
   polite,
 
-  /// It will interrupt any announcement a screen reader is currently making to notify
-  /// the user about the change. It should only be used for time-sensitive/critical notifications.
+  /// The assistive technology will interrupt any announcement that is currently making to notify
+  /// the user about the change.
+  ///
+  /// It should only be used for time-sensitive/critical notifications.
   assertive,
 }
 
@@ -83,7 +85,7 @@ abstract class SemanticsEvent {
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection, this.ariaLivePolitenessSetting)
+  const AnnounceSemanticsEvent(this.message, this.textDirection, this.assertivenessSetting)
     : assert(message != null),
       assert(textDirection != null),
       super('announce');
@@ -98,15 +100,15 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   /// This property must not be null.
   final TextDirection textDirection;
 
-  /// Determines whether aria announcement needs to be 'polite' or 'assertive' in Flutter web.
-  final AriaLivePolitenessSetting ariaLivePolitenessSetting;
+  /// Determines whether the announcement should interrupt any existing announcement, or queue after it.
+  final Assertiveness assertivenessSetting;
 
   @override
   Map<String, dynamic> getDataMap() {
     return <String, dynamic>{
       'message': message,
       'textDirection': textDirection.index,
-      'ariaLivePolitenessSetting': ariaLivePolitenessSetting.index,
+      'assertivenessSetting': assertivenessSetting.index,
     };
   }
 }
