@@ -1667,6 +1667,12 @@ class _RepositoryLibcxxabiDirectory extends _RepositoryDirectory {
   _RepositoryLibcxxabiDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
   @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'www'
+        && super.shouldRecurse(entry);
+  }
+
+  @override
   _RepositoryFile createFile(fs.IoNode entry) {
     if (entry.name == 'LICENSE.TXT')
       return _RepositoryCxxStlDualLicenseFile(this, entry as fs.TextFile);
