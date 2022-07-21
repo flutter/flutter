@@ -75,17 +75,18 @@ RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
   stage_ = ToShaderStage(runtime_stage->stage());
   entrypoint_ = runtime_stage->entrypoint()->str();
 
-  for (auto i = runtime_stage->uniforms()->begin(),
-            end = runtime_stage->uniforms()->end();
-       i != end; i++) {
-    RuntimeUniformDescription desc;
-    desc.name = i->name()->str();
-    desc.location = i->location();
-    desc.type = ToType(i->type());
-    desc.dimensions = RuntimeUniformDimensions{
-        static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
-    desc.bit_width = i->bit_width();
-    uniforms_.emplace_back(std::move(desc));
+  auto* uniforms = runtime_stage->uniforms();
+  if (uniforms) {
+    for (auto i = uniforms->begin(), end = uniforms->end(); i != end; i++) {
+      RuntimeUniformDescription desc;
+      desc.name = i->name()->str();
+      desc.location = i->location();
+      desc.type = ToType(i->type());
+      desc.dimensions = RuntimeUniformDimensions{
+          static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
+      desc.bit_width = i->bit_width();
+      uniforms_.emplace_back(std::move(desc));
+    }
   }
 
   code_mapping_ = std::make_shared<fml::NonOwnedMapping>(
