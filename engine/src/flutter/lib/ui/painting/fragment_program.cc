@@ -22,18 +22,21 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, FragmentProgram);
 
-void FragmentProgram::initFromAsset(std::string asset_name) {
+std::string FragmentProgram::initFromAsset(std::string asset_name) {
   std::shared_ptr<AssetManager> asset_manager = UIDartState::Current()
                                                     ->platform_configuration()
                                                     ->client()
                                                     ->GetAssetManager();
   std::unique_ptr<fml::Mapping> data = asset_manager->GetAsMapping(asset_name);
   if (data == nullptr) {
-    Dart_ThrowException(tonic::ToDart("Asset '" + asset_name + "' not found"));
-    return;
+    return std::string("Asset '") + asset_name + std::string("' not found");
   }
 
   auto runtime_stage = impeller::RuntimeStage(std::move(data));
+  if (!runtime_stage.IsValid()) {
+    return std::string("Asset '") + asset_name +
+           std::string("' does not contain valid shader data.");
+  }
   {
     auto code_mapping = runtime_stage.GetCodeMapping();
     auto code_size = code_mapping->GetSize();
@@ -43,10 +46,8 @@ void FragmentProgram::initFromAsset(std::string asset_name) {
     SkRuntimeEffect::Result result =
         SkRuntimeEffect::MakeForShader(SkString(sksl, code_size));
     if (result.effect == nullptr) {
-      Dart_ThrowException(tonic::ToDart(std::string("Invalid SkSL:\n") + sksl +
-                                        std::string("\nSkSL Error:\n") +
-                                        result.errorText.c_str()));
-      return;
+      return std::string("Invalid SkSL:\n") + sksl +
+             std::string("\nSkSL Error:\n") + result.errorText.c_str();
     }
     runtime_effect_ = result.effect;
   }
@@ -84,6 +85,8 @@ void FragmentProgram::initFromAsset(std::string asset_name) {
   if (Dart_IsError(result)) {
     Dart_PropagateError(result);
   }
+
+  return "";
 }
 
 void FragmentProgram::init(std::string sksl, bool debugPrintSksl) {
