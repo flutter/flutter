@@ -244,7 +244,7 @@
 /dev/integration_tests/release_smoke_test @blasten @flutter/android
 
 ## OpenPay tests
-/dev/devicelab/bin/tasks/Linux_android openpay_benchmarks__scroll_perf @iskakaushik @flutter/engine
+/dev/devicelab/bin/tasks/openpay_benchmarks__scroll_perf.dart @iskakaushik @flutter/engine
 
 ## Shards tests
 # TODO(keyonghan): add files/paths for below framework host only testss.
