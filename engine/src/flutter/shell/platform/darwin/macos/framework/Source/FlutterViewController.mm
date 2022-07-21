@@ -36,6 +36,27 @@ static constexpr int32_t kPointerPanZoomDeviceId = 1;
  */
 struct MouseState {
   /**
+   * The currently pressed buttons, as represented in FlutterPointerEvent.
+   */
+  int64_t buttons = 0;
+
+  /**
+   * The accumulated gesture pan.
+   */
+  CGFloat delta_x = 0;
+  CGFloat delta_y = 0;
+
+  /**
+   * The accumulated gesture zoom scale.
+   */
+  CGFloat scale = 0;
+
+  /**
+   * The accumulated gesture rotation.
+   */
+  CGFloat rotation = 0;
+
+  /**
    * Whether or not a kAdd event has been sent (or sent again since the last kRemove if tracking is
    * enabled). Used to determine whether to send a kAdd event before sending an incoming mouse
    * event, since Flutter expects pointers to be added before events are sent for them.
@@ -57,20 +78,9 @@ struct MouseState {
   bool has_pending_exit = false;
 
   /**
-   * The currently pressed buttons, as represented in FlutterPointerEvent.
-   */
-  int64_t buttons = 0;
-
-  /**
    * Pan gesture is currently sending us events.
    */
   bool pan_gesture_active = false;
-
-  /**
-   * The accumulated gesture pan.
-   */
-  CGFloat delta_x = 0;
-  CGFloat delta_y = 0;
 
   /**
    * Scale gesture is currently sending us events.
@@ -78,19 +88,14 @@ struct MouseState {
   bool scale_gesture_active = false;
 
   /**
-   * The accumulated gesture zoom scale.
-   */
-  CGFloat scale = 0;
-
-  /**
    * Rotate gesture is currently sending use events.
    */
   bool rotate_gesture_active = false;
 
   /**
-   * The accumulated gesture rotation.
+   * System scroll inertia is currently sending us events.
    */
-  CGFloat rotation = 0;
+  bool system_scroll_inertia_active = false;
 
   /**
    * Resets all gesture state to default values.
@@ -375,6 +380,10 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)viewDidLoad {
   [self configureTrackingArea];
+  if (@available(macOS 10.12.2, *)) {
+    [self.view setAllowedTouchTypes:NSTouchTypeMaskIndirect];
+    [self.view setWantsRestingTouches:YES];
+  }
 }
 
 - (void)viewWillAppear {
@@ -510,7 +519,13 @@ static void CommonInit(FlutterViewController* controller) {
   } else if (event.phase == NSEventPhaseNone && event.momentumPhase == NSEventPhaseNone) {
     [self dispatchMouseEvent:event phase:kHover];
   } else {
-    // Skip momentum events, the framework will generate scroll momentum.
+    if (event.momentumPhase == NSEventPhaseBegan) {
+      _mouseState.system_scroll_inertia_active = true;
+    } else if (event.momentumPhase == NSEventPhaseEnded ||
+               event.momentumPhase == NSEventPhaseCancelled) {
+      _mouseState.system_scroll_inertia_active = false;
+    }
+    // Skip momentum update events, the framework will generate scroll momentum.
     NSAssert(event.momentumPhase != NSEventPhaseNone,
              @"Received gesture event with unexpected phase");
   }
@@ -823,6 +838,33 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)swipeWithEvent:(NSEvent*)event {
   // Not needed, it's handled by scrollWheel.
+}
+
+- (void)touchesBeganWithEvent:(NSEvent*)event {
+  if (@available(macOS 10.12, *)) {
+    NSTouch* touch = event.allTouches.anyObject;
+    if (touch != nil) {
+      if (_mouseState.system_scroll_inertia_active) {
+        // The trackpad has been touched and a scroll gesture is still sending inertia events.
+        // A scroll inertia cancel message should be sent to the framework.
+        NSPoint locationInView = [self.flutterView convertPoint:event.locationInWindow
+                                                       fromView:nil];
+        NSPoint locationInBackingCoordinates =
+            [self.flutterView convertPointToBacking:locationInView];
+        FlutterPointerEvent flutterEvent = {
+            .struct_size = sizeof(flutterEvent),
+            .timestamp = static_cast<size_t>(event.timestamp * USEC_PER_SEC),
+            .x = locationInBackingCoordinates.x,
+            .y = -locationInBackingCoordinates.y,  // convertPointToBacking makes this negative.
+            .device = kPointerPanZoomDeviceId,
+            .signal_kind = kFlutterPointerSignalKindScrollInertiaCancel,
+            .device_kind = kFlutterPointerDeviceKindTrackpad,
+        };
+
+        [_engine sendPointerEvent:flutterEvent];
+      }
+    }
+  }
 }
 
 @end
