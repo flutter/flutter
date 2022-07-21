@@ -40,9 +40,9 @@ class FilledTextFieldExample extends StatelessWidget {
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.search),
         suffixIcon: Icon(Icons.clear),
-        labelText: "Filled",
-        hintText: "hint text",
-        helperText: "supporting text",
+        labelText: 'Filled',
+        hintText: 'hint text',
+        helperText: 'supporting text',
         filled: true,
       )
     );
@@ -59,9 +59,9 @@ class OutlinedTextFieldExample extends StatelessWidget {
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.search),
         suffixIcon: Icon(Icons.clear),
-        labelText: "Outlined",
-        hintText: "hint text",
-        helperText: "supporting text",
+        labelText: 'Outlined',
+        hintText: 'hint text',
+        helperText: 'supporting text',
         border: OutlineInputBorder(),
       ),
     );
