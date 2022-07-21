@@ -290,7 +290,7 @@ class TextField extends StatefulWidget {
     this.textDirection,
     this.readOnly = false,
     @Deprecated(
-      'Use `buildContextMenu` instead. '
+      'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     this.toolbarOptions,
@@ -334,7 +334,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextMenu = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -501,7 +501,7 @@ class TextField extends StatefulWidget {
   /// will be disabled if [obscureText] is true. If [readOnly] is true,
   /// paste and cut will be disabled regardless.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   final ToolbarOptions? toolbarOptions;
@@ -752,16 +752,16 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   ///
   /// If not provided, will build a default menu based on the platform.
   ///
   /// See also:
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.
-  final EditableTextToolbarBuilder? buildContextMenu;
+  final EditableTextToolbarBuilder? contextMenuBuilder;
 
-  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
     return DefaultTextSelectionToolbar(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
@@ -1284,7 +1284,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          buildContextMenu: widget.buildContextMenu,
+          contextMenuBuilder: widget.contextMenuBuilder,
         ),
       ),
     );

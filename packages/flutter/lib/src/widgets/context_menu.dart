@@ -62,7 +62,7 @@ class ContextMenuController {
   // TODO(justinmc): Update method for efficiency of moving the menu?
   /// Shows the given context menu at the location.
   static void show({
-    required WidgetBuilder buildContextMenu,
+    required WidgetBuilder contextMenuBuilder,
     required BuildContext context,
     Widget? debugRequiredFor,
   }) {
@@ -79,7 +79,7 @@ class ContextMenuController {
 
     _menuOverlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        return capturedThemes.wrap(buildContextMenu(context));
+        return capturedThemes.wrap(contextMenuBuilder(context));
       },
     );
     overlayState!.insert(_menuOverlayEntry!);
@@ -88,7 +88,7 @@ class ContextMenuController {
   /// Cause the underlying [OverlayEntry] to rebuild during the next pipeline
   /// flush.
   ///
-  /// You need to call this function if the output of [buildContextMenu] has
+  /// You need to call this function if the output of [contextMenuBuilder] has
   /// changed.
   ///
   /// If the context menu is not currently shown, does nothing.

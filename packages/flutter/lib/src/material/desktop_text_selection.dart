@@ -22,7 +22,7 @@ const double _kToolbarWidth = 222.0;
 /// Desktop Material styled text selection handle controls.
 ///
 /// Specifically does not manage the toolbar, which is left to
-/// [EditableText.buildContextMenu].
+/// [EditableText.contextMenuBuilder].
 class _DesktopTextSelectionHandleControls extends _DesktopTextSelectionControls with TextSelectionHandleControls {
 }
 
@@ -35,7 +35,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
 
   /// Builder for the Material-style desktop copy/paste text selection toolbar.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override
@@ -76,7 +76,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
   }
 
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override
@@ -90,7 +90,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
   }
 
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override

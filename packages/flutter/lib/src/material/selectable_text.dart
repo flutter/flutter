@@ -187,7 +187,7 @@ class SelectableText extends StatefulWidget {
     this.showCursor = false,
     this.autofocus = false,
     @Deprecated(
-      'Use `buildContextMenu` instead. '
+      'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     this.toolbarOptions,
@@ -208,7 +208,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.buildContextMenu = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultBuildContextMenu,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -244,7 +244,7 @@ class SelectableText extends StatefulWidget {
     this.showCursor = false,
     this.autofocus = false,
     @Deprecated(
-      'Use `buildContextMenu` instead. '
+      'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     this.toolbarOptions,
@@ -265,7 +265,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.buildContextMenu = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultBuildContextMenu,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -392,7 +392,7 @@ class SelectableText extends StatefulWidget {
   ///
   /// If not set, select all and copy will be enabled by default.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   final ToolbarOptions? toolbarOptions;
@@ -432,8 +432,8 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  final EditableTextToolbarBuilder? buildContextMenu;
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  final EditableTextToolbarBuilder? contextMenuBuilder;
 
   static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
     return DefaultTextSelectionToolbar(
@@ -727,7 +727,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
-        buildContextMenu: widget.buildContextMenu,
+        contextMenuBuilder: widget.contextMenuBuilder,
       ),
     );
 

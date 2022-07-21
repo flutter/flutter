@@ -185,7 +185,7 @@ class SelectableRegion extends StatefulWidget {
   /// toolbar for mobile devices.
   const SelectableRegion({
     super.key,
-    this.buildContextMenu,
+    this.contextMenuBuilder,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
@@ -199,8 +199,8 @@ class SelectableRegion extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  final ButtonDatasToolbarBuilder? buildContextMenu;
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  final ButtonDatasToolbarBuilder? contextMenuBuilder;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -625,7 +625,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         return _SelectableRegionContextMenuButtonDatasBuilder(
           delegate: this,
           builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
-            return widget.buildContextMenu!(context, buttonDatas, location);
+            return widget.contextMenuBuilder!(context, buttonDatas, location);
           },
         );
       }, context);
@@ -641,7 +641,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return _SelectableRegionContextMenuButtonDatasBuilder(
         delegate: this,
         builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
-          return widget.buildContextMenu!(
+          return widget.contextMenuBuilder!(
             context,
             buttonDatas,
             _selectionOverlay!.getAnchorAbove(renderBox, lineHeightAtStart, endGlyphHeight),
@@ -776,14 +776,14 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   // [TextSelectionDelegate] overrides.
 
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override
   bool get cutEnabled => false;
 
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override
@@ -824,7 +824,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   void bringIntoView(TextPosition position) {/* SelectableRegion must be in view at this point. */}
 
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override
@@ -836,7 +836,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
 
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override

@@ -35,7 +35,7 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
-    this.buildContextMenu = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultBuildContextMenu,
     required this.child,
   });
 
@@ -47,14 +47,14 @@ class SelectionArea extends StatefulWidget {
   /// If it is null, the platform specific selection control is used.
   final TextSelectionControls? selectionControls;
 
-  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   ///
   /// If not provided, will build a default menu based on the platform.
   ///
   /// See also:
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.
-  final ButtonDatasToolbarBuilder? buildContextMenu;
+  final ButtonDatasToolbarBuilder? contextMenuBuilder;
 
   /// The child widget this selection area applies to.
   ///
@@ -112,7 +112,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       selectionControls: controls,
       focusNode: _effectiveFocusNode,
-      buildContextMenu: widget.buildContextMenu,
+      contextMenuBuilder: widget.contextMenuBuilder,
       child: widget.child,
     );
   }

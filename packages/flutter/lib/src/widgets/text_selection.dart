@@ -105,7 +105,7 @@ abstract class TextSelectionControls {
   /// If you want more detailed position information, can use [endpoints]
   /// to calculate it.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Widget buildToolbar(
@@ -133,7 +133,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the cut
   /// functionality to the user.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canCut(TextSelectionDelegate delegate) {
@@ -148,7 +148,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the copy
   /// functionality to the user.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canCopy(TextSelectionDelegate delegate) {
@@ -165,7 +165,7 @@ abstract class TextSelectionControls {
   /// to, for example, disallow pasting when the clipboard contains an empty
   /// string.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canPaste(TextSelectionDelegate delegate) {
@@ -179,7 +179,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the select all
   /// functionality to the user.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool canSelectAll(TextSelectionDelegate delegate) {
@@ -193,7 +193,7 @@ abstract class TextSelectionControls {
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
@@ -207,7 +207,7 @@ abstract class TextSelectionControls {
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
@@ -224,7 +224,7 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
@@ -239,7 +239,7 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   void handleSelectAll(TextSelectionDelegate delegate) {
@@ -272,7 +272,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    this.buildContextMenu,
+    this.contextMenuBuilder,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -337,10 +337,10 @@ class TextSelectionOverlay {
 
   late final SelectionOverlay _selectionOverlay;
 
-  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   ///
   /// If not provided, no context menu will be built.
-  final ContextMenuBuilder? buildContextMenu;
+  final ContextMenuBuilder? contextMenuBuilder;
 
   /// Retrieve current value.
   @visibleForTesting
@@ -394,7 +394,7 @@ class TextSelectionOverlay {
       return;
     }
 
-    if (buildContextMenu == null) {
+    if (contextMenuBuilder == null) {
       return;
     }
 
@@ -411,7 +411,7 @@ class TextSelectionOverlay {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           _selectionOverlay.showToolbar((BuildContext context) {
-            return buildContextMenu!(context, renderObject.lastSecondaryTapDownPosition!);
+            return contextMenuBuilder!(context, renderObject.lastSecondaryTapDownPosition!);
           }, context);
           return;
       }
@@ -422,7 +422,7 @@ class TextSelectionOverlay {
     _selectionOverlay.showToolbar((BuildContext context) {
       final double startGlyphHeight = _getStartGlyphHeight();
       final double endGlyphHeight = _getEndGlyphHeight();
-      return buildContextMenu!(
+      return contextMenuBuilder!(
         context,
         _selectionOverlay.getAnchorAbove(renderBox, startGlyphHeight, endGlyphHeight),
         _selectionOverlay.getAnchorBelow(renderBox, startGlyphHeight, endGlyphHeight),
@@ -703,7 +703,7 @@ class SelectionOverlay {
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
     @Deprecated(
-      'Use `buildContextMenu` instead. '
+      'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     Offset? toolbarLocation,
@@ -911,7 +911,7 @@ class SelectionOverlay {
   /// This is useful for displaying toolbars at the mouse right-click locations
   /// in desktop devices.
   @Deprecated(
-    'Use the `buildContextMenu` parameter in `showToolbar` instead. '
+    'Use the `contextMenuBuilder` parameter in `showToolbar` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Offset? get toolbarLocation => _toolbarLocation;
@@ -1028,14 +1028,14 @@ class SelectionOverlay {
     }
   }
 
-  // TODO(justinmc): After removing the deprecations, this buildContextMenu
+  // TODO(justinmc): After removing the deprecations, this contextMenuBuilder
   // param will need to be required. Is that really what we want here? Can I
   // determine the location stuff before _showToolbar is called?
   /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
-  void showToolbar([WidgetBuilder? buildContextMenu, BuildContext? context]) {
-    if (buildContextMenu == null) {
+  void showToolbar([WidgetBuilder? contextMenuBuilder, BuildContext? context]) {
+    if (contextMenuBuilder == null) {
       if (_toolbar != null) {
         return;
       }
@@ -1044,7 +1044,7 @@ class SelectionOverlay {
       return;
     }
 
-    if (buildContextMenu == null || context == null) {
+    if (contextMenuBuilder == null || context == null) {
       return;
     }
 
@@ -1053,11 +1053,11 @@ class SelectionOverlay {
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     ContextMenuController.show(
       context: context,
-      buildContextMenu: (BuildContext context) {
+      contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
-          child: buildContextMenu(context),
+          child: contextMenuBuilder(context),
         );
       },
     );
@@ -1231,7 +1231,7 @@ class SelectionOverlay {
 // should follow the correct fading behavior for the current platform, then be
 // made public and de-duplicated with widgets/selectable_region.dart.
 // https://github.com/flutter/flutter/issues/107732
-// Wrap the given child in the widgets common to both buildContextMenu and
+// Wrap the given child in the widgets common to both contextMenuBuilder and
 // TextSelectionControls.buildToolbar.
 class _SelectionToolbarWrapper extends StatefulWidget {
   const _SelectionToolbarWrapper({
@@ -2519,7 +2519,7 @@ enum ClipboardStatus {
 }
 
 /// [TextSelectionControls] that specifically do not manage the toolbar in order
-/// to leave that to [EditableText.buildContextMenu].
+/// to leave that to [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `TextSelectionControls`. '
   'This feature was deprecated after v2.12.0-4.1.pre.',

@@ -96,7 +96,7 @@ class EditableTextContextMenuButtonDatasBuilder extends StatefulWidget {
 
   /// Returns the [ContextMenuButtonData]s for the given [ToolbarOptions].
   @Deprecated(
-    'Use `buildContextMenu` instead of `toolbarOptions`. '
+    'Use `contextMenuBuilder` instead of `toolbarOptions`. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {

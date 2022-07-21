@@ -23,7 +23,7 @@ const double _kToolbarContentDistance = 8.0;
 /// Android Material styled text selection handle controls.
 ///
 /// Specifically does not manage the toolbar, which is left to
-/// [EditableText.buildContextMenu].
+/// [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `MaterialTextSelectionControls`. '
   'This feature was deprecated after v2.12.0-4.1.pre.',
@@ -39,7 +39,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style copy/paste text selection toolbar.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override
@@ -121,7 +121,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   }
 
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override

@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
               Container(height: 20.0),
               TextField(
                 controller: _controller,
-                buildContextMenu: (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
                   // Here we add an "Email" button to the default TextField
                   // context menu for the current platform, but only if an email
                   // address is currently selected.
@@ -78,4 +78,3 @@ bool _isValidEmail(String text) {
   return RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
     .hasMatch(text);
 }
-

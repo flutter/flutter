@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           child: SizedBox(
             width: 200.0,
             child: SelectionArea(
-              buildContextMenu: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+              contextMenuBuilder: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
                 return DefaultTextSelectionToolbar(
                   primaryAnchor: primaryAnchor,
                   secondaryAnchor: secondaryAnchor,

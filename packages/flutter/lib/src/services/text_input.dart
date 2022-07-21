@@ -1045,28 +1045,28 @@ mixin TextSelectionDelegate {
 
   /// Whether cut is enabled, must not be null.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get cutEnabled => true;
 
   /// Whether copy is enabled, must not be null.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get copyEnabled => true;
 
   /// Whether paste is enabled, must not be null.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get pasteEnabled => true;
 
   /// Whether select all is enabled, must not be null.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get selectAllEnabled => true;
@@ -1076,7 +1076,7 @@ mixin TextSelectionDelegate {
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
   @Deprecated(
-    'Use `buildContextMenu` with a custom cut button instead. '
+    'Use `contextMenuBuilder` with a custom cut button instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   void cutSelection(SelectionChangedCause cause);
@@ -1088,7 +1088,7 @@ mixin TextSelectionDelegate {
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
   @Deprecated(
-    'Use `buildContextMenu` with a custom paste button instead. '
+    'Use `contextMenuBuilder` with a custom paste button instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   Future<void> pasteText(SelectionChangedCause cause);

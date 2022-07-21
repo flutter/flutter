@@ -58,7 +58,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 /// iOS Cupertino styled text selection handle controls.
 ///
 /// Specifically does not manage the toolbar, which is left to
-/// [EditableText.buildContextMenu].
+/// [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `CupertinoTextSelectionControls`. '
   'This feature was deprecated after v2.12.0-4.1.pre.',
@@ -79,7 +79,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   @override

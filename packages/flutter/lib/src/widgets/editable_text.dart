@@ -261,7 +261,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
 /// option.
 @Deprecated(
-  'Use `buildContextMenu` instead. '
+  'Use `contextMenuBuilder` instead. '
   'This feature was deprecated after v2.12.0-4.1.pre.',
 )
 class ToolbarOptions {
@@ -269,7 +269,7 @@ class ToolbarOptions {
   ///
   /// All options default to false if they are not explicitly set.
   @Deprecated(
-    'Use `buildContextMenu` instead. '
+    'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   const ToolbarOptions({
@@ -637,7 +637,7 @@ class EditableText extends StatefulWidget {
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
     @Deprecated(
-      'Use `buildContextMenu` instead. '
+      'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     ToolbarOptions? toolbarOptions,
@@ -648,7 +648,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextMenu,
+    this.contextMenuBuilder,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1520,12 +1520,12 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@template flutter.widgets.EditableText.buildContextMenu}
+  /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.
-  final EditableTextToolbarBuilder? buildContextMenu;
+  final EditableTextToolbarBuilder? contextMenuBuilder;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -1771,28 +1771,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canCut` instead, or `buildContextMenu` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonDatasBuilder.canCut` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canCopy` instead, or `buildContextMenu` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonDatasBuilder.canCopy` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canPaste` instead, or `buildContextMenu` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonDatasBuilder.canPaste` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canSelectAll` instead, or `buildContextMenu` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonDatasBuilder.canSelectAll` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
@@ -2625,12 +2625,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      buildContextMenu: widget.buildContextMenu == null ? null : (
+      contextMenuBuilder: widget.contextMenuBuilder == null ? null : (
         BuildContext context,
         Offset primaryAnchor,
         [Offset? secondaryAnchor]
       ) {
-        return widget.buildContextMenu!(
+        return widget.contextMenuBuilder!(
           context,
           this,
           primaryAnchor,
@@ -2673,7 +2673,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         break;
     }
-    if (widget.selectionControls == null && widget.buildContextMenu == null) {
+    if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else {

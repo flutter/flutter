@@ -112,7 +112,7 @@ class TextFormField extends FormField<String> {
     bool autofocus = false,
     bool readOnly = false,
     @Deprecated(
-      'Use `buildContextMenu` instead. '
+      'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     ToolbarOptions? toolbarOptions,
@@ -152,7 +152,7 @@ class TextFormField extends FormField<String> {
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
-    EditableTextToolbarBuilder? buildContextMenu = _defaultBuildContextMenu,
+    EditableTextToolbarBuilder? contextMenuBuilder = _defaultBuildContextMenu,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -240,7 +240,7 @@ class TextFormField extends FormField<String> {
                scrollController: scrollController,
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
                mouseCursor: mouseCursor,
-               buildContextMenu: buildContextMenu,
+               contextMenuBuilder: contextMenuBuilder,
              ),
            );
          },

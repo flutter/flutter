@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
           title: const Text('Context menu in SelectionArea'),
         ),
         body: _ContextMenuRegion(
-          buildContextMenu: (BuildContext context, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+          contextMenuBuilder: (BuildContext context, Offset primaryAnchor, [Offset? secondaryAnchor]) {
             // The custom context menu will look like the default context menu
             // on the current platform, but it will have only a single 'Print'
             // button.
@@ -71,11 +71,11 @@ class _ContextMenuRegion extends StatefulWidget {
   /// Creates an instance of [_ContextMenuRegion].
   const _ContextMenuRegion({
     required this.child,
-    required this.buildContextMenu,
+    required this.contextMenuBuilder,
   });
 
   /// Builds the context menu.
-  final ContextMenuBuilder buildContextMenu;
+  final ContextMenuBuilder contextMenuBuilder;
 
   /// The child widget that will be listened to for gestures.
   final Widget child;
@@ -124,8 +124,8 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   void _show(Offset position) {
     ContextMenuController.show(
       context: context,
-      buildContextMenu: (BuildContext context) {
-        return widget.buildContextMenu(context, position);
+      contextMenuBuilder: (BuildContext context) {
+        return widget.contextMenuBuilder(context, position);
       },
     );
   }

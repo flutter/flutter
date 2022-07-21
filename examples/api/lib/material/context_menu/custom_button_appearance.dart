@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
             children: <Widget>[
               Container(height: 20.0),
               TextField(
-                buildContextMenu: (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
                   return EditableTextContextMenuButtonDatasBuilder(
                     editableTextState: editableTextState,
                     builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
@@ -66,4 +66,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
