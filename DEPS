@@ -15,6 +15,7 @@ vars = {
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'github_git': 'https://github.com',
   'skia_git': 'https://skia.googlesource.com',
+  'llvm_git': 'https://llvm.googlesource.com',
   # OCMock is for testing only so there is no google clone
   'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
   'skia_revision': '501b767fce684df1081773530bfa8704a8ff5800',
@@ -101,7 +102,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '6af51ff4b86270cc61517bff3fff5c3bb11492e1',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '633907dfb90f6e8d97ad122aa66cf2d4207cda9b',
 
    # Fuchsia compatibility
    #
@@ -116,10 +117,10 @@ deps = {
    Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'd40d15e994ed60d32bcfc9ab87004dfb028dfbd6',
 
   'src/third_party/libcxx':
-   Var('fuchsia_git') + '/third_party/libcxx' + '@' + '7524ef50093a376f334a62a7e5cebf5d238d4c99',
+   Var('llvm_git') + '/llvm-project/libcxx' + '@' + '44079a4cc04cdeffb9cfe8067bfb3c276fb2bab0',
 
   'src/third_party/libcxxabi':
-   Var('fuchsia_git') + '/third_party/libcxxabi' + '@' + '74d1e602c76350f0760bf6907910e4f3a4fccffe',
+   Var('llvm_git') + '/llvm-project/libcxxabi' + '@' + '2ce528fb5e0f92e57c97ec3ff53b75359d33af12',
 
   'src/third_party/glfw':
    Var('fuchsia_git') + '/third_party/glfw' + '@' + '78e6a0063d27ed44c2c4805606309744f6fb29fc',
