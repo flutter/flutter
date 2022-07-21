@@ -7,9 +7,9 @@ import static org.mockito.Mockito.*;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
 import android.view.View;
@@ -65,7 +65,7 @@ public class PlatformViewWrapperTest {
     // Verify.
     verify(surface, times(1)).lockHardwareCanvas();
     verify(surface, times(1)).unlockCanvasAndPost(canvas);
-    verify(canvas, times(1)).drawColor(Color.TRANSPARENT, BlendMode.CLEAR);
+    verify(canvas, times(1)).drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
     verifyNoMoreInteractions(surface);
     verifyNoMoreInteractions(canvas);
   }
@@ -112,7 +112,7 @@ public class PlatformViewWrapperTest {
     wrapper.draw(new Canvas());
 
     // Verify.
-    verify(canvas, times(1)).drawColor(Color.TRANSPARENT, BlendMode.CLEAR);
+    verify(canvas, times(1)).drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
     verify(surface, times(1)).isValid();
     verify(surface, times(1)).lockHardwareCanvas();
     verify(surface, times(1)).unlockCanvasAndPost(canvas);

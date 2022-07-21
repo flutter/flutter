@@ -9,10 +9,10 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
@@ -169,11 +169,7 @@ class PlatformViewWrapper extends FrameLayout {
     // to the user until the platform view draws its first frame.
     final Canvas canvas = surface.lockHardwareCanvas();
     try {
-      if (Build.VERSION.SDK_INT >= 29) {
-        canvas.drawColor(Color.TRANSPARENT, BlendMode.CLEAR);
-      } else {
-        canvas.drawColor(Color.TRANSPARENT);
-      }
+      canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
       onFrameProduced();
     } finally {
       surface.unlockCanvasAndPost(canvas);
@@ -305,11 +301,7 @@ class PlatformViewWrapper extends FrameLayout {
       try {
         // Clear the current pixels in the canvas.
         // This helps when a WebView renders an HTML document with transparent background.
-        if (Build.VERSION.SDK_INT >= 29) {
-          surfaceCanvas.drawColor(Color.TRANSPARENT, BlendMode.CLEAR);
-        } else {
-          surfaceCanvas.drawColor(Color.TRANSPARENT);
-        }
+        surfaceCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         super.draw(surfaceCanvas);
         onFrameProduced();
       } finally {
