@@ -2025,8 +2025,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
     return themeData.textTheme.subtitle1!
-      .merge(defaultStyle)
       .merge(widget.baseStyle)
+      .merge(defaultStyle)
       .merge(style)
       .copyWith(height: 1);
   }

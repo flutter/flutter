@@ -3503,13 +3503,13 @@ void main() {
     //      10 - label (ahem font size 10dps)
     //   17.75 - bottom padding (empty input text still appears here)
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 45.5 bumped up to minimum.
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 50.0 : kMinInteractiveDimension)); // 45.5 bumped up to minimum.
     expect(tester.getSize(find.text('hint')).height, 10.0);
-    expect(tester.getSize(find.text('label')).height, 10.0);
+    expect(tester.getSize(find.text('label')).height,  useMaterial3 ? 14.0 : 10.0);
     expect(tester.getSize(find.text('text')).height, 10.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 24.75);
-    expect(tester.getTopLeft(find.text('label')).dy, 19.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 24.75);
+    expect(tester.getTopLeft(find.text('hint')).dy, useMaterial3 ? 27.25 : 24.75);
+    expect(tester.getTopLeft(find.text('label')).dy, useMaterial3 ? 18 : 19.0);
+    expect(tester.getTopLeft(find.text('text')).dy, useMaterial3 ? 27.25 : 24.75);
   });
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {
