@@ -1966,7 +1966,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return enabledColor;
   }
 
-
   Color _getFillColor(ThemeData themeData, InputDecorationTheme defaults) {
     if (decoration.filled != true) { // filled == null same as filled == false
       return Colors.transparent;
