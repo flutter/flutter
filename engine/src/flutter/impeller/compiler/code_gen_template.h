@@ -147,6 +147,34 @@ std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
 
 {% endfor %}
 
+  // ===========================================================================
+  // Metadata for Vulkan =======================================================
+  // ===========================================================================
+#ifdef IMPELLER_ENABLE_VULKAN_REFLECTION
+{% if length(buffers)+length(sampled_images) > 0 %}
+  static constexpr std::array<VkDescriptorSetLayoutBinding,{{length(buffers)+length(sampled_images)}}> kDescriptorSetLayouts{
+{% for buffer in buffers %}
+    VkDescriptorSetLayoutBinding{
+      {{buffer.binding}}, // binding = {{buffer.binding}}
+      VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, // descriptorType = Uniform Buffer
+      1, // descriptorCount = 1
+      {{to_vk_shader_stage_flag_bits(shader_stage)}}, // stageFlags = {{to_shader_stage(shader_stage)}}
+      nullptr, // pImmutableSamplers = NULL
+    },
+{% endfor %}
+{% for sampled_image in sampled_images %}
+    VkDescriptorSetLayoutBinding{
+      {{sampled_image.binding}}, // binding = {{sampled_image.binding}}
+      VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, // descriptorType = Sampled Image
+      1, // descriptorCount = 1
+      {{to_vk_shader_stage_flag_bits(shader_stage)}},// stageFlags = {{to_shader_stage(shader_stage)}}
+      nullptr, // pImmutableSamplers = NULL
+    },
+{% endfor %}
+  };
+{% endif %}
+#endif
+
 };  // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader
 
 }  // namespace impeller
