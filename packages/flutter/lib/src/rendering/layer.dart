@@ -1440,8 +1440,8 @@ class OffsetLayer extends ContainerLayer {
   /// (the default) will give you a 1:1 mapping between logical pixels and the
   /// output pixels in the image.
   ///
-  /// This API functions like [toImageSync], except that rasterization is started
-  /// on the IO thread.
+  /// This API functions like [toImageSync], except that it only returns after
+  /// rasterization is complete.
   ///
   /// See also:
   ///
@@ -1475,7 +1475,7 @@ class OffsetLayer extends ContainerLayer {
   /// output pixels in the image.
   ///
   /// This API functions like [toImage], except that rasterization begins eagerly
-  /// on the raster thread.
+  /// on the raster thread and the image is returned before this is completed.
   ///
   /// See also:
   ///
