@@ -174,8 +174,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// If `false`, calling the above methods may yield an image which is
   /// incomplete.
   ///
-  /// This value is not allowed to change during the lifetime of the
-  /// layer object.
+  /// This value may change throughout the lifetime of the object, as the
+  /// child layers themselves are added or removed.
   bool supportsRasterization() {
     return true;
   }
@@ -890,7 +890,7 @@ class TextureLayer extends Layer {
   // TODO(jonahwilliams): remove once https://github.com/flutter/flutter/issues/107576 is fixed.
   @override
   bool supportsRasterization() {
-    return false;
+    return true;
   }
 
   /// When true the texture will not be updated with new frames.

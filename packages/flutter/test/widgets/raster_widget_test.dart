@@ -218,7 +218,7 @@ void main() {
       delegate: delegate,
       controller: controller,
       devicePixelRatio: 1.0,
-      ignorePlatformViews: false,
+      mode: RasterizeMode.enabled,
     );
 
     expect(delegate.addedListenerCount, 0);
@@ -250,7 +250,7 @@ void main() {
       delegate: delegate,
       controller: controller,
       devicePixelRatio: 1.0,
-      ignorePlatformViews: false,
+      mode: RasterizeMode.enabled,
     );
 
     expect(controller.addedListenerCount, 0);
@@ -319,7 +319,7 @@ void main() {
       .having((FlutterError error) => error.message, 'message', contains('RasterWidget used with a child that contains a PlatformView')));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderRasterWidget does not assert if ignorePlatformViews is true', (WidgetTester tester) async {
+  testWidgets('RenderRasterWidget does not assert if RasterizeMode.forced', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     final RasterWidgetController controller = RasterWidgetController(rasterize: true);
 
@@ -330,7 +330,7 @@ void main() {
           child: RasterWidget(
             delegate: delegate,
             controller: controller,
-            ignorePlatformViews: true,
+            mode: RasterizeMode.forced,
             child: const SizedBox(
               width: 100,
               height: 100,
@@ -370,9 +370,9 @@ void main() {
     expect(delegate.count, 0);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderRasterWidget fallbacks to delegate if controller enables fallback', (WidgetTester tester) async {
+  testWidgets('RenderRasterWidget fallbacks to delegate if mode: RasterizeMode.fallback', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true, fallback: true);
+    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
     final TestFallback fallback = TestFallback();
     await tester.pumpWidget(
       Center(
@@ -382,6 +382,7 @@ void main() {
             delegate: delegate,
             controller: controller,
             fallback: fallback,
+            mode: RasterizeMode.fallback,
             child: const SizedBox(
               width: 100,
               height: 100,

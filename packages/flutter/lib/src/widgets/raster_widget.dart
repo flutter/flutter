@@ -10,12 +10,37 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
+/// Controls how the [RasterWidget] paints its children via the [RasterWidgetController].
+enum RasterizeMode {
+  /// the children are rasterized, but only if all descendants can be rasterized.
+  ///
+  /// This setting is the default state of the [RasterWidgetController].
+  ///
+  /// If there is a platform view in the children of a raster widget
+  /// and a [RasterWidgetFallbackDelegate]h as been provided to the raster_widget,
+  /// this fallback delegate will be used to render the children instead of the image.
+  /// If there is no fallback delegate, an excpetion will be thrown
+  enabled,
+
+  /// The children are rasterized and any child platform views are ignored.
+  ///
+  /// In this state a [RasterWidgetFallbackDelegate] is never used. Generally this
+  /// can be useful if there is a platform view descendant that does not need to
+  /// be included in the raster.
+  forced,
+
+  /// the children are not rasterized and the [RasterWidgetFallbackDelegate],
+  /// if provided, is used to draw the children.
+  ///
+  /// 
+  fallback,
+}
+
 /// A controller for the [RasterWidget] that controls when the child image is displayed
 /// and when to regenerated the child image.
 ///
-/// When the value of [rasterize] is true, The [RasterWidget] will convert the child scene into
-/// an image. This image will be drawn in place of the children until [rasterize] is false.
-/// Any changes to the widget tree that would normally cause it to repaint are ignored.
+/// When the value of [rasterize] is true, the [RasterWidget] will paint the child
+/// widgets based on the [RasterizeMode] of the raster widget.
 ///
 /// To force [RasterWidget] to recreate the child image, call [clear].
 class RasterWidgetController extends ChangeNotifier {
@@ -24,9 +49,7 @@ class RasterWidgetController extends ChangeNotifier {
   /// By default, [rasterize] is `false` and cannot be `null`.
   RasterWidgetController({
     bool rasterize = false,
-    bool fallback = false,
-  }) : _rasterize = rasterize,
-       _fallback = fallback;
+  }) : _rasterize = rasterize;
 
   /// Reset the raster held by any listening [RasterWidget].
   ///
@@ -46,24 +69,6 @@ class RasterWidgetController extends ChangeNotifier {
     _rasterize = value;
     notifyListeners();
   }
-
-  /// Whether the raster widget should use the provided [RasterWidgetFallbackDelegate]
-  /// to render.
-  ///
-  /// Defaults to `false`. Generally, this should only be used if it is known
-  /// that the current platform does not support the raster widget.
-  ///
-  /// Setting this to `true` on a raster widget that does not have a fallback
-  /// delegate will cause an exception to be thrown.
-  bool get fallback => _fallback;
-  bool _fallback;
-  set fallback(bool value) {
-    if (value == fallback) {
-      return;
-    }
-    _fallback = value;
-    notifyListeners();
-  }
 }
 
 /// A widget that replaces its child with a rasterized version of the child.
@@ -76,14 +81,10 @@ class RasterWidgetController extends ChangeNotifier {
 /// Caveats:
 ///
 /// The contents of platform views cannot be captured by a raster
-/// widget. If a platform view is encountered, then by default an error
-/// is thrown. If [ignorePlatformViews] is true, the rasterization is used
-/// without the platform view included. This may result in an incomplete picture,
-/// but may be a reasonable choice if the platform view is only incidentally included
-/// in a scene. Alternatively, if a [fallback] is provided and a platform view is
-/// detected, then the fallback is used to render the scene instead of the
-/// raster. This is only intended for the rare case when a raster widget
-/// cannot know if a child will have a platform view.
+/// widget. If a platform view is encountered, then the raster widget will
+/// determine how to render its children based on the [RasterizeMode]. This
+/// defaults to [RasterizeMode.enabled] which will throw an exception if a platform
+/// view is encountered.
 ///
 /// This widget is not supported on the HTML backend of Flutter for the web.
 class RasterWidget extends SingleChildRenderObjectWidget {
@@ -94,7 +95,7 @@ class RasterWidget extends SingleChildRenderObjectWidget {
     super.key,
     this.delegate = const _RasterDefaultDelegate(),
     this.fallback,
-    this.ignorePlatformViews = false,
+    this.mode = RasterizeMode.enabled,
     required this.controller,
     required super.child
   });
@@ -110,11 +111,13 @@ class RasterWidget extends SingleChildRenderObjectWidget {
   /// A fallback delegate which is used if the child layers contains a platform view.
   final RasterWidgetFallbackDelegate? fallback;
 
-  /// Whether the raster widget will ignore platform views in child layers.
+  /// Configuration that controls how the raster widget decides to draw its children.
   ///
-  /// Defaults to `false`, which causes an error to be thrown if a platform view
-  /// is encountered.
-  final bool ignorePlatformViews;
+  /// Defaults to [RasterizeMode.enabled], which throws an error when a platform view
+  /// or other un-rasterizable view is encountered.
+  ///
+  /// See [RasterizeMode] for more information.
+  final RasterizeMode mode;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -122,7 +125,7 @@ class RasterWidget extends SingleChildRenderObjectWidget {
       delegate: delegate,
       controller: controller,
       fallback: fallback,
-      ignorePlatformViews: ignorePlatformViews,
+      mode: mode,
       devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
     );
   }
@@ -133,7 +136,7 @@ class RasterWidget extends SingleChildRenderObjectWidget {
       ..delegate = delegate
       ..controller = controller
       ..fallback = fallback
-      ..ignorePlatformViews = ignorePlatformViews
+      ..mode = mode
       ..devicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0;
   }
 }
@@ -191,6 +194,7 @@ abstract class RasterWidgetFallbackDelegate {
 ///   context.canvas.drawImageRect(image, src, dst, paint);
 /// }
 /// ```
+/// {@end-tool}
 abstract class RasterWidgetDelegate extends ChangeNotifier {
   /// Called whenever the [image] that represents a [RasterWidget]s child should be painted.
   ///
@@ -254,13 +258,13 @@ class RenderRasterWidget extends RenderProxyBox {
     required RasterWidgetDelegate delegate,
     required double devicePixelRatio,
     required RasterWidgetController controller,
-    required bool ignorePlatformViews,
+    required RasterizeMode mode,
     RasterWidgetFallbackDelegate? fallback,
   }) : _delegate = delegate,
        _devicePixelRatio = devicePixelRatio,
        _controller = controller,
        _fallback = fallback,
-       _ignorePlatformViews = ignorePlatformViews;
+       _mode = mode;
 
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
@@ -321,17 +325,14 @@ class RenderRasterWidget extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// Whether the raster widget will ignore platform views in child layers.
-  bool get ignorePlatformViews => _ignorePlatformViews;
-  bool _ignorePlatformViews;
-  set ignorePlatformViews(bool value) {
-    if (value == ignorePlatformViews) {
+  /// How the raster widget will handle platform views in child layers.
+  RasterizeMode get mode => _mode;
+  RasterizeMode _mode;
+  set mode(RasterizeMode value) {
+    if (value == _mode) {
       return;
     }
-    _ignorePlatformViews = value;
-    if (ignorePlatformViews) {
-      _hitPlatformView = false;
-    }
+    _mode = value;
     markNeedsPaint();
   }
 
@@ -369,7 +370,7 @@ class RenderRasterWidget extends RenderProxyBox {
   }
 
   bool _hitPlatformView = false;
-  bool get _useFallback => _hitPlatformView || _controller.fallback;
+  bool get _useFallback => _hitPlatformView || mode == RasterizeMode.fallback;
 
   // Paint [child] with this painting context, then convert to a raster and detach all
   // children from this layer.
@@ -382,7 +383,7 @@ class RenderRasterWidget extends RenderProxyBox {
     // that would conflict with our goals of minimizing painting context.
     // ignore: invalid_use_of_protected_member
     context.stopRecordingIfNeeded();
-    if (!ignorePlatformViews && !offsetLayer.supportsRasterization()) {
+    if (mode != RasterizeMode.forced && !offsetLayer.supportsRasterization()) {
       _hitPlatformView = true;
       if (fallback == null) {
         assert(() {

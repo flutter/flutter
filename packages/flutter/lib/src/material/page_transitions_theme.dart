@@ -286,7 +286,6 @@ class _ZoomEnterTransition extends StatefulWidget {
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
   // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  @override
   bool get allowRasterization => !kIsWeb && widget.preferRasterization;
 
   late _ZoomEnterTransitionDelegate delegate;
@@ -334,7 +333,6 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       scale: scaleTransition,
       animation: widget.animation,
     );
-    controller.fallback = !allowRasterization;
     super.initState();
   }
 
@@ -352,7 +350,6 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
         animation: widget.animation,
       );
     }
-    controller.fallback = !allowRasterization;
     super.didUpdateWidget(oldWidget);
   }
 
@@ -370,6 +367,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       delegate: delegate,
       controller: controller,
       fallback: delegate,
+      mode: allowRasterization ? RasterizeMode.enabled : RasterizeMode.fallback,
       child: widget.child,
     );
   }
@@ -397,7 +395,6 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   late _ZoomExitTransitionDelegate delegate;
 
   // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  @override
   bool get allowRasterization => !kIsWeb && widget.preferRasterization;
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
@@ -436,7 +433,6 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       fade: fadeTransition,
       scale: scaleTransition,
     );
-    controller.fallback = !allowRasterization;
     super.initState();
   }
 
@@ -453,7 +449,6 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
         scale: scaleTransition,
       );
     }
-    controller.fallback = !allowRasterization;
     super.didUpdateWidget(oldWidget);
   }
 
@@ -471,6 +466,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       delegate: delegate,
       controller: controller,
       fallback: delegate,
+      mode: allowRasterization ? RasterizeMode.enabled : RasterizeMode.fallback,
       child: widget.child,
     );
   }
@@ -778,8 +774,6 @@ mixin _ZoomTransitionBase {
 
   late Animation<double> fadeTransition;
   late Animation<double> scaleTransition;
-
-  bool get allowRasterization;
 
   void onAnimationValueChange() {
     if ((scaleTransition.value == 1.0) &&
