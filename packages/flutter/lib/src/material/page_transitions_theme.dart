@@ -841,7 +841,7 @@ class _ZoomEnterTransitionDelegate extends RasterWidgetDelegate implements Raste
     if (!reverse && animation.status != AnimationStatus.completed) {
       scrimOpacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
     }
-
+    assert(!reverse || scrimOpacity == 0.0);
     if (scrimOpacity > 0.0) {
       context.canvas.drawRect(
         offset & size,
