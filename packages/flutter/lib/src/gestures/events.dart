@@ -1035,10 +1035,7 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.tilt,
     super.synthesized,
     super.embedderId,
-  }) : // Dart doesn't support comparing enums with == in const contexts yet.
-       // https://github.com/dart-lang/language/issues/1811
-       assert(!identical(kind, PointerDeviceKind.trackpad)),
-       super(
+  }) : super(
          down: false,
          pressure: 0.0,
        );
@@ -1156,7 +1153,9 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : // Dart doesn't support comparing enums with == in const contexts yet.
+       // https://github.com/dart-lang/language/issues/1811
+       assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          pressure: 0.0,
        );
