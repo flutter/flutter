@@ -2016,19 +2016,19 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
-    if (themeData.useMaterial3) {
-      return MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState) ;
-    }
-    final TextStyle defaultStyle = TextStyle(
-      color: decoration.enabled ? themeData.hintColor : themeData.disabledColor,
-    );
+    final TextStyle defaultStyle = themeData.useMaterial3
+      ? MaterialStateProperty.resolveAs(defaults.labelStyle!, materialState)
+      :
+    TextStyle(
+          color: decoration.enabled ? themeData.hintColor : themeData.disabledColor,
+        );
 
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
     return themeData.textTheme.subtitle1!
-      .merge(widget.baseStyle)
       .merge(defaultStyle)
+      .merge(widget.baseStyle)
       .merge(style)
       .copyWith(height: 1);
   }
@@ -2075,7 +2075,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
     if (themeData.useMaterial3) {
-      return MaterialStateProperty.resolveAs(defaults.helperStyle!, materialState) ;
+      return MaterialStateProperty.resolveAs(decoration.helperStyle, materialState) ??
+          MaterialStateProperty.resolveAs(defaults.helperStyle!, materialState) ;
     }
     final Color color = decoration.enabled ? themeData.hintColor : Colors.transparent;
     return themeData.textTheme.caption!.copyWith(color: color).merge(MaterialStateProperty.resolveAs(decoration.helperStyle, materialState));
@@ -2328,14 +2329,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+          : themeData.useMaterial3
+            ? const EdgeInsets.fromLTRB(12.0, 12.75, 12.0, 12.75)
+            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+          : themeData.useMaterial3
+            ? const EdgeInsets.fromLTRB(0.0, 12.75, 0.0, 12.75)
+            : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
