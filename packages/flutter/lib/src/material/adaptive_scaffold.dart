@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'app_bar.dart';
 import 'bottom_navigation_bar.dart';
 import 'breakpoints.dart';
 import 'colors.dart';
+import 'drawer.dart';
 import 'navigation_bar.dart';
 import 'navigation_rail.dart';
+import 'scaffold.dart';
 
 /// [AdaptiveScaffold] is an abstraction that passes properties to
 /// [AdaptiveLayout] and reduces repetition and a burden on the developer.
@@ -27,6 +30,9 @@ class AdaptiveScaffold extends StatefulWidget {
     this.breakpoints = const <Breakpoint>[Breakpoints.small, Breakpoints.medium, Breakpoints.large],
     this.internalAnimations = true,
     this.horizontalBody = true,
+    this.onSelectedIndexChange,
+    this.useDrawerForDesktop = true,
+    this.appBar,
     super.key,
   });
 
@@ -106,6 +112,19 @@ class AdaptiveScaffold extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool horizontalBody;
+
+  /// Whether to use a [Drawer] over a [BottomNavigationBar] when not on mobile
+  /// and Breakpoint is small.
+  ///
+  /// Defaults to true.
+  final bool useDrawerForDesktop;
+
+  /// Option to override the default [AppBar] when using drawer in desktop
+  /// small.
+  final AppBar? appBar;
+
+  /// Callback function for when the index of a [NavigationRail] changes.
+  final Function(int)? onSelectedIndexChange;
 
   /// Public helper method to be used for creating a [NavigationRail] from a
   /// list of [NavigationDestination]s. Takes in a [selectedIndex] property for
@@ -266,57 +285,72 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: AdaptiveLayout(
-        horizontalBody: widget.horizontalBody,
-        bodyRatio: widget.bodyRatio,
-        internalAnimations: widget.internalAnimations,
-        primaryNavigation: widget.destinations != null && widget.selectedIndex != null
-            ? SlotLayout(
-                config: <Breakpoint, SlotLayoutConfig>{
-                  widget.breakpoints[1]: SlotLayoutConfig(
-                    key: const Key('primaryNavigation'),
-                    builder: (_) => SizedBox(
-                      width: 72,
-                      height: MediaQuery.of(context).size.height,
-                      child: NavigationRail(
-                        selectedIndex: widget.selectedIndex,
-                        destinations: widget.destinations!.map(_toRailDestination).toList(),
-                      ),
-                    ),
-                  ),
-                  widget.breakpoints[2]: SlotLayoutConfig(
-                    key: const Key('primaryNavigation1'),
-                    builder: (_) => SizedBox(
-                      width: 192,
-                      height: MediaQuery.of(context).size.height,
-                      child: NavigationRail(
-                        extended: true,
-                        selectedIndex: widget.selectedIndex,
-                        destinations: widget.destinations!.map(_toRailDestination).toList(),
-                      ),
-                    ),
-                  ),
-                },
+      child: Scaffold(
+        appBar: Breakpoints.onlySmallDesktop.isActive(context) ? widget.appBar ?? AppBar() : null,
+        drawer: Breakpoints.onlySmallDesktop.isActive(context)
+            ? Drawer(
+                child: NavigationRail(
+                  extended: true,
+                  selectedIndex: widget.selectedIndex,
+                  destinations: widget.destinations!.map(_toRailDestination).toList(),
+                  onDestinationSelected: widget.onSelectedIndexChange,
+                ),
               )
             : null,
-        bottomNavigation: widget.destinations != null && widget.selectedIndex != null
-            ? SlotLayout(
-                config: <Breakpoint, SlotLayoutConfig>{
-                  widget.breakpoints[0]: SlotLayoutConfig(
-                    key: const Key('bottomNavigation'),
-                    builder: (_) => BottomNavigationBar(
-                      unselectedItemColor: Colors.grey,
-                      selectedItemColor: Colors.black,
-                      items: widget.destinations!.map(_toBottomNavItem).toList(),
+        body: AdaptiveLayout(
+          horizontalBody: widget.horizontalBody,
+          bodyRatio: widget.bodyRatio,
+          internalAnimations: widget.internalAnimations,
+          primaryNavigation: widget.destinations != null && widget.selectedIndex != null
+              ? SlotLayout(
+                  config: <Breakpoint, SlotLayoutConfig>{
+                    widget.breakpoints[1]: SlotLayoutConfig(
+                      key: const Key('primaryNavigation'),
+                      builder: (_) => SizedBox(
+                        width: 72,
+                        height: MediaQuery.of(context).size.height,
+                        child: NavigationRail(
+                          selectedIndex: widget.selectedIndex,
+                          destinations: widget.destinations!.map(_toRailDestination).toList(),
+                          onDestinationSelected: widget.onSelectedIndexChange,
+                        ),
+                      ),
                     ),
-                  ),
-                  widget.breakpoints[1]: SlotLayoutConfig.empty(),
-                  widget.breakpoints[2]: SlotLayoutConfig.empty(),
-                },
-              )
-            : null,
-        body: _createSlotFromProperties(bodyList, 'body'),
-        secondaryBody: _createSlotFromProperties(secondaryBodyList, 'secondaryBody'),
+                    widget.breakpoints[2]: SlotLayoutConfig(
+                      key: const Key('primaryNavigation1'),
+                      builder: (_) => SizedBox(
+                        width: 192,
+                        height: MediaQuery.of(context).size.height,
+                        child: NavigationRail(
+                          extended: true,
+                          selectedIndex: widget.selectedIndex,
+                          destinations: widget.destinations!.map(_toRailDestination).toList(),
+                          onDestinationSelected: widget.onSelectedIndexChange,
+                        ),
+                      ),
+                    ),
+                  },
+                )
+              : null,
+          bottomNavigation: widget.destinations != null && widget.selectedIndex != null && Breakpoints.smallMobile.isActive(context)
+              ? SlotLayout(
+                  config: <Breakpoint, SlotLayoutConfig>{
+                    widget.breakpoints[0]: SlotLayoutConfig(
+                      key: const Key('bottomNavigation'),
+                      builder: (_) => BottomNavigationBar(
+                        unselectedItemColor: Colors.grey,
+                        selectedItemColor: Colors.black,
+                        items: widget.destinations!.map(_toBottomNavItem).toList(),
+                      ),
+                    ),
+                    widget.breakpoints[1]: SlotLayoutConfig.empty(),
+                    widget.breakpoints[2]: SlotLayoutConfig.empty(),
+                  },
+                )
+              : null,
+          body: _createSlotFromProperties(bodyList, 'body'),
+          secondaryBody: _createSlotFromProperties(secondaryBodyList, 'secondaryBody'),
+        ),
       ),
     );
   }
