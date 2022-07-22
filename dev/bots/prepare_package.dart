@@ -12,7 +12,7 @@ import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
 
 const String gobMirror =
