@@ -278,6 +278,13 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// navigation and being able to insert widgets on top of the pages in an app.
 /// To simply display a stack of widgets, consider using [Stack] instead.
 ///
+/// {@tool dartpad}
+/// This example shows how to use the [Overlay] to highlight the [NavigationBar]
+/// destination.
+///
+/// ** See code in examples/api/lib/widgets/overlay/overlay.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [OverlayEntry], the class that is used for describing the overlay entries.

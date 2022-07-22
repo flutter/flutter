@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -22,8 +20,8 @@ import '../../src/context.dart';
 
 void main() {
   group('clean command', () {
-    Xcode xcode;
-    FakeXcodeProjectInterpreter xcodeProjectInterpreter;
+    late Xcode xcode;
+    late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
 
     setUp(() {
       xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -34,8 +32,8 @@ void main() {
     });
 
     group('general', () {
-      MemoryFileSystem fs;
-      Directory buildDirectory;
+      late MemoryFileSystem fs;
+      late Directory buildDirectory;
 
       setUp(() {
         fs = MemoryFileSystem.test();
@@ -104,9 +102,9 @@ void main() {
     });
 
     group('Windows', () {
-      FakePlatform windowsPlatform;
-      MemoryFileSystem fileSystem;
-      FileExceptionHandler exceptionHandler;
+      late FakePlatform windowsPlatform;
+      late MemoryFileSystem fileSystem;
+      late FileExceptionHandler exceptionHandler;
 
       setUp(() {
         windowsPlatform = FakePlatform(operatingSystem: 'windows');
@@ -191,8 +189,13 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Version version = Version(0, 0, 0);
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
-    return XcodeProjectInfo(null, null, <String>['Runner'], BufferLogger.test());
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(
+      const <String>[],
+      const <String>[],
+      <String>['Runner'],
+      BufferLogger.test(),
+    );
   }
 
   final List<CleanWorkspaceCall> workspaces = <CleanWorkspaceCall>[];

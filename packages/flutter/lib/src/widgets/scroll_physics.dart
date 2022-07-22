@@ -14,7 +14,7 @@ import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 
-export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
+export 'package:flutter/physics.dart' show ScrollSpringSimulation, Simulation, Tolerance;
 
 // Examples can assume:
 // class FooScrollPhysics extends ScrollPhysics {

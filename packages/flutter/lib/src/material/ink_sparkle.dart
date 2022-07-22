@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -522,14 +521,8 @@ class FragmentShaderManager {
   /// Creates an [FragmentShaderManager] with an [InkSparkle] effect.
   static Future<FragmentShaderManager> inkSparkle() async {
     final FragmentShaderManager manager = FragmentShaderManager._();
-    await manager._compile();
+    _program = ui.FragmentProgram.fromAsset('shaders/ink_sparkle.frag');
     return manager;
-  }
-
-  /// Compiles the spir-v bytecode into a shader program.
-  Future<void> _compile() async {
-    final ByteData data = await rootBundle.load('shaders/ink_sparkle.frag');
-    _program = await ui.FragmentProgram.compile(spirv: data.buffer);
   }
 
   /// Creates a shader with the original program and optional uniforms.

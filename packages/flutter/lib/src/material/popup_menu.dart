@@ -534,11 +534,13 @@ class _PopupMenu<T> extends StatelessWidget {
     required this.route,
     required this.semanticLabel,
     this.constraints,
+    required this.clipBehavior,
   });
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -607,6 +609,7 @@ class _PopupMenu<T> extends StatelessWidget {
           child: Material(
             shape: route.shape ?? popupMenuTheme.shape,
             color: route.color ?? popupMenuTheme.color,
+            clipBehavior: clipBehavior,
             type: MaterialType.card,
             elevation: route.elevation ?? popupMenuTheme.elevation ?? 8.0,
             child: Align(
@@ -769,6 +772,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.color,
     required this.capturedThemes,
     this.constraints,
+    required this.clipBehavior,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -781,6 +785,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final Color? color;
   final CapturedThemes capturedThemes;
   final BoxConstraints? constraints;
+  final Clip clipBehavior;
 
   @override
   Animation<double> createAnimation() {
@@ -819,6 +824,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       route: this,
       semanticLabel: semanticLabel,
       constraints: constraints,
+      clipBehavior: clipBehavior,
     );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(
@@ -896,6 +902,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// label is not provided, it will default to
 /// [MaterialLocalizations.popupMenuLabel].
 ///
+/// The `clipBehavior` argument is used to clip the shape of the menu. Defaults to
+/// [Clip.none].
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -916,6 +925,7 @@ Future<T?> showMenu<T>({
   Color? color,
   bool useRootNavigator = false,
   BoxConstraints? constraints,
+  Clip clipBehavior = Clip.none,
 }) {
   assert(context != null);
   assert(position != null);
@@ -946,6 +956,7 @@ Future<T?> showMenu<T>({
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     constraints: constraints,
+    clipBehavior: clipBehavior,
   ));
 }
 
@@ -1015,6 +1026,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.enableFeedback,
     this.constraints,
     this.position = PopupMenuPosition.over,
+    this.clipBehavior = Clip.none,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
        assert(
@@ -1146,6 +1158,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// popup menu appear directly over the button that was used to create it.
   final PopupMenuPosition position;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// The [clipBehavior] argument is used the clip shape of the menu.
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1195,6 +1214,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
         constraints: widget.constraints,
+        clipBehavior: widget.clipBehavior,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
