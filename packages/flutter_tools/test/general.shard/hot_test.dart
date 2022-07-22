@@ -570,6 +570,9 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> assetPathsToEvict = <String>{};
 
   @override
+  Set<String> shaderPathsToEvict= <String>{};
+
+  @override
   Uri baseUri;
 }
 

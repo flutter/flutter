@@ -49,7 +49,7 @@ class DevelopmentShaderCompiler {
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform platform, bool enableImpeller) {
+  void configureCompiler(TargetPlatform? platform, bool enableImpeller) {
     switch (platform) {
       case TargetPlatform.ios:
         _shaderTarget = enableImpeller ? ShaderTarget.impelleriOS : ShaderTarget.sksl;
@@ -71,6 +71,8 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.web_javascript:
         _shaderTarget = ShaderTarget.sksl;
         break;
+      case null:
+        return;
     }
     _debugConfigured = true;
   }
@@ -168,9 +170,9 @@ class ShaderCompiler {
         '--spirv=$outputPath'
       else
         ...<String>[
+          '--iplr',
           '--sl=$outputPath',
           '--spirv=$outputPath.spirv',
-          '--iplr',
         ],
       '--input=${input.path}',
       '--input-type=frag',

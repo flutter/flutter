@@ -2336,6 +2336,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler generator;
 
   @override
+  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.android;
+
+  @override
   Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
 
   @override
@@ -2593,6 +2599,9 @@ class FakeDevFS extends Fake implements DevFS {
 
   @override
   Set<String> assetPathsToEvict = <String>{};
+
+  @override
+  Set<String> shaderPathsToEvict = <String>{};
 
   UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
 

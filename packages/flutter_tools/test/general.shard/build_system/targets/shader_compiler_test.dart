@@ -63,7 +63,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.spirv,
+        target: ShaderTarget.sksl,
       ),
       true,
     );
@@ -77,8 +77,9 @@ void main() {
         command: <String>[
           impellerc,
           '--metal-ios',
-          '--spirv=$outputPath.spirv',
+          '--iplr',
           '--sl=$outputPath',
+          '--spirv=$outputPath.spirv',
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
@@ -111,9 +112,10 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--metal-ios',
-          '--spirv=$outputPath.spirv',
+          '--opengl-es',
+          '--iplr',
           '--sl=$outputPath',
+          '--spirv=$outputPath.spirv',
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
@@ -147,8 +149,9 @@ void main() {
         command: <String>[
           impellerc,
           '--sksl',
-          '--spirv=$outputPath.spirv',
+          '--iplr',
           '--sl=$outputPath',
+          '--spirv=$outputPath.spirv',
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
@@ -169,7 +172,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        target: ShaderTarget.impellerAndroid,
+        target: ShaderTarget.sksl,
       ),
       true,
     );
@@ -207,7 +210,7 @@ void main() {
       await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.spirv,
+        target: ShaderTarget.sksl,
       ),
       true,
     );
@@ -242,7 +245,7 @@ void main() {
       () => shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
-        target: ShaderTarget.spirv,
+        target: ShaderTarget.sksl,
       ),
       throwsA(isA<ShaderCompilerException>()),
     );

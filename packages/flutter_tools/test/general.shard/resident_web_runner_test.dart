@@ -1457,6 +1457,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
 
   @override
+  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
+
+  @override
   FlutterVmService vmService;
 
   DevFS _devFS;
@@ -1525,4 +1528,16 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
 }

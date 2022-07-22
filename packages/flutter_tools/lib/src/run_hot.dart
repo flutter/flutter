@@ -247,7 +247,7 @@ class HotRunner extends ResidentRunner {
 
     for (final FlutterDevice? device in flutterDevices) {
       await device!.initLogReader();
-      device.developmentShaderCompiler.configureCompiler(device.targetPlatform!, debuggingOptions.enableImpeller);
+      device.developmentShaderCompiler.configureCompiler(device.targetPlatform, debuggingOptions.enableImpeller);
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
