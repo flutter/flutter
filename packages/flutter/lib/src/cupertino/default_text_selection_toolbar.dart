@@ -14,20 +14,21 @@ import 'text_selection_toolbar_buttons_builder.dart';
 ///
 /// Builds the mobile Cupertino context menu for all mobile platforms, not just
 /// iOS, and builds the desktop Cupertino context menu for all desktop
-/// platforms, not just MacOS. For a widget that builds all context menus, see
-/// [DefaultTextSelectionToolbar].
+/// platforms, not just MacOS. For a widget that builds the native-looking
+/// context menu for all platforms, see [DefaultTextSelectionToolbar].
 ///
 /// The children can be customized using the [children] or [buttonDatas]
 /// parameters. If neither is given, then the default buttons will be used.
 ///
 /// See also:
 ///
-/// * [EditableTextContextMenuButtonDatasBuilder], which builds the
-///   [ContextMenuButtonData]s.
-/// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextMenuButtonData]s.
+/// * [EditableTextContextMenuButtonDatasBuilder], which generates the default
+///   [ContextMenuButtonData]s for the current platform for a context menu
+///   displaying inside of an [EditableText].
+/// * [TextSelectionToolbarButtonsBuilder], which builds the native-looking
+///   button Widgets for the current platform given [ContextMenuButtonData]s.
 /// * [DefaultTextSelectionToolbar], which does the same thing as this widget
-///   but for all platforms.
+///   but for all platforms, not just Cupertino.
 class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [DefaultCupertinoTextSelectionToolbar].
   const DefaultCupertinoTextSelectionToolbar({
@@ -36,7 +37,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
     this.buttonDatas,
     this.children,
     this.editableTextState,
-    TargetPlatform? targetPlatform,
+    final TargetPlatform? targetPlatform,
     this.secondaryAnchor,
   }) : assert(
          buttonDatas == null || children == null,
@@ -46,7 +47,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
          !(buttonDatas == null && children == null && editableTextState == null),
          'If not providing buttonDatas or children, provide editableTextState to generate them.',
        ),
-       _targetPlatform = targetPlatform;
+       targetPlatform = targetPlatform ?? defaultTargetPlatform;
 
   /// The main location on which to anchor the menu.
   ///
@@ -69,12 +70,10 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
 
   /// The platform to base the toolbar on.
   ///
-  /// If null, then [defaultTargetPlatform] will be used.
-  TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
+  /// Defaults to [defaultTargetPlatform].
+  final TargetPlatform targetPlatform;
 
-  final TargetPlatform? _targetPlatform;
-
-  /// The children of the toolbar.
+  /// The children of the toolbar, typically buttons.
   ///
   /// If provided, [buttonDatas] cannot also be provided.
   final List<Widget>? children;
