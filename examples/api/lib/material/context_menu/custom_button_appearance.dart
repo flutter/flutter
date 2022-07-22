@@ -22,7 +22,6 @@ class MyApp extends StatelessWidget {
         ),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Container(height: 20.0),
               TextField(
@@ -37,8 +36,6 @@ class MyApp extends StatelessWidget {
                         // Note that in a real project you may want to build
                         // different buttons depending on the platform.
                         children: buttonDatas.map((ContextMenuButtonData buttonData) {
-                          assert(debugCheckHasCupertinoLocalizations(context));
-                          final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
                           return CupertinoButton(
                             borderRadius: null,
                             color: const Color(0xffaaaa00),

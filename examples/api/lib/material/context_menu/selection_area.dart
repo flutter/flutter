@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
                 );
               },
               child: ListView(
-                children: <Widget>[
+                children: const <Widget>[
                   const SizedBox(height: 20.0),
                   const Text('I am some text inside of SelectionArea. Right click or long press me to show the customized context menu.'),
                 ],
