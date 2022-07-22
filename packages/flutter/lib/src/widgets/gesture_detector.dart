@@ -1041,7 +1041,9 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onDoubleTap != null || onDoubleTapDown != null) {
+    if (onDoubleTap != null ||
+        onDoubleTapDown != null ||
+        onDoubleTapCancel != null) {
       gestures[DoubleTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
         () => DoubleTapGestureRecognizer(debugOwner: this),
         (DoubleTapGestureRecognizer instance) {
