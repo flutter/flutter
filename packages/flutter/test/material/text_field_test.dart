@@ -8236,7 +8236,6 @@ void main() {
     // Start long pressing on the first line.
     final TestGesture gesture =
         await tester.startGesture(textOffsetToPosition(tester, 19));
-    // TODO(justinmc): Make sure you've got all things torn down.
     await tester.pump(const Duration(milliseconds: 500));
     expect(
       controller.selection,

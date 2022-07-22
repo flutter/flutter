@@ -422,10 +422,15 @@ class TextSelectionOverlay {
     _selectionOverlay.showToolbar((BuildContext context) {
       final double startGlyphHeight = _getStartGlyphHeight();
       final double endGlyphHeight = _getEndGlyphHeight();
+      final Rect anchorRect = _selectionOverlay.getAnchors(
+        renderBox,
+        startGlyphHeight,
+        endGlyphHeight,
+      );
       return contextMenuBuilder!(
         context,
-        _selectionOverlay.getAnchorAbove(renderBox, startGlyphHeight, endGlyphHeight),
-        _selectionOverlay.getAnchorBelow(renderBox, startGlyphHeight, endGlyphHeight),
+        anchorRect.topLeft,
+        anchorRect.bottomRight,
       );
     }, context);
   }
@@ -929,22 +934,9 @@ class SelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
-  // TODO(justinmc): This caching is a bit ridiculous for just needing to return
-  // two values.  Just recalculating is preferable.
-  late Offset _anchorAbove;
-  late Offset _anchorBelow;
-  RenderBox? _lastRenderBox;
-  double? _lastStartGlyphHeight;
-  double? _lastEndGlyphHeight;
-  List<TextSelectionPoint>? _lastSelectionEndpoints;
-  void _calculateAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
-    // This caching is simply to avoid recalculating everything for both the top
-    // and bottom anchors.
-    _lastRenderBox = renderBox;
-    _lastStartGlyphHeight = startGlyphHeight;
-    _lastEndGlyphHeight = endGlyphHeight;
-    _lastSelectionEndpoints = selectionEndpoints;
-
+  /// Returns a collapsed [Rect] where the top is the primary anchor and the
+  /// bottom is the secondary anchor.
+  Rect getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
     final Rect editingRegion = Rect.fromPoints(
       renderBox.localToGlobal(Offset.zero),
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
@@ -963,36 +955,16 @@ class SelectionOverlay {
       editingRegion.top + selectionEndpoints.last.point.dy,
     );
 
-    _anchorAbove = Offset(
-      selectionRect.left + selectionRect.width / 2,
-      clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
+    return Rect.fromPoints(
+      Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
+      ),
+      Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
+      ),
     );
-    _anchorBelow = Offset(
-      _anchorAbove.dx,
-      clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
-    );
-  }
-
-  /// Returns the [Offset] of the upper anchor point of the context menu.
-  Offset getAnchorAbove(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
-    if (renderBox != _lastRenderBox
-        || startGlyphHeight != _lastStartGlyphHeight
-        || endGlyphHeight != _lastEndGlyphHeight
-        || selectionEndpoints != _lastSelectionEndpoints) {
-      _calculateAnchors(renderBox, startGlyphHeight, endGlyphHeight);
-    }
-    return _anchorAbove;
-  }
-
-  /// Returns the [Offset] of the upper anchor point of the context menu.
-  Offset getAnchorBelow(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
-    if (renderBox != _lastRenderBox
-        || startGlyphHeight != _lastStartGlyphHeight
-        || endGlyphHeight != _lastEndGlyphHeight
-        || selectionEndpoints != _lastSelectionEndpoints) {
-      _calculateAnchors(renderBox, startGlyphHeight, endGlyphHeight);
-    }
-    return _anchorBelow;
   }
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
@@ -1023,9 +995,6 @@ class SelectionOverlay {
     }
   }
 
-  // TODO(justinmc): After removing the deprecations, this contextMenuBuilder
-  // param will need to be required. Is that really what we want here? Can I
-  // determine the location stuff before _showToolbar is called?
   /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
@@ -1039,7 +1008,7 @@ class SelectionOverlay {
       return;
     }
 
-    if (contextMenuBuilder == null || context == null) {
+    if (context == null) {
       return;
     }
 

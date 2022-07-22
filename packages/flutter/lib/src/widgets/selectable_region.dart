@@ -642,11 +642,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return _SelectableRegionContextMenuButtonDatasBuilder(
         delegate: this,
         builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
+          final Rect anchorRect = _selectionOverlay!.getAnchors(
+            renderBox,
+            lineHeightAtStart,
+            endGlyphHeight,
+          );
           return widget.contextMenuBuilder!(
             context,
             buttonDatas,
-            _selectionOverlay!.getAnchorAbove(renderBox, lineHeightAtStart, endGlyphHeight),
-            _selectionOverlay!.getAnchorBelow(renderBox, lineHeightAtStart, endGlyphHeight),
+            anchorRect.topLeft,
+            anchorRect.bottomRight,
           );
         },
       );

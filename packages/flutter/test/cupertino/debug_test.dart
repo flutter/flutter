@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-// TODO(justinmc): I think you've done something crazy with imports, and that's
-// why the analyzer tells you to remove this.
-//import 'package:flutter/src/cupertino/debug.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
