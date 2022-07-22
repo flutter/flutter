@@ -4437,7 +4437,6 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
         return Colors.black45;
     }
   });
-
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - InputDecorator
@@ -4618,15 +4617,6 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle= Theme.of(context).textTheme.bodySmall ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
-      }
-      if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
-      }
-      return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
-    }
     if (states.contains(MaterialState.hovered)) {
       return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurfaceVariant);
     }
@@ -4637,6 +4627,18 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
     }
     return textStyle.copyWith(color:Theme.of(context).colorScheme.onSurfaceVariant);
+  });
+
+  @override
+  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle= Theme.of(context).textTheme.bodySmall ?? const TextStyle();
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
+    }
+    return textStyle.copyWith(color:Theme.of(context).colorScheme.error);
   });
 }
 
