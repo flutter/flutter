@@ -8,7 +8,14 @@
 #include "impeller/base/validation.h"
 
 #define VK_NO_PROTOTYPES
+
+#if !defined(NDEBUG)
 #define VULKAN_HPP_ASSERT FML_CHECK
+#else
+#define VULKAN_HPP_ASSERT(ignored) \
+  {}
+#endif
+
 #define VULKAN_HPP_NAMESPACE impeller::vk
 #define VULKAN_HPP_ASSERT_ON_RESULT(ignored) \
   { [[maybe_unused]] auto res = (ignored); }
