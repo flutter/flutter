@@ -65,7 +65,7 @@ void tryDelete(String dependencyBaseName, Directory globalCachePub, Logger logge
   final Directory dependency = globalCachePub.childDirectory(dependencyBaseName);
   if (dependency.existsSync()) {
     try {
-      globalCachePub.childDirectory(dependencyBaseName).deleteSync();
+      globalCachePub.childDirectory(dependencyBaseName).deleteSync(recursive: true);
     }
     on FileSystemException {
       throwToolExit('FileSystemException found while deleting a directory, '
