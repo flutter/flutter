@@ -70,6 +70,24 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
 }
 
+/// {@template flutter.widgets.textSelection.LoupeBuilder}
+/// A builder that builds a Widget with a [LoupeController].
+///
+/// Consuming [controller] or [textSelectionData] is not required, although if a
+/// Widget intends to have entry or exit animations, it should take
+/// [controller] and provide it an [AnimationController], so that
+/// [LoupeController] can wait before removing it from the overlay.
+///
+///
+/// see also:
+/// - [LoupeSelectionOverlayInfoBearer], the dataclass that updates the
+///   loupe.
+/// {@endtemplate}
+typedef LoupeBuilder = Widget? Function(
+    BuildContext context,
+    LoupeController controller,
+    ValueNotifier<LoupeSelectionOverlayInfoBearer> textSelectionData
+);
 
 /// A data class that allows the SelectionOverlay to delegate
 /// the loupe's positioning to the loupe itself, based on the
@@ -77,9 +95,6 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 @immutable
 class LoupeSelectionOverlayInfoBearer {
   /// Construct a [LoupeSelectionOverlayInfoBearer] from raw values.
-  ///
-  /// It is recommended to use [LoupeSelectionOverlayInfoBearer._selectionControlDerrived]
-  /// in order to not manually re-calculate all the required parameters.
   const LoupeSelectionOverlayInfoBearer({
     required this.globalGesturePosition,
     required this.handleRect,
@@ -87,14 +102,13 @@ class LoupeSelectionOverlayInfoBearer {
     required this.currentLineBoundries,
   });
 
-  factory LoupeSelectionOverlayInfoBearer._selectionControlDerrived({
+  factory LoupeSelectionOverlayInfoBearer._selectionControlDerived({
     required RenderEditable renderEditable,
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
   }) {
     final Offset globalRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero);
     final Rect localCaratRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-
 
     final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
     final TextPosition positionAtEndOfLine = TextPosition(
@@ -111,7 +125,6 @@ class LoupeSelectionOverlayInfoBearer {
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topLeft,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomRight
     );
-
 
     return LoupeSelectionOverlayInfoBearer(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
@@ -144,12 +157,20 @@ class LoupeSelectionOverlayInfoBearer {
   final Rect fieldBounds;
 
   @override
-  bool operator ==(Object other) =>
-    other is LoupeSelectionOverlayInfoBearer &&
-    other.globalGesturePosition == globalGesturePosition &&
-    other.handleRect == handleRect &&
-    other.currentLineBoundries == currentLineBoundries &&
-    other.fieldBounds == fieldBounds;
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (other is! LoupeSelectionOverlayInfoBearer) {
+      return false;
+    }
+
+    return other.globalGesturePosition == globalGesturePosition &&
+        other.handleRect == handleRect &&
+        other.currentLineBoundries == currentLineBoundries &&
+        other.fieldBounds == fieldBounds;
+  }
 
   @override
   int get hashCode => Object.hash(
@@ -326,7 +347,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder,
+    LoupeBuilder? loupeBuilder,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -399,17 +420,14 @@ class TextSelectionOverlay {
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
 
-  /// {@template flutter.widgets.SelectionOverlay.selectionControls}
   /// The context in which the selection handles should appear.
   ///
   /// This context must have an [Overlay] as an ancestor because this object
   /// will display the text selection handles in that [Overlay].
-  /// {@endtemplate}
   final BuildContext context;
 
   final ValueNotifier<LoupeSelectionOverlayInfoBearer> _loupeSelectionOverlayInfoBearer =
           ValueNotifier<LoupeSelectionOverlayInfoBearer>(const LoupeSelectionOverlayInfoBearer.empty());
-
 
   /// The loupe and toolbar cannot be shown at the same time, and [_loupeController] is
   /// dominant over [_effectiveToolbarVisibility]. `_effectiveToolbarVisibility.value == true &&
@@ -418,22 +436,19 @@ class TextSelectionOverlay {
   ///
   /// [_loupeController.show] and [_loupeController.hide] should not be called directly, except
   /// from inside [_showLoupe] and [_hideLoupe]. If it is desired to show or hide the loupe,
-  ///  call [_showLoupe] or [_hideLoupe]. This is because the loupe needs to orchestrate
+  /// call [_showLoupe] or [_hideLoupe]. This is because the loupe needs to orchestrate
   /// with other properties in [TextSelectionOverlay].
   ///
   /// [_loupeController] and [_loupeBuilder] will only be null if the constructor was
   /// explicitly passed in null. Otherwise, it will be a builder function that returns
   /// the platform widget, or null, if no loupe is built for the platform.
   final LoupeController? _loupeController;
-  final LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? _loupeBuilder;
+  final LoupeBuilder? _loupeBuilder;
 
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
     _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
-
-    assert(!_effectiveToolbarVisibility.value || !(_loupeController?.shown ?? false),
-                'The loupe and the toolbar cannot be shown at the same time.');
   }
 
   /// Whether selection handles are visible.
@@ -582,20 +597,20 @@ class TextSelectionOverlay {
   /// if the user drags too far away. If this info is needed, check
   /// [_loupeController.status].
   void _showLoupe(LoupeSelectionOverlayInfoBearer initalInfoBearer) {
-  if (_loupeController == null) {
-    return;
-  }
+    if (_loupeController == null) {
+      return;
+    }
 
-  if (toolbarIsVisible) {
-    hideToolbar();
-  }
+    if (toolbarIsVisible) {
+      hideToolbar();
+    }
 
-  // Start from empty, so we don't utilize any rememnant values
-  _loupeSelectionOverlayInfoBearer.value = initalInfoBearer;
+    // Start from empty, so we don't utilize any rememnant values.
+    _loupeSelectionOverlayInfoBearer.value = initalInfoBearer;
 
-  // If we don't build a loupe for the specified platform,
-  // then we should short circuit.
-  final Widget? builtLoupe = _loupeBuilder!(
+    // If we don't build a loupe for the specified platform,
+    // then we should short circuit.
+    final Widget? builtLoupe = _loupeBuilder!(
       context,
       _loupeController!,
       _loupeSelectionOverlayInfoBearer,
@@ -605,11 +620,13 @@ class TextSelectionOverlay {
       return;
     }
 
-  _loupeController!.show(
-    context: context,
-    // On Android, the loupe cannot see the handles. On iOS, it can.
-    below: defaultTargetPlatform == TargetPlatform.iOS ? null : _selectionOverlay._handles!.first,
-    builder: (BuildContext context) => builtLoupe);
+    _loupeController!.show(
+        context: context,
+        // On Android, the loupe cannot see the handles. On iOS, it can.
+        below: defaultTargetPlatform == TargetPlatform.iOS
+            ? null
+            : _selectionOverlay._handles!.first,
+        builder: (_) => builtLoupe);
   }
 
   void _hideLoupe() {
@@ -617,7 +634,7 @@ class TextSelectionOverlay {
       return;
     }
 
-   _loupeController!.hide();
+    _loupeController!.hide();
 
     if (!_selection.isCollapsed) {
       showToolbar();
@@ -632,7 +649,7 @@ class TextSelectionOverlay {
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
-    _showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+    _showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -646,7 +663,7 @@ class TextSelectionOverlay {
     final TextSelection currentSelection = TextSelection.fromPosition(position);
 
     if (_selection.isCollapsed) {
-      _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+      _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerived(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -685,7 +702,7 @@ class TextSelectionOverlay {
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
 
-     _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+     _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerived(
       currentTextPosition: newSelection.extent,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -701,7 +718,7 @@ class TextSelectionOverlay {
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
-    _showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+    _showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -713,7 +730,7 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
-      _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+      _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerived(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -750,7 +767,7 @@ class TextSelectionOverlay {
         break;
     }
 
-    _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerrived(
+    _loupeSelectionOverlayInfoBearer.value = LoupeSelectionOverlayInfoBearer._selectionControlDerived(
       currentTextPosition: newSelection.base,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,

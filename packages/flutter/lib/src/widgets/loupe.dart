@@ -3,25 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
-/// {@template flutter.widgets.loupe.loupeBuilder}
-/// A builder that builds a Widget with a [LoupeController].
-///
-/// Consuming [controller] or [data] is not required, although if a
-/// Widget intends to have entry or exit animations, it should take
-/// [controller] and provide it an [AnimationController], so that
-/// [LoupeController] can wait before removing it from the overlay.
-///
-/// [data] is a convienence provided incase some data needs to be passed
-/// to the loupe's [OverlayEntry].
-/// {@endtemplate}
-typedef LoupeBuilder<T> = Widget? Function(
-    BuildContext context, LoupeController controller, T data);
-
 
 /// [LoupeController]'s main benefit over holding a raw [OverlayEntry] is that
 /// [LoupeController] will handle logic around waiting for a loupe to animate in or out.
@@ -46,7 +32,9 @@ class LoupeController {
   /// respectively.
   AnimationController? animationController;
 
-  /// The loupe's [OverlayEntry], if currently visible.
+  /// The loupe's [OverlayEntry], if currently in the overlay.
+  ///
+  /// It may be possible that this is not null, but
   ///
   /// This is public in case other overlay entries need to be positioned
   /// above or below this [overlayEntry]. Anything in the paint order after
@@ -56,33 +44,37 @@ class LoupeController {
   ///
   /// {@tool snippet}
   /// ```dart
-  ///  final myLoupeController = LoupeController();
+  /// void loupeShowExample(BuildContext context) {
+  ///   final LoupeController myLoupeController = LoupeController();
   ///
-  /// // Placed below the loupe, so it will show.
-  /// Overlay.of(context).insert(
-  ///   OverlayEntry(builder: (context) => Text('I WILL display in the loupe'))
-  /// );
+  ///   // Placed below the loupe, so it will show.
+  ///   Overlay.of(context)!.insert(OverlayEntry(
+  ///       builder: (BuildContext context) => const Text('I WILL display in the loupe')));
   ///
-  /// /// Will display in the loupe, since this entry was passed to [show].
-  /// final displayInLoupeEvenThoughPlacedBeforeChronologically = OverlayEntry(builer: (context) => Text('I WILL display in the loupe');
-  /// Overlay.of(context).insert(displayInLoupeEvenThoughPlacedBeforeChronologically);
+  ///   // Will display in the loupe, since this entry was passed to show.
+  ///   final displayInLoupeEvenThoughPlacedBeforeChronologically = OverlayEntry(
+  ///       builder: (BuildContext context) =>
+  ///           const Text('I WILL display in the loupe'));
   ///
-  /// myLoupeController.show(
-  ///   context,
-  ///   below: displayInLoupeEvenThoughPlacedBeforeChronologically,
-  ///   builder: (context) => Loupe(...)
-  /// );
+  ///   Overlay.of(context)!
+  ///       .insert(displayInLoupeEvenThoughPlacedBeforeChronologically);
+  ///   myLoupeController.show(
+  ///       context: context,
+  ///       below: displayInLoupeEvenThoughPlacedBeforeChronologically,
+  ///       builder: (BuildContext context) => const RawLoupe(
+  ///             size: Size(100, 100),
+  ///           ));
   ///
-  /// // By default, new entries will be placed over the top entry.
-  /// Overlay.of(context).insert(
-  ///   OverlayEntry(builer: (context) => Text('I WILL NOT display in the loupe'))
-  /// );
+  ///   // By default, new entries will be placed over the top entry.
+  ///   Overlay.of(context)!.insert(OverlayEntry(
+  ///       builder: (BuildContext context) => const Text('I WILL NOT display in the loupe')));
   ///
-  ///
-  /// Overlay.of(context).insert(
-  ///   below: myLoupeController.overlayEntry, // Explicitly placed below the loupe.
-  ///   OverlayEntry(builer: (context) => Text('I WILL display in the loupe'))
-  /// );
+  ///   Overlay.of(context)!.insert(
+  ///       below:
+  ///           myLoupeController.overlayEntry, // Explicitly placed below the loupe.
+  ///       OverlayEntry(
+  ///           builder: (BuildContext context) => const Text('I WILL display in the loupe')));
+  /// }
   /// ```
   /// {@end-tool}
   ///
@@ -112,11 +104,10 @@ class LoupeController {
     return true;
   }
 
-
-  /// Shows the [RawLoupe] that this controller controlls.
+  /// Shows the [RawLoupe] that this controller controls.
   ///
   /// Returns a future that completes when the loupe is fully shown, i.e. done
-  /// with it's entry animation.
+  /// with its entry animation.
   ///
   /// To control what overlays are shown in the loupe, utilize [below]. See
   /// [overlayEntry] for more details on how to utilize [below].
@@ -183,14 +174,18 @@ class LoupeController {
   }
 
   /// A utility for calculating a new [Rect] from [rect] such that
-  /// [rect] is fully constrained within [bounds], that is, any point
-  /// in the output rect is guaranteed to also be a point contained in [bounds].
+  /// [rect] is fully constrained within [bounds].
+  ///
+  /// Any point in the output rect is guaranteed to also be a point contained in [bounds].
   ///
   /// It is a runtime error for [rect].width to be greater than [bounds].width,
   /// and it is also an error for [rect].height to be greater than [bounds].height.
   ///
-  /// This algorithm makes no guarantees about where this is placed within [bounds],
-  /// only that the entirety of the output rect is inside [bounds].
+  /// This algorithm translates [rect] the shortest distance such that it is entirely within
+  /// [bounds].
+  ///
+  /// If [rect] is already within [bounds], no shift will be applied to [rect] and
+  /// [rect] will be returned as-is.
   ///
   /// It is perfectly valid for the output rect to have a point along the edge of the
   /// [bounds]. If the desired output rect requires that no edges are parellel to edges
@@ -226,16 +221,12 @@ class LoupeController {
 /// [LoupeDecoration] does not expose [ShapeDecoration.color], [ShapeDecoration.image],
 /// or [ShapeDecoration.gradient], since they will be covered by the [RawLoupe]'s lense.
 ///
-/// Also takes an [opacity].
-/// {@template flutter.widgets.loupe.opacity.reason}
-/// This is because [RawLoupe]'s lens is backed by [BackdropFilter],
-/// which, to have any opacity, must be the first decendant of [Opacity].
-/// (see https://github.com/flutter/engine/pull/34435)
-/// {@endtemplate}
+/// Also takes an [opacity] (see https://github.com/flutter/engine/pull/34435).
 class LoupeDecoration extends ShapeDecoration {
   /// Constructs a [LoupeDecoration].
   ///
-  /// By default, is a rectangular loupe with no shadows, and fully opaque.
+  /// By default, [LoupeDecoration] is a rectangular loupe with no shadows, and
+  /// fully opaque.
   const LoupeDecoration({
     this.opacity = 1,
     super.shadows,
@@ -243,19 +234,29 @@ class LoupeDecoration extends ShapeDecoration {
   });
 
   /// The loupe's opacity.
-  ///
-  /// {@macro flutter.widgets.loupe.opacity.reason}
   final double opacity;
 
   @override
-  bool operator ==(Object other) =>
-      super == other && other is LoupeDecoration && other.opacity == opacity;
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    return super == other && other is LoupeDecoration && other.opacity == opacity;
+  }
 
   @override
   int get hashCode => Object.hash(super.hashCode, opacity);
 }
 
-/// A common building base for [RawLoupe]s.
+/// A common building base for Loupes.
+///
+/// {@template flutter.widgets.loupe.intro}
+/// This magnifying glass is useful for scenarios on mobile devices where
+/// the user's finger may be covering part of the screen where a granular
+/// action is being performed, such as navigating a small cursor with a drag
+/// gesture, on an image or text.
+/// {@endtemplate}
 ///
 /// A loupe can be convienently managed by [LoupeController], which handles
 /// showing and hiding the loupe, with an optional entry / exit animation.
@@ -272,14 +273,14 @@ class RawLoupe extends StatelessWidget {
   /// since it is painting exactly what is under it, exactly where it was painted
   /// orignally.
   /// {@endtemplate}
-  const RawLoupe(
-      {super.key,
+  const RawLoupe({
+      super.key,
       this.magnificationScale = 1,
       required this.size,
       this.focalPoint = Offset.zero,
       this.child,
-      this.decoration = const LoupeDecoration()})
-      : assert(magnificationScale != 0,
+      this.decoration = const LoupeDecoration()
+      }) : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
   /// This loupe's decoration.
@@ -318,15 +319,19 @@ class RawLoupe extends StatelessWidget {
           child: Opacity(
             opacity: decoration.opacity,
             child: _Magnifier(
-                focalPoint: focalPoint,
-                shape: decoration.shape,
-                magnificationScale: magnificationScale,
-                child: SizedBox.fromSize(
-                  size: size,
-                  child: child,
-                )),
+              focalPoint: focalPoint,
+              magnificationScale: magnificationScale,
+              child: SizedBox.fromSize(
+                size: size,
+                child: child,
+              ),
+            ),
           ),
         ),
+
+      // Because `BackdropFilter` will filter any widgets before it, we should
+      // apply the style after (i.e. in a younger sibling) to avoid the loupe
+      // from seeing its own styling.
         Opacity(
           opacity: decoration.opacity,
           child: _LoupeStyle(
@@ -339,9 +344,6 @@ class RawLoupe extends StatelessWidget {
   }
 }
 
-/// Because backdrop filter will filter any widgets before it, we should
-/// apply the style after (i.e. in a younger sibling) to avoid the loupe
-/// from seeing its own styling.
 class _LoupeStyle extends StatelessWidget {
   const _LoupeStyle(this.decoration, {required this.size});
 
@@ -350,10 +352,19 @@ class _LoupeStyle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double largestShadow = 0;
+    for (final BoxShadow shadow in decoration.shadows ?? <BoxShadow>[]) {
+      largestShadow = math.max(
+          largestShadow,
+          shadow.spreadRadius +
+              math.max(shadow.offset.dy.abs(), shadow.offset.dx.abs()));
+    }
+
     return ClipPath(
       clipBehavior: Clip.hardEdge,
       clipper: _DonutClip(
         shape: decoration.shape,
+        spreadRadius: largestShadow,
       ),
       child: DecoratedBox(
         decoration: decoration,
@@ -365,7 +376,7 @@ class _LoupeStyle extends StatelessWidget {
   }
 }
 
-/// A clipPath that looks like a donut if you were to fill it's area.
+/// A clipPath that looks like a donut if you were to fill its area.
 ///
 /// This is necessary because the shadow must be added after the loupe is drawn,
 /// so that the shadow does not end up in the loupe. Without this clip, the loupe would be
@@ -374,12 +385,9 @@ class _LoupeStyle extends StatelessWidget {
 /// The negative space of the donut is clipped out (the donut hole, outside the donut).
 /// The donut hole is cut out exactly like the shape of the Loupe.
 class _DonutClip extends CustomClipper<Path> {
-  _DonutClip({required this.shape});
+  _DonutClip({required this.shape, required this.spreadRadius});
 
-  // A very large clip; will display all but the most
-  // unreasonably large shadows.
-  static const double _kEstimatedWidestShadowLoupeBounds = 90.0;
-
+  final double spreadRadius;
   final ShapeBorder shape;
 
   @override
@@ -389,7 +397,7 @@ class _DonutClip extends CustomClipper<Path> {
 
     path.fillType = PathFillType.evenOdd;
     path.addPath(shape.getOuterPath(Offset.zero & size), Offset.zero);
-    path.addRect(rect.inflate(_kEstimatedWidestShadowLoupeBounds));
+    path.addRect(rect.inflate(spreadRadius));
     return path;
   }
 
@@ -399,16 +407,11 @@ class _DonutClip extends CustomClipper<Path> {
 
 class _Magnifier extends SingleChildRenderObjectWidget {
   /// Construct a [_Magnifier].
-  _Magnifier(
-      {super.child,
-      ShapeBorder? shape,
+  const _Magnifier({
+      super.child,
       this.magnificationScale = 1,
-      this.focalPoint = Offset.zero})
-      : clip = shape != null
-            ? ShapeBorderClipper(
-                shape: shape,
-              )
-            : null;
+      this.focalPoint = Offset.zero,
+  });
 
   /// [focalPoint] of the magnifier is the area the center of the
   /// [_Magnifier] points to, relative to the center of the magnifier.
@@ -421,13 +424,9 @@ class _Magnifier extends SingleChildRenderObjectWidget {
   /// A [magnificationScale] of 1 means that the content magi
   final double magnificationScale;
 
-  /// The shape of the magnifier is dictated by [clip], which clips
-  /// the magnifier to the shape. If null, the shape will be rectangular.
-  final ShapeBorderClipper? clip;
-
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderMagnification(focalPoint, magnificationScale, clip);
+    return _RenderMagnification(focalPoint, magnificationScale);
   }
 
   @override
@@ -435,7 +434,6 @@ class _Magnifier extends SingleChildRenderObjectWidget {
       BuildContext context, covariant _RenderMagnification renderObject) {
     renderObject
       ..focalPoint = focalPoint
-      ..clip = clip
       ..magnificationScale = magnificationScale;
   }
 }
@@ -443,8 +441,7 @@ class _Magnifier extends SingleChildRenderObjectWidget {
 class _RenderMagnification extends RenderProxyBox {
   _RenderMagnification(
     this._focalPoint,
-    this._magnificationScale,
-    this._clip, {
+    this._magnificationScale, {
     RenderBox? child,
   }) : super(child);
 
@@ -465,16 +462,6 @@ class _RenderMagnification extends RenderProxyBox {
       return;
     }
     _magnificationScale = value;
-    markNeedsLayout();
-  }
-
-  CustomClipper<Path>? get clip => _clip;
-  CustomClipper<Path>? _clip;
-  set clip(CustomClipper<Path>? value) {
-    if (_clip == value) {
-      return;
-    }
-    _clip = value;
     markNeedsLayout();
   }
 

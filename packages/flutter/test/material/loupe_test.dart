@@ -11,8 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final LoupeController loupeController = LoupeController();
   const Rect reasonableTextField = Rect.fromLTRB(50, 100, 200, 100);
-  final Offset basicOffset = Offset(Loupe.kSize.width / 2,
-      Loupe.kSize.height - Loupe.kStandardVerticalFocalPointShift);
+  final Offset basicOffset = Offset(Loupe.kDefaultLoupeSize.width / 2,
+      Loupe.kDefaultLoupeSize.height - Loupe.kStandardVerticalFocalPointShift);
 
   Offset getLoupePosition(WidgetTester tester, [bool animated = false]) {
     if (animated) {

@@ -395,8 +395,9 @@ class TextField extends StatefulWidget {
   /// A [LoupeBuilder] for this [TextField].
   ///
   /// If null, then no loupe will be built for this text field. By default, builds a
-  /// [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on Android.
-  final LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
+  /// [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on Android, and builds
+  /// nothing on all other platforms.
+  final LoupeBuilder? loupeBuilder;
 
   /// Controls the text being edited.
   ///

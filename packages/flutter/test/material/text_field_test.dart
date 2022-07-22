@@ -11572,7 +11572,7 @@ void main() {
               equals(customLoupe.key)));
     });
 
-    test('should be null on null passed in null', () {
+    test('should be null on passed in null', () {
       const TextField textField = TextField(
         loupeBuilder: null,
       );

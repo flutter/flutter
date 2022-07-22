@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final Offset basicOffset = Offset(CupertinoLoupe.kSize.width / 2,
-      CupertinoLoupe.kSize.height - CupertinoLoupe.kVerticalFocalPointOffset);
-  const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 100);
+  final Offset basicOffset = Offset(CupertinoLoupe.kDefaultSize.width / 2,
+      CupertinoLoupe.kDefaultSize.height - CupertinoLoupe.kLoupeAboveFocalPoint);
+  const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
   final LoupeController loupeController = LoupeController();
 
   // Make sure that your gesture in infoBearer is within the line in infoBearer,
@@ -50,13 +50,13 @@ void main() {
             animatedPositioned.left ?? 0, animatedPositioned.top ?? 0);
       }
 
-      testWidgets(
-          'should be at gesture position if does not violate any positioning rules',
-          (WidgetTester tester) async {
+      testWidgets('should be at gesture position if does not violate any positioning rules', (WidgetTester tester) async {
         final Key fakeTextFieldKey = UniqueKey();
+        final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
           Container(
+            key: outerKey,
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
               home: Center(
@@ -73,28 +73,25 @@ void main() {
         final BuildContext context = tester.element(find.byType(Placeholder));
 
         // Loupe should be positioned directly over the red square.
-        final RenderBox tapPointRenderBox =
-            tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
-        final Rect fakeTextFieldRect =
-            tapPointRenderBox.localToGlobal(Offset.zero) &
-                tapPointRenderBox.size;
+        final RenderBox tapPointRenderBox = tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
+        final Rect fakeTextFieldRect = tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
-        final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo =
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
-          currentLineBoundries: fakeTextFieldRect,
-          fieldBounds: fakeTextFieldRect,
-          handleRect: fakeTextFieldRect,
-          // The tap position is dragBelow units below the text field.
-          globalGesturePosition: fakeTextFieldRect.center,
-        ));
+        final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo = ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+          LoupeSelectionOverlayInfoBearer(
+            currentLineBoundries: fakeTextFieldRect,
+            fieldBounds: fakeTextFieldRect,
+            handleRect: fakeTextFieldRect,
+            // The tap position is dragBelow units below the text field.
+            globalGesturePosition: fakeTextFieldRect.center,
+          ),
+        );
 
         await showCupertinoLoupe(context, tester, loupeInfo);
 
         // Should show two red squares; original, and one in the loupe,
         // directly ontop of one another.
         await expectLater(
-          find.byType(Placeholder),
+          find.byKey(outerKey),
           matchesGoldenFile('cupertino_loupe.position.default.png'),
         );
       });
@@ -108,8 +105,7 @@ void main() {
           ),
         );
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Placeholder));
+        final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
         await showCupertinoLoupe(
             context,
@@ -131,7 +127,7 @@ void main() {
 
       testWidgets('should have some vertical drag',
           (WidgetTester tester) async {
-        final double dragPositionBelowTextField = reasonableTextField.top + 30;
+        final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
           const MaterialApp(
@@ -157,8 +153,7 @@ void main() {
                   dragPositionBelowTextField),
             )));
 
-        // The loupe should be greater than the text field, since we "dragged" it down,
-        // but excatly following the drag position.
+        // The loupe Y should be greater than the text field, since we "dragged" it down.
         expect(getLoupePosition(tester).dy + basicOffset.dy,
             greaterThan(reasonableTextField.center.dy));
         expect(getLoupePosition(tester).dy + basicOffset.dy,

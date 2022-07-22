@@ -781,8 +781,17 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.loupe.loupeBuilder}
-  final LoupeBuilder<ValueNotifier<LoupeSelectionOverlayInfoBearer>>? loupeBuilder;
+  /// The builder that determines what kind of magnifying glass is built for this
+  /// [CupertinoTextField].
+  ///
+  /// {@macro flutter.widgets.loupe.intro}
+  ///
+  /// In cases where the loupe should not be shown, this builder may be null,
+  /// or may return null.
+  ///
+  // todo(antholeole): once the loupe PR lands, I should enrich this area of the
+  // docs with images of what a loupe is.
+  final LoupeBuilder? loupeBuilder;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();

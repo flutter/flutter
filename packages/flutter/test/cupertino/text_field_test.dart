@@ -5770,50 +5770,21 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+  group('loupe', () {
+    late ValueNotifier<LoupeSelectionOverlayInfoBearer> infoBearer;
+    final Widget fakeLoupe = Container(key: UniqueKey());
 
-  group('loupe builder', () {
-    testWidgets('should build custom loupe if given',
-        (WidgetTester tester) async {
-      final Widget customLoupe = Container(
-        key: UniqueKey(),
-      );
-      final CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
-        loupeBuilder: (_, __, ___) => customLoupe,
-      );
-
-      await tester.pumpWidget(const MaterialApp(
-        home: Placeholder(),
-      ));
-
-      final BuildContext context =
-          tester.firstElement(find.byType(Placeholder));
-
-      expect(
-          defaultCupertinoTextField.loupeBuilder!(
-              context,
-              LoupeController(),
-              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                const LoupeSelectionOverlayInfoBearer.empty(),
-              )),
-          isA<Widget>().having(
-              (Widget widget) => widget.key, 'key',
-              equals(customLoupe.key)));
-    });
-
-    test('should be null on null passed in null', () {
-      const CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
-        loupeBuilder: null,
-      );
-      expect(defaultCupertinoTextField.loupeBuilder, isNull);
-    });
-
-    group('defaults', () {
-      testWidgets('should build CupertinoLoupe on iOS',
+    group('loupe builder', () {
+      testWidgets('should build custom loupe if given',
           (WidgetTester tester) async {
-        const CupertinoTextField defaultCupertinoTextField =
-            CupertinoTextField();
+        final Widget customLoupe = Container(
+          key: UniqueKey(),
+        );
+        final CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
+          loupeBuilder: (_, __, ___) => customLoupe,
+        );
 
-        await tester.pumpWidget(const MaterialApp(
+        await tester.pumpWidget(const CupertinoApp(
           home: Placeholder(),
         ));
 
@@ -5827,32 +5798,132 @@ void main() {
                 ValueNotifier<LoupeSelectionOverlayInfoBearer>(
                   const LoupeSelectionOverlayInfoBearer.empty(),
                 )),
-            isA<CupertinoTextEditingLoupe>());
+            isA<Widget>().having(
+                (Widget widget) => widget.key, 'key', equals(customLoupe.key)));
+      });
+
+      test('should be null on null passed in null', () {
+        const CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
+          loupeBuilder: null,
+        );
+        expect(defaultCupertinoTextField.loupeBuilder, isNull);
+      });
+
+      group('defaults', () {
+        testWidgets('should build CupertinoLoupe on iOS',
+            (WidgetTester tester) async {
+          const CupertinoTextField defaultCupertinoTextField =
+              CupertinoTextField();
+
+          await tester.pumpWidget(const CupertinoApp(
+            home: Placeholder(),
+          ));
+
+          final BuildContext context =
+              tester.firstElement(find.byType(Placeholder));
+
+          expect(
+              defaultCupertinoTextField.loupeBuilder!(
+                  context,
+                  LoupeController(),
+                  ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+                    const LoupeSelectionOverlayInfoBearer.empty(),
+                  )),
+              isA<CupertinoTextEditingLoupe>());
+        },
+            variant: const TargetPlatformVariant(
+                <TargetPlatform>{TargetPlatform.iOS}));
+      });
+
+      testWidgets('should build nothing on not iOS',
+          (WidgetTester tester) async {
+        const CupertinoTextField defaultCupertinoTextField =
+            CupertinoTextField();
+
+        await tester.pumpWidget(const CupertinoApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
+
+        expect(
+            defaultCupertinoTextField.loupeBuilder!(
+                context,
+                LoupeController(),
+                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
+                  const LoupeSelectionOverlayInfoBearer.empty(),
+                )),
+            isNull);
       },
-          variant: const TargetPlatformVariant(
-              <TargetPlatform>{TargetPlatform.iOS}));
+          variant: TargetPlatformVariant.all(
+              excluding: <TargetPlatform>{TargetPlatform.iOS}));
     });
 
-    testWidgets('should build nothing on not iOS', (WidgetTester tester) async {
-      const CupertinoTextField defaultCupertinoTextField = CupertinoTextField();
+    testWidgets('Can drag handles to show, unshow, and update loupe',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Builder(
+              builder: (BuildContext context) => CupertinoTextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                loupeBuilder: (_,
+                    LoupeController controller,
+                    ValueNotifier<LoupeSelectionOverlayInfoBearer>
+                        localInfoBearer) {
+                  infoBearer = localInfoBearer;
+                  return fakeLoupe;
+                },
+              ),
+            ),
+          ),
+        ),
+      );
 
-      await tester.pumpWidget(const MaterialApp(
-        home: Placeholder(),
-      ));
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
 
-      final BuildContext context =
-          tester.firstElement(find.byType(Placeholder));
+      // Double tap the 'e' to select 'def'.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
 
-      expect(
-          defaultCupertinoTextField.loupeBuilder!(
-              context,
-              LoupeController(),
-              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                const LoupeSelectionOverlayInfoBearer.empty(),
-              )),
-          isNull);
-    },
-        variant: TargetPlatformVariant.all(
-            excluding: <TargetPlatform>{TargetPlatform.iOS}));
+      final TextSelection selection = controller.selection;
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+
+      // Drag the right handle 2 letters to the right.
+      final Offset handlePos = endpoints.last.point + const Offset(1.0, 1.0);
+      final TestGesture gesture =
+          await tester.startGesture(handlePos, pointer: 7);
+
+      Offset? firstDragGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
+      await tester.pump();
+
+      expect(find.byKey(fakeLoupe.key!), findsOneWidget);
+      firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
+      await tester.pump();
+
+      // Expect the position the loupe gets to have moved.
+      expect(firstDragGesturePosition,
+          isNot(infoBearer.value.globalGesturePosition));
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeLoupe.key!), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 }
