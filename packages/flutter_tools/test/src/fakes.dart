@@ -253,9 +253,6 @@ class FakeStdin extends Fake implements Stdin {
   bool echoMode = true;
 
   @override
-  bool echoNewlineMode = true;
-
-  @override
   bool lineMode = true;
 
   @override
