@@ -2,16 +2,27 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 // ignore: avoid_classes_with_only_static_members
+/// Standard Breakpoints.
 class Breakpoints {
+  /// Small breakpoint. Open bounded.
   static const Breakpoint small =  _SmallBreakpoint();
+  /// Small breakpoint for non-mobile. Open bounded.
   static const Breakpoint smallDesktop =  _SmallDesktopBreakpoint();
+  /// Small breakpoint for mobile. Open bounded.
   static const Breakpoint smallMobile =  _SmallMobileBreakpoint();
+  /// Medium breakpoint. Close bounded.
   static const Breakpoint medium = _MediumBreakpoint();
+  /// Medium breakpoint for non-mobile. Close bounded.
   static const Breakpoint mediumDesktop = _MediumDesktopBreakpoint();
+  /// Medium breakpoint for mobile. Close bounded.
   static const Breakpoint mediumMobile = _MediumMobileBreakpoint();
+  /// Large breakpoint. Open bounded.
   static const Breakpoint large = _LargeBreakpoint();
+  /// Large breakpoint for non-mobile. Open bounded.
   static const Breakpoint largeDesktop = _LargeDesktopBreakpoint();
+  /// Large breakpoint for mobile. Open bounded.
   static const Breakpoint largeMobile = _LargeMobileBreakpoint();
+  /// Always-on breakpoint. Can act as fallback.
   static const Breakpoint standard = _StandardBreakpoint();
 }
 
