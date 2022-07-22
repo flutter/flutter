@@ -36,49 +36,44 @@ const int _kPubExitCodeUnavailable = 69;
 typedef MessageFilter = String? Function(String message);
 
 /// globalCachePath is the directory in which the content of the localCachePath will be moved in
-bool joinCaches({
+void joinCaches({
   required FileSystem fileSystem,
-  required String globalCachePath,
-  required String localCachePath,
-  bool start = true,
+  required Directory globalCacheDirectory,
+  required Directory dependencyDirectory,
 }) {
-  final Directory globalDirectory = fileSystem.directory(globalCachePath);
-  final Directory localDirectory = fileSystem.directory(localCachePath);
-
-  for (final FileSystemEntity entity in localDirectory.listSync()) {
-    final String newPath = fileSystem.path.join(globalDirectory.path, entity.basename);
+  for (final FileSystemEntity entity in dependencyDirectory.listSync()) {
+    final String newPath = fileSystem.path.join(globalCacheDirectory.path, entity.basename);
     if (entity is File) {
-      try {
+      if (!fileSystem.file(newPath).existsSync()) {
         entity.copySync(newPath);
       }
-      on FileSystemException {
-        if (!start) { // check if it's not the first iteration; we only want to delete newly created directories
-          globalDirectory.deleteSync(recursive: true);
-        }
-        return false;
-      }
     } else if (entity is Directory) {
-      if (!globalDirectory.childDirectory(entity.basename).existsSync()) {
-        final Directory newDirectory = globalDirectory.childDirectory(entity.basename);
-        try {
-          newDirectory.createSync();
-        }
-        on FileSystemException {
-          if (!start) {
-            globalDirectory.deleteSync(recursive: true);
-          }
-          return false;
-        }
-        return joinCaches(
+      if (!globalCacheDirectory.childDirectory(entity.basename).existsSync()) {
+        final Directory newDirectory = globalCacheDirectory.childDirectory(entity.basename);
+        newDirectory.createSync();
+        joinCaches(
           fileSystem: fileSystem,
-          globalCachePath: newDirectory.path,
-          localCachePath: entity.path,
-          start: false,
+          globalCacheDirectory: newDirectory,
+          dependencyDirectory: entity,
         );
       }
     }
   }
-  return true;
+}
+
+void tryDelete(String dependencyBaseName, Directory globalCachePub, Logger logger) {
+  final Directory dependency = globalCachePub.childDirectory(dependencyBaseName);
+  if (dependency.existsSync()) {
+    try {
+      globalCachePub.childDirectory(dependencyBaseName).deleteSync();
+    }
+    on FileSystemException {
+      throwToolExit('FileSystemException found while deleting a directory, '
+        'try running "flutter pub cache repair"'
+      );
+    }
+  }
+  logger.printWarning('The join of pub-caches failed');
 }
 
 /// When local cache (flutter_root/.pub-cache) and global cache (HOME/.pub-cache) are present a
@@ -593,16 +588,19 @@ class _DefaultPub implements Pub {
       final Directory globalDirectoryPub = _fileSystem.directory(
         _fileSystem.path.join(globalDirectory!.path, 'hosted', 'pub.dartlang.org')
       );
-      final bool canJoin = joinCaches(
-        fileSystem: _fileSystem,
-        globalCachePath: globalDirectoryPub.path,
-        localCachePath: localDirectoryPub.path,
-      );
-      if (!canJoin) {
-        _logger.printTrace('The join of pub-caches failed');
-      }
-      else {
-        _fileSystem.directory(localCachePath).deleteSync(recursive: true);
+      for (final FileSystemEntity entity in localDirectoryPub.listSync()) {
+        if (entity is Directory && !globalDirectoryPub.childDirectory(entity.basename).existsSync()){
+          try {
+            joinCaches(
+              fileSystem: _fileSystem,
+              globalCacheDirectory: globalDirectoryPub,
+              dependencyDirectory: entity,
+            );
+          }
+          on FileSystemException {
+            tryDelete(entity.basename, globalDirectoryPub, _logger);
+          }
+        }
       }
       return globalDirectory.path;
     } else if (globalDirectory != null && globalDirectory.existsSync()) {
