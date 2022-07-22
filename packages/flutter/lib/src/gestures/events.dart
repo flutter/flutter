@@ -1718,7 +1718,7 @@ abstract class PointerSignalEvent extends PointerEvent {
     super.device,
     super.position,
     super.embedderId,
-  }) : assert(!identical(kind, PointerDeviceKind.trackpad));
+  });
 }
 
 mixin _CopyPointerScrollEvent on PointerEvent {
@@ -1787,7 +1787,8 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
        assert(kind != null),
        assert(device != null),
        assert(position != null),
-       assert(scrollDelta != null);
+       assert(scrollDelta != null),
+       assert(!identical(kind, PointerDeviceKind.trackpad));
 
   @override
   final Offset scrollDelta;
