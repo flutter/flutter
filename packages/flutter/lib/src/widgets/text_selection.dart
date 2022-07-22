@@ -491,13 +491,7 @@ class TextSelectionOverlay {
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
-  void hideToolbar() {
-    if (selectionControls is! TextSelectionHandleControls) {
-      return _selectionOverlay.hideToolbar();
-    }
-    // TODO(justinmc): Should always delegate to _selectionOverlay actually.
-    ContextMenuController.hide();
-  }
+  void hideToolbar() => _selectionOverlay.hideToolbar();
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {

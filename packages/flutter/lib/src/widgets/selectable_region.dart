@@ -618,8 +618,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return true;
     }
 
-    // TODO(justinmc): Change to _selectionOverlay!.hideToolbar();
-    ContextMenuController.hide();
+    _selectionOverlay!.hideToolbar();
 
     // If given a location, just display the context menu there.
     if (location != null) {
@@ -797,8 +796,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (hideHandles) {
       _selectionOverlay?.hideHandles();
     }
-    // TODO(justinmc): What of the above is still needed?
-    ContextMenuController.hide();
   }
 
   @override
@@ -871,7 +868,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionDelegate.dispose();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
-    ContextMenuController.hide();
     super.dispose();
   }
 
