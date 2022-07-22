@@ -847,6 +847,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void dispose() {
     FocusManager.instance.removeHighlightModeListener(handleFocusHighlightModeChange);
     statesController.removeListener(handleStatesControllerChange);
+    internalStatesController?.dispose();
     super.dispose();
   }
 
