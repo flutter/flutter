@@ -1522,6 +1522,29 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to customize the menu, in this case by keeping the
+  /// default buttons for the platform but modifying their appearance.
+  ///
+  /// ** See code in examples/api/lib/material/context_menu/custom_button_appearance.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to show a custom button only when an email address
+  /// is currently selected.
+  ///
+  /// ** See code in examples/api/lib/material/context_menu/with_specific_selection.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///   * [DefaultTextSelectionToolbar], which builds the default text selection
+  ///     toolbar for the current platform, but allows customization of the
+  ///     buttons.
+  /// * [TextSelectionToolbarButtonsBuilder], which builds the default buttons
+  ///   for the current platform given [ContextMenuButtonItem]s.
+  /// * [EditableTextContextMenuButtonItemsBuilder], which generates the default
+  ///   [ContextMenuButtonItem]s for the current platform.
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.

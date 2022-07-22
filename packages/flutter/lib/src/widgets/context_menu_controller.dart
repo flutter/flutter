@@ -44,7 +44,16 @@ typedef EditableTextToolbarBuilder = Widget Function(
   [Offset?]
 );
 
-/// Builds and manages a context menu at the given location.
+/// Builds and manages a context menu at a given location.
+///
+/// There can only ever be one context menu shown at a given time.
+///
+/// {@tool dartpad}
+/// This example shows how to use a GestureDetector to show a context menu
+//  anywhere in a widget subtree that receives a right click or long press.
+///
+/// ** See code in examples/api/lib/material/context_menu/anywhere.dart **
+/// {@end-tool}
 class ContextMenuController {
   ContextMenuController._();
 

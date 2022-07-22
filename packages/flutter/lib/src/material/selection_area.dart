@@ -51,6 +51,13 @@ class SelectionArea extends StatefulWidget {
   ///
   /// If not provided, will build a default menu based on the platform.
   ///
+  /// {@tool dartpad}
+  /// This example shows how to build a custom context menu for any selected
+  /// content in a SelectionArea.
+  ///
+  /// ** See code in examples/api/lib/material/context_menu/selection_area.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.

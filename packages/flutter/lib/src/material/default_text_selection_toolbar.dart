@@ -22,6 +22,11 @@ import 'theme.dart';
 ///   given [ContextMenuButtonItem]s.
 /// * [DefaultCupertinoTextSelectionToolbar], which does the same thing as this
 ///   widget but only for Cupertino context menus.
+/// * [TextSelectionToolbar], the default toolbar for Android.
+/// * [DesktopTextSelectionToolbar], the default toolbar for desktop platforms
+///    other than MacOS.
+/// * [CupertinoTextSelectionToolbar], the default toolbar for iOS.
+/// * [CupertinoDesktopTextSelectionToolbar], the default toolbar for MacOS.
 class DefaultTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [DefaultTextSelectionToolbar].
   const DefaultTextSelectionToolbar({
