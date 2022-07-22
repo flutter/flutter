@@ -145,7 +145,7 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri?> getObservatoryUri(String applicationId, Device device, {
+  Future<Uri?> getObservatoryUri(String? applicationId, Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
     int? deviceVmservicePort,
