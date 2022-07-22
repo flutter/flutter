@@ -10,9 +10,11 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
+const String fragDir = '/shaders';
 const String fragPath = '/shaders/my_shader.frag';
 const String notFragPath = '/shaders/not_a_frag.file';
-const String outputPath = '/output/shaders/my_shader.spv';
+const String outputSpirvPath = '/output/shaders/my_shader.frag.spirv';
+const String outputPath = '/output/shaders/my_shader.frag';
 
 void main() {
   late BufferLogger logger;
@@ -36,13 +38,17 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--flutter-spirv',
-          '--spirv=$outputPath',
+          '--sksl',
+          '--iplr',
+          '--sl=$outputPath',
+          '--spirv=$outputSpirvPath',
           '--input=$fragPath',
           '--input-type=frag',
+          '--include=$fragDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
+          fileSystem.file(outputSpirvPath).createSync(recursive: true);
         },
       ),
     ]);
@@ -61,6 +67,7 @@ void main() {
       true,
     );
     expect(fileSystem.file(outputPath).existsSync(), true);
+    expect(fileSystem.file(outputSpirvPath).existsSync(), false);
   });
 
   testWithoutContext('compileShader invokes impellerc for non-.frag files', () async {
@@ -68,13 +75,17 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--flutter-spirv',
-          '--spirv=$outputPath',
+          '--sksl',
+          '--iplr',
+          '--sl=$outputPath',
+          '--spirv=$outputSpirvPath',
           '--input=$notFragPath',
           '--input-type=frag',
+          '--include=$fragDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
+          fileSystem.file(outputSpirvPath).createSync(recursive: true);
         },
       ),
     ]);
@@ -93,6 +104,7 @@ void main() {
       true,
     );
     expect(fileSystem.file(outputPath).existsSync(), true);
+    expect(fileSystem.file(outputSpirvPath).existsSync(), false);
   });
 
   testWithoutContext('compileShader throws an exception when impellerc fails', () async {
@@ -100,10 +112,13 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--flutter-spirv',
-          '--spirv=$outputPath',
+          '--sksl',
+          '--iplr',
+          '--sl=$outputPath',
+          '--spirv=$outputSpirvPath',
           '--input=$notFragPath',
           '--input-type=frag',
+          '--include=$fragDir',
         ],
         exitCode: 1,
       ),

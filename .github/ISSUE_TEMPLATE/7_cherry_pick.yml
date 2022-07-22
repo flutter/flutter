@@ -28,6 +28,15 @@ body:
     validations:
       required: true
   - type: input
+    id: pr_link
+    attributes:
+      label: pr_link
+      description: >-
+        Link to an open PR that cherrypick's this into the target release branch.
+        The current branches can be found under release-caniddate-branch.version for [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version)
+    validations:
+      required: true
+  - type: input
     id: impacted_users
     attributes:
       label: Impacted Users
