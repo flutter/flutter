@@ -1973,8 +1973,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.fillColor != null) {
       return MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
     }
-
-    return decoration.enabled ? defaults.fillColor!: defaults.disabledFillColor!;
+    return MaterialStateProperty.resolveAs(defaults.fillColor!, materialState);
   }
 
   Color _getHoverColor(ThemeData themeData) {
@@ -2118,7 +2117,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       }
       else {
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(defaults.outLineBorder, materialState),
+          borderSide: MaterialStateProperty.resolveAs(defaults.outlineBorder, materialState),
         );
       }
     }
@@ -3759,9 +3758,8 @@ class InputDecorationTheme with Diagnosticable {
     this.counterStyle,
     this.filled = false,
     this.fillColor,
-    this.disabledFillColor,
     this.activeIndicatorBorder,
-    this.outLineBorder,
+    this.outlineBorder,
     this.focusColor,
     this.hoverColor,
     this.errorBorder,
@@ -3949,12 +3947,8 @@ class InputDecorationTheme with Diagnosticable {
   /// true and bordered per the [border].
   final Color? fillColor;
 
-  /// The color to fill the decoration's container with, if [filled] is true and
-  /// the text field is disabled.
-  final Color? disabledFillColor;
-
   /// The borderSide of the OutlineInputBorder with `color` and `weight`.
-  final BorderSide? outLineBorder;
+  final BorderSide? outlineBorder;
 
   /// The borderSide of the UnderlineInputBorder with `color` and `weight`.
   final BorderSide? activeIndicatorBorder;
@@ -4179,9 +4173,8 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? counterStyle,
     bool? filled,
     Color? fillColor,
-    Color? disabledFillColor,
     BorderSide? activeIndicatorBorder,
-    BorderSide? outLineBorder,
+    BorderSide? outlineBorder,
     Color? focusColor,
     Color? hoverColor,
     InputBorder? errorBorder,
@@ -4215,9 +4208,8 @@ class InputDecorationTheme with Diagnosticable {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
-      disabledFillColor: disabledFillColor ?? this.disabledFillColor,
       activeIndicatorBorder: activeIndicatorBorder ?? this.activeIndicatorBorder,
-      outLineBorder: outLineBorder ?? this.outLineBorder,
+      outlineBorder: outlineBorder ?? this.outlineBorder,
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       errorBorder: errorBorder ?? this.errorBorder,
@@ -4254,9 +4246,8 @@ class InputDecorationTheme with Diagnosticable {
     filled,
     Object.hash(
       fillColor,
-      disabledFillColor,
       activeIndicatorBorder,
-      outLineBorder,
+      outlineBorder,
       focusColor,
       hoverColor,
       errorBorder,
@@ -4299,9 +4290,8 @@ class InputDecorationTheme with Diagnosticable {
         && other.floatingLabelAlignment == floatingLabelAlignment
         && other.filled == filled
         && other.fillColor == fillColor
-        && other.disabledFillColor == disabledFillColor
         && other.activeIndicatorBorder == activeIndicatorBorder
-        && other.outLineBorder == outLineBorder
+        && other.outlineBorder == outlineBorder
         && other.focusColor == focusColor
         && other.hoverColor == hoverColor
         && other.errorBorder == errorBorder
@@ -4339,9 +4329,8 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
     properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
     properties.add(ColorProperty('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
-    properties.add(ColorProperty('disabledFillColor', disabledFillColor, defaultValue: defaultTheme.disabledFillColor));
     properties.add(DiagnosticsProperty<BorderSide>('activeIndicatorBorder', activeIndicatorBorder, defaultValue: defaultTheme.activeIndicatorBorder));
-    properties.add(DiagnosticsProperty<BorderSide>('outLineBorder', outLineBorder, defaultValue: defaultTheme.outLineBorder));
+    properties.add(DiagnosticsProperty<BorderSide>('outlineBorder', outlineBorder, defaultValue: defaultTheme.outlineBorder));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultTheme.focusColor));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultTheme.hoverColor));
     properties.add(DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
@@ -4365,26 +4354,24 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   TextStyle? get inputStyle => Theme.of(context).textTheme.subtitle1;
 
   @override
-  Color? get fillColor {
+  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      // dark theme: 5% white
+      // light theme: 2% black
+      switch (Theme.of(context).brightness) {
+        case Brightness.dark:
+          return const Color(0x0DFFFFFF);
+        case Brightness.light:
+          return const Color(0x05000000) ;
+      }
+    }
     // dark theme: 10% white
     // light theme: 4% black
     switch (Theme.of(context).brightness) {
       case Brightness.dark: return const Color(0x1AFFFFFF);
       case Brightness.light:return const Color(0x0A000000) ;
     }
-  }
-
-  @override
-  Color? get disabledFillColor {
-    // dark theme: 5% white
-    // light theme: 2% black
-    switch (Theme.of(context).brightness) {
-      case Brightness.dark:
-        return const Color(0x0DFFFFFF);
-      case Brightness.light:
-        return const Color(0x05000000) ;
-    }
-  }
+  });
 
   @override
   Color? get iconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
@@ -4453,10 +4440,12 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   final BuildContext context;
 
   @override
-  Color? get fillColor => Theme.of(context).colorScheme.surfaceVariant;
-
-  @override
-  Color? get disabledFillColor => Theme.of(context).colorScheme.onSurface.withOpacity(0.04);
+  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return Theme.of(context).colorScheme.onSurface.withOpacity(0.04);
+    }
+    return Theme.of(context).colorScheme.surfaceVariant;
+  });
 
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {

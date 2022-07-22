@@ -17,10 +17,12 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   final BuildContext context;
 
   @override
-  Color? get fillColor => ${componentColor("md.comp.filled-text-field.container")};
-
-  @override
-  Color? get disabledFillColor => ${componentColor("md.comp.filled-text-field.disabled.container")};
+  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return ${componentColor("md.comp.filled-text-field.disabled.container")};
+    }
+    return ${componentColor("md.comp.filled-text-field.container")};
+  });
 
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {

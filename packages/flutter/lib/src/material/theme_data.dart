@@ -1183,7 +1183,7 @@ class ThemeData with Diagnosticable {
   ///   * FAB: [FloatingActionButton]
   ///   * Extended FAB: [FloatingActionButton.extended]
   ///   * Cards: [Card]
-  ///   * TextFields: [TextField]
+  ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Chips:
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
