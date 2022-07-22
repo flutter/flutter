@@ -3744,7 +3744,7 @@ class InputDecorationTheme with Diagnosticable {
        assert(filled != null),
        assert(alignLabelWithHint != null);
 
-  /// The style to use for input text in [Textfield].
+  /// The style to use for input text in [TextField].
   final TextStyle? inputStyle;
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
