@@ -436,63 +436,59 @@ void main() {
     }));
   });
 
-  //testWidgets('The InkWell widget renders ink ripple', (WidgetTester tester) async {
-  //  await tester.pumpWidget(
-  //    Center(
-  //      child: RepaintBoundary(
-  //        child: SizedBox.square(
-  //          dimension: 200,
-  //          child: Directionality(
-  //            textDirection: TextDirection.ltr,
-  //            child: Overlay(
-  //              initialEntries: <OverlayEntry>[
-  //                OverlayEntry(
-  //                  builder: (BuildContext context) {
-  //                    return Center(
-  //                      child: SizedBox.square(
-  //                        dimension: 100,
-  //                        // The material partially overlaps the overlayChild.
-  //                        // This is to verify that the `overlayChild`'s ink
-  //                        // features aren't clipped by it.
-  //                        child: Material(
-  //                          color: Colors.black,
-  //                          child: OverlayPortal(
-  //                            overlayInfo: OverlayInfo.of(context),
-  //                            overlayChild: Positioned(
-  //                              right: 0,
-  //                              bottom: 0,
-  //                              child: InkWell(
-  //                                splashColor: Colors.red,
-  //                                onTap: () {},
-  //                                child: const SizedBox.square(dimension: 100),
-  //                              ),
-  //                            ),
-  //                            child: null,
-  //                          ),
-  //                        ),
-  //                      ),
-  //                    );
-  //                  },
-  //                ),
-  //              ],
-  //            ),
-  //          ),
-  //        ),
-  //      ),
-  //    ),
-  //  );
+  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: SizedBox.square(
+            dimension: 200,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Overlay(
+                initialEntries: <OverlayEntry>[
+                  OverlayEntry(
+                    builder: (BuildContext context) {
+                      return Center(
+                        child: SizedBox.square(
+                          dimension: 100,
+                          // The material partially overlaps the overlayChild.
+                          // This is to verify that the `overlayChild`'s ink
+                          // features aren't clipped by it.
+                          child: Material(
+                            color: Colors.black,
+                            child: OverlayPortal(
+                              overlayChild: Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: InkWell(
+                                  splashColor: Colors.red,
+                                  onTap: () {},
+                                  child: const SizedBox.square(dimension: 100),
+                                ),
+                              ),
+                              child: null,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
 
-  //  final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
-  //  await tester.pump(); // start gesture
-  //  await tester.pump(const Duration(seconds: 2));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+    addTearDown(() async {
+      await gesture.up();
+    });
 
-  //  addTearDown(() async {
-  //    await gesture.up(); // generates a tap cancel
-  //  });
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(seconds: 2));
 
-  //  await expectLater(
-  //    find.byType(RepaintBoundary),
-  //    matchesGoldenFile('ink_paint_test.overlay_portal.png'),
-  //  );
-  //});
+    expect(tester.takeException(), isNull);
+  });
 }

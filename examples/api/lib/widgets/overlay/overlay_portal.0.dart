@@ -11,12 +11,10 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      title: 'Flutter Code Sample',
       home: Scaffold(
         appBar: AppBar(title: const Text('OverlayPortal Example')),
         body: const Center(child: ClickableTooltipWidget()),
@@ -35,7 +33,7 @@ class ClickableTooltipWidget extends StatefulWidget {
 class ClickableTooltipWidgetState extends State<ClickableTooltipWidget> {
   bool shouldShowTooltip = false;
 
-  void _onTap() {
+  void _onPressed() {
     setState(() { shouldShowTooltip = !shouldShowTooltip; });
   }
 
@@ -43,10 +41,9 @@ class ClickableTooltipWidgetState extends State<ClickableTooltipWidget> {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: DefaultTextStyle.of(context).style.copyWith(fontSize: 50),
-      child: GestureDetector(
-        onTap: _onTap,
+      child: TextButton(
+        onPressed: _onPressed,
         child: OverlayPortal(
-          overlayInfo: OverlayInfo.of(context),
           overlayChild: !shouldShowTooltip
             ? null
             : const Positioned(

@@ -1697,7 +1697,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This method is used to implement an assert that ensures the render subtree
   /// actively performing layout can not get accidently mutated. It's only
-  /// implemented in debug mode and always returns nil in release mode.
+  /// implemented in debug mode and always returns null in release mode.
   ///
   /// Typically this returns [parent]. A [RenderObject] subclass that expects
   /// its [RenderObject.performLayout] to be called from a different
