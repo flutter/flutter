@@ -1445,15 +1445,6 @@ void main() {
                 reason: activator.toString(),
               );
             }
-          }, variant: TargetPlatformVariant.all());
-
-          testWidgets('at start with page up', (WidgetTester tester) async {
-            controller.text = testText;
-            controller.selection = const TextSelection.collapsed(
-              offset: 0,
-            );
-
-            await tester.pumpWidget(buildEditableText());
 
             for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.pageUp)) {
               await sendKeyCombination(tester, activator);
@@ -1466,7 +1457,7 @@ void main() {
                 reason: activator.toString(),
               );
             }
-          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+          }, variant: TargetPlatformVariant.all());
 
           testWidgets('at end', (WidgetTester tester) async {
             controller.text = testText;
@@ -1494,24 +1485,6 @@ void main() {
               expect(controller.selection.extentOffset, 72, reason: activator.toString());
             }
           }, variant: TargetPlatformVariant.all());
-
-          testWidgets('at end with page down', (WidgetTester tester) async {
-            controller.text = testText;
-            controller.selection = const TextSelection.collapsed(
-              offset: 72,
-            );
-
-            await tester.pumpWidget(buildEditableText());
-
-            for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.pageDown)) {
-              await sendKeyCombination(tester, activator);
-              await tester.pump();
-
-              expect(controller.text, testText);
-              expect(controller.selection.baseOffset, 72, reason: activator.toString());
-              expect(controller.selection.extentOffset, 72, reason: activator.toString());
-            }
-          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
           testWidgets('run', (WidgetTester tester) async {
             controller.text =
@@ -1608,6 +1581,8 @@ void main() {
               '${"aaa\n" * 50}'
               'aaaa';
 
+            final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+
             controller.selection = const TextSelection.collapsed(offset: 2);
             await tester.pumpWidget(buildEditableText());
 
@@ -1618,7 +1593,7 @@ void main() {
               affinity: TextAffinity.upstream,
             ));
 
-            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageDown));
+            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageDown, alt: isApple));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(offset: 81));
 
@@ -1626,13 +1601,13 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(offset: 77));
 
-            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageUp));
+            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageUp, alt: isApple));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 4,
               affinity: TextAffinity.upstream,
             ));
-          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+          }, variant: TargetPlatformVariant.all());
 
           testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =
