@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'basic.dart';
-import 'context_menu_button_data.dart';
+import 'context_menu_button_item.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
@@ -19,15 +19,15 @@ typedef ContextMenuBuilder = Widget Function(
 );
 
 /// A builder function that builds a context menu given a list of
-/// [ContextMenuButtonData]s representing its children.
+/// [ContextMenuButtonItem]s representing its children.
 ///
 /// See also:
 ///
-///   * [EditableTextContextMenuButtonDatasBuilder], which receives this as a
+///   * [EditableTextContextMenuButtonItemsBuilder], which receives this as a
 ///     parameter.
 typedef ToolbarButtonWidgetBuilder = Widget Function(
   BuildContext context,
-  List<ContextMenuButtonData> buttonDatas,
+  List<ContextMenuButtonItem> buttonItems,
 );
 
 /// A function that builds a widget to use as the text selection toolbar for

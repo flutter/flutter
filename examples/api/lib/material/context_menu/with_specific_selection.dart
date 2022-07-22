@@ -43,12 +43,12 @@ class MyApp extends StatelessWidget {
                   // Here we add an "Email" button to the default TextField
                   // context menu for the current platform, but only if an email
                   // address is currently selected.
-                  return EditableTextContextMenuButtonDatasBuilder(
+                  return EditableTextContextMenuButtonItemsBuilder(
                     editableTextState: editableTextState,
-                    builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
+                    builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
                       final TextEditingValue value = editableTextState.textEditingValue;
                       if (_isValidEmail(value.selection.textInside(value.text))) {
-                        buttonDatas.insert(0, ContextMenuButtonData(
+                        buttonItems.insert(0, ContextMenuButtonItem(
                           label: 'Send email',
                           onPressed: () {
                             ContextMenuController.hide();
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
                       return DefaultTextSelectionToolbar(
                         primaryAnchor: primaryAnchor,
                         secondaryAnchor: secondaryAnchor,
-                        buttonDatas: buttonDatas,
+                        buttonItems: buttonItems,
                       );
                     },
                   );

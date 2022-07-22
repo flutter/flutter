@@ -24,9 +24,9 @@ enum ContextMenuButtonType {
 
 /// The type and callback for a context menu button.
 @immutable
-class ContextMenuButtonData {
-  /// Creates an instance of [ContextMenuButtonData].
-  const ContextMenuButtonData({
+class ContextMenuButtonItem {
+  /// Creates an instance of [ContextMenuButtonItem].
+  const ContextMenuButtonItem({
     required this.onPressed,
     this.type = ContextMenuButtonType.custom,
     this.label,
@@ -45,14 +45,14 @@ class ContextMenuButtonData {
   /// platform will be looked up.
   final String? label;
 
-  /// Creates a new [ContextMenuButtonData] with the provided parameters
+  /// Creates a new [ContextMenuButtonItem] with the provided parameters
   /// overridden.
-  ContextMenuButtonData copyWith({
+  ContextMenuButtonItem copyWith({
     VoidCallback? onPressed,
     ContextMenuButtonType? type,
     String? label,
   }) {
-    return ContextMenuButtonData(
+    return ContextMenuButtonItem(
       onPressed: onPressed ?? this.onPressed,
       type: type ?? this.type,
       label: label ?? this.label,
@@ -64,7 +64,7 @@ class ContextMenuButtonData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ContextMenuButtonData
+    return other is ContextMenuButtonItem
         && other.label == label
         && other.onPressed == onPressed
         && other.type == type;
@@ -74,5 +74,5 @@ class ContextMenuButtonData {
   int get hashCode => Object.hash(label, onPressed, type);
 
   @override
-  String toString() => 'ContextMenuButtonData $type, $label';
+  String toString() => 'ContextMenuButtonItem $type, $label';
 }

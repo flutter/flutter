@@ -38,8 +38,8 @@ class MyApp extends StatelessWidget {
             return DefaultTextSelectionToolbar(
               primaryAnchor: primaryAnchor,
               secondaryAnchor: secondaryAnchor,
-              buttonDatas: <ContextMenuButtonData>[
-                ContextMenuButtonData(
+              buttonItems: <ContextMenuButtonItem>[
+                ContextMenuButtonItem(
                   onPressed: () {
                     ContextMenuController.hide();
                     _showDialog(context);

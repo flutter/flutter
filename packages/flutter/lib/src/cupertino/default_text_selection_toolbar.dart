@@ -17,16 +17,16 @@ import 'text_selection_toolbar_buttons_builder.dart';
 /// platforms, not just MacOS. For a widget that builds the native-looking
 /// context menu for all platforms, see [DefaultTextSelectionToolbar].
 ///
-/// The children can be customized using the [children] or [buttonDatas]
+/// The children can be customized using the [children] or [buttonItems]
 /// parameters. If neither is given, then the default buttons will be used.
 ///
 /// See also:
 ///
-/// * [EditableTextContextMenuButtonDatasBuilder], which generates the default
-///   [ContextMenuButtonData]s for the current platform for a context menu
+/// * [EditableTextContextMenuButtonItemsBuilder], which generates the default
+///   [ContextMenuButtonItem]s for the current platform for a context menu
 ///   displaying inside of an [EditableText].
 /// * [TextSelectionToolbarButtonsBuilder], which builds the native-looking
-///   button Widgets for the current platform given [ContextMenuButtonData]s.
+///   button Widgets for the current platform given [ContextMenuButtonItem]s.
 /// * [DefaultTextSelectionToolbar], which does the same thing as this widget
 ///   but for all platforms, not just Cupertino.
 class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
@@ -34,20 +34,20 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   const DefaultCupertinoTextSelectionToolbar({
     super.key,
     required this.primaryAnchor,
-    this.buttonDatas,
+    this.buttonItems,
     this.children,
     this.editableTextState,
     final TargetPlatform? targetPlatform,
     this.secondaryAnchor,
   }) : assert(
-         buttonDatas == null || children == null,
-         'No need for both buttonDatas and children, use one or the other, or neither.',
+         buttonItems == null || children == null,
+         'No need for both buttonItems and children, use one or the other, or neither.',
        ),
        assert(
-         !(buttonDatas == null && children == null && editableTextState == null),
-         'If not providing buttonDatas or children, provide editableTextState to generate them.',
+         !(buttonItems == null && children == null && editableTextState == null),
+         'If not providing buttonItems or children, provide editableTextState to generate them.',
        ),
-       targetPlatform = targetPlatform ?? defaultTargetPlatform;
+       _targetPlatform = targetPlatform;
 
   /// The main location on which to anchor the menu.
   ///
@@ -62,26 +62,28 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// The information needed to create each child button of the menu.
   ///
   /// If provided, [children] cannot also be provided.
-  final List<ContextMenuButtonData>? buttonDatas;
+  final List<ContextMenuButtonItem>? buttonItems;
 
   /// Used to generate the default buttons for the platform in the case that
-  /// [children] and [buttonDatas] are not provided.
+  /// [children] and [buttonItems] are not provided.
   final EditableTextState? editableTextState;
 
   /// The platform to base the toolbar on.
   ///
   /// Defaults to [defaultTargetPlatform].
-  final TargetPlatform targetPlatform;
+  TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
+
+  final TargetPlatform? _targetPlatform;
 
   /// The children of the toolbar, typically buttons.
   ///
-  /// If provided, [buttonDatas] cannot also be provided.
+  /// If provided, [buttonItems] cannot also be provided.
   final List<Widget>? children;
 
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
-    if ((children?.isEmpty ?? false) || (buttonDatas?.isEmpty ?? false)) {
+    if ((children?.isEmpty ?? false) || (buttonItems?.isEmpty ?? false)) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -93,22 +95,22 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
       );
     }
 
-    if (buttonDatas?.isNotEmpty ?? false) {
-      return _DefaultTextSelectionToolbarFromButtonDatas(
+    if (buttonItems?.isNotEmpty ?? false) {
+      return _DefaultTextSelectionToolbarFromButtonItems(
         primaryAnchor: primaryAnchor,
         secondaryAnchor: secondaryAnchor,
-        buttonDatas: buttonDatas!,
+        buttonItems: buttonItems!,
       );
     }
 
-    return EditableTextContextMenuButtonDatasBuilder(
+    return EditableTextContextMenuButtonItemsBuilder(
       editableTextState: editableTextState!,
       targetPlatform: targetPlatform,
-      builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
-        return _DefaultTextSelectionToolbarFromButtonDatas(
+      builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+        return _DefaultTextSelectionToolbarFromButtonItems(
           primaryAnchor: primaryAnchor,
           secondaryAnchor: secondaryAnchor,
-          buttonDatas: buttonDatas,
+          buttonItems: buttonItems,
         );
       },
     );
@@ -164,14 +166,14 @@ class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
   }
 }
 
-/// The default text selection toolbar by platform given [buttonDatas]
+/// The default text selection toolbar by platform given [buttonItems]
 /// representing the children for the platform.
-class _DefaultTextSelectionToolbarFromButtonDatas extends StatelessWidget {
-  const _DefaultTextSelectionToolbarFromButtonDatas({
+class _DefaultTextSelectionToolbarFromButtonItems extends StatelessWidget {
+  const _DefaultTextSelectionToolbarFromButtonItems({
     required this.primaryAnchor,
     this.secondaryAnchor,
-    required this.buttonDatas,
-  }) : assert(buttonDatas != null);
+    required this.buttonItems,
+  }) : assert(buttonItems != null);
 
   /// The main location on which to anchor the menu.
   ///
@@ -184,17 +186,17 @@ class _DefaultTextSelectionToolbarFromButtonDatas extends StatelessWidget {
   final Offset? secondaryAnchor;
 
   /// The information needed to create each child button of the menu.
-  final List<ContextMenuButtonData> buttonDatas;
+  final List<ContextMenuButtonItem> buttonItems;
 
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
-    if (buttonDatas.isEmpty) {
+    if (buttonItems.isEmpty) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
     return CupertinoTextSelectionToolbarButtonsBuilder(
-      buttonDatas: buttonDatas,
+      buttonItems: buttonItems,
       builder: (BuildContext context, List<Widget> children) {
         return _DefaultTextSelectionToolbarFromChildren(
           primaryAnchor: primaryAnchor,

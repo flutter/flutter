@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
-import 'context_menu_button_data.dart';
+import 'context_menu_button_item.dart';
 import 'context_menu_controller.dart';
 import 'editable_text.dart';
 import 'framework.dart';
@@ -18,7 +18,7 @@ typedef _ClipboardStatusWidgetBuilder = Widget Function(
   ClipboardStatus clipboardStatus,
 );
 
-/// Calls [builder] with the [ContextMenuButtonData]s representing the
+/// Calls [builder] with the [ContextMenuButtonItem]s representing the
 /// buttons in this platform's default text selection menu.
 ///
 /// By default the [targetPlatform] will be [defaultTargetPlatform].
@@ -26,18 +26,18 @@ typedef _ClipboardStatusWidgetBuilder = Widget Function(
 /// See also:
 ///
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextMenuButtonData]s.
+///   given [ContextMenuButtonItem]s.
 /// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
-class EditableTextContextMenuButtonDatasBuilder extends StatefulWidget {
-  /// Creates an instance of [EditableTextContextMenuButtonDatasBuilder].
-  const EditableTextContextMenuButtonDatasBuilder({
+class EditableTextContextMenuButtonItemsBuilder extends StatefulWidget {
+  /// Creates an instance of [EditableTextContextMenuButtonItemsBuilder].
+  const EditableTextContextMenuButtonItemsBuilder({
     super.key,
     TargetPlatform? targetPlatform,
     required this.builder,
     required this.editableTextState,
   }) : _targetPlatform = targetPlatform;
 
-  /// Called with a list of [ContextMenuButtonData]s so the context menu can be
+  /// Called with a list of [ContextMenuButtonItem]s so the context menu can be
   /// built.
   final ToolbarButtonWidgetBuilder builder;
 
@@ -47,7 +47,7 @@ class EditableTextContextMenuButtonDatasBuilder extends StatefulWidget {
 
   final TargetPlatform? _targetPlatform;
 
-  /// The platform to base the button datas on.
+  /// The platform to base the button items on.
   TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
 
   /// Returns true if the given [EditableTextState] supports cut.
@@ -95,44 +95,44 @@ class EditableTextContextMenuButtonDatasBuilder extends StatefulWidget {
     }
   }
 
-  /// Returns the [ContextMenuButtonData]s for the given [ToolbarOptions].
+  /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
   @Deprecated(
     'Use `contextMenuBuilder` instead of `toolbarOptions`. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
-  static List<ContextMenuButtonData>? buttonDatasForToolbarOptions(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
+  static List<ContextMenuButtonItem>? buttonItemsForToolbarOptions(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
     final ToolbarOptions toolbarOptions = editableTextState.widget.toolbarOptions;
     if (toolbarOptions == const ToolbarOptions()) {
       return null;
     }
-    return <ContextMenuButtonData>[
+    return <ContextMenuButtonItem>[
       if (toolbarOptions.cut
-          && EditableTextContextMenuButtonDatasBuilder.canCut(editableTextState))
-        ContextMenuButtonData(
+          && EditableTextContextMenuButtonItemsBuilder.canCut(editableTextState))
+        ContextMenuButtonItem(
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
           type: ContextMenuButtonType.selectAll,
         ),
       if (toolbarOptions.copy
-          && EditableTextContextMenuButtonDatasBuilder.canCopy(editableTextState))
-        ContextMenuButtonData(
+          && EditableTextContextMenuButtonItemsBuilder.canCopy(editableTextState))
+        ContextMenuButtonItem(
           onPressed: () {
             editableTextState.copySelection(SelectionChangedCause.toolbar);
           },
           type: ContextMenuButtonType.copy,
         ),
       if (toolbarOptions.paste && editableTextState.clipboardStatus != null
-          && EditableTextContextMenuButtonDatasBuilder.canPaste(editableTextState))
-        ContextMenuButtonData(
+          && EditableTextContextMenuButtonItemsBuilder.canPaste(editableTextState))
+        ContextMenuButtonItem(
           onPressed: () {
             editableTextState.pasteText(SelectionChangedCause.toolbar);
           },
           type: ContextMenuButtonType.paste,
         ),
       if (toolbarOptions.selectAll
-          && EditableTextContextMenuButtonDatasBuilder.canSelectAll(editableTextState, targetPlatform))
-        ContextMenuButtonData(
+          && EditableTextContextMenuButtonItemsBuilder.canSelectAll(editableTextState, targetPlatform))
+        ContextMenuButtonItem(
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
@@ -142,15 +142,15 @@ class EditableTextContextMenuButtonDatasBuilder extends StatefulWidget {
   }
 
   @override
-  State<EditableTextContextMenuButtonDatasBuilder> createState() => _EditableTextContextMenuButtonDatasBuilderState();
+  State<EditableTextContextMenuButtonItemsBuilder> createState() => _EditableTextContextMenuButtonItemsBuilderState();
 }
 
-class _EditableTextContextMenuButtonDatasBuilderState extends State<EditableTextContextMenuButtonDatasBuilder> with TickerProviderStateMixin {
-  bool get _canCut => EditableTextContextMenuButtonDatasBuilder.canCut(widget.editableTextState);
+class _EditableTextContextMenuButtonItemsBuilderState extends State<EditableTextContextMenuButtonItemsBuilder> with TickerProviderStateMixin {
+  bool get _canCut => EditableTextContextMenuButtonItemsBuilder.canCut(widget.editableTextState);
 
-  bool get _canCopy => EditableTextContextMenuButtonDatasBuilder.canCopy(widget.editableTextState);
+  bool get _canCopy => EditableTextContextMenuButtonItemsBuilder.canCopy(widget.editableTextState);
 
-  bool get _canSelectAll => EditableTextContextMenuButtonDatasBuilder.canSelectAll(widget.editableTextState, widget.targetPlatform);
+  bool get _canSelectAll => EditableTextContextMenuButtonItemsBuilder.canSelectAll(widget.editableTextState, widget.targetPlatform);
 
   void _handleCut() {
     return widget.editableTextState.cutSelection(SelectionChangedCause.toolbar);
@@ -173,7 +173,7 @@ class _EditableTextContextMenuButtonDatasBuilderState extends State<EditableText
     return _ClipboardStatusBuilder(
       clipboardStatusNotifier: widget.editableTextState.clipboardStatus,
       builder: (BuildContext context, ClipboardStatus clipboardStatus) {
-        final bool canPaste = EditableTextContextMenuButtonDatasBuilder.canPaste(
+        final bool canPaste = EditableTextContextMenuButtonItemsBuilder.canPaste(
           widget.editableTextState,
         );
         // If there are no buttons to be shown, don't render anything.
@@ -190,35 +190,35 @@ class _EditableTextContextMenuButtonDatasBuilderState extends State<EditableText
         // Determine which buttons will appear so that the order and total number is
         // known. A button's position in the menu can slightly affect its
         // appearance.
-        final List<ContextMenuButtonData> buttonDatas = <ContextMenuButtonData>[
+        final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[
           if (_canCut)
-            ContextMenuButtonData(
+            ContextMenuButtonItem(
               onPressed: _handleCut,
               type: ContextMenuButtonType.cut,
             ),
           if (_canCopy)
-            ContextMenuButtonData(
+            ContextMenuButtonItem(
               onPressed: _handleCopy,
               type: ContextMenuButtonType.copy,
             ),
           if (canPaste && clipboardStatus == ClipboardStatus.pasteable)
-            ContextMenuButtonData(
+            ContextMenuButtonItem(
               onPressed: _handlePaste,
               type: ContextMenuButtonType.paste,
             ),
           if (_canSelectAll)
-            ContextMenuButtonData(
+            ContextMenuButtonItem(
               onPressed: _handleSelectAll,
               type: ContextMenuButtonType.selectAll,
             ),
         ];
 
         // If there is no option available, build an empty widget.
-        if (buttonDatas.isEmpty) {
+        if (buttonItems.isEmpty) {
           return const SizedBox(width: 0.0, height: 0.0);
         }
 
-        return widget.builder(context, buttonDatas);
+        return widget.builder(context, buttonItems);
       },
     );
   }

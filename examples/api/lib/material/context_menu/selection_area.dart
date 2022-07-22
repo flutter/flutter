@@ -33,13 +33,13 @@ class MyApp extends StatelessWidget {
           child: SizedBox(
             width: 200.0,
             child: SelectionArea(
-              contextMenuBuilder: (BuildContext context, List<ContextMenuButtonData> buttonDatas, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+              contextMenuBuilder: (BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
                 return DefaultTextSelectionToolbar(
                   primaryAnchor: primaryAnchor,
                   secondaryAnchor: secondaryAnchor,
-                  buttonDatas: <ContextMenuButtonData>[
-                    ...buttonDatas,
-                    ContextMenuButtonData(
+                  buttonItems: <ContextMenuButtonItem>[
+                    ...buttonItems,
+                    ContextMenuButtonItem(
                       onPressed: () {
                         ContextMenuController.hide();
                         _showDialog(context);

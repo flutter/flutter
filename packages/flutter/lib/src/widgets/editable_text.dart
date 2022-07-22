@@ -22,7 +22,7 @@ import 'constants.dart';
 import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
-import 'editable_text_context_menu_button_datas_builder.dart';
+import 'editable_text_context_menu_button_items_builder.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
@@ -1771,28 +1771,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canCut` instead, or `contextMenuBuilder` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonItemsBuilder.canCut` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canCopy` instead, or `contextMenuBuilder` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonItemsBuilder.canCopy` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canPaste` instead, or `contextMenuBuilder` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonItemsBuilder.canPaste` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
 
   @override
   @Deprecated(
-    'Use `TextSelectionToolbarButtonDatasBuilder.canSelectAll` instead, or `contextMenuBuilder` to change the toolbar. '
+    'Use `TextSelectionToolbarButtonItemsBuilder.canSelectAll` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v2.12.0-4.1.pre.',
   )
   bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
@@ -2069,7 +2069,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
-        ? EditableTextContextMenuButtonDatasBuilder.canPaste(this)
+        ? EditableTextContextMenuButtonItemsBuilder.canPaste(this)
         : widget.selectionControls?.canPaste(this) ?? false;
     if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
       clipboardStatus!.update();
@@ -3282,7 +3282,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? EditableTextContextMenuButtonDatasBuilder.canCopy(this)
+            ? EditableTextContextMenuButtonItemsBuilder.canCopy(this)
             : copyEnabled && (widget.selectionControls?.canCopy(this) ?? false))
       ? () {
         controls?.handleCopy(this);
@@ -3295,7 +3295,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? EditableTextContextMenuButtonDatasBuilder.canCut(this)
+            ? EditableTextContextMenuButtonItemsBuilder.canCut(this)
             : cutEnabled && (widget.selectionControls?.canCut(this) ?? false))
       ? () {
         controls?.handleCut(this);
@@ -3308,7 +3308,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? EditableTextContextMenuButtonDatasBuilder.canPaste(this)
+            ? EditableTextContextMenuButtonItemsBuilder.canPaste(this)
             : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
         && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
       ? () {

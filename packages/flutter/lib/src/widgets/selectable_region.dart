@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'context_menu_button_data.dart';
+import 'context_menu_button_item.dart';
 import 'context_menu_controller.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -31,10 +31,10 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 };
 
 /// A function that builds a widget to use as the text selection toolbar with
-/// the given [ContextMenuButtonData]s.
-typedef ButtonDatasToolbarBuilder = Widget Function(
+/// the given [ContextMenuButtonItem]s.
+typedef ButtonItemsToolbarBuilder = Widget Function(
   BuildContext,
-  List<ContextMenuButtonData>,
+  List<ContextMenuButtonItem>,
   Offset,
   [Offset?]
 );
@@ -201,7 +201,7 @@ class SelectableRegion extends StatefulWidget {
   final Widget child;
 
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
-  final ButtonDatasToolbarBuilder? contextMenuBuilder;
+  final ButtonItemsToolbarBuilder? contextMenuBuilder;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -623,10 +623,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // If given a location, just display the context menu there.
     if (location != null) {
       _selectionOverlay!.showToolbar((BuildContext context) {
-        return _SelectableRegionContextMenuButtonDatasBuilder(
+        return _SelectableRegionContextMenuButtonItemsBuilder(
           delegate: this,
-          builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
-            return widget.contextMenuBuilder!(context, buttonDatas, location);
+          builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+            return widget.contextMenuBuilder!(context, buttonItems, location);
           },
         );
       }, context);
@@ -639,9 +639,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
       final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
       final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
-      return _SelectableRegionContextMenuButtonDatasBuilder(
+      return _SelectableRegionContextMenuButtonItemsBuilder(
         delegate: this,
-        builder: (BuildContext context, List<ContextMenuButtonData> buttonDatas) {
+        builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
           final Rect anchorRect = _selectionOverlay!.getAnchors(
             renderBox,
             lineHeightAtStart,
@@ -649,7 +649,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
           );
           return widget.contextMenuBuilder!(
             context,
-            buttonDatas,
+            buttonItems,
             anchorRect.topLeft,
             anchorRect.bottomRight,
           );
@@ -1751,7 +1751,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   }
 }
 
-/// Calls [builder] with the [ContextMenuButtonData]s representing the
+/// Calls [builder] with the [ContextMenuButtonItem]s representing the
 /// buttons in this platform's default text selection menu.
 ///
 /// By default the [targetPlatform] will be [defaultTargetPlatform].
@@ -1759,19 +1759,19 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 /// See also:
 ///
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextMenuButtonData]s.
+///   given [ContextMenuButtonItem]s.
 /// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
-/// * [EditableTextContextMenuButtonDatasBuilder], which performs a similar role
+/// * [EditableTextContextMenuButtonItemBuilder], which performs a similar role
 ///   but for [EditableText]'s context menu.
-class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
-  /// Creates an instance of [_SelectableRegionContextMenuButtonDatasBuilder].
-  const _SelectableRegionContextMenuButtonDatasBuilder({
+class _SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
+  /// Creates an instance of [_SelectableRegionContextMenuButtonItemsBuilder].
+  const _SelectableRegionContextMenuButtonItemsBuilder({
     TargetPlatform? targetPlatform,
     required this.builder,
     required this.delegate,
   }) : _targetPlatform = targetPlatform;
 
-  /// Called with a list of [ContextMenuButtonData]s so the context menu can be
+  /// Called with a list of [ContextMenuButtonItem]s so the context menu can be
   /// built.
   final ToolbarButtonWidgetBuilder builder;
 
@@ -1779,7 +1779,7 @@ class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
 
   final TargetPlatform? _targetPlatform;
 
-  /// The platform to base the button datas on.
+  /// The platform to base the button items on.
   TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
 
   /// Returns true if the given [_SelectableRegionState]
@@ -1819,24 +1819,24 @@ class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
     // Determine which buttons will appear so that the order and total number is
     // known. A button's position in the menu can slightly affect its
     // appearance.
-    final List<ContextMenuButtonData> buttonDatas = <ContextMenuButtonData>[
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[
       if (_canCopy)
-        ContextMenuButtonData(
+        ContextMenuButtonItem(
           onPressed: _handleCopy,
           type: ContextMenuButtonType.copy,
         ),
       if (_canSelectAll)
-        ContextMenuButtonData(
+        ContextMenuButtonItem(
           onPressed: _handleSelectAll,
           type: ContextMenuButtonType.selectAll,
         ),
     ];
 
     // If there is no option available, build an empty widget.
-    if (buttonDatas.isEmpty) {
+    if (buttonItems.isEmpty) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    return builder(context, buttonDatas);
+    return builder(context, buttonItems);
   }
 }
