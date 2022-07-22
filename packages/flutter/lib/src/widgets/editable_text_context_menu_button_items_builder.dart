@@ -66,7 +66,8 @@ class EditableTextContextMenuButtonItemsBuilder extends StatefulWidget {
   /// Returns true if the given [EditableTextState] supports paste.
   static bool canPaste(EditableTextState editableTextState) {
     return !editableTextState.widget.readOnly
-        && editableTextState.clipboardStatus?.value == ClipboardStatus.pasteable;
+        && (editableTextState.clipboardStatus == null
+          || editableTextState.clipboardStatus!.value == ClipboardStatus.pasteable);
   }
 
   /// Returns true if the given [EditableTextState] supports select all.
