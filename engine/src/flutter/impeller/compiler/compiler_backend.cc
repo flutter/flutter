@@ -42,7 +42,7 @@ uint32_t CompilerBackend::GetExtendedMSLResourceBinding(
     }
   }
   if (auto compiler = GetGLSLCompiler()) {
-    return compiler->get_decoration(id, spv::Decoration::DecorationLocation);
+    return compiler->get_decoration(id, spv::Decoration::DecorationBinding);
   }
   const auto kOOBIndex = static_cast<uint32_t>(-1);
   return kOOBIndex;
