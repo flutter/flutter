@@ -1751,9 +1751,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   }
 }
 
-// TODO(justinmc): This should be public. Users will want to easily build menus
-// for SelectableRegions.
-// TODO(justinmc): Move to a separate file?
 /// Calls [builder] with the [ContextMenuButtonData]s representing the
 /// buttons in this platform's default text selection menu.
 ///
@@ -1764,6 +1761,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextMenuButtonData]s.
 /// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
+/// * [EditableTextContextMenuButtonDatasBuilder], which performs a similar role
+///   but for [EditableText]'s context menu.
 class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
   /// Creates an instance of [_SelectableRegionContextMenuButtonDatasBuilder].
   const _SelectableRegionContextMenuButtonDatasBuilder({
