@@ -1768,16 +1768,12 @@ class _SelectableRegionContextMenuButtonDatasBuilder extends StatelessWidget {
   const _SelectableRegionContextMenuButtonDatasBuilder({
     TargetPlatform? targetPlatform,
     required this.builder,
-    //required this.selectable,
     required this.delegate,
   }) : _targetPlatform = targetPlatform;
 
   /// Called with a list of [ContextMenuButtonData]s so the context menu can be
   /// built.
   final ToolbarButtonWidgetBuilder builder;
-
-  /// The Selectable that will display the text selection toolbar.
-  //final Selectable selectable;
 
   final _SelectableRegionState delegate;
 
