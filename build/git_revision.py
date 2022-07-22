@@ -10,7 +10,11 @@ import sys
 import subprocess
 import os
 import argparse
-from shutil import which  # Natively supported since python 3.3
+
+
+def is_windows():
+  os_id = sys.platform
+  return os_id.startswith('win32') or os_id.startswith('cygwin')
 
 
 def get_repository_version(repository):
@@ -18,12 +22,9 @@ def get_repository_version(repository):
   if not os.path.exists(repository):
     raise IOError('path does not exist')
 
-  git_candidates = ['git', 'git.sh', 'git.bat']
-  git = next(filter(which, git_candidates), None)
-  if git is None:
-    candidates = "', '".join(git_candidates)
-    raise IOError(f"Looks like GIT is not on the path. Tried '{candidates}'")
-
+  git = 'git'
+  if is_windows():
+    git = 'git.bat'
   version = subprocess.check_output([
       git,
       '-C',
