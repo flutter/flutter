@@ -12,6 +12,10 @@ import 'framework.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// FocusNode focusNode = FocusNode();
+
 // BuildContext/Element doesn't have a parent accessor, but it can be simulated
 // with visitAncestorElements. _getAncestor is needed because
 // context.getElementForInheritedWidgetOfExactType will return itself if it
@@ -1625,7 +1629,7 @@ class RequestFocusIntent extends Intent {
 /// [Action.invoke] like so:
 ///
 /// ```dart
-/// Actions.invoke(context, const RequestFocusIntent(focusNode));
+/// Actions.invoke(context, RequestFocusIntent(focusNode));
 /// ```
 ///
 /// Where the `focusNode` is the node for which the focus will be requested.

@@ -25,6 +25,10 @@ import 'tabs.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late String _logoAsset;
+// double _myToolbarHeight = 250.0;
+
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 const double _kMaxTitleTextScaleFactor = 1.34; // TODO(perc): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
 
@@ -319,10 +323,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   home: Scaffold(
   ///     appBar: AppBar(
   ///       title: SizedBox(
-  ///         height: toolbarHeight,
-  ///         child: Image.asset(logoAsset),
+  ///         height: _myToolbarHeight,
+  ///         child: Image.asset(_logoAsset),
   ///       ),
-  ///       toolbarHeight: toolbarHeight,
+  ///       toolbarHeight: _myToolbarHeight,
   ///     ),
   ///   ),
   /// )

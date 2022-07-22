@@ -6,6 +6,9 @@ import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Asserts that the given context has a [Localizations] ancestor that contains
 /// a [CupertinoLocalizations] delegate.
 ///

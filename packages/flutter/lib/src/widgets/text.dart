@@ -15,6 +15,7 @@ import 'selection_container.dart';
 
 // Examples can assume:
 // late String _name;
+// late BuildContext context;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
@@ -251,7 +252,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// DefaultTextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// TextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context)!;
   /// ```
   static TextHeightBehavior? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
@@ -520,7 +521,7 @@ class Text extends StatelessWidget {
   /// text value:
   ///
   /// ```dart
-  /// Text(r'$$', semanticsLabel: 'Double dollars')
+  /// const Text(r'$$', semanticsLabel: 'Double dollars')
   /// ```
   /// {@endtemplate}
   final String? semanticsLabel;

@@ -91,7 +91,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// ```
 /// {@end-tool}
 ///
-/// ```
 ///
 ///               SelectionContainer
 ///               (SelectableRegion)
@@ -109,7 +108,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///                     Selectable        Selectable
 ///                     ("Item 0")         ("Item 1")
 ///
-///```
 ///
 /// ## Making a widget selectable
 ///

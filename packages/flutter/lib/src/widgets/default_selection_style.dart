@@ -7,6 +7,8 @@ import 'dart:ui';
 import 'framework.dart';
 import 'inherited_theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
 
 /// The selection style to apply to descendant [EditableText] widgets which
 /// don't have an explicit style.

@@ -26,8 +26,9 @@ import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
-// class MyPage extends Placeholder { const MyPage({super.key}); }
-// class MyHomePage extends Placeholder { const MyHomePage({super.key}); }
+// typedef MyAppHome = Placeholder;
+// typedef MyHomePage = Placeholder;
+// typedef MyPage = ListTile; // any const widget with a Widget "title" constructor argument would do
 // late NavigatorState navigator;
 // late BuildContext context;
 
@@ -1118,7 +1119,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///
 /// ```dart
 /// void main() {
-///   runApp(MaterialApp(home: MyAppHome()));
+///   runApp(const MaterialApp(home: MyAppHome()));
 /// }
 /// ```
 ///
@@ -1130,10 +1131,10 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// Navigator.push(context, MaterialPageRoute<void>(
 ///   builder: (BuildContext context) {
 ///     return Scaffold(
-///       appBar: AppBar(title: Text('My Page')),
+///       appBar: AppBar(title: const Text('My Page')),
 ///       body: Center(
 ///         child: TextButton(
-///           child: Text('POP'),
+///           child: const Text('POP'),
 ///           onPressed: () {
 ///             Navigator.pop(context);
 ///           },
@@ -1176,11 +1177,11 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// ```dart
 /// void main() {
 ///   runApp(MaterialApp(
-///     home: MyAppHome(), // becomes the route named '/'
+///     home: const MyAppHome(), // becomes the route named '/'
 ///     routes: <String, WidgetBuilder> {
-///       '/a': (BuildContext context) => MyPage(title: 'page A'),
-///       '/b': (BuildContext context) => MyPage(title: 'page B'),
-///       '/c': (BuildContext context) => MyPage(title: 'page C'),
+///       '/a': (BuildContext context) => const MyPage(title: Text('page A')),
+///       '/b': (BuildContext context) => const MyPage(title: Text('page B')),
+///       '/c': (BuildContext context) => const MyPage(title: Text('page C')),
 ///     },
 ///   ));
 /// }
@@ -1205,11 +1206,11 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// operation we could `await` the result of [Navigator.push]:
 ///
 /// ```dart
-/// bool value = await Navigator.push(context, MaterialPageRoute<bool>(
+/// bool? value = await Navigator.push(context, MaterialPageRoute<bool>(
 ///   builder: (BuildContext context) {
 ///     return Center(
 ///       child: GestureDetector(
-///         child: Text('OK'),
+///         child: const Text('OK'),
 ///         onTap: () { Navigator.pop(context, true); }
 ///       ),
 ///     );
@@ -1257,10 +1258,10 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// screen because it specifies `opaque: false`, just as a popup route does.
 ///
 /// ```dart
-/// Navigator.push(context, PageRouteBuilder(
+/// Navigator.push(context, PageRouteBuilder<void>(
 ///   opaque: false,
 ///   pageBuilder: (BuildContext context, _, __) {
-///     return Center(child: Text('My PageRoute'));
+///     return const Center(child: Text('My PageRoute'));
 ///   },
 ///   transitionsBuilder: (___, Animation<double> animation, ____, Widget child) {
 ///     return FadeTransition(
@@ -1280,6 +1281,9 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// because it doesn't depend on its animation parameters (elided with `_`
 /// and `__` in this example). The transition is built on every frame
 /// for its duration.
+///
+/// (In this example, `void` is used as the return type for the route, because
+/// it does not return a value.)
 ///
 /// ### Nesting Navigators
 ///
@@ -3558,8 +3562,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
 
     // This attempts to diff the new pages list (widget.pages) with
-    // the old _RouteEntry[s] list (_history), and produces a new list of
-    // _RouteEntry[s] to be the new list of _history. This method roughly
+    // the old _RouteEntry(s) list (_history), and produces a new list of
+    // _RouteEntry(s) to be the new list of _history. This method roughly
     // follows the same outline of RenderObjectElement.updateChildren.
     //
     // The cases it tries to optimize for are:
@@ -3587,11 +3591,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     //       transitionDelegate.
     //     * Sync keyed items with the source if it exists.
     // 5. Walk the narrowed part of the old list again to records the
-    //    _RouteEntry[s], as well as pageless routes, needed to be removed for
+    //    _RouteEntry(s), as well as pageless routes, needed to be removed for
     //    transitionDelegate.
     // 5. Walk the top of the list again, syncing the nodes and recording
     //    pageless routes.
-    // 6. Use transitionDelegate for explicit decisions on how _RouteEntry[s]
+    // 6. Use transitionDelegate for explicit decisions on how _RouteEntry(s)
     //    transition in or off the screens.
     // 7. Fill pageless routes back into the new history.
 

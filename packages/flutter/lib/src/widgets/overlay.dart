@@ -13,6 +13,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A place in an [Overlay] that can contain a widget.
 ///
 /// Overlay entries are inserted into an [Overlay] using the
@@ -338,7 +341,7 @@ class Overlay extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// OverlayState overlay = Overlay.of(context);
+  /// OverlayState overlay = Overlay.of(context)!;
   /// ```
   ///
   /// If `rootOverlay` is set to true, the state from the furthest instance of
