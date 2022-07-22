@@ -86,7 +86,7 @@ abstract class SemanticsEvent {
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection, this.assertiveness)
+  const AnnounceSemanticsEvent(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite})
     : assert(message != null),
       assert(textDirection != null),
       super('announce');
