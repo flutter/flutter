@@ -7,6 +7,7 @@ import("//flutter/testing/dart/compile_test.gni")
 tests = [
   "skp_test.dart",
   "tracing_test.dart",
+  "shader_reload_test.dart",
 ]
 
 foreach(test, tests) {
