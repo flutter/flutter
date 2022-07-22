@@ -27,6 +27,9 @@ void main() {
     });
 
     Future<void> simpleChannelTest(List<String> args) async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'branch', '-r'], stdout: '  branch-1\n  branch-2'),
+      ]);
       final ChannelCommand command = ChannelCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
@@ -42,10 +45,16 @@ void main() {
 
     testUsingContext('list', () async {
       await simpleChannelTest(<String>['channel']);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => fakeProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('verbose list', () async {
       await simpleChannelTest(<String>['channel', '-v']);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => fakeProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('sorted by stability', () async {
