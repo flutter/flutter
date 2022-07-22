@@ -4155,10 +4155,10 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   @pragma('vm:entry-point')
-  late final int _uniformFloatCount;
+  late int _uniformFloatCount;
 
   @pragma('vm:entry-point')
-  late final int _samplerCount;
+  late int _samplerCount;
 
   @FfiNative<Void Function(Handle)>('FragmentProgram::Create')
   external void _constructor();
