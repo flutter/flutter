@@ -1075,13 +1075,7 @@ class HotRunner extends ResidentRunner {
       device.devFS!.assetPathsToEvict.clear();
       device.devFS!.shaderPathsToEvict.clear();
     }
-    try {
-      await Future.wait<Map<String, Object?>?>(futures);
-    } catch (err, st) {
-      print(err);
-      print(st);
-      rethrow;
-    }
+    await Future.wait<Map<String, Object?>?>(futures);
   }
 
   @override

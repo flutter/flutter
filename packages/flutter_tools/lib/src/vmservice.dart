@@ -817,7 +817,6 @@ class FlutterVmService {
     Map<String, Object?>? args,
   }) async {
     try {
-      print(method);
       return await service.callServiceExtension(method, args: args);
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service

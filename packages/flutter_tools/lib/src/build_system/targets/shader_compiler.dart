@@ -77,7 +77,7 @@ class DevelopmentShaderCompiler {
 
   /// Recompile the input shader and return a devfs content that should be synced
   /// to the attached device in its place.
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) async {
+  Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
     late File inputFile;
@@ -91,16 +91,20 @@ class DevelopmentShaderCompiler {
         inputFile.writeAsBytesSync(await inputShader.contentsAsBytes());
         cleanupInput = true;
       }
-      await _shaderCompiler.compileShader(
+      final bool success = await _shaderCompiler.compileShader(
         input: inputFile,
         outputPath: output.path,
         target: _shaderTarget,
+        fatal: false,
       );
+      if (!success) {
+        return null;
+      }
       result = output.readAsBytesSync();
     } finally {
-      output.deleteSync();
+      ErrorHandlingFileSystem.deleteIfExists(output);
       if (cleanupInput) {
-        inputFile.deleteSync();
+        ErrorHandlingFileSystem.deleteIfExists(inputFile);
       }
     }
     return DevFSByteContent(result);
@@ -145,6 +149,7 @@ class ShaderCompiler {
     required File input,
     required String outputPath,
     required ShaderTarget target,
+    bool fatal = true,
   }) async {
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),
@@ -176,10 +181,13 @@ class ShaderCompiler {
     if (code != 0) {
       _logger.printTrace(await utf8.decodeStream(impellercProcess.stdout));
       _logger.printError(await utf8.decodeStream(impellercProcess.stderr));
-      throw ShaderCompilerException._(
-        'Shader compilation of "${input.path}" to "$outputPath" '
-        'failed with exit code $code.',
-      );
+      if (fatal) {
+        throw ShaderCompilerException._(
+          'Shader compilation of "${input.path}" to "$outputPath" '
+          'failed with exit code $code.',
+        );
+      }
+      return false;
     }
     if (target != ShaderTarget.spirv) {
       ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
