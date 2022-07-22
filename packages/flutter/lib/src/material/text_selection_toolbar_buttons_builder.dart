@@ -47,21 +47,46 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
   /// children.
   final ContextMenuFromChildrenBuilder builder;
 
-  static String _getButtonLabel(ContextMenuButtonData buttonData, MaterialLocalizations localizations) {
+  static String _getButtonLabel(BuildContext context, ContextMenuButtonData buttonData) {
     if (buttonData.label != null) {
       return buttonData.label!;
     }
-    switch (buttonData.type) {
-      case ContextMenuButtonType.cut:
-        return localizations.cutButtonLabel;
-      case ContextMenuButtonType.copy:
-        return localizations.copyButtonLabel;
-      case ContextMenuButtonType.paste:
-        return localizations.pasteButtonLabel;
-      case ContextMenuButtonType.selectAll:
-        return localizations.selectAllButtonLabel;
-      case ContextMenuButtonType.custom:
-        return '';
+
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        assert(debugCheckHasCupertinoLocalizations(context));
+        final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+        switch (buttonData.type) {
+          case ContextMenuButtonType.cut:
+            return localizations.cutButtonLabel;
+          case ContextMenuButtonType.copy:
+            return localizations.copyButtonLabel;
+          case ContextMenuButtonType.paste:
+            return localizations.pasteButtonLabel;
+          case ContextMenuButtonType.selectAll:
+            return localizations.selectAllButtonLabel;
+          case ContextMenuButtonType.custom:
+            return '';
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        assert(debugCheckHasMaterialLocalizations(context));
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        switch (buttonData.type) {
+          case ContextMenuButtonType.cut:
+            return localizations.cutButtonLabel;
+          case ContextMenuButtonType.copy:
+            return localizations.copyButtonLabel;
+          case ContextMenuButtonType.paste:
+            return localizations.pasteButtonLabel;
+          case ContextMenuButtonType.selectAll:
+            return localizations.selectAllButtonLabel;
+          case ContextMenuButtonType.custom:
+            return '';
+        }
     }
   }
 
@@ -70,55 +95,47 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
     int buttonIndex = 0;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
-        assert(debugCheckHasCupertinoLocalizations(context));
-        final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
         return builder(
           context,
           buttonDatas.map((ContextMenuButtonData buttonData) {
             return CupertinoTextSelectionToolbarButton.text(
               onPressed: buttonData.onPressed,
-              text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData, localizations),
+              text: _getButtonLabel(context, buttonData),
             );
           }).toList(),
         );
       case TargetPlatform.android:
-        assert(debugCheckHasMaterialLocalizations(context));
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         return builder(
           context,
           buttonDatas.map((ContextMenuButtonData buttonData) {
             return TextSelectionToolbarTextButton(
               padding: TextSelectionToolbarTextButton.getPadding(buttonIndex++, buttonDatas.length),
               onPressed: buttonData.onPressed,
-              child: Text(_getButtonLabel(buttonData, localizations)),
+              child: Text(_getButtonLabel(context, buttonData)),
             );
           }).toList(),
         );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        assert(debugCheckHasMaterialLocalizations(context));
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         return builder(
           context,
           buttonDatas.map((ContextMenuButtonData buttonData) {
             return DesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,
-              text: _getButtonLabel(buttonData, localizations),
+              text: _getButtonLabel(context, buttonData),
             );
           }).toList(),
         );
       case TargetPlatform.macOS:
-        assert(debugCheckHasCupertinoLocalizations(context));
-        final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
         return builder(
           context,
           buttonDatas.map((ContextMenuButtonData buttonData) {
             return CupertinoDesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,
-              text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData, localizations),
+              text: _getButtonLabel(context, buttonData),
             );
           }).toList(),
         );

@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-
 import 'basic.dart';
 import 'editable_text.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -47,7 +43,6 @@ typedef EditableTextToolbarBuilder = Widget Function(
   [Offset?]
 );
 
-// TODO(justinmc): Put in own file?
 /// Builds and manages a context menu at the given location.
 class ContextMenuController {
   ContextMenuController._();
@@ -125,12 +120,6 @@ enum ContextMenuButtonType {
   custom,
 }
 
-/// A type that returns the label string for a button.
-///
-/// [BuildContext] is provided to allow the use of localizations.
-typedef LabelGetter = String Function (BuildContext context);
-
-// TODO(justinmc): Make `label` a method that uses the current platform.
 /// The type and callback for a context menu button.
 @immutable
 class ContextMenuButtonData {
