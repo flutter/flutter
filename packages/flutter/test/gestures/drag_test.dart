@@ -536,10 +536,10 @@ void main() {
   });
 
   testGesture('A pointer joins and leaves during a gesture', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag1 =
-    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
-    final VerticalDragGestureRecognizer drag2 =
-    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(() => drag1.dispose);
     addTearDown(() => drag2.dispose);
 
@@ -601,7 +601,7 @@ void main() {
     ]);
     log.clear();
 
-    // They move at the opposite direction. Pointer5 moves (-10, -10)
+    // They move in the opposite direction. Pointer5 moves (-10, -10)
     // and pointer6 moves (+20, +20)
     tester.route(pointer5.move(const Offset(40.0, 40.0)));
     expect(log, <String>[]);
@@ -700,12 +700,12 @@ void main() {
     expect(updatedScrollDelta, isNull);
     log.clear();
 
-    // // The drag2 won the arena but triggered no movement due to DragStartBehavior.start.
+    // Pointer 6 moved, but the gesture recognizer is waiting for a full batch, so there is no movement yet.
     tester.route(pointer6.move(const Offset(50.0, 50.0)));
     expect(log, <String>[]);
     expect(updatedScrollDelta, isNull);
 
-    // Pointer 5 moved, but the gesture recognizer is waiting for a full batch, so there is no movement yet.
+    // Pointer 5 moved, making a full batch. The gesture recognizer dispatches movement.
     tester.route(pointer5.move(const Offset(80.0, 100.0)));
     expect(log, <String>[
       'drag1-update',
@@ -713,7 +713,6 @@ void main() {
     expect(updatedScrollDelta, const Offset(10.0, 0.0));
     log.clear();
 
-    // Pointer 6 moved, making a full batch. The gesture recognizer dispatches movement.
     updatedScrollDelta = null;
     tester.route(pointer6.move(const Offset(40.0, 70.0)));
     expect(log, <String>[]);
@@ -792,6 +791,8 @@ void main() {
     expect(updatedScrollDelta, isNull);
 
     // Pointer 5 moved again. The gesture recognizer takes it as a new batch, and dispatches movement.
+    // Pointer 5 firstly moves (-50, 50) and now moves (20, 50). Therefore the gesture recognizer dispatches
+    // last batch (-50, 50) and store this movement  (20, 50).
     tester.route(pointer5.move(const Offset(70.0, 100.0)));
     expect(log, <String>[
       'drag1-update',
@@ -799,7 +800,7 @@ void main() {
     expect(updatedScrollDelta, const Offset(-50.0, 0.0));
     log.clear();
 
-    // Pointer 5 moved again. Another new batch.
+    // Pointer 5 moved again. Another new batch. So Therefore the gesture recognizer dispatches the last batch (20, 50).
     tester.route(pointer5.move(const Offset(80.0, 70.0)));
     expect(log, <String>[
       'drag1-update',
