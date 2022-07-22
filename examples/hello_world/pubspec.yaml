@@ -3,12 +3,6 @@ name: hello_world
 environment:
   sdk: ">=2.17.0-0 <3.0.0"
 
-
-flutter:
-  uses-material-design: true
-  shaders:
-    - shaders/example.frag
-
 dependencies:
   flutter:
     sdk: flutter
