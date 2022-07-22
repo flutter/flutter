@@ -57,7 +57,8 @@ void main() {
       '--verbose',
     ], workingDirectory: tempDir.path);
     expect(result.stdout.toString(), contains('Working directory created at'));
-    expect(result.stdout.toString(), contains('''Added files:
+    expect(result.stdout.toString(), contains('''
+           Added files:
              - android/app/src/main/res/values-night/styles.xml
              - android/app/src/main/res/drawable-v21/launch_background.xml
              - analysis_options.yaml
@@ -86,8 +87,8 @@ void main() {
       '--verbose',
     ], workingDirectory: tempDir.path);
     logger.printStatus('${result.exitCode}', color: TerminalColor.blue);
-    logger.printStatus(result.stdout, color: TerminalColor.green);
-    logger.printStatus(result.stderr, color: TerminalColor.red);
+    logger.printStatus(result.stdout as String, color: TerminalColor.green);
+    logger.printStatus(result.stderr as String, color: TerminalColor.red);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Migration complete'));
 
@@ -140,8 +141,8 @@ class MyApp extends StatelessWidget {
       '--verbose',
     ], workingDirectory: tempDir.path);
     logger.printStatus('${result.exitCode}', color: TerminalColor.blue);
-    logger.printStatus(result.stdout, color: TerminalColor.green);
-    logger.printStatus(result.stderr, color: TerminalColor.red);
+    logger.printStatus(result.stdout as String, color: TerminalColor.green);
+    logger.printStatus(result.stderr as String, color: TerminalColor.red);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Migration complete'));
 
@@ -254,7 +255,8 @@ class MyApp extends StatelessWidget {
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Working directory created at'));
-    expect(result.stdout.toString(), contains('''Modified files:
+    expect(result.stdout.toString(), contains('''
+           Modified files:
              - .metadata
              - ios/Runner/Info.plist
              - ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
