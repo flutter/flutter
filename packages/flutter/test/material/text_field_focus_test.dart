@@ -168,6 +168,7 @@ void main() {
             children: <Widget>[
               TextField(
                 focusNode: focusNode,
+                onTapOutside: () {},
               ),
               Container(
                 height: 1000.0,
@@ -211,6 +212,7 @@ void main() {
                 decoration: InputDecoration(
                   prefixText: prefix,
                 ),
+                onTapOutside: () {},
               ),
               Container(
                 height: 1000.0,
