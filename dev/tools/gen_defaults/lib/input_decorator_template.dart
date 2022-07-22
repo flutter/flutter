@@ -17,6 +17,14 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   final BuildContext context;
 
   @override
+  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    return TextStyle(color: Theme.of(context).hintColor);
+  });
+
+  @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return ${componentColor("md.comp.filled-text-field.disabled.container")};
@@ -48,7 +56,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     });
 
   @override
-  BorderSide? get outLineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.hovered)) {
           return ${border('md.comp.outlined-text-field.error.hover.outline')};
@@ -144,17 +152,32 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();
+  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.hover.supporting-text')});
+        return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.hover.label-text')});
       }
       if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.focus.supporting-text')});
+        return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.focus.label-text')});
       }
-      return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.supporting-text')});
+      return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.label-text')});
     }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.hover.label-text')});
+    }
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.focus.label-text')});
+    }
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.disabled.label-text')});
+    }
+    return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.label-text')});
+  });
+
+  @override
+  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();
     if (states.contains(MaterialState.hovered)) {
       return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.hover.supporting-text')});
     }
@@ -165,6 +188,18 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
       return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.disabled.supporting-text')});
     }
     return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.supporting-text')});
+  });
+
+  @override
+  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.hover.supporting-text')});
+    }
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.focus.supporting-text')});
+    }
+    return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.supporting-text')});
   });
 }
 ''';

@@ -3544,7 +3544,7 @@ void main() {
     //   12 - help/error/counter text (ahem font size 12dps)
 
     // Label is floating because isEmpty is false.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 78.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
     expect(tester.getTopLeft(find.text('text')).dy, useMaterial3 ? 27.25 : 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, useMaterial3 ? 43.25 : 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, useMaterial3 ? 12.75 : 12.0);
