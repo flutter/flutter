@@ -47,7 +47,9 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
   /// children.
   final ContextMenuFromChildrenBuilder builder;
 
-  static String _getButtonLabel(BuildContext context, ContextMenuButtonData buttonData) {
+  /// Returns the default button label String for the button of the given
+  /// [ContextMenuButtonType] on any platform.
+  static String getButtonLabel(BuildContext context, ContextMenuButtonData buttonData) {
     if (buttonData.label != null) {
       return buttonData.label!;
     }
@@ -55,20 +57,10 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        assert(debugCheckHasCupertinoLocalizations(context));
-        final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-        switch (buttonData.type) {
-          case ContextMenuButtonType.cut:
-            return localizations.cutButtonLabel;
-          case ContextMenuButtonType.copy:
-            return localizations.copyButtonLabel;
-          case ContextMenuButtonType.paste:
-            return localizations.pasteButtonLabel;
-          case ContextMenuButtonType.selectAll:
-            return localizations.selectAllButtonLabel;
-          case ContextMenuButtonType.custom:
-            return '';
-        }
+        return CupertinoTextSelectionToolbarButtonsBuilder.getButtonLabel(
+          context,
+          buttonData,
+        );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -100,7 +92,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
           buttonDatas.map((ContextMenuButtonData buttonData) {
             return CupertinoTextSelectionToolbarButton.text(
               onPressed: buttonData.onPressed,
-              text: _getButtonLabel(context, buttonData),
+              text: getButtonLabel(context, buttonData),
             );
           }).toList(),
         );
@@ -111,7 +103,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
             return TextSelectionToolbarTextButton(
               padding: TextSelectionToolbarTextButton.getPadding(buttonIndex++, buttonDatas.length),
               onPressed: buttonData.onPressed,
-              child: Text(_getButtonLabel(context, buttonData)),
+              child: Text(getButtonLabel(context, buttonData)),
             );
           }).toList(),
         );
@@ -124,7 +116,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
             return DesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,
-              text: _getButtonLabel(context, buttonData),
+              text: getButtonLabel(context, buttonData),
             );
           }).toList(),
         );
@@ -135,7 +127,7 @@ class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
             return CupertinoDesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,
-              text: _getButtonLabel(context, buttonData),
+              text: getButtonLabel(context, buttonData),
             );
           }).toList(),
         );

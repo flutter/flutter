@@ -16,7 +16,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'container.dart';
-import 'context_menu.dart';
+import 'context_menu_controller.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -495,6 +495,7 @@ class TextSelectionOverlay {
     if (selectionControls is! TextSelectionHandleControls) {
       return _selectionOverlay.hideToolbar();
     }
+    // TODO(justinmc): Should always delegate to _selectionOverlay actually.
     ContextMenuController.hide();
   }
 

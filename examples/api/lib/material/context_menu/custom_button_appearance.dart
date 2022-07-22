@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
                             child: SizedBox(
                               width: 200.0,
                               child: Text(
-                                CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData, localizations),
+                                CupertinoTextSelectionToolbarButtonsBuilder.getButtonLabel(context, buttonData),
                               ),
                             ),
                           );

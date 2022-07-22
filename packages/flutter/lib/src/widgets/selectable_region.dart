@@ -12,7 +12,8 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'context_menu.dart';
+import 'context_menu_button_data.dart';
+import 'context_menu_controller.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -617,6 +618,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return true;
     }
 
+    // TODO(justinmc): Change to _selectionOverlay!.hideToolbar();
     ContextMenuController.hide();
 
     // If given a location, just display the context menu there.

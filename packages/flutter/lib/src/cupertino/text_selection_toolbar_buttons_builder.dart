@@ -59,11 +59,13 @@ class CupertinoTextSelectionToolbarButtonsBuilder extends StatelessWidget {
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonType].
-  static String _getButtonLabel(ContextMenuButtonData buttonData, CupertinoLocalizations localizations) {
+  static String getButtonLabel(BuildContext context, ContextMenuButtonData buttonData) {
     if (buttonData.label != null) {
       return buttonData.label!;
     }
 
+    assert(debugCheckHasCupertinoLocalizations(context));
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     switch (buttonData.type) {
       case ContextMenuButtonType.cut:
         return localizations.cutButtonLabel;
@@ -83,14 +85,12 @@ class CupertinoTextSelectionToolbarButtonsBuilder extends StatelessWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        assert(debugCheckHasCupertinoLocalizations(context));
-        final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
         return builder(
           context,
           buttonDatas.map((ContextMenuButtonData buttonData) {
             return CupertinoTextSelectionToolbarButton.text(
               onPressed: buttonData.onPressed,
-              text: _getButtonLabel(buttonData, localizations),
+              text: getButtonLabel(context, buttonData),
             );
           }).toList(),
         );
@@ -98,15 +98,13 @@ class CupertinoTextSelectionToolbarButtonsBuilder extends StatelessWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
-        assert(debugCheckHasCupertinoLocalizations(context));
-        final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
         return builder(
           context,
           buttonDatas.map((ContextMenuButtonData buttonData) {
             return CupertinoDesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,
-              text: _getButtonLabel(buttonData, localizations),
+              text: getButtonLabel(context, buttonData),
             );
           }).toList(),
         );
