@@ -528,6 +528,7 @@ def to_gn_args(args):
 
   # Vulkan support is WIP, see: https://github.com/flutter/flutter/issues/107357
   if args.enable_impeller_vulkan:
+    gn_args['impeller_enable_opengles'] = False
     gn_args['impeller_enable_vulkan'] = True
     gn_args['skia_use_vma'] = False
 
