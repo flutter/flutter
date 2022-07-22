@@ -1063,7 +1063,7 @@ class HotRunner extends ResidentRunner {
             )
         );
       }
-      for (final String assetPath in device.devFS!.assetPathsToEvict) {
+      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
         futures.add(
           device.vmService!
             .flutterEvictShader(
@@ -1075,7 +1075,13 @@ class HotRunner extends ResidentRunner {
       device.devFS!.assetPathsToEvict.clear();
       device.devFS!.shaderPathsToEvict.clear();
     }
-    await Future.wait<Map<String, Object?>?>(futures);
+    try {
+      await Future.wait<Map<String, Object?>?>(futures);
+    } catch (err, st) {
+      print(err);
+      print(st);
+      rethrow;
+    }
   }
 
   @override

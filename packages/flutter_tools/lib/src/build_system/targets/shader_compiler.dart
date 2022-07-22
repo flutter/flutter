@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
+import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
@@ -161,7 +162,11 @@ class ShaderCompiler {
       if (target == ShaderTarget.spirv)
         '--spirv=$outputPath'
       else
-        ...<String>['--sl=$outputPath.iplr', '--spirv=$outputPath.spirv',],
+        ...<String>[
+          '--sl=$outputPath',
+          '--spirv=$outputPath.spirv',
+          '--iplr',
+        ],
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
@@ -177,11 +182,8 @@ class ShaderCompiler {
       );
     }
     if (target != ShaderTarget.spirv) {
-      input.fileSystem.file('$outputPath.iplr').copySync(outputPath);
-      input.fileSystem.file('$outputPath.iplr').deleteSync();
-      input.fileSystem.file('$outputPath.spirv').deleteSync();
+      ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     }
-
     return true;
   }
 }
