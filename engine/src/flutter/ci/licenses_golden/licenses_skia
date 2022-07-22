@@ -1,4 +1,4 @@
-Signature: e4c6df0cae2561776578cf8f9af22866
+Signature: f005be9d348098c04d9c5a8815a86059
 
 UNUSED LICENSES:
 
@@ -5652,6 +5652,7 @@ FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.h
 FILE: ../../../third_party/skia/src/text/gpu/SubRunContainer.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunContainer.h
+FILE: ../../../third_party/skia/src/utils/SkGaussianColorFilter.cpp
 FILE: ../../../third_party/skia/src/utils/SkTestCanvas.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
