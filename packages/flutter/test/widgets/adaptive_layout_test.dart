@@ -34,7 +34,7 @@ Widget on(_) {
   return const SizedBox(width: 10, height: 10);
 }
 
-Future<SizedBox> layout({
+Future<MediaQuery> layout({
   required double width,
   required WidgetTester tester,
   bool orientation = true,
@@ -43,60 +43,57 @@ Future<SizedBox> layout({
   bool animations = true,
 }) async {
   await tester.binding.setSurfaceSize(Size(width, 800));
-  return SizedBox(
-    width: width,
-    child: MediaQuery(
-      data: MediaQueryData(size: Size(width, 800)),
-      child: Directionality(
-        textDirection: directionality,
-        child: AdaptiveLayout(
-          horizontalBody: orientation,
-          bodyRatio: bodyRatio,
-          internalAnimations: animations,
-          primaryNavigation: SlotLayout(
-            config: <Breakpoint, SlotLayoutConfig>{
-              TestBreakpoint0(): const SlotLayoutConfig(key: Key('pnav'), builder: on),
-              TestBreakpoint400(): const SlotLayoutConfig(key: Key('pnav1'), builder: on),
-              TestBreakpoint800(): const SlotLayoutConfig(key: Key('pnav2'), builder: on),
-            },
-          ),
-          secondaryNavigation: SlotLayout(
-            config: <Breakpoint, SlotLayoutConfig>{
-              TestBreakpoint0(): const SlotLayoutConfig(key: Key('snav'), builder: on),
-              TestBreakpoint400(): const SlotLayoutConfig(key: Key('snav1'), builder: on),
-              TestBreakpoint800(): const SlotLayoutConfig(key: Key('snav2'), builder: on),
-            },
-          ),
-          topNavigation: SlotLayout(
-            config: <Breakpoint, SlotLayoutConfig>{
-              TestBreakpoint0(): const SlotLayoutConfig(key: Key('tnav'), builder: on),
-              TestBreakpoint400(): const SlotLayoutConfig(key: Key('tnav1'), builder: on),
-              TestBreakpoint800(): const SlotLayoutConfig(key: Key('tnav2'), builder: on),
-            },
-          ),
-          bottomNavigation: SlotLayout(
-            config: <Breakpoint, SlotLayoutConfig>{
-              TestBreakpoint0(): const SlotLayoutConfig(key: Key('bnav'), builder: on),
-              TestBreakpoint400(): const SlotLayoutConfig(key: Key('bnav1'), builder: on),
-              TestBreakpoint800(): const SlotLayoutConfig(key: Key('bnav2'), builder: on),
-            },
-          ),
-          body: SlotLayout(
-            config: <Breakpoint, SlotLayoutConfig>{
-              TestBreakpoint0(): SlotLayoutConfig(key: const Key('b'), builder: (_) => Container(color: Colors.red)),
-              TestBreakpoint400(): SlotLayoutConfig(key: const Key('b1'), builder: (_) => Container(color: Colors.red)),
-              TestBreakpoint800(): SlotLayoutConfig(key: const Key('b2'), builder: (_) => Container(color: Colors.red)),
-            },
-          ),
-          secondaryBody: SlotLayout(
-            config: <Breakpoint, SlotLayoutConfig>{
-              TestBreakpoint0(): SlotLayoutConfig(key: const Key('sb'), builder: (_) => Container(color: Colors.blue)),
-              TestBreakpoint400():
-                  SlotLayoutConfig(key: const Key('sb1'), builder: (_) => Container(color: Colors.blue)),
-              TestBreakpoint800():
-                  SlotLayoutConfig(key: const Key('sb2'), builder: (_) => Container(color: Colors.blue)),
-            },
-          ),
+  return MediaQuery(
+    data: MediaQueryData(size: Size(width, 800)),
+    child: Directionality(
+      textDirection: directionality,
+      child: AdaptiveLayout(
+        horizontalBody: orientation,
+        bodyRatio: bodyRatio,
+        internalAnimations: animations,
+        primaryNavigation: SlotLayout(
+          config: <Breakpoint, SlotLayoutConfig>{
+            TestBreakpoint0(): const SlotLayoutConfig(key: Key('pnav'), builder: on),
+            TestBreakpoint400(): const SlotLayoutConfig(key: Key('pnav1'), builder: on),
+            TestBreakpoint800(): const SlotLayoutConfig(key: Key('pnav2'), builder: on),
+          },
+        ),
+        secondaryNavigation: SlotLayout(
+          config: <Breakpoint, SlotLayoutConfig>{
+            TestBreakpoint0(): const SlotLayoutConfig(key: Key('snav'), builder: on),
+            TestBreakpoint400(): const SlotLayoutConfig(key: Key('snav1'), builder: on),
+            TestBreakpoint800(): const SlotLayoutConfig(key: Key('snav2'), builder: on),
+          },
+        ),
+        topNavigation: SlotLayout(
+          config: <Breakpoint, SlotLayoutConfig>{
+            TestBreakpoint0(): const SlotLayoutConfig(key: Key('tnav'), builder: on),
+            TestBreakpoint400(): const SlotLayoutConfig(key: Key('tnav1'), builder: on),
+            TestBreakpoint800(): const SlotLayoutConfig(key: Key('tnav2'), builder: on),
+          },
+        ),
+        bottomNavigation: SlotLayout(
+          config: <Breakpoint, SlotLayoutConfig>{
+            TestBreakpoint0(): const SlotLayoutConfig(key: Key('bnav'), builder: on),
+            TestBreakpoint400(): const SlotLayoutConfig(key: Key('bnav1'), builder: on),
+            TestBreakpoint800(): const SlotLayoutConfig(key: Key('bnav2'), builder: on),
+          },
+        ),
+        body: SlotLayout(
+          config: <Breakpoint, SlotLayoutConfig>{
+            TestBreakpoint0(): SlotLayoutConfig(key: const Key('b'), builder: (_) => Container(color: Colors.red)),
+            TestBreakpoint400(): SlotLayoutConfig(key: const Key('b1'), builder: (_) => Container(color: Colors.red)),
+            TestBreakpoint800(): SlotLayoutConfig(key: const Key('b2'), builder: (_) => Container(color: Colors.red)),
+          },
+        ),
+        secondaryBody: SlotLayout(
+          config: <Breakpoint, SlotLayoutConfig>{
+            TestBreakpoint0(): SlotLayoutConfig(key: const Key('sb'), builder: (_) => Container(color: Colors.blue)),
+            TestBreakpoint400():
+                SlotLayoutConfig(key: const Key('sb1'), builder: (_) => Container(color: Colors.blue)),
+            TestBreakpoint800():
+                SlotLayoutConfig(key: const Key('sb2'), builder: (_) => Container(color: Colors.blue)),
+          },
         ),
       ),
     ),
@@ -187,8 +184,6 @@ void main() {
   testWidgets('adaptive layout displays children in correct places', (WidgetTester tester) async {
     await tester.pumpWidget(await layout(width: 400, tester: tester));
     await tester.pumpAndSettle();
-
-    await tester.pumpAndSettle();
     expect(tester.getTopLeft(tnav), Offset.zero);
     expect(tester.getTopLeft(snav), const Offset(390, 10));
     expect(tester.getTopLeft(pnav), const Offset(0, 10));
@@ -202,7 +197,6 @@ void main() {
   testWidgets('adaptive layout correct layout when body vertical', (WidgetTester tester) async {
     await tester.pumpWidget(await layout(width: 400, tester: tester, orientation: false));
     await tester.pumpAndSettle();
-
     expect(tester.getTopLeft(tnav), Offset.zero);
     expect(tester.getTopLeft(snav), const Offset(390, 10));
     expect(tester.getTopLeft(pnav), const Offset(0, 10));
@@ -216,8 +210,6 @@ void main() {
   testWidgets('adaptive layout correct layout when rtl', (WidgetTester tester) async {
     await tester.pumpWidget(await layout(width: 400, tester: tester, directionality: TextDirection.rtl));
     await tester.pumpAndSettle();
-
-    await tester.pumpAndSettle();
     expect(tester.getTopLeft(tnav), Offset.zero);
     expect(tester.getTopLeft(snav), const Offset(0, 10));
     expect(tester.getTopLeft(pnav), const Offset(390, 10));
@@ -230,8 +222,6 @@ void main() {
 
   testWidgets('adaptive layout correct layout when body ratio not default', (WidgetTester tester) async {
     await tester.pumpWidget(await layout(width: 400, tester: tester, bodyRatio: 1/3));
-    await tester.pumpAndSettle();
-
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(tnav), Offset.zero);
     expect(tester.getTopLeft(snav), const Offset(390, 10));

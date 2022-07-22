@@ -25,7 +25,6 @@ class AdaptiveScaffold extends StatefulWidget {
     this.largeSecondaryBody,
     this.bodyRatio,
     this.breakpoints = const <Breakpoint>[Breakpoints.small, Breakpoints.medium, Breakpoints.large],
-    this.offsetAnimations = true,
     this.internalAnimations = true,
     this.horizontalBody = true,
     super.key,
@@ -95,11 +94,6 @@ class AdaptiveScaffold extends StatefulWidget {
   ///
   /// Defaults to [0, 480, 1024].
   final List<Breakpoint> breakpoints;
-
-  /// Whether or not the developer wants display animations.
-  ///
-  /// Defaults to true.
-  final bool offsetAnimations;
 
   /// Whether or not the developer wants the smooth entering slide transition on
   /// secondaryBody.
@@ -275,15 +269,14 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       child: AdaptiveLayout(
         horizontalBody: widget.horizontalBody,
         bodyRatio: widget.bodyRatio,
-        internalAnimations: widget.internalAnimations && widget.offsetAnimations,
+        internalAnimations: widget.internalAnimations,
         primaryNavigation: widget.destinations != null && widget.selectedIndex != null
             ? SlotLayout(
                 config: <Breakpoint, SlotLayoutConfig>{
-                  widget.breakpoints[0]: SlotLayoutConfig(
-                    inAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftOutIn : null,
-                    key: const Key('primaryNavigation1'),
+                  widget.breakpoints[1]: SlotLayoutConfig(
+                    key: const Key('primaryNavigation'),
                     builder: (_) => SizedBox(
-                      width: 75,
+                      width: 72,
                       height: MediaQuery.of(context).size.height,
                       child: NavigationRail(
                         selectedIndex: widget.selectedIndex,
@@ -291,11 +284,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       ),
                     ),
                   ),
-                  widget.breakpoints[1]: SlotLayoutConfig(
-                    inAnimation: widget.offsetAnimations ? AdaptiveScaffold.leftOutIn : null,
-                    key: const Key('primaryNavigation2'),
+                  widget.breakpoints[2]: SlotLayoutConfig(
+                    key: const Key('primaryNavigation1'),
                     builder: (_) => SizedBox(
-                      width: 150,
+                      width: 192,
                       height: MediaQuery.of(context).size.height,
                       child: NavigationRail(
                         extended: true,
@@ -311,14 +303,15 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             ? SlotLayout(
                 config: <Breakpoint, SlotLayoutConfig>{
                   widget.breakpoints[0]: SlotLayoutConfig(
-                    inAnimation: widget.offsetAnimations ? AdaptiveScaffold.bottomToTop : null,
-                    key: const Key('botnav1'),
+                    key: const Key('bottomNavigation'),
                     builder: (_) => BottomNavigationBar(
                       unselectedItemColor: Colors.grey,
                       selectedItemColor: Colors.black,
                       items: widget.destinations!.map(_toBottomNavItem).toList(),
                     ),
                   ),
+                  widget.breakpoints[1]: SlotLayoutConfig.empty(),
+                  widget.breakpoints[2]: SlotLayoutConfig.empty(),
                 },
               )
             : null,
