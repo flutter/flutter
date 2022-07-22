@@ -2675,4 +2675,97 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 121.0)) // thumb
     ); // thumb
   });
+
+  testWidgets('Scrollbar thumb can only be dragged parallel to cross axis', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107765
+
+    final ScrollController scrollController = ScrollController();
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: CustomScrollView(
+                  primary: true,
+                  center: uniqueKey,
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      key: uniqueKey,
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 200.0, 800.0, 400.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag the thumb up to scroll up.
+    const double scrollAmount = -500.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 300.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, -600);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 200.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag the thumb down to scroll down.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, 100));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, -600);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 200.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 }

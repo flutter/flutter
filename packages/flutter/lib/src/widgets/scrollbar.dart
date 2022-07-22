@@ -1634,16 +1634,16 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     late double primaryDelta;
     switch (position.axisDirection) {
       case AxisDirection.up:
-        primaryDelta = _dragScrollbarAxisOffset!.dy - updatedOffset.dy;
+        primaryDelta = clampDouble(_dragScrollbarAxisOffset!.dy, 0, position.viewportDimension) - updatedOffset.dy;
         break;
       case AxisDirection.right:
-        primaryDelta = updatedOffset.dx -_dragScrollbarAxisOffset!.dx;
+        primaryDelta = updatedOffset.dx - clampDouble(_dragScrollbarAxisOffset!.dx, 0, position.viewportDimension);
         break;
       case AxisDirection.down:
-        primaryDelta = updatedOffset.dy -_dragScrollbarAxisOffset!.dy;
+        primaryDelta = updatedOffset.dy - clampDouble(_dragScrollbarAxisOffset!.dy, 0, position.viewportDimension);
         break;
       case AxisDirection.left:
-        primaryDelta = _dragScrollbarAxisOffset!.dx - updatedOffset.dx;
+        primaryDelta = clampDouble(_dragScrollbarAxisOffset!.dx, 0, position.viewportDimension) - updatedOffset.dx;
         break;
     }
 
