@@ -1679,7 +1679,7 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
     final RenderBox container = tester.renderObject(find.descendant(
-      of: find.byType(FadeTransition),
+      of: find.byType(RasterWidget),
       matching: find.byType(SizedBox),
     ).first);
     expect(container.size, Size.zero);
