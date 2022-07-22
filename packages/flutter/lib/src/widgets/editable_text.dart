@@ -3192,7 +3192,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
 
-    if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
+    if (_selectionOverlay == null) {
       return false;
     }
     clipboardStatus?.update();

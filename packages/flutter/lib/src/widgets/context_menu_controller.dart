@@ -62,12 +62,12 @@ class ContextMenuController {
   static OverlayEntry? _menuOverlayEntry;
 
   /// True iff the menu is currently being displayed.
-  static bool get isShown => _menuOverlayEntry != null;
+  static bool get isShown => _menuOverlayEntry != null && _menuOverlayEntry!.mounted;
 
   /// Shows the given context menu at the location.
   static void show({
-    required WidgetBuilder contextMenuBuilder,
     required BuildContext context,
+    required WidgetBuilder contextMenuBuilder,
     Widget? debugRequiredFor,
   }) {
     hide();
