@@ -961,13 +961,19 @@ class ThemeData with Diagnosticable {
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.light() => ThemeData(brightness: Brightness.light);
+  factory ThemeData.light({bool? useMaterial3}) => ThemeData(
+    brightness: Brightness.light,
+    useMaterial3: useMaterial3,
+  );
 
   /// A default dark theme with a teal secondary [ColorScheme] color.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.dark() => ThemeData(brightness: Brightness.dark);
+  factory ThemeData.dark({bool? useMaterial3}) => ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: useMaterial3,
+  );
 
   /// The default color theme. Same as [ThemeData.light].
   ///
@@ -978,7 +984,7 @@ class ThemeData with Diagnosticable {
   ///
   /// Most applications would use [Theme.of], which provides correct localized
   /// text geometry.
-  factory ThemeData.fallback() => ThemeData.light();
+  factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
 
   /// The overall theme brightness.
   ///
@@ -1133,53 +1139,67 @@ class ThemeData with Diagnosticable {
 
   /// A temporary flag used to opt-in to Material 3 features.
   ///
-  /// If true, then components that have been migrated to Material 3 will
+  /// If true, then widgets that have been migrated to Material 3 will
   /// use new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
+  /// During the migration to Material 3, turning this on may yield
+  /// inconsistent look and feel in your app as some widgets are migrated
+  /// while others have yet to be.
+  ///
+  /// Defaults to false. When the Material 3 specification is complete
+  /// and all widgets are migrated on stable, we will change this flag to be
+  /// true by default. After that change has landed on stable, we will deprecate
+  /// this flag and remove all uses of it. At that point, the `material` library
+  /// will aim to only support Material 3.
+  ///
+  /// ## Defaults
   /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
-  /// some properties will get special defaults. However, just copying a [ThemeData]
-  /// with [useMaterial3] set to true will not change any of these properties in the
-  /// resulting [ThemeData]. These properties are:
+  /// some properties will get updated defaults. Please note that
+  /// [ThemeData.copyWith] with [useMaterial3] set to true will
+  /// not change any of these properties in the resulting [ThemeData].
+  ///
   /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
   ///
-  /// | Property        | Material 3 default           | Fallback default          |
+  /// | Property        | Material 3 default           | Material 2 default        |
   /// | :-------------- | :--------------------------- | :------------------------ |
   /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
   /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
   ///
-  /// \* if and only if the target platform is Android and the app is not
+  /// \* if the target platform is Android and the app is not
   /// running on the web, otherwise it will fallback to [InkRipple].
   ///
-  /// During the migration to Material 3, turning this on may yield
-  /// inconsistent look and feel in your app. Some components will be migrated
-  /// before others and typography changes will be coming in stages.
+  /// ## Affected widgets
   ///
-  /// [useMaterial3] defaults to false. After all the migrated components
-  /// have landed on stable, we will change this to be true by default. After
-  /// that change has landed on stable, we will deprecate this flag and remove
-  /// all uses of it. Everything will use the Material 3 look and feel at
-  /// that point.
+  /// This flag affects styles and components.
   ///
-  /// Components that have been migrated to Material 3 are:
+  /// ### Styles
+  ///   * Color: [ColorScheme], [Material]
+  ///   * Shape: (see components below)
+  ///   * Typography: `typography` (see table above)
   ///
-  ///   * [AlertDialog]
-  ///   * [AppBar]
-  ///   * [Card]
-  ///   * [Dialog]
-  ///   * [ElevatedButton]
-  ///   * [FloatingActionButton]
-  ///   * [Material]
-  ///   * [NavigationBar] (new, replacing [BottomNavigationBar])
-  ///   * [NavigationRail]
-  ///   * [OutlinedButton]
-  ///   * [StretchingOverscrollIndicator], replacing the
-  ///     [GlowingOverscrollIndicator]
-  ///   * [TextButton]
+  /// ### Components
+  ///   * Common buttons: [TextButton], [OutlinedButton], [ElevatedButton]
+  ///   * FAB: [FloatingActionButton]
+  ///   * Extended FAB: [FloatingActionButton.extended]
+  ///   * Cards: [Card]
+  ///   * Chips:
+  ///     - [ActionChip] (used for Assist and Suggestion chips),
+  ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
+  ///     - [InputChip]
+  ///   * Dialogs: [Dialog], [AlertDialog]
+  ///   * Lists: [ListTile]
+  ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
+  ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * Top app bar: [AppBar]
+  ///
+  /// In addition, this flag enables features introduced in Android 12.
+  ///   * Stretch overscroll: [MaterialScrollBehavior]
+  ///   * Ripple: `splashFactory` (see table above)
   ///
   /// See also:
   ///
-  ///   * [Material Design 3](https://m3.material.io/).
+  ///   * [Material 3 specification](https://m3.material.io/).
   final bool useMaterial3;
 
   /// The density value for specifying the compactness of various UI components.

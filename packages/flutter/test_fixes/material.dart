@@ -554,4 +554,19 @@ void main() {
 
   // Change made in https://github.com/flutter/flutter/pull/100381
   TextSelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/105291
+  ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
+    primary: Colors.blue,
+    onPrimary: Colors.white,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle textButtonStyle = TextButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
 }

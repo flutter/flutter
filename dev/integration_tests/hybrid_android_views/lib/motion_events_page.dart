@@ -154,8 +154,9 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
   Future<void> saveRecordedEvents(ByteData data, BuildContext context) async {
     if (await channel.invokeMethod<bool>('getStoragePermission') != true) {
-      showMessage(
-          context, 'External storage permissions are required to save events');
+      if (mounted) {
+        showMessage(context, 'External storage permissions are required to save events');
+      }
       return;
     }
     try {

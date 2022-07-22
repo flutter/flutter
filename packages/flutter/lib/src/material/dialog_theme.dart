@@ -32,6 +32,7 @@ class DialogTheme with Diagnosticable {
     this.elevation,
     this.shape,
     this.alignment,
+    this.iconColor,
     this.titleTextStyle,
     this.contentTextStyle,
     this.actionsPadding,
@@ -60,6 +61,9 @@ class DialogTheme with Diagnosticable {
   /// Overrides the default value for [AlertDialog.actionsPadding].
   final EdgeInsetsGeometry? actionsPadding;
 
+  /// Used to configure the [IconTheme] for the [AlertDialog.icon] widget.
+  final Color? iconColor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogTheme copyWith({
@@ -67,6 +71,7 @@ class DialogTheme with Diagnosticable {
     double? elevation,
     ShapeBorder? shape,
     AlignmentGeometry? alignment,
+    Color? iconColor,
     TextStyle? titleTextStyle,
     TextStyle? contentTextStyle,
     EdgeInsetsGeometry? actionsPadding,
@@ -76,6 +81,7 @@ class DialogTheme with Diagnosticable {
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
       alignment: alignment ?? this.alignment,
+      iconColor: iconColor ?? this.iconColor,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
       actionsPadding: actionsPadding ?? this.actionsPadding,
@@ -99,6 +105,7 @@ class DialogTheme with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
+      iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
       actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
@@ -121,6 +128,7 @@ class DialogTheme with Diagnosticable {
         && other.elevation == elevation
         && other.shape == shape
         && other.alignment == alignment
+        && other.iconColor == iconColor
         && other.titleTextStyle == titleTextStyle
         && other.contentTextStyle == contentTextStyle
         && other.actionsPadding == actionsPadding;
@@ -133,6 +141,7 @@ class DialogTheme with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(ColorProperty('iconColor', iconColor));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));

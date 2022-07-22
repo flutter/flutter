@@ -5,7 +5,7 @@
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
-import '../../base/common.dart';
+import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
@@ -43,17 +43,13 @@ class ShaderCompiler {
   ///
   /// All parameters are required.
   ///
-  /// If the input file is not a fragment shader, this returns false.
-  /// If the shader compiler subprocess fails, it will [throwToolExit].
-  /// Otherwise, it will return true.
+  /// If the shader compiler subprocess fails, it will print the stdout and
+  /// stderr to the log and throw a [ShaderCompilerException]. Otherwise, it
+  /// will return true.
   Future<bool> compileShader({
     required File input,
     required String outputPath,
   }) async {
-    if (!input.path.endsWith('.frag')) {
-      return false;
-    }
-
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),
     );
@@ -69,9 +65,13 @@ class ShaderCompiler {
       // TODO(zanderso): When impeller is enabled, the correct flags for the
       // target backend will need to be passed.
       // https://github.com/flutter/flutter/issues/102853
-      '--flutter-spirv',
-      '--spirv=$outputPath',
+      '--sksl',
+      '--iplr',
+      '--sl=$outputPath',
+      '--spirv=$outputPath.spirv',
       '--input=${input.path}',
+      '--input-type=frag',
+      '--include=${input.parent.path}',
     ];
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;
@@ -84,6 +84,7 @@ class ShaderCompiler {
       );
     }
 
+    ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     return true;
   }
 }

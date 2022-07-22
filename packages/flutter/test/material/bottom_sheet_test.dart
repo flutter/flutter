@@ -681,6 +681,69 @@ void main() {
     );
   });
 
+  testWidgets('modal BottomSheet can insert a SafeArea', (WidgetTester tester) async {
+    late BuildContext outerContext;
+    late BuildContext innerContext;
+
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(50.0),
+            size: Size(400.0, 600.0),
+          ),
+          child: Navigator(
+            onGenerateRoute: (_) {
+              return PageRouteBuilder<void>(
+                pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                  outerContext = context;
+                  return Container();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Without a SafeArea (useSafeArea is false by default)
+    showModalBottomSheet<void>(
+      context: outerContext,
+      builder: (BuildContext context) {
+        innerContext = context;
+        return Container();
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Top padding is consumed and there is no SafeArea
+    expect(MediaQuery.of(innerContext).padding.top, 0);
+    expect(find.byType(SafeArea), findsNothing);
+
+    // With a SafeArea
+    showModalBottomSheet<void>(
+      context: outerContext,
+      useSafeArea: true,
+      builder: (BuildContext context) {
+        innerContext = context;
+        return Container();
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Top padding is consumed and there is a SafeArea
+    expect(MediaQuery.of(innerContext).padding.top, 0);
+    expect(find.byType(SafeArea), findsOneWidget);
+  });
+
   testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();

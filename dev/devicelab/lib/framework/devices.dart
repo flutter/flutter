@@ -482,7 +482,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> output = (await eval(_ffx, <String>['target', 'list', '--format', 's']))
+    final List<String> output = (await eval(_ffx, <String>['target', 'list', '-f', 's']))
       .trim()
       .split('\n');
 
@@ -505,7 +505,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
           <String>[
             'target',
             'list',
-            '--format',
+            '-f',
             'a',
             deviceId,
           ]

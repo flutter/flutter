@@ -390,7 +390,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
           highlightColor: Colors.transparent,
-          customBorder: resolvedShape,
+          customBorder: resolvedShape.copyWith(side: resolvedSide),
           statesController: statesController,
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedForegroundColor),

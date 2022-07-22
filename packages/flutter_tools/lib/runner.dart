@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -31,9 +31,9 @@ Future<int> run(
     bool muteCommandLogging = false,
     bool verbose = false,
     bool verboseHelp = false,
-    bool reportCrashes,
-    String flutterVersion,
-    Map<Type, Generator> overrides,
+    bool? reportCrashes,
+    String? flutterVersion,
+    Map<Type, Generator>? overrides,
   }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -55,8 +55,8 @@ Future<int> run(
     );
 
     String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
-    Object firstError;
-    StackTrace firstStackTrace;
+    Object? firstError;
+    StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
@@ -74,7 +74,7 @@ Future<int> run(
         // This catches all exceptions to send to crash logging, etc.
         firstError = error;
         firstStackTrace = stackTrace;
-        return _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
+        return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion);
       }
     }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
@@ -82,14 +82,14 @@ Future<int> run(
       // to send the original error that triggered the crash report.
       firstError ??= error;
       firstStackTrace ??= stackTrace;
-      await _handleToolError(firstError, firstStackTrace, verbose, args, reportCrashes, getVersion);
+      await _handleToolError(firstError!, firstStackTrace, verbose, args, reportCrashes!, getVersion);
     });
   }, overrides: overrides);
 }
 
 Future<int> _handleToolError(
-  dynamic error,
-  StackTrace stackTrace,
+  Object error,
+  StackTrace? stackTrace,
   bool verbose,
   List<String> args,
   bool reportCrashes,
@@ -102,7 +102,7 @@ Future<int> _handleToolError(
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null) {
-      globals.printError(error.message);
+      globals.printError(error.message!);
     }
     if (verbose) {
       globals.printError('\n$stackTrace\n');
@@ -138,7 +138,7 @@ Future<int> _handleToolError(
       );
       await crashReportSender.sendReport(
         error: error,
-        stackTrace: stackTrace,
+        stackTrace: stackTrace!,
         getFlutterVersion: getFlutterVersion,
         command: args.join(' '),
       );
@@ -159,17 +159,17 @@ Future<int> _handleToolError(
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
-        stackTrace: stackTrace,
+        stackTrace: stackTrace!,
         doctorText: doctorText,
       );
       final File file = await _createLocalCrashReport(details);
-      await globals.crashReporter.informUser(details, file);
+      await globals.crashReporter!.informUser(details, file);
 
       return _exit(1);
     // This catch catches all exceptions to ensure the message below is printed.
-    } catch (error) { // ignore: avoid_catches_without_on_clauses
+    } catch (error, st) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
-        'Unable to generate crash report due to secondary error: $error\n'
+        'Unable to generate crash report due to secondary error: $error\n$st\n'
         '${globals.userMessages.flutterToolBugInstructions}\n',
       );
       // Any exception thrown here (including one thrown by `_exit()`) will
@@ -241,7 +241,7 @@ Future<int> _exit(int code) async {
   }
 
   // Run shutdown hooks before flushing logs
-  await globals.shutdownHooks.runShutdownHooks();
+  await globals.shutdownHooks!.runShutdownHooks();
 
   final Completer<void> completer = Completer<void>();
 

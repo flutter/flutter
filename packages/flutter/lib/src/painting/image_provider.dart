@@ -4,9 +4,8 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui show Codec, ImmutableBuffer;
-import 'dart:ui' show Size, Locale, TextDirection;
+import 'dart:ui' show Locale, Size, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';

@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, FontVariation, TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' as ui show
+  FontFeature,
+  FontVariation,
+  ParagraphStyle,
+  Shadow,
+  StrutStyle,
+  TextHeightBehavior,
+  TextLeadingDistribution,
+  TextStyle,
+  lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -14,10 +23,10 @@ import 'text_painter.dart';
 const String _kDefaultDebugLabel = 'unknown';
 
 const String _kColorForegroundWarning = 'Cannot provide both a color and a foreground\n'
-    'The color argument is just a shorthand for "foreground: new Paint()..color = color".';
+    'The color argument is just a shorthand for "foreground: Paint()..color = color".';
 
 const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor and a background\n'
-    'The backgroundColor argument is just a shorthand for "background: new Paint()..color = color".';
+    'The backgroundColor argument is just a shorthand for "background: Paint()..color = color".';
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_painter.dart, as well as the
@@ -504,7 +513,7 @@ class TextStyle with Diagnosticable {
   /// style (e.g., in a [TextSpan] tree).
   ///
   /// If this is false, properties that don't have explicit values will revert
-  /// to the defaults: white in color, a font size of 10 pixels, in a sans-serif
+  /// to the defaults: white in color, a font size of 14 pixels, in a sans-serif
   /// font face.
   final bool inherit;
 
@@ -1010,7 +1019,7 @@ class TextStyle with Diagnosticable {
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
   ///
-  /// Similarly, One of [backgroundColor] or [background] must be null, and if
+  /// Similarly, one of [backgroundColor] or [background] must be null, and if
   /// this or `other` has [background] specified it will be given preference
   /// over any backgroundColor parameter.
   TextStyle merge(TextStyle? other) {

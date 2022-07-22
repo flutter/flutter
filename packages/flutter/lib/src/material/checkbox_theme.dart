@@ -129,9 +129,9 @@ class CheckboxThemeData with Diagnosticable {
   static CheckboxThemeData lerp(CheckboxThemeData? a, CheckboxThemeData? b, double t) {
     return CheckboxThemeData(
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
-      fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
-      checkColor: _lerpProperties<Color?>(a?.checkColor, b?.checkColor, t, Color.lerp),
-      overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      fillColor: MaterialStateProperty.lerp<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
+      checkColor: MaterialStateProperty.lerp<Color?>(a?.checkColor, b?.checkColor, t, Color.lerp),
+      overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
@@ -187,41 +187,12 @@ class CheckboxThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
   }
 
-  static MaterialStateProperty<T>? _lerpProperties<T>(
-    MaterialStateProperty<T>? a,
-    MaterialStateProperty<T>? b,
-    double t,
-    T Function(T?, T?, double) lerpFunction,
-  ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null) {
-      return null;
-    }
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-
   // Special case because BorderSide.lerp() doesn't support null arguments
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
     if (a == null && b == null) {
       return null;
     }
     return BorderSide.lerp(a!, b!, t);
-  }
-}
-
-class _LerpProperties<T> implements MaterialStateProperty<T> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T Function(T?, T?, double) lerpFunction;
-
-  @override
-  T resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
   }
 }
 

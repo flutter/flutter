@@ -291,12 +291,6 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
-  /// A constructor to be used only when the extending class also has a mixin.
-  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/31543 is fixed.
-  @protected
-  RenderAligningShiftedBox.mixin(AlignmentGeometry alignment, TextDirection? textDirection, RenderBox? child)
-    : this(alignment: alignment, textDirection: textDirection, child: child);
-
   Alignment? _resolvedAlignment;
 
   void _resolve() {
@@ -707,17 +701,16 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   ///
   /// The [alignment] and [clipBehavior] must not be null.
   RenderConstraintsTransformBox({
-    required AlignmentGeometry alignment,
-    required TextDirection? textDirection,
+    required super.alignment,
+    required super.textDirection,
     required BoxConstraintsTransform constraintsTransform,
-    RenderBox? child,
+    super.child,
     Clip clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
        assert(constraintsTransform != null),
        _constraintsTransform = constraintsTransform,
-       _clipBehavior = clipBehavior,
-       super.mixin(alignment, textDirection, child);
+       _clipBehavior = clipBehavior;
 
   /// {@macro flutter.widgets.constraintsTransform}
   BoxConstraintsTransform get constraintsTransform => _constraintsTransform;

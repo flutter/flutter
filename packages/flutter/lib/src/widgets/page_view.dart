@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show precisionErrorTolerance, clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
@@ -460,6 +460,20 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return false;
     }
     return result;
+  }
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_cachedPage == null);
+
+    if (other is! _PagePosition) {
+      return;
+    }
+
+    if (other._cachedPage != null) {
+      _cachedPage = other._cachedPage;
+    }
   }
 
   @override

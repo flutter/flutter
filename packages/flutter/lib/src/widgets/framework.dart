@@ -24,11 +24,11 @@ export 'package:flutter/foundation.dart' show
   protected,
   required,
   visibleForTesting;
-export 'package:flutter/foundation.dart' show FlutterError, ErrorSummary, ErrorDescription, ErrorHint, debugPrint, debugPrintStack;
-export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
-export 'package:flutter/foundation.dart' show DiagnosticsNode, DiagnosticLevel;
+export 'package:flutter/foundation.dart' show ErrorDescription, ErrorHint, ErrorSummary, FlutterError, debugPrint, debugPrintStack;
+export 'package:flutter/foundation.dart' show ValueChanged, ValueGetter, ValueSetter, VoidCallback;
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsNode;
 export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
-export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
+export 'package:flutter/rendering.dart' show RenderBox, RenderObject, debugDumpLayerTree, debugDumpRenderTree;
 
 // Examples can assume:
 // late BuildContext context;
@@ -3264,6 +3264,19 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return isDefunct;
   }
 
+  /// Returns true if the Element is active.
+  ///
+  /// This getter always returns false in profile and release builds.
+  /// See the lifecycle documentation for [Element] for additional information.
+  bool get debugIsActive {
+    bool isActive = false;
+    assert(() {
+      isActive = _lifecycleState == _ElementLifecycle.active;
+      return true;
+    }());
+    return isActive;
+  }
+
   /// The object that manages the lifecycle of this element.
   @override
   BuildOwner? get owner => _owner;
@@ -4218,7 +4231,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  Map<Type, InheritedElement>? _inheritedWidgets;
+  PersistentHashMap<Type, InheritedElement>? _inheritedWidgets;
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4452,8 +4465,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     properties.add(DiagnosticsProperty<Key>('key', _widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
     _widget?.debugFillProperties(properties);
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
-    if (_dependencies != null && _dependencies!.isNotEmpty) {
-      final List<DiagnosticsNode> diagnosticsDependencies = _dependencies!
+    final Set<InheritedElement>? deps = _dependencies;
+    if (deps != null && deps.isNotEmpty) {
+      final List<InheritedElement> sortedDependencies = deps.toList()
+        ..sort((InheritedElement a, InheritedElement b) =>
+            a.toStringShort().compareTo(b.toStringShort()));
+      final List<DiagnosticsNode> diagnosticsDependencies = sortedDependencies
         .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
         .toList();
       properties.add(DiagnosticsProperty<List<DiagnosticsNode>>('dependencies', diagnosticsDependencies));
@@ -5302,13 +5319,9 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
-    if (incomingWidgets != null) {
-      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
-    } else {
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
-    }
-    _inheritedWidgets![widget.runtimeType] = this;
+    final PersistentHashMap<Type, InheritedElement> incomingWidgets =
+        _parent?._inheritedWidgets ?? const PersistentHashMap<Type, InheritedElement>.empty();
+    _inheritedWidgets = incomingWidgets.put(widget.runtimeType, this);
   }
 
   @override

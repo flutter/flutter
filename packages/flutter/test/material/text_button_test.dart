@@ -1525,6 +1525,30 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
+  testWidgets('TextButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.purple,
+            ),
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    ));
+    expect(material.color, Colors.purple);
+    expect(material.textStyle!.color, Colors.white);
+  });
+
   testWidgets('TextButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {

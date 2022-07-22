@@ -125,6 +125,20 @@ void main() {
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
+  test('light, dark and fallback constructors support useMaterial3', () {
+    final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
+    expect(lightTheme.useMaterial3, true);
+    expect(lightTheme.typography, Typography.material2021());
+
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+    expect(darkTheme.useMaterial3, true);
+    expect(darkTheme.typography, Typography.material2021());
+
+    final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
+    expect(fallbackTheme.useMaterial3, true);
+    expect(fallbackTheme.typography, Typography.material2021());
+  });
+
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(platform: defaultTargetPlatform);
     switch (defaultTargetPlatform) {

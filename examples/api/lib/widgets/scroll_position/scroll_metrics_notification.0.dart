@@ -46,6 +46,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
               height: windowSize,
               width: double.infinity,
               child: const SingleChildScrollView(
+                primary: true,
                 child: FlutterLogo(
                   size: 300.0,
                 ),

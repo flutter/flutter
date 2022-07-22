@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:io' hide Directory, File;
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -1118,6 +1120,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     FileSystem fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File dartPluginRegistrant,
   }) async {
     return output;
   }

@@ -312,7 +312,19 @@ class NestedScrollView extends StatefulWidget {
     return <Widget>[
       ...headerSliverBuilder(context, bodyIsScrolled),
       SliverFillRemaining(
+        // The inner (body) scroll view must use this scroll controller so that
+        // the independent scroll positions can be kept in sync.
         child: PrimaryScrollController(
+          // The inner scroll view should always inherit this
+          // PrimaryScrollController, on every platform.
+          automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
+          // `PrimaryScrollController.scrollDirection` is not set, and so it is
+          // restricted to the default Axis.vertical.
+          // Ideally the inner and outer views would have the same
+          // scroll direction, and so we could assume
+          // `NestedScrollView.scrollDirection` for the PrimaryScrollController,
+          // but use cases already exist where the axes are mismatched.
+          // https://github.com/flutter/flutter/issues/102001
           controller: innerController,
           child: body,
         ),

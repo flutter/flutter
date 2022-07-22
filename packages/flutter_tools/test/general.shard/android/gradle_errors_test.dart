@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('gradleErrors', () {
@@ -38,53 +40,13 @@ void main() {
           jvm11RequiredHandler,
           outdatedGradleHandler,
           sslExceptionHandler,
+          zipExceptionHandler,
         ])
       );
     });
   });
 
   group('network errors', () {
-    testUsingContext('retries and deletes zip if gradle fails to unzip', () async {
-      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
-      const String errorMessage = r'''
-Exception in thread "main" java.util.zip.ZipException: error in opening zip file
-at java.util.zip.ZipFile.open(Native Method)
-at java.util.zip.ZipFile.(ZipFile.java:225)
-at java.util.zip.ZipFile.(ZipFile.java:155)
-at java.util.zip.ZipFile.(ZipFile.java:169)
-at org.gradle.wrapper.Install.unzip(Install.java:214)
-at org.gradle.wrapper.Install.access$600(Install.java:27)
-at org.gradle.wrapper.Install$1.call(Install.java:74)
-at org.gradle.wrapper.Install$1.call(Install.java:48)
-at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
-at org.gradle.wrapper.Install.createDist(Install.java:48)
-at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
-at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-[!] Gradle threw an error while trying to update itself. Retrying the update...
-Exception in thread "main" java.util.zip.ZipException: error in opening zip file
-at java.util.zip.ZipFile.open(Native Method)
-at java.util.zip.ZipFile.(ZipFile.java:225)
-at java.util.zip.ZipFile.(ZipFile.java:155)
-at java.util.zip.ZipFile.(ZipFile.java:169)
-at org.gradle.wrapper.Install.unzip(Install.java:214)
-at org.gradle.wrapper.Install.access$600(Install.java:27)
-at org.gradle.wrapper.Install$1.call(Install.java:74)
-at org.gradle.wrapper.Install$1.call(Install.java:48)
-at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
-at org.gradle.wrapper.Install.createDist(Install.java:48)
-at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
-at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-''';
-
-      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
-      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
-    });
-
     testUsingContext('retries if gradle fails while downloading', () async {
       const String errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
@@ -1122,6 +1084,121 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''
     });
   });
 
+  group('Zip exception', () {
+    testWithoutContext('pattern', () {
+      expect(
+        zipExceptionHandler.test(r'''
+Exception in thread "main" java.util.zip.ZipException: error in opening zip file
+at java.util.zip.ZipFile.open(Native Method)
+at java.util.zip.ZipFile.(ZipFile.java:225)
+at java.util.zip.ZipFile.(ZipFile.java:155)
+at java.util.zip.ZipFile.(ZipFile.java:169)
+at org.gradle.wrapper.Install.unzip(Install.java:214)
+at org.gradle.wrapper.Install.access$600(Install.java:27)
+at org.gradle.wrapper.Install$1.call(Install.java:74)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+       expect(testLogger.statusText, '');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      BotDetector: () => const FakeBotDetector(false),
+    });
+
+    testUsingContext('suggestion if running as bot', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
+
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(
+        testLogger.statusText,
+        contains('Deleting foo/.gradle\n'),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      BotDetector: () => const FakeBotDetector(true),
+    });
+
+    testUsingContext('suggestion if stdin has terminal and user entered y', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(
+        testLogger.statusText,
+        contains('Deleting foo/.gradle\n'),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      AnsiTerminal: () => _TestPromptTerminal('y'),
+      BotDetector: () => const FakeBotDetector(false),
+    });
+
+    testUsingContext('suggestion if stdin has terminal and user entered n', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(testLogger.statusText, '');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      AnsiTerminal: () => _TestPromptTerminal('n'),
+      BotDetector: () => const FakeBotDetector(false),
+    });
+  });
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
@@ -1162,4 +1239,7 @@ class _TestPromptTerminal extends AnsiTerminal {
   }) {
     return Future<String>.value(promptResult);
   }
+
+  @override
+  bool get stdinHasTerminal => true;
 }

@@ -5,7 +5,6 @@
 @TestOn('!chrome')
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -2063,6 +2062,45 @@ void main() {
 
       expect(containerFocusNode.hasFocus, isFalse);
       expect(uiKitViewFocusNode.hasFocus, isTrue);
+    });
+
+    testWidgets('UiKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
+
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final Focus uiKitViewFocusWidget = tester.widget(
+        find.descendant(
+          of: find.byType(UiKitView),
+          matching: find.byType(Focus),
+        ),
+      );
+      final FocusNode uiKitViewFocusNode = uiKitViewFocusWidget.focusNode!;
+
+      late Map<String, dynamic> channelArguments;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
+        if (call.method == 'TextInput.setPlatformViewClient') {
+          channelArguments = call.arguments as Map<String, dynamic>;
+        }
+        return null;
+      });
+
+      expect(uiKitViewFocusNode.hasFocus, false);
+
+      uiKitViewFocusNode.requestFocus();
+      await tester.pump();
+
+      expect(uiKitViewFocusNode.hasFocus, true);
+      expect(channelArguments['platformViewId'], currentViewId + 1);
     });
 
     testWidgets('UiKitView has correct semantics', (WidgetTester tester) async {

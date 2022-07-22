@@ -658,6 +658,36 @@ abstract class MaterialStateProperty<T> {
   // a dart fix that will replace this with MaterialStatePropertyAll:
   // https://github.com/dart-lang/sdk/issues/49056.
   static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
+
+  /// Linearly interpolate between two [MaterialStateProperty]s.
+  static MaterialStateProperty<T?>? lerp<T>(
+    MaterialStateProperty<T>? a,
+    MaterialStateProperty<T>? b,
+    double t,
+    T? Function(T?, T?, double) lerpFunction,
+  ) {
+    // Avoid creating a _LerpProperties object for a common case.
+    if (a == null && b == null) {
+      return null;
+    }
+    return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+}
+
+class _LerpProperties<T> implements MaterialStateProperty<T?> {
+  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
+
+  final MaterialStateProperty<T>? a;
+  final MaterialStateProperty<T>? b;
+  final double t;
+  final T? Function(T?, T?, double) lerpFunction;
+
+  @override
+  T? resolve(Set<MaterialState> states) {
+    final T? resolvedA = a?.resolve(states);
+    final T? resolvedB = b?.resolve(states);
+    return lerpFunction(resolvedA, resolvedB, t);
+  }
 }
 
 class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {

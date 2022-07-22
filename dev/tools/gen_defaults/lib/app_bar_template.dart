@@ -5,7 +5,7 @@
 import 'template.dart';
 
 class AppBarTemplate extends TokenTemplate {
-  const AppBarTemplate(super.fileName, super.tokens)
+  const AppBarTemplate(super.blockName, super.fileName, super.tokens)
     : super(
       colorSchemePrefix: '_colors.',
       textThemePrefix: '_textTheme.',
@@ -13,9 +13,8 @@ class AppBarTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends AppBarTheme {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends AppBarTheme {
+  _${blockName}DefaultsM3(this.context)
     : super(
       elevation: ${elevation('md.comp.top-app-bar.small.container')},
       scrolledUnderElevation: ${elevation('md.comp.top-app-bar.small.on-scroll.container')},

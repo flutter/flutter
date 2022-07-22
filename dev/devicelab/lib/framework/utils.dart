@@ -585,6 +585,8 @@ void cd(dynamic directory) {
 
 Directory get flutterDirectory => Directory.current.parent.parent;
 
+Directory get openpayDirectory => Directory(requireEnvVar('OPENPAY_CHECKOUT_PATH'));
+
 String requireEnvVar(String name) {
   final String? value = Platform.environment[name];
 
@@ -750,6 +752,13 @@ void checkDirectoryExists(String directory) {
 void checkDirectoryNotExists(String directory) {
   if (exists(Directory(directory))) {
     throw FileSystemException('Expected directory to not exist.', directory);
+  }
+}
+
+/// Checks that the symlink exists, otherwise throws a [FileSystemException].
+void checkSymlinkExists(String file) {
+  if (!exists(Link(file))) {
+    throw FileSystemException('Expected symlink to exist.', file);
   }
 }
 

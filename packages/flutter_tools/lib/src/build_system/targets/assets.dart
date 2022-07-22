@@ -88,6 +88,9 @@ Future<Depfile> copyAssets(
     if (skslBundle != null)
       kSkSLShaderBundlePath: skslBundle,
   };
+  final Map<String, AssetKind> entryKinds = <String, AssetKind>{
+    ...assetBundle.entryKinds,
+  };
 
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
@@ -100,19 +103,31 @@ Future<Depfile> copyAssets(
         // and the native APIs will look for files this way.
         final File file = environment.fileSystem.file(
           environment.fileSystem.path.join(outputDirectory.path, entry.key));
+        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(content.file as File);
-          if (!await iconTreeShaker.subsetFont(
-            input: content.file as File,
-            outputPath: file.path,
-            relativePath: entry.key,
-          ) && !await shaderCompiler.compileShader(
-            input: content.file as File,
-            outputPath: file.path,
-          )) {
+          bool doCopy = true;
+          switch (assetKind) {
+            case AssetKind.regular:
+              break;
+            case AssetKind.font:
+              doCopy = !await iconTreeShaker.subsetFont(
+                input: content.file as File,
+                outputPath: file.path,
+                relativePath: entry.key,
+              );
+              break;
+            case AssetKind.shader:
+              doCopy = !await shaderCompiler.compileShader(
+                input: content.file as File,
+                outputPath: file.path,
+              );
+              break;
+          }
+          if (doCopy) {
             await (content.file as File).copy(file.path);
           }
         } else {
@@ -127,8 +142,8 @@ Future<Depfile> copyAssets(
   // The assets are included in assetBundle.entries as a normal asset when
   // building as debug.
   if (environment.defines[kDeferredComponents] == 'true' && buildMode != null) {
-    await Future.wait<void>(
-      assetBundle.deferredComponentsEntries.entries.map<Future<void>>((MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
+    await Future.wait<void>(assetBundle.deferredComponentsEntries.entries.map<Future<void>>(
+      (MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
         final Directory componentOutputDir =
             environment.projectDir
                 .childDirectory('build')
@@ -210,10 +225,10 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
   }
 
   // Step 2: validate top level bundle structure.
-  Map<String, Object>? bundle;
+  Map<String, Object?>? bundle;
   try {
     final Object? rawBundle = json.decode(skSLBundleFile.readAsStringSync());
-    if (rawBundle is Map<String, Object>) {
+    if (rawBundle is Map<String, Object?>) {
       bundle = rawBundle;
     } else {
       logger.printError('"$bundle" was not a JSON object: $rawBundle');

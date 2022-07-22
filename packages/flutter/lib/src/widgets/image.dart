@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io' show File;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -28,8 +27,8 @@ export 'package:flutter/painting.dart' show
   FilterQuality,
   ImageConfiguration,
   ImageInfo,
-  ImageStream,
   ImageProvider,
+  ImageStream,
   MemoryImage,
   NetworkImage;
 
