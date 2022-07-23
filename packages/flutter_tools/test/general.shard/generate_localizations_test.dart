@@ -2822,7 +2822,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles(BufferLogger.test());
           },
           throwsA(isA<L10nException>().having(
-                (L10nException e) => e.message,
+            (L10nException e) => e.message,
             'message',
             contains('Invalid ARB resource name'),
           )),
