@@ -348,9 +348,10 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   KeepAliveNotification? _keepAliveNotification;
 
   void _ensureKeepAlive() {
-    assert(_keepAliveHandle == null);
+    assert(_keepAliveHandle == null && _keepAliveNotification == null);
     _keepAliveHandle = KeepAliveHandle();
-    _keepAliveNotification = KeepAliveNotification(_keepAliveHandle!).dispatch(context);
+    _keepAliveNotification = KeepAliveNotification(_keepAliveHandle!);
+    _keepAliveNotification!.dispatch(context);
   }
 
   void _releaseKeepAlive() {
