@@ -922,6 +922,54 @@ void main() {
     expect(panDelta, isNull);
     expect(didEndPan, isFalse);
   });
+
+  group('DoubleTap', () {
+    testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onDoubleTap: () => log.add('double-tap'),
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: const Color(0xFF00FF00),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Container));
+      await tester.pump(kDoubleTapMinTime);
+      await tester.tap(find.byType(Container));
+      await tester.pumpAndSettle();
+      expect(log, <String>['double-tap']);
+    });
+
+    testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onDoubleTapDown: (_) => log.add('double-tap-down'),
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: const Color(0xFF00FF00),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Container));
+      await tester.pump(kDoubleTapMinTime);
+      await tester.tap(find.byType(Container));
+      await tester.pumpAndSettle();
+      expect(log, <String>['double-tap-down']);
+    });
+  });
 }
 
 class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
