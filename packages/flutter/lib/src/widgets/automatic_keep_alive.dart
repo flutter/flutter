@@ -354,7 +354,7 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
 
   void _releaseKeepAlive() {
     _keepAliveHandle!.release();
-    _keepAliveHandle.dispose();
+    _keepAliveHandle!.dispose();
     _keepAliveHandle = null;
   }
 
