@@ -1474,7 +1474,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
   @override
   void adoptChild(RenderObject child) {
-    assert(_debugCanPerformMutations);
     assert(child != null);
     setupParentData(child);
     markNeedsLayout();
@@ -1489,7 +1488,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
   @override
   void dropChild(RenderObject child) {
-    assert(_debugCanPerformMutations);
     assert(child != null);
     assert(child.parentData != null);
     child._cleanRelayoutBoundary();

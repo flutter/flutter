@@ -39,21 +39,21 @@ class ClickableTooltipWidgetState extends State<ClickableTooltipWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle(
-      style: DefaultTextStyle.of(context).style.copyWith(fontSize: 50),
-      child: TextButton(
-        onPressed: _onPressed,
+    return TextButton(
+      onPressed: _onPressed,
+      child: DefaultTextStyle(
+        style: DefaultTextStyle.of(context).style.copyWith(fontSize: 50),
         child: OverlayPortal(
           overlayChild: !shouldShowTooltip
             ? null
             : const Positioned(
-              right: 50,
-              bottom: 50,
-              child: ColoredBox(
-                color: Colors.amberAccent,
-                child: Text('tooltip'),
-              )
-            ),
+                right: 50,
+                bottom: 50,
+                child: ColoredBox(
+                  color: Colors.amberAccent,
+                  child: Text('tooltip'),
+                ),
+              ),
           child: const Text('Press to show/hide tooltip'),
         ),
       ),

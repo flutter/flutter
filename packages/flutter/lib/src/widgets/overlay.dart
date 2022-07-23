@@ -779,12 +779,35 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
   }
 
+  // Adding/removing deferred child does not affect the layout of other children,
+  // or that of the Overlay, so there's no need to invalidate the layout of the
+  // Overlay.
+  //
+  // When _skipMarkNeedsLayout is true, markNeedsLayout does not do anything.
+  bool _skipMarkNeedsLayout = false;
   void addDeferredChild(_RenderDeferredLayoutBox child) {
+    assert(!_skipMarkNeedsLayout);
+    _skipMarkNeedsLayout = true;
     add(child);
+    // When child has never been laid out before, mark its layout surrogate as
+    // needing layout so it's reachable via tree walk.
+    child._layoutSurrogate.markNeedsLayout();
+    _skipMarkNeedsLayout = false;
   }
 
   void removeDeferredChild(_RenderDeferredLayoutBox child) {
+    assert(!_skipMarkNeedsLayout);
+    _skipMarkNeedsLayout = true;
     remove(child);
+    _skipMarkNeedsLayout = false;
+  }
+
+  @override
+  void markNeedsLayout() {
+    if (_skipMarkNeedsLayout) {
+      return;
+    }
+    super.markNeedsLayout();
   }
 
   RenderBox? get _firstOnstageChild {
@@ -1086,7 +1109,7 @@ class OverlayPortal extends RenderObjectWidget {
   final OverlayInfo? _overlayInfo;
   OverlayInfo? _overlayInfoFrom(BuildContext context) {
     final OverlayInfo? overlayInfo = _overlayInfo ?? _overlayInfoGetter(context);
-    assert(overlayInfo != null || overlayChild != null);
+    assert(overlayInfo != null || overlayChild == null);
     return overlayInfo;
   }
 
@@ -1099,10 +1122,11 @@ class OverlayPortal extends RenderObjectWidget {
 
 @immutable
 class _OverlayChild {
-  const _OverlayChild(this.element, this.slot);
+  const _OverlayChild(this.element, this.slot, this.widget);
 
   final Element element;
   final OverlayInfo slot;
+  final _DeferredLayout widget;
 }
 
 class _OverlayPortalElement extends RenderObjectElement {
@@ -1117,14 +1141,13 @@ class _OverlayPortalElement extends RenderObjectElement {
   _OverlayChild? _overlayChild;
   Element? _child;
 
-  _DeferredLayout? _deferredLayoutWidget;
 
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     final OverlayPortal widget = this.widget as OverlayPortal;
     _child = updateChild(_child, widget.child, null);
-    _overlayChild = updateOverlayChild(widget.overlayChild, widget._overlayInfoFrom(this));
+    _overlayChild = updateOverlayChild(_overlayChild, widget.overlayChild, widget._overlayInfoFrom(this));
   }
 
   @override
@@ -1132,25 +1155,24 @@ class _OverlayPortalElement extends RenderObjectElement {
     super.update(newWidget);
 
     _child = updateChild(_child, newWidget.child, null);
-    _overlayChild = updateOverlayChild(newWidget.overlayChild, newWidget._overlayInfoFrom(this));
+    _overlayChild = updateOverlayChild(_overlayChild, newWidget.overlayChild, newWidget._overlayInfoFrom(this));
   }
 
-  _OverlayChild? updateOverlayChild(Widget? newOverlayChild, OverlayInfo? newSlot) {
-    if (_deferredLayoutWidget?.child == newOverlayChild) {
-      final Element? overlayChild = _overlayChild?.element;
+  _OverlayChild? updateOverlayChild(_OverlayChild? overlayChild, Widget? newOverlayChild, OverlayInfo? newSlot) {
+    if (overlayChild?.widget.child == newOverlayChild) {
       if (overlayChild != null && newSlot != overlayChild.slot) {
-        assert(newOverlayChild != null || _deferredLayoutWidget?.child != null);
-        updateSlotForChild(overlayChild, newSlot);
+        assert(newSlot != null);
+        updateSlotForChild(overlayChild.element, newSlot);
       }
-      // Skip updating and returns the current _overlayChild Element.
+      // Skip updating and returns the current _overlayChild.
       return _overlayChild;
     }
 
-    _deferredLayoutWidget = newOverlayChild == null
+    final _DeferredLayout? wrappedWidget = newOverlayChild == null
       ? null
       : _DeferredLayout(layoutSurrogate: renderObject, child: newOverlayChild);
-    final Element? newElement = updateChild(_overlayChild?.element, _deferredLayoutWidget, newSlot);
-    return newElement == null || newSlot == null ? null : _OverlayChild(newElement, newSlot);
+    final Element? newElement = updateChild(overlayChild?.element, wrappedWidget, newSlot);
+    return newElement == null || newSlot == null || wrappedWidget == null ? null : _OverlayChild(newElement, newSlot, wrappedWidget);
   }
 
   @override
@@ -1456,9 +1478,6 @@ class _RenderDeferredLayoutBox extends RenderProxyBox {
 
 // A RenderProxyBox that makes sure its `deferredLayoutChild` has a greater
 // depth than itself.
-//
-// This render object guarantees that its `_deferredLayoutChild` will have a
-// greater depth than this RenderObject itself.
 class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   _RenderDeferredLayoutBox? _deferredLayoutChild;
 
@@ -1477,7 +1496,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   @override
   void performLayout() {
     super.performLayout();
-    // Attempt to layout `_deferredLayoutChild` here now that its configuration
+    // Try to layout `_deferredLayoutChild` here now that its configuration
     // and constraints are up-to-date. Additionally, during the very first
     // layout, this makes sure that _deferredLayoutChild is reachable via tree
     // walk.
