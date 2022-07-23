@@ -26,8 +26,6 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
 
   std::string initFromAsset(std::string asset_name);
 
-  void init(std::string sksl, bool debugPrintSksl);
-
   fml::RefPtr<FragmentShader> shader(Dart_Handle shader,
                                      Dart_Handle uniforms_handle,
                                      Dart_Handle samplers);

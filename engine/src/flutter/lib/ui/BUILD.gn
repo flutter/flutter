@@ -183,6 +183,7 @@ source_set("ui") {
 
 if (enable_unittests) {
   test_fixtures("ui_unittests_fixtures") {
+    deps = [ "fixtures/shaders" ]
     dart_main = "fixtures/ui_test.dart"
     fixtures = [
       "fixtures/DashInNooglerHat.jpg",

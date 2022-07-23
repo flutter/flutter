@@ -14,47 +14,7 @@ import 'package:path/path.dart' as path;
 import 'shader_test_file_utils.dart';
 
 void main() {
-  test('throws exception for invalid shader', () async {
-    final ByteBuffer invalidBytes = Uint8List.fromList(
-      <int>[1, 2, 3, 4, 5],
-    ).buffer;
-    try {
-      await FragmentProgram.compile(spirv: invalidBytes);
-      fail('expected compile to throw an exception');
-    } catch (_) {
-    }
-  });
-
   test('simple shader renders correctly', () async {
-    final Uint8List shaderBytes = await shaderFile(
-      path.join('general_shaders', 'spirv'),
-      'functions.frag.spirv',
-    ).readAsBytes();
-    final FragmentProgram program = await FragmentProgram.compile(
-      spirv: shaderBytes.buffer,
-    );
-    final Shader shader = program.shader(
-      floatUniforms: Float32List.fromList(<double>[1]),
-    );
-    _expectShaderRendersGreen(shader);
-  });
-
-  test('simple sksl shader renders correctly', () async {
-    final Uint8List shaderBytes = await shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'functions.frag.sksl',
-    ).readAsBytes();
-    final FragmentProgram program = await FragmentProgram.compile(
-      raw: shaderBytes.buffer,
-      uniformFloatCount: 1,
-    );
-    final Shader shader = program.shader(
-      floatUniforms: Float32List.fromList(<double>[1]),
-    );
-    _expectShaderRendersGreen(shader);
-  });
-
-  test('simple iplr shader renders correctly', () async {
     final FragmentProgram program = FragmentProgram.fromAsset(
       'functions.frag.iplr',
     );
@@ -65,46 +25,6 @@ void main() {
   });
 
   test('blue-green image renders green', () async {
-    final ByteBuffer spirv = shaderFile(
-      path.join('general_shaders', 'spirv'),
-      'blue_green_sampler.frag.spirv',
-    ).readAsBytesSync().buffer;
-    final FragmentProgram program = await FragmentProgram.compile(
-      debugPrint: true,
-      spirv: spirv,
-    );
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final ImageShader imageShader = ImageShader(
-        blueGreenImage, TileMode.clamp, TileMode.clamp, _identityMatrix);
-    final Shader shader = program.shader(
-      floatUniforms: Float32List.fromList(<double>[]),
-      samplerUniforms: <ImageShader>[imageShader],
-    );
-    await _expectShaderRendersGreen(shader);
-  });
-
-  test('sksl blue-green image renders green', () async {
-    final ByteBuffer sksl = shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'blue_green_sampler.frag.sksl',
-    ).readAsBytesSync().buffer;
-    final FragmentProgram program = await FragmentProgram.compile(
-      debugPrint: true,
-      raw: sksl,
-      uniformFloatCount: 0,
-      samplerCount: 1,
-    );
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final ImageShader imageShader = ImageShader(
-        blueGreenImage, TileMode.clamp, TileMode.clamp, _identityMatrix);
-    final Shader shader = program.shader(
-      floatUniforms: Float32List.fromList(<double>[]),
-      samplerUniforms: <ImageShader>[imageShader],
-    );
-    await _expectShaderRendersGreen(shader);
-  });
-
-  test('iplr blue-green image renders green', () async {
     final FragmentProgram program = FragmentProgram.fromAsset(
       'blue_green_sampler.frag.iplr',
     );
@@ -119,67 +39,6 @@ void main() {
   });
 
   test('shader with uniforms renders correctly', () async {
-    final Uint8List shaderBytes = await shaderFile(
-      path.join('general_shaders', 'spirv'),
-      'uniforms.frag.spirv',
-    ).readAsBytes();
-    final FragmentProgram program = await FragmentProgram.compile(
-      spirv: shaderBytes.buffer,
-    );
-
-    final Shader shader = program.shader(
-        floatUniforms: Float32List.fromList(<double>[
-      0.0, // iFloatUniform
-      0.25, // iVec2Uniform.x
-      0.75, // iVec2Uniform.y
-      0.0, // iMat2Uniform[0][0]
-      0.0, // iMat2Uniform[0][1]
-      0.0, // iMat2Uniform[1][0]
-      1.0, // iMat2Uniform[1][1]
-    ]));
-
-    final ByteData renderedBytes = (await _imageByteDataFromShader(
-      shader: shader,
-    ))!;
-
-    expect(toFloat(renderedBytes.getUint8(0)), closeTo(0.0, epsilon));
-    expect(toFloat(renderedBytes.getUint8(1)), closeTo(0.25, epsilon));
-    expect(toFloat(renderedBytes.getUint8(2)), closeTo(0.75, epsilon));
-    expect(toFloat(renderedBytes.getUint8(3)), closeTo(1.0, epsilon));
-  });
-
-  test('sksl shader with uniforms renders correctly', () async {
-    final Uint8List shaderBytes = await shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'uniforms.frag.sksl',
-    ).readAsBytes();
-    final FragmentProgram program = await FragmentProgram.compile(
-      raw: shaderBytes.buffer,
-      uniformFloatCount: 7,
-    );
-
-    final Shader shader = program.shader(
-      floatUniforms: Float32List.fromList(<double>[
-        0.0, // iFloatUniform
-        0.25, // iVec2Uniform.x
-        0.75, // iVec2Uniform.y
-        0.0, // iMat2Uniform[0][0]
-        0.0, // iMat2Uniform[0][1]
-        0.0, // iMat2Uniform[1][0]
-        1.0, // iMat2Uniform[1][1]
-    ]));
-
-    final ByteData renderedBytes = (await _imageByteDataFromShader(
-      shader: shader,
-    ))!;
-
-    expect(toFloat(renderedBytes.getUint8(0)), closeTo(0.0, epsilon));
-    expect(toFloat(renderedBytes.getUint8(1)), closeTo(0.25, epsilon));
-    expect(toFloat(renderedBytes.getUint8(2)), closeTo(0.75, epsilon));
-    expect(toFloat(renderedBytes.getUint8(3)), closeTo(1.0, epsilon));
-  });
-
-  test('iplr shader with uniforms renders correctly', () async {
     final FragmentProgram program = FragmentProgram.fromAsset(
       'uniforms.frag.iplr',
     );
@@ -205,67 +64,7 @@ void main() {
     expect(toFloat(renderedBytes.getUint8(3)), closeTo(1.0, epsilon));
   });
 
-  test('spirv for the ink_sparkle shader is accepted', () async {
-    final Uint8List spirv = await shaderFile(
-      path.join('spirv'),
-      'ink_sparkle.frag.spirv',
-    ).readAsBytes();
-    final FragmentProgram program = await FragmentProgram.compile(
-      spirv: spirv.buffer,
-    );
-
-    final Shader shader = program.shader(
-      floatUniforms: Float32List(32),
-    );
-
-    await _imageByteDataFromShader(shader: shader);
-
-    // Testing that no exceptions are thrown. Tests that the ink_sparkle shader
-    // produces the correct pixels are in the framework.
-  });
-
-  test('sksl for the ink_sparkle shader is accepted', () async {
-    final Uint8List sksl = await shaderFile(
-      path.join('sksl'),
-      'ink_sparkle.frag.sksl',
-    ).readAsBytes();
-    final FragmentProgram program = await FragmentProgram.compile(
-      raw: sksl.buffer,
-      uniformFloatCount: 32,
-    );
-
-    final Shader shader = program.shader(
-      floatUniforms: Float32List(32),
-    );
-
-    await _imageByteDataFromShader(shader: shader);
-
-    // Testing that no exceptions are thrown. Tests that the ink_sparkle shader
-    // produces the correct pixels are in the framework.
-  });
-
-  test('sksl uniforms are sorted correctly', () async {
-    final Uint8List sksl = await shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'uniforms_sorted.frag.sksl',
-    ).readAsBytes();
-    final FragmentProgram program = await FragmentProgram.compile(
-      raw: sksl.buffer,
-      uniformFloatCount: 32,
-    );
-
-    // The shader will not render green if the compiler doesn't keep the
-    // uniforms in the right order.
-    final Shader shader = program.shader(
-      floatUniforms: Float32List.fromList(
-        List<double>.generate(32, (int i) => i.toDouble()),
-      ),
-    );
-
-    await _expectShaderRendersGreen(shader);
-  });
-
-  test('iplr for the ink_sparkle shader is accepted', () async {
+  test('The ink_sparkle shader is accepted', () async {
     final FragmentProgram program = FragmentProgram.fromAsset(
       'ink_sparkle.frag.iplr',
     );
@@ -279,7 +78,7 @@ void main() {
     // produces the correct pixels are in the framework.
   });
 
-  test('iplr uniforms are sorted correctly', () async {
+  test('Uniforms are sorted correctly', () async {
     final FragmentProgram program = FragmentProgram.fromAsset(
       'uniforms_sorted.frag.iplr',
     );
@@ -295,7 +94,7 @@ void main() {
     await _expectShaderRendersGreen(shader);
   });
 
-  test('iplr throws an exception on invalid assetKey', () async {
+  test('fromAsset throws an exception on invalid assetKey', () async {
     bool throws = false;
     try {
       final FragmentProgram program = FragmentProgram.fromAsset(
@@ -307,7 +106,7 @@ void main() {
     expect(throws, equals(true));
   });
 
-  test('iplr throws an exception on invalid data', () async {
+  test('fromAsset throws an exception on invalid data', () async {
     bool throws = false;
     try {
       final FragmentProgram program = FragmentProgram.fromAsset(
@@ -319,7 +118,7 @@ void main() {
     expect(throws, equals(true));
   });
 
-  test('iplr accepts a shader with no uniforms', () async {
+  test('fromAsset accepts a shader with no uniforms', () async {
     final FragmentProgram program = FragmentProgram.fromAsset(
       'no_uniforms.frag.iplr',
     );
@@ -328,22 +127,6 @@ void main() {
   });
 
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
-  final Map<String, ByteBuffer> supportedGLSLOpShaders = _loadShaders(
-    path.join('supported_glsl_op_shaders', 'spirv'),
-    '.spirv',
-  );
-  expect(supportedGLSLOpShaders.isNotEmpty, true);
-  _expectShadersRenderGreen(supportedGLSLOpShaders);
-  _expectShadersHaveOp(supportedGLSLOpShaders, true /* glsl ops */);
-
-  final Map<String, ByteBuffer> skslSupportedGLSLOpShaders = _loadShaders(
-    path.join('supported_glsl_op_shaders', 'sksl'),
-    '.sksl',
-  );
-  expect(skslSupportedGLSLOpShaders.isNotEmpty, true);
-  _expectSkSLShadersRenderGreen(skslSupportedGLSLOpShaders);
-
-
   final Map<String, FragmentProgram> iplrSupportedGLSLOpShaders = _loadShaderAssets(
     path.join('supported_glsl_op_shaders', 'iplr'),
     '.iplr',
@@ -352,21 +135,6 @@ void main() {
   _expectIplrShadersRenderGreen(iplrSupportedGLSLOpShaders);
 
   // Test all supported instructions. See lib/spirv/lib/src/constants.dart
-  final Map<String, ByteBuffer> supportedOpShaders = _loadShaders(
-    path.join('supported_op_shaders', 'spirv'),
-    '.spirv',
-  );
-  expect(supportedOpShaders.isNotEmpty, true);
-  _expectShadersRenderGreen(supportedOpShaders);
-  _expectShadersHaveOp(supportedOpShaders, false /* glsl ops */);
-
-  final Map<String, ByteBuffer> skslSupportedOpShaders = _loadShaders(
-    path.join('supported_op_shaders', 'sksl'),
-    '.sksl',
-  );
-  expect(skslSupportedOpShaders.isNotEmpty, true);
-  _expectSkSLShadersRenderGreen(skslSupportedOpShaders);
-
   final Map<String, FragmentProgram> iplrSupportedOpShaders = _loadShaderAssets(
     path.join('supported_op_shaders', 'iplr'),
     '.iplr',
@@ -374,58 +142,7 @@ void main() {
   expect(iplrSupportedOpShaders.isNotEmpty, true);
   _expectIplrShadersRenderGreen(iplrSupportedOpShaders);
 
-  test('equality depends on floatUniforms', () async {
-    final ByteBuffer spirv = shaderFile(
-      path.join('general_shaders', 'spirv'),
-      'simple.frag.spirv',
-    ).readAsBytesSync().buffer;
-    final FragmentProgram program = await FragmentProgram.compile(spirv: spirv);
-    final Float32List ones = Float32List.fromList(<double>[1]);
-    final Float32List zeroes = Float32List.fromList(<double>[0]);
-
-    {
-      final Shader a = program.shader(floatUniforms: ones);
-      final Shader b = program.shader(floatUniforms: ones);
-      expect(a, b);
-      expect(a.hashCode, b.hashCode);
-    }
-
-    {
-      final Shader a = program.shader(floatUniforms: ones);
-      final Shader b = program.shader(floatUniforms: zeroes);
-      expect(a, notEquals(b));
-      expect(a.hashCode, notEquals(b.hashCode));
-    }
-  });
-
-  test('sksl equality depends on floatUniforms', () async {
-    final ByteBuffer sksl = shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'simple.frag.sksl',
-    ).readAsBytesSync().buffer;
-    final FragmentProgram program = await FragmentProgram.compile(
-      raw: sksl,
-      uniformFloatCount: 1,
-    );
-    final Float32List ones = Float32List.fromList(<double>[1]);
-    final Float32List zeroes = Float32List.fromList(<double>[0]);
-
-    {
-      final Shader a = program.shader(floatUniforms: ones);
-      final Shader b = program.shader(floatUniforms: ones);
-      expect(a, b);
-      expect(a.hashCode, b.hashCode);
-    }
-
-    {
-      final Shader a = program.shader(floatUniforms: ones);
-      final Shader b = program.shader(floatUniforms: zeroes);
-      expect(a, notEquals(b));
-      expect(a.hashCode, notEquals(b.hashCode));
-    }
-  });
-
-  test('iplr equality depends on floatUniforms', () {
+  test('Equality depends on floatUniforms', () {
     final FragmentProgram program = FragmentProgram.fromAsset(
       'simple.frag.iplr',
     );
@@ -447,49 +164,7 @@ void main() {
     }
   });
 
-  test('equality depends on spirv', () async {
-    final ByteBuffer spirvA = shaderFile(
-      path.join('general_shaders', 'spirv'),
-      'simple.frag.spirv',
-    ).readAsBytesSync().buffer;
-    final ByteBuffer spirvB = shaderFile(
-      path.join('general_shaders', 'spirv'),
-      'uniforms.frag.spirv',
-    ).readAsBytesSync().buffer;
-    final FragmentProgram programA = await FragmentProgram.compile(spirv: spirvA);
-    final FragmentProgram programB = await FragmentProgram.compile(spirv: spirvB);
-    final Shader a = programA.shader();
-    final Shader b = programB.shader();
-
-    expect(a, notEquals(b));
-    expect(a.hashCode, notEquals(b.hashCode));
-  });
-
-  test('equality depends on data', () async {
-    final ByteBuffer skslA = shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'simple.frag.sksl',
-    ).readAsBytesSync().buffer;
-    final ByteBuffer skslB = shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'uniforms.frag.sksl',
-    ).readAsBytesSync().buffer;
-    final FragmentProgram programA = await FragmentProgram.compile(
-      raw: skslA,
-      uniformFloatCount: 1,
-    );
-    final FragmentProgram programB = await FragmentProgram.compile(
-      raw: skslB,
-      uniformFloatCount: 7,
-    );
-    final Shader a = programA.shader();
-    final Shader b = programB.shader();
-
-    expect(a, notEquals(b));
-    expect(a.hashCode, notEquals(b.hashCode));
-  });
-
-  test('iplr equality depends on data', () async {
+  test('Equality depends on data', () async {
     final FragmentProgram programA = FragmentProgram.fromAsset(
       'simple.frag.iplr',
     );
@@ -502,84 +177,11 @@ void main() {
     expect(a, notEquals(b));
     expect(a.hashCode, notEquals(b.hashCode));
   });
-
-  test('Compilation does not create a Timer object', () async {
-    final ByteBuffer spirvA = shaderFile(
-      path.join('general_shaders', 'spirv'),
-      'simple.frag.spirv',
-    ).readAsBytesSync().buffer;
-    bool createdTimer = false;
-    final ZoneSpecification specification = ZoneSpecification(
-      createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
-        createdTimer = true;
-        return parent.createTimer(zone, duration, f);
-      },
-    );
-    await runZoned(() async {
-       await FragmentProgram.compile(spirv: spirvA);
-    }, zoneSpecification: specification);
-
-    expect(createdTimer, false);
-  });
-
-  test('sksl "compile" does not create a Timer object', () async {
-    final ByteBuffer skslA = shaderFile(
-      path.join('general_shaders', 'sksl'),
-      'simple.frag.sksl',
-    ).readAsBytesSync().buffer;
-    bool createdTimer = false;
-    final ZoneSpecification specification = ZoneSpecification(
-      createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
-        createdTimer = true;
-        return parent.createTimer(zone, duration, f);
-      },
-    );
-    await runZoned(() async {
-      await FragmentProgram.compile(
-        raw: skslA,
-        uniformFloatCount: 1,
-      );
-    }, zoneSpecification: specification);
-
-    expect(createdTimer, false);
-  });
-}
-
-// Expect that all of the spirv shaders in this folder render green.
-// Keeping the outer loop of the test synchronous allows for easy printing
-// of the file name within the test case.
-void _expectShadersRenderGreen(Map<String, ByteBuffer> shaders) {
-  for (final String key in shaders.keys) {
-    test('$key renders green', () async {
-      final FragmentProgram program = await FragmentProgram.compile(
-        spirv: shaders[key]!,
-      );
-      final Shader shader = program.shader(
-        floatUniforms: Float32List.fromList(<double>[1]),
-      );
-      _expectShaderRendersGreen(shader);
-    });
-  }
 }
 
 // Expect that all of the shaders in this folder render green.
 // Keeping the outer loop of the test synchronous allows for easy printing
 // of the file name within the test case.
-void _expectSkSLShadersRenderGreen(Map<String, ByteBuffer> shaders) {
-  for (final String key in shaders.keys) {
-    test('SkSL $key renders green', () async {
-      final FragmentProgram program = await FragmentProgram.compile(
-        raw: shaders[key]!,
-        uniformFloatCount: 1,
-      );
-      final Shader shader = program.shader(
-        floatUniforms: Float32List.fromList(<double>[1]),
-      );
-      _expectShaderRendersGreen(shader);
-    });
-  }
-}
-
 void _expectIplrShadersRenderGreen(Map<String, FragmentProgram> shaders) {
   for (final String key in shaders.keys) {
     test('iplr $key renders green', () async {
@@ -590,51 +192,6 @@ void _expectIplrShadersRenderGreen(Map<String, FragmentProgram> shaders) {
       _expectShaderRendersGreen(shader);
     });
   }
-}
-
-void _expectShadersHaveOp(Map<String, ByteBuffer> shaders, bool glsl) {
-  for (final String key in shaders.keys) {
-    test('$key contains opcode', () {
-      _expectShaderHasOp(shaders[key]!, key, glsl);
-    });
-  }
-}
-
-const int _opExtInst = 12;
-
-// Expects that a spirv shader has the op code identified by its file name.
-void _expectShaderHasOp(ByteBuffer spirv, String filename, bool glsl) {
-  final Uint32List words = spirv.asUint32List();
-  final List<String> sections = filename.split('_');
-  expect(sections.length, greaterThan(1));
-  final int op = int.parse(sections.first);
-
-  // skip the header
-  int position = 5;
-
-  bool found = false;
-  while (position < words.length) {
-    final int word = words[position];
-    final int currentOpCode = word & 0xFFFF;
-    if (glsl) {
-      if (currentOpCode == _opExtInst && words[position + 4] == op) {
-        found = true;
-        break;
-      }
-    } else {
-      if (currentOpCode == op) {
-        found = true;
-        break;
-      }
-    }
-    final int advance = word >> 16;
-    if (advance <= 0) {
-      break;
-    }
-    position += advance;
-  }
-
-  expect(found, true);
 }
 
 // Expects that a spirv shader only outputs the color green.
@@ -668,24 +225,6 @@ Future<ByteData?> _imageByteDataFromShader({
 // $FLUTTER_BUILD_DIRECTORY/gen/flutter/lib/spirv/test/$leafFolderName
 // This is synchronous so that tests can be inside of a loop with
 // the proper test name.
-Map<String, ByteBuffer> _loadShaders(String leafFolderName, String ext) {
-  final Map<String, ByteBuffer> out = SplayTreeMap<String, ByteBuffer>();
-
-  final Directory directory = shaderDirectory(leafFolderName);
-  if (!directory.existsSync()) {
-    return out;
-  }
-
-  directory
-      .listSync()
-      .where((FileSystemEntity entry) => path.extension(entry.path) == ext)
-      .forEach((FileSystemEntity entry) {
-    final String key = path.basenameWithoutExtension(entry.path);
-    out[key] = (entry as File).readAsBytesSync().buffer;
-  });
-  return out;
-}
-
 Map<String, FragmentProgram> _loadShaderAssets(String leafFolderName, String ext) {
   final Map<String, FragmentProgram> out = SplayTreeMap<String, FragmentProgram>();
 
