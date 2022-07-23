@@ -240,14 +240,10 @@ template("impellerc") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.shader_target_flag),
          "The flag to impellerc for target selection must be specified.")
+  assert(defined(invoker.sl_file_extension),
+         "The extension of the SL file must be specified (metal, glsl, etc..).")
 
-  flutter_spirv = invoker.shader_target_flag == "--flutter-spirv"
   sksl = invoker.shader_target_flag == "--sksl"
-  if (!flutter_spirv) {
-    assert(
-        defined(invoker.sl_file_extension),
-        "The extension of the SL file must be specified (metal, glsl, etc..).")
-  }
   iplr = false
   if (defined(invoker.iplr) && invoker.iplr) {
     iplr = invoker.iplr
@@ -291,10 +287,7 @@ template("impellerc") {
       "$shader_target_flag",
     ]
 
-    if (flutter_spirv) {
-      args += [ "--spirv=$spirv_intermediate_path" ]
-      outputs = [ spirv_intermediate ]
-    } else if (sksl) {
+    if (sksl) {
       sl_intermediate =
           "$generated_dir/{{source_file_part}}.${invoker.sl_file_extension}"
       sl_intermediate_path = rebase_path(sl_intermediate, root_build_dir)

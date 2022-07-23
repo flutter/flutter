@@ -11,7 +11,6 @@
 /// text, layout, and rendering subsystems.
 library dart.ui;
 
-import 'dart:_spirv' as spv;
 import 'dart:async';
 import 'dart:collection' as collection;
 import 'dart:convert';

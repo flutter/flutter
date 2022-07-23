@@ -148,8 +148,6 @@ flutter_runner:
     typed_data:
       uri: "../../../../../../third_party/dart/sdk/lib/typed_data/typed_data.dart"
       patches: "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/typed_data_patch.dart"
-    _spirv:
-      uri: "../../../../../lib/spirv/lib/spirv.dart"
 
     fuchsia.builtin:
       uri: "../../dart_runner/embedder/builtin.dart"

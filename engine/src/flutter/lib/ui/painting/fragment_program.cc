@@ -7,6 +7,7 @@
 #include "flutter/lib/ui/painting/fragment_program.h"
 
 #include "flutter/assets/asset_manager.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -23,6 +24,8 @@ namespace flutter {
 IMPLEMENT_WRAPPERTYPEINFO(ui, FragmentProgram);
 
 std::string FragmentProgram::initFromAsset(std::string asset_name) {
+  FML_TRACE_EVENT("flutter", "FragmentProgram::initFromAsset", "asset",
+                  asset_name);
   std::shared_ptr<AssetManager> asset_manager = UIDartState::Current()
                                                     ->platform_configuration()
                                                     ->client()
@@ -87,22 +90,6 @@ std::string FragmentProgram::initFromAsset(std::string asset_name) {
   }
 
   return "";
-}
-
-void FragmentProgram::init(std::string sksl, bool debugPrintSksl) {
-  SkRuntimeEffect::Result result =
-      SkRuntimeEffect::MakeForShader(SkString(sksl));
-  runtime_effect_ = result.effect;
-
-  if (runtime_effect_ == nullptr) {
-    Dart_ThrowException(tonic::ToDart(
-        std::string("Invalid SkSL:\n") + sksl.c_str() +
-        std::string("\nSkSL Error:\n") + result.errorText.c_str()));
-    return;
-  }
-  if (debugPrintSksl) {
-    FML_DLOG(INFO) << std::string("debugPrintSksl:\n") + sksl.c_str();
-  }
 }
 
 fml::RefPtr<FragmentShader> FragmentProgram::shader(Dart_Handle shader,
