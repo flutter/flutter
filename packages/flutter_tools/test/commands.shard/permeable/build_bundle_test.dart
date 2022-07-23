@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
+import 'package:path/src/context.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -29,6 +30,8 @@ void main() {
   Cache.disableLocking();
   Directory tempDir;
   FakeBundleBuilder fakeBundleBuilder;
+  final FileSystemStyle fileSystemStyle = globals.fs.path.separator == '/' ?
+    FileSystemStyle.posix : FileSystemStyle.windows;
 
   setUp(() {
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -39,6 +42,10 @@ void main() {
   tearDown(() {
     tryToDelete(tempDir);
   });
+
+  MemoryFileSystem fsFactory() {
+    return MemoryFileSystem.test(style: fileSystemStyle);
+  }
 
   Future<BuildBundleCommand> runCommandIn(String projectPath, { List<String> arguments }) async {
     final BuildBundleCommand command = BuildBundleCommand(bundleBuilder: fakeBundleBuilder);
@@ -70,6 +77,13 @@ void main() {
     expect((await command.usageValues).commandBuildBundleIsModule, false);
   });
 
+  testUsingContext('foo test', () async {
+    final main = globals.fs.file('lib/main.dart')..createSync(recursive: true);
+    expect(main.existsSync(), isTrue);
+    globals.fs.file('pubspec.yaml').createSync(recursive: true);
+    globals.fs.file('.packages').createSync(recursive: true);
+  });
+
   testUsingContext('bundle getUsage indicate the target platform', () async {
     final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=app']);
@@ -91,7 +105,7 @@ void main() {
       '--target-platform=windows-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(),
   });
@@ -108,7 +122,7 @@ void main() {
       '--target-platform=linux-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(),
   });
@@ -125,7 +139,7 @@ void main() {
       '--target-platform=darwin',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(),
   });
@@ -143,7 +157,7 @@ void main() {
       '--tree-shake-icons',
     ]), throwsToolExit(message: 'tree-shake-icons'));
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -159,7 +173,7 @@ void main() {
       '--target-platform=windows-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -176,7 +190,7 @@ void main() {
       '--target-platform=linux-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -193,7 +207,7 @@ void main() {
       '--target-platform=darwin',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -224,7 +238,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -255,7 +269,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -285,7 +299,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -316,7 +330,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -347,7 +361,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
