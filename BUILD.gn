@@ -160,7 +160,6 @@ group("unittests") {
       "//flutter/display_list:display_list_unittests",
       "//flutter/flow:flow_unittests",
       "//flutter/fml:fml_unittests",
-      "//flutter/lib/spirv/test",
       "//flutter/lib/ui:ui_unittests",
       "//flutter/runtime:dart_plugin_registrant_unittests",
       "//flutter/runtime:no_dart_plugin_registrant_unittests",

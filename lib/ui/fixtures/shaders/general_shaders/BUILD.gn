@@ -19,27 +19,10 @@ if (enable_unittests) {
 
   group("general_shaders") {
     testonly = true
-    deps = [
-      ":fixtures",
-      ":sksl_compile_general_shaders",
-      ":spirv_compile_general_shaders",
-    ]
+    deps = [ ":fixtures" ]
   }
 
-  impellerc("spirv_compile_general_shaders") {
-    shaders = test_shaders
-    shader_target_flag = "--flutter-spirv"
-    intermediates_subdir = "spirv"
-  }
-
-  impellerc("sksl_compile_general_shaders") {
-    shaders = test_shaders
-    shader_target_flag = "--sksl"
-    intermediates_subdir = "sksl"
-    sl_file_extension = "sksl"
-  }
-
-  impellerc("sksl_compile_general_shaders_iplr") {
+  impellerc("compile_general_shaders") {
     shaders = test_shaders
     shader_target_flag = "--sksl"
     intermediates_subdir = "iplr"
@@ -48,8 +31,8 @@ if (enable_unittests) {
   }
 
   test_fixtures("fixtures") {
-    deps = [ ":sksl_compile_general_shaders_iplr" ]
-    fixtures = get_target_outputs(":sksl_compile_general_shaders_iplr")
+    deps = [ ":compile_general_shaders" ]
+    fixtures = get_target_outputs(":compile_general_shaders")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }

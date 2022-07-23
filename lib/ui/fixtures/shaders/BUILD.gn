@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/testing/testing.gni")
+
+if (enable_unittests) {
+  group("shaders") {
+    testonly = true
+    deps = [
+      ":fixtures",
+
+      # TODO(zra): Remove this when it is no longer referenced in the
+      # recipe.
+      "//flutter/lib/spirv/test/exception_shaders:spirv_compile_exception_shaders",
+      "//flutter/lib/ui/fixtures/shaders/general_shaders",
+      "//flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders",
+      "//flutter/lib/ui/fixtures/shaders/supported_op_shaders",
+    ]
+  }
+
+  impellerc("ink_sparkle") {
+    shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
+    shader_target_flag = "--sksl"
+    intermediates_subdir = "iplr"
+    sl_file_extension = "iplr"
+    iplr = true
+  }
+
+  test_fixtures("fixtures") {
+    deps = [ ":ink_sparkle" ]
+    fixtures = get_target_outputs(":ink_sparkle")
+    dest = "$root_gen_dir/flutter/lib/ui"
+  }
+}
