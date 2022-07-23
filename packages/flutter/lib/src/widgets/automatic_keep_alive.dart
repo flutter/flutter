@@ -345,20 +345,17 @@ class KeepAliveHandle extends ChangeNotifier {
 @optionalTypeArgs
 mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   KeepAliveHandle? _keepAliveHandle;
-  KeepAliveNotification? _keepAliveNotification;
 
   void _ensureKeepAlive() {
-    assert(_keepAliveHandle == null && _keepAliveNotification == null);
+    assert(_keepAliveHandle == null);
     _keepAliveHandle = KeepAliveHandle();
-    _keepAliveNotification = KeepAliveNotification(_keepAliveHandle!);
-    _keepAliveNotification!.dispatch(context);
+    KeepAliveNotification(_keepAliveHandle!).dispatch(context);
   }
 
   void _releaseKeepAlive() {
     _keepAliveHandle!.release();
+    _keepAliveHandle.dispose();
     _keepAliveHandle = null;
-    _keepAliveNotification!.dispose();
-    _keepAliveNotification = null;
   }
 
   /// Whether the current instance should be kept alive.
