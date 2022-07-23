@@ -139,7 +139,6 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 void main() {
   test('$ScrollPosition disposes isScrollingNotifier', () {
     final ScrollPosition scrollPosition = TestScrollPosition();
-    
     expect(scrollPosition.isScrollingNotifier.debugDisposed, false);
   
     scrollPosition.dispose();
