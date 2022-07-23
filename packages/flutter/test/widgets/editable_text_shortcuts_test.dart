@@ -1593,7 +1593,7 @@ void main() {
               affinity: TextAffinity.upstream,
             ));
 
-            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageDown, alt: isApple));
+            await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.pageDown, alt: isApple));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(offset: 81));
 
@@ -1601,7 +1601,7 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(offset: 77));
 
-            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageUp, alt: isApple));
+            await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.pageUp, alt: isApple));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 4,
