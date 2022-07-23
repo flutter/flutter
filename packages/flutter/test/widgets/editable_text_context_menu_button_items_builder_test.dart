@@ -120,5 +120,6 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
   );
 }
