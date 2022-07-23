@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// We disable these lints, because they relate to InkResponseState
+// that is actually private, but visible for testing.
+// ignore_for_file: public_member_api_docs, library_private_types_in_public_api
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -755,6 +759,7 @@ enum _HighlightType {
 }
 
 
+@visibleForTesting
 /// State of [_InkResponseStateWidget].
 class InkResponseState extends State<_InkResponseStateWidget>
   with AutomaticKeepAliveClientMixin<_InkResponseStateWidget>
