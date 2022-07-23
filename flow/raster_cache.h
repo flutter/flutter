@@ -78,20 +78,40 @@ struct RasterCacheMetrics {
   size_t in_use_bytes = 0;
 
   /**
-   * The total cache entries that had images during this frame whether
-   * they were used in the frame or held memory during the frame and then
-   * were evicted after it ended.
+   * The total cache entries that had images during this frame.
    */
-  size_t total_count() const { return in_use_count + eviction_count; }
+  size_t total_count() const { return in_use_count; }
 
   /**
-   * The size of all of the cached images during this frame whether
-   * they were used in the frame or held memory during the frame and then
-   * were evicted after it ended.
+   * The size of all of the cached images during this frame.
    */
-  size_t total_bytes() const { return in_use_bytes + eviction_bytes; }
+  size_t total_bytes() const { return in_use_bytes; }
 };
 
+/**
+ * RasterCache is used to cache rasterized layers or display lists to improve
+ * performance.
+ *
+ * Life cycle of RasterCache methods:
+ * - Preroll stage
+ *   - LayerTree::Preroll - for each Layer in the tree:
+ *     - RasterCacheItem::PrerollSetup
+ *         At the start of each layer's preroll, add cache items to
+ *         `PrerollContext::raster_cached_entries`.
+ *     - RasterCacheItem::PrerollFinalize
+ *         At the end of each layer's preroll, may mark cache entris as
+ *         encountered by the current frame.
+ * - Paint stage
+ *   - RasterCache::EvictUnusedCacheEntries
+ *       Evit cached images that are no longer used.
+ *   - LayerTree::TryToPrepareRasterCache
+ *       Create cache image for each cache entry if it does not exist.
+ *   - LayerTree::Paint - for each layer in the tree:
+ *       If layers or display lists are cached as cached images, the method
+ *       `RasterCache::Draw` will be used to draw those cache images.
+ *   - RasterCache::EndFrame:
+ *       Computes used counts and memory then reports cache metrics.
+ */
 class RasterCache {
  public:
   struct Context {
@@ -126,9 +146,11 @@ class RasterCache {
 
   bool HasEntry(const RasterCacheKeyID& id, const SkMatrix&) const;
 
-  void PrepareNewFrame();
+  void BeginFrame();
 
-  void CleanupAfterFrame();
+  void EvictUnusedCacheEntries();
+
+  void EndFrame();
 
   void Clear();
 
@@ -222,9 +244,9 @@ class RasterCache {
     std::unique_ptr<RasterCacheResult> image;
   };
 
-  void SweepOneCacheAfterFrame(RasterCacheKey::Map<Entry>& cache,
-                               RasterCacheMetrics& picture_metrics,
-                               RasterCacheMetrics& layer_metrics);
+  void UpdateMetrics();
+
+  RasterCacheMetrics& GetMetricsForKind(RasterCacheKeyKind kind);
 
   const size_t access_threshold_;
   const size_t display_list_cache_limit_per_frame_;
