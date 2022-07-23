@@ -268,8 +268,9 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
   {
     // frame1
     use_mock_raster_cache();
-    preroll_context()->raster_cache->PrepareNewFrame();
+    preroll_context()->raster_cache->BeginFrame();
     layer->Preroll(preroll_context(), SkMatrix::I());
+    preroll_context()->raster_cache->EvictUnusedCacheEntries();
     // Cache the cacheable entries
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
@@ -299,7 +300,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     // render count < 2 don't cache it
     EXPECT_EQ(cacheable_container_layer2->raster_cache_item()->cache_state(),
               RasterCacheItem::CacheState::kNone);
-    preroll_context()->raster_cache->CleanupAfterFrame();
+    preroll_context()->raster_cache->EndFrame();
   }
 
   {
@@ -307,8 +308,9 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     // new frame the layer tree will create new PrerollContext, so in here we
     // clear the cached_entries
     preroll_context()->raster_cached_entries->clear();
-    preroll_context()->raster_cache->PrepareNewFrame();
+    preroll_context()->raster_cache->BeginFrame();
     layer->Preroll(preroll_context(), SkMatrix::I());
+    preroll_context()->raster_cache->EvictUnusedCacheEntries();
 
     // Cache the cacheable entries
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
@@ -342,17 +344,17 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     EXPECT_TRUE(raster_cache()->Draw(
         cacheable_layer21->raster_cache_item()->GetId().value(), cache_canvas,
         &paint));
-    preroll_context()->raster_cache->CleanupAfterFrame();
+    preroll_context()->raster_cache->EndFrame();
   }
 
   {
     // frame3
     // new frame the layer tree will create new PrerollContext, so in here we
     // clear the cached_entries
-    preroll_context()->raster_cache->PrepareNewFrame();
+    preroll_context()->raster_cache->BeginFrame();
     preroll_context()->raster_cached_entries->clear();
     layer->Preroll(preroll_context(), SkMatrix::I());
-
+    preroll_context()->raster_cache->EvictUnusedCacheEntries();
     // Cache the cacheable entries
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
@@ -385,33 +387,34 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     EXPECT_TRUE(raster_cache()->HasEntry(
         cacheable_layer21->raster_cache_item()->GetId().value(),
         SkMatrix::I()));
-    preroll_context()->raster_cache->CleanupAfterFrame();
+    preroll_context()->raster_cache->EndFrame();
   }
 
   {
-    preroll_context()->raster_cache->PrepareNewFrame();
+    preroll_context()->raster_cache->BeginFrame();
     // frame4
     preroll_context()->raster_cached_entries->clear();
     layer->Preroll(preroll_context(), SkMatrix::I());
+    preroll_context()->raster_cache->EvictUnusedCacheEntries();
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
-    preroll_context()->raster_cache->CleanupAfterFrame();
+    preroll_context()->raster_cache->EndFrame();
 
     // frame5
-    preroll_context()->raster_cache->PrepareNewFrame();
+    preroll_context()->raster_cache->BeginFrame();
     preroll_context()->raster_cached_entries->clear();
     layer->Preroll(preroll_context(), SkMatrix::I());
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
-    preroll_context()->raster_cache->CleanupAfterFrame();
+    preroll_context()->raster_cache->EndFrame();
 
     // frame6
-    preroll_context()->raster_cache->PrepareNewFrame();
+    preroll_context()->raster_cache->BeginFrame();
     preroll_context()->raster_cached_entries->clear();
     layer->Preroll(preroll_context(), SkMatrix::I());
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
-    preroll_context()->raster_cache->CleanupAfterFrame();
+    preroll_context()->raster_cache->EndFrame();
   }
 }
 
