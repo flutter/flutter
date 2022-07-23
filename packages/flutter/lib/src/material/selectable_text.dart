@@ -723,4 +723,10 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }
