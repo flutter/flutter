@@ -488,13 +488,8 @@ class TextSelectionOverlay {
         : _selectionOverlay._toolbar != null;
   }
 
-  // TODO(justinmc): Remove this commented out line.
-  //void hide() => _selectionOverlay.hide();
   /// {@macro flutter.widgets.SelectionOverlay.hide}
-  void hide() {
-    _selectionOverlay.hide();
-    hideToolbar();
-  }
+  void hide() => _selectionOverlay.hide();
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
   void hideToolbar() => _selectionOverlay.hideToolbar();
