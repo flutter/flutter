@@ -120,6 +120,19 @@ class ChangeNotifier implements Listenable {
   List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
+  
+  /// Whether this has been disposed.
+  ///
+  /// If asserts are disabled, this property is always null.
+  bool? get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _debugDisposed;
+      return true;
+    }());
+    return disposed;
+  }
+
   bool _debugDisposed = false;
 
   /// Used by subclasses to assert that the [ChangeNotifier] has not yet been

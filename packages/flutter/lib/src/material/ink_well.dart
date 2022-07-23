@@ -721,7 +721,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final MaterialStatesController? statesController;
 
   @override
-  _InkResponseState createState() => _InkResponseState();
+  InkResponseState createState() => InkResponseState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -754,7 +754,9 @@ enum _HighlightType {
   focus,
 }
 
-class _InkResponseState extends State<_InkResponseStateWidget>
+
+/// State of [_InkResponseStateWidget].
+class InkResponseState extends State<_InkResponseStateWidget>
   with AutomaticKeepAliveClientMixin<_InkResponseStateWidget>
   implements _ParentInkResponseState
 {
@@ -766,6 +768,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: simulateTap),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: simulateTap),
   };
+
+  @visibleForTesting
   MaterialStatesController? internalStatesController;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight? highlight) => highlight != null).isNotEmpty;
@@ -1199,6 +1203,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         ),
       ),
     );
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<MaterialStatesController?>('_internalStatesController', internalStatesController));
   }
 }
 

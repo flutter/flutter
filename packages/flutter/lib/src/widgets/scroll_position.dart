@@ -977,7 +977,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
     isScrollingNotifier.dispose();
-    super.dispose();
+    super.dispose();    
   }
 
   @override
