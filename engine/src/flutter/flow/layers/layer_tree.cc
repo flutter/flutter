@@ -150,6 +150,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   };
 
   if (cache) {
+    cache->EvictUnusedCacheEntries();
     TryToRasterCache(raster_cache_items_, &context, ignore_raster_cache);
   }
 

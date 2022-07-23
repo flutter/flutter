@@ -46,6 +46,8 @@ class MockRasterCacheResult : public RasterCacheResult {
   SkRect device_rect_;
 };
 
+static std::vector<RasterCacheItem*> raster_cache_items_;
+
 /**
  * @brief A RasterCache implementation that simulates the act of rendering a
  * Layer or SkPicture without the overhead of rasterization or pixel storage.
@@ -73,7 +75,7 @@ class MockRasterCache : public RasterCache {
   TextureRegistry texture_registry_;
   PrerollContext preroll_context_ = {
       // clang-format off
-      .raster_cache                  = nullptr,
+      .raster_cache                  = this,
       .gr_context                    = nullptr,
       .view_embedder                 = nullptr,
       .mutators_stack                = mutators_stack_,
@@ -87,6 +89,7 @@ class MockRasterCache : public RasterCache {
       .frame_device_pixel_ratio      = 1.0f,
       .has_platform_view             = false,
       .has_texture_layer             = false,
+      .raster_cached_entries         = &raster_cache_items_
       // clang-format on
   };
 
@@ -124,11 +127,19 @@ PrerollContextHolder GetSamplePrerollContextHolder(
 PaintContextHolder GetSamplePaintContextHolder(
     RasterCache* raster_cache = nullptr);
 
-bool DisplayListRasterCacheItemTryToRasterCache(
+bool RasterCacheItemPrerollAndTryToRasterCache(
     DisplayListRasterCacheItem& display_list_item,
     PrerollContext& context,
     PaintContext& paint_context,
     const SkMatrix& matrix);
+
+void RasterCacheItemPreroll(DisplayListRasterCacheItem& display_list_item,
+                            PrerollContext& context,
+                            const SkMatrix& matrix);
+
+bool RasterCacheItemTryToRasterCache(
+    DisplayListRasterCacheItem& display_list_item,
+    PaintContext& paint_context);
 
 }  // namespace testing
 }  // namespace flutter

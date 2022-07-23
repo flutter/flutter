@@ -637,7 +637,7 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       frame->GetDisplayListBuilder().get()  // display list builder
   );
   if (compositor_frame) {
-    compositor_context_->raster_cache().PrepareNewFrame();
+    compositor_context_->raster_cache().BeginFrame();
     frame_timings_recorder.RecordRasterStart(fml::TimePoint::Now());
 
     std::unique_ptr<FrameDamage> damage;
@@ -704,7 +704,7 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       frame->Submit();
     }
 
-    compositor_context_->raster_cache().CleanupAfterFrame();
+    compositor_context_->raster_cache().EndFrame();
     frame_timings_recorder.RecordRasterEnd(
         &compositor_context_->raster_cache());
     FireNextFrameCallbackIfPresent();
