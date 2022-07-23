@@ -535,19 +535,107 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
        assert(isDismissible != null),
        assert(enableDrag != null);
 
+  /// A builder for the contents of the sheet.
+  ///
+  /// The bottom sheet will wrap the widget produced by this builder in a
+  /// [Material] widget.
   final WidgetBuilder? builder;
+
+  /// Stores a list of captured [InheritedTheme]s that are wrapped around the
+  /// bottom sheet.
   final CapturedThemes capturedThemes;
+
+  /// Specifies whether this is a route for
+  /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
+  /// to have a bottom sheet that has a scrollable child such as a [ListView] or
+  /// a [GridView] and have the bottom sheet be draggable, you should set this
+  /// parameter to true.
   final bool isScrollControlled;
+
+  /// The bottom sheet's background color.
+  ///
+  /// Defines the bottom sheet's [Material.color].
+  ///
+  /// Defaults to null and falls back to [Material]'s default.
   final Color? backgroundColor;
+
+  /// The z-coordinate at which to place this material relative to its parent.
+  ///
+  /// This controls the size of the shadow below the material.
+  ///
+  /// Defaults to 0. The value is non-negative.
   final double? elevation;
+
+  /// The shape of the bottom sheet.
+  ///
+  /// Defines the bottom sheet's [Material.shape].
+  ///
+  /// Defaults to null and falls back to [Material]'s default.
   final ShapeBorder? shape;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defines the bottom sheet's [Material.clipBehavior].
+  ///
+  /// Use this property to enable clipping of content when the bottom sheet has
+  /// a custom [shape] and the content can extend past this shape. For example,
+  /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
+  /// top.
+  ///
+  /// If this property is null then [BottomSheetThemeData.clipBehavior] of
+  /// [ThemeData.bottomSheetTheme] is used. If that's null then the behavior
+  /// will be [Clip.none].
   final Clip? clipBehavior;
+
+  /// Defines minimum and maximum sizes for a [BottomSheet].
+  ///
+  /// Typically a bottom sheet will cover the entire width of its
+  /// parent. However for large screens you may want to limit the width
+  /// to something smaller and this property provides a way to specify
+  /// a maximum width.
+  ///
+  /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
+  /// [BottomSheetThemeData.constraints] will be used. If that
+  /// is null then the bottom sheet's size will be constrained
+  /// by its parent (usually a [Scaffold]).
+  ///
+  /// If constraints are specified (either in this property or in the
+  /// theme), the bottom sheet will be aligned to the bottom-center of
+  /// the available space. Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
+
+  /// Specifies the color of the modal barrier that darkens everything below the
+  /// bottom sheet.
+  ///
+  /// If `null` the default color `Colors.black54` is used.
   final Color? modalBarrierColor;
+
+  /// If true, the bottom sheet will be dismissed when user taps on the scrim.
+  ///
+  /// Defaults to true.
   final bool isDismissible;
+
+  /// If true, the bottom sheet can be dragged up and down and dismissed by
+  /// swiping downwards.
+  ///
+  /// Default is true.
   final bool enableDrag;
+
+  /// The animation controller that controls the bottom sheet's entrance and
+  /// exit animations.
+  ///
+  /// The BottomSheet widget will manipulate the position of this animation, it
+  /// is not just a passive observer.
   final AnimationController? transitionAnimationController;
+
+  /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
+
+  /// If useSafeArea is true, a SafeArea is inserted.
+  /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
+  /// and isn't exposed to the top padding of the MediaQuery.
+  ///
+  /// Default is false.
   final bool useSafeArea;
 
   @override
