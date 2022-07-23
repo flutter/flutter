@@ -14,7 +14,7 @@ class TestScrollPosition extends ScrollPosition{
   TestScrollPosition() : super(physics: const ScrollPhysics(), context: _TestScrollContext());
 
   @override
-  Future<void> animateTo(double to, {required Duration duration, required Curve curve}) {   
+  Future<void> animateTo(double to, {required Duration duration, required Curve curve}) {
     throw UnimplementedError();
   }
 
@@ -27,7 +27,7 @@ class TestScrollPosition extends ScrollPosition{
   }
 
   @override
-  ScrollHoldController hold(VoidCallback holdCancelCallback) { 
+  ScrollHoldController hold(VoidCallback holdCancelCallback) {
     throw UnimplementedError();
   }
 
@@ -64,13 +64,13 @@ class _TestScrollContext implements ScrollContext{
   void setSemanticsActions(Set<SemanticsAction> actions) {}
 
   @override
- 
+
   BuildContext get storageContext =>  _TestBuildContext();
 
   @override
   TickerProvider get vsync => const TestVSync();
 }
- 
+
 class _TestBuildContext implements BuildContext {
   @override
   dynamic noSuchMethod(Invocation invocation) {}

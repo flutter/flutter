@@ -23,7 +23,7 @@ void main() {
     final InkResponseState inkResponseState = TestInkResponseState();
     final MaterialStatesController controller = inkResponseState.internalStatesController = MaterialStatesController();
     expect(controller.debugDisposed, false);
-    try {    
+    try {
        inkResponseState.dispose();
     // ignore: empty_catches
     } catch (e){

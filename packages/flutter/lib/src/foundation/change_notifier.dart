@@ -120,7 +120,7 @@ class ChangeNotifier implements Listenable {
   List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
-  
+
   /// Whether this has been disposed.
   ///
   /// If asserts are disabled, this property is always null.
