@@ -517,7 +517,10 @@ deps = {
   'src/third_party/android_tools/trace_to_text': {
     'packages': [
       {
-        'version': 'git_tag:v20.1',
+        # 25.0 downloads for both mac-amd64 and mac-arm64
+        # 26.1 is not found with either platform
+        # 27.1 is the latest release of perfetto
+        'version': 'git_tag:v25.0',
         'package': 'perfetto/trace_to_text/${{platform}}'
       }
     ],
