@@ -159,7 +159,7 @@ void main() {
     expect(renderBox.size.width, 80.0);
   });
 
-  testWidgets('No destinations', (WidgetTester tester) async {
+  testWidgets('Leading spacing is correct with 0 destinations', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2766,6 +2766,21 @@ void main() {
 
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
       expect(renderBox.size.width, 72.0);
+    });
+
+    testWidgets('Leading spacing is correct with 0 destinations', (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        useMaterial3: false,
+        navigationRail: NavigationRail(
+          selectedIndex: null,
+          leading: FloatingActionButton(onPressed: () { }),
+          destinations: const <NavigationRailDestination>[],
+        ),
+      );
+
+      final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+      expect(leading.localToGlobal(Offset.zero), const Offset(0, 8.0));
     });
 
     testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
