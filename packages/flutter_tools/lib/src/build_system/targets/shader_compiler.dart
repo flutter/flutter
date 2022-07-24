@@ -20,7 +20,6 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  spirv('--flutter-spirv'),
   impellerAndroid('--opengl-es'),
   impelleriOS('--metal-ios'),
   sksl('--sksl');
@@ -49,7 +48,7 @@ class DevelopmentShaderCompiler {
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform? platform, bool enableImpeller) {
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) {
     switch (platform) {
       case TargetPlatform.ios:
         _shaderTarget = enableImpeller ? ShaderTarget.impelleriOS : ShaderTarget.sksl;
@@ -69,6 +68,7 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
+        assert(!enableImpeller);
         _shaderTarget = ShaderTarget.sksl;
         break;
       case null:
@@ -166,14 +166,9 @@ class ShaderCompiler {
     final List<String> cmd = <String>[
       impellerc.path,
       target.target,
-      if (target == ShaderTarget.spirv)
-        '--spirv=$outputPath'
-      else
-        ...<String>[
-          '--iplr',
-          '--sl=$outputPath',
-          '--spirv=$outputPath.spirv',
-        ],
+      '--iplr',
+      '--sl=$outputPath',
+      '--spirv=$outputPath.spirv',
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
@@ -191,9 +186,7 @@ class ShaderCompiler {
       }
       return false;
     }
-    if (target != ShaderTarget.spirv) {
-      ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
-    }
+    ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     return true;
   }
 }

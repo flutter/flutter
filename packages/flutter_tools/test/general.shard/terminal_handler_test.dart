@@ -1513,7 +1513,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, bool enableImpeller) { }
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
