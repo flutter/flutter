@@ -87,8 +87,7 @@ void tryToDeleteLocalCache(Directory localCache, Logger logger) {
     if (localCache.existsSync()) {
       localCache.deleteSync(recursive: true);
     }
-  }
-  on FileSystemException {
+  } on FileSystemException {
     logger.printWarning('Failed to delete local cache on : ${localCache.path}');
   }
 }
@@ -614,8 +613,7 @@ class _DefaultPub implements Pub {
               globalCacheDirectory: newDirectory,
               dependencyDirectory: entity,
             );
-          }
-          on FileSystemException {
+          } on FileSystemException {
             tryDeleteCache(entity.basename, globalDirectoryPub, _logger);
           }
         }
