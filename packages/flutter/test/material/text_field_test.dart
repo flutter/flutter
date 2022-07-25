@@ -11756,4 +11756,77 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
+  group('context menu', () {
+    testWidgets('builds DefaultTextSelectionToolbar by default', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  controller: controller,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DefaultTextSelectionToolbar), findsOneWidget);
+    },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    );
+
+    testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  controller: controller,
+                  contextMenuBuilder: (
+                    BuildContext context,
+                    EditableTextState editableTextState,
+                    Offset primaryAnchor,
+                    [Offset? secondaryAnchor]
+                  ) {
+                    return Placeholder(key: key);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(find.byKey(key), findsNothing);
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(key), findsOneWidget);
+    },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    );
+  });
 }
