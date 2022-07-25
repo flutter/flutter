@@ -77,11 +77,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
   buffer.writeln(
-<<<<<<< HEAD
-      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
-=======
       '\tPost-submit cocoon dashboard: ${globals.kCocoonDashboard}');
->>>>>>> 03e8836dca (prefix global constants with k to fit style guide)
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
@@ -99,12 +95,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
-<<<<<<< HEAD
-  buffer.writeln(
-      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
-=======
   buffer.writeln('\tPost-submit cocoon dashboard: ${globals.kCocoonDashboard}');
->>>>>>> 03e8836dca (prefix global constants with k to fit style guide)
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln(
         '${state.framework.cherrypicks.length} Framework Cherrypicks:');
