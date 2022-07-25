@@ -1159,7 +1159,7 @@ class LocalizationsGenerator {
         }
         final Placeholder countPlaceholder = message.getCountPlaceholder();
         if (countPlaceholder.type != null && countPlaceholder.type != 'num') {
-          logger.printWarning("${message.resourceId} Placeholders for plurals are automatically converted to type 'num'.");
+          logger.printWarning("Placeholders for plurals are automatically converted to type 'num' for the message: ${message.resourceId}.");
         }
       }
     }
