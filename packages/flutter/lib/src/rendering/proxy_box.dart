@@ -3466,7 +3466,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// The returned [ui.Image] has uncompressed raw RGBA bytes in the dimensions
   /// of the render object, multiplied by the [pixelRatio].
   ///
-  /// To use [toImage], the render object must have gone through the paint phase
+  /// To use [toImageSync], the render object must have gone through the paint phase
   /// (i.e. [debugNeedsPaint] must be false).
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
