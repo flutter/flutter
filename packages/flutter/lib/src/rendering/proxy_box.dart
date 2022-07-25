@@ -3515,8 +3515,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// See also:
   ///
-  ///  * [OffsetLayer.toImage] for a similar API at the layer level.
-  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  ///  * [OffsetLayer.toImageSync] for a similar API at the layer level.
+  ///  * [dart:ui.Scene.toImageSync] for more information about the image returned.
   ui.Image toImageSync({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
     final OffsetLayer offsetLayer = layer! as OffsetLayer;
