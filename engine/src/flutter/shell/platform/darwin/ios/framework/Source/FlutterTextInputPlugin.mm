@@ -7,6 +7,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+#include "unicode/uchar.h"
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
 
@@ -1896,6 +1898,22 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     NSRange oldRange = ((FlutterTextRange*)oldSelectedRange).range;
     if (oldRange.location > 0) {
       NSRange newRange = NSMakeRange(oldRange.location - 1, 1);
+
+      // We should check if the last character is a part of emoji.
+      // If so, we must delete the entire emoji to prevent the text from being malformed.
+      NSRange charRange = fml::RangeForCharacterAtIndex(self.text, oldRange.location - 1);
+      UChar32 codePoint;
+      BOOL gotCodePoint = [self.text getBytes:&codePoint
+                                    maxLength:sizeof(codePoint)
+                                   usedLength:NULL
+                                     encoding:NSUTF32StringEncoding
+                                      options:kNilOptions
+                                        range:charRange
+                               remainingRange:NULL];
+      if (gotCodePoint && u_hasBinaryProperty(codePoint, UCHAR_EMOJI)) {
+        newRange = NSMakeRange(charRange.location, oldRange.location - charRange.location);
+      }
+
       _selectedTextRange = [[FlutterTextRange rangeWithNSRange:newRange] copy];
       [oldSelectedRange release];
     }
