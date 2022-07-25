@@ -28,11 +28,11 @@ class AdaptiveScaffold extends StatefulWidget {
     this.largeSecondaryBody,
     this.bodyRatio,
     this.breakpoints = const <Breakpoint>[Breakpoints.small, Breakpoints.medium, Breakpoints.large],
-    this.onlySmallDesktopBreakpoint = Breakpoints.onlySmallDesktop,
+    this.drawerBreakpoint = Breakpoints.onlySmallDesktop,
     this.internalAnimations = true,
     this.horizontalBody = true,
     this.onSelectedIndexChange,
-    this.useDrawerForDesktop = true,
+    this.useDrawer = true,
     this.appBar,
     super.key,
   });
@@ -118,13 +118,13 @@ class AdaptiveScaffold extends StatefulWidget {
   /// and Breakpoint is small.
   ///
   /// Defaults to true.
-  final bool useDrawerForDesktop;
+  final bool useDrawer;
 
-  /// Option to override the onlySmallDesktopBreakpoint for the usage of
-  /// [Drawer].
+  /// Option to override the drawerBreakpoint for the usage of [Drawer] over the
+  /// usual [BottomNavigationBar].
   ///
   /// Defaults to [Breakpoints.onlySmallDesktop].
-  final Breakpoint onlySmallDesktopBreakpoint;
+  final Breakpoint drawerBreakpoint;
 
   /// Option to override the default [AppBar] when using drawer in desktop
   /// small.
@@ -293,8 +293,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
-        appBar: widget.onlySmallDesktopBreakpoint.isActive(context) ? widget.appBar ?? AppBar() : null,
-        drawer: widget.onlySmallDesktopBreakpoint.isActive(context)
+        appBar: widget.drawerBreakpoint.isActive(context) ? widget.appBar ?? AppBar() : null,
+        drawer: widget.drawerBreakpoint.isActive(context)
             ? Drawer(
                 child: NavigationRail(
                   extended: true,
