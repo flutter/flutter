@@ -26,6 +26,7 @@ import 'package:gen_defaults/chip_input_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
+import 'package:gen_defaults/input_decorator_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
@@ -111,6 +112,7 @@ Future<void> main(List<String> args) async {
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   IconButtonTemplate('IconButton', '$materialLib/icon_button.dart', tokens).updateFile();
+  InputDecoratorTemplate('InputDecorator', '$materialLib/input_decorator.dart', tokens).updateFile();
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();
   NavigationRailTemplate('NavigationRail', '$materialLib/navigation_rail.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
