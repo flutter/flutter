@@ -29,7 +29,7 @@ final bool useInProcessDap = Platform.environment['DAP_TEST_INTERNAL'] == 'true'
 /// This is useful for debugging locally or on the bots and will include both
 /// DAP traffic (between the test DAP client and the DAP server) and the VM
 /// Service traffic (wrapped in a custom 'dart.log' event).
-final bool verboseLogging = false; //Platform.environment['DAP_TEST_VERBOSE'] == 'true';
+final bool verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
 
 const String endOfErrorOutputMarker = '════════════════════════════════════════════════════════════════════════════════════════════════════';
 
