@@ -5661,7 +5661,7 @@ class PictureRecorder extends NativeFieldWrapperClass1 {
     return picture;
   }
 
-  @FfiNative<Handle Function(Pointer<Void>, Handle)>('PictureRecorder::endRecording')
+  @FfiNative<Void Function(Pointer<Void>, Handle)>('PictureRecorder::endRecording')
   external void _endRecording(Picture outPicture);
 
   Canvas? _canvas;
