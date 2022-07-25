@@ -406,6 +406,41 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqualObjects(substring, @"bbbbaaaabbbbaaaa");
 }
 
+- (void)testDeletingBackward {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView insertText:@"ឹ😀 text 🥰👨‍👩‍👧‍👦🇺🇳ดี "];
+  [inputView deleteBackward];
+  [inputView deleteBackward];
+
+  // Thai vowel is removed.
+  XCTAssertEqualObjects(inputView.text, @"ឹ😀 text 🥰👨‍👩‍👧‍👦🇺🇳ด");
+  [inputView deleteBackward];
+  XCTAssertEqualObjects(inputView.text, @"ឹ😀 text 🥰👨‍👩‍👧‍👦🇺🇳");
+  [inputView deleteBackward];
+  XCTAssertEqualObjects(inputView.text, @"ឹ😀 text 🥰👨‍👩‍👧‍👦");
+  [inputView deleteBackward];
+  XCTAssertEqualObjects(inputView.text, @"ឹ😀 text 🥰");
+  [inputView deleteBackward];
+
+  XCTAssertEqualObjects(inputView.text, @"ឹ😀 text ");
+  [inputView deleteBackward];
+  [inputView deleteBackward];
+  [inputView deleteBackward];
+  [inputView deleteBackward];
+  [inputView deleteBackward];
+  [inputView deleteBackward];
+
+  XCTAssertEqualObjects(inputView.text, @"ឹ😀");
+  [inputView deleteBackward];
+  XCTAssertEqualObjects(inputView.text, @"ឹ");
+  [inputView deleteBackward];
+  XCTAssertEqualObjects(inputView.text, @"");
+}
+
 - (void)testPastingNonTextDisallowed {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
