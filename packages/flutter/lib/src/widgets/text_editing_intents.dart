@@ -460,26 +460,20 @@ class ShiftTappingOnDragStartIntent extends ListedIntents {
 /// An [Intent] that represents a gesture interaction when a drag is being updated.
 class DragUpdateIntent extends ListedIntents {
   /// Creates a [DragUpdateIntent].
-  const DragUpdateIntent({required super.intents, required super.enabledContext, required this.updateDetails, required this.startDetails});
+  const DragUpdateIntent({required super.intents, required super.enabledContext, required this.details});
 
   /// The [DragUpdateDetails] corresponding to a [DragGestureRecognizer.onUpdate] event.
-  final DragUpdateDetails updateDetails;
-
-  /// The [DragStartDetails] corresponding to a [DragGestureRecognizer.onStart] event.
-  final DragStartDetails startDetails;
+  final DragUpdateDetails details;
 }
 
 /// An [Intent] that represents a gesture interaction when a drag is being updated and the shift key
 /// has been tapped at anytime during the drag.
 class ShiftTappingOnDragUpdateIntent extends ListedIntents {
   /// Creates a [ShiftTappingOnDragUpdateIntent].
-  const ShiftTappingOnDragUpdateIntent({required super.intents, required super.enabledContext, required this.updateDetails, required this.startDetails});
+  const ShiftTappingOnDragUpdateIntent({required super.intents, required super.enabledContext, required this.details});
 
   /// The [DragUpdateDetails] corresponding to a [DragGestureRecognizer.onUpdate] event.
-  final DragUpdateDetails updateDetails;
-
-  /// The [DragStartDetails] corresponding to a [DragGestureRecognizer.onStart] event.
-  final DragStartDetails startDetails;
+  final DragUpdateDetails details;
 }
 
 /// An [Intent] that represents a gesture interaction when a drag has ended.
@@ -675,9 +669,9 @@ class SelectWordEdgeIntent extends Intent {
 
 /// An [Intent] that represents a user interaction that attempts to select the
 /// range in an input field at [from] to [to].
-class SelectRangeIntent extends Intent {
-  /// Creates an [SelectRangeIntent].
-  const SelectRangeIntent({required this.cause, required this.from, this.to});
+class SelectWordsInRangeIntent extends Intent {
+  /// Creates an [SelectWordsInRangeIntent].
+  const SelectWordsInRangeIntent({required this.cause, required this.from, this.to});
 
   /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
@@ -687,6 +681,19 @@ class SelectRangeIntent extends Intent {
 
   /// {@macro flutter.widgets.TextEditingIntents.to}
   final Offset? to;
+}
+
+/// An [Intent] that represents a user interaction that attempts to select the
+/// the word in an input field at the location of the [globalPosition].
+class SelectWordIntent extends Intent {
+  /// Creates an [SelectWordIntent].
+  const SelectWordIntent({required this.cause, required this.globalPosition});
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+
+  /// {@macro flutter.widgets.TextEditingIntents.from}
+  final Offset globalPosition;
 }
 
 /// An [Intent] that represents a user interaction that attempts to hide, show,

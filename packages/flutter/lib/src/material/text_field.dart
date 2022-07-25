@@ -1043,7 +1043,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             context, 
             ForcePressStartIntent(
               intents: <Intent>[
-                SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition), //can we call super of gesture recognizer? 
+                SelectWordsInRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition), //can we call super of gesture recognizer? 
                 SelectionToolbarControlIntent.show(position: details.globalPosition),
               ], 
               enabledContext: context,
@@ -1101,7 +1101,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             context,
             LongPressStartIntent(
               intents: <Intent>[
-                SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                SelectWordsInRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
                 const FeedbackRequestIntent(),
               ],
               enabledContext: context,
@@ -1114,7 +1114,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             context,
             LongPressMoveUpdateIntent(
               intents: <Intent>[
-                SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
+                SelectWordsInRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
               ],
               enabledContext: context,
               details: details,
@@ -1417,16 +1417,20 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         onInvoke: (SelectDragPositionIntent intent) => _editableText!.selectDragPosition(intent),
         enabledPredicate: (SelectDragPositionIntent intent) => widget.selectionEnabled,
       ),
-      SelectRangeIntent : SelectionGestureCallbackAction<SelectRangeIntent>(
-          onInvoke: (SelectRangeIntent intent) => _editableText!.selectRange(intent),
-          enabledPredicate: (SelectRangeIntent intent) => widget.selectionEnabled,
+      SelectWordsInRangeIntent : SelectionGestureCallbackAction<SelectWordsInRangeIntent>(
+          onInvoke: (SelectWordsInRangeIntent intent) => _editableText!.dispatchSelectionEvent(SelectWordsInRangeSelectionEvent(from: intent.from, to: intent.to, cause: intent.cause)),
+          enabledPredicate: (SelectWordsInRangeIntent intent) => widget.selectionEnabled,
+      ),
+      SelectWordIntent : SelectionGestureCallbackAction<SelectWordIntent>(
+          onInvoke: (SelectWordIntent intent) => _editableText!.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: intent.globalPosition, cause: intent.cause)),
+          enabledPredicate: (SelectWordIntent intent) => widget.selectionEnabled,
       ),
       SelectWordEdgeIntent : SelectionGestureCallbackAction<SelectWordEdgeIntent>(
-          onInvoke: (SelectWordEdgeIntent intent) => _editableText!.selectWordEdge(intent),
+          onInvoke: (SelectWordEdgeIntent intent) => _editableText!.dispatchSelectionEvent(SelectWordEdgeSelectionEvent(globalPosition: intent.position, cause: intent.cause)),
           enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
       ),
       SelectPositionIntent : SelectionGestureCallbackAction<SelectPositionIntent>(
-          onInvoke: (SelectPositionIntent intent) => _editableText!.selectPosition(intent),
+          onInvoke: (SelectPositionIntent intent) => _editableText!.dispatchSelectionEvent(SelectPositionSelectionEvent(globalPosition: intent.from, cause: intent.cause)),
           enabledPredicate: (SelectPositionIntent intent) => widget.selectionEnabled,
       ),
       SelectionOnDragStartControlIntent : SelectionGestureCallbackAction<SelectionOnDragStartControlIntent>(

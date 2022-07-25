@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show SelectionChangedCause;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'layer.dart';
@@ -291,11 +292,31 @@ enum SelectionEventType {
   /// Used by [SelectAllSelectionEvent].
   selectAll,
 
+  /// An event to select the location at 
+  /// [SelectPositionSelectionEvent.globalPosition].
+  ///
+  /// Used by [SelectPositionSelectionEvent].
+  selectPosition,
+
   /// An event to select a word at the location
   /// [SelectWordSelectionEvent.globalPosition].
   ///
   /// Used by [SelectWordSelectionEvent].
   selectWord,
+
+  /// An event to select the edge of the word
+  /// closest to the location of
+  /// [SelectWordEdgeSelectionEvent.globalPosition].
+  ///
+  /// Used by [SelectWordEdgeSelectionEvent].
+  selectWordEdge,
+
+  /// An event to select a word at the range from
+  /// [SelectWordsInRangeSelectionEvent.from] to 
+  /// [SelectWordsInRangeSelectionEvent.to].
+  ///
+  /// Used by [SelectWordsInRangeSelectionEvent].
+  selectWordsInRange,
 }
 
 /// An abstract base class for selection events.
@@ -315,6 +336,17 @@ abstract class SelectionEvent {
 
   /// The type of this selection event.
   final SelectionEventType type;
+}
+
+class SelectPositionSelectionEvent extends SelectionEvent {
+  /// Creates a select position selection event at the [globalPosition].
+  const SelectPositionSelectionEvent({required this.globalPosition, required this.cause}): super._(SelectionEventType.selectPosition);
+
+  /// The position in global coordinates to select.
+  final Offset globalPosition;
+
+  /// The cause of the selection change.
+  final SelectionChangedCause cause;
 }
 
 /// Selects all selectable contents.
@@ -338,10 +370,39 @@ class ClearSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of mobile long press selection.
 class SelectWordSelectionEvent extends SelectionEvent {
   /// Creates a select word event at the [globalPosition].
-  const SelectWordSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectWord);
+  const SelectWordSelectionEvent({required this.globalPosition, this.cause}): super._(SelectionEventType.selectWord);
 
   /// The position in global coordinates to select word at.
   final Offset globalPosition;
+
+  /// The cause of the selection change.
+  final SelectionChangedCause? cause;
+}
+
+class SelectWordEdgeSelectionEvent extends SelectionEvent {
+  /// Creates a select word edge event at the [globalPosition].
+  const SelectWordEdgeSelectionEvent({required this.globalPosition, required this.cause}): super._(SelectionEventType.selectWordEdge);
+
+  /// The position in global coordinates to select the word edge at.
+  final Offset globalPosition;
+
+  /// The cause of the selection change.
+  final SelectionChangedCause cause;
+}
+
+/// Selects the set words of a paragraph in a given range of global positions.
+class SelectWordsInRangeSelectionEvent extends SelectionEvent {
+  /// Creates a select words in range event at the given [from] to [to] range of global positions.
+  const SelectWordsInRangeSelectionEvent({required this.from, this.to, this.cause}): super._(SelectionEventType.selectWord);
+
+  /// The start of the range, where the first word in the range is located at.
+  final Offset from;
+
+  /// The end of the range, where the last word in the range is located at.
+  final Offset? to;
+
+  /// The cause of the selection change.
+  final SelectionChangedCause? cause;
 }
 
 /// Updates a selection edge.

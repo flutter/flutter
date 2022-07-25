@@ -571,7 +571,7 @@ class ConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer {
 
 typedef ShiftAwareGestureDragDownCallback = void Function(DragDownDetails details, bool isShiftTapping);
 typedef ShiftAwareGestureDragStartCallback = void Function(DragStartDetails details, bool isShiftTapping);
-typedef ShiftAwareGestureDragUpdateCallback = void Function(DragUpdateDetails updateDetails, DragStartDetails startDetails, bool isShiftTapping);
+typedef ShiftAwareGestureDragUpdateCallback = void Function(DragUpdateDetails details, bool isShiftTapping);
 typedef ShiftAwareGestureDragEndCallback = void Function(DragEndDetails details, bool isShiftTapping);
 
 enum _DragState {
@@ -736,9 +736,6 @@ abstract class ShiftAwareDragGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   bool _isShiftTapping = false;
-
-  // Saved DragStart state.
-  DragStartDetails? _lastDragStartDetails;
 
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
@@ -994,7 +991,6 @@ abstract class ShiftAwareDragGestureRecognizer extends OneSequenceGestureRecogni
         localPosition: _initialPosition.local,
         kind: getKindForPointer(pointer),
       );
-      _lastDragStartDetails = details;
       invokeCallback<void>('onStart', () => onStart!(details, _isShiftTapping));
     }
   }
@@ -1014,8 +1010,10 @@ abstract class ShiftAwareDragGestureRecognizer extends OneSequenceGestureRecogni
         primaryDelta: primaryDelta,
         globalPosition: globalPosition,
         localPosition: localPosition,
+        offsetFromOrigin: globalPosition - _initialPosition.global,
+        localOffsetFromOrigin: localPosition! - _initialPosition.local,
       );
-      invokeCallback<void>('onUpdate', () => onUpdate!(details, _lastDragStartDetails!, _isShiftTapping));
+      invokeCallback<void>('onUpdate', () => onUpdate!(details, _isShiftTapping));
     }
   }
 
@@ -1055,7 +1053,6 @@ abstract class ShiftAwareDragGestureRecognizer extends OneSequenceGestureRecogni
     }
     invokeCallback<void>('onEnd', () => onEnd!(details, _isShiftTapping), debugReport: debugReport);
     _isShiftTapping = false;
-    _lastDragStartDetails = null;
   }
 
   void _checkCancel() {

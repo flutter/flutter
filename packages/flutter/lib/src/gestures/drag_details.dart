@@ -140,13 +140,17 @@ class DragUpdateDetails {
     this.primaryDelta,
     required this.globalPosition,
     Offset? localPosition,
+    this.offsetFromOrigin = Offset.zero,
+    Offset? localOffsetFromOrigin,
   }) : assert(delta != null),
        assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
            || (primaryDelta == delta.dy && delta.dx == 0.0),
        ),
-       localPosition = localPosition ?? globalPosition;
+       assert(offsetFromOrigin != null),
+       localPosition = localPosition ?? globalPosition,
+       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -190,6 +194,16 @@ class DragUpdateDetails {
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
+
+  /// A delta offset from the point where the drag initially contacted
+  /// the screen to the point where the pointer is currently located (the
+  /// present [globalPosition]) when this callback is triggered.
+  final Offset offsetFromOrigin;
+
+  /// A local delta offset from the point where the drag initially contacted
+  /// the screen to the point where the pointer is currently located (the
+  /// present [localPosition]) when this callback is triggered.
+  final Offset localOffsetFromOrigin;
 
   @override
   String toString() => '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';

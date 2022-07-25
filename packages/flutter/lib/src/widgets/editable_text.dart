@@ -1685,7 +1685,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient, Selectable implements AutofillClient {
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
     return _backingCursorBlinkOpacityController ??= AnimationController(
@@ -1706,8 +1706,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
 
   final LayerLink _toolbarLayerLink = LayerLink();
-  final LayerLink _startHandleLayerLink = LayerLink();
-  final LayerLink _endHandleLayerLink = LayerLink();
+  LayerLink _startHandleLayerLink = LayerLink();
+  LayerLink _endHandleLayerLink = LayerLink();
 
   bool _didAutoFocus = false;
 
@@ -1902,6 +1902,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_updateSelectionOverlayForScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
+    _geometry = ValueNotifier<SelectionGeometry>(_noSelection);
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -1911,6 +1912,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _geometry.addListener(renderEditable.markNeedsPaint);
+      }
+    });
 
     final AutofillGroupState? newAutofillGroup = AutofillGroup.of(context);
     if (currentAutofillScope != newAutofillGroup) {
@@ -2045,6 +2052,80 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
+
+  // Selectable implementation:
+  @override
+  Matrix4 getTransformTo(RenderObject? ancestor) => renderEditable.getTransformTo(ancestor);
+
+  @override
+  Size get size => renderEditable.size;
+  // End of Selectable implementation
+
+  // SelectionHandler implementation:
+  static const SelectionGeometry _noSelection = SelectionGeometry(status: SelectionStatus.none, hasContent: true);
+  late final ValueNotifier<SelectionGeometry> _geometry;
+
+  @override
+  void addListener(VoidCallback listener) => _geometry.addListener(listener);
+
+  @override
+  void removeListener(VoidCallback listener) => _geometry.removeListener(listener);
+
+  @override
+  SelectionGeometry get value => _geometry.value;
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
+    if (!renderEditable.attached) {
+      assert(startHandle == null && endHandle == null, 'Only clean up can be called.');
+      return;
+    }
+    if (_startHandleLayerLink != startHandle) {
+      _startHandleLayerLink = startHandle ?? LayerLink();
+      renderEditable.markNeedsPaint();
+    }
+    if (_endHandleLayerLink != endHandle) {
+      _endHandleLayerLink = endHandle ?? LayerLink();
+      renderEditable.markNeedsPaint();
+    }
+  }
+
+  @override
+  SelectedContent? getSelectedContent() {
+    if (_value.selection == null) {
+      return null;
+    }
+    final int start = math.min(_value.selection.baseOffset, _value.selection.extentOffset);
+    final int end = math.max(_value.selection.baseOffset, _value.selection.extentOffset);
+    return SelectedContent(
+      plainText: renderEditable.text?.toPlainText(includeSemanticsLabels: false).substring(start, end) ?? '',
+    );
+  }
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    if (event.type == SelectionEventType.selectPosition) {
+      final SelectPositionSelectionEvent selectPositionEvent = event as SelectPositionSelectionEvent;
+      _selectPosition(selectPositionEvent.globalPosition, null, selectPositionEvent.cause);
+    }
+
+    if (event.type == SelectionEventType.selectWord) {
+      final SelectWordSelectionEvent selectWordEvent = event as SelectWordSelectionEvent;
+      _selectWord(globalPosition: selectWordEvent.globalPosition, cause: selectWordEvent.cause!);
+    }
+
+    if (event.type == SelectionEventType.selectWordEdge) {
+      final SelectWordEdgeSelectionEvent selectWordEdgeEvent = event as SelectWordEdgeSelectionEvent;
+      _selectWordEdge(selectWordEdgeEvent.globalPosition, selectWordEdgeEvent.cause);
+    }
+
+    if (event.type == SelectionEventType.selectWordsInRange) {
+      final SelectWordsInRangeSelectionEvent selectWordsInRangeEvent = event as SelectWordsInRangeSelectionEvent;
+      _selectWordsInRange(from: selectWordsInRangeEvent.from, to: selectWordsInRangeEvent.to, cause: selectWordsInRangeEvent.cause!);
+    }
+    return SelectionResult.none;
+  }
+  // End of SelectionHandler implementation
 
   // TextInputClient implementation:
 
@@ -3331,7 +3412,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
         : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
 
-    selectPosition(SelectPositionIntent(cause: SelectionChangedCause.drag, from: intent.from - startOffset, to: intent.to));
+    _selectPosition(intent.from, intent.to, intent.cause);
   }
 
   /// Select text between the given intent's `from` and `to` global position
@@ -3341,11 +3422,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// corresponds to the [TextSelection.extentOffset].
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void selectPosition(SelectPositionIntent intent) {
-    final TextPosition fromPosition = renderEditable.getPositionForPoint(intent.from);
-    final TextPosition? toPosition = intent.to == null
+  void _selectPosition(Offset from, Offset? to, SelectionChangedCause cause) {
+    final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
+    final TextPosition? toPosition = to == null
       ? null
-      : renderEditable.getPositionForPoint(intent.to!);
+      : renderEditable.getPositionForPoint(to!);
 
     final int baseOffset = fromPosition.offset;
     final int extentOffset = toPosition?.offset ?? fromPosition.offset;
@@ -3356,15 +3437,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       affinity: fromPosition.affinity,
     );
 
-    _validateAndSetSelection(newSelection, intent.cause);
+    _validateAndSetSelection(newSelection, cause);
   }
 
   /// Move the selection to the beginning or end of a word closest to the given
   /// intent's `position` parameter.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void selectWordEdge(SelectWordEdgeIntent intent) {
-    final TextPosition textPosition = renderEditable.getPositionForPoint(intent.position);
+  void _selectWordEdge(Offset position, SelectionChangedCause cause) {
+    final TextPosition textPosition = renderEditable.getPositionForPoint(position);
     final TextRange word = renderEditable.getWordBoundary(textPosition);
     late TextSelection newSelection;
     if (textPosition.offset - word.start <= 1) {
@@ -3373,21 +3454,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
 
-    _validateAndSetSelection(newSelection, intent.cause);
+    _validateAndSetSelection(newSelection, cause);
   }
 
-  /// Selects the given intent's range of global positions in a paragraph. This
-  /// range is given by the intent's `from` and `to` parameters.
+  /// Select a word around the location of the [globalPosition].
+  void _selectWord({ required Offset globalPosition, required SelectionChangedCause cause }) {
+    _selectWordsInRange(from: globalPosition, cause: cause);
+  }
+
+  /// Selects the set words of a paragraph in a given range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void selectRange(SelectRangeIntent intent) {
-    final TextPosition firstPosition = renderEditable.getPositionForPoint(intent.from);
+  void _selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+    final TextPosition firstPosition = renderEditable.getPositionForPoint(from);
     final TextSelection firstWord = renderEditable.getWordAtOffset(firstPosition);
-    final TextSelection lastWord = intent.to == null ?
-        firstWord : renderEditable.getWordAtOffset(renderEditable.getPositionForPoint(intent.to!));
+    final TextSelection lastWord = to == null ?
+        firstWord : renderEditable.getWordAtOffset(renderEditable.getPositionForPoint(to!));
 
     final TextSelection newSelection = TextSelection(
       baseOffset: firstWord.base.offset,
@@ -3395,7 +3478,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       affinity: firstWord.affinity,
     );
 
-    _validateAndSetSelection(newSelection, intent.cause);
+    _validateAndSetSelection(newSelection, cause);
   }
 
   void _validateAndSetSelection(TextSelection newSelection, SelectionChangedCause cause) {
