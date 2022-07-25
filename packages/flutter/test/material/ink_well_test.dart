@@ -13,25 +13,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 
-class TestInkResponseState extends InkResponseState{
-  @override
-  MaterialStatesController get statesController => internalStatesController!;
-}
-
 void main() {
-  test('$InkResponseState disposes internalStatesController', () {
-    final InkResponseState inkResponseState = TestInkResponseState();
-    final MaterialStatesController controller = inkResponseState.internalStatesController = MaterialStatesController();
-    expect(controller.debugDisposed, false);
-    try {
-       inkResponseState.dispose();
-    // ignore: empty_catches
-    } catch (e){
-      // super.dispose() will fail because of poor initialization.
-    }
-    expect(controller.debugDisposed, true);
-  });
-
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 

@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// We disable these lints, because they relate to InkResponseState
-// that is actually private, but visible for testing.
-// ignore_for_file: public_member_api_docs, library_private_types_in_public_api
-
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -725,7 +721,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final MaterialStatesController? statesController;
 
   @override
-  InkResponseState createState() => InkResponseState();
+  _InkResponseState createState() => _InkResponseState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -758,10 +754,7 @@ enum _HighlightType {
   focus,
 }
 
-
-@visibleForTesting
-/// State of [_InkResponseStateWidget].
-class InkResponseState extends State<_InkResponseStateWidget>
+class _InkResponseState extends State<_InkResponseStateWidget>
   with AutomaticKeepAliveClientMixin<_InkResponseStateWidget>
   implements _ParentInkResponseState
 {
@@ -773,8 +766,6 @@ class InkResponseState extends State<_InkResponseStateWidget>
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: simulateTap),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: simulateTap),
   };
-
-  @visibleForTesting
   MaterialStatesController? internalStatesController;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight? highlight) => highlight != null).isNotEmpty;
@@ -1208,11 +1199,6 @@ class InkResponseState extends State<_InkResponseStateWidget>
         ),
       ),
     );
-  }
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStatesController?>('_internalStatesController', internalStatesController));
   }
 }
 

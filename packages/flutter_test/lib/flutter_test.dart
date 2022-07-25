@@ -77,7 +77,6 @@ export 'src/test_compat.dart';
 export 'src/test_default_binary_messenger.dart';
 export 'src/test_exception_reporter.dart';
 export 'src/test_pointer.dart';
-export 'src/test_scroll_position.dart';
 export 'src/test_text_input.dart';
 export 'src/test_vsync.dart';
 export 'src/widget_tester.dart';

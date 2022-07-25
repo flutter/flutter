@@ -137,15 +137,6 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
-  test('$ScrollPosition disposes isScrollingNotifier', () {
-    final ScrollPosition scrollPosition = TestScrollPosition();
-    expect(scrollPosition.isScrollingNotifier.debugDisposed, false);
-
-    scrollPosition.dispose();
-
-    expect(scrollPosition.isScrollingNotifier.debugDisposed, true);
-  });
-
   testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(
