@@ -837,7 +837,7 @@ last line of pub output: "err3"
       expect(error, isNull);
       expect(processManager, hasNoRemainingExpectations);
       expect(local.existsSync(), false);
-      expect(globalHosted.childFile('second.file').existsSync(), true);
+      expect(globalHosted.childFile('second.file').existsSync(), false);
       expect(
           globalHosted.childDirectory('dir').childFile('third.file').existsSync(), false
       ); // do not copy dependencies that are already downloaded

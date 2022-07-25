@@ -67,7 +67,7 @@ Directory createDependencyDirectory(Directory pubGlobalDirectory, String depende
   return newDirectory;
 }
 
-void tryDelete(String dependencyBaseName, Directory globalCachePub, Logger logger) {
+void tryDeleteCache(String dependencyBaseName, Directory globalCachePub, Logger logger) {
   final Directory dependency = globalCachePub.childDirectory(dependencyBaseName);
   if (dependency.existsSync()) {
     try {
@@ -80,6 +80,17 @@ void tryDelete(String dependencyBaseName, Directory globalCachePub, Logger logge
     }
   }
   logger.printWarning('The join of pub-caches failed');
+}
+
+void tryToDeleteLocalCache(Directory localCache, Logger logger) {
+  try {
+    if (localCache.existsSync()) {
+      localCache.deleteSync(recursive: true);
+    }
+  }
+  on FileSystemException catch(ex) {
+    logger.printWarning('Failed to delete local cache on : ${localCache.path}');
+  }
 }
 
 /// When local cache (flutter_root/.pub-cache) and global cache (HOME/.pub-cache) are present a
@@ -605,10 +616,11 @@ class _DefaultPub implements Pub {
             );
           }
           on FileSystemException {
-            tryDelete(entity.basename, globalDirectoryPub, _logger);
+            tryDeleteCache(entity.basename, globalDirectoryPub, _logger);
           }
         }
       }
+      tryToDeleteLocalCache(_fileSystem.directory(localCachePath), _logger);
       return globalDirectory.path;
     } else if (globalDirectory != null && globalDirectory.existsSync()) {
       return globalDirectory.path;
