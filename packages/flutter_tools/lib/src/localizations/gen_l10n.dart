@@ -1151,6 +1151,12 @@ class LocalizationsGenerator {
     // Warn users when placeholder types are overrided to 'num'.
     for (final Message message in messages) {
       if (message.isPlural) {
+        if (message.placeholders.isEmpty) {
+          throw L10nException(
+              'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
+              'Check to see if the plural message is in the proper ICU syntax format '
+              'and ensure that placeholders are properly specified.');
+        }
         final Placeholder countPlaceholder = message.getCountPlaceholder();
         if (countPlaceholder.type != null && countPlaceholder.type != 'num') {
           logger.printWarning("${message.resourceId} Placeholders for plurals are automatically converted to type 'num'.");
