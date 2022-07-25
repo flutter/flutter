@@ -11692,15 +11692,13 @@ void main() {
 
       // Drag the right handle 2 letters to the right.
       final Offset handlePos = endpoints.last.point + const Offset(1.0, 1.0);
-      final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
-
-      Offset? firstDragGesturePosition;
+      final TestGesture gesture = await tester.startGesture(handlePos);
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
       await tester.pump();
 
       expect(find.byKey(fakeLoupe.key!), findsOneWidget);
-      firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstDragGesturePosition = infoBearer.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
