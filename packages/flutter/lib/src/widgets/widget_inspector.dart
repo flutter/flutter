@@ -3310,8 +3310,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   ///   String groupName,
   ///   int subtreeDepth,
   /// ) {
-  ///   return _nodeToJson(
-  ///     root,
+  ///   return root.toJsonMap(
   ///     InspectorSerializationDelegate(
   ///       groupName: groupName,
   ///       summaryTree: false,
