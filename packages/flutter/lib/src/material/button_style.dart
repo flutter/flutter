@@ -132,6 +132,7 @@ class ButtonStyle with Diagnosticable {
     this.minimumSize,
     this.fixedSize,
     this.maximumSize,
+    this.iconSize,
     this.side,
     this.shape,
     this.mouseCursor,
@@ -209,6 +210,9 @@ class ButtonStyle with Diagnosticable {
   ///
   /// This value must be greater than or equal to [minimumSize].
   final MaterialStateProperty<Size?>? maximumSize;
+
+  /// The icon's size inside of the button.
+  final MaterialStateProperty<double?>? iconSize;
 
   /// The color and weight of the button's outline.
   ///
@@ -300,6 +304,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<Size?>? minimumSize,
     MaterialStateProperty<Size?>? fixedSize,
     MaterialStateProperty<Size?>? maximumSize,
+    MaterialStateProperty<double?>? iconSize,
     MaterialStateProperty<BorderSide?>? side,
     MaterialStateProperty<OutlinedBorder?>? shape,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
@@ -322,6 +327,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? this.minimumSize,
       fixedSize: fixedSize ?? this.fixedSize,
       maximumSize: maximumSize ?? this.maximumSize,
+      iconSize: iconSize ?? this.iconSize,
       side: side ?? this.side,
       shape: shape ?? this.shape,
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -355,6 +361,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? style.minimumSize,
       fixedSize: fixedSize ?? style.fixedSize,
       maximumSize: maximumSize ?? style.maximumSize,
+      iconSize: iconSize ?? style.iconSize,
       side: side ?? style.side,
       shape: shape ?? style.shape,
       mouseCursor: mouseCursor ?? style.mouseCursor,
@@ -368,28 +375,32 @@ class ButtonStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
-    textStyle,
-    backgroundColor,
-    foregroundColor,
-    overlayColor,
-    shadowColor,
-    surfaceTintColor,
-    elevation,
-    padding,
-    minimumSize,
-    fixedSize,
-    maximumSize,
-    side,
-    shape,
-    mouseCursor,
-    visualDensity,
-    tapTargetSize,
-    animationDuration,
-    enableFeedback,
-    alignment,
-    splashFactory,
-  );
+  int get hashCode {
+    final List<Object?> values = <Object?>[
+      textStyle,
+      backgroundColor,
+      foregroundColor,
+      overlayColor,
+      shadowColor,
+      surfaceTintColor,
+      elevation,
+      padding,
+      minimumSize,
+      fixedSize,
+      maximumSize,
+      iconSize,
+      side,
+      shape,
+      mouseCursor,
+      visualDensity,
+      tapTargetSize,
+      animationDuration,
+      enableFeedback,
+      alignment,
+      splashFactory,
+    ];
+    return Object.hashAll(values);
+  }
 
   @override
   bool operator ==(Object other) {
@@ -411,6 +422,7 @@ class ButtonStyle with Diagnosticable {
         && other.minimumSize == minimumSize
         && other.fixedSize == fixedSize
         && other.maximumSize == maximumSize
+        && other.iconSize == iconSize
         && other.side == side
         && other.shape == shape
         && other.mouseCursor == mouseCursor
@@ -436,6 +448,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
@@ -464,6 +477,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: _lerpProperties<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: _lerpProperties<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      iconSize: _lerpProperties<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       side: _lerpSides(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
