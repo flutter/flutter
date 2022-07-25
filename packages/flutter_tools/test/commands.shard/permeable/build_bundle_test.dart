@@ -393,7 +393,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -432,7 +432,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -471,7 +471,7 @@ void main() {
         kDartObfuscation: 'false',
       });
     }),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
 }

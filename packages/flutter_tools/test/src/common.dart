@@ -40,15 +40,11 @@ void tryToDelete(FileSystemEntity fileEntity) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  print('foo 1!');
   const Platform platform = LocalPlatform();
   if (platform.environment.containsKey('FLUTTER_ROOT')) {
-    print('fooboo!');
-    print('env var \$FLUTTER_ROOT in getFlutterRoot() = "${platform.environment['FLUTTER_ROOT']}"');
     return platform.environment['FLUTTER_ROOT']!;
   }
 
-  print('foo 2!');
   Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
@@ -69,7 +65,6 @@ String getFlutterRoot() {
   }
 
   final List<String> parts = path.split(globals.localFileSystem.path.fromUri(scriptUri));
-  print('parts = $parts');
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();

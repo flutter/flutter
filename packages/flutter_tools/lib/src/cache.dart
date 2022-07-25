@@ -201,13 +201,9 @@ class Cache {
     'chrome-infra-packages.appspot.com',
   ];
 
-  static String? _foo;
   // Initialized by FlutterCommandRunner on startup.
   // Explore making this field lazy to catch non-initialized access.
-  static String? get flutterRoot => _foo;
-  static set flutterRoot(String? val) {
-    _foo = val;
-  }
+  static String? flutterRoot;
 
   /// Determine the absolute and normalized path for the root of the current
   /// Flutter checkout.

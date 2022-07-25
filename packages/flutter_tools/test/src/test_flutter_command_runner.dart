@@ -58,14 +58,8 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
           fileSystem: globals.fs,
           userMessages: UserMessages(),
         );
-        final String abs = globals.fs.path.absolute(Cache.flutterRoot!);
-        print('path.absolute("${Cache.flutterRoot}") = $abs');
-        final String norm = globals.fs.path.normalize(abs);
-        print('path.normalize(abs) = $norm');
-        print('path.current = ${globals.fs.path.current}');
         // For compatibility with tests that set this to a relative path.
         Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot!));
-        print('what comes out = ${Cache.flutterRoot!}');
         return super.runCommand(topLevelResults);
       }
     );
