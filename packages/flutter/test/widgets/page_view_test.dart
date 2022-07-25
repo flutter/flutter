@@ -271,7 +271,7 @@ void main() {
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
     // Easing overscroll past overscroll limit.
-    await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(-500.0, 0.0));
     await tester.pump();
 
     expect(leftOf(0), lessThan(0.0));

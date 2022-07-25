@@ -227,7 +227,7 @@ void main() {
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
     final Offset point1 = tester.getCenter(find.text('aaa1'));
-    await tester.dragFrom(point1, const Offset(0.0, 200.0));
+    await tester.dragFrom(point1, const Offset(0.0, 400.0));
     await tester.pump();
     expect(
       tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
@@ -245,7 +245,7 @@ void main() {
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
     final Offset point = tester.getCenter(find.text('aaa1'));
-    await tester.flingFrom(point, const Offset(0.0, 200.0), 5000.0);
+    await tester.flingFrom(point, const Offset(0.0, 200.0), 15000.0);
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));

@@ -219,7 +219,7 @@ class ScrollBehavior {
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-        return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind); // FIXME(moffatmN)
+        return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.macOS:
         return (PointerEvent event) => MacOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.android:

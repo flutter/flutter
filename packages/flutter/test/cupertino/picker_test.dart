@@ -421,7 +421,7 @@ void main() {
         // Falling back to 0 shouldn't produce more callbacks.
         <int>[8, 6, 4, 2, 0],
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
   });
 
   testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {

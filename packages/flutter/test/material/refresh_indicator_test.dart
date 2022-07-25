@@ -406,12 +406,12 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.fling(find.text('A'), const Offset(0.0, 1500.0), 10000.0);
     await tester.pump(const Duration(milliseconds: 100));
     expect(lastScrollOffset = controller.offset, lessThan(0.0));
     expect(refreshCalled, isFalse);
 
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
     expect(controller.offset, greaterThan(lastScrollOffset));
     expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
