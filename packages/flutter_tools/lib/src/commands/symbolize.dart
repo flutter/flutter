@@ -110,14 +110,21 @@ class SymbolizeCommand extends FlutterCommand {
     }
 
     String debugInfoPath = stringArgDeprecated('debug-info')!;
+
+    // If it's a dSYM container, expand the path to the actual DWARF.
     if (debugInfoPath.endsWith('.dSYM')) {
-      debugInfoPath = path.join(
-        debugInfoPath,
-        'Contents',
-        'Resources',
-        'DWARF/',
-        path.basenameWithoutExtension(debugInfoPath)
+      final Directory debugInfoDir = _fileSystem.directory(
+        path.join(debugInfoPath, 'Contents', 'Resources','DWARF')
       );
+      final List<FileSystemEntity> dwarfFiles =
+        debugInfoDir.listSync().where(
+          (FileSystemEntity f) => f.statSync().type == FileSystemEntityType.file
+        ).toList();
+      if (dwarfFiles.length == 1) {
+        debugInfoPath = dwarfFiles.first.path;
+      } else {
+        throwToolExit('Expected a single DWARF file in a dSYM container.');
+      }
     }
 
     final Uint8List symbols = _fileSystem.file(debugInfoPath).readAsBytesSync();
