@@ -25,8 +25,8 @@ import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'iproxy.dart';
-import 'migrations/deployment_target_migration.dart';
 import 'migrations/host_app_info_plist_migration.dart';
+import 'migrations/ios_deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/project_object_version_migration.dart';
@@ -123,7 +123,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
-    DeploymentTargetMigration(app.project, globals.logger),
+    IOSDeploymentTargetMigration(app.project, globals.logger),
     ProjectObjectVersionMigration(app.project, globals.logger),
     HostAppInfoPlistMigration(app.project, globals.logger),
   ];

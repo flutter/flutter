@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
+import 'dart:io' as io show Directory, File, Link, Process, ProcessException, ProcessResult, ProcessSignal, ProcessStartMode, systemEncoding;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
