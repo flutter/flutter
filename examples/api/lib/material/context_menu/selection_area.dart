@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
+
+const String text = 'I am some text inside of SelectionArea. Right click or long press me to show the customized context menu.';
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -52,7 +55,7 @@ class MyApp extends StatelessWidget {
               child: ListView(
                 children: const <Widget>[
                   SizedBox(height: 20.0),
-                  Text('I am some text inside of SelectionArea. Right click or long press me to show the customized context menu.'),
+                  Text(text),
                 ],
               ),
             ),
