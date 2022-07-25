@@ -129,7 +129,7 @@ bool PointerInjectorDelegate::HandlePlatformMessage(
     }
 
     auto timestamp = args.FindMember("timestamp");
-    if (!timestamp->value.IsInt()) {
+    if (!timestamp->value.IsInt() && !timestamp->value.IsUint64()) {
       FML_LOG(ERROR) << "Argument 'timestamp' is not a int";
       return false;
     }
