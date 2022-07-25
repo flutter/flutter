@@ -410,7 +410,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
     if (_receivedAppStarted && serviceUri != null) {
       if (enableDebugger) {
-        connectDebugger(serviceUri, resumeIfStarting: true);
+        connectDebugger(serviceUri);
       } else {
         // Usually, `connectDebugger` (in the base Dart adapter) will send this
         // event when it connects a debugger. Since we're not connecting a
