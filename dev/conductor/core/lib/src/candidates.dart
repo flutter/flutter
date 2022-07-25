@@ -7,7 +7,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 
 import './git.dart';
-import './globals.dart' show releaseCandidateBranchRegex;
+import './globals.dart' show kReleaseCandidateBranchRegex;
 import './repository.dart';
 import './stdio.dart';
 import './version.dart';
@@ -70,7 +70,8 @@ class CandidatesCommand extends Command<void> {
     // Pattern for extracting only the branch name via sub-group 1
     final RegExp remotePattern = RegExp('${results[kRemote]}\\/(.*)');
     for (final String branchName in branches) {
-      final RegExpMatch? candidateMatch = releaseCandidateBranchRegex.firstMatch(branchName);
+      final RegExpMatch? candidateMatch =
+          kReleaseCandidateBranchRegex.firstMatch(branchName);
       if (candidateMatch == null) {
         continue;
       }

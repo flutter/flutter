@@ -301,10 +301,10 @@ class StartContext extends Context {
       throw ConductorException('Error! A persistent state file already found at ${stateFile.path}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
-    if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
+    if (!kReleaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
         'Invalid release candidate branch "$candidateBranch". Text should '
-        'match the regex pattern /${releaseCandidateBranchRegex.pattern}/.',
+        'match the regex pattern /${kReleaseCandidateBranchRegex.pattern}/.',
       );
     }
 

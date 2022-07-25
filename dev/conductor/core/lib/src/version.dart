@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'globals.dart' show ConductorException, releaseCandidateBranchRegex;
+import 'globals.dart' show ConductorException, kReleaseCandidateBranchRegex;
 
 import 'proto/conductor_state.pbenum.dart';
 
@@ -265,11 +265,12 @@ class Version {
   /// Will throw a [ConductorException] if the version is not possible given the
   /// [candidateBranch] and [incrementLetter].
   void ensureValid(String candidateBranch, ReleaseType releaseType) {
-    final RegExpMatch? branchMatch = releaseCandidateBranchRegex.firstMatch(candidateBranch);
+    final RegExpMatch? branchMatch =
+        kReleaseCandidateBranchRegex.firstMatch(candidateBranch);
     if (branchMatch == null) {
       throw ConductorException(
         'Candidate branch $candidateBranch does not match the pattern '
-        '${releaseCandidateBranchRegex.pattern}',
+        '${kReleaseCandidateBranchRegex.pattern}',
       );
     }
 
