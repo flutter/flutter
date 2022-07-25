@@ -88,7 +88,7 @@ void tryToDeleteLocalCache(Directory localCache, Logger logger) {
       localCache.deleteSync(recursive: true);
     }
   }
-  on FileSystemException catch(ex) {
+  on FileSystemException {
     logger.printWarning('Failed to delete local cache on : ${localCache.path}');
   }
 }
