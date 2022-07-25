@@ -3475,6 +3475,9 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// (the default) will give you a 1:1 mapping between logical pixels and the
   /// output pixels in the image.
   ///
+  /// This API functions like [toImage], except that rasterization begins eagerly
+  /// on the raster thread and the image is returned before this is completed.
+  ///
   /// {@tool snippet}
   ///
   /// The following is an example of how to go from a `GlobalKey` on a
