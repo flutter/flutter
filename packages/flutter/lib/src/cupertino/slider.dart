@@ -296,6 +296,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       vsync: vsync,
       textDirection: Directionality.of(context),
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      gestureSettings: MediaQuery.of(context).gestureSettings,
     );
   }
 
@@ -311,7 +312,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..gestureSettings = MediaQuery.of(context).gestureSettings;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -334,6 +336,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     ValueChanged<double>? onChanged,
     this.onChangeStart,
     this.onChangeEnd,
+    required DeviceGestureSettings gestureSettings,
     required TickerProvider vsync,
     required TextDirection textDirection,
     MouseCursor cursor = MouseCursor.defer,
@@ -352,7 +355,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd;
+      ..onEnd = _handleDragEnd
+      ..gestureSettings = gestureSettings;
     _position = AnimationController(
       value: value,
       duration: _kDiscreteTransitionDuration,
@@ -432,6 +436,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   ValueChanged<double>? onChangeStart;
   ValueChanged<double>? onChangeEnd;
 
+  DeviceGestureSettings? get gestureSettings => _drag.gestureSettings;
+  set gestureSettings(DeviceGestureSettings? gestureSettings) {
+    _drag.gestureSettings = gestureSettings;
+  }
+  
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
