@@ -290,7 +290,7 @@ void main() {
 
     final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
 
-    image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
+    image = layer.toImageSync(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
@@ -298,7 +298,7 @@ void main() {
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     // non-zero offsets.
-    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
+    image = layer.toImageSync(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
     expect(image.width, equals(30));
     expect(image.height, equals(30));
     data = (await image.toByteData())!;
@@ -308,7 +308,7 @@ void main() {
     expect(getPixel(image.width - 1, 10), equals(0xffffffff));
 
     // offset combined with a custom pixel ratio.
-    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
+    image = layer.toImageSync(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
     expect(image.width, equals(60));
     expect(image.height, equals(60));
     data = (await image.toByteData())!;
