@@ -5,16 +5,22 @@
 import 'template.dart';
 
 class InputDecoratorTemplate extends TokenTemplate {
-  const InputDecoratorTemplate(super.blockName, super.fileName, super.tokens);
+  const InputDecoratorTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   @override
   String generate() => '''
 // Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends InputDecorationTheme {
-  const _${blockName}DefaultsM3(this.context)
+   _${blockName}DefaultsM3(this.context)
     : super();
 
   final BuildContext context;
+
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
