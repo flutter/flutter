@@ -80,7 +80,7 @@ void main() {
           LoupeSelectionOverlayInfoBearer(
             currentLineBoundries: fakeTextFieldRect,
             fieldBounds: fakeTextFieldRect,
-            handleRect: fakeTextFieldRect,
+            caratRect: fakeTextFieldRect,
             // The tap position is dragBelow units below the text field.
             globalGesturePosition: fakeTextFieldRect.center,
           ),
@@ -114,7 +114,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              handleRect: reasonableTextField,
+              caratRect: reasonableTextField,
               // The tap position is far out of the right side of the app.
               globalGesturePosition:
                   Offset(MediaQuery.of(context).size.width + 100, 0),
@@ -146,7 +146,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              handleRect: reasonableTextField,
+              caratRect: reasonableTextField,
               // The tap position is dragBelow units below the text field.
               globalGesturePosition: Offset(
                   MediaQuery.of(context).size.width / 2,
@@ -179,7 +179,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
+          caratRect: reasonableTextField,
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: Offset(
               MediaQuery.of(context).size.width / 2, reasonableTextField.top),
@@ -192,7 +192,7 @@ void main() {
         loupeInfo.value = LoupeSelectionOverlayInfoBearer(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
-            handleRect: reasonableTextField,
+            caratRect: reasonableTextField,
             globalGesturePosition:
                 loupeInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
@@ -218,7 +218,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
+          caratRect: reasonableTextField,
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: Offset(
               MediaQuery.of(context).size.width / 2, reasonableTextField.top),
@@ -231,7 +231,7 @@ void main() {
         loupeInfo.value = LoupeSelectionOverlayInfoBearer(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
-            handleRect: reasonableTextField,
+            caratRect: reasonableTextField,
             globalGesturePosition:
                 loupeInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
@@ -243,7 +243,7 @@ void main() {
         loupeInfo.value = LoupeSelectionOverlayInfoBearer(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
-            handleRect: reasonableTextField,
+            caratRect: reasonableTextField,
             globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2,
                 reasonableTextField.top));
         await tester.pumpAndSettle();

@@ -155,7 +155,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
           currentLineBoundries: fakeTextFieldRect,
           fieldBounds: fakeTextFieldRect,
-          handleRect: fakeTextFieldRect,
+          caratRect: fakeTextFieldRect,
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: fakeTextFieldRect.center,
         ));
@@ -191,7 +191,7 @@ void main() {
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
               fieldBounds: reasonableTextField.inflate(gestureOutsideLine),
-              handleRect: reasonableTextField.inflate(gestureOutsideLine),
+              caratRect: reasonableTextField.inflate(gestureOutsideLine),
               // The tap position is far out of the right side of the app.
               globalGesturePosition:
                   Offset(reasonableTextField.right + gestureOutsideLine, 0),
@@ -223,7 +223,7 @@ void main() {
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
               fieldBounds: reasonableTextField.inflate(gestureOutsideLine),
-              handleRect: reasonableTextField.inflate(gestureOutsideLine),
+              caratRect: reasonableTextField.inflate(gestureOutsideLine),
               // The tap position is far out of the left side of the app.
               globalGesturePosition:
                   Offset(reasonableTextField.left - gestureOutsideLine, 0),
@@ -249,7 +249,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              handleRect: reasonableTextField,
+              caratRect: reasonableTextField,
               globalGesturePosition: reasonableTextField.center,
             )));
 
@@ -276,7 +276,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
-              handleRect: topOfScreenTextFieldRect,
+              caratRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
@@ -307,7 +307,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              handleRect: reasonableTextField,
+              caratRect: reasonableTextField,
 
               // Gesture on the far right of the loupe.
               globalGesturePosition: reasonableTextField.topLeft,
@@ -337,7 +337,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
-              handleRect: topOfScreenTextFieldRect,
+              caratRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
@@ -368,7 +368,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              handleRect: reasonableTextField,
+              caratRect: reasonableTextField,
               globalGesturePosition: reasonableTextField.center,
             )));
 
@@ -389,7 +389,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
+          caratRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
@@ -399,7 +399,7 @@ void main() {
         loupePositioner.value = LoupeSelectionOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
+          caratRect: reasonableTextField,
           globalGesturePosition:
               reasonableTextField.center + const Offset(200, 0),
         );
@@ -424,7 +424,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
+          caratRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
@@ -435,7 +435,7 @@ void main() {
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
-          handleRect: reasonableTextField.shift(verticalShift),
+          caratRect: reasonableTextField.shift(verticalShift),
           globalGesturePosition: reasonableTextField.center + verticalShift,
         );
 
@@ -459,7 +459,7 @@ void main() {
                 LoupeSelectionOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          handleRect: reasonableTextField,
+          caratRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
@@ -470,7 +470,7 @@ void main() {
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
-          handleRect: reasonableTextField.shift(verticalShift),
+          caratRect: reasonableTextField.shift(verticalShift),
           globalGesturePosition: reasonableTextField.center + verticalShift,
         );
 

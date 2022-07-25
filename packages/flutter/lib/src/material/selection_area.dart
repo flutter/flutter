@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 
 import 'desktop_text_selection.dart';
+import 'loupe.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -34,8 +35,14 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
+    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeBuilder,
     required this.child,
   });
+
+  /// {@macro flutter.widgets.textSelection.LoupeBuilder}
+  ///
+  /// {@macro flutter.widgets.loupe.intro}
+  final LoupeBuilder? loupeBuilder;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -92,6 +99,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       focusNode: _effectiveFocusNode,
       selectionControls: controls,
+      loupeBuilder: widget.loupeBuilder,
       child: widget.child,
     );
   }

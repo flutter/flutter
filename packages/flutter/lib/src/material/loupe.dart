@@ -147,7 +147,7 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     // Place the loupe at the previously calculated X, and the Y should be
     // exactly at the center of the handle.
     final Rect unadjustedLoupeRect =
-        Offset(loupeX, selectionInfo.handleRect.center.dy) - basicLoupeOffset &
+        Offset(loupeX, selectionInfo.caratRect.center.dy) - basicLoupeOffset &
             Loupe.kDefaultLoupeSize;
 
     // Shift the loupe so that, if we are ever out of the screen, we become in bounds.
@@ -173,7 +173,7 @@ class _TextEditingLoupeState extends State<TextEditingLoupe> {
     // then settle for pointing to the center all the time.
     if (selectionInfo.fieldBounds.width <
         horizontalMaxFocalPointEdgeInsets * 2) {
-      newGlobalFocalPointX = selectionInfo.fieldBounds.center.dy;
+      newGlobalFocalPointX = selectionInfo.fieldBounds.center.dx;
     } else {
       // Otherwise, we can clamp the focal point to always point in bounds.
       newGlobalFocalPointX = clampDouble(
