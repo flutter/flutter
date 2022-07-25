@@ -4,9 +4,16 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+
   testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
 
