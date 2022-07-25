@@ -64,7 +64,9 @@ abstract class TapRegionRegistry {
 }
 
 /// A widget that provides notification of a tap inside or outside of a set of
-/// registered regions, without participating in the gesture arena.
+/// registered regions, without participating in the [gesture
+/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// system.
 ///
 /// The regions are defined by adding [TapRegion] widgets to the widget tree
 /// around the regions of interest, and they will register with this
@@ -77,7 +79,7 @@ abstract class TapRegionRegistry {
 /// member of a group, but inside another, no notification is made.
 ///
 /// When a tap inside of a registered region or region group is detected, its
-/// [TapRegion.onTapOutside] callback is called. If the tap is inside one member
+/// [TapRegion.onTapInside] callback is called. If the tap is inside one member
 /// of a group, all members are notified.
 ///
 /// The `TapRegionSurface` should be defined at the highest level needed to
@@ -85,13 +87,14 @@ abstract class TapRegionRegistry {
 /// around the entire app. If the entire app isn't covered, then taps outside of
 /// the `TapRegionSurface` will be ignored and no [TapRegion.onTapOutside] calls
 /// wil be made for those events. The [WidgetsApp], [MaterialApp] and
-/// [CupertinoApp] automatically include a `TapRegionSurface` around the entire
-/// app.
+/// [CupertinoApp] automatically include a `TapRegionSurface` around their
+/// entire app.
 ///
-/// [TapRegionSurface] does not participate in the gesture arena, so if
-/// multiple [TapRegionSurface]s are active at the same time, they will all
-/// fire, and so will any other gestures recognized by a [GestureDetector] or
-/// other pointer event handlers.
+/// [TapRegionSurface] does not participate in the [gesture
+/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// system, so if multiple [TapRegionSurface]s are active at the same time, they
+/// will all fire, and so will any other gestures recognized by a
+/// [GestureDetector] or other pointer event handlers.
 ///
 /// [TapRegion]s register only with the nearest ancestor `TapRegionSurface`.
 ///
@@ -99,6 +102,8 @@ abstract class TapRegionRegistry {
 ///
 ///  * [RenderTapRegionSurface], the render object that is inserted into the
 ///    render tree by this widget.
+///  * <https://flutter.dev/gestures/#gesture-disambiguation> for more
+///    information about the gesture system and how it disambiguates inputs.
 class TapRegionSurface extends SingleChildRenderObjectWidget {
   /// Creates a const [RenderTapRegionSurface].
   ///
@@ -121,7 +126,9 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 }
 
 /// A render object that provides notification of a tap inside or outside of a
-/// set of registered regions, without participating in the gesture arena.
+/// set of registered regions, without participating in the [gesture
+/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// system.
 ///
 /// The regions are defined by adding [RenderTapRegion] render objects in the
 /// render tree around the regions of interest, and they will register with this
@@ -134,7 +141,7 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// member of a group, but inside another, no notification is made.
 ///
 /// When a tap inside of a registered region or region group is detected, its
-/// [TapRegion.onTapOutside] callback is called. If the tap is inside one member
+/// [TapRegion.onTapInside] callback is called. If the tap is inside one member
 /// of a group, all members are notified.
 ///
 /// The `RenderTapRegionSurface` should be defined at the highest level needed
@@ -145,10 +152,11 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// [WidgetsApp], [MaterialApp] and [CupertinoApp] automatically include a
 /// `RenderTapRegionSurface` around the entire app.
 ///
-/// `RenderTapRegionSurface` does not participate in the gesture arena, so if
-/// multiple `RenderTapRegionSurface`s are active at the same time, they will
-/// all fire, and so will any other gestures recognized by a [GestureDetector]
-/// or other pointer event handlers.
+/// `RenderTapRegionSurface` does not participate in the [gesture
+/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// system, so if multiple `RenderTapRegionSurface`s are active at the same
+/// time, they will all fire, and so will any other gestures recognized by a
+/// [GestureDetector] or other pointer event handlers.
 ///
 /// [RenderTapRegion]s register only with the nearest ancestor
 /// `RenderTapRegionSurface`.
@@ -278,7 +286,8 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior with TapR
 
 /// A widget that defines a region that can detect taps inside or outside of
 /// itself and any group of regions it belongs to, without participating in the
-/// gesture arena.
+/// [gesture disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// system.
 ///
 /// This widget indicates to the nearest ancestor [TapRegionSurface] that the
 /// region occupied by its child will participate in the tap detection for that
@@ -363,7 +372,9 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
 /// A render object that defines a region that can detect taps inside or outside
 /// of itself and any group of regions it belongs to, without participating in
-/// the gesture arena.
+/// the [gesture
+/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// system.
 ///
 /// This render object indicates to the nearest ancestor [TapRegionSurface] that
 /// the region occupied by its child will participate in the tap detection for
@@ -374,6 +385,11 @@ class TapRegion extends SingleChildRenderObjectWidget {
 ///
 /// If there is no [RenderTapRegionSurface] ancestor in the render tree,
 /// `RenderTapRegion` will do nothing.
+///
+/// See also:
+///
+///  * [TapRegion], a widget that inserts a [RenderTapRegion] into the render
+///    tree.
 class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   /// Creates a [RenderTapRegion].
   RenderTapRegion({

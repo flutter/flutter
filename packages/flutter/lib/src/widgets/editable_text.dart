@@ -1219,9 +1219,12 @@ class EditableText extends StatefulWidget {
   /// Called for each tap that occurs outside of the editable text when the text
   /// field is focused.
   ///
-  /// If this is null, then, on desktop platforms and web browsers, this will
-  /// execute [FocusNode.unfocus] on the [focusNode] for this editable text. It
-  /// will do nothing by default on mobile applications.
+  /// If this is null or not given, then, on desktop platforms and web browsers
+  /// (even mobile browsers), then [FocusNode.unfocus] will be called on the
+  /// [focusNode] for this editable text when a tap is received on another part
+  /// of the UI. It will do nothing by default on mobile applications. To
+  /// disable this behavior, an empty function (e.g. `() {}`) must be passed
+  /// here.
   ///
   /// See also:
   ///
@@ -1233,7 +1236,8 @@ class EditableText extends StatefulWidget {
   /// [EditableText].
   ///
   /// This group ID will also be used for tap region in the popup toolbars for
-  /// this [EditableText].
+  /// this [EditableText] so that tapping on the toolbars doesn't unfocus the
+  /// text field.
   ///
   /// See also:
   ///

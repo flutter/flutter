@@ -2831,7 +2831,6 @@ void main() {
               fontFamily: 'Ahem',
               fontSize: 10.0,
             ),
-            onTapOutside: () {},
           ),
         ),
       ),

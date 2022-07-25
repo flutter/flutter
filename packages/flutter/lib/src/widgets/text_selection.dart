@@ -974,8 +974,11 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return ExcludeSemantics(
-      child: handle,
+    return TapRegion(
+      groupId: tapRegionGroupId,
+      child: ExcludeSemantics(
+        child: handle,
+      ),
     );
   }
 
@@ -999,8 +1002,11 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return ExcludeSemantics(
-      child: handle,
+    return TapRegion(
+      groupId: tapRegionGroupId,
+      child: ExcludeSemantics(
+        child: handle,
+      ),
     );
   }
 
@@ -1031,20 +1037,22 @@ class SelectionOverlay {
       selectionEndpoints.first.point.dy - lineHeightAtStart,
     );
 
-    return Directionality(
-      textDirection: Directionality.of(this.context),
-      child: _SelectionToolbarOverlay(
-        preferredLineHeight: lineHeightAtStart,
-        toolbarLocation: toolbarLocation,
-        layerLink: toolbarLayerLink,
-        editingRegion: editingRegion,
-        selectionControls: selectionControls,
-        midpoint: midpoint,
-        selectionEndpoints: selectionEndpoints,
-        visibility: toolbarVisible,
-        selectionDelegate: selectionDelegate,
-        clipboardStatus: clipboardStatus,
-        tapRegionGroupId: tapRegionGroupId,
+    return TapRegion(
+      groupId: tapRegionGroupId,
+      child: Directionality(
+        textDirection: Directionality.of(this.context),
+        child: _SelectionToolbarOverlay(
+          preferredLineHeight: lineHeightAtStart,
+          toolbarLocation: toolbarLocation,
+          layerLink: toolbarLayerLink,
+          editingRegion: editingRegion,
+          selectionControls: selectionControls,
+          midpoint: midpoint,
+          selectionEndpoints: selectionEndpoints,
+          visibility: toolbarVisible,
+          selectionDelegate: selectionDelegate,
+          clipboardStatus: clipboardStatus,
+        ),
       ),
     );
   }
@@ -1064,7 +1072,6 @@ class _SelectionToolbarOverlay extends StatefulWidget {
     required this.selectionEndpoints,
     required this.selectionDelegate,
     required this.clipboardStatus,
-    required this.tapRegionGroupId,
   });
 
   final double preferredLineHeight;
@@ -1077,7 +1084,6 @@ class _SelectionToolbarOverlay extends StatefulWidget {
   final List<TextSelectionPoint> selectionEndpoints;
   final TextSelectionDelegate? selectionDelegate;
   final ClipboardStatusNotifier? clipboardStatus;
-  final Object? tapRegionGroupId;
 
   @override
   _SelectionToolbarOverlayState createState() => _SelectionToolbarOverlayState();
@@ -1125,28 +1131,25 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
 
   @override
   Widget build(BuildContext context) {
-    return TapRegion(
-      groupId: widget.tapRegionGroupId,
-      child: FadeTransition(
-        opacity: _opacity,
-        child: CompositedTransformFollower(
-          link: widget.layerLink,
-          showWhenUnlinked: false,
-          offset: -widget.editingRegion.topLeft,
-          child: Builder(
-            builder: (BuildContext context) {
-              return widget.selectionControls!.buildToolbar(
-                context,
-                widget.editingRegion,
-                widget.preferredLineHeight,
-                widget.midpoint,
-                widget.selectionEndpoints,
-                widget.selectionDelegate!,
-                widget.clipboardStatus,
-                widget.toolbarLocation,
-              );
-            },
-          ),
+    return FadeTransition(
+      opacity: _opacity,
+      child: CompositedTransformFollower(
+        link: widget.layerLink,
+        showWhenUnlinked: false,
+        offset: -widget.editingRegion.topLeft,
+        child: Builder(
+          builder: (BuildContext context) {
+            return widget.selectionControls!.buildToolbar(
+              context,
+              widget.editingRegion,
+              widget.preferredLineHeight,
+              widget.midpoint,
+              widget.selectionEndpoints,
+              widget.selectionDelegate!,
+              widget.clipboardStatus,
+              widget.toolbarLocation,
+            );
+          },
         ),
       ),
     );
