@@ -854,6 +854,8 @@ class RenderParagraph extends RenderBox
     //
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
+    print('${(text as TextSpan).text?.codeUnits} ${(text as TextSpan).style}\n');
+
     _layoutTextWithConstraints(constraints);
 
     assert(() {
