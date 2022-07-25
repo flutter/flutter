@@ -120,7 +120,6 @@ class ChangeNotifier implements Listenable {
   List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
-
   bool _debugDisposed = false;
 
   /// Used by subclasses to assert that the [ChangeNotifier] has not yet been

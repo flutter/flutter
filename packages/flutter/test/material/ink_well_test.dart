@@ -12,7 +12,6 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-
 void main() {
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
