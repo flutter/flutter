@@ -4,6 +4,15 @@
 
 // @dart = 2.8
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210722"
+//
+// The mixture of MemoryFileSystem and LocalFileSystem and the global state of
+// Cache.flutterRoot are blocking randomizing these tests.
+@Tags(<String>['no-shuffle'])
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,7 +26,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
-import 'package:path/src/context.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -75,13 +83,6 @@ void main() {
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
     expect((await command.usageValues).commandBuildBundleIsModule, false);
-  });
-
-  testUsingContext('foo test', () async {
-    final main = globals.fs.file('lib/main.dart')..createSync(recursive: true);
-    expect(main.existsSync(), isTrue);
-    globals.fs.file('pubspec.yaml').createSync(recursive: true);
-    globals.fs.file('.packages').createSync(recursive: true);
   });
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
