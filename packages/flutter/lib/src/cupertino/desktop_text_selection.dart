@@ -267,8 +267,8 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
 
   @override
   void dispose() {
-    super.dispose();
     widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    super.dispose();
   }
 
   @override

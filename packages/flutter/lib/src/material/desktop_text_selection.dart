@@ -168,8 +168,8 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 
   @override
   void dispose() {
-    super.dispose();
     widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    super.dispose();
   }
 
   @override

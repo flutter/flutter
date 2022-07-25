@@ -200,8 +200,8 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
   @override
   void dispose() {
-    super.dispose();
     widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    super.dispose();
   }
 
   @override
