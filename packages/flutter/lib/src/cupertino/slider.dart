@@ -440,7 +440,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   set gestureSettings(DeviceGestureSettings? gestureSettings) {
     _drag.gestureSettings = gestureSettings;
   }
-  
+
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
