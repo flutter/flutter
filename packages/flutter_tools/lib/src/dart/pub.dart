@@ -61,6 +61,12 @@ void joinCaches({
   }
 }
 
+Directory createDependencyDirectory(Directory pubGlobalDirectory, String dependencyName) {
+  final Directory newDirectory = pubGlobalDirectory.childDirectory(dependencyName);
+  newDirectory.createSync();
+  return newDirectory;
+}
+
 void tryDelete(String dependencyBaseName, Directory globalCachePub, Logger logger) {
   final Directory dependency = globalCachePub.childDirectory(dependencyBaseName);
   if (dependency.existsSync()) {
@@ -591,9 +597,10 @@ class _DefaultPub implements Pub {
       for (final FileSystemEntity entity in localDirectoryPub.listSync()) {
         if (entity is Directory && !globalDirectoryPub.childDirectory(entity.basename).existsSync()){
           try {
+            final Directory newDirectory = createDependencyDirectory(globalDirectoryPub, entity.basename);
             joinCaches(
               fileSystem: _fileSystem,
-              globalCacheDirectory: globalDirectoryPub,
+              globalCacheDirectory: newDirectory,
               dependencyDirectory: entity,
             );
           }
