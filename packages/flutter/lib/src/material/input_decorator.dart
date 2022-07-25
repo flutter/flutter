@@ -2045,8 +2045,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
-    final TextStyle defaultTextStyle = MaterialStateProperty.resolveAs(defaults.floatingLabelStyle!, materialState)
-      .merge(decoration.floatingLabelStyle ?? decoration.labelStyle);
+    TextStyle defaultTextStyle = MaterialStateProperty.resolveAs(defaults.floatingLabelStyle!, materialState);
+    if (decoration.errorText != null && decoration.errorStyle?.color != null) {
+      defaultTextStyle = defaultTextStyle.copyWith(color: decoration.errorStyle?.color);
+    }
+    defaultTextStyle = defaultTextStyle.merge(decoration.floatingLabelStyle ?? decoration.labelStyle);
 
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
