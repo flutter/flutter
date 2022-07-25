@@ -60,7 +60,7 @@ void main() {
 
     // Use AGP 4.1.0
     final String newBuildGradle = buildGradle.replaceAll(
-        androidPluginRegExp, 'com.android.tools.build:gradle:{{agpVersion}}');
+        androidPluginRegExp, 'com.android.tools.build:gradle:7.5');
     buildGradleFile.writeAsStringSync(newBuildGradle);
 
     // Run flutter build apk using AGP 4.1.0
