@@ -621,11 +621,11 @@ class CustomScrollView extends ScrollView {
 /// A [ScrollView] that uses a single child layout model.
 ///
 /// {@template flutter.widgets.BoxScroll.scrollBehaviour}
-/// ## Scrolling Behaviour
-///
-/// [ScrollBehavior] cannot be provided because it is only exposed
-/// in widgets where the scrolling is hard-coded due to scrollbars and
-/// overscroll indicators, or widget-specific [ScrollPhysics].
+/// [ScrollView]s are often decorated with [Scrollbar]s and overscroll indicators,
+/// which are managed by the inherited [ScrollBehavior]. Placing a
+/// [ScrollConfiguration] above a ScrollView can modify these behaviors for that
+/// ScrollView, or can be managed app-wide by providing a ScrollBehavior to
+/// [MaterialApp.scrollBehavior] or [CupertinoApp.scrollBehavior].
 /// {@endtemplate}
 ///
 /// See also:
