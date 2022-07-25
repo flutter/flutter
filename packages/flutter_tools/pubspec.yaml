@@ -16,7 +16,7 @@ dependencies:
   coverage: 1.5.0
   crypto: 3.0.2
   file: 6.1.2
-  flutter_template_images: 4.1.0
+  flutter_template_images: 4.2.0
   html: 0.15.0
   http: 0.13.4
   intl: 0.17.0
@@ -103,4 +103,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: b869
+# PUBSPEC CHECKSUM: 5d6a

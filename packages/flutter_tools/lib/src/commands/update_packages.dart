@@ -29,7 +29,7 @@ import '../runner/flutter_command.dart';
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
-  'flutter_template_images': '4.1.0', // Must always exactly match flutter_tools template.
+  'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
   // Could potentially break color scheme tests on upgrade,
   // so pin and manually update as needed.
