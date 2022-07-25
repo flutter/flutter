@@ -171,6 +171,8 @@ class Xcode {
 
   Future<RunResult> dsymutil(List<String> args) => _run('dsymutil', args);
 
+  Future<RunResult> strip(List<String> args) => _run('strip', args);
+
   Future<RunResult> _run(String command, List<String> args) {
     return _processUtils.run(
       <String>[...xcrunCommand(), command, ...args],
