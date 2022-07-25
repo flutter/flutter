@@ -13,6 +13,10 @@ import 'basic.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 
+BoxHitTest _toBoxHitTest(bool Function(BoxHitTestResult result, { required Offset position }) hitTest) {
+  return (BoxHitTestResult result, Offset transform) => hitTest(result, position: transform);
+}
+
 /// A place in an [Overlay] that can contain a widget.
 ///
 /// Overlay entries are inserted into an [Overlay] using the
@@ -712,7 +716,88 @@ class _TheatreElement extends MultiChildRenderObjectElement {
   }
 }
 
-class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData> {
+// A `RenderBox` that sizes itself to its parent's size, implements the stack
+// layout algorithm and renders its children in the given `theatre`.
+mixin _RenderTheatreMixin on RenderBox {
+  _RenderTheatre get theatre;
+
+  RenderBox? get _firstOnstageChild;
+  RenderBox? get _lastOnstageChild;
+  int get _onstageChildCount;
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! StackParentData) {
+      child.parentData = StackParentData();
+    }
+  }
+
+  bool _layoutChild(RenderBox child, StackParentData childParentData, BoxConstraints nonPositionedChildConstraints, Alignment alignment) {
+    if (!childParentData.isPositioned) {
+      child.layout(nonPositionedChildConstraints, parentUsesSize: true);
+      childParentData.offset = alignment.alongOffset(size - child.size as Offset);
+      return false;
+    } else {
+      assert(child is! _RenderDeferredLayoutBox);
+      return RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
+    }
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performLayout() {
+    // `theatre` must override this method to reset _hasVisualOverflow.
+    RenderBox? child = _firstOnstageChild;
+    if (child == null) {
+      return;
+    }
+    // Same BoxConstraints as used by RenderStack for StackFit.expand.
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+    final Alignment alignment = theatre._resolvedAlignment;
+    while (child != null) {
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final bool hasVisualOverflow = _layoutChild(child, childParentData, nonPositionedChildConstraints, alignment);
+      theatre._hasVisualOverflow = theatre._hasVisualOverflow || hasVisualOverflow;
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
+    }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    RenderBox? child = _lastOnstageChild;
+    int childCount = _onstageChildCount;
+    while (child != null) {
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: _toBoxHitTest(child.hitTest),
+      );
+      if (isHit) {
+        return true;
+      }
+      childCount -= 1;
+      child = childCount > 0 ? childParentData.previousSibling : null;
+    }
+    return false;
+  }
+
+  // `theatre` must override this method to handle clipping.
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    RenderBox? child = _firstOnstageChild;
+    while (child != null) {
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      context.paintChild(child, childParentData.offset + offset);
+      child = childParentData.nextSibling;
+    }
+  }
+}
+
+class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheatreMixin {
   _RenderTheatre({
     List<RenderBox>? children,
     required TextDirection textDirection,
@@ -728,14 +813,8 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     addAll(children);
   }
 
-  bool _hasVisualOverflow = false;
-
   @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! StackParentData) {
-      child.parentData = StackParentData();
-    }
-  }
+  _RenderTheatre get theatre => this;
 
   Alignment? _alignmentCache;
   Alignment get _resolvedAlignment => _alignmentCache ??= AlignmentDirectional.topStart.resolve(textDirection);
@@ -810,6 +889,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     super.markNeedsLayout();
   }
 
+  @override
   RenderBox? get _firstOnstageChild {
     if (skipCount == super.childCount) {
       return null;
@@ -823,8 +903,10 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     return child;
   }
 
+  @override
   RenderBox? get _lastOnstageChild => skipCount == super.childCount ? null : lastChild;
 
+  @override
   int get _onstageChildCount => childCount - skipCount;
 
   @override
@@ -870,9 +952,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 
   @override
-  bool get sizedByParent => true;
-
-  @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(constraints.biggest.isFinite);
     return constraints.biggest;
@@ -881,81 +960,30 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void performLayout() {
     _hasVisualOverflow = false;
-
-    if (_onstageChildCount == 0) {
-      return;
-    }
-
-    // Same BoxConstraints as used by RenderStack for StackFit.expand.
-    final BoxConstraints nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-
-    RenderBox? child = _firstOnstageChild;
-    while (child != null) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
-
-      if (!childParentData.isPositioned) {
-        child.layout(nonPositionedConstraints, parentUsesSize: true);
-        childParentData.offset = _resolvedAlignment.alongOffset(size - child.size as Offset);
-      } else {
-        assert(child is! _RenderDeferredLayoutBox);
-        _hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment) || _hasVisualOverflow;
-      }
-
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
+    super.performLayout();
   }
 
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    RenderBox? child = _lastOnstageChild;
-    for (int i = 0; i < _onstageChildCount; i++) {
-      assert(child != null);
-      final StackParentData childParentData = child!.parentData! as StackParentData;
-      final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit) {
-        return true;
-      }
-      child = childParentData.previousSibling;
-    }
-    return false;
-  }
-
-  @protected
-  void paintStack(PaintingContext context, Offset offset) {
-    RenderBox? child = _firstOnstageChild;
-    while (child != null) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      context.paintChild(child, childParentData.offset + offset);
-      child = childParentData.nextSibling;
-    }
-  }
+  bool _hasVisualOverflow = false;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer.layer = context.pushClipRect(
+    final bool shouldClip = _hasVisualOverflow && clipBehavior != Clip.none;
+    final LayerHandle<ClipRectLayer> clipRectLayer = _clipRectLayer;
+    if (shouldClip) {
+      clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
         Offset.zero & size,
-        paintStack,
+        super.paint,
         clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer.layer,
+        oldLayer: clipRectLayer.layer,
       );
     } else {
-      _clipRectLayer.layer = null;
-      paintStack(context, offset);
+      clipRectLayer.layer = null;
+      super.paint(context, offset);
     }
   }
-
-  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void dispose() {
@@ -1132,9 +1160,6 @@ class _OverlayChild {
 class _OverlayPortalElement extends RenderObjectElement {
   _OverlayPortalElement(OverlayPortal super.widget);
 
-  //@override
-  //OverlayPortal get widget => super.widget as OverlayPortal;
-
   @override
   _RenderLayoutSurrogateProxyBox get renderObject => super.renderObject as _RenderLayoutSurrogateProxyBox;
 
@@ -1286,14 +1311,13 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   }
 }
 
-// A `RenderProxyBox` that defers its layout until its `_layoutSurrogate` is laid
-// out.
+// A `RenderProxyBox` that defers its layout until its `_layoutSurrogate` is
+// laid out.
 //
-// This `RenderObject` must be a child `RenderObject` of a `_RenderTheatre`. It
-// guarantees that:
+// This `RenderObject` must be a child of a `_RenderTheatre`. It guarantees that:
 //
-// 1. It's a relayout boundary. And it never dirties its parent `_RenderTheatre`
-//    or its `_layoutSurrogate`.
+// 1. It's a relayout boundary, and `markParentNeedsLayout` is overridden such
+//    that it never dirties its `_RenderTheatre`.
 //
 // 2. Its `layout` implementation is overridden such that `performLayout` does
 //    not do anything when its called from `layout`, preventing the parent
@@ -1305,16 +1329,26 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 // 3. When invoked from `PipelineOwner.flushLayout`, or
 //    `_layoutSurrogate.performLayout`, this `RenderObject` behaves like an
 //    `Overlay` that has only one entry.
-class _RenderDeferredLayoutBox extends RenderProxyBox {
+class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheatreMixin {
   _RenderDeferredLayoutBox(this._layoutSurrogate);
 
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
 
   @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! StackParentData) {
-      child.parentData = StackParentData();
-    }
+  RenderBox? get _firstOnstageChild => child;
+
+  @override
+  RenderBox? get _lastOnstageChild => child;
+
+  @override
+  int get _onstageChildCount => child == null ? 0 : 1;
+
+  @override
+  _RenderTheatre get theatre {
+    final AbstractNode? parent = this.parent;
+    return parent is _RenderTheatre
+      ? parent
+      : throw FlutterError('$parent of $this is not a _RenderTheatre');
   }
 
   @override
@@ -1346,9 +1380,6 @@ class _RenderDeferredLayoutBox extends RenderProxyBox {
   @override
   RenderObject? get debugLayoutParent => _layoutSurrogate;
 
-  @override
-  bool get sizedByParent => true;
-
   void layoutByLayoutSurrogate() {
     assert(!_parentDoingLayout);
     final _RenderTheatre? theatre = parent as _RenderTheatre?;
@@ -1363,6 +1394,8 @@ class _RenderDeferredLayoutBox extends RenderProxyBox {
   @override
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(_needsLayout == debugNeedsLayout);
+    // Only _RenderTheatre calls this implementation.
+    assert(parent != null);
     final bool scheduleDeferredLayout = _needsLayout || this.constraints != constraints;
     assert(!_parentDoingLayout);
     _parentDoingLayout = true;
@@ -1372,11 +1405,11 @@ class _RenderDeferredLayoutBox extends RenderProxyBox {
     _needsLayout = false;
     assert(!debugNeedsLayout);
     if (scheduleDeferredLayout) {
-      final _RenderTheatre? parent = this.parent as _RenderTheatre?;
+      final _RenderTheatre parent = this.parent! as _RenderTheatre;
       // Invoking markNeedsLayout as a layout callback allows this node to be
       // merged back to the `PipelineOwner` if it's not already dirty. Otherwise
       // this may cause some dirty descendants to performLayout a second time.
-      parent?.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
+      parent.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
     }
   }
 
@@ -1399,23 +1432,13 @@ class _RenderDeferredLayoutBox extends RenderProxyBox {
     }());
     // This method is directly being invoked from `PipelineOwner.flushLayout`,
     // or from `_layoutSurrogate`'s performLayout.
-    final _RenderTheatre? parent = this.parent as _RenderTheatre?;
+    assert(parent != null);
     final RenderBox? child = this.child;
-    if (parent == null || child == null) {
-      assert(parent != null);
+    if (child == null) {
       _needsLayout = false;
       return;
     }
-
-    final Alignment alignment = parent._resolvedAlignment;
-    final StackParentData childParentData = child.parentData! as StackParentData;
-    if (!childParentData.isPositioned) {
-      child.layout(constraints, parentUsesSize: true);
-      childParentData.offset = alignment.alongOffset(size - child.size as Offset);
-    } else {
-      parent._hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, alignment) || parent._hasVisualOverflow;
-    }
-    assert(child.parentData == childParentData);
+    super.performLayout();
     assert(() {
       _debugMutationsLocked = false;
       return true;
@@ -1424,55 +1447,10 @@ class _RenderDeferredLayoutBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return false;
-    }
-    final StackParentData childParentData = child.parentData! as StackParentData;
-    return result.addWithPaintOffset(
-      offset: childParentData.offset,
-      position: position,
-      hitTest: (BoxHitTestResult result, Offset transformed) {
-        assert(transformed == position - childParentData.offset);
-        return child.hitTest(result, position: transformed);
-      },
-    );
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final RenderBox? child = this.child;
-    final _RenderTheatre? parent = this.parent as _RenderTheatre?;
-    if (child == null || parent == null) {
-      return;
-    }
-    final StackParentData childParentData = child.parentData! as StackParentData;
-    if (parent._hasVisualOverflow && parent.clipBehavior != Clip.none) {
-      parent._clipRectLayer.layer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        Offset.zero & size,
-        (PaintingContext context, Offset offset) { context.paintChild(child, offset + childParentData.offset); },
-      );
-    } else {
-      context.paintChild(child, offset + childParentData.offset);
-    }
-  }
-
-  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
-  }
-
-  @override
-  Rect? describeApproximatePaintClip(RenderObject child) {
-    final _RenderTheatre parent = this.parent! as _RenderTheatre;
-    return parent._hasVisualOverflow && parent.clipBehavior != Clip.none
-      ? Offset.zero & size
-      : null;
   }
 }
 
