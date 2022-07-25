@@ -219,8 +219,9 @@ class ScrollBehavior {
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
+        return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind); // FIXME(moffatmN)
       case TargetPlatform.macOS:
-        return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind);
+        return (PointerEvent event) => MacOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -230,6 +231,7 @@ class ScrollBehavior {
   }
 
   static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _bouncingDesktopPhysics = BouncingDesktopScrollPhysics(parent: RangeMaintainingScrollPhysics());
   static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 
   /// The scroll physics to use for the platform given by [getPlatform].
@@ -240,8 +242,9 @@ class ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
+      return _bouncingPhysics;
       case TargetPlatform.macOS:
-        return _bouncingPhysics;
+        return _bouncingDesktopPhysics;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
