@@ -42,6 +42,8 @@ impeller_shaders("entity_shaders") {
     "shaders/texture_fill.vert",
     "shaders/vertices.vert",
     "shaders/vertices.frag",
+    "shaders/radial_gradient_fill.vert",
+    "shaders/radial_gradient_fill.frag",
   ]
 }
 
@@ -71,6 +73,10 @@ impeller_component("entity") {
     "contents/filters/inputs/texture_filter_input.h",
     "contents/linear_gradient_contents.cc",
     "contents/linear_gradient_contents.h",
+    "contents/path_contents.cc",
+    "contents/path_contents.h",
+    "contents/radial_gradient_contents.cc",
+    "contents/radial_gradient_contents.h",
     "contents/solid_color_contents.cc",
     "contents/solid_color_contents.h",
     "contents/solid_stroke_contents.cc",

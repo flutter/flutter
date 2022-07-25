@@ -10,6 +10,7 @@
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
+#include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
@@ -30,7 +31,7 @@ struct Paint {
   };
 
   Color color = Color::Black();
-  std::shared_ptr<LinearGradientContents> contents;
+  std::shared_ptr<PathContents> contents;
 
   Scalar stroke_width = 0.0;
   SolidStrokeContents::Cap stroke_cap = SolidStrokeContents::Cap::kButt;

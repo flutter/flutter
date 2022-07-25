@@ -15,6 +15,7 @@
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
+#include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
@@ -219,7 +220,16 @@ void DisplayListDispatcher::setColorSource(
       return;
     }
     case flutter::DlColorSourceType::kImage:
-    case flutter::DlColorSourceType::kRadialGradient:
+    case flutter::DlColorSourceType::kRadialGradient: {
+      const flutter::DlRadialGradientColorSource* radialGradient =
+          source->asRadialGradient();
+      FML_CHECK(radialGradient);
+      auto contents = std::make_shared<RadialGradientContents>();
+      contents->SetCenterAndRadius(ToPoint(radialGradient->center()),
+                                   radialGradient->radius());
+      paint_.contents = std::move(contents);
+      return;
+    }
     case flutter::DlColorSourceType::kConicalGradient:
     case flutter::DlColorSourceType::kSweepGradient:
     case flutter::DlColorSourceType::kUnknown:
