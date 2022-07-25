@@ -1361,7 +1361,7 @@ void main() {
     expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
   });
 
-  testWidgets('DraggableScrollableController must be attached before using any of its paramters', (WidgetTester tester) async {
+  testWidgets('DraggableScrollableController must be attached before using any of its parameters', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     expect(controller.isAttached, false);
     expect(()=>controller.size, throwsAssertionError);
@@ -1389,4 +1389,70 @@ void main() {
       expect(controller.isAttached, false);
       expect(tester.takeException(), isNull);
     });
+
+  testWidgets('DraggableScrollableSheet should not reset programmatic drag on rebuild', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/101114
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.jumpTo(.6);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    // Force an arbitrary rebuild by pushing a new widget.
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    // Sheet remains at .6.
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    controller.reset();
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.5, precisionErrorTolerance),
+    );
+
+    controller.animateTo(
+      .6,
+      curve: Curves.linear,
+      duration: const Duration(milliseconds: 200),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    // Force an arbitrary rebuild by pushing a new widget.
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    // Sheet remains at .6.
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+  });
 }
