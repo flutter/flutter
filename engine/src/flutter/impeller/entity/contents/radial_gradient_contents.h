@@ -16,11 +16,11 @@
 
 namespace impeller {
 
-class LinearGradientContents final : public PathContents {
+class RadialGradientContents final : public PathContents {
  public:
-  LinearGradientContents();
+  RadialGradientContents();
 
-  ~LinearGradientContents() override;
+  ~RadialGradientContents() override;
 
   void SetPath(Path path) override;
 
@@ -32,7 +32,7 @@ class LinearGradientContents final : public PathContents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  void SetEndPoints(Point start_point, Point end_point);
+  void SetCenterAndRadius(Point centre, Scalar radius);
 
   void SetColors(std::vector<Color> colors);
 
@@ -40,11 +40,11 @@ class LinearGradientContents final : public PathContents {
 
  private:
   Path path_;
-  Point start_point_;
-  Point end_point_;
+  Point center_;
+  Scalar radius_;
   std::vector<Color> colors_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(LinearGradientContents);
+  FML_DISALLOW_COPY_AND_ASSIGN(RadialGradientContents);
 };
 
 }  // namespace impeller
