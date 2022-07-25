@@ -203,6 +203,23 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderRadialGradient) {
+  Canvas canvas;
+
+  Paint paint;
+  auto contents = std::make_shared<RadialGradientContents>();
+  contents->SetCenterAndRadius({125, 125}, 100);
+  std::vector<Color> colors = {Color{0.9019, 0.3921, 0.3960, 1.0},
+                               Color{0.5686, 0.5960, 0.8980, 1.0}};
+  contents->SetColors(std::move(colors));
+  paint.contents = contents;
+
+  canvas.DrawRect({25, 25, 200, 200}, paint);
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderGroupOpacity) {
   Canvas canvas;
 
