@@ -189,5 +189,7 @@ void main() {
 
     expect(find.byKey(builtInKey), findsNothing);
     expect(find.byKey(directKey), findsNothing);
-  });
+  },
+    skip: isContextMenuProvidedByPlatform, // [intended] no Flutter-drawn text selection toolbar on web.
+  );
 }
