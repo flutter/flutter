@@ -58,7 +58,7 @@ class LoupeController {
   ///       builder: (BuildContext context) => const Text('I WILL display in the loupe')));
   ///
   ///   // Will display in the loupe, since this entry was passed to show.
-  ///   final displayInLoupeEvenThoughPlacedBeforeChronologically = OverlayEntry(
+  ///   final OverlayEntry displayInLoupeEvenThoughPlacedBeforeChronologically = OverlayEntry(
   ///       builder: (BuildContext context) =>
   ///           const Text('I WILL display in the loupe'));
   ///
