@@ -214,6 +214,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     bool textPointerWithinComposingRegion = false;
     bool currSpanIsComposingRegion = false;
 
+    // Add text interwoven with any misspelled words to the tree.
     if (spellCheckSuggestions != null) {
       while (textPointer < text.length &&
         currSpanPointer < spellCheckSuggestions.length) {
@@ -268,6 +269,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       }
     }
 
+    // Add any remaining text to the tree if applicable.
     if (textPointer < text.length) {
       if (textPointer < composingRegion.start &&
           !composingWithinCurrentTextRange) {
