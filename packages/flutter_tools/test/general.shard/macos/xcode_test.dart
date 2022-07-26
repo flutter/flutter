@@ -59,6 +59,8 @@ void main() {
               'xcrun',
               'simctl',
               'list',
+              'devices',
+              'booted',
             ],
           ),
         );
@@ -78,6 +80,8 @@ void main() {
               'xcrun',
               'simctl',
               'list',
+              'devices',
+              'booted',
             ],
             exitCode: 1,
           ),
