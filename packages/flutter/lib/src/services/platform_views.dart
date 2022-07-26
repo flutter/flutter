@@ -107,6 +107,10 @@ class PlatformViewsService {
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
+  ///
+  /// This attempts to use the newest and most efficient platform view
+  /// implementation when possible. In cases where that is not supported, it
+  /// falls back to using Virtual Display.
   static AndroidViewController initAndroidView({
     required int id,
     required String viewType,
@@ -134,9 +138,10 @@ class PlatformViewsService {
 
   /// {@macro flutter.services.PlatformViewsService.initAndroidView}
   ///
-  /// Alias for [initAndroidView].
-  /// This factory is provided for backward compatibility purposes.
-  /// In the future, this method will be deprecated.
+  /// This attempts to use the newest and most efficient platform view
+  /// implementation when possible. In cases where that is not supported, it
+  /// falls back to using Hybrid Composition, which is the mode used by
+  /// [initExpensiveAndroidView].
   static SurfaceAndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
@@ -163,11 +168,13 @@ class PlatformViewsService {
 
   /// {@macro flutter.services.PlatformViewsService.initAndroidView}
   ///
-  /// When this factory is used, the Android view and Flutter widgets are composed at the
-  /// Android view hierarchy level.
-  /// This is only useful if the view is a Android SurfaceView. However, using this method
-  /// has a performance cost on devices that run below 10, or underpowered devices.
-  /// In most situations, you should use [initAndroidView].
+  /// When this factory is used, the Android view and Flutter widgets are
+  /// composed at the Android view hierarchy level.
+  ///
+  /// Using this method has a performance cost on devices running Android 9 or
+  /// earlier, or on underpowered devices.
+  /// In most situations, you should use [initAndroidView] or
+  /// [initSurfaceAndroidView] instead.
   static ExpensiveAndroidViewController initExpensiveAndroidView({
     required int id,
     required String viewType,
