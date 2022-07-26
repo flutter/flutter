@@ -638,7 +638,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckConfiguration = SpellCheckConfiguration.disabled,
+    this.spellCheckConfiguration,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -702,7 +702,6 @@ class EditableText extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        assert(
-          spellCheckConfiguration == SpellCheckConfiguration.disabled ||
           spellCheckConfiguration == null ||
           spellCheckConfiguration!.misspelledTextStyle != null,
           'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
@@ -1710,7 +1709,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
-    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: SpellCheckConfiguration.disabled));
+    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
   }
 }
 
@@ -1965,7 +1964,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
 
     // Spell check setup
-    if (widget.spellCheckConfiguration == SpellCheckConfiguration.disabled || widget.spellCheckConfiguration == null) {
+    if (widget.spellCheckConfiguration == null) {
       return;
     }
 

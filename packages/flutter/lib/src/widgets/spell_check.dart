@@ -37,14 +37,6 @@ class SpellCheckConfiguration {
   /// assertion error.
   final TextStyle? misspelledTextStyle;
 
-  /// A [SpellCheckConfiguration] that indicates a text input widget does not
-  /// wish to enable spell check.
-  static const SpellCheckConfiguration disabled = SpellCheckConfiguration(
-    spellCheckService: null,
-    spellCheckSuggestionsHandler: null,
-    misspelledTextStyle: null,
-  );
-
   /// Returns a copy of the current [SpellCheckConfiguration] instance with
   /// specified overrides.
   SpellCheckConfiguration copyWith({
