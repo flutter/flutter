@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
-import 'loupe.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -273,7 +273,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeConfiguration,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -434,7 +434,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeConfiguration,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -781,19 +781,19 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.loupe.intro}
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextEditingLoupe] on iOS nothing on all other
-  /// platforms. If it is desired to supress the loupe, consider passing
-  /// [TextEditingLoupeConfiguration.disabled].
+  /// By default, builds a [CupertinoTextMagnifier] on iOS nothing on all other
+  /// platforms. If it is desired to supress the magnifier, consider passing
+  /// [TextMagnifierConfiguration.disabled].
   ///
-  // todo(antholeole): once the loupe PR lands, I should enrich this area of the
-  // docs with images of what a loupe is.
-  final TextEditingLoupeConfiguration? loupeConfiguration;
+  // todo(antholeole): once the magnifier PR lands, I should enrich this area of the
+  // docs with images of what a magnifier is.
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
@@ -840,16 +840,16 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 
-  static final TextEditingLoupeConfiguration _iosLoupeConfiguration = TextEditingLoupeConfiguration(
-    loupeBuilder: (
+  static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
+    magnifierBuilder: (
     BuildContext context,
-    LoupeController controller,
-    ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeSelectionOverlayInfoBearer
+    MagnifierController controller,
+    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer
   ) {
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return CupertinoTextEditingLoupe(
+      return CupertinoTextMagnifier(
         controller: controller,
-        loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer,
+        magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
       );
     }
 
@@ -1303,7 +1303,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             maxLines: widget.maxLines,
             minLines: widget.minLines,
             expands: widget.expands,
-            loupeConfiguration: widget.loupeConfiguration ?? CupertinoTextField._iosLoupeConfiguration,
+            magnifierConfiguration: widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
             // Only show the selection highlight when the text field is focused.
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled

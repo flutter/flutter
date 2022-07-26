@@ -11735,15 +11735,15 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
-  group('loupe builder', () {
-    testWidgets('should build custom loupe if given',
+  group('magnifier builder', () {
+    testWidgets('should build custom magnifier if given',
         (WidgetTester tester) async {
-      final Widget customLoupe = Container(
+      final Widget customMagnifier = Container(
         key: UniqueKey(),
       );
       final TextField textField = TextField(
-        loupeConfiguration: TextEditingLoupeConfiguration(
-          loupeBuilder: (_, __, ___) => customLoupe,
+        magnifierConfiguration: TextMagnifierConfiguration(
+          magnifierBuilder: (_, __, ___) => customMagnifier,
         ),
       );
 
@@ -11755,20 +11755,20 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       expect(
-          textField.loupeConfiguration!.loupeBuilder(
+          textField.magnifierConfiguration!.magnifierBuilder(
               context,
-              LoupeController(),
-              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                const LoupeSelectionOverlayInfoBearer.empty(),
+              MagnifierController(),
+              ValueNotifier<MagnifierOverlayInfoBearer>(
+                const MagnifierOverlayInfoBearer.empty(),
               )),
           isA<Widget>().having(
               (Widget widget) => widget.key,
-              'built loupe key equal to passed in loupe key',
-              equals(customLoupe.key)));
+              'built magnifier key equal to passed in magnifier key',
+              equals(customMagnifier.key)));
     });
 
     group('defaults', () {
-      testWidgets('should build Loupe on Android', (WidgetTester tester) async {
+      testWidgets('should build Magnifier on Android', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
         );
@@ -11777,16 +11777,16 @@ void main() {
         final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            editableText.loupeConfiguration.loupeBuilder(
+            editableText.magnifierConfiguration.magnifierBuilder(
                 context,
-                LoupeController(),
-                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty(),
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
                 )),
-            isA<TextEditingLoupe>());
+            isA<TextEditingMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-      testWidgets('should build CupertinoLoupe on iOS',
+      testWidgets('should build CupertinoMagnifier on iOS',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
@@ -11796,13 +11796,13 @@ void main() {
         final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            editableText.loupeConfiguration.loupeBuilder(
+            editableText.magnifierConfiguration.magnifierBuilder(
                 context,
-                LoupeController(),
-                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty(),
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
                 )),
-            isA<CupertinoTextEditingLoupe>());
+            isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
       testWidgets('should build nothing on Android and iOS',
@@ -11815,11 +11815,11 @@ void main() {
         final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            editableText.loupeConfiguration.loupeBuilder(
+            editableText.magnifierConfiguration.magnifierBuilder(
                 context,
-                LoupeController(),
-                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty(),
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
                 )),
             isNull);
       },
@@ -11830,12 +11830,12 @@ void main() {
     });
   });
 
-  group('loupe', () {
-    late ValueNotifier<LoupeSelectionOverlayInfoBearer> infoBearer;
-    final Widget fakeLoupe = Container(key: UniqueKey());
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
 
     testWidgets(
-        'Can drag handles to show, unshow, and update loupe',
+        'Can drag handles to show, unshow, and update magnifier',
         (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -11843,14 +11843,14 @@ void main() {
           child: TextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            loupeConfiguration: TextEditingLoupeConfiguration(
-              loupeBuilder: (
+            magnifierConfiguration: TextMagnifierConfiguration(
+              magnifierBuilder: (
                   _,
-                  LoupeController controller,
-                  ValueNotifier<LoupeSelectionOverlayInfoBearer> localInfoBearer
+                  MagnifierController controller,
+                  ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
                 ) {
                   infoBearer = localInfoBearer;
-                  return fakeLoupe;
+                  return fakeMagnifier;
                 },
               ),
           ),
@@ -11882,20 +11882,20 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
       await tester.pump();
 
-      expect(find.byKey(fakeLoupe.key!), findsOneWidget);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       final Offset firstDragGesturePosition = infoBearer.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
 
-      // Expect the position the loupe gets to have moved.
+      // Expect the position the magnifier gets to have moved.
       expect(firstDragGesturePosition,
           isNot(infoBearer.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();
 
-      expect(find.byKey(fakeLoupe.key!), findsNothing);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
   });
 }

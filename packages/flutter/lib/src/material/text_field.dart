@@ -14,7 +14,7 @@ import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'input_decorator.dart';
-import 'loupe.dart';
+import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
@@ -329,7 +329,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeConfiguration,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -392,16 +392,16 @@ class TextField extends StatefulWidget {
                        paste: true,
                      )));
 
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.loupe.intro}
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextEditingMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
-  /// the loupe, consider passing [TextEditingLoupeConfiguration.disabled].
-  final TextEditingLoupeConfiguration? loupeConfiguration;
+  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// Controls the text being edited.
   ///
@@ -1304,7 +1304,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          loupeConfiguration: widget.loupeConfiguration ?? TextEditingLoupe.adaptiveLoupeConfiguration,
+          magnifierConfiguration: widget.magnifierConfiguration ?? TextEditingMagnifier.adaptiveMagnifierConfiguration,
         ),
       ),
     );

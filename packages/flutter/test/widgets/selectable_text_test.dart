@@ -5053,24 +5053,24 @@ void main() {
     expect(find.byType(SelectableText, skipOffstage: false), findsOneWidget);
   });
 
-  group('loupe', () {
-    late ValueNotifier<LoupeSelectionOverlayInfoBearer> infoBearer;
-    final Widget fakeLoupe = Container(key: UniqueKey());
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
 
     testWidgets(
-        'Can drag handles to show, unshow, and update loupe',
+        'Can drag handles to show, unshow, and update magnifier',
         (WidgetTester tester) async {
       const String testValue = 'abc def ghi';
       final SelectableText selectableText = SelectableText(
             testValue,
-            loupeConfiguration: TextEditingLoupeConfiguration(
-        loupeBuilder: (
+            magnifierConfiguration: TextMagnifierConfiguration(
+        magnifierBuilder: (
           _,
-          LoupeController controller,
-          ValueNotifier<LoupeSelectionOverlayInfoBearer> localInfoBearer
+          MagnifierController controller,
+          ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
         ) {
           infoBearer = localInfoBearer;
-          return fakeLoupe;
+          return fakeMagnifier;
         },
       )
           );
@@ -5110,20 +5110,20 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
       await tester.pump();
 
-      expect(find.byKey(fakeLoupe.key!), findsOneWidget);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       firstDragGesturePosition = infoBearer.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
 
-      // Expect the position the loupe gets to have moved.
+      // Expect the position the magnifier gets to have moved.
       expect(firstDragGesturePosition,
           isNot(infoBearer.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();
 
-      expect(find.byKey(fakeLoupe.key!), findsNothing);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
   });
 

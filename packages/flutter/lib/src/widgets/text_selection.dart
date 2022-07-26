@@ -19,7 +19,7 @@ import 'container.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'loupe.dart';
+import 'magnifier.dart';
 import 'overlay.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -70,39 +70,39 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
 }
 
-/// {@template flutter.widgets.textSelection.LoupeBuilder}
-/// A builder that builds a Widget with a [LoupeController].
+/// {@template flutter.widgets.textSelection.MagnifierBuildewr}
+/// A builder that builds a Widget with a [MagnifierController].
 ///
-/// Consuming [LoupeController] or [ValueNotifier]<[LoupeSelectionOverlayInfoBearer]> is not
+/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
 /// required, although if a Widget intends to have entry or exit animations, it should take
-/// [LoupeController] and provide it an [AnimationController], so that [LoupeController]
+/// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
 /// can wait before removing it from the overlay.
 /// {@endtemplate}
 ///
 ///
 /// see also:
-/// - [LoupeSelectionOverlayInfoBearer], the dataclass that updates the
-///   loupe.
-typedef LoupeBuilder = Widget? Function(
+/// - [MagnifierOverlayInfoBearer], the dataclass that updates the
+///   magnifier.
+typedef MagnifierBuilder = Widget? Function(
     BuildContext context,
-    LoupeController controller,
-    ValueNotifier<LoupeSelectionOverlayInfoBearer> textSelectionData
+    MagnifierController controller,
+    ValueNotifier<MagnifierOverlayInfoBearer> textSelectionData
 );
 
 /// A data class that allows the SelectionOverlay to delegate
-/// the loupe's positioning to the loupe itself, based on the
-/// info in [LoupeSelectionOverlayInfoBearer].
+/// the magnifier's positioning to the magnifier itself, based on the
+/// info in [MagnifierOverlayInfoBearer].
 @immutable
-class LoupeSelectionOverlayInfoBearer {
-  /// Construct a [LoupeSelectionOverlayInfoBearer] from raw values.
-  const LoupeSelectionOverlayInfoBearer({
+class MagnifierOverlayInfoBearer {
+  /// Construct a [MagnifierOverlayInfoBearer] from raw values.
+  const MagnifierOverlayInfoBearer({
     required this.globalGesturePosition,
     required this.caratRect,
     required this.fieldBounds,
     required this.currentLineBoundries,
   });
 
-  factory LoupeSelectionOverlayInfoBearer._fromRenderEditable({
+  factory MagnifierOverlayInfoBearer._fromRenderEditable({
     required RenderEditable renderEditable,
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
@@ -126,7 +126,7 @@ class LoupeSelectionOverlayInfoBearer {
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomRight
     );
 
-    return LoupeSelectionOverlayInfoBearer(
+    return MagnifierOverlayInfoBearer(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
       caratRect: localCaratRect.shift(globalRenderEditableTopLeft),
@@ -134,26 +134,26 @@ class LoupeSelectionOverlayInfoBearer {
     );
   }
 
-  /// Construct an empty [LoupeSelectionOverlayInfoBearer], with all
+  /// Construct an empty [MagnifierOverlayInfoBearer], with all
   /// values set to 0.
-  const LoupeSelectionOverlayInfoBearer.empty() :
+  const MagnifierOverlayInfoBearer.empty() :
     globalGesturePosition = Offset.zero,
     caratRect = Rect.zero,
     currentLineBoundries = Rect.zero,
     fieldBounds = Rect.zero;
 
-  /// The offset of the gesture position that the loupe should be shown at.
+  /// The offset of the gesture position that the magnifier should be shown at.
   final Offset globalGesturePosition;
 
-  /// The rect of the current line the loupe should be shown at. Do not take
+  /// The rect of the current line the magnifier should be shown at. Do not take
   /// into account any padding of the field; only the position of the first
   /// and last character.
   final Rect currentLineBoundries;
 
-  /// The rect of the handle that the loupe should follow.
+  /// The rect of the handle that the magnifier should follow.
   final Rect caratRect;
 
-  /// The bounds of the entire text field that the Loupe is bound to.
+  /// The bounds of the entire text field that the magnifier is bound to.
   final Rect fieldBounds;
 
   @override
@@ -162,7 +162,7 @@ class LoupeSelectionOverlayInfoBearer {
       return true;
     }
 
-    if (other is! LoupeSelectionOverlayInfoBearer) {
+    if (other is! MagnifierOverlayInfoBearer) {
       return false;
     }
 
@@ -181,46 +181,46 @@ class LoupeSelectionOverlayInfoBearer {
   );
 }
 
-/// {@template flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
-/// A configuration object for a loupe.
+/// {@template flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
+/// A configuration object for a magnifier.
 /// {@endtemplate}
 ///
-/// {@macro flutter.widgets.loupe.intro}
+/// {@macro flutter.widgets.magnifier.intro}
 ///
-/// {@template flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
-/// In general, most features of the loupe can be configured through
-/// [LoupeBuilder]. [TextEditingLoupeConfiguration] is used to configure
-/// the loupe's behavior through the [SelectionOverlay].
+/// {@template flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+/// In general, most features of the magnifier can be configured through
+/// [MagnifierBuilder]. [TextMagnifierConfiguration] is used to configure
+/// the magnifier's behavior through the [SelectionOverlay].
 /// {@endtemplate}
-class TextEditingLoupeConfiguration {
-  /// Construct a [TextEditingLoupeConfiguration] from parts.
+class TextMagnifierConfiguration {
+  /// Construct a [TextMagnifierConfiguration] from parts.
   ///
-  /// If [loupeBuilder] is null, a default [LoupeBuilder] will be used
-  /// that never builds a loupe.
-  const TextEditingLoupeConfiguration({
-    LoupeBuilder? loupeBuilder,
-    this.shouldDisplayHandlesInLoupe = true
-  }) : _loupeBuilder = loupeBuilder;
+  /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
+  /// that never builds a magnifier.
+  const TextMagnifierConfiguration({
+    MagnifierBuilder? magnifierBuilder,
+    this.shouldDisplayHandlesInMagnifier = true
+  }) : _magnifierBuilder = magnifierBuilder;
 
-  /// The passed in [LoupeBuilder].
+  /// The passed in [MagnifierBuilder].
   ///
   /// This is nullable because [disabled] needs to be static const,
   /// so that it can be used as a default parameter. If left null,
-  /// the [loupeBuilder] getter will be a function that always returns
+  /// the [magnifierBuilder] getter will be a function that always returns
   /// null.
-  final LoupeBuilder? _loupeBuilder;
+  final MagnifierBuilder? _magnifierBuilder;
 
-  /// {@macro flutter.widgets.textSelection.LoupeBuilder}
-  LoupeBuilder get loupeBuilder => _loupeBuilder ?? (_, __, ___) => null;
+  /// {@macro flutter.widgets.textSelection.MagnifierBuilder}
+  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
 
-  /// Determines whether a loupe should show the text editing handles or not.
-  final bool shouldDisplayHandlesInLoupe;
+  /// Determines whether a magnifier should show the text editing handles or not.
+  final bool shouldDisplayHandlesInMagnifier;
 
-  /// A constant for a [TextEditingLoupeConfiguration] that is disabled.
+  /// A constant for a [TextMagnifierConfiguration] that is disabled.
   ///
-  /// In particular, this [TextEditingLoupeConfiguration] is considered disabled
+  /// In particular, this [TextMagnifierConfiguration] is considered disabled
   /// because it never builds anything, regardless of platform.
-  static const TextEditingLoupeConfiguration disabled = TextEditingLoupeConfiguration();
+  static const TextMagnifierConfiguration disabled = TextMagnifierConfiguration();
 }
 
 /// An interface for building the selection UI, to be provided by the
@@ -389,7 +389,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    required TextEditingLoupeConfiguration loupeConfiguration,
+    required TextMagnifierConfiguration magnifierConfiguration,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -399,7 +399,7 @@ class TextSelectionOverlay {
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
-      loupeConfiguration: loupeConfiguration,
+      magnifierConfiguration: magnifierConfiguration,
       context: context,
       debugRequiredFor: debugRequiredFor,
       // The metrics will be set when show handles.
@@ -616,7 +616,7 @@ class TextSelectionOverlay {
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
-    _selectionOverlay.showLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
+    _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -630,7 +630,7 @@ class TextSelectionOverlay {
     final TextSelection currentSelection = TextSelection.fromPosition(position);
 
     if (_selection.isCollapsed) {
-      _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
+      _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -669,7 +669,7 @@ class TextSelectionOverlay {
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
 
-     _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
+     _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: newSelection.extent,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -685,7 +685,7 @@ class TextSelectionOverlay {
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
-    _selectionOverlay.showLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
+    _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -697,7 +697,7 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
-      _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
+      _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -734,7 +734,7 @@ class TextSelectionOverlay {
         break;
     }
 
-    _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
+    _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: newSelection.base,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -743,7 +743,7 @@ class TextSelectionOverlay {
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
 
-  void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideLoupe(shouldShowToolbar: !_selection.isCollapsed);
+  void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideMagnifier(shouldShowToolbar: !_selection.isCollapsed);
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
@@ -807,7 +807,7 @@ class SelectionOverlay {
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
     Offset? toolbarLocation,
-    this.loupeConfiguration = TextEditingLoupeConfiguration.disabled,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
@@ -830,68 +830,68 @@ class SelectionOverlay {
   final BuildContext context;
 
 
-  final ValueNotifier<LoupeSelectionOverlayInfoBearer> _loupeSelectionOverlayInfoBearer =
-          ValueNotifier<LoupeSelectionOverlayInfoBearer>(const LoupeSelectionOverlayInfoBearer.empty());
+  final ValueNotifier<MagnifierOverlayInfoBearer> _magnifierOverlayInfoBearer =
+          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty());
 
-  /// [LoupeController.show] and [LoupeController.hide] should not be called directly, except
-  /// from inside [showLoupe] and [hideLoupe]. If it is desired to show or hide the loupe,
-  /// call [showLoupe] or [hideLoupe]. This is because the loupe needs to orchestrate
+  /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
+  /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,
+  /// call [showMagnifier] or [hideMagnifier]. This is because the magnifier needs to orchestrate
   /// with other properties in [SelectionOverlay].
-  final LoupeController _loupeController = LoupeController();
+  final MagnifierController _magnifierController = MagnifierController();
 
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.loupe.intro}
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// By default, [SelectionOverlay]'s [TextEditingLoupeConfiguration] is disabled.
+  /// By default, [SelectionOverlay]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
-  final TextEditingLoupeConfiguration loupeConfiguration;
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
 
-  /// Shows the loupe, and hides the toolbar if it was showing when [showLoupe]
+  /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]
   /// was called. This is safe to call on platforms not mobile, since
-  /// a loupeBuilder will not be provided, or the loupeBuilder will return null
+  /// a magnifierBuilder will not be provided, or the magnifierBuilder will return null
   /// on platforms not mobile.
   ///
-  /// This is NOT the souce of truth for if the loupe is up or not,
-  /// since loupes may hide themselves. If this info is needed, check
-  /// [LoupeController.shown].
-  void showLoupe(LoupeSelectionOverlayInfoBearer initalInfoBearer) {
+  /// This is NOT the souce of truth for if the magnifier is up or not,
+  /// since magnifiers may hide themselves. If this info is needed, check
+  /// [MagnifierController.shown].
+  void showMagnifier(MagnifierOverlayInfoBearer initalInfoBearer) {
     if (_toolbar != null) {
       hideToolbar();
     }
 
     // Start from empty, so we don't utilize any rememnant values.
-    _loupeSelectionOverlayInfoBearer.value = initalInfoBearer;
+    _magnifierOverlayInfoBearer.value = initalInfoBearer;
 
-    // pre-build the loupe so we can tell if we've built something
-    // or not. If we don't build a loupe, then we should not
+    // pre-build the magnifiers so we can tell if we've built something
+    // or not. If we don't build a magnifiers, then we should not
     // insert anything in the overlay.
-    final Widget? builtLoupe = loupeConfiguration.loupeBuilder(
+    final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
       context,
-      _loupeController,
-      _loupeSelectionOverlayInfoBearer,
+      _magnifierController,
+      _magnifierOverlayInfoBearer,
     );
 
-    if (builtLoupe == null) {
+    if (builtMagnifier == null) {
       return;
     }
 
-    _loupeController.show(
+    _magnifierController.show(
         context: context,
-        below: loupeConfiguration.shouldDisplayHandlesInLoupe
+        below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
             ? null
             : _handles!.first,
-        builder: (_) => builtLoupe);
+        builder: (_) => builtMagnifier);
   }
 
-  /// Hide the current loupe, optionally immediately showing
+  /// Hide the current magnifier, optionally immediately showing
   /// the toolbar.
   ///
-  /// This does nothing if there is no loupe.
-  void hideLoupe({required bool shouldShowToolbar}) {
-    _loupeController.hide();
+  /// This does nothing if there is no magnifier.
+  void hideMagnifier({required bool shouldShowToolbar}) {
+    _magnifierController.hide();
 
     if (shouldShowToolbar) {
       showToolbar();
@@ -1298,16 +1298,16 @@ class SelectionOverlay {
     );
   }
 
-  /// Update the current loupe with new selection data, so the loupe
+  /// Update the current magnifier with new selection data, so the magnifier
   /// can respond accordingly.
   ///
-  /// If there is no loupe shown, this does nothing.
-  void updateLoupe(LoupeSelectionOverlayInfoBearer loupeSelectionOverlayInfoBearer) {
-    if (!_loupeController.shown) {
+  /// If there is no magnifier shown, this does nothing.
+  void updateMagnifier(MagnifierOverlayInfoBearer magnifierOverlayInfoBearer) {
+    if (!_magnifierController.shown) {
       return;
     }
 
-    _loupeSelectionOverlayInfoBearer.value = loupeSelectionOverlayInfoBearer;
+    _magnifierOverlayInfoBearer.value = magnifierOverlayInfoBearer;
   }
 }
 

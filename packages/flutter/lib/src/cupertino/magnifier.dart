@@ -5,28 +5,28 @@
 import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
-/// A [CupertinoLoupe], specifically for text editing.
+/// A [CupertinoMagnifier], specifically for text editing.
 ///
-/// Delegates styling to [CupertinoLoupe] with its positioned depending on
-/// [loupeSelectionOverlayInfoBearer].
+/// Delegates styling to [CupertinoMagnifier] with its positioned depending on
+/// [magnifierOverlayInfoBearer].
 ///
-/// Specifically, the [CupertinoTextEditingLoupe] follows the following rules.
-/// [CupertinoTextEditingLoupe]:
+/// Specifically, the [CupertinoTextMagnifier] follows the following rules.
+/// [CupertinoTextMagnifier] :
 /// - is positioned horizontally outside the screen width, with _kHorizontalScreenEdgePadding padding.
-/// - is hidden if a gesture is detected _kHideIfBelowThreshold units below the line that the loupe is on, shown otherwise.
+/// - is hidden if a gesture is detected _kHideIfBelowThreshold units below the line that the magnifier is on, shown otherwise.
 /// - follows the X of the gesture directly (with respect to rule 1).
 /// - has some vertical drag resistance; i.e. if a gesture is detected k units below the field,
 /// then has vertical offset _kDragResistance * k.
-class CupertinoTextEditingLoupe extends StatefulWidget {
-  /// Construct a [RawLoupe] in the Cupertino style, positioning with respect to
-  /// [loupeSelectionOverlayInfoBearer].
+class CupertinoTextMagnifier extends StatefulWidget {
+  /// Construct a [RawMagnifier] in the Cupertino style, positioning with respect to
+  /// [magnifierOverlayInfoBearer].
   ///
   /// The default constructor parameters and constants were eyeballed on
   /// an iPhone XR iOS v15.5.
-  const CupertinoTextEditingLoupe({
+  const CupertinoTextMagnifier({
     super.key,
     required this.controller,
-    required this.loupeSelectionOverlayInfoBearer,
+    required this.magnifierOverlayInfoBearer,
     this.dragResistance = 10.0,
     this.hideBelowThreshold = -48.0,
     this.horizontalScreenEdgePadding = 10.0,
@@ -40,44 +40,44 @@ class CupertinoTextEditingLoupe extends StatefulWidget {
   final double dragResistance;
 
   /// The difference in Y between the gesture position and the carat center
-  /// so that the loupe hides itself.
+  /// so that the magnifier hides itself.
   final double hideBelowThreshold;
 
-  /// The padding on either edge of the screen that any part of the loupe
+  /// The padding on either edge of the screen that any part of the magnifier
   /// cannot exist past.
   ///
-  /// This includes the entire loupe, not just the center.
+  /// This includes the entire magnifier, not just the center.
   ///
-  /// If the screen has width w, then the loupe is bound to
+  /// If the screen has width w, then the magnifier is bound to
   /// `_kHorizontalScreenEdgePadding, w - _kHorizontalScreenEdgePadding`.
   final double horizontalScreenEdgePadding;
 
-  /// The duration that the loupe drags behind its final position.
+  /// The duration that the magnifier drags behind its final position.
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
 
-  /// This loupe's controller.
+  /// This magnifier's controller.
   ///
-  /// The [CupertinoTextEditingLoupe] requires a [LoupeController]
+  /// The [CupertinoTextMagnifier] requires a [MagnifierController]
   /// in order to show / hide itself without removing itself from the
   /// overlay.
-  final LoupeController controller;
+  final MagnifierController controller;
 
-  /// [CupertinoTextEditingLoupe] will determine its own positioning
-  /// based on the [LoupeSelectionOverlayInfoBearer] of this notifier.
-  final ValueNotifier<LoupeSelectionOverlayInfoBearer>
-      loupeSelectionOverlayInfoBearer;
+  /// [CupertinoTextMagnifier] will determine its own positioning
+  /// based on the [MagnifierOverlayInfoBearer] of this notifier.
+  final ValueNotifier<MagnifierOverlayInfoBearer>
+      magnifierOverlayInfoBearer;
 
   @override
-  State<CupertinoTextEditingLoupe> createState() =>
-      _CupertinoTextEditingLoupeState();
+  State<CupertinoTextMagnifier> createState() =>
+      _CupertinoTextMagnifierState();
 }
 
-class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
+class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     with SingleTickerProviderStateMixin {
   // Initalize to dummy values for the event that the inital call to
-  // _determineLoupePositionAndFocalPoint calls hide, and thus does not
+  // _determineMagnifierPositionAndFocalPoint calls hide, and thus does not
   // set these values.
-  Offset _currentAdjustedLoupePosition = Offset.zero;
+  Offset _currentAdjustedMagnifierPosition = Offset.zero;
   double _verticalFocalPointAdjustment = 0;
   late AnimationController _ioAnimationController;
   late Animation<double> _ioAnimation;
@@ -87,12 +87,12 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
     _ioAnimationController = AnimationController(
       value: 0,
       vsync: this,
-      duration: CupertinoLoupe._kInOutAnimationDuration,
+      duration: CupertinoMagnifier._kInOutAnimationDuration,
     )..addListener(() => setState(() {}));
 
     widget.controller.animationController = _ioAnimationController;
-    widget.loupeSelectionOverlayInfoBearer
-        .addListener(_determineLoupePositionAndFocalPoint);
+    widget.magnifierOverlayInfoBearer
+        .addListener(_determineMagnifierPositionAndFocalPoint);
 
     _ioAnimation = Tween<double>(
       begin: 0.0,
@@ -106,26 +106,26 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
   @override
   void dispose() {
     widget.controller.animationController = null;
-    widget.loupeSelectionOverlayInfoBearer
-        .removeListener(_determineLoupePositionAndFocalPoint);
+    widget.magnifierOverlayInfoBearer
+        .removeListener(_determineMagnifierPositionAndFocalPoint);
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
-    _determineLoupePositionAndFocalPoint();
+    _determineMagnifierPositionAndFocalPoint();
     super.didChangeDependencies();
   }
 
-  void _determineLoupePositionAndFocalPoint() {
-    final LoupeSelectionOverlayInfoBearer textEditingContext =
-        widget.loupeSelectionOverlayInfoBearer.value;
+  void _determineMagnifierPositionAndFocalPoint() {
+    final MagnifierOverlayInfoBearer textEditingContext =
+        widget.magnifierOverlayInfoBearer.value;
 
     // The exact Y of the center of the current line.
     final double verticalCenterOfCurrentLine =
         textEditingContext.caratRect.center.dy;
 
-    // If the loupe is currently showing, but we have dragged out of threshold,
+    // If the magnifier is currently showing, but we have dragged out of threshold,
     // we should hide it.
     if (verticalCenterOfCurrentLine -
             textEditingContext.globalGesturePosition.dy <
@@ -152,35 +152,35 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
                 widget.dragResistance);
 
     // The raw position, tracking the gesture directly.
-    final Offset rawLoupePosition = Offset(
+    final Offset rawMagnifierPosition = Offset(
       textEditingContext.globalGesturePosition.dx -
-          CupertinoLoupe.kDefaultSize.width / 2,
+          CupertinoMagnifier.kDefaultSize.width / 2,
       verticalPositionOfLens -
-          (CupertinoLoupe.kDefaultSize.height -
-              CupertinoLoupe.kLoupeAboveFocalPoint),
+          (CupertinoMagnifier.kDefaultSize.height -
+              CupertinoMagnifier.kMagnifierAboveFocalPoint),
     );
 
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 
-    // Adjust the loupe position so that it never exists outside the horizontal
+    // Adjust the magnifier position so that it never exists outside the horizontal
     // padding.
-    final Offset adjustedLoupePosition = LoupeController.shiftWithinBounds(
+    final Offset adjustedMagnifierPosition = MagnifierController.shiftWithinBounds(
       bounds: Rect.fromLTRB(
           screenRect.left + widget.horizontalScreenEdgePadding,
           // iOS doesn't reposition for Y, so we should expand the threshold
-          // so we can send the whole loupe out of bounds if need be.
+          // so we can send the whole magnifier out of bounds if need be.
           screenRect.top -
-              (CupertinoLoupe.kDefaultSize.height +
-                  CupertinoLoupe.kLoupeAboveFocalPoint),
+              (CupertinoMagnifier.kDefaultSize.height +
+                  CupertinoMagnifier.kMagnifierAboveFocalPoint),
           screenRect.right - widget.horizontalScreenEdgePadding,
           screenRect.bottom +
-              (CupertinoLoupe.kDefaultSize.height +
-                  CupertinoLoupe.kLoupeAboveFocalPoint)),
-      rect: rawLoupePosition & CupertinoLoupe.kDefaultSize,
+              (CupertinoMagnifier.kDefaultSize.height +
+                  CupertinoMagnifier.kMagnifierAboveFocalPoint)),
+      rect: rawMagnifierPosition & CupertinoMagnifier.kDefaultSize,
     ).topLeft;
 
     setState(() {
-      _currentAdjustedLoupePosition = adjustedLoupePosition;
+      _currentAdjustedMagnifierPosition = adjustedMagnifierPosition;
       // The lens should always point to the center of the line.
       _verticalFocalPointAdjustment =
           verticalPositionOfLens - verticalCenterOfCurrentLine;
@@ -190,11 +190,11 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
-      duration: CupertinoTextEditingLoupe._kDragAnimationDuration,
+      duration: CupertinoTextMagnifier._kDragAnimationDuration,
       curve: widget.animationCurve,
-      left: _currentAdjustedLoupePosition.dx,
-      top: _currentAdjustedLoupePosition.dy,
-      child: CupertinoLoupe(
+      left: _currentAdjustedMagnifierPosition.dx,
+      top: _currentAdjustedMagnifierPosition.dy,
+      child: CupertinoMagnifier(
         inOutAnimation: _ioAnimation,
         additionalFocalPointOffset: Offset(0, _verticalFocalPointAdjustment),
       ),
@@ -202,25 +202,25 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
   }
 }
 
-/// A [RawLoupe] in the Cupertino style.
+/// A [RawMagnifier] in the Cupertino style.
 ///
-/// [CupertinoLoupe] is a wrapper around [RawLoupe] that handles styling
+/// [CupertinoMagnifier] is a wrapper around [RawMagnifier] that handles styling
 /// and transitions.
 ///
-/// {@macro flutter.widgets.loupe.intro}
+/// {@macro flutter.widgets.magnifier.intro}
 ///
 ///
 /// See also:
-/// * [RawLoupe], the backing implementation.
-/// * [CupertinoTextEditingLoupe], a widget that positions [CupertinoLoupe] based on
-/// [LoupeSelectionOverlayInfoBearer].
-/// * [LoupeController], the controller for this loupe.
-class CupertinoLoupe extends StatelessWidget {
-  /// Creates a [RawLoupe] in the Cupertino style.
+/// * [RawMagnifier], the backing implementation.
+/// * [CupertinoTextMagnifier], a widget that positions [CupertinoMagnifier] based on
+/// [MagnifierOverlayInfoBearer].
+/// * [MagnifierController], the controller for this magnifier.
+class CupertinoMagnifier extends StatelessWidget {
+  /// Creates a [RawMagnifier] in the Cupertino style.
   ///
   /// The default constructor parameters and constants were eyeballed on
   /// an iPhone XR iOS v15.5.
-  const CupertinoLoupe({
+  const CupertinoMagnifier({
     super.key,
     this.size = kDefaultSize,
     this.borderRadius = const BorderRadius.all(Radius.elliptical(60, 50)),
@@ -231,61 +231,61 @@ class CupertinoLoupe extends StatelessWidget {
   });
   // These constants were eyeballed on an iPhone XR iOS v15.5.
 
-  /// The border, or "rim", of this loupe.
+  /// The border, or "rim", of this magnifier.
   final BorderSide borderSide;
 
-  /// The vertical offset, that the loupe is along the Y axis above
+  /// The vertical offset, that the magnifier is along the Y axis above
   /// the focal point.
   @visibleForTesting
-  static const double kLoupeAboveFocalPoint = -25;
+  static const double kMagnifierAboveFocalPoint = -25;
 
-  /// The default size of the loupe.
+  /// The default size of the magnifier.
   ///
   /// This is public so that positioners can choose to depend on it, although
   /// it is overrideable.
   @visibleForTesting
   static const Size kDefaultSize = Size(82.5, 45);
 
-  /// The duration that this loupe animates in / out for.
+  /// The duration that this magnifier animates in / out for.
   ///
   /// The animation is a translation and a fade. The translation
-  /// begins at the focal point, and ends at [kLoupeAboveFocalPoint].
+  /// begins at the focal point, and ends at [kMagnifierAboveFocalPoint].
   /// The opacity begins at 0 and ends at 1.
   static const Duration _kInOutAnimationDuration = Duration(milliseconds: 150);
 
-  /// The size of this loupe.
+  /// The size of this magnifier.
   final Size size;
 
-  /// The border radius of this loupe.
+  /// The border radius of this magnifier.
   final BorderRadius borderRadius;
 
-  /// This [RawLoupe]'s controller.
+  /// This [RawMagnifier]'s controller.
   ///
-  /// Since [CupertinoLoupe] has no knowledge of shown / hidden state,
+  /// Since [CupertinoMagnifier] has no knowledge of shown / hidden state,
   /// this animation should be driven by an external actor.
   final Animation<double>? inOutAnimation;
 
   /// Any additional focal point offset, applied over the regular focal
-  /// point offset defined in [kLoupeAboveFocalPoint].
+  /// point offset defined in [kMagnifierAboveFocalPoint].
   final Offset additionalFocalPointOffset;
 
   @override
   Widget build(BuildContext context) {
     Offset focalPointOffset =
-        Offset(0, kLoupeAboveFocalPoint - kDefaultSize.height / 2);
+        Offset(0, kMagnifierAboveFocalPoint - kDefaultSize.height / 2);
     focalPointOffset.scale(1, inOutAnimation?.value ?? 1);
     focalPointOffset += additionalFocalPointOffset;
 
     return Transform.translate(
         offset: Offset.lerp(
-          const Offset(0, -kLoupeAboveFocalPoint),
+          const Offset(0, -kMagnifierAboveFocalPoint),
           Offset.zero,
           inOutAnimation?.value ?? 1,
         )!,
-        child: RawLoupe(
+        child: RawMagnifier(
           size: size,
           focalPoint: focalPointOffset,
-          decoration: LoupeDecoration(
+          decoration: MagnifierDecoration(
             opacity: inOutAnimation?.value ?? 1,
             shape: RoundedRectangleBorder(
               borderRadius: borderRadius,

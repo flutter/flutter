@@ -15,22 +15,22 @@ import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 
-/// [LoupeController]'s main benefit over holding a raw [OverlayEntry] is that
-/// [LoupeController] will handle logic around waiting for a loupe to animate in or out.
+/// [MagnifierController]'s main benefit over holding a raw [OverlayEntry] is that
+/// [MagnifierController] will handle logic around waiting for a magnifier to animate in or out.
 ///
-/// If a loupe chooses to have an entry / exit animation, it should provide the animation
-/// controller to [LoupeController.animationController]. [LoupeController] will then drive
+/// If a magnifier chooses to have an entry / exit animation, it should provide the animation
+/// controller to [MagnifierController.animationController]. [MagnifierController] will then drive
 /// the [AnimationController] and wait for it to be complete before removing it from the
 /// [Overlay].
 ///
-/// To check the status of the loupe, see [LoupeController.shown].
+/// To check the status of the magnifier, see [MagnifierController.shown].
 // TODO(antholeole): This whole paradigm can be removed once portals
-// lands - then the loupe can be controlled though a widget in the tree.
+// lands - then the magnifier can be controlled though a widget in the tree.
 // https://github.com/flutter/flutter/pull/105335
-class LoupeController {
-  /// If there is no in / out animation for the loupe, [animationController] should be left
+class MagnifierController {
+  /// If there is no in / out animation for the magnifier, [animationController] should be left
   /// null.
-  LoupeController({this.animationController}) {
+  MagnifierController({this.animationController}) {
     animationController?.value = 0;
   }
 
@@ -38,59 +38,59 @@ class LoupeController {
   /// respectively.
   AnimationController? animationController;
 
-  /// The loupe's [OverlayEntry], if currently in the overlay.
+  /// The magnifier's [OverlayEntry], if currently in the overlay.
   ///
   /// It may be possible that this is not null, but
   ///
   /// This is public in case other overlay entries need to be positioned
   /// above or below this [overlayEntry]. Anything in the paint order after
-  /// the [RawLoupe] will not be displaued in the loupe; this means that if it
-  /// is desired for an overlay entry to be displayed in the loupe,
-  /// it _must_ be positioned below the loupe.
+  /// the [RawMagnifier] will not be displaued in the magnifier; this means that if it
+  /// is desired for an overlay entry to be displayed in the magnifier,
+  /// it _must_ be positioned below the magnifier.
   ///
   /// {@tool snippet}
   /// ```dart
-  /// void loupeShowExample(BuildContext context) {
-  ///   final LoupeController myLoupeController = LoupeController();
+  /// void magnifierShowExample(BuildContext context) {
+  ///   final MagnifierController myMagnifierController = MagnifierController();
   ///
-  ///   // Placed below the loupe, so it will show.
+  ///   // Placed below the magnifier, so it will show.
   ///   Overlay.of(context)!.insert(OverlayEntry(
-  ///       builder: (BuildContext context) => const Text('I WILL display in the loupe')));
+  ///       builder: (BuildContext context) => const Text('I WILL display in the magnifier')));
   ///
-  ///   // Will display in the loupe, since this entry was passed to show.
-  ///   final OverlayEntry displayInLoupeEvenThoughPlacedBeforeChronologically = OverlayEntry(
+  ///   // Will display in the magnifier, since this entry was passed to show.
+  ///   final OverlayEntry displayInMagnifierEvenThoughPlacedBeforeChronologically = OverlayEntry(
   ///       builder: (BuildContext context) =>
-  ///           const Text('I WILL display in the loupe'));
+  ///           const Text('I WILL display in the magnifier'));
   ///
   ///   Overlay.of(context)!
-  ///       .insert(displayInLoupeEvenThoughPlacedBeforeChronologically);
-  ///   myLoupeController.show(
+  ///       .insert(displayInMagnifierEvenThoughPlacedBeforeChronologically);
+  ///   myMagnifierController.show(
   ///       context: context,
-  ///       below: displayInLoupeEvenThoughPlacedBeforeChronologically,
-  ///       builder: (BuildContext context) => const RawLoupe(
+  ///       below: displayInMagnifierEvenThoughPlacedBeforeChronologically,
+  ///       builder: (BuildContext context) => const RawMagnifier(
   ///             size: Size(100, 100),
   ///           ));
   ///
   ///   // By default, new entries will be placed over the top entry.
   ///   Overlay.of(context)!.insert(OverlayEntry(
-  ///       builder: (BuildContext context) => const Text('I WILL NOT display in the loupe')));
+  ///       builder: (BuildContext context) => const Text('I WILL NOT display in the magnifier')));
   ///
   ///   Overlay.of(context)!.insert(
   ///       below:
-  ///           myLoupeController.overlayEntry, // Explicitly placed below the loupe.
+  ///           myMagnifierController.overlayEntry, // Explicitly placed below the magnifier.
   ///       OverlayEntry(
-  ///           builder: (BuildContext context) => const Text('I WILL display in the loupe')));
+  ///           builder: (BuildContext context) => const Text('I WILL display in the magnifier')));
   /// }
   /// ```
   /// {@end-tool}
   ///
-  /// A null check on [overlayEntry] will not suffice to check if a loupe is in the
+  /// A null check on [overlayEntry] will not suffice to check if a magnifier is in the
   /// overlay or not; instead, you should check [shown]. This is because it is possible,
-  /// such as in cases where [hide] was called with removeFromOverlay false, that the loupe
+  /// such as in cases where [hide] was called with removeFromOverlay false, that the magnifier
   /// is not shown, but the entry is not null.
   OverlayEntry? overlayEntry;
 
-  /// If the loupe is shown or not.
+  /// If the magnifier is shown or not.
   ///
   /// [shown] is:
   /// - false when nothing is in the overlay
@@ -110,15 +110,15 @@ class LoupeController {
     return true;
   }
 
-  /// Shows the [RawLoupe] that this controller controls.
+  /// Shows the [RawMagnifier] that this controller controls.
   ///
-  /// Returns a future that completes when the loupe is fully shown, i.e. done
+  /// Returns a future that completes when the magnifier is fully shown, i.e. done
   /// with its entry animation.
   ///
-  /// To control what overlays are shown in the loupe, utilize [below]. See
+  /// To control what overlays are shown in the magnifier, utilize [below]. See
   /// [overlayEntry] for more details on how to utilize [below].
   ///
-  /// If the loupe already exists (i.e. [overlayEntry] != null), then [show] will
+  /// If the magnifier already exists (i.e. [overlayEntry] != null), then [show] will
   /// reshow the old overlay.
   Future<void> show({
     required BuildContext context,
@@ -155,15 +155,15 @@ class LoupeController {
     }
   }
 
-  /// Schedules a hide of the loupe.
+  /// Schedules a hide of the magnifier.
   ///
-  /// If this [LoupeController] has an [AnimationController],
+  /// If this [MagnifierController] has an [AnimationController],
   /// then [hide] reverses the animation controller and waits
   /// for the animation to complete. Then, if [removeFromOverlay]
-  /// is true, remove the loupe from the overlay.
+  /// is true, remove the magnifier from the overlay.
   ///
   /// In general, [removeFromOverlay] should be true, unless
-  /// the loupe needs to preserve states between shows / hides.
+  /// the magnifier needs to preserve states between shows / hides.
   Future<void> hide({bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;
@@ -222,24 +222,24 @@ class LoupeController {
   }
 }
 
-/// A decoration for a [RawLoupe].
+/// A decoration for a [RawMagnifier].
 ///
-/// [LoupeDecoration] does not expose [ShapeDecoration.color], [ShapeDecoration.image],
-/// or [ShapeDecoration.gradient], since they will be covered by the [RawLoupe]'s lense.
+/// [MagnifierDecoration] does not expose [ShapeDecoration.color], [ShapeDecoration.image],
+/// or [ShapeDecoration.gradient], since they will be covered by the [RawMagnifier]'s lense.
 ///
 /// Also takes an [opacity] (see https://github.com/flutter/engine/pull/34435).
-class LoupeDecoration extends ShapeDecoration {
-  /// Constructs a [LoupeDecoration].
+class MagnifierDecoration extends ShapeDecoration {
+  /// Constructs a [MagnifierDecoration].
   ///
-  /// By default, [LoupeDecoration] is a rectangular loupe with no shadows, and
+  /// By default, [MagnifierDecoration] is a rectangular magnifier with no shadows, and
   /// fully opaque.
-  const LoupeDecoration({
+  const MagnifierDecoration({
     this.opacity = 1,
     super.shadows,
     super.shape = const RoundedRectangleBorder(),
   });
 
-  /// The loupe's opacity.
+  /// The magnifier's opacity.
   final double opacity;
 
   @override
@@ -248,68 +248,68 @@ class LoupeDecoration extends ShapeDecoration {
       return true;
     }
 
-    return super == other && other is LoupeDecoration && other.opacity == opacity;
+    return super == other && other is MagnifierDecoration && other.opacity == opacity;
   }
 
   @override
   int get hashCode => Object.hash(super.hashCode, opacity);
 }
 
-/// A common building base for Loupes.
+/// A common building base for magnifiers.
 ///
-/// {@template flutter.widgets.loupe.intro}
+/// {@template flutter.widgets.magnifier.intro}
 /// This magnifying glass is useful for scenarios on mobile devices where
 /// the user's finger may be covering part of the screen where a granular
 /// action is being performed, such as navigating a small cursor with a drag
 /// gesture, on an image or text.
 /// {@endtemplate}
 ///
-/// A loupe can be convienently managed by [LoupeController], which handles
-/// showing and hiding the loupe, with an optional entry / exit animation.
+/// A magnifier can be convienently managed by [MagnifierController], which handles
+/// showing and hiding the magnifier, with an optional entry / exit animation.
 ///
 /// See:
-/// * [LoupeController], a controller to handle loupes in an overlay.
-class RawLoupe extends StatelessWidget {
-  /// Constructs a [RawLoupe].
+/// * [MagnifierController], a controller to handle magnifiers in an overlay.
+class RawMagnifier extends StatelessWidget {
+  /// Constructs a [RawMagnifier].
   ///
-  /// {@template flutter.widgets.loupe.loupe.invisibility_warning}
-  /// By default, this loupe uses the default [LoupeDecoration],
-  /// the focal point is directly under the loupe, and there is no magnification:
-  /// This means that a default loupe will be entirely invisible to the naked eye,
+  /// {@template flutter.widgets.magnifier.RawMagnifier.invisibility_warning}
+  /// By default, this magnifier uses the default [MagnifierDecoration],
+  /// the focal point is directly under the magnifier, and there is no magnification:
+  /// This means that a default magnifier will be entirely invisible to the naked eye,
   /// since it is painting exactly what is under it, exactly where it was painted
   /// orignally.
   /// {@endtemplate}
-  const RawLoupe({
+  const RawMagnifier({
       super.key,
       this.magnificationScale = 1,
       required this.size,
       this.focalPoint = Offset.zero,
       this.child,
-      this.decoration = const LoupeDecoration()
+      this.decoration = const MagnifierDecoration()
       }) : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
-  /// This loupe's decoration.
+  /// This magnifier's decoration.
   ///
-  /// {@macro flutter.widgets.loupe.loupe.invisibility_warning}
-  final LoupeDecoration decoration;
+  /// {@macro flutter.widgets.magnifier.RawMagnifier.invisibility_warning}
+  final MagnifierDecoration decoration;
 
-  /// The size of the loupe.
+  /// The size of the magnifier.
   ///
   /// This does not include added border; it only includes
   /// the size of the magnifier.
   final Size size;
 
-  /// The offset of the loupe from [RawLoupe]'s center.
+  /// The offset of the magnifier from [RawMagnifier]'s center.
   ///
   /// If [focalPoint] is [Offset.zero], then the [focalPoint]
-  /// will point directly below this [RawLoupe].
+  /// will point directly below this [RawMagnifier].
   final Offset focalPoint;
 
-  /// An optional widget to posiiton inside the len of the [RawLoupe].
+  /// An optional widget to posiiton inside the len of the [RawMagnifier].
   ///
-  /// This is positioned over the [RawLoupe] - it may be useful for tinting the
-  /// [RawLoupe], or drawing a crosshair like UI.
+  /// This is positioned over the [RawMagnifier] - it may be useful for tinting the
+  /// [RawMagnifier], or drawing a crosshair like UI.
   final Widget? child;
 
   /// How "zoomed in" the magnification subject is in the lens.
@@ -336,11 +336,11 @@ class RawLoupe extends StatelessWidget {
         ),
 
       // Because `BackdropFilter` will filter any widgets before it, we should
-      // apply the style after (i.e. in a younger sibling) to avoid the loupe
+      // apply the style after (i.e. in a younger sibling) to avoid the magnifier
       // from seeing its own styling.
         Opacity(
           opacity: decoration.opacity,
-          child: _LoupeStyle(
+          child: _MagnifierStyle(
             decoration,
             size: size,
           ),
@@ -350,10 +350,10 @@ class RawLoupe extends StatelessWidget {
   }
 }
 
-class _LoupeStyle extends StatelessWidget {
-  const _LoupeStyle(this.decoration, {required this.size});
+class _MagnifierStyle extends StatelessWidget {
+  const _MagnifierStyle(this.decoration, {required this.size});
 
-  final LoupeDecoration decoration;
+  final MagnifierDecoration decoration;
   final Size size;
 
   @override
@@ -384,12 +384,12 @@ class _LoupeStyle extends StatelessWidget {
 
 /// A clipPath that looks like a donut if you were to fill its area.
 ///
-/// This is necessary because the shadow must be added after the loupe is drawn,
-/// so that the shadow does not end up in the loupe. Without this clip, the loupe would be
+/// This is necessary because the shadow must be added after the magnifier is drawn,
+/// so that the shadow does not end up in the magnifier. Without this clip, the magnifier would be
 /// entirely covered by the shadow.
 ///
 /// The negative space of the donut is clipped out (the donut hole, outside the donut).
-/// The donut hole is cut out exactly like the shape of the Loupe.
+/// The donut hole is cut out exactly like the shape of the magnifier.
 class _DonutClip extends CustomClipper<Path> {
   _DonutClip({required this.shape, required this.spreadRadius});
 

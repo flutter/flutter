@@ -634,7 +634,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeConfiguration = TextEditingLoupeConfiguration.disabled,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1506,12 +1506,12 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.loupe.intro}
+  /// {@macro flutter.widgets.text_magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
-  final TextEditingLoupeConfiguration loupeConfiguration;
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2584,7 +2584,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      loupeConfiguration: widget.loupeConfiguration,
+      magnifierConfiguration: widget.magnifierConfiguration,
     );
   }
 

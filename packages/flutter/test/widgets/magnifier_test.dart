@@ -39,13 +39,13 @@ void main() {
     });
   }
 
-  group('Raw Loupe', () {
+  group('Raw Magnifier', () {
     testWidgets('should render with correct focal point and decoration',
         (WidgetTester tester) async {
       final Key appKey = UniqueKey();
-      const Size loupeSize = Size(100, 100);
-      const Offset loupeFocalPoint = Offset(50, 50);
-      const Offset loupePosition = Offset(200, 200);
+      const Size magnifierSize = Size(100, 100);
+      const Offset magnifierFocalPoint = Offset(50, 50);
+      const Offset magnifierPosition = Offset(200, 200);
       const double magnificationScale = 2;
 
       await tester.pumpWidget(MaterialApp(
@@ -57,26 +57,26 @@ void main() {
         child: Stack(
           children: <Widget>[
             Positioned(
-              // Positioned so that it is right in the center of the loupe
+              // Positioned so that it is right in the center of the magnifier
               // focal point.
-              left: loupePosition.dx - loupeFocalPoint.dx,
-              top: loupePosition.dy - loupeFocalPoint.dy,
+              left: magnifierPosition.dx - magnifierFocalPoint.dx,
+              top: magnifierPosition.dy - magnifierFocalPoint.dy,
               child: Container(
                 color: Colors.pink,
-                // Since it is the size of the loupe but over it's
-                // magnificationScale, it should take up the whole loupe
-                width: (loupeSize.width * 1.5) / magnificationScale,
-                height: (loupeSize.height * 1.5) / magnificationScale,
+                // Since it is the size of the magnifier but over it's
+                // magnificationScale, it should take up the whole magnifier
+                width: (magnifierSize.width * 1.5) / magnificationScale,
+                height: (magnifierSize.height * 1.5) / magnificationScale,
               ),
             ),
             Positioned(
-              left: loupePosition.dx,
-              top: loupePosition.dy,
-              child: const RawLoupe(
-                size: loupeSize,
-                focalPoint: loupeFocalPoint,
+              left: magnifierPosition.dx,
+              top: magnifierPosition.dy,
+              child: const RawMagnifier(
+                size: magnifierSize,
+                focalPoint: magnifierFocalPoint,
                 magnificationScale: magnificationScale,
-                decoration: LoupeDecoration(opacity: 0.75, shadows: <BoxShadow>[
+                decoration: MagnifierDecoration(opacity: 0.75, shadows: <BoxShadow>[
                   BoxShadow(
                       spreadRadius: 10,
                       blurRadius: 10,
@@ -92,27 +92,27 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should look like an orange screen, with two pink boxes.
-      // One pink box is in the loupe (so has a green shadow) and is double
-      // size (from magnification). Also, the loupe should be slightly orange
+      // One pink box is in the magnifier (so has a green shadow) and is double
+      // size (from magnification). Also, the magnifier should be slightly orange
       // since it has opacity.
       await expectLater(
         find.byKey(appKey),
-        matchesGoldenFile('widgets.loupe.styled.png'),
+        matchesGoldenFile('widgets.magnifier.styled.png'),
       );
     });
 
     group('transition states', () {
       final AnimationController animationController = AnimationController(
           vsync: const TestVSync(), duration: const Duration(minutes: 2));
-      final LoupeController loupeController = LoupeController();
+      final MagnifierController magnifierController = MagnifierController();
 
       tearDown(() {
         animationController.value = 0;
-        loupeController.hide();
+        magnifierController.hide();
 
-        if (loupeController.overlayEntry != null) {
-          loupeController.overlayEntry!.remove();
-          loupeController.overlayEntry = null;
+        if (magnifierController.overlayEntry != null) {
+          magnifierController.overlayEntry!.remove();
+          magnifierController.overlayEntry = null;
         }
       });
 
@@ -120,7 +120,7 @@ void main() {
           'should immediately remove from overlay on no animation controller',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
-          const RawLoupe testLoupe = RawLoupe(
+          const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
           );
 
@@ -131,31 +131,31 @@ void main() {
           final BuildContext context =
               tester.firstElement(find.byType(Placeholder));
 
-          loupeController.show(
+          magnifierController.show(
             context: context,
-            builder: (BuildContext context) => testLoupe,
+            builder: (BuildContext context) => testMagnifier,
           );
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(loupeController.overlayEntry, isNot(isNull));
+          expect(magnifierController.overlayEntry, isNot(isNull));
 
-          loupeController.hide();
+          magnifierController.hide();
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(loupeController.overlayEntry, isNull);
+          expect(magnifierController.overlayEntry, isNull);
         });
       });
 
       testWidgets('should update shown based on animation status',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
-          final LoupeController loupeController =
-              LoupeController(animationController: animationController);
+          final MagnifierController magnifierController =
+              MagnifierController(animationController: animationController);
 
-          const RawLoupe testLoupe = RawLoupe(
+          const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
           );
 
@@ -166,53 +166,53 @@ void main() {
           final BuildContext context =
               tester.firstElement(find.byType(Placeholder));
 
-          loupeController.show(
+          magnifierController.show(
             context: context,
-            builder: (BuildContext context) => testLoupe,
+            builder: (BuildContext context) => testMagnifier,
           );
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
           // No time has passed, so the animation controller has not completed.
-          expect(loupeController.animationController?.status,
+          expect(magnifierController.animationController?.status,
               AnimationStatus.forward);
-          expect(loupeController.shown, true);
+          expect(magnifierController.shown, true);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(loupeController.animationController?.status,
+          expect(magnifierController.animationController?.status,
               AnimationStatus.completed);
-          expect(loupeController.shown, true);
+          expect(magnifierController.shown, true);
 
-          loupeController.hide();
+          magnifierController.hide();
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(loupeController.animationController?.status,
+          expect(magnifierController.animationController?.status,
               AnimationStatus.reverse);
-          expect(loupeController.shown, false);
+          expect(magnifierController.shown, false);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(loupeController.animationController?.status,
+          expect(magnifierController.animationController?.status,
               AnimationStatus.dismissed);
-          expect(loupeController.shown, false);
+          expect(magnifierController.shown, false);
         });
       });
     });
   });
 
-  group('loupe controller', () {
-    final LoupeController loupeController = LoupeController();
+  group('magnifier controller', () {
+    final MagnifierController magnifierController = MagnifierController();
 
     tearDown(() {
-      loupeController.overlayEntry?.remove();
-      loupeController.animationController = null;
-      loupeController.overlayEntry = null;
+      magnifierController.overlayEntry?.remove();
+      magnifierController.animationController = null;
+      magnifierController.overlayEntry = null;
     });
 
     group('show', () {
@@ -224,16 +224,16 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Text));
 
-        final Widget fakeLoupe = Placeholder(key: UniqueKey());
+        final Widget fakeMagnifier = Placeholder(key: UniqueKey());
         final Widget fakeBefore = Placeholder(key: UniqueKey());
 
         final OverlayEntry fakeBeforeOverlayEntry =
             OverlayEntry(builder: (_) => fakeBefore);
 
         Overlay.of(context)!.insert(fakeBeforeOverlayEntry);
-        loupeController.show(
+        magnifierController.show(
             context: context,
-            builder: (_) => fakeLoupe,
+            builder: (_) => fakeMagnifier,
             below: fakeBeforeOverlayEntry);
 
         WidgetsBinding.instance.scheduleFrame();
@@ -244,19 +244,19 @@ void main() {
                 of: find.byType(Overlay), matching: find.byType(Placeholder))
             .evaluate();
 
-        // Expect the loupe to be the first child, even though it was inserted
+        // Expect the magnifier to be the first child, even though it was inserted
         // after the fakeBefore.
         expect(allOverlayChildren.last.widget.key, fakeBefore.key);
-        expect(allOverlayChildren.first.widget.key, fakeLoupe.key);
+        expect(allOverlayChildren.first.widget.key, fakeMagnifier.key);
       });
 
-      testWidgets('should re-insert without animating if loupe already shown',
+      testWidgets('should re-insert without animating if magnifier already shown',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =
               _MockAnimationController();
 
-          const RawLoupe testLoupe = RawLoupe(
+          const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
           );
 
@@ -267,9 +267,9 @@ void main() {
           final BuildContext context =
               tester.firstElement(find.byType(Placeholder));
 
-          loupeController.show(
+          magnifierController.show(
             context: context,
-            builder: (BuildContext context) => testLoupe,
+            builder: (BuildContext context) => testMagnifier,
           );
 
           WidgetsBinding.instance.scheduleFrame();
@@ -278,7 +278,7 @@ void main() {
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          loupeController.show(context: context, builder: (_) => testLoupe);
+          magnifierController.show(context: context, builder: (_) => testMagnifier);
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
@@ -314,7 +314,7 @@ void main() {
         test(
             'should shift ${inputRects[i]} to ${outputRects[i]} for bounds ${boundsRects[i]}',
             () {
-          final Rect outputRect = LoupeController.shiftWithinBounds(
+          final Rect outputRect = MagnifierController.shiftWithinBounds(
               bounds: boundsRects[i], rect: inputRects[i]);
           expect(outputRect, outputRects[i]);
         });

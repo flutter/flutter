@@ -5960,17 +5960,17 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
-  group('loupe', () {
-    late ValueNotifier<LoupeSelectionOverlayInfoBearer> infoBearer;
-    final Widget fakeLoupe = Container(key: UniqueKey());
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
 
-    group('loupe builder', () {
-      testWidgets('should build custom loupe if given', (WidgetTester tester) async {
-        final Widget customLoupe = Container(
+    group('magnifier builder', () {
+      testWidgets('should build custom magnifier if given', (WidgetTester tester) async {
+        final Widget customMagnifier = Container(
           key: UniqueKey(),
         );
         final CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
-          loupeConfiguration: TextEditingLoupeConfiguration(loupeBuilder: (_, __, ___) => customLoupe),
+          magnifierConfiguration: TextMagnifierConfiguration(magnifierBuilder: (_, __, ___) => customMagnifier),
         );
 
         await tester.pumpWidget(const CupertinoApp(
@@ -5981,18 +5981,18 @@ void main() {
             tester.firstElement(find.byType(Placeholder));
 
         expect(
-            defaultCupertinoTextField.loupeConfiguration!.loupeBuilder(
+            defaultCupertinoTextField.magnifierConfiguration!.magnifierBuilder(
                 context,
-                LoupeController(),
-                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty(),
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
                 )),
             isA<Widget>().having(
-                (Widget widget) => widget.key, 'key', equals(customLoupe.key)));
+                (Widget widget) => widget.key, 'key', equals(customMagnifier.key)));
       });
 
       group('defaults', () {
-        testWidgets('should build CupertinoLoupe on iOS', (WidgetTester tester) async {
+        testWidgets('should build CupertinoMagnifier on iOS', (WidgetTester tester) async {
           await tester.pumpWidget(const CupertinoApp(
             home: CupertinoTextField(),
           ));
@@ -6001,13 +6001,13 @@ void main() {
         final EditableText editableText = tester.widget(find.byType(EditableText));
 
           expect(
-              editableText.loupeConfiguration.loupeBuilder(
+              editableText.magnifierConfiguration.magnifierBuilder(
                   context,
-                  LoupeController(),
-                  ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                    const LoupeSelectionOverlayInfoBearer.empty(),
+                  MagnifierController(),
+                  ValueNotifier<MagnifierOverlayInfoBearer>(
+                    const MagnifierOverlayInfoBearer.empty(),
                   )),
-              isA<CupertinoTextEditingLoupe>());
+              isA<CupertinoTextMagnifier>());
         },
             variant: const TargetPlatformVariant(
                 <TargetPlatform>{TargetPlatform.iOS}));
@@ -6022,11 +6022,11 @@ void main() {
         final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            editableText.loupeConfiguration.loupeBuilder(
+            editableText.magnifierConfiguration.magnifierBuilder(
                 context,
-                LoupeController(),
-                ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty(),
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
                 )),
             isNull);
       },
@@ -6034,7 +6034,7 @@ void main() {
               excluding: <TargetPlatform>{TargetPlatform.iOS}));
     });
 
-    testWidgets('Can drag handles to show, unshow, and update loupe',
+    testWidgets('Can drag handles to show, unshow, and update magnifier',
         (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -6044,14 +6044,14 @@ void main() {
               builder: (BuildContext context) => CupertinoTextField(
                 dragStartBehavior: DragStartBehavior.down,
                 controller: controller,
-                loupeConfiguration: TextEditingLoupeConfiguration(
-                  loupeBuilder: (
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
                     _,
-                    LoupeController controller,
-                    ValueNotifier<LoupeSelectionOverlayInfoBearer> localInfoBearer
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
                   ) {
                     infoBearer = localInfoBearer;
-                    return fakeLoupe;
+                    return fakeMagnifier;
                 }),
               ),
             ),
@@ -6086,20 +6086,20 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
       await tester.pump();
 
-      expect(find.byKey(fakeLoupe.key!), findsOneWidget);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       firstDragGesturePosition = infoBearer.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
 
-      // Expect the position the loupe gets to have moved.
+      // Expect the position the magnifier gets to have moved.
       expect(firstDragGesturePosition,
           isNot(infoBearer.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();
 
-      expect(find.byKey(fakeLoupe.key!), findsNothing);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 }

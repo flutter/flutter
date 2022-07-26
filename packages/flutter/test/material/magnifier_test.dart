@@ -9,12 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final LoupeController loupeController = LoupeController();
+  final MagnifierController magnifierController = MagnifierController();
   const Rect reasonableTextField = Rect.fromLTRB(50, 100, 200, 100);
-  final Offset basicOffset = Offset(Loupe.kDefaultLoupeSize.width / 2,
-      Loupe.kDefaultLoupeSize.height - Loupe.kStandardVerticalFocalPointShift);
+  final Offset basicOffset = Offset(Magnifier.kDefaultMagnifierSize.width / 2,
+      Magnifier.kDefaultMagnifierSize.height - Magnifier.kStandardVerticalFocalPointShift);
 
-  Offset getLoupePosition(WidgetTester tester, [bool animated = false]) {
+  Offset getMagnifierPosition(WidgetTester tester, [bool animated = false]) {
     if (animated) {
       final AnimatedPositioned animatedPositioned =
           tester.firstWidget(find.byType(AnimatedPositioned));
@@ -25,33 +25,33 @@ void main() {
     }
   }
 
-  Future<void> showLoupe(
+  Future<void> showMagnifier(
     BuildContext context,
     WidgetTester tester,
-    ValueNotifier<LoupeSelectionOverlayInfoBearer> infoBearer,
+    ValueNotifier<MagnifierOverlayInfoBearer> infoBearer,
   ) async {
-    final Future<void> loupeShown = loupeController.show(
+    final Future<void> magnifierShown = magnifierController.show(
         context: context,
-        builder: (_) => TextEditingLoupe(
-              loupeSelectionOverlayInfoBearer: infoBearer,
+        builder: (_) => TextEditingMagnifier(
+              magnifierSelectionOverlayInfoBearer: infoBearer,
             ));
 
-    // The loupe will never be shown if we don't pump the animation
+    // The magnifier will never be shown if we don't pump the animation
     WidgetsBinding.instance.scheduleFrame();
     await tester.pumpAndSettle();
 
-    // Verify that the loupe is shown
-    await loupeShown;
+    // Verify that the magnifier is shown
+    await magnifierShown;
   }
 
   tearDown(() {
-    loupeController.overlayEntry?.remove();
-    loupeController.overlayEntry = null;
-    loupeController.animationController = null;
+    magnifierController.overlayEntry?.remove();
+    magnifierController.overlayEntry = null;
+    magnifierController.animationController = null;
   });
 
-  group('adaptiveLoupeControllerBuilder', () {
-    testWidgets('should return a TextEditingLoupe on Android',
+  group('adaptiveMagnifierControllerBuilder', () {
+    testWidgets('should return a TextEditingMagnifier on Android',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
@@ -61,16 +61,16 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeConfiguration.loupeBuilder(
+          TextEditingMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
               context,
-              LoupeController(),
-              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty()));
+              MagnifierController(),
+              ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty()));
 
-      expect(builtWidget, isA<TextEditingLoupe>());
+      expect(builtWidget, isA<TextEditingMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets('should return a CupertinoLoupe on iOS',
+    testWidgets('should return a CupertinoMagnifier on iOS',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
@@ -80,13 +80,13 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeConfiguration.loupeBuilder(
+          TextEditingMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
               context,
-              LoupeController(),
-              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty()));
+              MagnifierController(),
+              ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty()));
 
-      expect(builtWidget, isA<CupertinoTextEditingLoupe>());
+      expect(builtWidget, isA<CupertinoTextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('should return null on all platforms not Android, iOS',
@@ -99,11 +99,11 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeConfiguration.loupeBuilder(
+          TextEditingMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
               context,
-              LoupeController(),
-              ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                  const LoupeSelectionOverlayInfoBearer.empty()));
+              MagnifierController(),
+              ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty()));
 
       expect(builtWidget, isNull);
     },
@@ -113,7 +113,7 @@ void main() {
         }));
   });
 
-  group('loupe', () {
+  group('magnifier', () {
     group('position', () {
       testWidgets(
           'should be at gesture position if does not violate any positioning rules',
@@ -143,16 +143,16 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        // Loupe should be positioned directly over the red square.
+        // Magnifier should be positioned directly over the red square.
         final RenderBox tapPointRenderBox =
             tester.firstRenderObject(find.byKey(textField)) as RenderBox;
         final Rect fakeTextFieldRect =
             tapPointRenderBox.localToGlobal(Offset.zero) &
                 tapPointRenderBox.size;
 
-        final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeInfo =
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierInfo =
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
           currentLineBoundries: fakeTextFieldRect,
           fieldBounds: fakeTextFieldRect,
           caratRect: fakeTextFieldRect,
@@ -160,13 +160,13 @@ void main() {
           globalGesturePosition: fakeTextFieldRect.center,
         ));
 
-        await showLoupe(context, tester, loupeInfo);
+        await showMagnifier(context, tester, magnifierInfo);
 
-        // Should show two red squares; original, and one in the loupe,
+        // Should show two red squares; original, and one in the magnifier,
         // directly ontop of one another.
         await expectLater(
           find.byType(MaterialApp),
-          matchesGoldenFile('loupe.position.default.png'),
+          matchesGoldenFile('magnifier.position.default.png'),
         );
       });
 
@@ -182,11 +182,11 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        await showLoupe(
+        await showMagnifier(
             context,
             tester,
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
@@ -198,7 +198,7 @@ void main() {
             )));
 
         // Should be less than the right edge, since we have padding.
-        expect(getLoupePosition(tester).dx,
+        expect(getMagnifierPosition(tester).dx,
             lessThanOrEqualTo(reasonableTextField.right));
       });
 
@@ -214,11 +214,11 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        await showLoupe(
+        await showMagnifier(
             context,
             tester,
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
@@ -229,7 +229,7 @@ void main() {
                   Offset(reasonableTextField.left - gestureOutsideLine, 0),
             )));
 
-        expect(getLoupePosition(tester).dx + basicOffset.dx,
+        expect(getMagnifierPosition(tester).dx + basicOffset.dx,
             greaterThanOrEqualTo(reasonableTextField.left));
       });
 
@@ -242,18 +242,18 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        await showLoupe(
+        await showMagnifier(
             context,
             tester,
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caratRect: reasonableTextField,
               globalGesturePosition: reasonableTextField.center,
             )));
 
-        expect(getLoupePosition(tester).dy,
+        expect(getMagnifierPosition(tester).dy,
             reasonableTextField.center.dy - basicOffset.dy);
       });
 
@@ -269,25 +269,25 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        await showLoupe(
+        await showMagnifier(
             context,
             tester,
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
               caratRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
-        expect(getLoupePosition(tester).dy, greaterThanOrEqualTo(0));
+        expect(getMagnifierPosition(tester).dy, greaterThanOrEqualTo(0));
       });
     });
 
     group('focal point', () {
-      Offset getLoupeAdditionalFocalPoint(WidgetTester tester) {
-        final Loupe loupe = tester.firstWidget(find.byType(Loupe));
-        return loupe.additionalFocalPointOffset;
+      Offset getMagnifierAdditionalFocalPoint(WidgetTester tester) {
+        final Magnifier magnifier = tester.firstWidget(find.byType(Magnifier));
+        return magnifier.additionalFocalPointOffset;
       }
 
       testWidgets(
@@ -300,20 +300,20 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        await showLoupe(
+        await showMagnifier(
             context,
             tester,
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caratRect: reasonableTextField,
 
-              // Gesture on the far right of the loupe.
+              // Gesture on the far right of the magnifier.
               globalGesturePosition: reasonableTextField.topLeft,
             )));
 
-        expect(getLoupeAdditionalFocalPoint(tester).dx,
+        expect(getMagnifierAdditionalFocalPoint(tester).dx,
             lessThan(reasonableTextField.left));
       });
 
@@ -330,18 +330,18 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        await showLoupe(
+        await showMagnifier(
             context,
             tester,
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
               caratRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
-        expect(getLoupeAdditionalFocalPoint(tester).dy, greaterThanOrEqualTo(0));
+        expect(getMagnifierAdditionalFocalPoint(tester).dy, greaterThanOrEqualTo(0));
       });
     });
 
@@ -361,11 +361,11 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        await showLoupe(
+        await showMagnifier(
             context,
             tester,
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caratRect: reasonableTextField,
@@ -384,19 +384,19 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupePositioner =
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
           caratRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
-        await showLoupe(context, tester, loupePositioner);
+        await showMagnifier(context, tester, magnifierPositioner);
 
         // New position has a horizontal shift.
-        loupePositioner.value = LoupeSelectionOverlayInfoBearer(
+        magnifierPositioner.value = MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
           caratRect: reasonableTextField,
@@ -419,19 +419,19 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupePositioner =
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
           caratRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
-        await showLoupe(context, tester, loupePositioner);
+        await showMagnifier(context, tester, magnifierPositioner);
 
         // New position has a vertical shift.
-        loupePositioner.value = LoupeSelectionOverlayInfoBearer(
+        magnifierPositioner.value = MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
@@ -454,19 +454,19 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<LoupeSelectionOverlayInfoBearer> loupePositioner =
-            ValueNotifier<LoupeSelectionOverlayInfoBearer>(
-                LoupeSelectionOverlayInfoBearer(
+        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
+            ValueNotifier<MagnifierOverlayInfoBearer>(
+                MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
           caratRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
-        await showLoupe(context, tester, loupePositioner);
+        await showMagnifier(context, tester, magnifierPositioner);
 
         // New position has a vertical shift.
-        loupePositioner.value = LoupeSelectionOverlayInfoBearer(
+        magnifierPositioner.value = MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
@@ -476,7 +476,7 @@ void main() {
 
         await tester.pump();
         expect(getIsAnimated(tester), true);
-        await tester.pump(TextEditingLoupe.jumpBetweenLinesAnimationDuration +
+        await tester.pump(TextEditingMagnifier.jumpBetweenLinesAnimationDuration +
             const Duration(seconds: 2));
         expect(getIsAnimated(tester), false);
       });

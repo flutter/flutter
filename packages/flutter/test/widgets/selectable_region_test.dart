@@ -1101,24 +1101,24 @@ void main() {
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
 
-    group('loupe', () {
-      late ValueNotifier<LoupeSelectionOverlayInfoBearer> infoBearer;
-      final Widget fakeLoupe = Container(key: UniqueKey());
+    group('magnifier', () {
+      late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+      final Widget fakeMagnifier = Container(key: UniqueKey());
 
-      testWidgets('Can drag handles to show, unshow, and update loupe',
+      testWidgets('Can drag handles to show, unshow, and update magnifier',
           (WidgetTester tester) async {
         const String text = 'Monkies and rabbits in my soup';
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              loupeConfiguration: TextEditingLoupeConfiguration(
-                loupeBuilder: (_,
-                    LoupeController controller,
-                    ValueNotifier<LoupeSelectionOverlayInfoBearer>
+              magnifierConfiguration: TextMagnifierConfiguration(
+                magnifierBuilder: (_,
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierOverlayInfoBearer>
                         localInfoBearer) {
                   infoBearer = localInfoBearer;
-                  return fakeLoupe;
+                  return fakeMagnifier;
                 },
               ),
               focusNode: FocusNode(),
@@ -1140,7 +1140,7 @@ void main() {
         await activateSelectionGesture.up();
         await tester.pump(const Duration(milliseconds: 500));
 
-        // Drag the handle around so that the loupe shows.
+        // Drag the handle around so that the magnifier shows.
         final TextBox selectionBox =
             paragraph.getBoxesForSelection(paragraph.selections.first).first;
         final Offset leftHandlePos =
@@ -1149,23 +1149,23 @@ void main() {
         await gesture.moveTo(textOffsetToPosition(paragraph, text.length - 2));
         await tester.pump();
 
-        // Expect the loupe to show and then store it's position.
-        expect(find.byKey(fakeLoupe.key!), findsOneWidget);
+        // Expect the magnifier to show and then store it's position.
+        expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
         final Offset firstDragGesturePosition =
             infoBearer.value.globalGesturePosition;
 
         await gesture.moveTo(textOffsetToPosition(paragraph, text.length));
         await tester.pump();
 
-        // Expect the position the loupe gets to have moved.
+        // Expect the position the magnifier gets to have moved.
         expect(firstDragGesturePosition,
             isNot(infoBearer.value.globalGesturePosition));
 
-        // Lift the pointer and expect the loupe to disappear.
+        // Lift the pointer and expect the magnifier to disappear.
         await gesture.up();
         await tester.pump();
 
-        expect(find.byKey(fakeLoupe.key!), findsNothing);
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
       });
     });
   });

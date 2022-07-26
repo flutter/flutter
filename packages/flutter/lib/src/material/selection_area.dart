@@ -5,7 +5,7 @@
 import 'package:flutter/cupertino.dart';
 
 import 'desktop_text_selection.dart';
-import 'loupe.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -35,20 +35,20 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
-    this.loupeConfiguration,
+    this.magnifierConfiguration,
     required this.child,
   });
 
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.loupe.intro}
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifieronfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextEditingMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
-  /// the loupe, consider passing [TextEditingLoupeConfiguration.disabled].
-  final TextEditingLoupeConfiguration? loupeConfiguration;
+  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -105,7 +105,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       focusNode: _effectiveFocusNode,
       selectionControls: controls,
-      loupeConfiguration: widget.loupeConfiguration ?? TextEditingLoupe.adaptiveLoupeConfiguration,
+      magnifierConfiguration: widget.magnifierConfiguration ?? TextEditingMagnifier.adaptiveMagnifierConfiguration,
       child: widget.child,
     );
   }

@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
-import 'loupe.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -204,7 +204,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.loupeConfiguration,
+    this.magnifierConfiguration,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -262,7 +262,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.loupeConfiguration,
+    this.magnifierConfiguration,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -430,16 +430,16 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.loupe.intro}
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextEditingMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
-  /// the loupe, consider passing [TextEditingLoupeConfiguration.disabled].
-  final TextEditingLoupeConfiguration? loupeConfiguration;
+  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -719,7 +719,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         paintCursorAboveText: paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         enableInteractiveSelection: widget.enableInteractiveSelection,
-        loupeConfiguration: widget.loupeConfiguration ?? TextEditingLoupe.adaptiveLoupeConfiguration,
+        magnifierConfiguration: widget.magnifierConfiguration ?? TextEditingMagnifier.adaptiveMagnifierConfiguration,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,

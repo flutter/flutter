@@ -179,17 +179,17 @@ class SelectableRegion extends StatefulWidget {
     required this.focusNode,
     required this.selectionControls,
     required this.child,
-    this.loupeConfiguration = TextEditingLoupeConfiguration.disabled,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   });
 
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.loupe.intro}
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// By default, [SelectableRegion]'s [TextEditingLoupeConfiguration] is disabled.
+  /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
-  final TextEditingLoupeConfiguration loupeConfiguration;
+  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
@@ -416,7 +416,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
  }
 
  void _onAnyDragEnd(DragEndDetails details) {
-  _selectionOverlay!.hideLoupe(shouldShowToolbar: true);
+  _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
   _stopSelectionEndEdgeUpdate();
  }
 
@@ -475,7 +475,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionStartHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
 
-    _selectionOverlay!.showLoupe(_buildInfoForLoupe(
+    _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
       _selectionDelegate.value.startSelectionPoint!,
     ));
@@ -488,7 +488,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionStartPosition = _selectionStartHandleDragPosition - Offset(0, _selectionDelegate.value.startSelectionPoint!.lineHeight / 2);
     _triggerSelectionStartEdgeUpdate();
 
-    _selectionOverlay!.updateLoupe(_buildInfoForLoupe(
+    _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
       _selectionDelegate.value.startSelectionPoint!,
     ));
@@ -500,7 +500,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionEndHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
 
-    _selectionOverlay!.showLoupe(_buildInfoForLoupe(
+    _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
       _selectionDelegate.value.endSelectionPoint!,
     ));
@@ -513,13 +513,13 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionEndPosition = _selectionEndHandleDragPosition - Offset(0, _selectionDelegate.value.endSelectionPoint!.lineHeight / 2);
     _triggerSelectionEndEdgeUpdate();
 
-    _selectionOverlay!.updateLoupe(_buildInfoForLoupe(
+    _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
       _selectionDelegate.value.endSelectionPoint!,
     ));
   }
 
-  LoupeSelectionOverlayInfoBearer _buildInfoForLoupe(Offset globalGesturePosition, SelectionPoint selectionPoint) {
+  MagnifierOverlayInfoBearer _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
       final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
       final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
       final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
@@ -530,7 +530,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         selectionPoint.lineHeight
       );
 
-      return LoupeSelectionOverlayInfoBearer(
+      return MagnifierOverlayInfoBearer(
         globalGesturePosition: globalGesturePosition,
         caratRect: caratRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,
@@ -578,7 +578,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
       toolbarLayerLink: _toolbarLayerLink,
-      loupeConfiguration: widget.loupeConfiguration
+      magnifierConfiguration: widget.magnifierConfiguration
     );
   }
 
@@ -855,9 +855,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
     _selectionDelegate.dispose();
-    // In case dispose was triggered before gesture end, remove the loupe
+    // In case dispose was triggered before gesture end, remove the magnifier
     // so it doesn't remain stuck in the overlay forever.
-    _selectionOverlay?.hideLoupe(shouldShowToolbar: false);
+    _selectionOverlay?.hideMagnifier(shouldShowToolbar: false);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     super.dispose();
