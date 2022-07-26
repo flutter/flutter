@@ -14,7 +14,7 @@ void main() {
   test('simple iplr shader can be re-initialized', () async {
     vms.VmService? vmService;
     try {
-      final FragmentProgram program = FragmentProgram.fromAsset(
+      final FragmentProgram program = await FragmentProgram.fromAssetAsync(
         'functions.frag.iplr',
       );
       final Shader shader = program.shader(

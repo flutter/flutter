@@ -4049,6 +4049,12 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
     return program;
   }
 
+  // TODO(zra): This is part of a soft transition of the framework to this
+  // API, which pushes the asset load to an asynchronous operation.
+  static Future<FragmentProgram> fromAssetAsync(String assetKey) {
+    return Future<FragmentProgram>.microtask(() => FragmentProgram.fromAsset(assetKey));
+  }
+
   static Map<String, WeakReference<FragmentProgram>> _shaderRegistry =
       <String, WeakReference<FragmentProgram>>{};
 
