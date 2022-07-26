@@ -792,7 +792,7 @@ class KeyEventManager {
   /// Patching [keyMessageHandler] can not be reverted. You should always assume
   /// that another component might haved patched it before you and after you.
   /// This means that you might want to write your own global notification
-  /// manager, which callbacks can be added to and removed from.
+  /// manager, to which callbacks can be added and removed.
   ///
   /// You should not patch [keyMessageHandler] until the `FocusManager` has assigned
   /// its callback. This is assured during any time within the widget lifecycle
@@ -808,6 +808,11 @@ class KeyEventManager {
   /// out. Now try some text shortcuts, such as Ctrl+A. The KeyA press is
   /// handled as a shortcut, and is not sent to the fallback handler and so is
   /// not printed out.
+  ///
+  /// The key widget is `FallbackKeyEventRegistrar`, a necessity class to allow
+  /// reversible patching. `FallbackFocus` and `FallbackFocusNode` are also
+  /// useful to recognize the widget tree's structure. `FallbackDemo` is an
+  /// example of using them in an app.
   ///
   /// ** See code in examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
   /// {@end-tool}

@@ -8,8 +8,6 @@ import 'package:flutter/services.dart';
 // This example app demonstrates a use case of patching
 // `KeyEventManager.keyMessageHandler`: be notified of key events that are not
 // handled by any focus handlers (such as shortcuts).
-//
-// See [KeyEventManager.keyMessageHandler].
 
 void main() => runApp(
   const MaterialApp(
@@ -75,24 +73,41 @@ class FallbackDemoState extends State<FallbackDemo> {
 }
 
 /// A node used by [FallbackKeyEventRegistrar] to register fallback key handlers.
+///
+/// This class must not be replaced by bare [KeyEventCallback] because Dart
+/// does not allow comparing with `==` on annonymous functions (always returns
+/// false.)
 class FallbackFocusNode {
   FallbackFocusNode({required this.onKeyEvent});
 
   final KeyEventCallback onKeyEvent;
 }
 
-/// A global singleton class that allows [FallbackFocus] to register fallback
-/// key event handlers.
+/// A singleton class that allows [FallbackFocus] to register fallback key
+/// event handlers.
 ///
 /// This class is initialized when [instance] is first called, at which time it
-/// patches [ServicesBinding.instance.keyEventManager.keyMessageHandler] with
-/// its own handler.
+/// patches [KeyEventManager.keyMessageHandler] with its own handler.
+///
+/// A global registrar like [FallbackKeyEventRegistrar] is almost always needed
+/// when patching [KeyEventManager.keyMessageHandler]. This is because
+/// [FallbackFocus] will add and and remove callbacks constantly, but
+/// [KeyEventManager.keyMessageHandler] can only be patched once, and can not
+/// be unpatched. Therefore [FallbackFocus] must not directly interact with
+/// [KeyEventManager.keyMessageHandler], but through a separate registrar that
+/// handles listening reversibly.
 class FallbackKeyEventRegistrar {
   FallbackKeyEventRegistrar._();
   static FallbackKeyEventRegistrar get instance {
     if (!_initialized) {
+      // Get the global handler.
       final KeyMessageHandler? existing = ServicesBinding.instance.keyEventManager.keyMessageHandler;
+      // The handler is guaranteed non-null since
+      // `FallbackKeyEventRegistrar.instance` is only called during
+      // `Focus.onFocusChange`, at which time `ServicesBinding.instance` must
+      // have been called somewhere.
       assert(existing != null);
+      // Assign the global handler with a patched handler.
       ServicesBinding.instance.keyEventManager.keyMessageHandler = _instance._buildHandler(existing!);
       _initialized = true;
     }
@@ -103,6 +118,12 @@ class FallbackKeyEventRegistrar {
 
   final List<FallbackFocusNode> _fallbackNodes = <FallbackFocusNode>[];
 
+  // Returns a handler that patches the existing `KeyEventManager.keyMessageHandler`.
+  //
+  // The existing `KeyEventManager.keyMessageHandler` is typically the one
+  // assigned by the shortcut system, but it can be anything. The returned
+  // handler calls that handler first, and if the event is not handled at all
+  // by the framework, invokes the innermost `FallbackNode`'s handler.
   KeyMessageHandler _buildHandler(KeyMessageHandler existing) {
     return (KeyMessage message) {
       if (existing(message)) {
@@ -129,6 +150,10 @@ class FallbackKeyEventRegistrar {
 /// not move forward with the text input system.
 ///
 /// If multiple [FallbackFocus] nest, then only the innermost takes effect.
+///
+/// Internally, this class registers its node to the singleton
+/// [FallbackKeyEventRegistrar]. The inner this widget is, the later its node
+/// will be added to the registrar's list when focused on.
 class FallbackFocus extends StatelessWidget {
   const FallbackFocus({
     super.key,
