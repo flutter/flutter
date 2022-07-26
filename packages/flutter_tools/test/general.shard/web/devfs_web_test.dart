@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:logging/logging.dart' as logging;
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
@@ -1134,7 +1135,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

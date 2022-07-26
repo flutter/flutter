@@ -307,7 +307,7 @@ class WebReleaseBundle extends Target {
       environment,
       environment.outputDir.childDirectory('assets'),
       targetPlatform: TargetPlatform.web_javascript,
-      shaderTarget: ShaderTarget.sksl, // TODO.
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,

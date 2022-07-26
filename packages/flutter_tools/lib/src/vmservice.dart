@@ -734,7 +734,7 @@ class FlutterVmService {
       'ext.ui.window.reinitializeShader',
       isolateId: isolateId,
       args: <String, Object?>{
-        'value': assetPath,
+        'assetKey': assetPath,
       },
     );
   }

@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
+import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
@@ -19,7 +20,6 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  spirv('--flutter-spirv'),
   impellerAndroid('--opengl-es'),
   impelleriOS('--metal-ios'),
   sksl('--sksl');
@@ -48,7 +48,7 @@ class DevelopmentShaderCompiler {
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform platform, bool enableImpeller) {
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) {
     switch (platform) {
       case TargetPlatform.ios:
         _shaderTarget = enableImpeller ? ShaderTarget.impelleriOS : ShaderTarget.sksl;
@@ -68,15 +68,18 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
+        assert(!enableImpeller);
         _shaderTarget = ShaderTarget.sksl;
         break;
+      case null:
+        return;
     }
     _debugConfigured = true;
   }
 
   /// Recompile the input shader and return a devfs content that should be synced
   /// to the attached device in its place.
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) async {
+  Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
     late File inputFile;
@@ -90,16 +93,20 @@ class DevelopmentShaderCompiler {
         inputFile.writeAsBytesSync(await inputShader.contentsAsBytes());
         cleanupInput = true;
       }
-      await _shaderCompiler.compileShader(
+      final bool success = await _shaderCompiler.compileShader(
         input: inputFile,
         outputPath: output.path,
         target: _shaderTarget,
+        fatal: false,
       );
+      if (!success) {
+        return null;
+      }
       result = output.readAsBytesSync();
     } finally {
-      output.deleteSync();
+      ErrorHandlingFileSystem.deleteIfExists(output);
       if (cleanupInput) {
-        inputFile.deleteSync();
+        ErrorHandlingFileSystem.deleteIfExists(inputFile);
       }
     }
     return DevFSByteContent(result);
@@ -144,6 +151,7 @@ class ShaderCompiler {
     required File input,
     required String outputPath,
     required ShaderTarget target,
+    bool fatal = true,
   }) async {
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),
@@ -158,10 +166,9 @@ class ShaderCompiler {
     final List<String> cmd = <String>[
       impellerc.path,
       target.target,
-      if (target == ShaderTarget.spirv)
-        '--spirv=$outputPath'
-      else
-        ...<String>['--sl=$outputPath.iplr', '--spirv=$outputPath.spriv',],
+      '--iplr',
+      '--sl=$outputPath',
+      '--spirv=$outputPath.spirv',
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
@@ -171,15 +178,15 @@ class ShaderCompiler {
     if (code != 0) {
       _logger.printTrace(await utf8.decodeStream(impellercProcess.stdout));
       _logger.printError(await utf8.decodeStream(impellercProcess.stderr));
-      throw ShaderCompilerException._(
-        'Shader compilation of "${input.path}" to "$outputPath" '
-        'failed with exit code $code.',
-      );
+      if (fatal) {
+        throw ShaderCompilerException._(
+          'Shader compilation of "${input.path}" to "$outputPath" '
+          'failed with exit code $code.',
+        );
+      }
+      return false;
     }
-    if (target != ShaderTarget.spirv) {
-      input.fileSystem.file('$outputPath.iplr').copySync(outputPath);
-    }
-
+    ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     return true;
   }
 }

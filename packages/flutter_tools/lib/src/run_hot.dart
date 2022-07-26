@@ -247,7 +247,9 @@ class HotRunner extends ResidentRunner {
 
     for (final FlutterDevice? device in flutterDevices) {
       await device!.initLogReader();
-      device.developmentShaderCompiler.configureCompiler(device.targetPlatform!, debuggingOptions.enableImpeller);
+      device
+        .developmentShaderCompiler
+        .configureCompiler(device.targetPlatform, enableImpeller: debuggingOptions.enableImpeller);
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
@@ -1063,7 +1065,7 @@ class HotRunner extends ResidentRunner {
             )
         );
       }
-      for (final String assetPath in device.devFS!.assetPathsToEvict) {
+      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
         futures.add(
           device.vmService!
             .flutterEvictShader(

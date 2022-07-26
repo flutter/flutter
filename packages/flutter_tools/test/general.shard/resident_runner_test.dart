@@ -148,6 +148,14 @@ const FakeVmServiceRequest evict = FakeVmServiceRequest(
   }
 );
 
+const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
+  method: 'ext.ui.window.reinitializeShader',
+  args: <String, Object>{
+    'assetKey': 'foo.frag',
+    'isolateId': '1',
+  }
+);
+
 final Uri testUri = Uri.parse('foo://bar');
 
 void main() {
@@ -2243,6 +2251,30 @@ flutter:
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('HotRunner sets asset directory when first evict shaders', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      setAssetBundlePath,
+      evictShader,
+    ]);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+
+    (flutterDevice.devFS as FakeDevFS).shaderPathsToEvict = <String>{'foo.frag'};
+
+    expect(flutterDevice.devFS.hasSetAssetDirectory, false);
+    await (residentRunner as HotRunner).evictDirtyAssets();
+    expect(flutterDevice.devFS.hasSetAssetDirectory, true);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
   testUsingContext('HotRunner does not sets asset directory when no assets to evict', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
     ]);
@@ -2334,6 +2366,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   ResidentCompiler generator;
+
+  @override
+  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.android;
 
   @override
   Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
@@ -2594,6 +2632,9 @@ class FakeDevFS extends Fake implements DevFS {
   @override
   Set<String> assetPathsToEvict = <String>{};
 
+  @override
+  Set<String> shaderPathsToEvict = <String>{};
+
   UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
 
   @override
@@ -2636,7 +2677,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

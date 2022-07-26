@@ -570,6 +570,9 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> assetPathsToEvict = <String>{};
 
   @override
+  Set<String> shaderPathsToEvict= <String>{};
+
+  @override
   Uri baseUri;
 }
 
@@ -746,7 +749,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

@@ -89,6 +89,7 @@ export 'src/widgets/platform_menu_bar.dart';
 export 'src/widgets/platform_view.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
+export 'src/widgets/raster_widget.dart';
 export 'src/widgets/raw_keyboard_listener.dart';
 export 'src/widgets/reorderable_list.dart';
 export 'src/widgets/restoration.dart';

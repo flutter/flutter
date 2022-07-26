@@ -145,7 +145,7 @@ abstract class BundleLinuxAssets extends Target {
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
       },
-      shaderTarget: ShaderTarget.sksl, // TODO.
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

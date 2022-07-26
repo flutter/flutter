@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -122,7 +120,6 @@ class InkSparkle extends InteractiveInkFeature {
        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox) {
-    // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNeccessary();
     controller.addInkFeature(this);
 
@@ -268,14 +265,7 @@ class InkSparkle extends InteractiveInkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     assert(_animationController.isAnimating);
-
-    // InkSparkle can only paint if its shader has been compiled.
-    if (_InkSparkleFactory._shaderManager == null) {
-      // Skipping paintFeature because the shader it relies on is not ready to
-      // be used. InkSparkleFactory.compileShaderIfNeccessary must complete
-      // before InkSparkle can paint.
-      return;
-    }
+    assert(_InkSparkleFactory._shaderManager != null);
 
     canvas.save();
     _transformCanvas(canvas: canvas, transform: transform);
@@ -432,16 +422,10 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
 
   const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
 
-  // TODO(clocksmith): Update this once shaders are precompiled.
   static void compileShaderIfNeccessary() {
-    if (!_initCalled) {
-      FragmentShaderManager.inkSparkle().then((FragmentShaderManager manager) {
-        _shaderManager = manager;
-      });
-      _initCalled = true;
-    }
+    _shaderManager ??= FragmentShaderManager.inkSparkle();
   }
-  static bool _initCalled = false;
+
   static FragmentShaderManager? _shaderManager;
 
   final double? turbulenceSeed;
@@ -517,19 +501,12 @@ double _getTargetRadius(
 class FragmentShaderManager {
   FragmentShaderManager._();
 
-  static late ui.FragmentProgram _program;
+  static final ui.FragmentProgram _program = ui.FragmentProgram.fromAsset('shaders/ink_sparkle.frag');
 
   /// Creates an [FragmentShaderManager] with an [InkSparkle] effect.
-  static Future<FragmentShaderManager> inkSparkle() async {
+  static FragmentShaderManager inkSparkle() {
     final FragmentShaderManager manager = FragmentShaderManager._();
-    await manager._compile();
     return manager;
-  }
-
-  /// Compiles the spir-v bytecode into a shader program.
-  Future<void> _compile() async {
-    final ByteData data = await rootBundle.load('shaders/ink_sparkle.frag');
-    _program = await ui.FragmentProgram.compile(spirv: data.buffer);
   }
 
   /// Creates a shader with the original program and optional uniforms.

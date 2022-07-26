@@ -143,7 +143,7 @@ abstract class BundleWindowsAssets extends Target {
       environment,
       outputDirectory,
       targetPlatform: TargetPlatform.windows_x64,
-      shaderTarget: ShaderTarget.sksl, // TODO.
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

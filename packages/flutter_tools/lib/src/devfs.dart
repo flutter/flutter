@@ -595,6 +595,7 @@ class DevFS {
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
     final List<Future<void>> pendingShaderCompiles = <Future<void>>[];
+    bool shaderCompilationFailed = false;
     int syncedBytes = 0;
     if (fullRestart) {
       generator.reset();
@@ -645,9 +646,13 @@ class DevFS {
         }
 
         if (bundle.entryKinds[archivePath] == AssetKind.shader) {
-          final Future<DevFSContent> pending = shaderCompiler.recompileShader(content);
+          final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
           pendingShaderCompiles.add(pending);
-          pending.then((DevFSContent content) {
+          pending.then((DevFSContent? content) {
+            if (content == null) {
+              shaderCompilationFailed = true;
+              return;
+            }
             dirtyEntries[deviceUri] = content;
             syncedBytes += content.size;
             if (archivePath != null && !bundleFirstUpload) {
@@ -690,7 +695,12 @@ class DevFS {
     }
     _logger.printTrace('Updating files.');
     final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
+
     await Future.wait(pendingShaderCompiles);
+    if (shaderCompilationFailed) {
+      return UpdateFSReport();
+    }
+
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }

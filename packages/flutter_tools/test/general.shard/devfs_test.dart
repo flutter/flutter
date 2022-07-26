@@ -584,6 +584,66 @@ void main() {
     expect(compileLibMainIndex, greaterThanOrEqualTo(0));
     expect(bundleProcessingDoneIndex, greaterThan(compileLibMainIndex));
   });
+
+  group('Shader compilation',() {
+    late FileSystem fileSystem;
+    late ProcessManager processManager;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      processManager = FakeProcessManager.any();
+    });
+
+    testUsingContext('DevFS recompiles shaders', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[createDevFSRequest],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await devFS.create();
+
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+      final FakeBundle bundle = FakeBundle()
+        ..entries['foo.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
+        ..entries['not.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
+        ..entryKinds['foo.frag'] = AssetKind.shader;
+
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/main.dart'),
+        generator: residentCompiler,
+        dillOutputPath: 'lib/foo.dill',
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: bundle,
+      );
+
+      expect(report.success, true);
+      expect(devFS.shaderPathsToEvict, <String>{'foo.frag'});
+      expect(devFS.assetPathsToEvict, <String>{'not.frag'});
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+  });
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -639,10 +699,10 @@ class FakeBundle extends AssetBundle {
   Map<String, Map<String, DevFSContent>> get deferredComponentsEntries => <String, Map<String, DevFSContent>>{};
 
   @override
-  Map<String, DevFSContent> get entries => <String, DevFSContent>{};
+  final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   @override
-  Map<String, AssetKind> get entryKinds => <String, AssetKind>{};
+  final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
 
   @override
   List<File> get inputFiles => <File>[];
@@ -717,10 +777,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, bool enableImpeller) { }
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
 
   @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
-    throw UnimplementedError();
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) async {
+    return DevFSByteContent(await inputShader.contentsAsBytes());
   }
 }

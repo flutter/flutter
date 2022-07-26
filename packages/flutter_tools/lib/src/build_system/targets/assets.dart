@@ -308,7 +308,7 @@ class CopyAssets extends Target {
       environment,
       output,
       targetPlatform: TargetPlatform.android,
-      shaderTarget: ShaderTarget.sksl // TODO.
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
