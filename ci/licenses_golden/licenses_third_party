@@ -1,4 +1,4 @@
-Signature: 62f45ca0a47b2ef7b4bbd2030b1067b7
+Signature: e71b4b7293d6b95b231f2679f2d129c0
 
 UNUSED LICENSES:
 
@@ -10578,6 +10578,9 @@ ORIGIN: ../../../third_party/dart/benchmarks/AsyncLiveVars/dart/AsyncLiveVars.da
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/AsyncLiveVars/dart/AsyncLiveVars.dart
 FILE: ../../../third_party/dart/benchmarks/AsyncLiveVars/dart2/AsyncLiveVars.dart
+FILE: ../../../third_party/dart/benchmarks/InstantiateTypeArgs/dart/InstantiateTypeArgs.dart
+FILE: ../../../third_party/dart/benchmarks/InstantiateTypeArgs/dart2/InstantiateTypeArgs.dart
+FILE: ../../../third_party/dart/benchmarks/InstantiateTypeArgs/generate.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateBaseOverhead/dart/IsolateBaseOverhead.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateBaseOverhead/dart2/IsolateBaseOverhead.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateSendExitLatency/dart/IsolateSendExitLatency.dart
