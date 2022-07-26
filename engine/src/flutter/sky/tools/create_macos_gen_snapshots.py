@@ -16,6 +16,7 @@ def main():
   )
 
   parser.add_argument('--dst', type=str, required=True)
+  parser.add_argument('--clang-dir', type=str, default='clang_x64')
   parser.add_argument('--x64-out-dir', type=str)
   parser.add_argument('--arm64-out-dir', type=str)
   parser.add_argument('--armv7-out-dir', type=str)
@@ -29,13 +30,13 @@ def main():
 
   if args.arm64_out_dir:
     generate_gen_snapshot(
-        os.path.join(args.arm64_out_dir, 'clang_x64'),
+        os.path.join(args.arm64_out_dir, args.clang_dir),
         os.path.join(args.dst, 'gen_snapshot_arm64')
     )
 
   if args.armv7_out_dir:
     generate_gen_snapshot(
-        os.path.join(args.armv7_out_dir, 'clang_x64'),
+        os.path.join(args.armv7_out_dir, args.clang_dir),
         os.path.join(args.dst, 'gen_snapshot_armv7')
     )
 
