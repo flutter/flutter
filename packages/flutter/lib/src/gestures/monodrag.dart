@@ -253,7 +253,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   // once a new batch of [PointerMoveEvent]s is detected. Used in [handleEvent].
   final List<PointerEvent> _multiPointerMoveTrackers = <PointerEvent>[];
 
-  // Whether the recognizer has accepted any pointer. If it is true, any up 
+  // Whether the recognizer has accepted any pointer. If it is true, any up
   // event will cause this recognizer to give up all pointers. Used in [handleEvent].
   bool _pointerMoveAccept = false;
 
@@ -319,28 +319,28 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    // When multiple pointers are down and move, there may be the following 
+    // When multiple pointers are down and move, there may be the following
     // situations depending on the current platform:
     //
     // 1) All pointers move, and therefore each pointer dispatches a PointerMoveEvent
     // (for example on Android and iOS).
     //
-    //  * The gesture should only move after each pointer has dispatched one 
+    //  * The gesture should only move after each pointer has dispatched one
     //    PointerMoveEvent or PointerPanZoomUpdateEvent.
-    //  * The scrolling distance (`delta`) should be delta(combined) = 
+    //  * The scrolling distance (`delta`) should be delta(combined) =
     //     max(delta(i) which are positive) + min(delta(i) which are negative).
     //  * The drag location should be the average of all pointers.
     //
     // Logic:
     //
-    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the 
+    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the
     //    PointerEvent to the _multiPointerMoveTrackers.
-    //  * When all pointers have dispatched PointerMoveEvent, they are considered 
+    //  * When all pointers have dispatched PointerMoveEvent, they are considered
     //    a batch, and the gesture will update by the rules above.
     //
     // Example:
     //
-    //  * When two pointers (p1 and p2) are down, the sequence of PointerMoveEvents 
+    //  * When two pointers (p1 and p2) are down, the sequence of PointerMoveEvents
     //    is: p1 down, p2 down, p1 move +50, p2 move +10,
     //    p1 move +30, p2 move -10 , p1 up and p2 up.
     //    The handleEvent process will be:
@@ -350,12 +350,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     //     * p2 move +10 (_multiPointerMoveTrackers.add, the gesture update +50,
     //       and _multiPointerMoveTrackers.clear),
     //     * p1 move +30 (_multiPointerMoveTrackers.add and the gesture wait),
-    //     * p2 move -10 (_multiPointerMoveTrackers.add, the gesture update +20, 
+    //     * p2 move -10 (_multiPointerMoveTrackers.add, the gesture update +20,
     //       and _multiPointerMoveTrackers.clear),
     //     * p1 up (_multiPointerStartTrackers.clear),
     //     * p2 up.
     //
-    // 2) Only some pointers move, but each pointer still dispatch a PointerMoveEvent 
+    // 2) Only some pointers move, but each pointer still dispatch a PointerMoveEvent
     //    (for example on Android).
     //
     //  * This means that the delta of the not moved pointers' PointerMoveEvent
