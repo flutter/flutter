@@ -13,7 +13,6 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
@@ -46,8 +45,7 @@
 - (instancetype)initWithContentsScale:(CGFloat)contentsScale {
   self = [self init];
 
-  if ([self.layer isKindOfClass:NSClassFromString(@"CAEAGLLayer")] ||
-      [self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
+  if ([self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
     self.layer.allowsGroupOpacity = NO;
     self.layer.contentsScale = contentsScale;
     self.layer.rasterizationScale = contentsScale;

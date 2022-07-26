@@ -11,9 +11,7 @@
 
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/shell.h"
-#import "flutter/shell/platform/darwin/ios/ios_context_gl.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 

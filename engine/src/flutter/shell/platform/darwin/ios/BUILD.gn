@@ -16,7 +16,7 @@ _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 
 shell_gpu_configuration("ios_gpu_configuration") {
   enable_software = true
-  enable_gl = true
+  enable_gl = false
   enable_vulkan = false
   enable_metal = shell_enable_metal
 }
@@ -111,24 +111,14 @@ source_set("flutter_framework_source") {
     "framework/Source/vsync_waiter_ios.mm",
     "ios_context.h",
     "ios_context.mm",
-    "ios_context_gl.h",
-    "ios_context_gl.mm",
     "ios_context_software.h",
     "ios_context_software.mm",
-    "ios_external_texture_gl.h",
-    "ios_external_texture_gl.mm",
     "ios_external_view_embedder.h",
     "ios_external_view_embedder.mm",
-    "ios_render_target_gl.h",
-    "ios_render_target_gl.mm",
     "ios_surface.h",
     "ios_surface.mm",
-    "ios_surface_gl.h",
-    "ios_surface_gl.mm",
     "ios_surface_software.h",
     "ios_surface_software.mm",
-    "ios_switchable_gl_context.h",
-    "ios_switchable_gl_context.mm",
     "platform_message_handler_ios.h",
     "platform_message_handler_ios.mm",
     "platform_view_ios.h",
@@ -185,7 +175,6 @@ source_set("flutter_framework_source") {
     "AudioToolbox.framework",
     "CoreMedia.framework",
     "CoreVideo.framework",
-    "OpenGLES.framework",
     "QuartzCore.framework",
     "UIKit.framework",
   ]
