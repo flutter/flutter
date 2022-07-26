@@ -111,15 +111,12 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 
   @override
   Map<String, dynamic> getDataMap() {
-    final Map<String, dynamic> dataMap = <String, dynamic> {
+    return <String, dynamic> {
       'message': message,
       'textDirection': textDirection.index,
+      if (assertiveness != Assertiveness.polite)
+        'assertiveness': assertiveness.index,
     };
-
-    if (assertiveness == Assertiveness.assertive) {
-      dataMap['assertiveness']=assertiveness.index;
-    }
-    return dataMap;
   }
 }
 
