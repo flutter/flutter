@@ -5,7 +5,6 @@
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 
 #include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/ios/ios_context_gl.h"
 #import "flutter/shell/platform/darwin/ios/ios_context_software.h"
 
 #if SHELL_ENABLE_METAL
@@ -23,8 +22,6 @@ std::unique_ptr<IOSContext> IOSContext::Create(IOSRenderingAPI api,
                                                IOSRenderingBackend backend,
                                                MsaaSampleCount msaa_samples) {
   switch (api) {
-    case IOSRenderingAPI::kOpenGLES:
-      return std::make_unique<IOSContextGL>();
     case IOSRenderingAPI::kSoftware:
       return std::make_unique<IOSContextSoftware>();
 #if SHELL_ENABLE_METAL
