@@ -675,6 +675,12 @@ class _AndroidMotionEventConverter {
       event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
+class _CreationParams {
+  const _CreationParams(this.data, this.codec);
+  final dynamic data;
+  final MessageCodec<dynamic> codec;
+}
+
 /// Controls an Android view that is composed using a GL texture.
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
@@ -692,8 +698,7 @@ abstract class AndroidViewController extends PlatformViewController {
         assert(creationParams == null || creationParamsCodec != null),
         _viewType = viewType,
         _layoutDirection = layoutDirection,
-        _creationParams = creationParams,
-        _creationParamsCodec = creationParamsCodec;
+        _creationParams = creationParams == null ? null : _CreationParams(creationParams, creationParamsCodec!);
 
   /// Action code for when a primary pointer touched the screen.
   ///
@@ -745,9 +750,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
   _AndroidViewState _state = _AndroidViewState.waitingForSize;
 
-  final dynamic _creationParams;
-
-  final MessageCodec<dynamic>? _creationParamsCodec;
+  final _CreationParams? _creationParams;
 
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks =
       <PlatformViewCreatedCallback>[];
@@ -811,8 +814,8 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Returns the texture entry id that the Android view is rendering into.
   ///
-  /// Returns null if the Android view has not been successfully created, or if it has been
-  /// disposed.
+  /// Returns null if the Android view has not been successfully created, if it has been
+  /// disposed, or if the implementation does not use textures.
   int? get textureId;
 
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
@@ -980,22 +983,13 @@ class ExpensiveAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendCreateMessage({Size? size}) {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': _viewType,
-      'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
-      'hybrid': true,
-    };
-    if (_creationParams != null) {
-      final ByteData paramsByteData =
-          _creationParamsCodec!.encodeMessage(_creationParams)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
-    }
-    return SystemChannels.platform_views.invokeMethod<void>('create', args);
+    return _AndroidViewControllerInternals.sendCreateMessage(
+      viewId: viewId,
+      viewType: _viewType,
+      hybrid: true,
+      layoutDirection: _layoutDirection,
+      creationParams: _creationParams,
+    );
   }
 
   @override
@@ -1072,16 +1066,6 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> create({Size? size}) async {
-    if (size == null) {
-      return;
-    }
-    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
-    assert(!size.isEmpty);
-    return super.create(size: size);
-  }
-
-  @override
   Future<void> setOffset(Offset off) async {
     if (off == _off) {
       return;
@@ -1111,25 +1095,17 @@ class TextureAndroidViewController extends AndroidViewController {
     if (size == null) {
       return;
     }
-
+    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': _viewType,
-      'width': size.width,
-      'height': size.height,
-      'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
-    };
-    if (_creationParams != null) {
-      final ByteData paramsByteData = _creationParamsCodec!.encodeMessage(_creationParams)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
-    }
-    _textureId = await SystemChannels.platform_views.invokeMethod<int>('create', args);
+    _textureId = await _AndroidViewControllerInternals.sendCreateMessage(
+      viewId: viewId,
+      viewType: _viewType,
+      hybrid: false,
+      layoutDirection: _layoutDirection,
+      creationParams: _creationParams,
+      size: size,
+    ) as int;
   }
 
   @override
@@ -1140,6 +1116,52 @@ class TextureAndroidViewController extends AndroidViewController {
       'hybrid': false,
     });
   }
+}
+
+abstract class _AndroidViewControllerInternals {
+  // Sends a create message with the given parameters, and returns the result
+  // if any.
+  //
+  // This uses a dynamic return because depending on the mode that is selected
+  // on the native side, the return type is different. Callers should cast
+  // depending on the possible return types for their arguments.
+  static Future<dynamic> sendCreateMessage({
+      required int viewId,
+      required String viewType,
+      required TextDirection layoutDirection,
+      required bool hybrid,
+      bool? hybridFallback,
+      _CreationParams? creationParams,
+      Size? size}) {
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': viewId,
+      'viewType': viewType,
+      'direction': AndroidViewController._getAndroidDirection(layoutDirection),
+      'hybrid': hybrid,
+      if (size != null)
+        'width': size.width,
+      if (size != null)
+        'height': size.height,
+      if (hybridFallback != null)
+        'hybridFallback': hybridFallback,
+    };
+    if (creationParams != null) {
+      final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
+      args['params'] = Uint8List.view(
+        paramsByteData.buffer,
+        0,
+        paramsByteData.lengthInBytes,
+      );
+    }
+    return SystemChannels.platform_views.invokeMethod<dynamic>('create', args);
+  }
+}
+
+class _NonHybridAndroidViewControllerInternals extends _AndroidViewControllerInternals {
+}
+
+class _HybridAndroidViewControllerInternals extends _AndroidViewControllerInternals {
+
 }
 
 /// Controls an iOS UIView.
