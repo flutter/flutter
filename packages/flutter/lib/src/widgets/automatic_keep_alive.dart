@@ -321,6 +321,9 @@ class KeepAliveNotification extends Notification {
 class KeepAliveHandle extends ChangeNotifier {
   /// Trigger the listeners to indicate that the widget
   /// no longer needs to be kept alive.
+  ///
+  /// This method does not call [dispose]. When the handle is not needed
+  /// anymore, it must be [dispose]d regardless of whether notifying listeners.
   void release() {
     notifyListeners();
   }
