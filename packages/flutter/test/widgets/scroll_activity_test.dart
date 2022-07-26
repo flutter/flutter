@@ -183,9 +183,9 @@ void main() {
     await tester.pump();
     final TestGesture trackpadGesture = await tester.createGesture(kind: PointerDeviceKind.trackpad);
     // Try mouse hovering while scrolling with a trackpad
-    await trackpadGesture.down(tester.getCenter(find.byType(ListView)));
+    await trackpadGesture.panZoomStart(tester.getCenter(find.byType(ListView)));
     await tester.pump();
-    await trackpadGesture.moveBy(const Offset(0, 200));
+    await trackpadGesture.panZoomUpdate(tester.getCenter(find.byType(ListView)), pan: const Offset(0, 200));
     await tester.pump();
     await hoverGesture.addPointer(
       location: tester.getCenter(find.text('3'))
@@ -197,10 +197,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored for trackpad scrolling.
     expect(lastHovered, equals(3));
-    await trackpadGesture.up();
+    await trackpadGesture.panZoomEnd();
     await tester.pump();
     // Try mouse clicking during inertia after scrolling with a trackpad
-    await tester.fling(find.byType(ListView), const Offset(0, -200), 1000, deviceKind: PointerDeviceKind.trackpad);
+    await tester.trackpadFling(find.byType(ListView), const Offset(0, -200), 1000);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored following trackpad scrolling.
