@@ -694,7 +694,7 @@ class CupertinoTextField extends StatefulWidget {
   ///    the user is done editing.
   final ValueChanged<String>? onSubmitted;
 
-  /// {@macro flutter.material.textfield.onTapOutside}
+  /// {@macro flutter.widgets.editableText.onTapOutside}
   final GestureTapCallback? onTapOutside;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}

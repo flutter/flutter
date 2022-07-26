@@ -676,7 +676,7 @@ class TextField extends StatefulWidget {
   /// {@endtemplate}
   final GestureTapCallback? onTap;
 
-  /// {@macro flutter.widgets.EditableText.onTapOutside}
+  /// {@macro flutter.widgets.editableText.onTapOutside}
   final GestureTapCallback? onTapOutside;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the

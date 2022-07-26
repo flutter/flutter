@@ -1215,7 +1215,7 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.SelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
 
-  /// {@template flutter.widgets.EditableText.onTapOutside}
+  /// {@template flutter.widgets.editableText.onTapOutside}
   /// Called for each tap that occurs outside of the editable text when the text
   /// field is focused.
   ///
