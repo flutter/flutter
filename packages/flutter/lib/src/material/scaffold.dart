@@ -228,7 +228,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       if (_isRoot(scaffold)) {
         scaffold._updateSnackBar();
         scaffold._updateMaterialBanner();
-      }
+
     }
   }
 
@@ -1676,6 +1676,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
+    this.onStatusBarTapped,
   });
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
@@ -1931,6 +1932,9 @@ class Scaffold extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// Called when the status bar is tapped.
+  final VoidCallback? onStatusBarTapped;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
