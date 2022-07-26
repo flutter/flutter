@@ -38,7 +38,7 @@ void main() {
     fileSystem.file(notFragPath).createSync(recursive: true);
   });
 
-  testWithoutContext('compileShader invokes impellerc for .frag files and spirv target', () async {
+  testWithoutContext('compileShader invokes impellerc for .frag files and sksl target', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -147,43 +147,6 @@ void main() {
     );
     expect(fileSystem.file(outputPath).existsSync(), true);
   });
-
-  testWithoutContext('compileShader invokes impellerc for .frag files and sksl', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <String>[
-          impellerc,
-          '--sksl',
-          '--iplr',
-          '--sl=$outputPath',
-          '--spirv=$outputPath.spirv',
-          '--input=$fragPath',
-          '--input-type=frag',
-          '--include=$fragDir',
-        ],
-        onRun: () {
-          fileSystem.file(outputPath).createSync(recursive: true);
-        },
-      ),
-    ]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-    );
-
-    expect(
-      await shaderCompiler.compileShader(
-        input: fileSystem.file(fragPath),
-        outputPath: outputPath,
-        target: ShaderTarget.sksl,
-      ),
-      true,
-    );
-    expect(fileSystem.file(outputPath).existsSync(), true);
-  });
-
 
   testWithoutContext('compileShader invokes impellerc for non-.frag files', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[

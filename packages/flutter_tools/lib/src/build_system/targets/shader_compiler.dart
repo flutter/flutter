@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
@@ -41,6 +42,7 @@ class DevelopmentShaderCompiler {
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
+  final Pool _compilationPool = Pool(4);
   final math.Random _random;
 
   late ShaderTarget _shaderTarget;
@@ -85,7 +87,9 @@ class DevelopmentShaderCompiler {
     late File inputFile;
     bool cleanupInput = false;
     Uint8List result;
+    PoolResource? resource;
     try {
+      resource = await _compilationPool.request();
       if (inputShader is DevFSFileContent) {
         inputFile = inputShader.file as File;
       } else {
@@ -104,6 +108,7 @@ class DevelopmentShaderCompiler {
       }
       result = output.readAsBytesSync();
     } finally {
+      resource?.release();
       ErrorHandlingFileSystem.deleteIfExists(output);
       if (cleanupInput) {
         ErrorHandlingFileSystem.deleteIfExists(inputFile);

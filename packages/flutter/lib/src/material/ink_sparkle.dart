@@ -120,6 +120,7 @@ class InkSparkle extends InteractiveInkFeature {
        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox) {
+    // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNeccessary();
     controller.addInkFeature(this);
 
@@ -265,7 +266,14 @@ class InkSparkle extends InteractiveInkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     assert(_animationController.isAnimating);
-    assert(_InkSparkleFactory._shaderManager != null);
+
+    // InkSparkle can only paint if its shader has been compiled.
+    if (_InkSparkleFactory._shaderManager == null) {
+      // Skipping paintFeature because the shader it relies on is not ready to
+      // be used. InkSparkleFactory.compileShaderIfNeccessary must complete
+      // before InkSparkle can paint.
+      return;
+    }
 
     canvas.save();
     _transformCanvas(canvas: canvas, transform: transform);
@@ -423,9 +431,15 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
   const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
 
   static void compileShaderIfNeccessary() {
-    _shaderManager ??= FragmentShaderManager.inkSparkle();
+    if (!_initCalled) {
+      FragmentShaderManager.inkSparkle().then((FragmentShaderManager manager) {
+        _shaderManager = manager;
+      });
+      _initCalled = true;
+    }
   }
 
+  static bool _initCalled = false;
   static FragmentShaderManager? _shaderManager;
 
   final double? turbulenceSeed;
@@ -501,11 +515,12 @@ double _getTargetRadius(
 class FragmentShaderManager {
   FragmentShaderManager._();
 
-  static final ui.FragmentProgram _program = ui.FragmentProgram.fromAsset('shaders/ink_sparkle.frag');
+  static late ui.FragmentProgram _program;
 
   /// Creates an [FragmentShaderManager] with an [InkSparkle] effect.
-  static FragmentShaderManager inkSparkle() {
+  static Future<FragmentShaderManager> inkSparkle() async {
     final FragmentShaderManager manager = FragmentShaderManager._();
+    _program = ui.FragmentProgram.fromAsset('shaders/ink_sparkle.frag');
     return manager;
   }
 

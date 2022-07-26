@@ -135,6 +135,8 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
   final Offset topLeft = tester.getTopLeft(buttonFinder);
   final Offset bottomRight = tester.getBottomRight(buttonFinder);
 
+  await _warmUpShader(tester, buttonFinder);
+
   final Offset target = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
   await tester.tapAt(target);
   for (int i = 0; i <= 5; i++) {
@@ -144,4 +146,12 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
       matchesGoldenFile('ink_sparkle.$positionName.$i.png'),
     );
   }
+}
+
+// Warm up shader. Compilation is of the order of 10 milliseconds and
+// Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
+// net to prevent flakiness.
+Future<void> _warmUpShader(WidgetTester tester, Finder buttonFinder) async {
+  await tester.tap(buttonFinder);
+  await tester.pumpAndSettle(const Duration(milliseconds: 2000));
 }

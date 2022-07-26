@@ -585,7 +585,7 @@ void main() {
     expect(bundleProcessingDoneIndex, greaterThan(compileLibMainIndex));
   });
 
-  group('Shader compilation',() {
+  group('Shader compilation', () {
     late FileSystem fileSystem;
     late ProcessManager processManager;
 
