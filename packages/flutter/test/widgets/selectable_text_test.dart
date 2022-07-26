@@ -5126,7 +5126,7 @@ void main() {
       expect(find.byKey(fakeLoupe.key!), findsNothing);
     });
   });
-    
+
   testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/71389
 

@@ -571,7 +571,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       onEndHandleDragEnd: _onAnyDragEnd,
-      selectionEndPoints: points,
+      selectionEndpoints: points,
       selectionControls: widget.selectionControls,
       selectionDelegate: this,
       clipboardStatus: null,
