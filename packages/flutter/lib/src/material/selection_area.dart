@@ -43,7 +43,7 @@ class SelectionArea extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextEditingMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
