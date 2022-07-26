@@ -57,6 +57,14 @@ class SpellCheckConfiguration {
 mixin SpellCheckSuggestionsHandler {
   /// Builds the [TextSpan] tree given the current state of the text input and
   /// spell check results.
+  ///
+  /// The [value] is the current [TextEditingValue] requested to be rendered
+  /// by a text input widget. The [composingWithinCurrentTextRange] value
+  /// represents whether or not there is a valid composing region in the
+  /// [value]. The [style] is the [TextStyle] to render the [value]'s text with,
+  /// and the [misspelledTextStyle] is the [TextStyle] to render misspelled
+  /// words within the [value]'s text with. The [spellCheckResults] are the
+  /// results of spell checking the [value]'s text.
   TextSpan buildTextSpanWithSpellCheckSuggestions(
     TextEditingValue value,
     bool composingWithinCurrentTextRange,
