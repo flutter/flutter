@@ -43,6 +43,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   late String executable;
   late List<String> processArgs;
   late Map<String, String>? env;
+  final List<String> flutterRequests = <String>[];
 
   @override
   Future<void> launchAsProcess({
@@ -57,6 +58,16 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     // Pretend we launched the app and got the app.started event so that
     // launchRequest will complete.
     appStartedCompleter.complete();
+  }
+
+  @override
+  Future<Object?> sendFlutterRequest(
+    String method,
+    Map<String, Object?>? params, {
+    bool failSilently = true,
+  }) {
+    flutterRequests.add(method);
+    return super.sendFlutterRequest(method, params, failSilently: failSilently);
   }
 
   @override
