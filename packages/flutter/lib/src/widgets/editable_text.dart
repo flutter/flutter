@@ -1508,7 +1508,7 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
   ///
-  /// {@macro flutter.widgets.text_magnifier.intro}
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
   /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;

@@ -781,11 +781,11 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS nothing on all other
   /// platforms. If it is desired to supress the magnifier, consider passing

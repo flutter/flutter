@@ -70,7 +70,7 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
 }
 
-/// {@template flutter.widgets.textSelection.MagnifierBuildewr}
+/// {@template flutter.widgets.textSelection.MagnifierBuilder}
 /// A builder that builds a Widget with a [MagnifierController].
 ///
 /// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
@@ -181,13 +181,13 @@ class MagnifierOverlayInfoBearer {
   );
 }
 
-/// {@template flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
+/// {@template flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
 /// A configuration object for a magnifier.
 /// {@endtemplate}
 ///
 /// {@macro flutter.widgets.magnifier.intro}
 ///
-/// {@template flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+/// {@template flutter.widgets.text_selection.TextMagnifierConfiguration.details}
 /// In general, most features of the magnifier can be configured through
 /// [MagnifierBuilder]. [TextMagnifierConfiguration] is used to configure
 /// the magnifier's behavior through the [SelectionOverlay].
@@ -839,13 +839,13 @@ class SelectionOverlay {
   /// with other properties in [SelectionOverlay].
   final MagnifierController _magnifierController = MagnifierController();
 
-  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
   /// By default, [SelectionOverlay]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
 

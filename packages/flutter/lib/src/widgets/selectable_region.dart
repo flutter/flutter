@@ -182,13 +182,13 @@ class SelectableRegion extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   });
 
-  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
   /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.text_selection.TextEditingMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}

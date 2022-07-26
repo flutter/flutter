@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 /// [magnifierOverlayInfoBearer].
 ///
 /// Specifically, the [CupertinoTextMagnifier] follows the following rules.
-/// [CupertinoTextMagnifier] :
+/// [CupertinoTextMagnifier]:
 /// - is positioned horizontally outside the screen width, with _kHorizontalScreenEdgePadding padding.
 /// - is hidden if a gesture is detected _kHideIfBelowThreshold units below the line that the magnifier is on, shown otherwise.
 /// - follows the X of the gesture directly (with respect to rule 1).
