@@ -887,7 +887,11 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>['--enable-vmservice']);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>[
+      '--enable-vmservice',
+      // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
+      '--exclude-tags=web',
+    ]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
@@ -1115,6 +1119,16 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
       '--sound-null-safety',
     ]),
+    () => _runFlutterWebTest(
+      'html',
+      path.join(flutterRoot, 'packages', 'integration_test'),
+      <String>['test/web_extension_test.dart'],
+    ),
+    () => _runFlutterWebTest(
+      'canvaskit',
+      path.join(flutterRoot, 'packages', 'integration_test'),
+      <String>['test/web_extension_test.dart'],
+    ),
   ];
 
   // Shuffling mixes fast tests with slow tests so shards take roughly the same

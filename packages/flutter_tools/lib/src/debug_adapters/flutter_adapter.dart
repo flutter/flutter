@@ -28,6 +28,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     bool enableDds = true,
     super.enableAuthCodes,
     super.logger,
+    super.onError,
   })  : _enableDds = enableDds,
         // Always disable in the DAP layer as it's handled in the spawned
         // 'flutter' process.
@@ -409,7 +410,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
     if (_receivedAppStarted && serviceUri != null) {
       if (enableDebugger) {
-        connectDebugger(serviceUri, resumeIfStarting: true);
+        connectDebugger(serviceUri);
       } else {
         // Usually, `connectDebugger` (in the base Dart adapter) will send this
         // event when it connects a debugger. Since we're not connecting a

@@ -5,6 +5,7 @@
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
+import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
@@ -64,10 +65,13 @@ class ShaderCompiler {
       // TODO(zanderso): When impeller is enabled, the correct flags for the
       // target backend will need to be passed.
       // https://github.com/flutter/flutter/issues/102853
-      '--flutter-spirv',
-      '--spirv=$outputPath',
+      '--sksl',
+      '--iplr',
+      '--sl=$outputPath',
+      '--spirv=$outputPath.spirv',
       '--input=${input.path}',
       '--input-type=frag',
+      '--include=${input.parent.path}',
     ];
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;
@@ -80,6 +84,7 @@ class ShaderCompiler {
       );
     }
 
+    ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     return true;
   }
 }
