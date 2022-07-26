@@ -5,7 +5,7 @@
 import 'package:flutter/cupertino.dart';
 
 import 'debug.dart';
-import 'desktop_text_selection.dart';
+import 'desktop_text_selection_toolbar_button.dart';
 import 'material_localizations.dart';
 import 'text_selection_toolbar_text_button.dart';
 import 'theme.dart';

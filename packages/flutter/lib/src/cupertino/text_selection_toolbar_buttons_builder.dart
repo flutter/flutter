@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
-import 'desktop_text_selection.dart';
+import 'desktop_text_selection_toolbar_button.dart';
 import 'localizations.dart';
 import 'text_selection_toolbar_button.dart';
 

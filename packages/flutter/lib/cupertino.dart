@@ -34,6 +34,8 @@ export 'src/cupertino/date_picker.dart';
 export 'src/cupertino/debug.dart';
 export 'src/cupertino/default_text_selection_toolbar.dart';
 export 'src/cupertino/desktop_text_selection.dart';
+export 'src/cupertino/desktop_text_selection_toolbar.dart';
+export 'src/cupertino/desktop_text_selection_toolbar_button.dart';
 export 'src/cupertino/dialog.dart';
 export 'src/cupertino/form_row.dart';
 export 'src/cupertino/form_section.dart';
