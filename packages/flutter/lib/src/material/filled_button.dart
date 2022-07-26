@@ -32,7 +32,7 @@ enum _FilledButtonVariant { filled, tonal }
 /// background is the [ButtonStyle.backgroundColor].
 ///
 /// The filled button's default style is defined by
-/// [defaultStyleOf].  The style of this filled button can be
+/// [defaultStyleOf]. The style of this filled button can be
 /// overridden with its [style] parameter. The style of all filled
 /// buttons in a subtree can be overridden with the
 /// [FilledButtonTheme], and the style of all of the filled
@@ -45,7 +45,7 @@ enum _FilledButtonVariant { filled, tonal }
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
 ///
-/// To create a 'filled tonal' buton, use [FilledButton.tonal].
+/// To create a 'filled tonal' button, use [FilledButton.tonal].
 ///
 /// {@tool dartpad}
 /// This sample produces enabled and disabled filled and filled tonal
@@ -79,11 +79,10 @@ class FilledButton extends ButtonStyleButton {
     required super.child,
   }) : _variant = _FilledButtonVariant.filled;
 
-  /// Create a filled button from a pair of widgets that serve as the button's
-  /// [icon] and [label].
+  /// Create a filled button from [icon] and [label].
   ///
-  /// The icon and label are arranged in a row and padded by 12 logical pixels
-  /// at the start, and 16 at the end, with an 8 pixel gap in between.
+  /// The icon and label are arranged in a row with padding at the start and end
+  /// and a gap between them.
   ///
   /// The [icon] and [label] arguments must not be null.
   factory FilledButton.icon({
@@ -122,11 +121,10 @@ class FilledButton extends ButtonStyleButton {
     required super.child,
   }) : _variant = _FilledButtonVariant.tonal;
 
-  /// Create a filled tonal button from a pair of widgets that serve as
-  /// the button's [icon] and [label].
+  /// Create a filled tonal button from [icon] and [label].
   ///
-  /// The icon and label are arranged in a row and padded by 12 logical pixels
-  /// at the start, and 16 at the end, with an 8 pixel gap in between.
+  /// The icon and label are arranged in a row with padding at the start and end
+  /// and a gap between them.
   ///
   /// The [icon] and [label] arguments must not be null.
   factory FilledButton.tonalIcon({
@@ -171,7 +169,7 @@ class FilledButton extends ButtonStyleButton {
   /// or focused, and elevation + 6 is used when the button is pressed.
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle].mouseCursor.
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -189,6 +187,13 @@ class FilledButton extends ButtonStyleButton {
   /// FilledButton(
   ///   style: FilledButton.styleFrom(foregroundColor: Colors.green),
   /// )
+  ///
+  /// or for a Filled tonal variant:
+  /// ```dart
+  /// FilledButton.tonal(
+  ///   style: FilledButton.styleFrom(foregroundColor: Colors.green),
+  /// )
+  ///
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,
@@ -473,6 +478,8 @@ class _FilledButtonWithIconChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    // Adjust the gap based on the text scale factor. Start at 8, and lerp
+    // to 4 based on how large the text is.
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
