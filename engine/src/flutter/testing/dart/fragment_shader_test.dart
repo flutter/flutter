@@ -13,9 +13,9 @@ import 'package:path/path.dart' as path;
 
 import 'shader_test_file_utils.dart';
 
-void main() {
+void main() async {
   test('simple shader renders correctly', () async {
-    final FragmentProgram program = FragmentProgram.fromAsset(
+    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
       'functions.frag.iplr',
     );
     final Shader shader = program.shader(
@@ -25,7 +25,7 @@ void main() {
   });
 
   test('blue-green image renders green', () async {
-    final FragmentProgram program = FragmentProgram.fromAsset(
+    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
       'blue_green_sampler.frag.iplr',
     );
     final Image blueGreenImage = await _createBlueGreenImage();
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('shader with uniforms renders correctly', () async {
-    final FragmentProgram program = FragmentProgram.fromAsset(
+    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
       'uniforms.frag.iplr',
     );
 
@@ -65,7 +65,7 @@ void main() {
   });
 
   test('The ink_sparkle shader is accepted', () async {
-    final FragmentProgram program = FragmentProgram.fromAsset(
+    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
       'ink_sparkle.frag.iplr',
     );
     final Shader shader = program.shader(
@@ -79,7 +79,7 @@ void main() {
   });
 
   test('Uniforms are sorted correctly', () async {
-    final FragmentProgram program = FragmentProgram.fromAsset(
+    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
       'uniforms_sorted.frag.iplr',
     );
 
@@ -97,7 +97,7 @@ void main() {
   test('fromAsset throws an exception on invalid assetKey', () async {
     bool throws = false;
     try {
-      final FragmentProgram program = FragmentProgram.fromAsset(
+      final FragmentProgram program = await FragmentProgram.fromAssetAsync(
         '<invalid>',
       );
     } catch (e) {
@@ -109,7 +109,7 @@ void main() {
   test('fromAsset throws an exception on invalid data', () async {
     bool throws = false;
     try {
-      final FragmentProgram program = FragmentProgram.fromAsset(
+      final FragmentProgram program = await FragmentProgram.fromAssetAsync(
         'DashInNooglerHat.jpg',
       );
     } catch (e) {
@@ -119,7 +119,7 @@ void main() {
   });
 
   test('fromAsset accepts a shader with no uniforms', () async {
-    final FragmentProgram program = FragmentProgram.fromAsset(
+    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
       'no_uniforms.frag.iplr',
     );
     final Shader shader = program.shader();
@@ -127,7 +127,7 @@ void main() {
   });
 
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
-  final Map<String, FragmentProgram> iplrSupportedGLSLOpShaders = _loadShaderAssets(
+  final Map<String, FragmentProgram> iplrSupportedGLSLOpShaders = await _loadShaderAssets(
     path.join('supported_glsl_op_shaders', 'iplr'),
     '.iplr',
   );
@@ -135,15 +135,15 @@ void main() {
   _expectIplrShadersRenderGreen(iplrSupportedGLSLOpShaders);
 
   // Test all supported instructions. See lib/spirv/lib/src/constants.dart
-  final Map<String, FragmentProgram> iplrSupportedOpShaders = _loadShaderAssets(
+  final Map<String, FragmentProgram> iplrSupportedOpShaders = await _loadShaderAssets(
     path.join('supported_op_shaders', 'iplr'),
     '.iplr',
   );
   expect(iplrSupportedOpShaders.isNotEmpty, true);
   _expectIplrShadersRenderGreen(iplrSupportedOpShaders);
 
-  test('Equality depends on floatUniforms', () {
-    final FragmentProgram program = FragmentProgram.fromAsset(
+  test('Equality depends on floatUniforms', () async {
+    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
       'simple.frag.iplr',
     );
     final Float32List ones = Float32List.fromList(<double>[1]);
@@ -165,10 +165,10 @@ void main() {
   });
 
   test('Equality depends on data', () async {
-    final FragmentProgram programA = FragmentProgram.fromAsset(
+    final FragmentProgram programA = await FragmentProgram.fromAssetAsync(
       'simple.frag.iplr',
     );
-    final FragmentProgram programB = FragmentProgram.fromAsset(
+    final FragmentProgram programB = await FragmentProgram.fromAssetAsync(
       'uniforms.frag.iplr',
     );
     final Shader a = programA.shader();
@@ -225,7 +225,10 @@ Future<ByteData?> _imageByteDataFromShader({
 // $FLUTTER_BUILD_DIRECTORY/gen/flutter/lib/spirv/test/$leafFolderName
 // This is synchronous so that tests can be inside of a loop with
 // the proper test name.
-Map<String, FragmentProgram> _loadShaderAssets(String leafFolderName, String ext) {
+Future<Map<String, FragmentProgram>> _loadShaderAssets(
+    String leafFolderName,
+    String ext,
+  ) async {
   final Map<String, FragmentProgram> out = SplayTreeMap<String, FragmentProgram>();
 
   final Directory directory = shaderDirectory(leafFolderName);
@@ -233,13 +236,17 @@ Map<String, FragmentProgram> _loadShaderAssets(String leafFolderName, String ext
     return out;
   }
 
-  directory
+  await Future.forEach(
+    directory
       .listSync()
-      .where((FileSystemEntity entry) => path.extension(entry.path) == ext)
-      .forEach((FileSystemEntity entry) {
-    final String key = path.basenameWithoutExtension(entry.path);
-    out[key] = FragmentProgram.fromAsset(path.basename(entry.path));
-  });
+      .where((FileSystemEntity entry) => path.extension(entry.path) == ext),
+    (FileSystemEntity entry) async {
+      final String key = path.basenameWithoutExtension(entry.path);
+      out[key] = await FragmentProgram.fromAssetAsync(
+        path.basename(entry.path),
+      );
+    },
+  );
   return out;
 }
 
