@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../base/file_system.dart';
-import '../../base/project_migrator.dart';
-import '../../xcode_project.dart';
+import '../base/file_system.dart';
+import '../base/project_migrator.dart';
+import '../xcode_project.dart';
 
-/// Migrate the Xcode project for Xcode 13 compatibility to avoid an "Update to recommended settings" Xcode warning.
-class ProjectObjectVersionMigration extends ProjectMigrator {
-  ProjectObjectVersionMigration(
-    IosProject project,
+/// Migrate the Xcode project for Xcode compatibility to avoid an "Update to recommended settings" Xcode warning.
+class XcodeProjectObjectVersionMigration extends ProjectMigrator {
+  XcodeProjectObjectVersionMigration(
+    XcodeBasedProject project,
     super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
         _xcodeProjectSchemeFile = project.xcodeProjectSchemeFile;
@@ -37,8 +37,8 @@ class ProjectObjectVersionMigration extends ProjectMigrator {
   String? migrateLine(String line) {
     String updatedString = line;
     final Map<Pattern, String> originalToReplacement = <Pattern, String>{
-      // objectVersion has only been 46 and 50 in the iOS template.
-      'objectVersion = 46;': 'objectVersion = 50;',
+      // objectVersion value has been 46, 50, 51, and 54 in the template.
+      RegExp(r'objectVersion = \d+;'): 'objectVersion = 54;',
       // LastUpgradeCheck is in the Xcode project file, not scheme file.
       // Value has been 0730, 0800, 1020, and 1300 in the template.
       RegExp(r'LastUpgradeCheck = \d+;'): 'LastUpgradeCheck = 1300;',
