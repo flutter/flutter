@@ -15,8 +15,8 @@ void main() {
 
     expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
 
-    // Right clicking the Text in the SelectionArea shows the custom context
-    // menu, but no email button since no email address is selected.
+    // Right clicking the Text in the TextField shows the custom context menu,
+    // but no email button since no email address is selected.
     TestGesture gesture = await tester.startGesture(
       tester.getTopLeft(find.text(example.text)),
       kind: PointerDeviceKind.mouse,
@@ -46,8 +46,8 @@ void main() {
     ));
     await tester.pump();
 
-    // Right clicking the Text in the SelectionArea shows the custom context
-    // menu with the email button.
+    // Right clicking the Text in the TextField shows the custom context menu
+    // with the email button.
     gesture = await tester.startGesture(
       tester.getCenter(find.text(example.text)),
       kind: PointerDeviceKind.mouse,
