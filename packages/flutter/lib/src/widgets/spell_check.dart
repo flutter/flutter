@@ -170,19 +170,19 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       TextStyle? style,
       TextStyle misspelledTextStyle,
       SpellCheckResults spellCheckResults) {
-    final List<SuggestionSpan> spellCheckResults =
+    final List<SuggestionSpan> spellCheckResultsSpans =
         spellCheckResults.suggestionSpans;
     final String spellCheckResultsText = spellCheckResults.spellCheckedText;
 
     if (spellCheckResultsText != value.text) {
-      spellCheckResults = correctSpellCheckResults(
-          value.text, spellCheckResultsText, spellCheckResults);
+      spellCheckResultsSpans = correctSpellCheckResults(
+          value.text, spellCheckResultsText, spellCheckResultsSpans);
     }
 
     return TextSpan(
         style: style,
         children: buildSubtreesWithMisspelledWordsIndicated(
-            spellCheckResults,
+            spellCheckResultsSpans,
             value,
             style,
             misspelledTextStyle,
