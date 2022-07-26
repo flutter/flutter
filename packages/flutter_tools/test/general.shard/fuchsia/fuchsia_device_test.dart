@@ -43,7 +43,6 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
     timestamp: 0,
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[],
   livePorts: 0,
   name: 'wrong name',

@@ -951,7 +951,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner!.focusManager.dispose();
+
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
