@@ -73,10 +73,10 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// {@template flutter.widgets.textSelection.LoupeBuilder}
 /// A builder that builds a Widget with a [LoupeController].
 ///
-/// Consuming [controller] or [textSelectionData] is not required, although if a
-/// Widget intends to have entry or exit animations, it should take
-/// [controller] and provide it an [AnimationController], so that
-/// [LoupeController] can wait before removing it from the overlay.
+/// Consuming [LoupeController] or [ValueNotifier]<[LoupeSelectionOverlayInfoBearer]> is not
+/// required, although if a Widget intends to have entry or exit animations, it should take
+/// [LoupeController] and provide it an [AnimationController], so that [LoupeController]
+/// can wait before removing it from the overlay.
 /// {@endtemplate}
 ///
 ///
