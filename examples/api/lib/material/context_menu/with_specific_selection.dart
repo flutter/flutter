@@ -9,11 +9,14 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
 
+const String emailAddress = 'me@example.com';
+const String text = 'Select the email address and open the menu: $emailAddress';
+
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   final TextEditingController _controller = TextEditingController(
-    text: 'Select the email address and open the menu: me@example.com',
+    text: text,
   );
 
   void _showDialog (BuildContext context) {
