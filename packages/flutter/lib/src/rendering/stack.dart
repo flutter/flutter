@@ -373,17 +373,11 @@ class RenderStack extends RenderBox
     }
   }
 
-  Alignment? _resolvedAlignment;
-
-  void _resolve() {
-    if (_resolvedAlignment != null) {
-      return;
-    }
-    _resolvedAlignment = alignment.resolve(textDirection);
-  }
+  Alignment? _alignmentCache;
+  Alignment get _resolvedAlignment => _alignmentCache ??= AlignmentDirectional.topStart.resolve(textDirection);
 
   void _markNeedResolution() {
-    _resolvedAlignment = null;
+    _alignmentCache = null;
     markNeedsLayout();
   }
 
@@ -560,8 +554,6 @@ class RenderStack extends RenderBox
   }
 
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    _resolve();
-    assert(_resolvedAlignment != null);
     bool hasNonPositionedChildren = false;
     if (childCount == 0) {
       return (constraints.biggest.isFinite) ? constraints.biggest : constraints.smallest;
@@ -624,15 +616,14 @@ class RenderStack extends RenderBox
       layoutChild: ChildLayoutHelper.layoutChild,
     );
 
-    assert(_resolvedAlignment != null);
     RenderBox? child = firstChild;
     while (child != null) {
       final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
-        childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
+        childParentData.offset = _resolvedAlignment.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
+        _hasVisualOverflow = layoutPositionedChild(child, childParentData, size, _resolvedAlignment) || _hasVisualOverflow;
       }
 
       assert(child.parentData == childParentData);
