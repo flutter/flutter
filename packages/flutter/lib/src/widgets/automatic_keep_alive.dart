@@ -366,7 +366,9 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _releaseKeepAlive() {
+    // Dispose and release do not imply each other.
     _keepAliveHandle!.release();
+    _keepAliveHandle!.dispose();
     _keepAliveHandle = null;
   }
 
