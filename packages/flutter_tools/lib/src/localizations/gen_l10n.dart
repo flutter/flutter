@@ -1148,7 +1148,6 @@ class LocalizationsGenerator {
       );
     });
 
-    // Warn users when placeholder types are overrided to 'num'.
     for (final Message message in messages) {
       if (message.isPlural) {
         if (message.placeholders.isEmpty) {

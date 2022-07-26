@@ -2038,7 +2038,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           logger: logger,
         )
           ..loadResources()
-          ..writeOutputFiles(); 
+          ..writeOutputFiles();
         expect(logger.warningText, contains("Placeholders for plurals are automatically converted to type 'num'"));
       });
     });
