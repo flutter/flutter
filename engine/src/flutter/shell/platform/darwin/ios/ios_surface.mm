@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
-#import "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
@@ -20,14 +19,6 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
                                                fml::scoped_nsobject<CALayer> layer) {
   FML_DCHECK(layer);
   FML_DCHECK(context);
-
-  if ([layer.get() isKindOfClass:[CAEAGLLayer class]]) {
-    return std::make_unique<IOSSurfaceGL>(
-        fml::scoped_nsobject<CAEAGLLayer>(
-            reinterpret_cast<CAEAGLLayer*>([layer.get() retain])),  // EAGL layer
-        std::move(context)                                          // context
-    );
-  }
 
 #if SHELL_ENABLE_METAL
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {

@@ -17,7 +17,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 
 @implementation UIView (FirstResponder)
 - (BOOL)flt_hasFirstResponderInViewHierarchySubtree {
