@@ -67,7 +67,30 @@ void main() {
     expect(iosWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext('iOS workflow can launch and list devices when Xcode is set up', () {
+  testWithoutContext('iOS workflow can list devices even when Xcode version is too low', () {
+    final Xcode xcode = Xcode.test(
+      processManager: FakeProcessManager.any(),
+      xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          processManager: FakeProcessManager.any(),
+          version: Version(1, 0, 0)
+      ),
+    );
+
+    final IOSWorkflow iosWorkflow = IOSWorkflow(
+      platform: FakePlatform(operatingSystem: 'macos'),
+      xcode: xcode,
+      featureFlags: TestFeatureFlags(),
+    );
+
+    // Make sure we're testing the right Xcode state.
+    // expect(xcode.isInstalledAndMeetsVersionCheck, true);
+    expect(xcode.isSimctlInstalled, true);
+    expect(iosWorkflow.canLaunchDevices, false);
+    expect(iosWorkflow.canListDevices, true);
+    expect(iosWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('iOS workflow can launch devices when Xcode is set up', () {
     final Xcode xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
