@@ -23,6 +23,12 @@ enum ContextMenuButtonType {
 }
 
 /// The type and callback for a context menu button.
+///
+/// See also:
+///
+///  * [DefaultTextSelectionToolbar], which can take a list of
+///    ContextMenuButtonItems and create a platform-specific context menu with
+///    the indicated buttons.
 @immutable
 class ContextMenuButtonItem {
   /// Creates an instance of [ContextMenuButtonItem].

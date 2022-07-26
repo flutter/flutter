@@ -35,8 +35,8 @@ const double _kToolbarContentDistance = 8.0;
 ///
 /// See also:
 ///
-///  * [TextSelectionControls.buildToolbar], where this is used by default to
-///    build an Android-style toolbar.
+///  * [DefaultTextSelectionToolbar], which builds the toolbar for the current
+///    platform.
 ///  * [CupertinoTextSelectionToolbar], which is similar, but builds an iOS-
 ///    style toolbar.
 class TextSelectionToolbar extends StatelessWidget {

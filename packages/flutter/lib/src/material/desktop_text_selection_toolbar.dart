@@ -20,8 +20,8 @@ const double _kToolbarWidth = 222.0;
 ///
 /// See also:
 ///
-///  * [_DesktopTextSelectionControls.buildToolbar], where this is used by
-///    default to build a Material-style desktop toolbar.
+///  * [DefaultTextSelectionToolbar], which builds the toolbar for the current
+///    platform.
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.
 class DesktopTextSelectionToolbar extends StatelessWidget {

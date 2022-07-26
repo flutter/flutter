@@ -49,14 +49,18 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
        ),
        _targetPlatform = targetPlatform;
 
+  /// {@template flutter.cupertino.DefaultCupertinoTextSelectionToolbar.primaryAnchor}
   /// The main location on which to anchor the menu.
   ///
   /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
   /// location if the menu doesn't fit here.
+  /// {@endtemplate}
   final Offset primaryAnchor;
 
+  /// {@template flutter.cupertino.DefaultCupertinoTextSelectionToolbar.secondaryAnchor}
   /// The optional secondary location on which to anchor the menu, if it doesn't
   /// fit at [primaryAnchor].
+  /// {@endtemplate}
   final Offset? secondaryAnchor;
 
   /// The information needed to create each child button of the menu.
@@ -126,14 +130,10 @@ class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
     required this.children,
   }) : assert(children != null);
 
-  /// The main location on which to anchor the menu.
-  ///
-  /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
-  /// location if the menu doesn't fit here.
+  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
 
-  /// The optional secondary location on which to anchor the menu, if it doesn't
-  /// fit at [primaryAnchor].
+  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.secondaryAnchor}
   final Offset? secondaryAnchor;
 
   /// The children of the toolbar, typically buttons.
@@ -175,14 +175,10 @@ class _DefaultTextSelectionToolbarFromButtonItems extends StatelessWidget {
     required this.buttonItems,
   }) : assert(buttonItems != null);
 
-  /// The main location on which to anchor the menu.
-  ///
-  /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
-  /// location if the menu doesn't fit here.
+  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
 
-  /// The optional secondary location on which to anchor the menu, if it doesn't
-  /// fit at [primaryAnchor].
+  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.secondaryAnchor}
   final Offset? secondaryAnchor;
 
   /// The information needed to create each child button of the menu.

@@ -767,8 +767,8 @@ class CupertinoTextField extends StatefulWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        return TargetPlatform.iOS;
       case TargetPlatform.fuchsia:
+        return TargetPlatform.iOS;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
