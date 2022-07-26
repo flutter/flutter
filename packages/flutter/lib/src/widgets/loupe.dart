@@ -6,8 +6,14 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
+import 'container.dart';
+import 'framework.dart';
+import 'inherited_theme.dart';
+import 'navigator.dart';
+import 'overlay.dart';
 
 /// [LoupeController]'s main benefit over holding a raw [OverlayEntry] is that
 /// [LoupeController] will handle logic around waiting for a loupe to animate in or out.
