@@ -428,6 +428,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         _pointerMoveAccept = true;
         // When a same pointer is detected, update immediately and add this event.
         final bool eventExists = _multiPointerMoveTrackers.any((PointerEvent element) => element.pointer == event.pointer);
+        print('${event.pointer}: ${event.endOfBatch}');
         if (eventExists) {
           _checkMultiPointerUpdate();
           _multiPointerMoveTrackers.clear();
@@ -436,7 +437,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           // Wait until each pointer dispatches one event to fill up a batch.
           _multiPointerMoveTrackers.add(event);
           assert (_multiPointerMoveTrackers.length <= _multiPointerStartTrackers.length);
-          if (_multiPointerMoveTrackers.length == _multiPointerStartTrackers.length) {
+          if (event.endOfBatch) {
             _checkMultiPointerUpdate();
             _multiPointerMoveTrackers.clear();
           }
@@ -462,7 +463,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       if (_pointerMoveAccept) {
-        _velocityTrackers.keys.forEach(_giveUpPointer);
+        _velocityTrackers.keys.toList().forEach(_giveUpPointer);
         _multiPointerMoveTrackers.clear();
         _pointerMoveAccept = false;
       } else {
