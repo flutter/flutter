@@ -4,10 +4,13 @@
 
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 
+#include <optional>
+
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/promise.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
 
 namespace impeller {
@@ -73,8 +76,10 @@ PipelineFuture PipelineLibraryVK::GetRenderPipeline(
                         "could be created.";
       return;
     }
-    promise->set_value(
-        PipelineLibraryVK::Cast(thiz.get())->CreatePipeline(descriptor));
+    auto pipeline_create_info =
+        PipelineLibraryVK::Cast(thiz.get())->CreatePipeline(descriptor);
+    promise->set_value(std::make_shared<PipelineVK>(
+        weak_this, descriptor, std::move(pipeline_create_info)));
   });
 
   return future;
@@ -104,22 +109,88 @@ static vk::AttachmentDescription CreatePlaceholderAttachmentDescription(
   return desc;
 }
 
-std::shared_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
-    const PipelineDescriptor& desc) const {
+//----------------------------------------------------------------------------
+/// Render Pass
+/// We are NOT going to use the same render pass with the framebuffer (later)
+/// and the graphics pipeline (here). Instead, we are going to ensure that the
+/// sub-passes are compatible. To see the compatibility rules, see the Vulkan
+/// spec:
+/// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/chap8.html#renderpass-compatibility
+/// TODO(106378): Add a format specifier to the ColorAttachmentDescriptor,
+///               StencilAttachmentDescriptor, and, DepthAttachmentDescriptor.
+///               Right now, these are placeholders.
+///
+std::optional<vk::UniqueRenderPass> PipelineLibraryVK::CreateRenderPass(
+    const PipelineDescriptor& desc) {
+  std::vector<vk::AttachmentDescription> render_pass_attachments;
+  const auto sample_count = desc.GetSampleCount();
+  // Set the color attachment.
+  render_pass_attachments.push_back(CreatePlaceholderAttachmentDescription(
+      vk::Format::eR8G8B8A8Unorm, sample_count));
+
+  std::vector<vk::AttachmentReference> color_attachment_references;
+  std::vector<vk::AttachmentReference> resolve_attachment_references;
+  std::optional<vk::AttachmentReference> depth_stencil_attachment_reference;
+
+  // TODO (kaushikiska): consider changing the image layout to
+  // eColorAttachmentOptimal.
+  color_attachment_references.push_back(vk::AttachmentReference(
+      render_pass_attachments.size() - 1u, vk::ImageLayout::eGeneral));
+
+  // Set the resolve attachment if MSAA is enabled.
+  if (sample_count != SampleCount::kCount1) {
+    render_pass_attachments.push_back(CreatePlaceholderAttachmentDescription(
+        vk::Format::eR8G8B8A8Unorm, SampleCount::kCount1));
+    resolve_attachment_references.push_back(vk::AttachmentReference(
+        render_pass_attachments.size() - 1u, vk::ImageLayout::eGeneral));
+  }
+
+  if (desc.HasStencilAttachmentDescriptors()) {
+    render_pass_attachments.push_back(CreatePlaceholderAttachmentDescription(
+        vk::Format::eS8Uint, sample_count));
+    depth_stencil_attachment_reference = vk::AttachmentReference(
+        render_pass_attachments.size() - 1u, vk::ImageLayout::eGeneral);
+  }
+
+  vk::SubpassDescription subpass_info;
+  subpass_info.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics);
+  subpass_info.setColorAttachments(color_attachment_references);
+  subpass_info.setResolveAttachments(resolve_attachment_references);
+  if (depth_stencil_attachment_reference.has_value()) {
+    subpass_info.setPDepthStencilAttachment(
+        &depth_stencil_attachment_reference.value());
+  }
+
+  vk::RenderPassCreateInfo render_pass_info;
+  render_pass_info.setSubpasses(subpass_info);
+  render_pass_info.setAttachments(render_pass_attachments);
+  auto render_pass = device_.createRenderPassUnique(render_pass_info);
+  if (render_pass.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create render pass for pipeline "
+                   << desc.GetLabel() << ": "
+                   << vk::to_string(render_pass.result);
+    return std::nullopt;
+  }
+
+  return std::move(render_pass.value);
+}
+
+std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
+    const PipelineDescriptor& desc) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   vk::GraphicsPipelineCreateInfo pipeline_info;
 
   //----------------------------------------------------------------------------
   /// Dynamic States
   ///
-  vk::PipelineDynamicStateCreateInfo dynamic_state_info;
+  vk::PipelineDynamicStateCreateInfo dynamic_create_state_info;
   std::vector<vk::DynamicState> dynamic_states = {
       vk::DynamicState::eViewport,
       vk::DynamicState::eScissor,
       vk::DynamicState::eStencilReference,
   };
-  dynamic_state_info.setDynamicStates(dynamic_states);
-  pipeline_info.setPDynamicState(&dynamic_state_info);
+  dynamic_create_state_info.setDynamicStates(dynamic_states);
+  pipeline_info.setPDynamicState(&dynamic_create_state_info);
 
   //----------------------------------------------------------------------------
   /// Viewport State
@@ -160,7 +231,12 @@ std::shared_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   rasterization_state.setFrontFace(vk::FrontFace::eClockwise);
   rasterization_state.setCullMode(vk::CullModeFlagBits::eNone);
   rasterization_state.setPolygonMode(vk::PolygonMode::eFill);
-  rasterization_state.setLineWidth(1.0f);
+  // requires GPU extensions to change.
+  {
+    rasterization_state.setLineWidth(1.0f);
+    rasterization_state.setDepthClampEnable(false);
+  }
+  rasterization_state.setRasterizerDiscardEnable(false);
   pipeline_info.setPRasterizationState(&rasterization_state);
 
   //----------------------------------------------------------------------------
@@ -195,59 +271,14 @@ std::shared_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   blend_state.setAttachments(attachment_blend_state);
   pipeline_info.setPColorBlendState(&blend_state);
 
-  //----------------------------------------------------------------------------
-  /// Render Pass
-  /// We are NOT going to use the same render pass with the framebuffer (later)
-  /// and the graphics pipeline (here). Instead, we are going to ensure that the
-  /// sub-passes are compatible. To see the compatibility rules, see the Vulkan
-  /// spec:
-  /// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/chap8.html#renderpass-compatibility
-  /// TODO(106378): Add a format specifier to the ColorAttachmentDescriptor,
-  ///               StencilAttachmentDescriptor, and, DepthAttachmentDescriptor.
-  ///               Right now, these are placeholders.
-  ///
-  std::vector<vk::AttachmentReference> color_attachment_references;
-  std::vector<vk::AttachmentReference> resolve_attachment_references;
-  std::optional<vk::AttachmentReference> depth_stencil_attachment_reference;
-  std::vector<vk::AttachmentDescription> render_pass_attachments;
-  const auto sample_count = desc.GetSampleCount();
-  // Set the color attachment.
-  render_pass_attachments.push_back(CreatePlaceholderAttachmentDescription(
-      vk::Format::eR8G8B8A8Unorm, sample_count));
-  color_attachment_references.push_back(vk::AttachmentReference(
-      render_pass_attachments.size() - 1u, vk::ImageLayout::eGeneral));
-  // Set the resolve attachment if MSAA is enabled.
-  if (sample_count != SampleCount::kCount1) {
-    render_pass_attachments.push_back(CreatePlaceholderAttachmentDescription(
-        vk::Format::eR8G8B8A8Unorm, SampleCount::kCount1));
-    resolve_attachment_references.push_back(vk::AttachmentReference(
-        render_pass_attachments.size() - 1u, vk::ImageLayout::eGeneral));
-  }
-  if (desc.HasStencilAttachmentDescriptors()) {
-    render_pass_attachments.push_back(CreatePlaceholderAttachmentDescription(
-        vk::Format::eS8Uint, sample_count));
-    depth_stencil_attachment_reference = vk::AttachmentReference(
-        render_pass_attachments.size() - 1u, vk::ImageLayout::eGeneral);
-  }
-  vk::SubpassDescription subpass_info;
-  subpass_info.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics);
-  subpass_info.setColorAttachments(color_attachment_references);
-  subpass_info.setResolveAttachments(resolve_attachment_references);
-  if (depth_stencil_attachment_reference.has_value()) {
-    subpass_info.setPDepthStencilAttachment(
-        &depth_stencil_attachment_reference.value());
-  }
-  vk::RenderPassCreateInfo render_pass_info;
-  render_pass_info.setSubpasses(subpass_info);
-  render_pass_info.setAttachments(render_pass_attachments);
-  auto render_pass = device_.createRenderPassUnique(render_pass_info);
-  if (render_pass.result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create render pass for pipeline "
-                   << desc.GetLabel() << ": "
-                   << vk::to_string(render_pass.result);
+  auto render_pass = CreateRenderPass(desc);
+  if (render_pass.has_value()) {
+    pipeline_info.setBasePipelineHandle(VK_NULL_HANDLE);
+    pipeline_info.setSubpass(0);
+    pipeline_info.setRenderPass((*render_pass).get());
+  } else {
     return nullptr;
   }
-  pipeline_info.setRenderPass(render_pass.value.get());
 
   //----------------------------------------------------------------------------
   /// Pipeline Layout a.k.a the descriptor sets and uniforms.
@@ -267,10 +298,8 @@ std::shared_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   pipeline_info.setLayout(pipeline_layout.value.get());
 
   // TODO(WIP)
-
   // pipeline_info.setPVertexInputState(&vertex_input_state);
   // pipeline_info.setPDepthStencilState(&depth_stencil_state_);
-  // pipeline_info.setLayout(pipeline_layout);
 
   // See the note in the header about why this is a reader lock.
   ReaderLock lock(cache_mutex_);
@@ -280,7 +309,9 @@ std::shared_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
     VALIDATION_LOG << "Could not create graphics pipeline: " << desc.GetLabel();
     return nullptr;
   }
-  FML_UNREACHABLE();
+
+  return std::make_unique<PipelineCreateInfoVK>(std::move(pipeline.value),
+                                                std::move(render_pass.value()));
 }
 
 }  // namespace impeller

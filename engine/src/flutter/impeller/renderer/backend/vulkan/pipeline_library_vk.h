@@ -12,6 +12,7 @@
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/pipeline_library.h"
+#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
@@ -52,8 +53,11 @@ class PipelineLibraryVK final
   // |PipelineLibrary|
   PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor) override;
 
-  std::shared_ptr<PipelineVK> CreatePipeline(
-      const PipelineDescriptor& desc) const;
+  std::unique_ptr<PipelineCreateInfoVK> CreatePipeline(
+      const PipelineDescriptor& desc);
+
+  std::optional<vk::UniqueRenderPass> CreateRenderPass(
+      const PipelineDescriptor& desc);
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryVK);
 };
