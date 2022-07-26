@@ -204,7 +204,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeBuilder,
+    this.loupeConfiguration,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -262,7 +262,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.loupeBuilder,
+    this.loupeConfiguration,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -430,8 +430,16 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.textSelection.LoupeBuilder}
-  final LoupeBuilder? loupeBuilder;
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.loupe.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on
+  /// Android, and builds nothing on all other platforms. If it is desired to supress
+  /// the loupe, consider passing [TextEditingLoupeConfiguration.disabled].
+  final TextEditingLoupeConfiguration? loupeConfiguration;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -711,7 +719,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         paintCursorAboveText: paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         enableInteractiveSelection: widget.enableInteractiveSelection,
-        loupeBuilder: widget.loupeBuilder,
+        loupeConfiguration: widget.loupeConfiguration ?? TextEditingLoupe.adaptiveLoupeConfiguration,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,

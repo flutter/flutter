@@ -102,7 +102,7 @@ class LoupeSelectionOverlayInfoBearer {
     required this.currentLineBoundries,
   });
 
-  factory LoupeSelectionOverlayInfoBearer._selectionControlDerived({
+  factory LoupeSelectionOverlayInfoBearer._fromRenderEditable({
     required RenderEditable renderEditable,
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
@@ -179,6 +179,48 @@ class LoupeSelectionOverlayInfoBearer {
     fieldBounds,
     currentLineBoundries
   );
+}
+
+/// {@template flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+/// A configuration object for a loupe.
+/// {@endtemplate}
+///
+/// {@macro flutter.widgets.loupe.intro}
+///
+/// {@template flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+/// In general, most features of the loupe can be configured through
+/// [LoupeBuilder]. [TextEditingLoupeConfiguration] is used to configure
+/// the loupe's behavior through the [SelectionOverlay].
+/// {@endtemplate}
+class TextEditingLoupeConfiguration {
+  /// Construct a [TextEditingLoupeConfiguration] from parts.
+  ///
+  /// If [loupeBuilder] is null, a default [LoupeBuilder] will be used
+  /// that never builds a loupe.
+  const TextEditingLoupeConfiguration({
+    LoupeBuilder? loupeBuilder,
+    this.shouldDisplayHandlesInLoupe = true
+  }) : _loupeBuilder = loupeBuilder;
+
+  /// The passed in [LoupeBuilder].
+  ///
+  /// This is nullable because [disabled] needs to be static const,
+  /// so that it can be used as a default parameter. If left null,
+  /// the [loupeBuilder] getter will be a function that always returns
+  /// null.
+  final LoupeBuilder? _loupeBuilder;
+
+  /// {@macro flutter.widgets.textSelection.LoupeBuilder}
+  LoupeBuilder get loupeBuilder => _loupeBuilder ?? (_, __, ___) => null;
+
+  /// Determines whether a loupe should show the text editing handles or not.
+  final bool shouldDisplayHandlesInLoupe;
+
+  /// A constant for a [TextEditingLoupeConfiguration] that is disabled.
+  ///
+  /// In particular, this [TextEditingLoupeConfiguration] is considered disabled
+  /// because it never builds anything, regardless of platform.
+  static const TextEditingLoupeConfiguration disabled = TextEditingLoupeConfiguration();
 }
 
 /// An interface for building the selection UI, to be provided by the
@@ -347,7 +389,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    LoupeBuilder? loupeBuilder,
+    required TextEditingLoupeConfiguration loupeConfiguration,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -357,7 +399,7 @@ class TextSelectionOverlay {
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
-      loupeBuilder: loupeBuilder,
+      loupeConfiguration: loupeConfiguration,
       context: context,
       debugRequiredFor: debugRequiredFor,
       // The metrics will be set when show handles.
@@ -574,7 +616,7 @@ class TextSelectionOverlay {
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
-    _selectionOverlay.showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
+    _selectionOverlay.showLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -588,7 +630,7 @@ class TextSelectionOverlay {
     final TextSelection currentSelection = TextSelection.fromPosition(position);
 
     if (_selection.isCollapsed) {
-      _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
+      _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -627,7 +669,7 @@ class TextSelectionOverlay {
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
 
-     _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
+     _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: newSelection.extent,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -643,7 +685,7 @@ class TextSelectionOverlay {
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
-    _selectionOverlay.showLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
+    _selectionOverlay.showLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -655,7 +697,7 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
-      _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
+      _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -692,7 +734,7 @@ class TextSelectionOverlay {
         break;
     }
 
-    _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._selectionControlDerived(
+    _selectionOverlay.updateLoupe(LoupeSelectionOverlayInfoBearer._fromRenderEditable(
       currentTextPosition: newSelection.base,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -765,14 +807,12 @@ class SelectionOverlay {
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
     Offset? toolbarLocation,
-    LoupeBuilder? loupeBuilder,
+    this.loupeConfiguration = TextEditingLoupeConfiguration.disabled,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndPoints = selectionEndPoints,
-        _loupeBuilder = loupeBuilder,
-       _loupeController = loupeBuilder != null ? LoupeController() : null,
        _toolbarLocation = toolbarLocation {
     final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
     assert(
@@ -793,32 +833,31 @@ class SelectionOverlay {
   final ValueNotifier<LoupeSelectionOverlayInfoBearer> _loupeSelectionOverlayInfoBearer =
           ValueNotifier<LoupeSelectionOverlayInfoBearer>(const LoupeSelectionOverlayInfoBearer.empty());
 
-  /// [_loupeController.show] and [_loupeController.hide] should not be called directly, except
-  /// from inside [_showLoupe] and [_hideLoupe]. If it is desired to show or hide the loupe,
-  /// call [_showLoupe] or [_hideLoupe]. This is because the loupe needs to orchestrate
-  /// with other properties in [TextSelectionOverlay].
+  /// [LoupeController.show] and [LoupeController.hide] should not be called directly, except
+  /// from inside [showLoupe] and [hideLoupe]. If it is desired to show or hide the loupe,
+  /// call [showLoupe] or [hideLoupe]. This is because the loupe needs to orchestrate
+  /// with other properties in [SelectionOverlay].
+  final LoupeController _loupeController = LoupeController();
+
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
   ///
-  /// [_loupeController] and [_loupeBuilder] will only be null if the constructor was
-  /// explicitly passed in null. Otherwise, it will be a builder function that returns
-  /// the platform widget, or null, if no loupe is built for the platform.
-  final LoupeController? _loupeController;
-  final LoupeBuilder? _loupeBuilder;
+  /// {@macro flutter.widgets.loupe.intro}
+  ///
+  /// By default, [SelectionOverlay]'s [TextEditingLoupeConfiguration] is disabled.
+  ///
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  final TextEditingLoupeConfiguration loupeConfiguration;
 
 
-  /// Shows the loupe, and hides the toolbar if it was showing when _showLoupe
+  /// Shows the loupe, and hides the toolbar if it was showing when [showLoupe]
   /// was called. This is safe to call on platforms not mobile, since
   /// a loupeBuilder will not be provided, or the loupeBuilder will return null
   /// on platforms not mobile.
   ///
   /// This is NOT the souce of truth for if the loupe is up or not,
-  /// since, for example, the [CupertinoLoupe] is able to hide itself
-  /// if the user drags too far away. If this info is needed, check
-  /// [_loupeController.status].
+  /// since loupes may hide themselves. If this info is needed, check
+  /// [LoupeController.shown].
   void showLoupe(LoupeSelectionOverlayInfoBearer initalInfoBearer) {
-    if (_loupeController == null) {
-      return;
-    }
-
     if (_toolbar != null) {
       hideToolbar();
     }
@@ -826,11 +865,12 @@ class SelectionOverlay {
     // Start from empty, so we don't utilize any rememnant values.
     _loupeSelectionOverlayInfoBearer.value = initalInfoBearer;
 
-    // If we don't build a loupe for the specified platform,
-    // then we should short circuit.
-    final Widget? builtLoupe = _loupeBuilder!(
+    // pre-build the loupe so we can tell if we've built something
+    // or not. If we don't build a loupe, then we should not
+    // insert anything in the overlay.
+    final Widget? builtLoupe = loupeConfiguration.loupeBuilder(
       context,
-      _loupeController!,
+      _loupeController,
       _loupeSelectionOverlayInfoBearer,
     );
 
@@ -838,21 +878,20 @@ class SelectionOverlay {
       return;
     }
 
-    _loupeController!.show(
+    _loupeController.show(
         context: context,
-        // On Android, the loupe cannot see the handles. On iOS, it can.
-        below: defaultTargetPlatform == TargetPlatform.iOS
+        below: loupeConfiguration.shouldDisplayHandlesInLoupe
             ? null
             : _handles!.first,
         builder: (_) => builtLoupe);
   }
 
+  /// Hide the current loupe, optionally immediately showing
+  /// the toolbar.
+  ///
+  /// This does nothing if there is no loupe.
   void hideLoupe({required bool shouldShowToolbar}) {
-    if (_loupeController == null) {
-      return;
-    }
-
-    _loupeController!.hide();
+    _loupeController.hide();
 
     if (shouldShowToolbar) {
       showToolbar();
@@ -1259,7 +1298,15 @@ class SelectionOverlay {
     );
   }
 
+  /// Update the current loupe with new selection data, so the loupe
+  /// can respond accordingly.
+  ///
+  /// If there is no loupe shown, this does nothing.
   void updateLoupe(LoupeSelectionOverlayInfoBearer loupeSelectionOverlayInfoBearer) {
+    if (!_loupeController.shown) {
+      return;
+    }
+
     _loupeSelectionOverlayInfoBearer.value = loupeSelectionOverlayInfoBearer;
   }
 }

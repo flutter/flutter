@@ -35,14 +35,20 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
-    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeBuilder,
+    this.loupeConfiguration,
     required this.child,
   });
 
-  /// {@macro flutter.widgets.textSelection.LoupeBuilder}
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
   ///
   /// {@macro flutter.widgets.loupe.intro}
-  final LoupeBuilder? loupeBuilder;
+  ///
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on
+  /// Android, and builds nothing on all other platforms. If it is desired to supress
+  /// the loupe, consider passing [TextEditingLoupeConfiguration.disabled].
+  final TextEditingLoupeConfiguration? loupeConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -99,7 +105,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       focusNode: _effectiveFocusNode,
       selectionControls: controls,
-      loupeBuilder: widget.loupeBuilder,
+      loupeConfiguration: widget.loupeConfiguration ?? TextEditingLoupe.adaptiveLoupeConfiguration,
       child: widget.child,
     );
   }

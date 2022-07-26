@@ -179,10 +179,17 @@ class SelectableRegion extends StatefulWidget {
     required this.focusNode,
     required this.selectionControls,
     required this.child,
-    this.loupeBuilder,
+    this.loupeConfiguration = TextEditingLoupeConfiguration.disabled,
   });
 
-  final LoupeBuilder? loupeBuilder;
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.loupe.intro}
+  ///
+  /// By default, [SelectableRegion]'s [TextEditingLoupeConfiguration] is disabled.
+  ///
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  final TextEditingLoupeConfiguration loupeConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
@@ -571,7 +578,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
       toolbarLayerLink: _toolbarLayerLink,
-      loupeBuilder: widget.loupeBuilder
+      loupeConfiguration: widget.loupeConfiguration
     );
   }
 

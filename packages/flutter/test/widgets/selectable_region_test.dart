@@ -1112,13 +1112,15 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              loupeBuilder: (_,
-                  LoupeController controller,
-                  ValueNotifier<LoupeSelectionOverlayInfoBearer>
-                      localInfoBearer) {
-                infoBearer = localInfoBearer;
-                return fakeLoupe;
-              },
+              loupeConfiguration: TextEditingLoupeConfiguration(
+                loupeBuilder: (_,
+                    LoupeController controller,
+                    ValueNotifier<LoupeSelectionOverlayInfoBearer>
+                        localInfoBearer) {
+                  infoBearer = localInfoBearer;
+                  return fakeLoupe;
+                },
+              ),
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
               child: const Text(text),

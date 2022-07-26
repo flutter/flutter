@@ -61,7 +61,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeBuilder(
+          TextEditingLoupe.adaptiveLoupeConfiguration.loupeBuilder(
               context,
               LoupeController(),
               ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -80,7 +80,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeBuilder(
+          TextEditingLoupe.adaptiveLoupeConfiguration.loupeBuilder(
               context,
               LoupeController(),
               ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -99,7 +99,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingLoupe.adaptiveLoupeBuilder(
+          TextEditingLoupe.adaptiveLoupeConfiguration.loupeBuilder(
               context,
               LoupeController(),
               ValueNotifier<LoupeSelectionOverlayInfoBearer>(

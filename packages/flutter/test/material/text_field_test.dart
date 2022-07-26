@@ -11549,7 +11549,9 @@ void main() {
         key: UniqueKey(),
       );
       final TextField textField = TextField(
-        loupeBuilder: (_, __, ___) => customLoupe,
+        loupeConfiguration: TextEditingLoupeConfiguration(
+          loupeBuilder: (_, __, ___) => customLoupe,
+        ),
       );
 
       await tester.pumpWidget(const MaterialApp(
@@ -11560,7 +11562,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       expect(
-          textField.loupeBuilder!(
+          textField.loupeConfiguration!.loupeBuilder(
               context,
               LoupeController(),
               ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -11572,26 +11574,17 @@ void main() {
               equals(customLoupe.key)));
     });
 
-    test('should be null on passed in null', () {
-      const TextField textField = TextField(
-        loupeBuilder: null,
-      );
-      expect(textField.loupeBuilder, isNull);
-    });
-
     group('defaults', () {
       testWidgets('should build Loupe on Android', (WidgetTester tester) async {
-        const TextField textField = TextField();
-
         await tester.pumpWidget(const MaterialApp(
-          home: Placeholder(),
-        ));
+          home: Scaffold(body: TextField()))
+        );
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Placeholder));
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            textField.loupeBuilder!(
+            editableText.loupeConfiguration.loupeBuilder(
                 context,
                 LoupeController(),
                 ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -11602,17 +11595,15 @@ void main() {
 
       testWidgets('should build CupertinoLoupe on iOS',
           (WidgetTester tester) async {
-        const TextField textField = TextField();
-
         await tester.pumpWidget(const MaterialApp(
-          home: Placeholder(),
-        ));
+          home: Scaffold(body: TextField()))
+        );
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Placeholder));
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            textField.loupeBuilder!(
+            editableText.loupeConfiguration.loupeBuilder(
                 context,
                 LoupeController(),
                 ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -11623,17 +11614,15 @@ void main() {
 
       testWidgets('should build nothing on Android and iOS',
           (WidgetTester tester) async {
-        const TextField defaultTextField = TextField();
-
         await tester.pumpWidget(const MaterialApp(
-          home: Placeholder(),
-        ));
+          home: Scaffold(body: TextField()))
+        );
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Placeholder));
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            defaultTextField.loupeBuilder!(
+            editableText.loupeConfiguration.loupeBuilder(
                 context,
                 LoupeController(),
                 ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -11661,13 +11650,16 @@ void main() {
           child: TextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            loupeBuilder: (_,
-                LoupeController controller,
-                ValueNotifier<LoupeSelectionOverlayInfoBearer>
-                    localInfoBearer) {
-              infoBearer = localInfoBearer;
-              return fakeLoupe;
-            },
+            loupeConfiguration: TextEditingLoupeConfiguration(
+              loupeBuilder: (
+                  _,
+                  LoupeController controller,
+                  ValueNotifier<LoupeSelectionOverlayInfoBearer> localInfoBearer
+                ) {
+                  infoBearer = localInfoBearer;
+                  return fakeLoupe;
+                },
+              ),
           ),
         ),
       );

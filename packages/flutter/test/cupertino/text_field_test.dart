@@ -5781,7 +5781,7 @@ void main() {
           key: UniqueKey(),
         );
         final CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
-          loupeBuilder: (_, __, ___) => customLoupe,
+          loupeConfiguration: TextEditingLoupeConfiguration(loupeBuilder: (_, __, ___) => customLoupe),
         );
 
         await tester.pumpWidget(const CupertinoApp(
@@ -5792,7 +5792,7 @@ void main() {
             tester.firstElement(find.byType(Placeholder));
 
         expect(
-            defaultCupertinoTextField.loupeBuilder!(
+            defaultCupertinoTextField.loupeConfiguration!.loupeBuilder(
                 context,
                 LoupeController(),
                 ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -5800,13 +5800,6 @@ void main() {
                 )),
             isA<Widget>().having(
                 (Widget widget) => widget.key, 'key', equals(customLoupe.key)));
-      });
-
-      test('should be null on null passed in null', () {
-        const CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
-          loupeBuilder: null,
-        );
-        expect(defaultCupertinoTextField.loupeBuilder, isNull);
       });
 
       group('defaults', () {
@@ -5823,7 +5816,7 @@ void main() {
               tester.firstElement(find.byType(Placeholder));
 
           expect(
-              defaultCupertinoTextField.loupeBuilder!(
+              defaultCupertinoTextField.loupeConfiguration!.loupeBuilder(
                   context,
                   LoupeController(),
                   ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -5848,7 +5841,7 @@ void main() {
             tester.firstElement(find.byType(Placeholder));
 
         expect(
-            defaultCupertinoTextField.loupeBuilder!(
+            defaultCupertinoTextField.loupeConfiguration!.loupeBuilder(
                 context,
                 LoupeController(),
                 ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -5870,13 +5863,15 @@ void main() {
               builder: (BuildContext context) => CupertinoTextField(
                 dragStartBehavior: DragStartBehavior.down,
                 controller: controller,
-                loupeBuilder: (_,
+                loupeConfiguration: TextEditingLoupeConfiguration(
+                  loupeBuilder: (
+                    _,
                     LoupeController controller,
-                    ValueNotifier<LoupeSelectionOverlayInfoBearer>
-                        localInfoBearer) {
-                  infoBearer = localInfoBearer;
-                  return fakeLoupe;
-                },
+                    ValueNotifier<LoupeSelectionOverlayInfoBearer> localInfoBearer
+                  ) {
+                    infoBearer = localInfoBearer;
+                    return fakeLoupe;
+                }),
               ),
             ),
           ),

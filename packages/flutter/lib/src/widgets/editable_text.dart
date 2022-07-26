@@ -634,7 +634,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeBuilder,
+    this.loupeConfiguration = TextEditingLoupeConfiguration.disabled,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1497,10 +1497,12 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.textSelection.LoupeBuilder}
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
   ///
-  /// If not provided, no loupe will be shown.
-  final LoupeBuilder? loupeBuilder;
+  /// {@macro flutter.widgets.loupe.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  final TextEditingLoupeConfiguration loupeConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2568,7 +2570,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      loupeBuilder: widget.loupeBuilder,
+      loupeConfiguration: widget.loupeConfiguration,
     );
   }
 

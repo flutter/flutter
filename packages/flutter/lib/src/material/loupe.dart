@@ -34,32 +34,34 @@ class TextEditingLoupe extends StatefulWidget {
   const TextEditingLoupe(
       {super.key, required this.loupeSelectionOverlayInfoBearer});
 
-  /// A [LoupeBuilder]<[LoupeSelectionOverlayInfoBearer]>
-  /// that returns a [CupertinoTextEditingLoupe] on iOS, [TextEditingLoupe]
-  /// on Android, and null on all other platforms.
-  static Widget? adaptiveLoupeBuilder(
-    BuildContext context,
-    LoupeController controller,
-    ValueNotifier<LoupeSelectionOverlayInfoBearer>
-        loupeSelectionOverlayInfoBearer,
-  ) {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        return CupertinoTextEditingLoupe(
-          controller: controller,
-          loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer,
-        );
-      case TargetPlatform.android:
-        return TextEditingLoupe(
-            loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer);
+  /// A [TextEditingLoupeConfiguration] that returns a [CupertinoTextEditingLoupe] on iOS,
+  /// [TextEditingLoupe] on Android, and null on all other platforms, and shows the editing handles
+  /// only on iOS.
+  static TextEditingLoupeConfiguration adaptiveLoupeConfiguration = TextEditingLoupeConfiguration(
+    shouldDisplayHandlesInLoupe: defaultTargetPlatform == TargetPlatform.iOS,
+    loupeBuilder: (
+      BuildContext context,
+      LoupeController controller,
+      ValueNotifier<LoupeSelectionOverlayInfoBearer> loupeSelectionOverlayInfoBearer,
+    ) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          return CupertinoTextEditingLoupe(
+            controller: controller,
+            loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer,
+          );
+        case TargetPlatform.android:
+          return TextEditingLoupe(
+              loupeSelectionOverlayInfoBearer: loupeSelectionOverlayInfoBearer);
 
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return null;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          return null;
+      }
     }
-  }
+  );
 
   /// The duration that the position is animated if [TextEditingLoupe] just switched
   /// between lines.

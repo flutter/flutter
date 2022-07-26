@@ -5062,13 +5062,16 @@ void main() {
       const String testValue = 'abc def ghi';
       final SelectableText selectableText = SelectableText(
             testValue,
-            loupeBuilder: (_,
-                LoupeController controller,
-                ValueNotifier<LoupeSelectionOverlayInfoBearer>
-                    localInfoBearer) {
-              infoBearer = localInfoBearer;
-              return fakeLoupe;
-            },
+            loupeConfiguration: TextEditingLoupeConfiguration(
+        loupeBuilder: (
+          _,
+          LoupeController controller,
+          ValueNotifier<LoupeSelectionOverlayInfoBearer> localInfoBearer
+        ) {
+          infoBearer = localInfoBearer;
+          return fakeLoupe;
+        },
+      )
           );
 
       await tester.pumpWidget(

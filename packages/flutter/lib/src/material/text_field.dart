@@ -329,7 +329,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.loupeBuilder = TextEditingLoupe.adaptiveLoupeBuilder,
+    this.loupeConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -392,12 +392,16 @@ class TextField extends StatefulWidget {
                        paste: true,
                      )));
 
-  /// A [LoupeBuilder] for this [TextField].
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.intro}
   ///
-  /// If null, then no loupe will be built for this text field. By default, builds a
-  /// [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on Android, and builds
-  /// nothing on all other platforms.
-  final LoupeBuilder? loupeBuilder;
+  /// {@macro flutter.widgets.loupe.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextEditingLoupeConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextEditingLoupe] on iOS and [TextEditingLoupe] on
+  /// Android, and builds nothing on all other platforms. If it is desired to supress
+  /// the loupe, consider passing [TextEditingLoupeConfiguration.disabled].
+  final TextEditingLoupeConfiguration? loupeConfiguration;
 
   /// Controls the text being edited.
   ///
@@ -1286,7 +1290,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          loupeBuilder: widget.loupeBuilder,
+          loupeConfiguration: widget.loupeConfiguration ?? TextEditingLoupe.adaptiveLoupeConfiguration,
         ),
       ),
     );
