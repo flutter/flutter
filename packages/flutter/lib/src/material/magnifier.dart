@@ -30,7 +30,7 @@ class TextEditingMagnifier extends StatefulWidget {
   /// a Pixel 6 running Android 12 otherwise.
   /// {@endtemplate}
   ///
-  /// {@template widgets.material.magnifier.positionRules}
+  /// {@macro widgets.material.magnifier.positionRules}
   const TextEditingMagnifier(
       {super.key, required this.magnifierSelectionOverlayInfoBearer});
 
