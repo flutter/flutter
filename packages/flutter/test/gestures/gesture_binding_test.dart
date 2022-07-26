@@ -338,6 +338,28 @@ void main() {
     }
   });
 
+  test('Should produce correct endOfBatch', () {
+    final Offset location = const Offset(10.0, 10.0) * GestureBinding.instance.window.devicePixelRatio;
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: location.dx, physicalY: location.dy),
+      ],
+    );
+
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
+
+    expect(events.length, 2);
+    expect(events[0], isA<PointerAddedEvent>());
+    expect(events[0].endOfBatch, isFalse);
+    expect(events[1], isA<PointerHoverEvent>());
+    expect(events[1].endOfBatch, isTrue);
+
+    expect(events[0].copyWith().endOfBatch, isFalse);
+    expect(events[0].transformed(Matrix4.identity()).endOfBatch, isFalse);
+  });
+
+
   test('Pointer pan/zoom events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
