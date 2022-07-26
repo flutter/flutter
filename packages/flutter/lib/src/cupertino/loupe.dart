@@ -52,7 +52,7 @@ class CupertinoTextEditingLoupe extends StatefulWidget {
   /// `_kHorizontalScreenEdgePadding, w - _kHorizontalScreenEdgePadding`.
   final double horizontalScreenEdgePadding;
 
-  /// The duration that the loupe drags behind it's final position.
+  /// The duration that the loupe drags behind its final position.
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
 
   /// This loupe's controller.
@@ -62,7 +62,7 @@ class CupertinoTextEditingLoupe extends StatefulWidget {
   /// overlay.
   final LoupeController controller;
 
-  /// [CupertinoTextEditingLoupe] will determine it's own positioning
+  /// [CupertinoTextEditingLoupe] will determine its own positioning
   /// based on the [LoupeSelectionOverlayInfoBearer] of this notifier.
   final ValueNotifier<LoupeSelectionOverlayInfoBearer>
       loupeSelectionOverlayInfoBearer;
@@ -191,7 +191,7 @@ class _CupertinoTextEditingLoupeState extends State<CupertinoTextEditingLoupe>
   Widget build(BuildContext context) {
     return AnimatedPositioned(
       duration: CupertinoTextEditingLoupe._kDragAnimationDuration,
-      curve: Curves.easeOut,
+      curve: widget.animationCurve,
       left: _currentAdjustedLoupePosition.dx,
       top: _currentAdjustedLoupePosition.dy,
       child: CupertinoLoupe(
@@ -266,7 +266,7 @@ class CupertinoLoupe extends StatelessWidget {
   final Animation<double>? inOutAnimation;
 
   /// Any additional focal point offset, applied over the regular focal
-  /// point offset defined in [loupeAboveFocalPoint].
+  /// point offset defined in [kLoupeAboveFocalPoint].
   final Offset additionalFocalPointOffset;
 
   @override

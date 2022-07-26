@@ -5965,8 +5965,7 @@ void main() {
     final Widget fakeLoupe = Container(key: UniqueKey());
 
     group('loupe builder', () {
-      testWidgets('should build custom loupe if given',
-          (WidgetTester tester) async {
+      testWidgets('should build custom loupe if given', (WidgetTester tester) async {
         final Widget customLoupe = Container(
           key: UniqueKey(),
         );
@@ -5993,20 +5992,16 @@ void main() {
       });
 
       group('defaults', () {
-        testWidgets('should build CupertinoLoupe on iOS',
-            (WidgetTester tester) async {
-          const CupertinoTextField defaultCupertinoTextField =
-              CupertinoTextField();
-
+        testWidgets('should build CupertinoLoupe on iOS', (WidgetTester tester) async {
           await tester.pumpWidget(const CupertinoApp(
-            home: Placeholder(),
+            home: CupertinoTextField(),
           ));
 
-          final BuildContext context =
-              tester.firstElement(find.byType(Placeholder));
+        final BuildContext context = tester.firstElement(find.byType(CupertinoTextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
 
           expect(
-              defaultCupertinoTextField.loupeConfiguration!.loupeBuilder(
+              editableText.loupeConfiguration.loupeBuilder(
                   context,
                   LoupeController(),
                   ValueNotifier<LoupeSelectionOverlayInfoBearer>(
@@ -6018,20 +6013,16 @@ void main() {
                 <TargetPlatform>{TargetPlatform.iOS}));
       });
 
-      testWidgets('should build nothing on not iOS',
-          (WidgetTester tester) async {
-        const CupertinoTextField defaultCupertinoTextField =
-            CupertinoTextField();
-
+      testWidgets('should build nothing on not iOS', (WidgetTester tester) async {
         await tester.pumpWidget(const CupertinoApp(
-          home: Placeholder(),
+          home: CupertinoTextField(),
         ));
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Placeholder));
+        final BuildContext context = tester.firstElement(find.byType(CupertinoTextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
 
         expect(
-            defaultCupertinoTextField.loupeConfiguration!.loupeBuilder(
+            editableText.loupeConfiguration.loupeBuilder(
                 context,
                 LoupeController(),
                 ValueNotifier<LoupeSelectionOverlayInfoBearer>(
