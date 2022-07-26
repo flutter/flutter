@@ -324,8 +324,18 @@ class KeepAliveHandle extends ChangeNotifier {
   ///
   /// This method does not call [dispose]. When the handle is not needed
   /// anymore, it must be [dispose]d regardless of whether notifying listeners.
+  @Deprecated(
+    'Use dispose instead. '
+    'This feature was deprecated after v3.3.0-0.0.pre.',
+  )
   void release() {
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    notifyListeners();
+    super.dispose();
   }
 }
 
