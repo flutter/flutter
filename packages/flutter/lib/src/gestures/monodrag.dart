@@ -428,7 +428,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         _pointerMoveAccept = true;
         // When a same pointer is detected, update immediately and add this event.
         final bool eventExists = _multiPointerMoveTrackers.any((PointerEvent element) => element.pointer == event.pointer);
-        print('${event.pointer}: ${event.endOfBatch}');
         if (eventExists) {
           _checkMultiPointerUpdate();
           _multiPointerMoveTrackers.clear();
