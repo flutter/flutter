@@ -535,9 +535,18 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
-    final ValidationType valid = messages.every((ValidationMessage message) => message.isInformation)
-      ? ValidationType.installed
-      : ValidationType.partial;
+    ValidationType valid;
+    if (messages.every((ValidationMessage message) => message.isInformation)) {
+      valid = ValidationType.installed;
+    } else {
+      // The issues for this validator stem from broken git configuration of the local install;
+      // in that case, make it clear that it is fine to continue, but freshness check/upgrades
+      // won't be supported.
+      valid = ValidationType.partial;
+      messages.add(
+        ValidationMessage(_userMessages.flutterValidatorErrorIntentional),
+      );
+    }
 
     return ValidationResult(
       valid,
@@ -552,16 +561,22 @@ class FlutterValidator extends DoctorValidator {
   }
 
   ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {
-    final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
+    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
 
     // The tool sets the channel as "unknown", if the current branch is on a
     // "detached HEAD" state or doesn't have an upstream, and sets the
     // frameworkVersion as "0.0.0-unknown" if  "git describe" on HEAD doesn't
     // produce an expected format to be parsed for the frameworkVersion.
-    if (versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown') {
-      return ValidationMessage.hint(flutterVersionMessage);
+    if (versionChannel != 'unknown' && frameworkVersion != '0.0.0-unknown') {
+      return ValidationMessage(flutterVersionMessage);
     }
-    return ValidationMessage(flutterVersionMessage);
+    if (versionChannel == 'unknown') {
+      flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownChannel}';
+    }
+    if (frameworkVersion == '0.0.0-unknown') {
+      flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownVersion}';
+    }
+    return ValidationMessage.hint(flutterVersionMessage);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
@@ -572,7 +587,7 @@ class FlutterValidator extends DoctorValidator {
     if (upstreamValidationError != null) {
       final String errorMessage = upstreamValidationError.message;
       if (errorMessage.contains('could not determine the remote upstream which is being tracked')) {
-        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown'));
+        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUnknown);
       }
       // At this point, repositoryUrl must not be null
       if (errorMessage.contains('Flutter SDK is tracking a non-standard remote')) {
