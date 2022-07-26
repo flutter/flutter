@@ -176,7 +176,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
 
     if (spellCheckResultsText != value.text) {
       spellCheckResults = correctSpellCheckResults(
-          value.text, spellCheckResultsText, rawSpellCheckResults);
+          value.text, spellCheckResultsText, spellCheckResults);
     }
 
     return TextSpan(
