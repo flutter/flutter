@@ -162,23 +162,19 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       TextStyle? style,
       TextStyle misspelledTextStyle,
       SpellCheckResults spellCheckResults) {
-    List<SuggestionSpan>? correctedSpellCheckResults;
-
-    final List<SuggestionSpan> rawSpellCheckResults =
+    final List<SuggestionSpan> spellCheckResults =
         spellCheckResults.suggestionSpans;
     final String spellCheckResultsText = spellCheckResults.spellCheckedText;
 
     if (spellCheckResultsText != value.text) {
-      correctedSpellCheckResults = correctSpellCheckResults(
+      spellCheckResults = correctSpellCheckResults(
           value.text, spellCheckResultsText, rawSpellCheckResults);
-    } else {
-      correctedSpellCheckResults = rawSpellCheckResults;
     }
 
     return TextSpan(
         style: style,
         children: buildSubtreesWithMisspelledWordsIndicated(
-            correctedSpellCheckResults,
+            spellCheckResults,
             value,
             style,
             misspelledTextStyle,
@@ -210,56 +206,57 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     bool textPointerWithinComposingRegion = false;
     bool currSpanIsComposingRegion = false;
 
-    while (spellCheckSuggestions != null &&
-        textPointer < text.length &&
+    if (spellCheckSuggestions != null) {
+      while (textPointer < text.length &&
         currSpanPointer < spellCheckSuggestions.length) {
-      currSpan = spellCheckSuggestions[currSpanPointer];
+        currSpan = spellCheckSuggestions[currSpanPointer];
 
-      if (currSpan.range.start > textPointer) {
-        endIndex = currSpan.range.start < text.length
-            ? currSpan.range.start
-            : text.length;
-        textPointerWithinComposingRegion =
-            composingRegion.start >= textPointer &&
-                composingRegion.end <= endIndex &&
-                !composingWithinCurrentTextRange;
+        if (currSpan.range.start > textPointer) {
+          endIndex = currSpan.range.start < text.length
+              ? currSpan.range.start
+              : text.length;
+          textPointerWithinComposingRegion =
+              composingRegion.start >= textPointer &&
+                  composingRegion.end <= endIndex &&
+                  !composingWithinCurrentTextRange;
 
-        if (textPointerWithinComposingRegion) {
-          _addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
-              composingRegion, style, composingTextStyle);
-          tsTreeChildren.add(
-            TextSpan(
-              style: style,
-              text: text.substring(composingRegion.end, endIndex)
-            )
-          );
+          if (textPointerWithinComposingRegion) {
+            _addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
+                composingRegion, style, composingTextStyle);
+            tsTreeChildren.add(
+              TextSpan(
+                style: style,
+                text: text.substring(composingRegion.end, endIndex)
+              )
+            );
+          } else {
+            tsTreeChildren.add(
+              TextSpan(
+                style: style,
+                text: text.substring(textPointer, endIndex)
+              )
+            );
+          }
+
+          textPointer = endIndex;
         } else {
+          endIndex =
+              currSpan.range.end < text.length ? currSpan.range.end : text.length;
+          currSpanIsComposingRegion = textPointer >= composingRegion.start &&
+              endIndex <= composingRegion.end &&
+              !composingWithinCurrentTextRange;
           tsTreeChildren.add(
             TextSpan(
-              style: style,
-              text: text.substring(textPointer, endIndex)
+              style: currSpanIsComposingRegion
+                  ? composingTextStyle
+                  : misspelledJointStyle,
+              text: text.substring(currSpan.range.start, endIndex)
             )
           );
+
+          textPointer = endIndex;
+          currSpanPointer++;
         }
-
-        textPointer = endIndex;
-      } else {
-        endIndex =
-            currSpan.range.end < text.length ? currSpan.range.end : text.length;
-        currSpanIsComposingRegion = textPointer >= composingRegion.start &&
-            endIndex <= composingRegion.end &&
-            !composingWithinCurrentTextRange;
-        tsTreeChildren.add(
-          TextSpan(
-            style: currSpanIsComposingRegion
-                ? composingTextStyle
-                : misspelledJointStyle,
-            text: text.substring(currSpan.range.start, endIndex)
-          )
-        );
-
-        textPointer = endIndex;
-        currSpanPointer++;
       }
     }
 
