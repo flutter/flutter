@@ -50,9 +50,13 @@ class PointerEventConverter {
   /// from physical coordinates to logical pixels. See the discussion at
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
-    return data
+    final List<ui.PointerData> knownData = data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
+        .toList();
+    int remaining = knownData.length;
+    return knownData
         .map((ui.PointerData datum) {
+          remaining -= 1;
           final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
           assert(position != null);
           final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
@@ -61,6 +65,7 @@ class PointerEventConverter {
           final double radiusMin = _toLogicalPixels(datum.radiusMin, devicePixelRatio);
           final double radiusMax = _toLogicalPixels(datum.radiusMax, devicePixelRatio);
           final Duration timeStamp = datum.timeStamp;
+          final bool endOfBatch = remaining == 0;
           final PointerDeviceKind kind = datum.kind;
           assert(datum.change != null);
           switch (datum.signalKind ?? ui.PointerSignalKind.none) {
@@ -81,6 +86,7 @@ class PointerEventConverter {
                     radiusMax: radiusMax,
                     orientation: datum.orientation,
                     tilt: datum.tilt,
+                    endOfBatch: endOfBatch,
                     embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.hover:
@@ -104,6 +110,7 @@ class PointerEventConverter {
                     orientation: datum.orientation,
                     tilt: datum.tilt,
                     synthesized: datum.synthesized,
+                    endOfBatch: endOfBatch,
                     embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.down:
@@ -126,6 +133,7 @@ class PointerEventConverter {
                     radiusMax: radiusMax,
                     orientation: datum.orientation,
                     tilt: datum.tilt,
+                    endOfBatch: endOfBatch,
                     embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.move:
@@ -151,6 +159,7 @@ class PointerEventConverter {
                     tilt: datum.tilt,
                     platformData: datum.platformData,
                     synthesized: datum.synthesized,
+                    endOfBatch: endOfBatch,
                     embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.up:
@@ -174,6 +183,7 @@ class PointerEventConverter {
                     radiusMax: radiusMax,
                     orientation: datum.orientation,
                     tilt: datum.tilt,
+                    endOfBatch: endOfBatch,
                     embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.cancel:
@@ -196,6 +206,7 @@ class PointerEventConverter {
                     radiusMax: radiusMax,
                     orientation: datum.orientation,
                     tilt: datum.tilt,
+                    endOfBatch: endOfBatch,
                     embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.remove:
@@ -210,6 +221,7 @@ class PointerEventConverter {
                     distanceMax: datum.distanceMax,
                     radiusMin: radiusMin,
                     radiusMax: radiusMax,
+                    endOfBatch: endOfBatch,
                     embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.panZoomStart:
@@ -218,8 +230,9 @@ class PointerEventConverter {
                     pointer: datum.pointerIdentifier,
                     device: datum.device,
                     position: position,
-                    embedderId: datum.embedderId,
                     synthesized: datum.synthesized,
+                    endOfBatch: endOfBatch,
+                    embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.panZoomUpdate:
                   final Offset pan =
@@ -235,8 +248,9 @@ class PointerEventConverter {
                     panDelta: panDelta,
                     scale: datum.scale,
                     rotation: datum.rotation,
-                    embedderId: datum.embedderId,
                     synthesized: datum.synthesized,
+                    endOfBatch: endOfBatch,
+                    embedderId: datum.embedderId,
                   );
                 case ui.PointerChange.panZoomEnd:
                   return PointerPanZoomEndEvent(
@@ -244,8 +258,9 @@ class PointerEventConverter {
                     pointer: datum.pointerIdentifier,
                     device: datum.device,
                     position: position,
-                    embedderId: datum.embedderId,
                     synthesized: datum.synthesized,
+                    endOfBatch: endOfBatch,
+                    embedderId: datum.embedderId,
                   );
               }
             case ui.PointerSignalKind.scroll:
@@ -257,6 +272,7 @@ class PointerEventConverter {
                 device: datum.device,
                 position: position,
                 scrollDelta: scrollDelta,
+                endOfBatch: endOfBatch,
                 embedderId: datum.embedderId,
               );
             case ui.PointerSignalKind.scrollInertiaCancel:
@@ -265,6 +281,7 @@ class PointerEventConverter {
                 kind: kind,
                 device: datum.device,
                 position: position,
+                endOfBatch: endOfBatch,
                 embedderId: datum.embedderId,
               );
             case ui.PointerSignalKind.unknown:

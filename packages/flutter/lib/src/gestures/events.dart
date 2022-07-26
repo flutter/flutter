@@ -268,6 +268,7 @@ abstract class PointerEvent with Diagnosticable {
     this.tilt = 0.0,
     this.platformData = 0,
     this.synthesized = false,
+    this.endOfBatch = true,
     this.transform,
     this.original,
   });
@@ -480,6 +481,17 @@ abstract class PointerEvent with Diagnosticable {
   /// the difference between the 2 events in that case.
   final bool synthesized;
 
+  /// Whether this is the last of a batch of events.
+  ///
+  /// Some pointer events are sent in batches. For example, when the device
+  /// is being operated with multiple fingers, events from each moving finger
+  /// constitute a batch and is sent together. Since pointer events are always
+  /// dispatched in order, [endOfBatch] can be used to group events in batches,
+  /// which is useful in situations such as calculating scrolling distances.
+  ///
+  /// Defaults to true, meaning each event should be processed independently.
+  final bool endOfBatch;
+
   /// The transformation used to transform this event from the global coordinate
   /// space into the coordinate space of the event receiver.
   ///
@@ -649,6 +661,7 @@ mixin _PointerEventDescription on PointerEvent {
     properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
     properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
     properties.add(IntProperty('embedderId', embedderId, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('endOfBatch', value: endOfBatch, ifTrue: 'endOfBatch', level: DiagnosticLevel.debug));
   }
 
   /// Returns a complete textual description of this event.
@@ -748,6 +761,9 @@ abstract class _TransformedPointerEvent extends _AbstractPointerEvent with Diagn
   bool get synthesized => original.synthesized;
 
   @override
+  bool get endOfBatch => original.endOfBatch;
+
+  @override
   late final Offset localPosition = PointerEvent.transformPosition(transform, position);
 
   @override
@@ -799,6 +815,7 @@ mixin _CopyPointerAddedEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -827,6 +844,7 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.radiusMax,
     super.orientation,
     super.tilt,
+    super.endOfBatch = true,
     super.embedderId,
   }) : super(
          pressure: 0.0,
@@ -892,6 +910,7 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
       distanceMax: distanceMax ?? this.distanceMax,
       radiusMin: radiusMin ?? this.radiusMin,
       radiusMax: radiusMax ?? this.radiusMax,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -917,6 +936,7 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
     super.distanceMax,
     super.radiusMin,
     super.radiusMax,
+    super.endOfBatch = true,
     PointerRemovedEvent? super.original,
     super.embedderId,
   }) : super(
@@ -992,6 +1012,7 @@ mixin _CopyPointerHoverEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1034,6 +1055,7 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.orientation,
     super.tilt,
     super.synthesized,
+    super.endOfBatch = true,
     super.embedderId,
   }) : super(
          down: false,
@@ -1109,6 +1131,7 @@ mixin _CopyPointerEnterEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1152,6 +1175,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.tilt,
     super.down,
     super.synthesized,
+    super.endOfBatch = true,
     super.embedderId,
   }) : // Dart doesn't support comparing enums with == in const contexts yet.
        // https://github.com/dart-lang/language/issues/1811
@@ -1256,6 +1280,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1299,6 +1324,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.tilt,
     super.down,
     super.synthesized,
+    super.endOfBatch = true,
     super.embedderId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
@@ -1401,6 +1427,7 @@ mixin _CopyPointerDownEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1435,6 +1462,7 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.radiusMax,
     super.orientation,
     super.tilt,
+    super.endOfBatch = true,
     super.embedderId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
@@ -1512,6 +1540,7 @@ mixin _CopyPointerMoveEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1552,6 +1581,7 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.tilt,
     super.platformData,
     super.synthesized,
+    super.endOfBatch = true,
     super.embedderId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
@@ -1630,6 +1660,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1667,6 +1698,7 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
     super.radiusMax,
     super.orientation,
     super.tilt,
+    super.endOfBatch = true,
     super.embedderId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
@@ -1717,6 +1749,7 @@ abstract class PointerSignalEvent extends PointerEvent {
     super.kind = PointerDeviceKind.mouse,
     super.device,
     super.position,
+    super.endOfBatch = true,
     super.embedderId,
   });
 }
@@ -1756,6 +1789,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
       device: device ?? this.device,
       position: position ?? this.position,
       scrollDelta: scrollDelta,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1782,6 +1816,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     super.device,
     super.position,
     this.scrollDelta = Offset.zero,
+    super.endOfBatch = true,
     super.embedderId,
   }) : assert(timeStamp != null),
        assert(kind != null),
@@ -1862,6 +1897,7 @@ mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
       kind: kind ?? this.kind,
       device: device ?? this.device,
       position: position ?? this.position,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1887,6 +1923,7 @@ class PointerScrollInertiaCancelEvent extends PointerSignalEvent with _PointerEv
     super.kind,
     super.device,
     super.position,
+    super.endOfBatch = true,
     super.embedderId,
   }) : assert(timeStamp != null),
        assert(kind != null),
@@ -1947,6 +1984,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
       position: position ?? this.position,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1967,14 +2005,15 @@ class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescriptio
     super.device,
     super.pointer,
     super.position,
-    super.embedderId,
     super.synthesized,
+    super.endOfBatch = true,
+    super.embedderId,
   }) : assert(timeStamp != null),
        assert(device != null),
        assert(pointer != null),
        assert(position != null),
-       assert(embedderId != null),
        assert(synthesized != null),
+       assert(embedderId != null),
        super(kind: PointerDeviceKind.trackpad);
 
   @override
@@ -2036,25 +2075,26 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
     double? radiusMax,
     double? orientation,
     double? tilt,
-    bool? synthesized,
-    int? embedderId,
     Offset? pan,
     Offset? localPan,
     Offset? panDelta,
     Offset? localPanDelta,
     double? scale,
     double? rotation,
+    bool? synthesized,
+    int? embedderId,
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomUpdateEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
       position: position ?? this.position,
-      embedderId: embedderId ?? this.embedderId,
       pan: pan ?? this.pan,
       panDelta: panDelta ?? this.panDelta,
       scale: scale ?? this.scale,
       rotation: rotation ?? this.rotation,
+      endOfBatch: endOfBatch,
+      embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
 }
@@ -2074,12 +2114,13 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
     super.device,
     super.pointer,
     super.position,
-    super.embedderId,
     this.pan = Offset.zero,
     this.panDelta = Offset.zero,
     this.scale = 1.0,
     this.rotation = 0.0,
     super.synthesized,
+    super.endOfBatch = true,
+    super.embedderId,
   }) : assert(timeStamp != null),
        assert(device != null),
        assert(pointer != null),
@@ -2182,6 +2223,7 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
       position: position ?? this.position,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -2202,8 +2244,9 @@ class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription,
     super.device,
     super.pointer,
     super.position,
-    super.embedderId,
     super.synthesized,
+    super.endOfBatch = true,
+    super.embedderId,
   }) : assert(timeStamp != null),
        assert(device != null),
        assert(pointer != null),
@@ -2280,6 +2323,7 @@ mixin _CopyPointerCancelEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
+      endOfBatch: endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -2314,6 +2358,7 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
     super.radiusMax,
     super.orientation,
     super.tilt,
+    super.endOfBatch = true,
     super.embedderId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
