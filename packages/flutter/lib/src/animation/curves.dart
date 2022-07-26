@@ -680,12 +680,10 @@ class CatmullRomSpline extends Curve2D {
   CatmullRomSpline(
       List<Offset> controlPoints, {
         double tension = 0.0,
-        double alpha = 0.5,
         Offset? startHandle,
         Offset? endHandle,
       }) : assert(controlPoints != null),
            assert(tension != null),
-           assert(alpha <= 1.0 && alpha >= 0.0),
            assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
@@ -693,7 +691,6 @@ class CatmullRomSpline extends Curve2D {
            _startHandle = startHandle,
            _endHandle = endHandle,
            _tension = tension,
-           _alpha = alpha,
            _cubicSegments = <List<Offset>>[];
 
   /// Constructs a centripetal Catmull-Rom spline curve.
@@ -703,12 +700,10 @@ class CatmullRomSpline extends Curve2D {
   CatmullRomSpline.precompute(
       List<Offset> controlPoints, {
         double tension = 0.0,
-        double alpha = 0.5,
         Offset? startHandle,
         Offset? endHandle,
       }) : assert(controlPoints != null),
            assert(tension != null),
-           assert(alpha <= 1.0 && alpha >= 0.0),
            assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
@@ -716,14 +711,12 @@ class CatmullRomSpline extends Curve2D {
            _startHandle = null,
            _endHandle = null,
            _tension = null,
-           _alpha = null,
-           _cubicSegments = _computeSegments(controlPoints, tension, alpha, startHandle: startHandle, endHandle: endHandle);
+           _cubicSegments = _computeSegments(controlPoints, tension, startHandle: startHandle, endHandle: endHandle);
 
 
   static List<List<Offset>> _computeSegments(
     List<Offset> controlPoints,
-    double tension,
-    double alpha, {
+    double tension, {
     Offset? startHandle,
     Offset? endHandle,
   }) {
@@ -743,6 +736,7 @@ class CatmullRomSpline extends Curve2D {
     // 1.0 would make it a chordal Catmull-Rom spline. Non-centripetal values
     // for alpha can give self-intersecting behavior or looping within a
     // segment.
+    const double alpha = 0.5;
     final double reverseTension = 1.0 - tension;
     final List<List<Offset>> result = <List<Offset>>[];
     for (int i = 0; i < allPoints.length - 3; ++i) {
@@ -777,14 +771,13 @@ class CatmullRomSpline extends Curve2D {
   final Offset? _startHandle;
   final Offset? _endHandle;
   final double? _tension;
-  final double? _alpha;
 
   void _initializeIfNeeded() {
     if (_cubicSegments.isNotEmpty) {
       return;
     }
     _cubicSegments.addAll(
-      _computeSegments(_controlPoints!, _tension!, _alpha!, startHandle: _startHandle, endHandle: _endHandle),
+      _computeSegments(_controlPoints!, _tension!, startHandle: _startHandle, endHandle: _endHandle),
     );
   }
 
