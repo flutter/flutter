@@ -199,6 +199,8 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
         ],
+        stdout: 'impellerc stdout',
+        stderr: 'impellerc stderr',
         exitCode: 1,
       ),
     ]);
@@ -209,14 +211,18 @@ void main() {
       artifacts: artifacts,
     );
 
-    await expectLater(
-      () => shaderCompiler.compileShader(
+    try {
+      await shaderCompiler.compileShader(
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
         target: ShaderTarget.sksl,
-      ),
-      throwsA(isA<ShaderCompilerException>()),
-    );
+      );
+      fail('unreachable');
+    } on ShaderCompilerException catch (e) {
+      expect(e.toString(), contains('impellerc stdout:\nimpellerc stdout'));
+      expect(e.toString(), contains('impellerc stderr:\nimpellerc stderr'));
+    }
+
     expect(fileSystem.file(outputPath).existsSync(), false);
   });
 
