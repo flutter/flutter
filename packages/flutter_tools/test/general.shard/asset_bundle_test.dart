@@ -308,7 +308,12 @@ flutter:
       ..createSync();
     handler.addError(directory, FileSystemOp.delete, const FileSystemException('Expected Error Text'));
 
-    await writeBundle(directory, <String, DevFSContent>{}, loggerOverride: testLogger);
+    await writeBundle(
+      directory,
+      <String, DevFSContent>{},
+      <String, AssetKind>{},
+      loggerOverride: testLogger,
+    );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
   });
@@ -392,6 +397,7 @@ flutter:
     late Artifacts artifacts;
     late String impellerc;
     late Directory output;
+    late String assetsPath;
     late String shaderPath;
     late String outputPath;
 
@@ -403,8 +409,9 @@ flutter:
       fileSystem.file(impellerc).createSync(recursive: true);
 
       output = fileSystem.directory('asset_output')..createSync(recursive: true);
-      shaderPath = fileSystem.path.join('assets', 'shader.frag');
-      outputPath = fileSystem.path.join(output.path, 'assets', 'shader.frag');
+      assetsPath = 'assets';
+      shaderPath = fileSystem.path.join(assetsPath, 'shader.frag');
+      outputPath = fileSystem.path.join(output.path, assetsPath, 'shader.frag');
       fileSystem.file(shaderPath).createSync(recursive: true);
     });
 
@@ -415,14 +422,19 @@ flutter:
         ..writeAsStringSync(r'''
   name: example
   flutter:
-    assets:
+    shaders:
       - assets/shader.frag
   ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
       expect(await bundle.build(packagesPath: '.packages'), 0);
 
-      await writeBundle(output, bundle.entries, loggerOverride: testLogger);
+      await writeBundle(
+        output,
+        bundle.entries,
+        bundle.entryKinds,
+        loggerOverride: testLogger,
+      );
 
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
@@ -431,12 +443,17 @@ flutter:
         FakeCommand(
           command: <String>[
             impellerc,
-            '--flutter-spirv',
-            '--spirv=$outputPath',
+            '--sksl',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
             '--input=/$shaderPath',
+            '--input-type=frag',
+            '--include=/$assetsPath',
           ],
           onRun: () {
             fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
         ),
       ]),

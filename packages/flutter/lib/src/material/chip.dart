@@ -184,8 +184,19 @@ abstract class ChipAttributes {
 
   /// Color of the chip's shadow when the elevation is greater than 0.
   ///
-  /// The default is [Colors.black].
+  /// The default is null.
   Color? get shadowColor;
+
+  /// Color of the chip's surface tint overlay when its elevation is
+  /// greater than 0.
+  ///
+  /// The default is null.
+  Color? get surfaceTintColor;
+
+  /// Theme used for all icons in the chip.
+  ///
+  /// The default is null.
+  IconThemeData? get iconTheme;
 }
 
 /// An interface for Material Design chips that can be deleted.
@@ -575,6 +586,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
+    this.surfaceTintColor,
+    this.iconTheme,
     @Deprecated(
       'Migrate to deleteButtonTooltipMessage. '
       'This feature was deprecated after v2.10.0-0.3.pre.'
@@ -624,6 +637,10 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final Color? shadowColor;
   @override
+  final Color? surfaceTintColor;
+  @override
+  final IconThemeData? iconTheme;
+  @override
   @Deprecated(
     'Migrate to deleteButtonTooltipMessage. '
     'This feature was deprecated after v2.10.0-0.3.pre.'
@@ -655,6 +672,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
     );
   }
 }
@@ -708,6 +726,7 @@ class RawChip extends StatefulWidget
   /// [elevation].
   const RawChip({
     super.key,
+    this.defaultProperties,
     this.avatar,
     required this.label,
     this.labelStyle,
@@ -736,6 +755,8 @@ class RawChip extends StatefulWidget
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
+    this.surfaceTintColor,
+    this.iconTheme,
     this.selectedShadowColor,
     this.showCheckmark = true,
     this.checkmarkColor,
@@ -753,6 +774,13 @@ class RawChip extends StatefulWidget
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
+
+  /// Defines the defaults for the chip properties if
+  /// they are not specified elsewhere.
+  ///
+  /// If null then [ChipThemeData.fromDefaults] will be used
+  /// for the default properties.
+  final ChipThemeData? defaultProperties;
 
   @override
   final Widget? avatar;
@@ -808,6 +836,10 @@ class RawChip extends StatefulWidget
   final double? elevation;
   @override
   final Color? shadowColor;
+  @override
+  final Color? surfaceTintColor;
+  @override
+  final IconThemeData? iconTheme;
   @override
   final Color? selectedShadowColor;
   @override
@@ -985,23 +1017,41 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   /// Picks between three different colors, depending upon the state of two
   /// different animations.
   Color? _getBackgroundColor(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
-    final ColorTween backgroundTween = ColorTween(
-      begin: widget.disabledColor
-        ?? chipTheme.disabledColor
-        ?? theme.disabledColor,
-      end: widget.backgroundColor
-        ?? chipTheme.backgroundColor
-        ?? theme.chipTheme.backgroundColor
-        ?? chipDefaults.backgroundColor,
-    );
-    final ColorTween selectTween = ColorTween(
-      begin: backgroundTween.evaluate(enableController),
-      end: widget.selectedColor
-        ?? chipTheme.selectedColor
-        ?? theme.chipTheme.selectedColor
-        ?? chipDefaults.selectedColor,
-    );
-    return selectTween.evaluate(selectionFade);
+    if (theme.useMaterial3) {
+      final ColorTween backgroundTween = ColorTween(
+        begin: widget.disabledColor
+          ?? chipTheme.disabledColor
+          ?? chipDefaults.disabledColor,
+        end: widget.backgroundColor
+          ?? chipTheme.backgroundColor
+          ?? chipDefaults.backgroundColor,
+      );
+      final ColorTween selectTween = ColorTween(
+        begin: backgroundTween.evaluate(enableController),
+        end: widget.selectedColor
+          ?? chipTheme.selectedColor
+          ?? chipDefaults.selectedColor,
+      );
+      return selectTween.evaluate(selectionFade);
+    } else {
+      final ColorTween backgroundTween = ColorTween(
+        begin: widget.disabledColor
+            ?? chipTheme.disabledColor
+            ?? theme.disabledColor,
+        end: widget.backgroundColor
+            ?? chipTheme.backgroundColor
+            ?? theme.chipTheme.backgroundColor
+            ?? chipDefaults.backgroundColor,
+      );
+      final ColorTween selectTween = ColorTween(
+        begin: backgroundTween.evaluate(enableController),
+        end: widget.selectedColor
+            ?? chipTheme.selectedColor
+            ?? theme.chipTheme.selectedColor
+            ?? chipDefaults.selectedColor,
+      );
+      return selectTween.evaluate(selectionFade);
+    }
   }
 
   @override
@@ -1114,7 +1164,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final Brightness brightness = chipTheme.brightness ?? theme.brightness;
-    final ChipThemeData chipDefaults = ChipThemeData.fromDefaults(
+    final ChipThemeData chipDefaults = widget.defaultProperties ?? ChipThemeData.fromDefaults(
       brightness: brightness,
       secondaryColor: brightness == Brightness.dark ? Colors.tealAccent[200]! : theme.primaryColor,
       labelStyle: theme.textTheme.bodyText1!,
@@ -1124,16 +1174,21 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
 
     final double elevation = widget.elevation
       ?? chipTheme.elevation
-      ?? chipDefaults.elevation!;
+      ?? chipDefaults.elevation
+      ?? 0;
     final double pressElevation = widget.pressElevation
       ?? chipTheme.pressElevation
-      ?? chipDefaults.pressElevation!;
-    final Color shadowColor = widget.shadowColor
+      ?? chipDefaults.pressElevation
+      ?? 0;
+    final Color? shadowColor = widget.shadowColor
       ?? chipTheme.shadowColor
-      ?? chipDefaults.shadowColor!;
-    final Color selectedShadowColor = widget.selectedShadowColor
+      ?? chipDefaults.shadowColor;
+    final Color? surfaceTintColor = widget.surfaceTintColor
+      ?? chipTheme.surfaceTintColor
+      ?? chipDefaults.surfaceTintColor;
+    final Color? selectedShadowColor = widget.selectedShadowColor
       ?? chipTheme.selectedShadowColor
-      ?? chipDefaults.selectedShadowColor!;
+      ?? chipDefaults.selectedShadowColor;
     final Color? checkmarkColor = widget.checkmarkColor
       ?? chipTheme.checkmarkColor
       ?? chipDefaults.checkmarkColor;
@@ -1150,14 +1205,21 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       ?? chipTheme.labelPadding
       ?? chipDefaults.labelPadding
       ?? defaultLabelPadding;
+    final IconThemeData? iconTheme = widget.iconTheme
+      ?? chipTheme.iconTheme
+      ?? chipDefaults.iconTheme;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
+    final Widget? avatar = iconTheme != null && hasAvatar
+      ? IconTheme(data: iconTheme, child: widget.avatar!)
+      : widget.avatar;
 
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
       shadowColor: widget.selected ? selectedShadowColor : shadowColor,
+      surfaceTintColor: surfaceTintColor,
       animationDuration: pressedAnimationDuration,
       shape: resolvedShape,
       clipBehavior: widget.clipBehavior,
@@ -1198,7 +1260,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
                 avatar: AnimatedSwitcher(
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
-                  child: widget.avatar,
+                  child: avatar,
                 ),
                 deleteIcon: AnimatedSwitcher(
                   duration: _kDrawerDuration,
@@ -1226,6 +1288,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         ),
       ),
     );
+
     final BoxConstraints constraints;
     final Offset densityAdjustment = (widget.visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
@@ -1247,6 +1310,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         child: result,
       ),
     );
+    // if (height != null) {
+    //   result = SizedBox(height: height, child: result);
+    // }
     return Semantics(
       button: widget.tapEnabled,
       container: true,

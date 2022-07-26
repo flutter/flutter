@@ -458,6 +458,37 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
+  testWidgets('Cursor does not show when not focused', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/106512 .
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(focusNode: focusNode, autofocus: true),
+        ),
+      ),
+    );
+    assert(focusNode.hasFocus);
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    for (int i = 0; i < 10; i += 10) {
+      // Make sure it does not paint for a period of time.
+      expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+      expect(tester.hasRunningAnimations, isFalse);
+      await tester.pump(const Duration(milliseconds: 29));
+    }
+
+    // Refocus and it should paint the caret.
+    focusNode.requestFocus();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
+  });
+
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
       home: Material(
@@ -668,6 +699,73 @@ void main() {
     // The cursor did not change.
     expect(controller.selection.baseOffset, 29);
     expect(tester.takeException(), null);
+  });
+
+  testWidgets("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+
+    // Check that the cursor visibility toggles after each blink interval.
+    // Or if it's not blinking at all, it stays on.
+    Future<void> checkCursorBlinking({ bool isBlinking = true }) async {
+      bool initialShowCursor = true;
+      if (isBlinking) {
+        initialShowCursor = editableText.cursorCurrentlyVisible;
+      }
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+    }
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(EditableText));
+
+    await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+    await tester.pumpAndSettle();
+
+    // Before dragging, the cursor should blink.
+    await checkCursorBlinking();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+
+    // When drag cursor, the cursor shouldn't blink.
+    await checkCursorBlinking(isBlinking: false);
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    await tester.pumpAndSettle();
+
+    // After dragging, the cursor should blink.
+    await checkCursorBlinking();
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/30475.

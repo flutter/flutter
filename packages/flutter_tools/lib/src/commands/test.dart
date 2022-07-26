@@ -374,7 +374,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: <String>{projectName},
-        packagesPath: buildInfo.packagesPath
+        packagesPath: buildInfo.packagesPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath)
       );
     }
 
@@ -477,7 +478,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     if (_needRebuild(assetBundle.entries)) {
       await writeBundle(globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
-          assetBundle.entries);
+          assetBundle.entries, assetBundle.entryKinds);
     }
   }
 

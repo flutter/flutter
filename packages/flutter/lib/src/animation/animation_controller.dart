@@ -14,7 +14,11 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
-export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
+export 'package:flutter/physics.dart' show Simulation, SpringDescription;
+export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
+
+export 'animation.dart' show Animation, AnimationStatus;
+export 'curves.dart' show Curve;
 
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;

@@ -608,7 +608,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       ..lineHeightAtStart = start?.lineHeight ?? end!.lineHeight
       ..endHandleType = end?.handleType ?? TextSelectionHandleType.right
       ..lineHeightAtEnd = end?.lineHeight ?? start!.lineHeight
-      ..selectionEndPoints = points;
+      ..selectionEndpoints = points;
   }
 
   /// Shows the selection handles.

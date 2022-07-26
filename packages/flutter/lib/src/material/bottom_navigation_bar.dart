@@ -118,6 +118,15 @@ enum BottomNavigationBarLandscapeLayout {
 ///
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.1.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows [BottomNavigationBar] used in a [Scaffold] Widget with
+/// different interaction patterns. Tapping twice on the first [BottomNavigationBarItem]
+/// uses the [ScrollController] to animate the [ListView] to the top. The second
+/// [BottomNavigationBarItem] shows a Modal Dialog.
+///
+/// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.2.dart **
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomNavigationBarItem]
@@ -446,7 +455,7 @@ class _BottomNavigationTile extends StatelessWidget {
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
 
     // The effective tool tip message to be shown on the BottomNavigationBarItem.
-    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
+    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip;
 
     // Defines the padding for the animating icons + labels.
     //

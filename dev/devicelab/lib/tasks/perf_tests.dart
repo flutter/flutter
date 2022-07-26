@@ -223,6 +223,17 @@ TaskFunction createPictureCacheComplexityScoringPerfTest() {
   ).run;
 }
 
+TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
+  return PerfTest(
+    openpayDirectory.path,
+    'test_driver/scroll_perf.dart',
+    'openpay_scroll_perf',
+    measureCpuGpu: measureCpuGpu,
+    testDriver: 'test_driver/scroll_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart'}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
@@ -381,6 +392,20 @@ TaskFunction createColorFilterCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_cache_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createColorFilterWithUnstableChildPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/color_filter_with_unstable_child_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createRasterCacheUseMemoryPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/raster_cache_use_memory_perf_e2e.dart',
   ).run;
 }
 
@@ -1327,6 +1352,21 @@ class CompileTest {
         ...compileDebug,
         ...compileSecondDebug,
       };
+
+      final File mainDart = File('$testDirectory/lib/main.dart');
+      if (mainDart.existsSync()) {
+        final List<int> bytes = mainDart.readAsBytesSync();
+        // "Touch" the file
+        mainDart.writeAsStringSync(' ', mode: FileMode.append, flush: true);
+        // Build after "edit" without clean should be faster than first build
+        final Map<String, dynamic> compileAfterEditDebug = await _compileDebug(
+          clean: false,
+          metricKey: 'debug_compile_after_edit_millis',
+        );
+        metrics.addAll(compileAfterEditDebug);
+        // Revert the changes
+        mainDart.writeAsBytesSync(bytes, flush: true);
+      }
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });

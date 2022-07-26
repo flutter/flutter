@@ -35,7 +35,6 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
-final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
 
@@ -888,7 +887,11 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>['--enable-vmservice']);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>[
+      '--enable-vmservice',
+      // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
+      '--exclude-tags=web',
+    ]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
@@ -1116,6 +1119,16 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
       '--sound-null-safety',
     ]),
+    () => _runFlutterWebTest(
+      'html',
+      path.join(flutterRoot, 'packages', 'integration_test'),
+      <String>['test/web_extension_test.dart'],
+    ),
+    () => _runFlutterWebTest(
+      'canvaskit',
+      path.join(flutterRoot, 'packages', 'integration_test'),
+      <String>['test/web_extension_test.dart'],
+    ),
   ];
 
   // Shuffling mixes fast tests with slow tests so shards take roughly the same
@@ -1812,31 +1825,6 @@ void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
   environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
 }
 
-Map<String, String> _initGradleEnvironment() {
-  final String? androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
-      ? Platform.environment['ANDROID_SDK_ROOT']
-      : Platform.environment['ANDROID_HOME'];
-  if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
-    print('${red}Could not find Android SDK; set ANDROID_SDK_ROOT.$reset');
-    exit(1);
-  }
-  return <String, String>{
-    'ANDROID_HOME': androidSdkRoot!,
-    'ANDROID_SDK_ROOT': androidSdkRoot,
-  };
-}
-
-final Map<String, String> gradleEnvironment = _initGradleEnvironment();
-
-void deleteFile(String path) {
-  // This is technically a race condition but nobody else should be running
-  // while this script runs, so we should be ok. (Sadly recursive:true does not
-  // obviate the need for existsSync, at least on Windows.)
-  final File file = File(path);
-  if (file.existsSync())
-    file.deleteSync();
-}
-
 enum CiProviders {
   cirrus,
   luci,
@@ -1863,18 +1851,6 @@ CiProviders? get ciProvider {
     return CiProviders.luci;
   }
   return null;
-}
-
-/// Returns the name of the branch being tested.
-String get branchName {
-  switch(ciProvider) {
-    case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_BRANCH']!;
-    case CiProviders.luci:
-      return Platform.environment['LUCI_BRANCH']!;
-    case null:
-      return '';
-  }
 }
 
 /// Checks the given file's contents to determine if they match the allowed
