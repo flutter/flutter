@@ -64,6 +64,7 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.all(),
+    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
   testWidgets('Can build children directly as well', (WidgetTester tester) async {
