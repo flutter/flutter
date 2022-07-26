@@ -6030,7 +6030,6 @@ void main() {
                 width: 200,
                 height: 200,
                 child: CupertinoTextField(
-                  tapRegionGroupId: 'Test',
                   autofocus: true,
                   focusNode: focusNode,
                   controller: controller,

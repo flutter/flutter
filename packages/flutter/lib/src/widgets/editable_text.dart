@@ -610,7 +610,6 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
     this.onTapOutside,
-    this.tapRegionGroupId,
     List<TextInputFormatter>? inputFormatters,
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
@@ -1216,34 +1215,28 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.SelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
 
+  /// {@template flutter.widgets.EditableText.onTapOutside}
   /// Called for each tap that occurs outside of the editable text when the text
   /// field is focused.
   ///
-  /// If this is null or not given, then, on desktop platforms and web browsers
-  /// (even mobile browsers), then [FocusNode.unfocus] will be called on the
-  /// [focusNode] for this editable text when a tap is received on another part
-  /// of the UI. It will do nothing by default on mobile applications. To
-  /// disable this behavior, an empty function (e.g. `() {}`) must be passed
-  /// here.
+  /// If this is null, [FocusNode.unfocus] will be called on the [focusNode] for
+  /// this editable text on desktop platforms and web browsers (even mobile
+  /// browsers) when a tap is received on another part of the UI. It will do
+  /// nothing by default on mobile applications. To disable this behavior, an
+  /// empty function (e.g. `() {}`) must be passed here.
+  ///
+  /// When adding additional controls to a text field (for example, a spinner, a
+  /// button that copies the selected text, or modifies formatting), it is
+  /// helpful if tapping on that control doesn't unfocus the text field. In
+  /// order for an external widget to be considered as part of the text field
+  /// for the purposes of tapping "outside" of the field, wrap the control in a
+  /// [TextFieldTapRegion].
   ///
   /// See also:
   ///
-  ///  * [tapRegionGroupId] if you would like to add this [EditableText] to a
-  ///    [TapRegion] group.
+  ///  * [TapRegion] for how the region group is determined.
+  /// {@endtemplate}
   final VoidCallback? onTapOutside;
-
-  /// An optional group identifier for the [TapRegion] that surrounds the
-  /// [EditableText].
-  ///
-  /// This group ID will also be used for tap region in the popup toolbars for
-  /// this [EditableText] so that tapping on the toolbars doesn't unfocus the
-  /// text field.
-  ///
-  /// See also:
-  ///
-  ///  * [TapRegion.groupId] for a description of how the group ID is used and
-  ///    what it does.
-  final Object? tapRegionGroupId;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
@@ -2393,12 +2386,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
-  // The overlay needs to have the same group ID as this EditableText, so if the
-  // widget didn't provide one, use this state object as the group ID.
-  Object? get _tapRegionGroupId {
-    return widget.tapRegionGroupId ?? this;
-  }
-
   // Finds the closest scroll offset to the current scroll offset that fully
   // reveals the given caret rect. If the given rect's main axis extent is too
   // large to be fully revealed in `renderEditable`, it will be centered along
@@ -2614,7 +2601,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      tapRegionGroupId: _tapRegionGroupId,
     );
   }
 
@@ -3517,8 +3503,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    return TapRegion(
-      groupId: _tapRegionGroupId,
+    return TextFieldTapRegion(
       enabled: widget.focusNode.hasPrimaryFocus,
       onTapOutside: widget.onTapOutside ?? _handleDefaultTapOutside,
       debugLabel: kReleaseMode ? null : 'EditableText',

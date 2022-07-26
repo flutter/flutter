@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+import 'editable_text.dart';
 import 'framework.dart';
 
 // Enable if you want verbose logging about tap region changes.
@@ -45,10 +46,10 @@ abstract class TapRegionRegistry {
       if (registry == null) {
         throw FlutterError(
           'TapRegionRegistry.of() was called with a context that does not contain a TapRegionSurface widget.\n'
-              'No TapRegionSurface widget ancestor could be found starting from the context that was passed to '
-              'TapRegionRegistry.of().\n'
-              'The context used was:\n'
-              '  $context',
+          'No TapRegionSurface widget ancestor could be found starting from the context that was passed to '
+          'TapRegionRegistry.of().\n'
+          'The context used was:\n'
+          '  $context',
         );
       }
       return true;
@@ -245,7 +246,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior with TapR
     // A child was hit, so we need to call onTapOutside for those regions or
     // groups of regions that were not hit.
     final Set<RenderTapRegion> hitRegions =
-    _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
+        _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
     final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{};
     assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
 
@@ -490,4 +491,33 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }
+}
+
+/// A [TapRegion] that adds its children to the tap region group for widgets
+/// based on the [EditableText] text editing widget, such as [TextField] and
+/// [CupertinoTextField].
+///
+/// Widgets that are wrapped with a `TextFieldTapRegion` are considered to be
+/// part of a text field, and so when the user taps on them, the currently
+/// focused text field won't be unfocused by default. This allows controls like
+/// spinners, copy buttons, and formatting buttons to be attached to a text
+/// field without causing the text field to lose focus when they are interacted
+/// with.
+///
+/// See also:
+///
+///  * [TapRegion], the widget that this widget uses to add widgets to the group
+///    of text fields.
+class TextFieldTapRegion extends TapRegion {
+  /// Creates a const [TextFieldTapRegion].
+  ///
+  /// The [child] field is required.
+  const TextFieldTapRegion({
+    super.key,
+    required super.child,
+    super.enabled,
+    super.onTapOutside,
+    super.onTapInside,
+    super.debugLabel,
+  }) : super(groupId: EditableText);
 }

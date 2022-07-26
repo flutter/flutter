@@ -252,7 +252,6 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
-    this.tapRegionGroupId,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -414,7 +413,6 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
-    this.tapRegionGroupId,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -698,9 +696,6 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.material.textfield.onTapOutside}
   final GestureTapCallback? onTapOutside;
-
-  /// {@macro flutter.material.textfield.tapRegionGroupId}
-  final Object? tapRegionGroupId;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
@@ -1249,10 +1244,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       context,
     ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
-    // The border needs to have the same group ID as the EditableText, so if the
-    // widget didn't provide one, use this state object as the group ID.
-    final Object tapRegionGroupId = widget.tapRegionGroupId ?? this;
-
     final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
@@ -1292,7 +1283,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
             onTapOutside: widget.onTapOutside,
-            tapRegionGroupId: tapRegionGroupId,
             inputFormatters: formatters,
             rendererIgnoresPointer: true,
             cursorWidth: widget.cursorWidth,
@@ -1331,8 +1321,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         _requestKeyboard();
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-      child: TapRegion(
-        groupId: tapRegionGroupId,
+      child: TextFieldTapRegion(
         enabled: enabled,
         child: IgnorePointer(
           ignoring: !enabled,

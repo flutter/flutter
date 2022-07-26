@@ -236,7 +236,6 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
-    Object? tapRegionGroupId,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -270,7 +269,6 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
-      tapRegionGroupId: tapRegionGroupId,
     );
   }
 
@@ -614,14 +612,12 @@ class SelectionOverlay {
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
     Offset? toolbarLocation,
-    Object? tapRegionGroupId,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndpoints = selectionEndpoints,
-       _toolbarLocation = toolbarLocation,
-       _tapRegionGroupId = tapRegionGroupId {
+       _toolbarLocation = toolbarLocation {
     final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
     assert(
       overlay != null,
@@ -832,17 +828,6 @@ class SelectionOverlay {
     _markNeedsBuild();
   }
 
-  /// The [TapRegion] group ID that the toolbar overlay should belong to.
-  Object? get tapRegionGroupId => _tapRegionGroupId;
-  Object? _tapRegionGroupId;
-  set tapRegionGroupId(Object? value) {
-    if (_tapRegionGroupId == value) {
-      return;
-    }
-    _tapRegionGroupId = value;
-    _markNeedsBuild();
-  }
-
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
@@ -974,8 +959,7 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return TapRegion(
-      groupId: tapRegionGroupId,
+    return TextFieldTapRegion(
       child: ExcludeSemantics(
         child: handle,
       ),
@@ -1002,8 +986,7 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return TapRegion(
-      groupId: tapRegionGroupId,
+    return TextFieldTapRegion(
       child: ExcludeSemantics(
         child: handle,
       ),
@@ -1037,8 +1020,7 @@ class SelectionOverlay {
       selectionEndpoints.first.point.dy - lineHeightAtStart,
     );
 
-    return TapRegion(
-      groupId: tapRegionGroupId,
+    return TextFieldTapRegion(
       child: Directionality(
         textDirection: Directionality.of(this.context),
         child: _SelectionToolbarOverlay(
