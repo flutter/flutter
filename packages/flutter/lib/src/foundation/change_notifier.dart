@@ -297,6 +297,10 @@ class ChangeNotifier implements Listenable {
   /// [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
+  ///
+  /// This method does not notify listeners, and clears the listener list once
+  /// it is called. Consumers of this class must decide on whether to notify
+  /// listeners or not immediately before disposal.
   @mustCallSuper
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
