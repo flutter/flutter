@@ -28,7 +28,7 @@ import 'text_selection_toolbar_buttons_builder.dart';
 /// * [TextSelectionToolbarButtonsBuilder], which builds the native-looking
 ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
 /// * [DefaultTextSelectionToolbar], which does the same thing as this widget
-///   but for all platforms, not just Cupertino.
+///   but for all platforms, not just the Cupertino-styled platforms.
 class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [DefaultCupertinoTextSelectionToolbar].
   const DefaultCupertinoTextSelectionToolbar({

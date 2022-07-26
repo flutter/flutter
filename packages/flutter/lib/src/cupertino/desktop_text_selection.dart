@@ -123,8 +123,8 @@ final TextSelectionControls cupertinoDesktopTextSelectionControls =
 ///
 ///  * [TextSelectionControls.buildToolbar], where this is used by default to
 ///    build a Mac-style toolbar.
-///  * [TextSelectionToolbar], which is similar, but builds an Android-style
-///    toolbar.
+///  * [DesktopTextSelectionToolbar], which is similar but builds a
+///    Material-style desktop toolbar.
 class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of CupertinoTextSelectionToolbar.
   const CupertinoDesktopTextSelectionToolbar({
