@@ -1326,8 +1326,6 @@ class AppLocalizationsEn extends AppLocalizations {
       l10nDirectory.childFile(esArbFileName)
         .writeAsStringSync(singleEsMessageArbFileString);
 
-      final BufferLogger testLogger = BufferLogger.test();
-
       LocalizationsGenerator(
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
@@ -1377,7 +1375,6 @@ class AppLocalizationsEn extends AppLocalizations {
   "price": "el precio de este artículo es: ${price}"
 }''');
 
-      final BufferLogger testLogger = BufferLogger.test();
       LocalizationsGenerator(
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
