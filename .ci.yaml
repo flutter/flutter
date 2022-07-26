@@ -163,8 +163,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "android_virtual_device", "version": "31"},
-          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["framework","hostonly"]
