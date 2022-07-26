@@ -84,5 +84,7 @@ void main() {
     );
 
     expect(find.byKey(key), findsOneWidget);
-  });
+  },
+    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+  );
 }
