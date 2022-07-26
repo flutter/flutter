@@ -3316,7 +3316,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   ///       summaryTree: false,
   ///       subtreeDepth: subtreeDepth,
   ///       includeProperties: true,
-  ///       service: this,
+  ///       service: WidgetInspectorService.instance,
   ///       addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
   ///         final Map<String, Object> additionalJson = <String, Object>{};
   ///         final Object value = node.value;
