@@ -1299,7 +1299,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         );
         break;
       case MaterialTapTargetSize.shrinkWrap:
-        constraints = const BoxConstraints();
+        constraints = BoxConstraints(
+          minHeight: kMinInteractiveDimension  + densityAdjustment.dy,
+        );
         break;
     }
     result = _ChipRedirectingHitDetectionWidget(

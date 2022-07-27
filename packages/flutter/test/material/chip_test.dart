@@ -549,7 +549,7 @@ void main() {
         ),
       );
       expect(tester.getSize(find.byType(Chip).first), const Size(48.0, 48.0));
-      expect(tester.getSize(find.byType(Chip).last), const Size(38.0, 32.0));
+      expect(tester.getSize(find.byType(Chip).last), const Size(38.0, 48.0));
     },
   );
 
@@ -1756,7 +1756,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
+    expect(tester.getSize(find.byKey(key2)), const Size(80.0, 48.0));
   });
 
   testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
