@@ -320,11 +320,10 @@ class RawMagnifier extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        ClipPath.shape(
-          shape: decoration.shape,
-          child: Opacity(
+          Opacity(
             opacity: decoration.opacity,
             child: _Magnifier(
+              shape: decoration.shape,
               focalPoint: focalPoint,
               magnificationScale: magnificationScale,
               child: SizedBox.fromSize(
@@ -332,7 +331,6 @@ class RawMagnifier extends StatelessWidget {
                 child: child,
               ),
             ),
-          ),
         ),
 
       // Because `BackdropFilter` will filter any widgets before it, we should
@@ -415,11 +413,12 @@ class _Magnifier extends SingleChildRenderObjectWidget {
   /// Construct a [_Magnifier].
   const _Magnifier({
       super.child,
+      required this.shape,
       this.magnificationScale = 1,
       this.focalPoint = Offset.zero,
   });
 
-  /// [focalPoint] of the magnifier is the area the center of the
+  ///  [focalPoint] of the magnifier is the area the center of the
   /// [_Magnifier] points to, relative to the center of the magnifier.
   /// If left as [Offset.zero], the magnifier will magnify whatever is directly
   /// below it.
@@ -430,16 +429,21 @@ class _Magnifier extends SingleChildRenderObjectWidget {
   /// A [magnificationScale] of 1 means that the content magi
   final double magnificationScale;
 
+  /// The shape of the magnifier is dictated by [clip], which clips
+  /// the magnifier to the shape. If null, the shape will be rectangular.
+  final ShapeBorder shape;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderMagnification(focalPoint, magnificationScale);
+    return _RenderMagnification(focalPoint, magnificationScale, shape);
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant _RenderMagnification renderObject) {
-    renderObject
+      BuildContext context, covariant RenderProxyBox renderObject) {
+    (renderObject as _RenderMagnification)
       ..focalPoint = focalPoint
+      ..shape = shape
       ..magnificationScale = magnificationScale;
   }
 }
@@ -447,7 +451,8 @@ class _Magnifier extends SingleChildRenderObjectWidget {
 class _RenderMagnification extends RenderProxyBox {
   _RenderMagnification(
     this._focalPoint,
-    this._magnificationScale, {
+    this._magnificationScale,
+    this._shape, {
     RenderBox? child,
   }) : super(child);
 
@@ -471,24 +476,70 @@ class _RenderMagnification extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  ShapeBorder get shape => _shape;
+  ShapeBorder _shape;
+  set shape(ShapeBorder value) {
+    if (_shape == value) {
+      return;
+    }
+    _shape = value;
+    markNeedsLayout();
+  }
+
   @override
-  BackdropFilterLayer? get layer => super.layer as BackdropFilterLayer?;
+  _MagnificationLayer? get layer => super.layer as _MagnificationLayer?;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Offset thisCenter = Alignment.center.alongSize(size) + offset;
+    if (layer == null) {
+      layer = _MagnificationLayer(
+          size: size,
+          globalPosition: offset,
+          focalPoint: focalPoint,
+          shape: shape,
+          magnificationScale: magnificationScale);
+    } else {
+      layer!
+        ..magnificationScale = magnificationScale
+        ..size = size
+        ..globalPosition = offset
+        ..focalPoint = focalPoint;
+    }
+
+    context.pushLayer(layer!, super.paint, offset);
+  }
+}
+
+class _MagnificationLayer extends ContainerLayer {
+  _MagnificationLayer(
+      {required this.size,
+      required this.globalPosition,
+      required this.shape,
+      required this.focalPoint,
+      required this.magnificationScale});
+
+  Offset globalPosition;
+  Size size;
+
+  Offset focalPoint;
+  double magnificationScale;
+
+  ShapeBorder shape;
+
+  @override
+  void addToScene(SceneBuilder builder) {
+    builder.pushClipPath(shape.getOuterPath(globalPosition & size));
+
+    final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
     final Matrix4 matrix = Matrix4.identity()
       ..translate(
           magnificationScale * (focalPoint.dx - thisCenter.dx) + thisCenter.dx,
           magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
+    builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage));
+    builder.pop();
 
-    if (layer == null) {
-      layer = BackdropFilterLayer(filter: ImageFilter.matrix(matrix.storage));
-    } else {
-      layer!.filter = ImageFilter.matrix(matrix.storage);
-    }
-
-    context.pushLayer(layer!, super.paint, offset);
+    super.addToScene(builder);
+    builder.pop();
   }
 }
