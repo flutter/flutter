@@ -36,7 +36,7 @@ class StarBorderExample extends StatefulWidget {
 
 class _StarBorderExampleState extends State<StarBorderExample> {
   final OptionModel _model = OptionModel();
-  final TextEditingController textController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
 
   @override
   void initState() {
@@ -46,8 +46,9 @@ class _StarBorderExampleState extends State<StarBorderExample> {
 
   @override
   void dispose() {
-    super.dispose();
     _model.removeListener(_modelChanged);
+    _textController.dispose();
+    super.dispose();
   }
 
   void _modelChanged() {
@@ -63,88 +64,96 @@ class _StarBorderExampleState extends State<StarBorderExample> {
         fontFamily: 'Roboto',
         fontStyle: FontStyle.normal,
       ),
-      child: SliderTheme(
-        data: SliderTheme.of(context).copyWith(),
-        child: ListView(
-          children: <Widget>[
-            Container(
-              color: Colors.grey.shade200,
-              child: Options(_model),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      key: UniqueKey(),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(20),
-                      width: 150,
-                      height: 100,
-                      decoration: ShapeDecoration(
-                        color: Colors.blue.shade100,
-                        shape: StarBorder(
-                          side: const BorderSide(),
-                          points: _model.points,
-                          innerRadiusRatio: _model.innerRadiusRatio,
-                          pointRounding: _model.pointRounding,
-                          valleyRounding: _model.valleyRounding,
-                          rotation: _model.rotation,
-                          squash: _model.squash,
-                        ),
-                      ),
-                      child: const Text('Star'),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      key: UniqueKey(),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(20),
-                      width: 150,
-                      height: 100,
-                      decoration: ShapeDecoration(
-                        color: Colors.blue.shade100,
-                        shape: StarBorder.polygon(
-                          side: const BorderSide(),
-                          sides: _model.points,
-                          pointRounding: _model.pointRounding,
-                          rotation: _model.rotation,
-                          squash: _model.squash,
-                        ),
-                      ),
-                      child: const Text('Polygon'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(
+        children: <Widget>[
+          Container(
+            color: Colors.grey.shade200,
+            child: Options(_model),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Expanded(
-                  child: Container(
-                    color: Colors.black12,
-                    margin: const EdgeInsets.all(16.0),
-                    padding: const EdgeInsets.all(16.0),
-                    child: SelectableText(_model.starCode),
+                  child: ExampleBorder(
+                    border: StarBorder(
+                      side: const BorderSide(),
+                      points: _model.points,
+                      innerRadiusRatio: _model.innerRadiusRatio,
+                      pointRounding: _model.pointRounding,
+                      valleyRounding: _model.valleyRounding,
+                      rotation: _model.rotation,
+                      squash: _model.squash,
+                    ),
+                    title: 'Star',
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    color: Colors.black12,
-                    margin: const EdgeInsets.all(16.0),
-                    padding: const EdgeInsets.all(16.0),
-                    child: SelectableText(_model.polygonCode),
+                  child: ExampleBorder(
+                    border: StarBorder.polygon(
+                      side: const BorderSide(),
+                      sides: _model.points,
+                      pointRounding: _model.pointRounding,
+                      rotation: _model.rotation,
+                      squash: _model.squash,
+                    ),
+                    title: 'Polygon',
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  color: Colors.black12,
+                  margin: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
+                  child: SelectableText(_model.starCode),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  color: Colors.black12,
+                  margin: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
+                  child: SelectableText(_model.polygonCode),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class ExampleBorder extends StatelessWidget {
+  const ExampleBorder({
+    super.key,
+    required this.border,
+    required this.title,
+  });
+
+  final StarBorder border;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: UniqueKey(),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(20),
+      width: 150,
+      height: 100,
+      decoration: ShapeDecoration(
+        color: Colors.blue.shade100,
+        shape: border,
+      ),
+      child: Text(title),
     );
   }
 }
