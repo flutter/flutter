@@ -1,4 +1,4 @@
-Signature: e71b4b7293d6b95b231f2679f2d129c0
+Signature: 505cca9048590327c6f2856a882e6450
 
 UNUSED LICENSES:
 
@@ -10636,6 +10636,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/print_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/stack_trace_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_buffer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/symbol_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/timer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/c_type.dart
