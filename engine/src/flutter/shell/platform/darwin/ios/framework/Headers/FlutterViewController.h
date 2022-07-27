@@ -203,8 +203,10 @@ FLUTTER_DARWIN_EXPORT
  *
  * The view used should be appropriate for multiple sizes; an autoresizing mask to
  * have a flexible width and height will be applied automatically.
+ *
+ * Set to nil to remove the splash screen view.
  */
-@property(strong, nonatomic) UIView* splashScreenView;
+@property(strong, nonatomic, nullable) UIView* splashScreenView;
 
 /**
  * Attempts to set the `splashScreenView` property from the `UILaunchStoryboardName` from the
