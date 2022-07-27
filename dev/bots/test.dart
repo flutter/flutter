@@ -39,12 +39,15 @@ final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engi
 final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
 
 String get platformFolderName {
-  if (Platform.isWindows)
+  if (Platform.isWindows) {
     return 'windows-x64';
-  if (Platform.isMacOS)
+  }
+  if (Platform.isMacOS) {
     return 'darwin-x64';
-  if (Platform.isLinux)
+  }
+  if (Platform.isLinux) {
     return 'linux-x64';
+  }
   throw UnsupportedError('The platform ${Platform.operatingSystem} is not supported by this script.');
 }
 final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
@@ -187,8 +190,9 @@ Future<void> main(List<String> args) async {
       }
     }
     flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
-    if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
+    if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+    }
     print('═' * 80);
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
@@ -327,8 +331,9 @@ Future<void> _runTestHarnessTests() async {
 
   // Verify that we correctly generated the version file.
   final String? versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null)
+  if (versionError != null) {
     exitWithError(<String>[versionError]);
+  }
 }
 
 final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
@@ -1748,8 +1753,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
   ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
-  if (shouldProcessOutput)
+  if (shouldProcessOutput) {
     args.add('--machine');
+  }
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
@@ -1757,8 +1763,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
       print('${red}Could not find test$reset: $green$fullScriptPath$reset');
       print('Working directory: $cyan$workingDirectory$reset');
       print('Script: $green$script$reset');
-      if (!printOutput)
+      if (!printOutput) {
         print('This is one of the tests that does not normally print output.');
+      }
       exit(1);
     }
     args.add(script);
@@ -1782,8 +1789,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
     if (outputChecker != null) {
       final String? message = outputChecker(result);
-      if (message != null)
+      if (message != null) {
         exitWithError(<String>[message]);
+      }
     }
     return;
   }
@@ -1862,12 +1870,15 @@ Future<String?> verifyVersion(File file) async {
   final RegExp pattern = RegExp(
     r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
   final String version = await file.readAsString();
-  if (!file.existsSync())
+  if (!file.existsSync()) {
     return 'The version logic failed to create the Flutter version file.';
-  if (version == '0.0.0-unknown')
+  }
+  if (version == '0.0.0-unknown') {
     return 'The version logic failed to determine the Flutter version.';
-  if (!version.contains(pattern))
+  }
+  if (!version.contains(pattern)) {
     return 'The version logic generated an invalid version string: "$version".';
+  }
   return null;
 }
 

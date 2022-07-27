@@ -75,11 +75,13 @@ void main(List<String> args) {
     generatedSb.write('\n');
   }
 
-  if (argResults['codegen_comment'] as bool)
+  if (argResults['codegen_comment'] as bool) {
     generatedSb.write(kCodegenComment);
+  }
 
-  if (argResults.wasParsed('part-of'))
+  if (argResults.wasParsed('part-of')) {
     generatedSb.write('part of ${argResults['part-of']};\n');
+  }
 
   final Animation animation = Animation.fromFrameData(frames);
   generatedSb.write(animation.toDart('_AnimatedIconData', argResults['asset-name'] as String));
