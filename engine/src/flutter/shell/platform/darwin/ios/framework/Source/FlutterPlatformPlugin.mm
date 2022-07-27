@@ -37,6 +37,8 @@ using namespace flutter;
 
 @implementation FlutterPlatformPlugin {
   fml::WeakPtr<FlutterEngine> _engine;
+  // Used to detect whether this device has live text input ability or not.
+  UITextField* _textField;
 }
 
 - (instancetype)initWithEngine:(fml::WeakPtr<FlutterEngine>)engine {
@@ -88,6 +90,8 @@ using namespace flutter;
     result(nil);
   } else if ([method isEqualToString:@"Clipboard.hasStrings"]) {
     result([self clipboardHasStrings]);
+  } else if ([method isEqualToString:@"LiveText.isLiveTextInputAvailable"]) {
+    result(@([self isLiveTextInputAvailable]));
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -277,4 +281,19 @@ using namespace flutter;
   return @{@"value" : @([UIPasteboard generalPasteboard].hasStrings)};
 }
 
+- (BOOL)isLiveTextInputAvailable {
+  return [[self textField] canPerformAction:@selector(captureTextFromCamera:) withSender:nil];
+}
+
+- (UITextField*)textField {
+  if (_textField == nil) {
+    _textField = [[UITextField alloc] init];
+  }
+  return _textField;
+}
+
+- (void)dealloc {
+  [_textField release];
+  [super dealloc];
+}
 @end

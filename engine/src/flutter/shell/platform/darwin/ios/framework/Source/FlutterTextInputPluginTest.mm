@@ -68,6 +68,7 @@ FLUTTER_ASSERT_ARC
 - (UIView*)hostView;
 - (fml::WeakPtr<FlutterTextInputPlugin>)getWeakPtr;
 - (void)addToInputParentViewIfNeeded:(FlutterTextInputView*)inputView;
+- (void)startLiveTextInput;
 @end
 
 @interface FlutterTextInputPluginTest : XCTestCase
@@ -165,6 +166,17 @@ FLUTTER_ASSERT_ARC
 }
 
 #pragma mark - Tests
+
+- (void)testInvokeStartLiveTextInput {
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.startLiveTextInput" arguments:nil];
+  FlutterTextInputPlugin* mockPlugin = OCMPartialMock(textInputPlugin);
+  [mockPlugin handleMethodCall:methodCall
+                        result:^(id _Nullable result){
+                        }];
+  OCMVerify([mockPlugin startLiveTextInput]);
+}
+
 - (void)testNoDanglingEnginePointer {
   __weak FlutterTextInputPlugin* weakFlutterTextInputPlugin;
   FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
