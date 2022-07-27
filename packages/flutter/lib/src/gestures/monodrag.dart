@@ -249,6 +249,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   // Used in [handleEvent].
   final Set<int> _multiPointerStartTrackers = HashSet<int>();
 
+  Set<int> _remainPointers = HashSet<int>();
+
   // Record the moving pointers that are yet to fill a batch. The list is cleared
   // once a new batch of [PointerMoveEvent]s is detected. Used in [handleEvent].
   final List<PointerEvent> _multiPointerMoveTrackers = <PointerEvent>[];
@@ -409,6 +411,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
          event is PointerMoveEvent ||
          event is PointerPanZoomStartEvent ||
          event is PointerPanZoomUpdateEvent)) {
+      if ((event is PointerDownEvent || event is PointerPanZoomStartEvent) && _remainPointers.contains(event.pointer)) {
+        return;
+      }
+
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       assert(tracker != null);
       if (event is PointerPanZoomStartEvent) {
@@ -424,16 +430,17 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
     }
     if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
+      bool endOfBatch = false;
+      print('${event.pointer} : ${event.endOfBatch}');
       if (_state == _DragState.accepted) {
-        _pointerMoveAccept = true;
-        // When a same pointer is detected, update immediately and add this event.
-        final bool eventExists = _multiPointerMoveTrackers.any((PointerEvent element) => element.pointer == event.pointer);
-        if (eventExists) {
-          _checkMultiPointerUpdate();
-          _multiPointerMoveTrackers.clear();
-          _multiPointerMoveTrackers.add(event);
+        if (_remainPointers.contains(event.pointer)) {
+          if (event.endOfBatch) {
+            _checkMultiPointerUpdate();
+            _multiPointerMoveTrackers.clear();
+          }
+          return;
         } else {
-          // Wait until each pointer dispatches one event to fill up a batch.
+          _pointerMoveAccept = true;
           _multiPointerMoveTrackers.add(event);
           assert (_multiPointerMoveTrackers.length <= _multiPointerStartTrackers.length);
           if (event.endOfBatch) {
@@ -462,12 +469,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       if (_pointerMoveAccept) {
-        _velocityTrackers.keys.toList().forEach(_giveUpPointer);
+        // _velocityTrackers.keys.toList().forEach(_giveUpPointer);
+        _giveUpPointer(event.pointer);
         _multiPointerMoveTrackers.clear();
         _pointerMoveAccept = false;
+        _remainPointers = _multiPointerStartTrackers.toSet();
       } else {
         _giveUpPointer(event.pointer);
       }
+
     }
   }
 
@@ -683,6 +693,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkMultiPointerUpdate() {
+    if (_multiPointerMoveTrackers.length == 0) {
+      return;
+    }
     final Offset localDelta = _getMultiPointerLocalDelta();
     final Offset position = _getMultiPointerPosition();
     final Offset localPosition = _getMultiPointerLocalPosition();
