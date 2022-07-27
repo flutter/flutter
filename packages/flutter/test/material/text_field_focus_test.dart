@@ -186,7 +186,7 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
+    await tester.drag(find.byType(TextField), const Offset(0.0, -1000.0));
     await tester.pump();
     expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
     expect(tester.testTextInput.isVisible, isTrue);
@@ -225,7 +225,7 @@ void main() {
     FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
     await tester.pump();
     expect(find.byType(TextField), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
+    await tester.drag(find.byType(TextField), const Offset(0.0, -1000.0));
     await tester.pump();
     expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
     await tester.pumpWidget(makeTest('test'));

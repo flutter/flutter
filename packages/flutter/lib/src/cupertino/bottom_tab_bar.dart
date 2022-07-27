@@ -230,22 +230,25 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         _wrapActiveItem(
           context,
           Expanded(
-            child: Semantics(
-              selected: active,
-              hint: localizations.tabSemanticsLabel(
-                tabIndex: index + 1,
-                tabCount: items.length,
-              ),
-              child: MouseRegion(
-                cursor:  kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onTap == null ? null : () { onTap!(index); },
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: _buildSingleTabItem(items[index], active),
+            child: TapRegion(
+              groupId: EditableText,
+              child: Semantics(
+                selected: active,
+                hint: localizations.tabSemanticsLabel(
+                  tabIndex: index + 1,
+                  tabCount: items.length,
+                ),
+                child: MouseRegion(
+                  cursor:  kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onTap == null ? null : () { onTap!(index); },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: _buildSingleTabItem(items[index], active),
+                      ),
                     ),
                   ),
                 ),
