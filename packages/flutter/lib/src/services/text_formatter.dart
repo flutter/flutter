@@ -218,11 +218,9 @@ class _TextEditingValueAccumulator {
 ///
 /// Instances of filtered characters found in the new [TextEditingValue]s
 /// will be replaced by the [replacementString] which defaults to the empty
-/// string.
-///
-/// A [FilteringTextInputFormatter] also tries to preserve the existing
-/// [TextEditingValue.selection] and the [TextEditingValue.composing] region,
-/// adjusting them accordingly if text within either of these ranges is replaced.
+/// string, and the current [TextEditingValue.selection] and 
+/// [TextEditingValue.composing] region will be adjusted to account for the
+/// replacement.
 ///
 /// This formatter is typically used to match potentially recurring [Pattern]s
 /// in the new [TextEditingValue]. It never completely rejects the new
