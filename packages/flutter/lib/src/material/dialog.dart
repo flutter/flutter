@@ -69,9 +69,9 @@ class Dialog extends StatelessWidget {
   /// {@template flutter.material.dialog.elevation}
   /// The z-coordinate of this [Dialog].
   ///
-  /// This controls how far above the parent the dialog will appear. This is
-  /// represented with a drop shadow if [shadowColor] is non null,
-  /// and surface tint overlay on the background color if [surfaceTintColor] is
+  /// Controls how far above the parent the dialog will appear. Elevation is
+  /// represented by a drop shadow if [shadowColor] is non null,
+  /// and a surface tint overlay on the background color if [surfaceTintColor] is
   /// non null.
   ///
   /// If null then [DialogTheme.elevation] is used, and if that is null then
@@ -80,10 +80,9 @@ class Dialog extends StatelessWidget {
   /// See also:
   ///   * [Material.elevation], which describes how [elevation] effects the
   ///     drop shadow or surface tint overlay.
-  ///   * [shadowColor], if non null, then a drop shadow will be drawn under
-  ///     the dialog based on the elevation.
-  ///   * [surfaceTintColor], if non null, then a surface tint overlay will
-  ///     be applied to the background color based on the [elevation].
+  ///   * [shadowColor], color of the drop shadow used to indicate the elevation.
+  ///   * [surfaceTintColor], color of an overlay on top of the background
+  ///     color used to indicate the elevation.
   ///   * <https://m3.material.io/components/dialogs/overview>, the Material
   ///     Design specification for dialogs.
   /// {@endtemplate}
