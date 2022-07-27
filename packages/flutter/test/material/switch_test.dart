@@ -1552,7 +1552,8 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color thumbColor = Color(0xFF000000);
+    const Color activeThumbColor = Color(0xFF000000);
+    const Color inactiveThumbColor = Color(0xFF000010);
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
     const Color hoverOverlayColor = Color(0xFF000003);
@@ -1585,7 +1586,12 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) { },
-            thumbColor: const MaterialStatePropertyAll<Color>(thumbColor),
+            thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return activeThumbColor;
+              }
+              return inactiveThumbColor;
+            }),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
@@ -1595,7 +1601,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildSwitch(useOverlay: false));
+    await tester.pumpWidget(buildSwitch(useOverlay: false));  // inactive
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 
@@ -1604,7 +1610,7 @@ void main() {
       paints
         ..rrect()
         ..circle(
-          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          color: inactiveThumbColor.withAlpha(kRadialReactionAlpha),
           radius: splashRadius,
         ),
       reason: 'Default inactive pressed Switch should have overlay color from thumbColor',
@@ -1619,7 +1625,7 @@ void main() {
       paints
         ..rrect()
         ..circle(
-          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          color: activeThumbColor.withAlpha(kRadialReactionAlpha),
           radius: splashRadius,
         ),
       reason: 'Default active pressed Switch should have overlay color from thumbColor',
