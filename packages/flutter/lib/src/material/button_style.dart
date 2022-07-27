@@ -75,7 +75,7 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// TextButton(
-///   style: TextButton.styleFrom(primary: Colors.green),
+///   style: TextButton.styleFrom(foregroundColor: Colors.green),
 /// )
 /// ```
 ///
@@ -85,7 +85,7 @@ import 'theme_data.dart';
 /// MaterialApp(
 ///   theme: ThemeData(
 ///     textButtonTheme: TextButtonThemeData(
-///       style: TextButton.styleFrom(primary: Colors.green),
+///       style: TextButton.styleFrom(foregroundColor: Colors.green),
 ///     ),
 ///   ),
 ///   home: MyAppHome(),
