@@ -703,6 +703,7 @@ class EditableText extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        assert(
           spellCheckConfiguration == null ||
+          spellCheckConfiguration == SpellCheckConfiguration.disabled() ||
           spellCheckConfiguration!.misspelledTextStyle != null,
           'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
        ),
@@ -1964,7 +1965,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
 
     // Spell check setup
-    if (widget.spellCheckConfiguration == null) {
+    if (widget.spellCheckConfiguration == null || widget.spellCheckConfiguration! == SpellCheckConfiguration.disabled()) {
       return;
     }
 

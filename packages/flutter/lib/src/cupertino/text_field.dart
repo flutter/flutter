@@ -1258,12 +1258,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     // Ensure configuration uses Cupertino text style for misspelled words unless
     // a custom style is specified.
-    final SpellCheckConfiguration? spellCheckConfiguration =
-      widget.spellCheckConfiguration != null
+    final SpellCheckConfiguration spellCheckConfiguration =
+      widget.spellCheckConfiguration != null &&
+      widget.spellCheckConfiguration != SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? CupertinoTextField.cupertinoMisspelledTextStyle)
-        : null;
+        : SpellCheckConfiguration.disabled();
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,

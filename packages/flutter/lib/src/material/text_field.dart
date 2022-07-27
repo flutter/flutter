@@ -1172,12 +1172,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     // Ensure configuration uses Material text style for misspelled words unless
     // a custom style is specified.
-    final SpellCheckConfiguration? spellCheckConfiguration =
-      widget.spellCheckConfiguration != null
+    final SpellCheckConfiguration spellCheckConfiguration =
+      widget.spellCheckConfiguration != null &&
+      widget.spellCheckConfiguration != SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? TextField.materialMisspelledTextStyle)
-        : null;
+        : SpellCheckConfiguration.disabled();
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;

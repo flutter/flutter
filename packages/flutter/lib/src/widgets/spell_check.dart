@@ -20,7 +20,17 @@ class SpellCheckConfiguration {
     this.spellCheckService,
     this.spellCheckSuggestionsHandler,
     this.misspelledTextStyle,
-  });
+  }) : _spellCheckEnabled = true;
+
+  /// Creates a configuration that disables spell check.
+  const SpellCheckConfiguration.disabled({
+    SpellCheckService? spellCheckService,
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler,
+    TextStyle? misspelledTextStyle,
+  }) : _spellCheckEnabled = false,
+       spellCheckService = null,
+       spellCheckSuggestionsHandler = null,
+       misspelledTextStyle = null;
 
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
@@ -37,6 +47,9 @@ class SpellCheckConfiguration {
   /// assertion error.
   final TextStyle? misspelledTextStyle;
 
+  /// Whether or not the configuration should enable or disable spell check.
+  final bool _spellCheckEnabled;
+
   /// Returns a copy of the current [SpellCheckConfiguration] instance with
   /// specified overrides.
   SpellCheckConfiguration copyWith({
@@ -50,6 +63,22 @@ class SpellCheckConfiguration {
       misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+        return true;
+    }
+
+    return other is SpellCheckConfiguration &&
+        other.spellCheckService == spellCheckService &&
+        other.spellCheckSuggestionsHandler == spellCheckSuggestionsHandler &&
+        other.misspelledTextStyle == misspelledTextStyle &&
+        other._spellCheckEnabled == _spellCheckEnabled;
+  }
+
+  @override
+  int get hashCode => Object.hash(spellCheckService, spellCheckSuggestionsHandler, misspelledTextStyle, _spellCheckEnabled);
 }
 
 /// Determines how misspelled words are indicated in text input and how
@@ -170,7 +199,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       TextStyle? style,
       TextStyle misspelledTextStyle,
       SpellCheckResults spellCheckResults) {
-    final List<SuggestionSpan> spellCheckResultsSpans =
+    List<SuggestionSpan> spellCheckResultsSpans =
         spellCheckResults.suggestionSpans;
     final String spellCheckResultsText = spellCheckResults.spellCheckedText;
 
