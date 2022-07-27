@@ -225,11 +225,21 @@ class CupertinoMagnifier extends StatelessWidget {
     this.size = kDefaultSize,
     this.borderRadius = const BorderRadius.all(Radius.elliptical(60, 50)),
     this.additionalFocalPointOffset = Offset.zero,
+    this.shadows = const <BoxShadow>[
+              BoxShadow(
+                color: Color.fromARGB(25, 0, 0, 0),
+                blurRadius: 11,
+                spreadRadius: 0.2,
+              )
+            ],
     this.borderSide =
-        const BorderSide(color: Color.fromARGB(255, 235, 235, 235)),
+        const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
     this.inOutAnimation,
   });
   // These constants were eyeballed on an iPhone XR iOS v15.5.
+
+  /// The shadows displayed under the magnifier.
+  final List<BoxShadow> shadows;
 
   /// The border, or "rim", of this magnifier.
   final BorderSide borderSide;
@@ -237,14 +247,14 @@ class CupertinoMagnifier extends StatelessWidget {
   /// The vertical offset, that the magnifier is along the Y axis above
   /// the focal point.
   @visibleForTesting
-  static const double kMagnifierAboveFocalPoint = -25;
+  static const double kMagnifierAboveFocalPoint = -30;
 
   /// The default size of the magnifier.
   ///
   /// This is public so that positioners can choose to depend on it, although
   /// it is overrideable.
   @visibleForTesting
-  static const Size kDefaultSize = Size(82.5, 45);
+  static const Size kDefaultSize = Size(80, 47.5);
 
   /// The duration that this magnifier animates in / out for.
   ///
@@ -291,14 +301,7 @@ class CupertinoMagnifier extends StatelessWidget {
               borderRadius: borderRadius,
               side: borderSide,
             ),
-            shadows: const <BoxShadow>[
-              BoxShadow(
-                color: Color.fromARGB(34, 0, 0, 0),
-                blurRadius: 5,
-                spreadRadius: 0.2,
-                offset: Offset(0, 3),
-              )
-            ],
+            shadows: shadows,
           ),
         ));
   }

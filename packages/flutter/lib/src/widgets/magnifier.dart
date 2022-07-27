@@ -319,6 +319,7 @@ class RawMagnifier extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
+      alignment: Alignment.center,
       children: <Widget>[
           Opacity(
             opacity: decoration.opacity,
@@ -339,8 +340,8 @@ class RawMagnifier extends StatelessWidget {
         Opacity(
           opacity: decoration.opacity,
           child: _MagnifierStyle(
-            decoration,
-            size: size,
+              decoration,
+              size: size,
           ),
         )
       ],
@@ -360,7 +361,7 @@ class _MagnifierStyle extends StatelessWidget {
     for (final BoxShadow shadow in decoration.shadows ?? <BoxShadow>[]) {
       largestShadow = math.max(
           largestShadow,
-          shadow.spreadRadius +
+          (shadow.blurRadius + shadow.spreadRadius) +
               math.max(shadow.offset.dy.abs(), shadow.offset.dx.abs()));
     }
 
@@ -400,8 +401,8 @@ class _DonutClip extends CustomClipper<Path> {
     final Rect rect = Offset.zero & size;
 
     path.fillType = PathFillType.evenOdd;
-    path.addPath(shape.getOuterPath(Offset.zero & size), Offset.zero);
-    path.addRect(rect.inflate(spreadRadius));
+    path.addPath(shape.getOuterPath(rect.inflate(spreadRadius)), Offset.zero);
+    path.addPath(shape.getInnerPath(rect), Offset.zero);
     return path;
   }
 
@@ -536,7 +537,7 @@ class _MagnificationLayer extends ContainerLayer {
           magnificationScale * (focalPoint.dx - thisCenter.dx) + thisCenter.dx,
           magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
-    builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage));
+    builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high));
     builder.pop();
 
     super.addToScene(builder);
