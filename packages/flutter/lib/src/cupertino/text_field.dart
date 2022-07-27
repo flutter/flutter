@@ -1322,7 +1322,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: TextFieldTapRegion(
-        enabled: enabled,
         child: IgnorePointer(
           ignoring: !enabled,
           child: Container(

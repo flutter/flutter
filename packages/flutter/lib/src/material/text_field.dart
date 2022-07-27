@@ -1344,7 +1344,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       onEnter: (PointerEnterEvent event) => _handleHover(true),
       onExit: (PointerExitEvent event) => _handleHover(false),
       child: TextFieldTapRegion(
-        enabled: focusNode.hasPrimaryFocus,
         child: IgnorePointer(
           ignoring: !_isEnabled,
           child: AnimatedBuilder(

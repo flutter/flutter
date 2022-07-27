@@ -3504,7 +3504,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final TextSelectionControls? controls = widget.selectionControls;
     return TextFieldTapRegion(
-      enabled: widget.focusNode.hasPrimaryFocus,
       onTapOutside: widget.onTapOutside ?? _handleDefaultTapOutside,
       debugLabel: kReleaseMode ? null : 'EditableText',
       child: MouseRegion(
