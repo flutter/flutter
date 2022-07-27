@@ -221,22 +221,22 @@ class _TextEditingValueAccumulator {
 /// string.
 ///
 /// A [FilteringTextInputFormatter] also tries to preserve the existing
-/// [TextEditingValue.selection] and [TextEditingValue.composing], and adjusts
-/// them accordingly if text within either of these ranges is replaced.
+/// [TextEditingValue.selection] and the [TextEditingValue.composing] region,
+/// adjusting them accordingly if text within either of these ranges is replaced.
 ///
 /// This formatter is typically used to match potentially recurring [Pattern]s
-/// in the new [TextEditingValue], and it never completely rejects the new
+/// in the new [TextEditingValue]. It never completely rejects the new
 /// [TextEditingValue] and falls back to the current [TextEditingValue] when the
-/// given [filterPattern] fails to match. As a result, [RegExp]s with positional
-/// matchers (notably, `^` or `$`) often produce somewhat surprising results
-/// when used in a [FilteringTextInputFormatter], since such [RegExp]s usually
-/// act as predicates on the entire string. To prevent the user from entering
-/// new content based on a predicate on the new [TextEditingValue], consider
-/// using a different [TextInputFormatter] such as:
+/// given [filterPattern] fails to match. Consider using a different
+/// [TextInputFormatter] such as:
 /// `TextInputFormatter.withFunction((oldValue, newValue) => regExp.hasMatch(newValue.text) ? newValue : oldValue)`.
+/// for accepting/rejecting new input based on a predicate on the full string.
+/// As an example, [FilteringTextInputFormatter] typically shouldn't be used
+/// with [RegExp]s that contain positional matchers (`^` or `$`) since these
+/// patterns are usually meant for matching the whole string.
 class FilteringTextInputFormatter extends TextInputFormatter {
-  /// Creates a formatter that replaces the insertion of characters
-  /// based on a filter pattern.
+  /// Creates a formatter that replaces banned patterns with the given
+  /// [replacementString].
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also
