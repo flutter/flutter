@@ -90,20 +90,6 @@ typedef struct MouseState {
 - (void)deregisterNotifications;
 @end
 
-// The following conditional compilation defines an API 13 concept on earlier API targets so that
-// a compiler compiling against API 12 or below does not blow up due to non-existent members.
-#if __IPHONE_OS_VERSION_MAX_ALLOWED < 130000
-typedef enum UIAccessibilityContrast : NSInteger {
-  UIAccessibilityContrastUnspecified = 0,
-  UIAccessibilityContrastNormal = 1,
-  UIAccessibilityContrastHigh = 2
-} UIAccessibilityContrast;
-
-@interface UITraitCollection (MethodsFromNewerSDK)
-- (UIAccessibilityContrast)accessibilityContrast;
-@end
-#endif
-
 @implementation FlutterViewController {
   std::unique_ptr<fml::WeakPtrFactory<FlutterViewController>> _weakFactory;
   fml::scoped_nsobject<FlutterEngine> _engine;
@@ -924,19 +910,17 @@ static flutter::PointerData::Change PointerDataChangeFromUITouchPhase(UITouchPha
 }
 
 static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
-  if (@available(iOS 9, *)) {
-    switch (touch.type) {
-      case UITouchTypeDirect:
-      case UITouchTypeIndirect:
-        return flutter::PointerData::DeviceKind::kTouch;
-      case UITouchTypeStylus:
-        return flutter::PointerData::DeviceKind::kStylus;
-      case UITouchTypeIndirectPointer:
-        return flutter::PointerData::DeviceKind::kMouse;
-      default:
-        FML_DLOG(INFO) << "Unhandled touch type: " << touch.type;
-        break;
-    }
+  switch (touch.type) {
+    case UITouchTypeDirect:
+    case UITouchTypeIndirect:
+      return flutter::PointerData::DeviceKind::kTouch;
+    case UITouchTypeStylus:
+      return flutter::PointerData::DeviceKind::kStylus;
+    case UITouchTypeIndirectPointer:
+      return flutter::PointerData::DeviceKind::kMouse;
+    default:
+      FML_DLOG(INFO) << "Unhandled touch type: " << touch.type;
+      break;
   }
 
   return flutter::PointerData::DeviceKind::kTouch;
@@ -1040,57 +1024,46 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     }
 
     // pressure_min is always 0.0
-    if (@available(iOS 9, *)) {
-      // These properties were introduced in iOS 9.0.
-      pointer_data.pressure = touch.force;
-      pointer_data.pressure_max = touch.maximumPossibleForce;
-    } else {
-      pointer_data.pressure = 1.0;
-      pointer_data.pressure_max = 1.0;
-    }
-
-    // These properties were introduced in iOS 8.0
+    pointer_data.pressure = touch.force;
+    pointer_data.pressure_max = touch.maximumPossibleForce;
     pointer_data.radius_major = touch.majorRadius;
     pointer_data.radius_min = touch.majorRadius - touch.majorRadiusTolerance;
     pointer_data.radius_max = touch.majorRadius + touch.majorRadiusTolerance;
 
-    // These properties were introduced in iOS 9.1
-    if (@available(iOS 9.1, *)) {
-      // iOS Documentation: altitudeAngle
-      // A value of 0 radians indicates that the stylus is parallel to the surface. The value of
-      // this property is Pi/2 when the stylus is perpendicular to the surface.
-      //
-      // PointerData Documentation: tilt
-      // The angle of the stylus, in radians in the range:
-      //    0 <= tilt <= pi/2
-      // giving the angle of the axis of the stylus, relative to the axis perpendicular to the input
-      // surface (thus 0.0 indicates the stylus is orthogonal to the plane of the input surface,
-      // while pi/2 indicates that the stylus is flat on that surface).
-      //
-      // Discussion:
-      // The ranges are the same. Origins are swapped.
-      pointer_data.tilt = M_PI_2 - touch.altitudeAngle;
+    // iOS Documentation: altitudeAngle
+    // A value of 0 radians indicates that the stylus is parallel to the surface. The value of
+    // this property is Pi/2 when the stylus is perpendicular to the surface.
+    //
+    // PointerData Documentation: tilt
+    // The angle of the stylus, in radians in the range:
+    //    0 <= tilt <= pi/2
+    // giving the angle of the axis of the stylus, relative to the axis perpendicular to the input
+    // surface (thus 0.0 indicates the stylus is orthogonal to the plane of the input surface,
+    // while pi/2 indicates that the stylus is flat on that surface).
+    //
+    // Discussion:
+    // The ranges are the same. Origins are swapped.
+    pointer_data.tilt = M_PI_2 - touch.altitudeAngle;
 
-      // iOS Documentation: azimuthAngleInView:
-      // With the tip of the stylus touching the screen, the value of this property is 0 radians
-      // when the cap end of the stylus (that is, the end opposite of the tip) points along the
-      // positive x axis of the device's screen. The azimuth angle increases as the user swings the
-      // cap end of the stylus in a clockwise direction around the tip.
-      //
-      // PointerData Documentation: orientation
-      // The angle of the stylus, in radians in the range:
-      //    -pi < orientation <= pi
-      // giving the angle of the axis of the stylus projected onto the input surface, relative to
-      // the positive y-axis of that surface (thus 0.0 indicates the stylus, if projected onto that
-      // surface, would go from the contact point vertically up in the positive y-axis direction, pi
-      // would indicate that the stylus would go down in the negative y-axis direction; pi/4 would
-      // indicate that the stylus goes up and to the right, -pi/2 would indicate that the stylus
-      // goes to the left, etc).
-      //
-      // Discussion:
-      // Sweep direction is the same. Phase of M_PI_2.
-      pointer_data.orientation = [touch azimuthAngleInView:nil] - M_PI_2;
-    }
+    // iOS Documentation: azimuthAngleInView:
+    // With the tip of the stylus touching the screen, the value of this property is 0 radians
+    // when the cap end of the stylus (that is, the end opposite of the tip) points along the
+    // positive x axis of the device's screen. The azimuth angle increases as the user swings the
+    // cap end of the stylus in a clockwise direction around the tip.
+    //
+    // PointerData Documentation: orientation
+    // The angle of the stylus, in radians in the range:
+    //    -pi < orientation <= pi
+    // giving the angle of the axis of the stylus projected onto the input surface, relative to
+    // the positive y-axis of that surface (thus 0.0 indicates the stylus, if projected onto that
+    // surface, would go from the contact point vertically up in the positive y-axis direction, pi
+    // would indicate that the stylus would go down in the negative y-axis direction; pi/4 would
+    // indicate that the stylus goes up and to the right, -pi/2 would indicate that the stylus
+    // goes to the left, etc).
+    //
+    // Discussion:
+    // Sweep direction is the same. Phase of M_PI_2.
+    pointer_data.orientation = [touch azimuthAngleInView:nil] - M_PI_2;
 
     if (@available(iOS 13.4, *)) {
       if (event != nullptr) {
@@ -1207,14 +1180,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 // Viewport padding represents the iOS safe area insets.
 - (void)updateViewportPadding {
   CGFloat scale = [UIScreen mainScreen].scale;
-  if (@available(iOS 11, *)) {
-    _viewportMetrics.physical_padding_top = self.view.safeAreaInsets.top * scale;
-    _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
-    _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
-    _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
-  } else {
-    _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
-  }
+  _viewportMetrics.physical_padding_top = self.view.safeAreaInsets.top * scale;
+  _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
+  _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
+  _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
 }
 
 #pragma mark - Keyboard events
@@ -1222,12 +1191,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)keyboardWillChangeFrame:(NSNotification*)notification {
   NSDictionary* info = [notification userInfo];
 
-  if (@available(iOS 9, *)) {
-    // Ignore keyboard notifications related to other apps.
-    id isLocal = info[UIKeyboardIsLocalUserInfoKey];
-    if (isLocal && ![isLocal boolValue]) {
-      return;
-    }
+  // Ignore keyboard notifications related to other apps.
+  id isLocal = info[UIKeyboardIsLocalUserInfoKey];
+  if (isLocal && ![isLocal boolValue]) {
+    return;
   }
 
   // Ignore keyboard notifications if engine’s viewController is not current viewController.
@@ -1260,12 +1227,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
   NSDictionary* info = [notification userInfo];
 
-  if (@available(iOS 9, *)) {
-    // Ignore keyboard notifications related to other apps.
-    id isLocal = info[UIKeyboardIsLocalUserInfoKey];
-    if (isLocal && ![isLocal boolValue]) {
-      return;
-    }
+  // Ignore keyboard notifications related to other apps.
+  id isLocal = info[UIKeyboardIsLocalUserInfoKey];
+  if (isLocal && ![isLocal boolValue]) {
+    return;
   }
 
   // Ignore keyboard notifications if engine’s viewController is not current viewController.
@@ -1504,9 +1469,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)setIsHomeIndicatorHidden:(BOOL)hideHomeIndicator {
   if (hideHomeIndicator != _isHomeIndicatorHidden) {
     _isHomeIndicatorHidden = hideHomeIndicator;
-    if (@available(iOS 11, *)) {
-      [self setNeedsUpdateOfHomeIndicatorAutoHidden];
-    }
+    [self setNeedsUpdateOfHomeIndicatorAutoHidden];
   }
 }
 

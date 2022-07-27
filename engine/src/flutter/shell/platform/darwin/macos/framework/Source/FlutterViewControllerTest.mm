@@ -485,47 +485,45 @@ TEST(FlutterViewControllerTest, testViewWillAppearCalledMultipleTimes) {
   EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
   EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
 
-  if (@available(macOS 10.12, *)) {
-    // Start system momentum.
-    CGEventRef cgEventMomentumStart = CGEventCreateCopy(cgEventStart);
-    CGEventSetIntegerValueField(cgEventMomentumStart, kCGScrollWheelEventScrollPhase, 0);
-    CGEventSetIntegerValueField(cgEventMomentumStart, kCGScrollWheelEventMomentumPhase,
-                                kCGMomentumScrollPhaseBegin);
+  // Start system momentum.
+  CGEventRef cgEventMomentumStart = CGEventCreateCopy(cgEventStart);
+  CGEventSetIntegerValueField(cgEventMomentumStart, kCGScrollWheelEventScrollPhase, 0);
+  CGEventSetIntegerValueField(cgEventMomentumStart, kCGScrollWheelEventMomentumPhase,
+                              kCGMomentumScrollPhaseBegin);
 
-    called = false;
-    [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventMomentumStart]];
-    EXPECT_FALSE(called);
+  called = false;
+  [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventMomentumStart]];
+  EXPECT_FALSE(called);
 
-    // Mock a touch on the trackpad.
-    id touchMock = OCMClassMock([NSTouch class]);
-    NSSet* touchSet = [NSSet setWithObject:touchMock];
-    id touchEventMock = OCMClassMock([NSEvent class]);
-    OCMStub([touchEventMock allTouches]).andReturn(touchSet);
-    CGPoint touchLocation = {0, 0};
-    OCMStub([touchEventMock locationInWindow]).andReturn(touchLocation);
+  // Mock a touch on the trackpad.
+  id touchMock = OCMClassMock([NSTouch class]);
+  NSSet* touchSet = [NSSet setWithObject:touchMock];
+  id touchEventMock = OCMClassMock([NSEvent class]);
+  OCMStub([touchEventMock allTouches]).andReturn(touchSet);
+  CGPoint touchLocation = {0, 0};
+  OCMStub([touchEventMock locationInWindow]).andReturn(touchLocation);
 
-    // Scroll inertia cancel event should be issued.
-    called = false;
-    [viewController touchesBeganWithEvent:touchEventMock];
-    EXPECT_TRUE(called);
-    EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindScrollInertiaCancel);
-    EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  // Scroll inertia cancel event should be issued.
+  called = false;
+  [viewController touchesBeganWithEvent:touchEventMock];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindScrollInertiaCancel);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
 
-    // End system momentum.
-    CGEventRef cgEventMomentumEnd = CGEventCreateCopy(cgEventStart);
-    CGEventSetIntegerValueField(cgEventMomentumEnd, kCGScrollWheelEventScrollPhase, 0);
-    CGEventSetIntegerValueField(cgEventMomentumEnd, kCGScrollWheelEventMomentumPhase,
-                                kCGMomentumScrollPhaseEnd);
+  // End system momentum.
+  CGEventRef cgEventMomentumEnd = CGEventCreateCopy(cgEventStart);
+  CGEventSetIntegerValueField(cgEventMomentumEnd, kCGScrollWheelEventScrollPhase, 0);
+  CGEventSetIntegerValueField(cgEventMomentumEnd, kCGScrollWheelEventMomentumPhase,
+                              kCGMomentumScrollPhaseEnd);
 
-    called = false;
-    [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventMomentumEnd]];
-    EXPECT_FALSE(called);
+  called = false;
+  [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventMomentumEnd]];
+  EXPECT_FALSE(called);
 
-    // Scroll inertia cancel event should not be issued after momentum has ended.
-    called = false;
-    [viewController touchesBeganWithEvent:touchEventMock];
-    EXPECT_FALSE(called);
-  }
+  // Scroll inertia cancel event should not be issued after momentum has ended.
+  called = false;
+  [viewController touchesBeganWithEvent:touchEventMock];
+  EXPECT_FALSE(called);
 
   // May-begin and cancel are used while macOS determines which type of gesture to choose.
   CGEventRef cgEventMayBegin = CGEventCreateCopy(cgEventStart);
