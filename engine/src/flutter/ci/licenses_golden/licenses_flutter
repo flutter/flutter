@@ -671,6 +671,10 @@ FILE: ../../../flutter/impeller/renderer/allocator.cc
 FILE: ../../../flutter/impeller/renderer/allocator.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.h
+FILE: ../../../flutter/impeller/renderer/backend/gles/blit_command_gles.cc
+FILE: ../../../flutter/impeller/renderer/backend/gles/blit_command_gles.h
+FILE: ../../../flutter/impeller/renderer/backend/gles/blit_pass_gles.cc
+FILE: ../../../flutter/impeller/renderer/backend/gles/blit_pass_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/buffer_bindings_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/buffer_bindings_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/capabilities_gles.cc
@@ -712,6 +716,10 @@ FILE: ../../../flutter/impeller/renderer/backend/gles/texture_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/texture_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/allocator_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/allocator_mtl.mm
+FILE: ../../../flutter/impeller/renderer/backend/metal/blit_command_mtl.h
+FILE: ../../../flutter/impeller/renderer/backend/metal/blit_command_mtl.mm
+FILE: ../../../flutter/impeller/renderer/backend/metal/blit_pass_mtl.h
+FILE: ../../../flutter/impeller/renderer/backend/metal/blit_pass_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/metal/command_buffer_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/command_buffer_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/metal/context_mtl.h
@@ -742,6 +750,8 @@ FILE: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc
@@ -773,6 +783,10 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vk.h
+FILE: ../../../flutter/impeller/renderer/blit_command.cc
+FILE: ../../../flutter/impeller/renderer/blit_command.h
+FILE: ../../../flutter/impeller/renderer/blit_pass.cc
+FILE: ../../../flutter/impeller/renderer/blit_pass.h
 FILE: ../../../flutter/impeller/renderer/buffer.cc
 FILE: ../../../flutter/impeller/renderer/buffer.h
 FILE: ../../../flutter/impeller/renderer/buffer_view.cc

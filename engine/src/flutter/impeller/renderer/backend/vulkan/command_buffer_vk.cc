@@ -30,4 +30,8 @@ std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
   FML_UNREACHABLE();
 }
 
+std::shared_ptr<BlitPass> CommandBufferVK::OnCreateBlitPass() const {
+  FML_UNREACHABLE();
+}
+
 }  // namespace impeller

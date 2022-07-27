@@ -38,6 +38,9 @@ class CommandBufferMTL final : public CommandBuffer {
   std::shared_ptr<RenderPass> OnCreateRenderPass(
       RenderTarget target) const override;
 
+  // |CommandBuffer|
+  std::shared_ptr<BlitPass> OnCreateBlitPass() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferMTL);
 };
 

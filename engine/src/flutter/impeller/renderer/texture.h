@@ -31,6 +31,8 @@ class Texture {
 
   virtual ISize GetSize() const = 0;
 
+  size_t GetMipCount() const;
+
   const TextureDescriptor& GetTextureDescriptor() const;
 
   TextureIntent GetIntent() const;

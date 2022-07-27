@@ -123,6 +123,7 @@ struct GLProc {
   PROC(FramebufferTexture2D);                \
   PROC(FrontFace);                           \
   PROC(GenBuffers);                          \
+  PROC(GenerateMipmap);                      \
   PROC(GenFramebuffers);                     \
   PROC(GenRenderbuffers);                    \
   PROC(GenTextures);                         \
@@ -162,6 +163,8 @@ struct GLProc {
   PROC(VertexAttribPointer);                 \
   PROC(Viewport);
 
+#define FOR_EACH_IMPELLER_GLES3_PROC(PROC) PROC(BlitFramebuffer);
+
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC) \
   PROC(DiscardFramebufferEXT);           \
   PROC(PushDebugGroupKHR);               \
@@ -188,6 +191,7 @@ class ProcTableGLES {
   GLProc<decltype(gl##name)> name = {"gl" #name, nullptr};
 
   FOR_EACH_IMPELLER_PROC(IMPELLER_PROC);
+  FOR_EACH_IMPELLER_GLES3_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_EXT_PROC(IMPELLER_PROC);
 
 #undef IMPELLER_PROC

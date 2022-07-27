@@ -57,7 +57,8 @@ class Playground : public ::testing::TestWithParam<PlaygroundBackend> {
       const char* fixture_name) const;
 
   std::shared_ptr<Texture> CreateTextureForFixture(
-      const char* fixture_name) const;
+      const char* fixture_name,
+      bool enable_mipmapping = false) const;
 
   std::shared_ptr<Texture> CreateTextureCubeForFixture(
       std::array<const char*, 6> fixture_names) const;

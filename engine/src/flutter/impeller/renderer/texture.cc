@@ -42,6 +42,10 @@ bool Texture::SetContents(std::shared_ptr<const fml::Mapping> mapping,
   return true;
 }
 
+size_t Texture::GetMipCount() const {
+  return GetTextureDescriptor().mip_count;
+}
+
 const TextureDescriptor& Texture::GetTextureDescriptor() const {
   return desc_;
 }

@@ -174,19 +174,19 @@ struct RenderPassData {
 
     if (auto color = TextureGLES::Cast(pass_data.color_attachment.get())) {
       if (!color->SetAsFramebufferAttachment(
-              fbo, TextureGLES::AttachmentPoint::kColor0)) {
+              GL_FRAMEBUFFER, fbo, TextureGLES::AttachmentPoint::kColor0)) {
         return false;
       }
     }
     if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
       if (!depth->SetAsFramebufferAttachment(
-              fbo, TextureGLES::AttachmentPoint::kDepth)) {
+              GL_FRAMEBUFFER, fbo, TextureGLES::AttachmentPoint::kDepth)) {
         return false;
       }
     }
     if (auto stencil = TextureGLES::Cast(pass_data.stencil_attachment.get())) {
       if (!stencil->SetAsFramebufferAttachment(
-              fbo, TextureGLES::AttachmentPoint::kStencil)) {
+              GL_FRAMEBUFFER, fbo, TextureGLES::AttachmentPoint::kStencil)) {
         return false;
       }
     }
