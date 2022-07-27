@@ -376,7 +376,7 @@ class StarBorder extends OutlinedBorder {
       points: points ?? this.points,
       rotation: rotation ?? this.rotation,
       innerRadiusRatio: innerRadiusRatio ?? this.innerRadiusRatio,
-      pointRounding: valleyRounding ?? this.pointRounding,
+      pointRounding: pointRounding ?? this.pointRounding,
       valleyRounding: valleyRounding ?? this.valleyRounding,
       squash: squash ?? this.squash,
     );

@@ -54,10 +54,28 @@ void main() {
   });
 
   test('StarBorder copyWith, ==, hashCode', () {
-    expect(const StarBorder(), const StarBorder().copyWith());
-    expect(const StarBorder().hashCode, const StarBorder().copyWith().hashCode);
     const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
-    expect(const StarBorder().copyWith(side: side), const StarBorder(side: side));
+    final StarBorder copy = const StarBorder().copyWith(
+      side: side,
+      points: 3,
+      innerRadiusRatio: 0.1,
+      pointRounding: 0.2,
+      valleyRounding: 0.3,
+      rotation: 180,
+      squash: 0.4,
+    );
+    const StarBorder expected = StarBorder(
+      side: side,
+      points: 3,
+      innerRadiusRatio: 0.1,
+      pointRounding: 0.2,
+      valleyRounding: 0.3,
+      rotation: 180,
+      squash: 0.4,
+    );
+    expect(const StarBorder(), equals(const StarBorder().copyWith()));
+    expect(copy, equals(expected));
+    expect(copy.hashCode, equals(expected.hashCode));
   });
 
   testWidgets('StarBorder basic geometry', (WidgetTester tester) async {
