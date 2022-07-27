@@ -520,7 +520,9 @@ class FragmentShaderManager {
   /// Creates an [FragmentShaderManager] with an [InkSparkle] effect.
   static Future<FragmentShaderManager> inkSparkle() async {
     final FragmentShaderManager manager = FragmentShaderManager._();
-    _program = ui.FragmentProgram.fromAsset('shaders/ink_sparkle.frag');
+    _program = await ui.FragmentProgram.fromAssetAsync(
+      'shaders/ink_sparkle.frag',
+    );
     return manager;
   }
 
