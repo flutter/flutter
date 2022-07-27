@@ -215,7 +215,6 @@ TEST_P(AiksTest, CanRenderRadialGradient) {
   paint.contents = contents;
 
   canvas.DrawRect({25, 25, 200, 200}, paint);
-  canvas.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
