@@ -14,8 +14,8 @@
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/window.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
-#include "flutter/shell/platform/windows/window_win32.h"
 
 namespace flutter {
 
@@ -23,55 +23,55 @@ namespace flutter {
 // the future, there will likely be a CoreWindow-based FlutterWindow as well.
 // At the point may make sense to dependency inject the native window rather
 // than inherit.
-class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
+class FlutterWindowWin32 : public Window, public WindowBindingHandler {
  public:
   // Create flutter Window for use as child window
   FlutterWindowWin32(int width, int height);
 
   virtual ~FlutterWindowWin32();
 
-  // |WindowWin32|
+  // |Window|
   void OnDpiScale(unsigned int dpi) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnResize(unsigned int width, unsigned int height) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnPaint() override;
 
-  // |WindowWin32|
+  // |Window|
   void OnPointerMove(double x,
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnPointerDown(double x,
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
                      UINT button) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnPointerUp(double x,
                    double y,
                    FlutterPointerDeviceKind device_kind,
                    int32_t device_id,
                    UINT button) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnPointerLeave(double x,
                       double y,
                       FlutterPointerDeviceKind device_kind,
                       int32_t device_id) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnSetCursor() override;
 
-  // |WindowWin32|
+  // |Window|
   void OnText(const std::u16string& text) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnKey(int key,
              int scancode,
              int action,
@@ -80,16 +80,16 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
              bool was_down,
              KeyEventCallback callback) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnComposeBegin() override;
 
-  // |WindowWin32|
+  // |Window|
   void OnComposeCommit() override;
 
-  // |WindowWin32|
+  // |Window|
   void OnComposeEnd() override;
 
-  // |WindowWin32|
+  // |Window|
   void OnComposeChange(const std::u16string& text, int cursor_pos) override;
 
   // |FlutterWindowBindingHandler|
@@ -98,16 +98,16 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   void OnResetImeComposing() override;
 
-  // |WindowWin32|
+  // |Window|
   void OnUpdateSemanticsEnabled(bool enabled) override;
 
-  // |WindowWin32|
+  // |Window|
   void OnScroll(double delta_x,
                 double delta_y,
                 FlutterPointerDeviceKind device_kind,
                 int32_t device_id) override;
 
-  // |WindowWin32|
+  // |Window|
   gfx::NativeViewAccessible GetNativeViewAccessible() override;
 
   // |FlutterWindowBindingHandler|

@@ -12,7 +12,7 @@
 
 namespace flutter {
 
-class WindowWin32;
+class Window;
 class WindowBindingHandlerDelegate;
 
 class DirectManipulationEventHandler;
@@ -21,7 +21,7 @@ class DirectManipulationEventHandler;
 // DirectManipulation and WindowBindingHandlerDelegate.
 class DirectManipulationOwner {
  public:
-  explicit DirectManipulationOwner(WindowWin32* window);
+  explicit DirectManipulationOwner(Window* window);
   // Initialize a DirectManipulation viewport with specified width and height.
   // These should match the width and height of the application window.
   int Init(unsigned int width, unsigned int height);
@@ -46,7 +46,7 @@ class DirectManipulationOwner {
 
  private:
   // The window gesture input is occuring on.
-  WindowWin32* window_;
+  Window* window_;
   // Cookie needed to register child event handler with viewport.
   DWORD viewportHandlerCookie_;
   // Object needed for operation of the DirectManipulation API.

@@ -23,10 +23,9 @@ namespace flutter {
 // access Win32 system calls (to allow mocking) and where to send the results
 // of key calls and text calls to.
 //
-// Typically, |KeyboardManagerWin32| is owned by a |WindowWin32|, which also
+// Typically, |KeyboardManagerWin32| is owned by a |Window|, which also
 // implements the window delegate. The key calls and text calls are forwarded
-// to those of |WindowWin32|'s, and consequently, those of
-// |FlutterWindowsView|'s.
+// to those of |Window|'s, and consequently, those of |FlutterWindowsView|'s.
 //
 // ## Terminology
 //
@@ -46,7 +45,7 @@ class KeyboardManagerWin32 {
   // Define how the keyboard manager accesses Win32 system calls (to allow
   // mocking) and sends key calls and and text calls.
   //
-  // Typically implemented by |WindowWin32|.
+  // Typically implemented by |Window|.
   class WindowDelegate {
    public:
     using KeyEventCallback = std::function<void(bool)>;
@@ -102,7 +101,7 @@ class KeyboardManagerWin32 {
   // this message synchronously. It doesn't mean that the Flutter framework
   // handles it, which is reported asynchronously later. Not handling this
   // message here usually means that this message is a redispatched message,
-  // but there are other rare cases too. |WindowWin32| should forward unhandled
+  // but there are other rare cases too. |Window| should forward unhandled
   // messages to |DefWindowProc|.
   bool HandleMessage(UINT const message,
                      WPARAM const wparam,

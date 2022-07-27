@@ -63,7 +63,7 @@ static HCURSOR GetCursorByName(const std::string& cursor_name) {
 
 FlutterWindowWin32::FlutterWindowWin32(int width, int height)
     : binding_handler_delegate_(nullptr) {
-  WindowWin32::InitializeChild("FLUTTERVIEW", width, height);
+  Window::InitializeChild("FLUTTERVIEW", width, height);
   current_cursor_ = ::LoadCursor(nullptr, IDC_ARROW);
 }
 
