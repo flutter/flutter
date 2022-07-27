@@ -12582,7 +12582,7 @@ void main() {
             backgroundCursorColor: Colors.grey,
             cursorOpacityAnimates: true,
             autofillHints: null,
-            spellCheckConfiguration: null,
+            spellCheckConfiguration: SpellCheckConfiguration.disabled(),
           ),
         ),
       );
