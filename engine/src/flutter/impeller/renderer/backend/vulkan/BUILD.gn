@@ -8,6 +8,8 @@ impeller_component("vulkan") {
   sources = [
     "allocator_vk.cc",
     "allocator_vk.h",
+    "blit_pass_vk.cc",
+    "blit_pass_vk.h",
     "capabilities_vk.cc",
     "capabilities_vk.h",
     "command_buffer_vk.cc",

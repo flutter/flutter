@@ -16,6 +16,10 @@ impeller_component("gles") {
   sources = [
     "allocator_gles.cc",
     "allocator_gles.h",
+    "blit_command_gles.cc",
+    "blit_command_gles.h",
+    "blit_pass_gles.cc",
+    "blit_pass_gles.h",
     "buffer_bindings_gles.cc",
     "buffer_bindings_gles.h",
     "capabilities_gles.cc",
@@ -60,8 +64,11 @@ impeller_component("gles") {
   if (!is_android && !is_fuchsia) {
     public_configs = [ ":gles_config" ]
     sources += [
-      "//third_party/angle/include/GLES2/gl2.h",
       "//third_party/angle/include/GLES2/gl2ext.h",
+
+      # The GLES3 API is a superset of GLES2. Although we target GLES2, we use
+      # some GLES3 features if the driver supports them.
+      "//third_party/angle/include/GLES3/gl3.h",
     ]
   }
 

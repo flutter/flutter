@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/metal/command_buffer_mtl.h"
 
+#include "impeller/renderer/backend/metal/blit_pass_mtl.h"
 #include "impeller/renderer/backend/metal/render_pass_mtl.h"
 
 namespace impeller {
@@ -195,6 +196,19 @@ std::shared_ptr<RenderPass> CommandBufferMTL::OnCreateRenderPass(
 
   auto pass = std::shared_ptr<RenderPassMTL>(
       new RenderPassMTL(buffer_, std::move(target)));
+  if (!pass->IsValid()) {
+    return nullptr;
+  }
+
+  return pass;
+}
+
+std::shared_ptr<BlitPass> CommandBufferMTL::OnCreateBlitPass() const {
+  if (!buffer_) {
+    return nullptr;
+  }
+
+  auto pass = std::shared_ptr<BlitPassMTL>(new BlitPassMTL(buffer_));
   if (!pass->IsValid()) {
     return nullptr;
   }

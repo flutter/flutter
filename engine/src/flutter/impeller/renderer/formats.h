@@ -199,6 +199,16 @@ enum class MinMagFilter {
   kLinear,
 };
 
+enum class MipFilter {
+  /// Always sample from mip level 0. Other mip levels are ignored.
+  kNone,
+  /// Sample from the nearest mip level.
+  kNearest,
+  /// Sample from the two nearest mip levels and linearly interpolate between
+  /// them.
+  kLinear,
+};
+
 enum class SamplerAddressMode {
   kClampToEdge,
   kRepeat,
