@@ -229,7 +229,7 @@ class _TextEditingValueAccumulator {
 /// [TextEditingValue] and falls back to the current [TextEditingValue] when the
 /// given [filterPattern] fails to match. Consider using a different
 /// [TextInputFormatter] such as:
-/// ``dart
+/// ```dart
 /// TextInputFormatter.withFunction((oldValue, newValue) => regExp.hasMatch(newValue.text) ? newValue : oldValue)
 /// ```
 /// for accepting/rejecting new input based on a predicate on the full string.
