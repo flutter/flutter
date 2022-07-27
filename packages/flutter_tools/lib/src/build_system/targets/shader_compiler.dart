@@ -181,12 +181,16 @@ class ShaderCompiler {
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;
     if (code != 0) {
-      _logger.printTrace(await utf8.decodeStream(impellercProcess.stdout));
-      _logger.printError(await utf8.decodeStream(impellercProcess.stderr));
+      final String stdout = await utf8.decodeStream(impellercProcess.stdout);
+      final String stderr = await utf8.decodeStream(impellercProcess.stderr);
+      _logger.printTrace(stdout);
+      _logger.printError(stderr);
       if (fatal) {
         throw ShaderCompilerException._(
           'Shader compilation of "${input.path}" to "$outputPath" '
-          'failed with exit code $code.',
+          'failed with exit code $code.\n'
+          'impellerc stdout:\n$stdout\n'
+          'impellerc stderr:\n$stderr',
         );
       }
       return false;
