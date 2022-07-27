@@ -32,7 +32,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('painting.StarBorder.$name.png'),
+      matchesGoldenFile('painting.star_border.$name.png'),
     );
   }
 
