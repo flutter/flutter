@@ -25,11 +25,11 @@ namespace flutter {
 // A class abstraction for a high DPI aware Win32 Window.  Intended to be
 // inherited from by classes that wish to specialize with custom
 // rendering and input handling.
-class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
+class Window : public KeyboardManagerWin32::WindowDelegate {
  public:
-  WindowWin32();
-  WindowWin32(std::unique_ptr<TextInputManagerWin32> text_input_manager);
-  virtual ~WindowWin32();
+  Window();
+  Window(std::unique_ptr<TextInputManagerWin32> text_input_manager);
+  virtual ~Window();
 
   // Initializes as a child window with size using |width| and |height| and
   // |title| to identify the windowclass.  Does not show window, window must be
@@ -233,7 +233,7 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
   void HandleResize(UINT width, UINT height);
 
   // Retrieves a class instance pointer for |window|
-  static WindowWin32* GetThisFromHandle(HWND const window) noexcept;
+  static Window* GetThisFromHandle(HWND const window) noexcept;
 
   // Updates the cached scroll_offset_multiplier_ value based off OS settings.
   void UpdateScrollOffsetMultiplier();

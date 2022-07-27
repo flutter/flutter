@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/testing/mock_text_input_manager_win32.h"
-#include "flutter/shell/platform/windows/testing/mock_window_win32.h"
+#include "flutter/shell/platform/windows/testing/mock_window.h"
 #include "gtest/gtest.h"
 
 using testing::_;
@@ -14,18 +14,18 @@ using testing::Return;
 namespace flutter {
 namespace testing {
 
-TEST(MockWin32Window, CreateDestroy) {
-  MockWin32Window window;
+TEST(MockWindow, CreateDestroy) {
+  MockWindow window;
   ASSERT_TRUE(TRUE);
 }
 
-TEST(MockWin32Window, GetDpiAfterCreate) {
-  MockWin32Window window;
+TEST(MockWindow, GetDpiAfterCreate) {
+  MockWindow window;
   ASSERT_TRUE(window.GetDpi() > 0);
 }
 
-TEST(MockWin32Window, VerticalScroll) {
-  MockWin32Window window;
+TEST(MockWindow, VerticalScroll) {
+  MockWindow window;
   const int scroll_amount = 10;
   // Vertical scroll should be passed along, adjusted for scroll tick size
   // and direction.
@@ -36,12 +36,12 @@ TEST(MockWin32Window, VerticalScroll) {
   window.InjectWindowMessage(WM_MOUSEWHEEL, MAKEWPARAM(0, scroll_amount), 0);
 }
 
-TEST(MockWin32Window, OnImeCompositionCompose) {
+TEST(MockWindow, OnImeCompositionCompose) {
   MockTextInputManagerWin32* text_input_manager =
       new MockTextInputManagerWin32();
   std::unique_ptr<TextInputManagerWin32> text_input_manager_ptr(
       text_input_manager);
-  MockWin32Window window(std::move(text_input_manager_ptr));
+  MockWindow window(std::move(text_input_manager_ptr));
   EXPECT_CALL(*text_input_manager, GetComposingString())
       .WillRepeatedly(
           Return(std::optional<std::u16string>(std::u16string(u"nihao"))));
@@ -55,19 +55,19 @@ TEST(MockWin32Window, OnImeCompositionCompose) {
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"`}"), 0)).Times(0);
   EXPECT_CALL(window, OnComposeCommit()).Times(0);
   ON_CALL(window, OnImeComposition)
-      .WillByDefault(Invoke(&window, &MockWin32Window::CallOnImeComposition));
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
   // Send an IME_COMPOSITION event that contains just the composition string.
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
 }
 
-TEST(MockWin32Window, OnImeCompositionResult) {
+TEST(MockWindow, OnImeCompositionResult) {
   MockTextInputManagerWin32* text_input_manager =
       new MockTextInputManagerWin32();
   std::unique_ptr<TextInputManagerWin32> text_input_manager_ptr(
       text_input_manager);
-  MockWin32Window window(std::move(text_input_manager_ptr));
+  MockWindow window(std::move(text_input_manager_ptr));
   EXPECT_CALL(*text_input_manager, GetComposingString())
       .WillRepeatedly(
           Return(std::optional<std::u16string>(std::u16string(u"nihao"))));
@@ -81,19 +81,19 @@ TEST(MockWin32Window, OnImeCompositionResult) {
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"`}"), 0)).Times(1);
   EXPECT_CALL(window, OnComposeCommit()).Times(1);
   ON_CALL(window, OnImeComposition)
-      .WillByDefault(Invoke(&window, &MockWin32Window::CallOnImeComposition));
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
   // Send an IME_COMPOSITION event that contains just the result string.
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
 }
 
-TEST(MockWin32Window, OnImeCompositionResultAndCompose) {
+TEST(MockWindow, OnImeCompositionResultAndCompose) {
   MockTextInputManagerWin32* text_input_manager =
       new MockTextInputManagerWin32();
   std::unique_ptr<TextInputManagerWin32> text_input_manager_ptr(
       text_input_manager);
-  MockWin32Window window(std::move(text_input_manager_ptr));
+  MockWindow window(std::move(text_input_manager_ptr));
 
   // This situation is that Google Japanese Input finished composing "今日" in
   // "今日は" but is still composing "は".
@@ -117,7 +117,7 @@ TEST(MockWin32Window, OnImeCompositionResultAndCompose) {
       .WillRepeatedly(Return((int)0));
 
   ON_CALL(window, OnImeComposition)
-      .WillByDefault(Invoke(&window, &MockWin32Window::CallOnImeComposition));
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
   // send an IME_COMPOSITION event that contains both the result string and the
@@ -126,16 +126,16 @@ TEST(MockWin32Window, OnImeCompositionResultAndCompose) {
                              GCS_COMPSTR | GCS_RESULTSTR);
 }
 
-TEST(MockWin32Window, OnImeCompositionClearChange) {
+TEST(MockWindow, OnImeCompositionClearChange) {
   MockTextInputManagerWin32* text_input_manager =
       new MockTextInputManagerWin32();
   std::unique_ptr<TextInputManagerWin32> text_input_manager_ptr(
       text_input_manager);
-  MockWin32Window window(std::move(text_input_manager_ptr));
+  MockWindow window(std::move(text_input_manager_ptr));
   EXPECT_CALL(window, OnComposeChange(std::u16string(u""), 0)).Times(1);
   EXPECT_CALL(window, OnComposeCommit()).Times(1);
   ON_CALL(window, OnImeComposition)
-      .WillByDefault(Invoke(&window, &MockWin32Window::CallOnImeComposition));
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
   // send an IME_COMPOSITION event that contains both the result string and the
@@ -143,8 +143,8 @@ TEST(MockWin32Window, OnImeCompositionClearChange) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, 0);
 }
 
-TEST(MockWin32Window, HorizontalScroll) {
-  MockWin32Window window;
+TEST(MockWindow, HorizontalScroll) {
+  MockWindow window;
   const int scroll_amount = 10;
   // Vertical scroll should be passed along, adjusted for scroll tick size.
   EXPECT_CALL(window, OnScroll(scroll_amount / 120.0, 0,
@@ -154,8 +154,8 @@ TEST(MockWin32Window, HorizontalScroll) {
   window.InjectWindowMessage(WM_MOUSEHWHEEL, MAKEWPARAM(0, scroll_amount), 0);
 }
 
-TEST(MockWin32Window, MouseLeave) {
-  MockWin32Window window;
+TEST(MockWindow, MouseLeave) {
+  MockWindow window;
   const double mouse_x = 10.0;
   const double mouse_y = 20.0;
 
@@ -170,40 +170,40 @@ TEST(MockWin32Window, MouseLeave) {
   window.InjectWindowMessage(WM_MOUSELEAVE, 0, 0);
 }
 
-TEST(MockWin32Window, KeyDown) {
-  MockWin32Window window;
+TEST(MockWindow, KeyDown) {
+  MockWindow window;
   EXPECT_CALL(window, OnKey(_, _, _, _, _, _, _)).Times(1);
   LPARAM lparam = CreateKeyEventLparam(42, false, false);
   // send a "Shift" key down event.
   window.InjectWindowMessage(WM_KEYDOWN, 16, lparam);
 }
 
-TEST(MockWin32Window, KeyUp) {
-  MockWin32Window window;
+TEST(MockWindow, KeyUp) {
+  MockWindow window;
   EXPECT_CALL(window, OnKey(_, _, _, _, _, _, _)).Times(1);
   LPARAM lparam = CreateKeyEventLparam(42, false, true);
   // send a "Shift" key up event.
   window.InjectWindowMessage(WM_KEYUP, 16, lparam);
 }
 
-TEST(MockWin32Window, SysKeyDown) {
-  MockWin32Window window;
+TEST(MockWindow, SysKeyDown) {
+  MockWindow window;
   EXPECT_CALL(window, OnKey(_, _, _, _, _, _, _)).Times(1);
   LPARAM lparam = CreateKeyEventLparam(42, false, false);
   // send a "Shift" key down event.
   window.InjectWindowMessage(WM_SYSKEYDOWN, 16, lparam);
 }
 
-TEST(MockWin32Window, SysKeyUp) {
-  MockWin32Window window;
+TEST(MockWindow, SysKeyUp) {
+  MockWindow window;
   EXPECT_CALL(window, OnKey(_, _, _, _, _, _, _)).Times(1);
   LPARAM lparam = CreateKeyEventLparam(42, false, true);
   // send a "Shift" key up event.
   window.InjectWindowMessage(WM_SYSKEYUP, 16, lparam);
 }
 
-TEST(MockWin32Window, KeyDownPrintable) {
-  MockWin32Window window;
+TEST(MockWindow, KeyDownPrintable) {
+  MockWindow window;
   LPARAM lparam = CreateKeyEventLparam(30, false, false);
 
   auto respond_false = [](int key, int scancode, int action, char32_t character,
@@ -220,8 +220,8 @@ TEST(MockWin32Window, KeyDownPrintable) {
   window.InjectMessageList(2, messages);
 }
 
-TEST(MockWin32Window, KeyDownWithCtrl) {
-  MockWin32Window window;
+TEST(MockWindow, KeyDownWithCtrl) {
+  MockWindow window;
 
   // Simulate CONTROL pressed
   BYTE keyboard_state[256];
@@ -242,8 +242,8 @@ TEST(MockWin32Window, KeyDownWithCtrl) {
   SetKeyboardState(keyboard_state);
 }
 
-TEST(MockWin32Window, KeyDownWithCtrlToggled) {
-  MockWin32Window window;
+TEST(MockWindow, KeyDownWithCtrlToggled) {
+  MockWindow window;
 
   auto respond_false = [](int key, int scancode, int action, char32_t character,
                           bool extended, bool was_down,
@@ -273,8 +273,8 @@ TEST(MockWin32Window, KeyDownWithCtrlToggled) {
   SetKeyboardState(keyboard_state);
 }
 
-TEST(MockWin32Window, Paint) {
-  MockWin32Window window;
+TEST(MockWindow, Paint) {
+  MockWindow window;
   EXPECT_CALL(window, OnPaint()).Times(1);
   window.InjectWindowMessage(WM_PAINT, 0, 0);
 }

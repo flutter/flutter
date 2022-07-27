@@ -5,8 +5,8 @@
 #include "flutter/fml/logging.h"
 
 #include "flutter/shell/platform/windows/direct_manipulation.h"
+#include "flutter/shell/platform/windows/window.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
-#include "flutter/shell/platform/windows/window_win32.h"
 
 #define RETURN_IF_FAILED(operation)            \
   if (FAILED(operation)) {                     \
@@ -128,7 +128,7 @@ ULONG STDMETHODCALLTYPE DirectManipulationEventHandler::Release() {
   return 0;
 }
 
-DirectManipulationOwner::DirectManipulationOwner(WindowWin32* window)
+DirectManipulationOwner::DirectManipulationOwner(Window* window)
     : window_(window) {}
 
 int DirectManipulationOwner::Init(unsigned int width, unsigned int height) {

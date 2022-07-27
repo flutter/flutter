@@ -8,22 +8,22 @@
 #include <windowsx.h>
 
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
-#include "flutter/shell/platform/windows/window_win32.h"
+#include "flutter/shell/platform/windows/window.h"
 #include "gmock/gmock.h"
 
 namespace flutter {
 namespace testing {
 
-/// Mock for the |WindowWin32| base class.
-class MockWin32Window : public WindowWin32 {
+/// Mock for the |Window| base class.
+class MockWindow : public Window {
  public:
-  MockWin32Window();
-  MockWin32Window(std::unique_ptr<TextInputManagerWin32> text_input_manager);
-  virtual ~MockWin32Window();
+  MockWindow();
+  MockWindow(std::unique_ptr<TextInputManagerWin32> text_input_manager);
+  virtual ~MockWindow();
 
   // Prevent copying.
-  MockWin32Window(MockWin32Window const&) = delete;
-  MockWin32Window& operator=(MockWin32Window const&) = delete;
+  MockWindow(MockWindow const&) = delete;
+  MockWindow& operator=(MockWindow const&) = delete;
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi();
