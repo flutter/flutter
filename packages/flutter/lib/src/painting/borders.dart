@@ -21,6 +21,31 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
+/// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
+/// When set to [inside], the stroke is drawn completely inside the widget.
+/// For [center] and [outside], a property such as [Container.clipBehavior]
+/// can be used in an outside widget to clip it.
+/// If [Container.decoration] has a border, the container may incorporate
+/// [BorderSide.width] as additional padding:
+/// - [inside] provides padding with full [BorderSide.width].
+/// - [center] provides padding with half [BorderSide.width].
+/// - [outside] provides zero padding, as stroke is drawn entirely outside.
+@immutable
+class StrokeAlign {
+  /// Acts as a shortcut.
+  const StrokeAlign();
+
+  /// The border is drawn on the inside of the border path.
+  static const double inside = -1.0;
+
+  /// The border is drawn on the center of the border path, with half of the
+  /// [BorderSide.width] on the inside, and the other half on the outside of the path.
+  static const double center = 0.0;
+
+  /// The border is drawn on the outside of the border path.
+  static const double outside = 1.0;
+}
+
 /// A side of a border of a box.
 ///
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
@@ -575,9 +600,7 @@ abstract class OutlinedBorder extends ShapeBorder {
   const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
 
   @override
-  EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.strokeInset);
-  }
+  EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.strokeInset);
 
   /// The border outline's color and weight.
   ///

@@ -46,11 +46,6 @@ class CircleBorder extends OutlinedBorder {
   final double eccentricity;
 
   @override
-  EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.strokeInset);
-  }
-
-  @override
   ShapeBorder scale(double t) => CircleBorder(side: side.scale(t), eccentricity: eccentricity);
 
   @override

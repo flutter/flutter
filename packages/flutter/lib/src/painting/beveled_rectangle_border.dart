@@ -41,11 +41,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
   final BorderRadiusGeometry borderRadius;
 
   @override
-  EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.strokeInset);
-  }
-
-  @override
   ShapeBorder scale(double t) {
     return BeveledRectangleBorder(
       side: side.scale(t),
