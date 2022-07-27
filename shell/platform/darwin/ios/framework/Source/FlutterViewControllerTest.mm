@@ -1135,4 +1135,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertTrue(interval_micros / 1000 < tolerance_millis,
                 @"PointerData.time_stamp should be equal to NSProcessInfo.systemUptime");
 }
+
+- (void)testSplashScreenViewCanSetNil {
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithProject:nil nibName:nil bundle:nil];
+  [flutterViewController setSplashScreenView:nil];
+}
+
 @end
