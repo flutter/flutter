@@ -498,11 +498,11 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
 /// [CupertinoTextField].
 ///
 /// Widgets that are wrapped with a `TextFieldTapRegion` are considered to be
-/// part of a text field, and so when the user taps on them, the currently
-/// focused text field won't be unfocused by default. This allows controls like
-/// spinners, copy buttons, and formatting buttons to be attached to a text
-/// field without causing the text field to lose focus when they are interacted
-/// with.
+/// part of a text field for purposes of unfocus behavior. So, when the user
+/// taps on them, the currently focused text field won't be unfocused by
+/// default. This allows controls like spinners, copy buttons, and formatting
+/// buttons to be associated with a text field without causing the text field to
+/// lose focus when they are interacted with.
 ///
 /// See also:
 ///

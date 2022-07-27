@@ -230,8 +230,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         _wrapActiveItem(
           context,
           Expanded(
-            child: TapRegion(
-              groupId: EditableText,
+            // Make tab items part of the EditableText tap region so that
+            // switching tabs doesn't unfocus text fields.
+            child: TextFieldTapRegion(
               child: Semantics(
                 selected: active,
                 hint: localizations.tabSemanticsLabel(
