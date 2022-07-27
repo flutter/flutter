@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
+import 'build_system/targets/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -479,6 +480,7 @@ class DevFS {
   final String fsName;
   final Directory? rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
+  final Set<String> shaderPathsToEvict = <String>{};
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   bool hasSetAssetDirectory = false;
@@ -574,6 +576,7 @@ class DevFS {
     required List<Uri> invalidatedFiles,
     required PackageConfig packageConfig,
     required String dillOutputPath,
+    required DevelopmentShaderCompiler shaderCompiler,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -591,6 +594,8 @@ class DevFS {
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
+    final List<Future<void>> pendingShaderCompiles = <Future<void>>[];
+    bool shaderCompilationFailed = false;
     int syncedBytes = 0;
     if (fullRestart) {
       generator.reset();
@@ -634,14 +639,32 @@ class DevFS {
         if (!content.isModified || bundleFirstUpload) {
           return;
         }
+        // Modified shaders must be recompiled per-target platform.
         final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
-        dirtyEntries[deviceUri] = content;
-        syncedBytes += content.size;
-        if (archivePath != null && !bundleFirstUpload) {
-          assetPathsToEvict.add(archivePath);
+
+        if (bundle.entryKinds[archivePath] == AssetKind.shader) {
+          final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
+          pendingShaderCompiles.add(pending);
+          pending.then((DevFSContent? content) {
+            if (content == null) {
+              shaderCompilationFailed = true;
+              return;
+            }
+            dirtyEntries[deviceUri] = content;
+            syncedBytes += content.size;
+            if (archivePath != null && !bundleFirstUpload) {
+              shaderPathsToEvict.add(archivePath);
+            }
+          });
+        } else {
+          dirtyEntries[deviceUri] = content;
+          syncedBytes += content.size;
+          if (archivePath != null && !bundleFirstUpload) {
+            assetPathsToEvict.add(archivePath);
+          }
         }
       });
 
@@ -672,6 +695,12 @@ class DevFS {
     }
     _logger.printTrace('Updating files.');
     final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
+
+    await Future.wait(pendingShaderCompiles);
+    if (shaderCompilationFailed) {
+      return UpdateFSReport();
+    }
+
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }

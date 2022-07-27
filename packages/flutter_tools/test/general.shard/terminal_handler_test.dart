@@ -12,8 +12,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -1215,7 +1217,12 @@ void main() {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final ProcessInfo processInfo = ProcessInfo.test(fs);
     final FakeResidentRunner residentRunner = FakeResidentRunner(
-      FlutterDevice(FakeDevice(), buildInfo: BuildInfo.debug, generator: FakeResidentCompiler()),
+      FlutterDevice(
+        FakeDevice(),
+        buildInfo: BuildInfo.debug,
+        generator: FakeResidentCompiler(),
+        developmentShaderCompiler: const FakeShaderCompiler(),
+      ),
       testLogger,
       fs,
     );
@@ -1391,6 +1398,7 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
     FakeDevice()..supportsScreenshot = supportsScreenshot,
     buildInfo: BuildInfo(buildMode, '', treeShakeIcons: false),
     generator: FakeResidentCompiler(),
+    developmentShaderCompiler: const FakeShaderCompiler(),
     targetPlatform: web
       ? TargetPlatform.web_javascript
       : TargetPlatform.android_arm,
@@ -1498,4 +1506,16 @@ class _TestSignals implements Signals {
   @override
   Stream<Object> get errors => _errors.stream;
   final StreamController<Object> _errors = StreamController<Object>();
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
 }

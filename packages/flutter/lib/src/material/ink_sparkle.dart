@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -431,7 +430,6 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
 
   const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
 
-  // TODO(clocksmith): Update this once shaders are precompiled.
   static void compileShaderIfNeccessary() {
     if (!_initCalled) {
       FragmentShaderManager.inkSparkle().then((FragmentShaderManager manager) {
@@ -440,6 +438,7 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
       _initCalled = true;
     }
   }
+
   static bool _initCalled = false;
   static FragmentShaderManager? _shaderManager;
 

@@ -184,6 +184,7 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
+                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
               );
               break;
           }
