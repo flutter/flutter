@@ -299,7 +299,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Multiple widgets used the same key in ${widget.runtimeType}.'),
         ErrorDescription(
-          'The key ${duplicateKey.key} was used by multiple widgets. The parents of those widgets were:\n'
+          'The key ${duplicateKey.key} was used by multiple widgets. The offending widgets were:\n'
         ),
         for (final Element element in duplicateKey.value) ErrorDescription('  - $element\n'),
         ErrorDescription(
