@@ -14,6 +14,10 @@
 @interface FlutterPlatformPluginTest : XCTestCase
 @end
 
+@interface FlutterPlatformPlugin ()
+- (BOOL)isLiveTextInputAvailable;
+@end
+
 @implementation FlutterPlatformPluginTest
 
 - (void)testClipboardHasCorrectStrings {
@@ -109,6 +113,26 @@
   [plugin handleMethodCall:methodCallSet result:resultSet];
   [self waitForExpectationsWithTimeout:1 handler:nil];
   OCMVerify([navigationControllerMock popViewControllerAnimated:YES]);
+}
+
+- (void)testWhetherDeviceHasLiveTextInputInvokeCorrectly {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
+  XCTestExpectation* invokeExpectation =
+      [self expectationWithDescription:@"isLiveTextInputAvailableInvoke"];
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()];
+  FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"LiveText.isLiveTextInputAvailable"
+                                        arguments:nil];
+  FlutterResult result = ^(id result) {
+    OCMVerify([mockPlugin isLiveTextInputAvailable]);
+    [invokeExpectation fulfill];
+  };
+  [mockPlugin handleMethodCall:methodCall result:result];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
 @end
