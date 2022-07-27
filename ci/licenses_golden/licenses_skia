@@ -1,4 +1,4 @@
-Signature: ea3edbf2b0a3bc031d80deabf480a65c
+Signature: 9ed1dacea4fcd323ec0be0a2e1e9f9f3
 
 UNUSED LICENSES:
 
@@ -5647,6 +5647,7 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetComputeShaderMainParams
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsTrivialExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/text/StrikeForGPU.cpp
