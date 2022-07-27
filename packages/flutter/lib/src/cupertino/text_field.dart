@@ -1256,8 +1256,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       context,
     ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
-    // Ensure configuration uses Cupertino text style for misspelled words unless
-    // a custom style is specified.
+    // Set configuration as disabled if not otherwise specified. If specified,
+    // ensure that configuration uses Cupertino text style for misspelled words
+    // unless a custom style is specified.
     final SpellCheckConfiguration spellCheckConfiguration =
       widget.spellCheckConfiguration != null &&
       widget.spellCheckConfiguration != SpellCheckConfiguration.disabled()

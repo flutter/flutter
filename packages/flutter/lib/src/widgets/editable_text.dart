@@ -2826,6 +2826,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, text);
 
       if (spellCheckResults == null) {
+        // The request to fetch spell check suggestions was canceled.
         return;
       }
 
