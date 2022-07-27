@@ -124,16 +124,16 @@ void main() {
   });
 
   test('BorderSide - lerp with strokeAlign', () {
-    const BorderSide side0 = BorderSide(width: 2.0, strokeAlign: StrokeAlign.center);
-    const BorderSide side1 = BorderSide(width: 2.0, strokeAlign: StrokeAlign.outside);
-    expect(BorderSide.lerp(side0, side1, 0), const BorderSide(width: 2.0, strokeAlign: StrokeAlign.center));
-    expect(BorderSide.lerp(side0, side1, 0.5), const BorderSide(width: 2.0, strokeAlign: 0.5));
-    expect(BorderSide.lerp(side0, side1, 1), const BorderSide(width: 2.0, strokeAlign: StrokeAlign.outside));
+    const BorderSide side0 = BorderSide(width: 2.0);
+    const BorderSide side1 = BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignOutside);
+    expect(BorderSide.lerp(side0, side1, 0), const BorderSide(width: 2.0));
+    expect(BorderSide.lerp(side0, side1, 0.5), const BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignCenter));
+    expect(BorderSide.lerp(side0, side1, 1), const BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignOutside));
 
     const BorderSide side2 = BorderSide(width: 2.0);
-    const BorderSide side3 = BorderSide(width: 2.0, strokeAlign: StrokeAlign.center);
+    const BorderSide side3 = BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignCenter);
     expect(BorderSide.lerp(side2, side3, 0), const BorderSide(width: 2.0));
     expect(BorderSide.lerp(side2, side3, 0.5), const BorderSide(width: 2.0, strokeAlign: -0.5));
-    expect(BorderSide.lerp(side2, side3, 1), const BorderSide(width: 2.0, strokeAlign: StrokeAlign.center));
+    expect(BorderSide.lerp(side2, side3, 1), const BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignCenter));
   });
 }

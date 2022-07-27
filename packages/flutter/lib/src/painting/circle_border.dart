@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'borders.dart';
+import 'edge_insets.dart';
 
 /// A border that fits a circle within the available space.
 ///
@@ -45,6 +46,11 @@ class CircleBorder extends OutlinedBorder {
   final double eccentricity;
 
   @override
+  EdgeInsetsGeometry get dimensions {
+    return EdgeInsets.all(side.strokeInset);
+  }
+
+  @override
   ShapeBorder scale(double t) => CircleBorder(side: side.scale(t), eccentricity: eccentricity);
 
   @override
@@ -71,14 +77,12 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    final double delta = BorderSide.lerpStrokeAlignDecreasing(side);
-    final Rect adjustedRect = _adjustRect(rect).deflate(delta);
-    return Path()..addOval(adjustedRect);
+    return Path()..addOval(_adjustRect(rect).deflate(side.strokeInset));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    return Path()..addOval(_adjustRect(rect));
+    return Path()..addOval(_adjustRect(rect).inflate(side.strokeOutset));
   }
 
   @override
@@ -94,11 +98,9 @@ class CircleBorder extends OutlinedBorder {
       case BorderStyle.solid:
         if (eccentricity != 0.0) {
           final Rect borderRect = _adjustRect(rect);
-          final Rect adjustedRect = BorderSide.rectLerp(borderRect, side);
-          canvas.drawOval(adjustedRect, side.toPaint());
+          canvas.drawOval(borderRect.inflate(side.strokeOffset), side.toPaint());
         } else {
-          final double radius = BorderSide.radiusLerp(rect, side);
-          canvas.drawCircle(rect.center, radius, side.toPaint());
+          canvas.drawCircle(rect.center, (rect.shortestSide + side.strokeOffset) / 2, side.toPaint());
         }
     }
   }

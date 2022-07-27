@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
+import 'edge_insets.dart';
 
 /// A rectangular border with flattened or "beveled" corners.
 ///
@@ -39,6 +39,11 @@ class BeveledRectangleBorder extends OutlinedBorder {
   /// Negative radius values are clamped to 0.0 by [getInnerPath] and
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
+
+  @override
+  EdgeInsetsGeometry get dimensions {
+    return EdgeInsets.all(side.strokeInset);
+  }
 
   @override
   ShapeBorder scale(double t) {
@@ -113,14 +118,12 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-    final RRect adjustedRect = borderRect.deflate(BorderSide.lerpStrokeAlignDecreasing(side) / 2);
-    return _getPath(adjustedRect);
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect.deflate(side.strokeInset)));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOutset));
   }
 
   @override
@@ -132,11 +135,8 @@ class BeveledRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-        final RRect adjustedRect = borderRect.inflate(side.width * (1 + side.strokeAlign) / 2);
-        final Path path = _getPath(adjustedRect)
-          ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
-        canvas.drawPath(path, side.toPaint());
+        final Path path = _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOffset / 2));
+       canvas.drawPath(path, side.toPaint());
         break;
     }
   }

@@ -97,28 +97,28 @@ void main() {
 
     expect(
       ShapeBorder.lerp(r, c, 0.1).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)',
+      equalsIgnoringHashCodes('RoundedRectangleBorder(BorderSide#00000(width: 0.0, strokeAlign: -1.0), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)'),
     );
     expect(
       ShapeBorder.lerp(r, c, 0.2).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)',
+      equalsIgnoringHashCodes('RoundedRectangleBorder(BorderSide#00000(width: 0.0, strokeAlign: -1.0), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)'),
     );
     expect(
       ShapeBorder.lerp(ShapeBorder.lerp(r, c, 0.1), ShapeBorder.lerp(r, c, 0.9), 0.9).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)',
+      equalsIgnoringHashCodes('RoundedRectangleBorder(BorderSide#00000(width: 0.0, strokeAlign: -1.0), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)'),
     );
 
     expect(
       ShapeBorder.lerp(c, r, 0.9).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)',
+      equalsIgnoringHashCodes('RoundedRectangleBorder(BorderSide#00000(width: 0.0, strokeAlign: -1.0), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)'),
     );
     expect(
       ShapeBorder.lerp(c, r, 0.8).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)',
+      equalsIgnoringHashCodes('RoundedRectangleBorder(BorderSide#00000(width: 0.0, strokeAlign: -1.0), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)'),
     );
     expect(
       ShapeBorder.lerp(ShapeBorder.lerp(r, c, 0.9), ShapeBorder.lerp(r, c, 0.1), 0.1).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)',
+      equalsIgnoringHashCodes('RoundedRectangleBorder(BorderSide#00000(width: 0.0, strokeAlign: -1.0), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)'),
     );
 
     expect(ShapeBorder.lerp(r, c, 0.1), ShapeBorder.lerp(r, c, 0.1));
@@ -135,24 +135,24 @@ void main() {
     const RoundedRectangleBorder insideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10));
     expect(insideRoundedRectangleBorder.dimensions, const EdgeInsets.all(10));
 
-    const RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
+    const RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter));
     expect(centerRoundedRectangleBorder.dimensions, const EdgeInsets.all(5));
 
-    const RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
+    const RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside));
     expect(outsideRoundedRectangleBorder.dimensions, EdgeInsets.zero);
 
     const CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
     expect(insideCircleBorder.dimensions, const EdgeInsets.all(10));
 
-    const CircleBorder centerCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
+    const CircleBorder centerCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter));
     expect(centerCircleBorder.dimensions, const EdgeInsets.all(5));
 
-    const CircleBorder outsideCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
+    const CircleBorder outsideCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside));
     expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
   });
 
   test('RoundedRectangleBorder when borderRadius is 0', () {
-    const RoundedRectangleBorder centerBorder = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center));
+    const RoundedRectangleBorder centerBorder = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignCenter));
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
     expect(
       (Canvas canvas) => centerBorder.paint(canvas, rect),
@@ -163,7 +163,7 @@ void main() {
         ),
     );
 
-    const RoundedRectangleBorder outsideBorder = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.outside));
+    const RoundedRectangleBorder outsideBorder = RoundedRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignOutside));
     expect(
       (Canvas canvas) => outsideBorder.paint(canvas, rect),
       paints
@@ -176,8 +176,8 @@ void main() {
 
   test('RoundedRectangleBorder.lerp with different StrokeAlign', () {
     const RoundedRectangleBorder rInside = RoundedRectangleBorder(side: BorderSide(width: 10.0));
-    const RoundedRectangleBorder rOutside = RoundedRectangleBorder(side: BorderSide(width: 20.0, strokeAlign: StrokeAlign.outside));
-    const RoundedRectangleBorder rCenter = RoundedRectangleBorder(side: BorderSide(width: 15.0, strokeAlign: StrokeAlign.center));
+    const RoundedRectangleBorder rOutside = RoundedRectangleBorder(side: BorderSide(width: 20.0, strokeAlign: BorderSide.strokeAlignOutside));
+    const RoundedRectangleBorder rCenter = RoundedRectangleBorder(side: BorderSide(width: 15.0, strokeAlign: BorderSide.strokeAlignCenter));
     expect(ShapeBorder.lerp(rInside, rOutside, 0.5), rCenter);
   });
 }

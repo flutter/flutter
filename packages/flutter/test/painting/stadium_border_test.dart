@@ -48,8 +48,8 @@ void main() {
   });
 
   test('StadiumBorder with StrokeAlign', () {
-    const StadiumBorder center = StadiumBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center));
-    const StadiumBorder outside = StadiumBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.outside));
+    const StadiumBorder center = StadiumBorder(side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignCenter));
+    const StadiumBorder outside = StadiumBorder(side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignOutside));
     expect(center.dimensions, const EdgeInsets.all(5.0));
     expect(outside.dimensions, EdgeInsets.zero);
 

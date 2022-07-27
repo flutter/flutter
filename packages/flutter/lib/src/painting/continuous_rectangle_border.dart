@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
+import 'edge_insets.dart';
 
 /// A rectangular border with smooth continuous transitions between the straight
 /// sides and the rounded corners.
@@ -44,6 +45,9 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   /// Negative radius values are clamped to 0.0 by [getInnerPath] and
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.strokeInset);
 
   @override
   ShapeBorder scale(double t) {
@@ -119,12 +123,13 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect.deflate(side.strokeInset)));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
+    // Have to deflate first to get the right radius when we inflate again.
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect.deflate(side.width)).inflate(side.width + side.strokeOutset));
   }
 
   @override
@@ -144,8 +149,8 @@ class ContinuousRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection);
-        final Paint paint = side.toPaint();
+        final Path path = _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOffset / 2));
+        final Paint paint = side.toPaint()..strokeJoin = StrokeJoin.round;
         canvas.drawPath(path, paint);
         break;
     }

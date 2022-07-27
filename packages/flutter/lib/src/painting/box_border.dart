@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show lerpDouble;
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -222,22 +220,21 @@ abstract class BoxBorder extends ShapeBorder {
       canvas.drawRRect(borderRadius.toRRect(rect), paint);
     } else {
       final RRect borderRect = borderRadius.toRRect(rect);
-      final RRect inner = borderRect.deflate(ui.lerpDouble(width, 0, side.strokeAlign)!);
-      final RRect outer = borderRect.inflate(ui.lerpDouble(0, width, side.strokeAlign)!);
+      final RRect inner = borderRect.deflate(side.strokeInset);
+      final RRect outer = borderRect.inflate(side.strokeOutset);
       canvas.drawDRRect(outer, inner, paint);
     }
   }
 
   static void _paintUniformBorderWithCircle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    final double radius = BorderSide.radiusLerp(rect, side);
+    final double radius = (rect.shortestSide + side.strokeOffset) / 2;
     canvas.drawCircle(rect.center, radius, side.toPaint());
   }
 
   static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    final Rect rectToBeDrawn = BorderSide.rectLerp(rect, side);
-    canvas.drawRect(rectToBeDrawn, side.toPaint());
+    canvas.drawRect(rect.inflate(side.strokeOffset), side.toPaint());
   }
 }
 
@@ -393,13 +390,10 @@ class Border extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    if (isUniform) {
-      // side.strokeAlign == StrokeAlign.inside => 0 -> side.width
-      // side.strokeAlign == StrokeAlign.center => 0.5 -> side.width / 2
-      // side.strokeAlign == StrokeAlign.outside => 1 -> 0
-      return EdgeInsets.all(ui.lerpDouble(top.width, 0, top.strokeAlign)!);
+    if (_widthIsUniform) {
+      return EdgeInsets.all(top.strokeInset);
     }
-    return EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
+    return EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset);
   }
 
   @override
@@ -701,11 +695,11 @@ class BorderDirectional extends BoxBorder {
   EdgeInsetsGeometry get dimensions {
     if (isUniform) {
       // side.strokeAlign == StrokeAlign.inside => 0 -> side.width
-      // side.strokeAlign == StrokeAlign.center => 0.5 -> side.width / 2
-      // side.strokeAlign == StrokeAlign.outside => 1 -> 0
-      return EdgeInsets.all(ui.lerpDouble(top.width, 0, top.strokeAlign)!);
+      // side.strokeAlign == BorderSide.strokeAlignCenter => 0.5 -> side.width / 2
+      // side.strokeAlign == BorderSide.strokeAlignOutside => 1 -> 0
+      return EdgeInsets.all(top.strokeInset);
     }
-    return EdgeInsetsDirectional.fromSTEB(start.width, top.width, end.width, bottom.width);
+    return EdgeInsetsDirectional.fromSTEB(start.strokeInset, top.strokeInset, end.strokeInset, bottom.strokeInset);
   }
 
   @override
