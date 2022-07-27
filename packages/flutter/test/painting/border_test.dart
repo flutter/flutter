@@ -262,7 +262,7 @@ void main() {
     try {
       final TestCanvas canvas = TestCanvas();
       // Border.all supports all StrokeAlign values.
-      // Border() supports StrokeAlign.inside only.
+      // Border() supports [BorderSide.strokeAlignInside] only.
       const Border(
         left: BorderSide(strokeAlign: StrokeAlign.center),
         right: BorderSide(strokeAlign: StrokeAlign.outside),

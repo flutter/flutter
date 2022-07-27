@@ -30,16 +30,20 @@ enum BorderStyle {
 /// - [inside] provides padding with full [BorderSide.width].
 /// - [center] provides padding with half [BorderSide.width].
 /// - [outside] provides zero padding, as stroke is drawn entirely outside.
-enum StrokeAlign {
+@immutable
+class StrokeAlign {
+  /// Acts as a shortcut.
+  const StrokeAlign();
+
   /// The border is drawn on the inside of the border path.
-  inside,
+  static const double inside = -1.0;
 
   /// The border is drawn on the center of the border path, with half of the
   /// [BorderSide.width] on the inside, and the other half on the outside of the path.
-  center,
+  static const double center = 0.0;
 
   /// The border is drawn on the outside of the border path.
-  outside,
+  static const double outside = 1.0;
 }
 
 /// A side of a border of a box.
@@ -87,11 +91,12 @@ class BorderSide {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
-    this.strokeAlign = StrokeAlign.inside,
+    this.strokeAlign = strokeAlignInside,
   }) : assert(color != null),
        assert(width != null),
        assert(width >= 0.0),
-       assert(style != null);
+       assert(style != null),
+       assert(strokeAlign != null);
 
   /// Creates a [BorderSide] that represents the addition of the two given
   /// [BorderSide]s.
@@ -151,8 +156,26 @@ class BorderSide {
   /// A hairline black border that is not rendered.
   static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
 
-  /// The direction of where the border will be drawn relative to the container.
-  final StrokeAlign strokeAlign;
+  /// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
+  /// When set to [inside], the stroke is drawn completely inside the widget.
+  /// For [center] and [outside], a property such as [Container.clipBehavior]
+  /// can be used in an outside widget to clip it.
+  /// If [Container.decoration] has a border, the container may incorporate
+  /// [BorderSide.width] as additional padding:
+  /// - [strokeAlignInside] provides padding with full [BorderSide.width].
+  /// - [strokeAlignCenter] provides padding with half [BorderSide.width].
+  /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
+  final double strokeAlign;
+
+  /// The border is drawn on the inside of the border path.
+  static const double strokeAlignInside = -1.0;
+
+  /// The border is drawn on the center of the border path, with half of the
+  /// [BorderSide.width] on the inside, and the other half on the outside of the path.
+  static const double strokeAlignCenter = 0.0;
+
+  /// The border is drawn on the outside of the border path.
+  static const double strokeAlignOutside = 1.0;
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
@@ -278,13 +301,10 @@ class BorderSide {
         break;
     }
     if (a.strokeAlign != b.strokeAlign) {
-      // When strokeAlign changes, lerp to 0, then from 0 to the target width.
-      // All StrokeAlign values share a common zero width state.
-      final StrokeAlign strokeAlign = t > 0.5 ? b.strokeAlign : a.strokeAlign;
       return BorderSide(
         color: Color.lerp(colorA, colorB, t)!,
-        width: t > 0.5 ? ui.lerpDouble(0, b.width, t * 2 - 1)! : ui.lerpDouble(a.width, 0, t * 2)!,
-        strokeAlign: strokeAlign,
+        width: width,
+        strokeAlign: ui.lerpDouble(a.strokeAlign, b.strokeAlign, t)!,
       );
     }
     return BorderSide(
@@ -293,6 +313,26 @@ class BorderSide {
       strokeAlign: a.strokeAlign, // == b.strokeAlign
     );
   }
+
+  /// Lerp a side contained in a circle.
+  static double radiusLerp(Rect rect, BorderSide side) =>
+      (rect.shortestSide + side.strokeAlign * side.width) / 2;
+
+  /// Lerp a side contained in a [RRect].
+  static RRect rrectLerp(RRect rrect, BorderSide side) =>
+      rrect.inflate(side.width / 2 * side.strokeAlign);
+
+  /// Lerp a side contained in a [Rect].
+  static Rect rectLerp(Rect rect, BorderSide side) =>
+      rect.inflate(side.width / 2 * side.strokeAlign);
+
+  /// Lerp inside. This is used for dimensions and [innerPath],
+  /// 
+  /// Inside == -1 => side.width
+  /// Center == 0 => side.width * 0.5
+  /// Outside == 1 => 0
+  static double lerpStrokeAlignDecreasing(BorderSide side) =>
+      math.max(side.width * (1 - side.strokeAlign), 0);
 
   @override
   bool operator ==(Object other) {
@@ -314,7 +354,7 @@ class BorderSide {
 
   @override
   String toString() {
-    if (strokeAlign == StrokeAlign.inside) {
+    if (strokeAlign == strokeAlignInside) {
       return '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
     }
     return '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $strokeAlign)';
@@ -556,6 +596,11 @@ abstract class OutlinedBorder extends ShapeBorder {
   ///
   /// The value of [side] must not be null.
   const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
+
+  @override
+  EdgeInsetsGeometry get dimensions {
+    return EdgeInsets.all(BorderSide.lerpStrokeAlignDecreasing(side));
+  }
 
   /// The border outline's color and weight.
   ///
