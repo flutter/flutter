@@ -218,7 +218,7 @@ class _TextEditingValueAccumulator {
 ///
 /// Instances of filtered characters found in the new [TextEditingValue]s
 /// will be replaced by the [replacementString] which defaults to the empty
-/// string, and the current [TextEditingValue.selection] and 
+/// string, and the current [TextEditingValue.selection] and
 /// [TextEditingValue.composing] region will be adjusted to account for the
 /// replacement.
 ///
