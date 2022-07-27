@@ -495,7 +495,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// When [handlePointerEvent] is called directly, [pointerEventSource]
   /// is [TestBindingEventSource.device].
   ///
-  /// This default means that pointer events triggered by the [WidgetController]
+  /// This means that pointer events triggered by the [WidgetController] (e.g. via [WidgetController.tap])
   /// will result in actual interactions with the UI, but other pointer events
   /// such as those from physical taps will be delegated to
   /// [deviceEventDispatcher] *instead*. See also
