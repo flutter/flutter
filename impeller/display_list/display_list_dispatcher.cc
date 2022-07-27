@@ -219,7 +219,6 @@ void DisplayListDispatcher::setColorSource(
       paint_.contents = std::move(contents);
       return;
     }
-    case flutter::DlColorSourceType::kImage:
     case flutter::DlColorSourceType::kRadialGradient: {
       const flutter::DlRadialGradientColorSource* radialGradient =
           source->asRadialGradient();
@@ -227,9 +226,15 @@ void DisplayListDispatcher::setColorSource(
       auto contents = std::make_shared<RadialGradientContents>();
       contents->SetCenterAndRadius(ToPoint(radialGradient->center()),
                                    radialGradient->radius());
+      std::vector<Color> colors;
+      for (auto i = 0; i < radialGradient->stop_count(); i++) {
+        colors.emplace_back(ToColor(radialGradient->colors()[i]));
+      }
+      contents->SetColors(std::move(colors));
       paint_.contents = std::move(contents);
       return;
     }
+    case flutter::DlColorSourceType::kImage:
     case flutter::DlColorSourceType::kConicalGradient:
     case flutter::DlColorSourceType::kSweepGradient:
     case flutter::DlColorSourceType::kUnknown:
