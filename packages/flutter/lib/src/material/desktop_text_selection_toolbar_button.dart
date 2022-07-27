@@ -61,7 +61,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
     // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
-    final Color primary = isDark ? Colors.white : Colors.black87;
+    final Color foregroundColor = isDark ? Colors.white : Colors.black87;
 
     return SizedBox(
       width: double.infinity,
@@ -70,7 +70,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
           alignment: Alignment.centerLeft,
           enabledMouseCursor: SystemMouseCursors.basic,
           disabledMouseCursor: SystemMouseCursors.basic,
-          primary: primary,
+          foregroundColor: foregroundColor,
           shape: const RoundedRectangleBorder(),
           minimumSize: const Size(kMinInteractiveDimension, 36.0),
           padding: _kToolbarButtonPadding,

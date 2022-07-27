@@ -2579,6 +2579,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
     _scaffoldMessenger?._unregister(this);
+    _drawerOpened.dispose();
+    _endDrawerOpened.dispose();
     super.dispose();
   }
 
