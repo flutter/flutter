@@ -15,7 +15,7 @@ import 'shader_test_file_utils.dart';
 
 void main() async {
   test('simple shader renders correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram program = await FragmentProgram.fromAsset(
       'functions.frag.iplr',
     );
     final Shader shader = program.shader(
@@ -25,7 +25,7 @@ void main() async {
   });
 
   test('blue-green image renders green', () async {
-    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram program = await FragmentProgram.fromAsset(
       'blue_green_sampler.frag.iplr',
     );
     final Image blueGreenImage = await _createBlueGreenImage();
@@ -39,7 +39,7 @@ void main() async {
   });
 
   test('shader with uniforms renders correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram program = await FragmentProgram.fromAsset(
       'uniforms.frag.iplr',
     );
 
@@ -65,7 +65,7 @@ void main() async {
   });
 
   test('The ink_sparkle shader is accepted', () async {
-    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram program = await FragmentProgram.fromAsset(
       'ink_sparkle.frag.iplr',
     );
     final Shader shader = program.shader(
@@ -79,7 +79,7 @@ void main() async {
   });
 
   test('Uniforms are sorted correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram program = await FragmentProgram.fromAsset(
       'uniforms_sorted.frag.iplr',
     );
 
@@ -97,7 +97,7 @@ void main() async {
   test('fromAsset throws an exception on invalid assetKey', () async {
     bool throws = false;
     try {
-      final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+      await FragmentProgram.fromAsset(
         '<invalid>',
       );
     } catch (e) {
@@ -109,7 +109,7 @@ void main() async {
   test('fromAsset throws an exception on invalid data', () async {
     bool throws = false;
     try {
-      final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+      await FragmentProgram.fromAsset(
         'DashInNooglerHat.jpg',
       );
     } catch (e) {
@@ -119,7 +119,7 @@ void main() async {
   });
 
   test('fromAsset accepts a shader with no uniforms', () async {
-    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram program = await FragmentProgram.fromAsset(
       'no_uniforms.frag.iplr',
     );
     final Shader shader = program.shader();
@@ -143,7 +143,7 @@ void main() async {
   _expectIplrShadersRenderGreen(iplrSupportedOpShaders);
 
   test('Equality depends on floatUniforms', () async {
-    final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram program = await FragmentProgram.fromAsset(
       'simple.frag.iplr',
     );
     final Float32List ones = Float32List.fromList(<double>[1]);
@@ -165,10 +165,10 @@ void main() async {
   });
 
   test('Equality depends on data', () async {
-    final FragmentProgram programA = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram programA = await FragmentProgram.fromAsset(
       'simple.frag.iplr',
     );
-    final FragmentProgram programB = await FragmentProgram.fromAssetAsync(
+    final FragmentProgram programB = await FragmentProgram.fromAsset(
       'uniforms.frag.iplr',
     );
     final Shader a = programA.shader();
@@ -242,7 +242,7 @@ Future<Map<String, FragmentProgram>> _loadShaderAssets(
       .where((FileSystemEntity entry) => path.extension(entry.path) == ext),
     (FileSystemEntity entry) async {
       final String key = path.basenameWithoutExtension(entry.path);
-      out[key] = await FragmentProgram.fromAssetAsync(
+      out[key] = await FragmentProgram.fromAsset(
         path.basename(entry.path),
       );
     },
