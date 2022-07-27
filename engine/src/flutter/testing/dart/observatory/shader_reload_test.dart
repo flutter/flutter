@@ -14,12 +14,13 @@ void main() {
   test('simple iplr shader can be re-initialized', () async {
     vms.VmService? vmService;
     try {
-      final FragmentProgram program = await FragmentProgram.fromAssetAsync(
+      final FragmentProgram program = await FragmentProgram.fromAsset(
         'functions.frag.iplr',
       );
       final Shader shader = program.shader(
         floatUniforms: Float32List.fromList(<double>[1]),
       );
+      _use(shader);
 
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
@@ -47,4 +48,8 @@ void main() {
       await vmService?.dispose();
     }
   });
+}
+
+void _use(Shader shader) {
+
 }
