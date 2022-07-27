@@ -1160,7 +1160,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
     fml::MallocMapping mapping = message->releaseData();
     env->CallVoidMethod(java_object.obj(), g_handle_platform_message_method,
                         java_channel.obj(), message_array.obj(), responseId,
-                        mapping.Release());
+                        reinterpret_cast<jlong>(mapping.Release()));
   } else {
     env->CallVoidMethod(java_object.obj(), g_handle_platform_message_method,
                         java_channel.obj(), nullptr, responseId, nullptr);
