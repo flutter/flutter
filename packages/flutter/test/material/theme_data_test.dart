@@ -125,6 +125,20 @@ void main() {
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
+  test('light, dark and fallback constructors support useMaterial3', () {
+    final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
+    expect(lightTheme.useMaterial3, true);
+    expect(lightTheme.typography, Typography.material2021());
+
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+    expect(darkTheme.useMaterial3, true);
+    expect(darkTheme.typography, Typography.material2021());
+
+    final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
+    expect(fallbackTheme.useMaterial3, true);
+    expect(fallbackTheme.typography, Typography.material2021());
+  });
+
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(platform: defaultTargetPlatform);
     switch (defaultTargetPlatform) {
@@ -681,13 +695,13 @@ void main() {
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
       drawerTheme: const DrawerThemeData(),
-      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       listTileTheme: const ListTileThemeData(),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
-      outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(foregroundColor: Colors.blue)),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
@@ -695,7 +709,7 @@ void main() {
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       switchTheme: const SwitchThemeData(),
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
-      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: Colors.red)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),

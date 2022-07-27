@@ -5,16 +5,16 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, PlatformDispatcher, TimingsCallback;
 
-import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
+import 'package:collection/collection.dart' show HeapPriorityQueue, PriorityQueue;
 import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 import 'priority.dart';
 
 export 'dart:developer' show Flow;
-export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback, VoidCallback;
+export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback;
 
 export 'priority.dart' show Priority;
 

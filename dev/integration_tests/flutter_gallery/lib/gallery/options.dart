@@ -177,7 +177,7 @@ class _TextButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return TextButton(
       style: TextButton.styleFrom(
-        primary: theme.colorScheme.onPrimary,
+        foregroundColor: theme.colorScheme.onPrimary,
         textStyle: theme.textTheme.subtitle1,
         padding: EdgeInsets.zero,
       ),

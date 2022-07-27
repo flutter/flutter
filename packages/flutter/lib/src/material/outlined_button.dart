@@ -103,13 +103,13 @@ class OutlinedButton extends ButtonStyleButton {
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [primary], and [onSurface] colors are used to create a
-  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
-  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
-  /// names. Specify a value for [primary] to specify the color of the button's
-  /// text and icons as well as the overlay colors used to indicate the hover,
-  /// focus, and pressed states. Use [onSurface] to specify the button's
-  /// disabled text and icon color.
+  ///
+  /// The [foregroundColor] and [disabledForegroundColor] colors are used
+  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// a derived [ButtonStyle.overlayColor].
+  ///
+  /// The [backgroundColor] and [disabledBackgroundColor] colors are
+  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle.mouseCursor].
@@ -133,9 +133,10 @@ class OutlinedButton extends ButtonStyleButton {
   /// )
   /// ```
   static ButtonStyle styleFrom({
-    Color? primary,
-    Color? onSurface,
+    Color? foregroundColor,
     Color? backgroundColor,
+    Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     double? elevation,
@@ -154,21 +155,38 @@ class OutlinedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    @Deprecated(
+      'Use foregroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? primary,
+    @Deprecated(
+      'Use disabledForegroundColor and disabledForegroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onSurface,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
+    final Color? foreground = foregroundColor ?? primary;
+    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
-      : _OutlinedButtonDefaultForeground(primary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (primary == null)
+      : _OutlinedButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
       ? null
-      : _OutlinedButtonDefaultOverlay(primary);
+      : disabledBackgroundColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(backgroundColor)
+        : _OutlinedButtonDefaultColor(backgroundColor, disabledBackgroundColor);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+      ? null
+      : _OutlinedButtonDefaultOverlay(foreground);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _OutlinedButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
-      foregroundColor: foregroundColor,
-      backgroundColor: ButtonStyleButton.allOrNull<Color>(backgroundColor),
+      foregroundColor: foregroundColorProp,
+      backgroundColor: backgroundColorProp,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
@@ -288,11 +306,12 @@ class OutlinedButton extends ButtonStyleButton {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Theme.of(context).useMaterial3
-      ? _TokenDefaultsM3(context)
+      ? _OutlinedButtonDefaultsM3(context)
       : styleFrom(
-          primary: colorScheme.primary,
-          onSurface: colorScheme.onSurface,
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
           shadowColor: theme.shadowColor,
           elevation: 0,
           textStyle: theme.textTheme.button,
@@ -330,34 +349,34 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 }
 
 @immutable
-class _OutlinedButtonDefaultForeground extends MaterialStateProperty<Color?>  with Diagnosticable {
-  _OutlinedButtonDefaultForeground(this.primary, this.onSurface);
+class _OutlinedButtonDefaultColor extends MaterialStateProperty<Color?>  with Diagnosticable {
+  _OutlinedButtonDefaultColor(this.color, this.disabled);
 
-  final Color? primary;
-  final Color? onSurface;
+  final Color? color;
+  final Color? disabled;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.38);
+      return disabled;
     }
-    return primary;
+    return color;
   }
 }
 
 @immutable
 class _OutlinedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
-  _OutlinedButtonDefaultOverlay(this.primary);
+  _OutlinedButtonDefaultOverlay(this.foreground);
 
-  final Color primary;
+  final Color foreground;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered)) {
-      return primary.withOpacity(0.04);
+      return foreground.withOpacity(0.04);
     }
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-      return primary.withOpacity(0.12);
+      return foreground.withOpacity(0.12);
     }
     return null;
   }
@@ -419,15 +438,17 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - OutlinedButton
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_99
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _OutlinedButtonDefaultsM3 extends ButtonStyle {
+  _OutlinedButtonDefaultsM3(this.context)
    : super(
        animationDuration: kThemeChangeDuration,
        enableFeedback: true,
@@ -523,4 +544,4 @@ class _TokenDefaultsM3 extends ButtonStyle {
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - OutlinedButton

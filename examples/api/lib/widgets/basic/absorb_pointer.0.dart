@@ -49,7 +49,7 @@ class MyStatelessWidget extends StatelessWidget {
           child: AbsorbPointer(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.blue.shade200,
+                backgroundColor: Colors.blue.shade200,
               ),
               onPressed: () {},
               child: null,

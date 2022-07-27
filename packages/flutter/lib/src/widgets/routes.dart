@@ -126,6 +126,21 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   bool get opaque;
 
+  /// {@template flutter.widgets.TransitionRoute.preferRasterization}
+  /// Whether the route transition will prefer to animate a rasterized
+  /// snapshot of the entering/exiting routes.
+  ///
+  /// When this value is true, certain route transitions (such as the Android
+  /// zoom page transition) will rasterize the entering and exiting routes.
+  /// These textures are then animated in place of the underlying widgets to
+  /// improve performance of the transition.
+  ///
+  /// Generally this means that animations that occur on the entering/exiting
+  /// route while the route animation plays may appear frozen - unless they
+  /// are a hero animation or something that is drawn in a separate overlay.
+  /// {@endtemplate}
+  bool get preferRasterization => true;
+
   // This ensures that if we got to the dismissed state while still current,
   // we will still be disposed when we are eventually popped.
   //
@@ -1210,8 +1225,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
   ///
-  /// If [barrierDismissible] is true, then tapping this barrier will cause the
-  /// current route to be popped (see [Navigator.pop]) with null as the value.
+  /// If [barrierDismissible] is true, then tapping this barrier, pressing
+  /// the escape key on the keyboard, or calling route popping functions
+  /// such as [Navigator.pop] will cause the current route to be popped
+  /// with null as the value.
   ///
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
   ///
@@ -1226,6 +1243,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
+  ///  * [Navigator.pop], which is used to dismiss the route.
   ///  * [barrierColor], which controls the color of the scrim for this route.
   ///  * [ModalBarrier], the widget that implements this feature.
   /// {@endtemplate}
@@ -1691,6 +1709,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 }
 
 /// A modal route that overlays a widget over the current route.
+///
+/// {@macro flutter.widgets.ModalRoute.barrierDismissible}
+///
+/// {@tool dartpad}
+/// This example shows how to create a dialog box that is dismissible.
+///
+/// ** See code in examples/api/lib/widgets/routes/popup_route.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///   * [ModalRoute], which is the base class for this class.
+///   * [Navigator.pop], which is used to dismiss the route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
@@ -1703,6 +1734,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 
   @override
   bool get maintainState => true;
+
+  @override
+  bool get preferRasterization => false;
 }
 
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the

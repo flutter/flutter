@@ -47,14 +47,14 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 // that doesn't apply here.
 // ignore: deprecated_member_use
 export 'package:test_api/test_api.dart' hide
-  test,
-  group,
-  setUpAll,
-  tearDownAll,
-  setUp,
-  tearDown,
   expect,
-  isInstanceOf;
+  group,
+  isInstanceOf,
+  setUp,
+  setUpAll,
+  tearDown,
+  tearDownAll,
+  test;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -254,8 +254,11 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   const TargetPlatformVariant(this.values);
 
   /// Creates a [TargetPlatformVariant] that tests all values from
-  /// the [TargetPlatform] enum.
-  TargetPlatformVariant.all() : values = TargetPlatform.values.toSet();
+  /// the [TargetPlatform] enum. If [excluding] is provided, will test all platforms
+  /// except those in [excluding].
+  TargetPlatformVariant.all({
+    Set<TargetPlatform> excluding = const <TargetPlatform>{},
+  }) : values = TargetPlatform.values.toSet()..removeAll(excluding);
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
   /// considered desktop platforms.

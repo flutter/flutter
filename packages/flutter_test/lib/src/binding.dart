@@ -951,7 +951,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner!.focusManager.dispose();
+
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
@@ -1171,7 +1174,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void allowFirstFrame() {
     assert(_firstFrameDeferredCount > 0);
     _firstFrameDeferredCount -= 1;
-    // Unlike in RendererBinding.allowFirstFrame we do not force a frame her
+    // Unlike in RendererBinding.allowFirstFrame we do not force a frame here
     // to give the test full control over frame scheduling.
   }
 

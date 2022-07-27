@@ -425,6 +425,7 @@ abstract class ScrollView extends StatelessWidget {
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
+      clipBehavior: clipBehavior,
     );
 
     final Widget scrollableResult = effectivePrimary && scrollController != null
@@ -618,6 +619,14 @@ class CustomScrollView extends ScrollView {
 }
 
 /// A [ScrollView] that uses a single child layout model.
+///
+/// {@template flutter.widgets.BoxScroll.scrollBehaviour}
+/// [ScrollView]s are often decorated with [Scrollbar]s and overscroll indicators,
+/// which are managed by the inherited [ScrollBehavior]. Placing a
+/// [ScrollConfiguration] above a ScrollView can modify these behaviors for that
+/// ScrollView, or can be managed app-wide by providing a ScrollBehavior to
+/// [MaterialApp.scrollBehavior] or [CupertinoApp.scrollBehavior].
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -1010,6 +1019,8 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
 /// {@end-tool}
+///
+/// {@macro flutter.widgets.BoxScroll.scrollBehaviour}
 ///
 /// See also:
 ///
