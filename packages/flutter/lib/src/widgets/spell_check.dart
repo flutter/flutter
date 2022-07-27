@@ -148,11 +148,13 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     int searchStart = 0;
 
     while (spanPointer < results.length) {
+      // Try finding SuggestionSpan from old results (currentSpan) in new text.
       currentSpan = results[spanPointer];
       currentSpanText =
           resultsText.substring(currentSpan.range.start, currentSpan.range.end);
 
       try {
+        // currentSpan was found and can be applied to new text.
         newSpanText = newText.substring(
             currentSpan.range.start + offset, currentSpan.range.end + offset);
         currentSpanValid = true;
@@ -162,6 +164,9 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       }
 
       if (currentSpanValid && newSpanText == currentSpanText) {
+        // currentSpan was found at the same index in new text and old text
+        // (resultsText), so apply it to new text by adding it to the list of
+        // corrected results.
         searchStart = currentSpan.range.end + offset;
         adjustedSpan = SuggestionSpan(
             TextRange(
@@ -170,6 +175,8 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         );
         correctedSpellCheckResults.add(adjustedSpan);
       } else {
+        // Search for currentSpan in new text and if found, apply it to new text
+        // by adding it to the list of corrected results.
         regex = RegExp('\\b$currentSpanText\\b');
         foundIndex = newText.substring(searchStart).indexOf(regex);
 
