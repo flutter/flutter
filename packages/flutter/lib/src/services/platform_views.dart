@@ -960,7 +960,7 @@ abstract class AndroidViewController extends PlatformViewController {
 /// Controls an Android view that is composed using a GL texture.
 /// This controller is created from the [PlatformViewsService.initSurfaceAndroidView] factory,
 /// and is defined for backward compatibility.
-class SurfaceAndroidViewController extends TextureAndroidViewController{
+class SurfaceAndroidViewController extends AndroidViewController{
     SurfaceAndroidViewController._({
     required super.viewId,
     required super.viewType,
@@ -968,6 +968,55 @@ class SurfaceAndroidViewController extends TextureAndroidViewController{
     super.creationParams,
     super.creationParamsCodec,
   })  : super._();
+
+  // By default, assume the implementation will be texture-based.
+  _AndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
+
+  @override
+  Future<void> _sendCreateMessage({Size? size}) async {
+    if (size == null) {
+      return;
+    }
+    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
+    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+
+    final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
+      viewId: viewId,
+      viewType: _viewType,
+      hybrid: false,
+      hybridFallback: true,
+      layoutDirection: _layoutDirection,
+      creationParams: _creationParams,
+      size: size,
+    ) as int;
+    if (response is int) {
+      (_internals as _TextureAndroidViewControllerInternals).textureId = response;
+    } else {
+      // A null response indicates fallback to Hybrid Composition, so swap out
+      // the implementation.
+      _internals = _HybridAndroidViewControllerInternals();
+    }
+  }
+
+  @override
+  int? get textureId {
+    return _internals.textureId;
+  }
+
+  @override
+  Future<void> _sendDisposeMessage() {
+    return _internals.sendDisposeMessage(viewId: viewId);
+  }
+
+  @override
+  Future<Size> setSize(Size size) {
+    return _internals.setSize(size, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
+    return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
@@ -981,6 +1030,8 @@ class ExpensiveAndroidViewController extends AndroidViewController {
     super.creationParamsCodec,
   })  : super._();
 
+  final _AndroidViewControllerInternals _internals = _HybridAndroidViewControllerInternals();
+
   @override
   Future<void> _sendCreateMessage({Size? size}) {
     return _AndroidViewControllerInternals.sendCreateMessage(
@@ -993,26 +1044,23 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   }
 
   @override
-  int get textureId {
-    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+  int? get textureId {
+    return _internals.textureId;
   }
 
   @override
   Future<void> _sendDisposeMessage() {
-    return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
-      'id': viewId,
-      'hybrid': true,
-    });
+    return _internals.sendDisposeMessage(viewId: viewId);
   }
 
   @override
   Future<Size> setSize(Size size) {
-    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+    return _internals.setSize(size, viewId: viewId, viewState: _state);
   }
 
   @override
   Future<void> setOffset(Offset off) {
-    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+    return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
 }
 
@@ -1031,64 +1079,7 @@ class TextureAndroidViewController extends AndroidViewController {
     super.creationParamsCodec,
   }) : super._();
 
-  /// The texture entry id into which the Android view is rendered.
-  int? _textureId;
-
-  /// Returns the texture entry id that the Android view is rendering into.
-  ///
-  /// Returns null if the Android view has not been successfully created, or if it has been
-  /// disposed.
-  @override
-  int? get textureId => _textureId;
-
-  /// The current offset of the platform view.
-  Offset _off = Offset.zero;
-
-  @override
-  Future<Size> setSize(Size size) async {
-    assert(_state != _AndroidViewState.disposed, 'Android view is disposed. View id: $viewId');
-    assert(_state != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
-    assert(size != null);
-    assert(!size.isEmpty);
-
-    final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
-      'resize',
-      <String, dynamic>{
-        'id': viewId,
-        'width': size.width,
-        'height': size.height,
-      },
-    );
-    assert(meta != null);
-    assert(meta!.containsKey('width'));
-    assert(meta!.containsKey('height'));
-    return Size(meta!['width']! as double, meta['height']! as double);
-  }
-
-  @override
-  Future<void> setOffset(Offset off) async {
-    if (off == _off) {
-      return;
-    }
-
-    // Don't set the offset unless the Android view has been created.
-    // The implementation of this method channel throws if the Android view for this viewId
-    // isn't addressable.
-    if (_state != _AndroidViewState.created) {
-      return;
-    }
-
-    _off = off;
-
-    await SystemChannels.platform_views.invokeMethod<void>(
-      'offset',
-      <String, dynamic>{
-        'id': viewId,
-        'top': off.dy,
-        'left': off.dx,
-      },
-    );
-  }
+  final _TextureAndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
 
   @override
   Future<void> _sendCreateMessage({Size? size}) async {
@@ -1098,7 +1089,7 @@ class TextureAndroidViewController extends AndroidViewController {
     assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
-    _textureId = await _AndroidViewControllerInternals.sendCreateMessage(
+    _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
       viewType: _viewType,
       hybrid: false,
@@ -1109,12 +1100,23 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 
   @override
+  int? get textureId {
+    return _internals.textureId;
+  }
+
+  @override
   Future<void> _sendDisposeMessage() {
-    return SystemChannels
-        .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
-      'id': viewId,
-      'hybrid': false,
-    });
+    return _internals.sendDisposeMessage(viewId: viewId);
+  }
+
+  @override
+  Future<Size> setSize(Size size) {
+    return _internals.setSize(size, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
+    return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
 }
 
@@ -1138,12 +1140,9 @@ abstract class _AndroidViewControllerInternals {
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
       'hybrid': hybrid,
-      if (size != null)
-        'width': size.width,
-      if (size != null)
-        'height': size.height,
-      if (hybridFallback != null)
-        'hybridFallback': hybridFallback,
+      if (size != null) 'width': size.width,
+      if (size != null) 'height': size.height,
+      if (hybridFallback != null) 'hybridFallback': hybridFallback,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
@@ -1155,13 +1154,128 @@ abstract class _AndroidViewControllerInternals {
     }
     return SystemChannels.platform_views.invokeMethod<dynamic>('create', args);
   }
+
+  int? get textureId;
+
+  Future<Size> setSize(
+    Size size, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  });
+
+  Future<void> setOffset(
+    Offset offset, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  });
+
+  Future<void> sendDisposeMessage({required int viewId});
 }
 
-class _NonHybridAndroidViewControllerInternals extends _AndroidViewControllerInternals {
+class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInternals {
+  _TextureAndroidViewControllerInternals();
+
+  /// The current offset of the platform view.
+  Offset _offset = Offset.zero;
+
+  @override
+  int? textureId;
+
+  @override
+  Future<Size> setSize(
+    Size size, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  }) async {
+    assert(viewState != _AndroidViewState.disposed, 'Android view is disposed. View id: $viewId');
+    assert(viewState != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
+    assert(size != null);
+    assert(!size.isEmpty);
+
+    final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
+      'resize',
+      <String, dynamic>{
+        'id': viewId,
+        'width': size.width,
+        'height': size.height,
+      },
+    );
+    assert(meta != null);
+    assert(meta!.containsKey('width'));
+    assert(meta!.containsKey('height'));
+    return Size(meta!['width']! as double, meta['height']! as double);
+  }
+
+  @override
+  Future<void> setOffset(
+    Offset offset, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  }) async {
+    if (offset == _offset) {
+      return;
+    }
+
+    // Don't set the offset unless the Android view has been created.
+    // The implementation of this method channel throws if the Android view for this viewId
+    // isn't addressable.
+    if (viewState != _AndroidViewState.created) {
+      return;
+    }
+
+    _offset = offset;
+
+    await SystemChannels.platform_views.invokeMethod<void>(
+      'offset',
+      <String, dynamic>{
+        'id': viewId,
+        'top': offset.dy,
+        'left': offset.dx,
+      },
+    );
+  }
+
+  @override
+  Future<void> sendDisposeMessage({required int viewId}) {
+    return SystemChannels
+        .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+      'id': viewId,
+      'hybrid': false,
+    });
+  }
 }
 
 class _HybridAndroidViewControllerInternals extends _AndroidViewControllerInternals {
+  @override
+  int get textureId {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
 
+  @override
+  Future<Size> setSize(
+    Size size, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  }) {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  Future<void> setOffset(
+    Offset offset, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  }) {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  Future<void> sendDisposeMessage({required int viewId}) {
+    return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+      'id': viewId,
+      'hybrid': true,
+    });
+  }
 }
 
 /// Controls an iOS UIView.
