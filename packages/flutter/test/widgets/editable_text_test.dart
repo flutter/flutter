@@ -12568,7 +12568,6 @@ void main() {
       expect(state.spellCheckEnabled, isFalse);
     });
 
-    
     testWidgets(
       'Spell check configured properly when spell check disabled manually',
         (WidgetTester tester) async {
