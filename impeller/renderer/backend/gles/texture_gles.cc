@@ -12,6 +12,7 @@
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
+#include "impeller/renderer/formats.h"
 
 namespace impeller {
 
@@ -349,11 +350,15 @@ void TextureGLES::InitializeContentsIfNecessary() const {
   }
 }
 
-bool TextureGLES::Bind() const {
+std::optional<GLuint> TextureGLES::GetGLHandle() const {
   if (!IsValid()) {
-    return false;
+    return std::nullopt;
   }
-  auto handle = reactor_->GetGLHandle(handle_);
+  return reactor_->GetGLHandle(handle_);
+}
+
+bool TextureGLES::Bind() const {
+  auto handle = GetGLHandle();
   if (!handle.has_value()) {
     return false;
   }
@@ -375,6 +380,37 @@ bool TextureGLES::Bind() const {
   return true;
 }
 
+bool TextureGLES::GenerateMipmaps() const {
+  if (!IsValid()) {
+    return false;
+  }
+
+  auto type = GetTextureDescriptor().type;
+  switch (type) {
+    case TextureType::kTexture2D:
+      break;
+    case TextureType::kTexture2DMultisample:
+      VALIDATION_LOG << "Generating mipmaps for multisample textures is not "
+                        "supported in the GLES backend.";
+      return false;
+    case TextureType::kTextureCube:
+      break;
+  }
+
+  if (!Bind()) {
+    return false;
+  }
+
+  auto handle = GetGLHandle();
+  if (!handle.has_value()) {
+    return false;
+  }
+
+  const auto& gl = reactor_->GetProcTable();
+  gl.GenerateMipmap(ToTextureType(type));
+  return true;
+}
+
 TextureGLES::Type TextureGLES::GetType() const {
   return type_;
 }
@@ -390,20 +426,21 @@ static GLenum ToAttachmentPoint(TextureGLES::AttachmentPoint point) {
   }
 }
 
-bool TextureGLES::SetAsFramebufferAttachment(GLuint fbo,
+bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
+                                             GLuint fbo,
                                              AttachmentPoint point) const {
   if (!IsValid()) {
     return false;
   }
   InitializeContentsIfNecessary();
-  auto handle = reactor_->GetGLHandle(handle_);
+  auto handle = GetGLHandle();
   if (!handle.has_value()) {
     return false;
   }
   const auto& gl = reactor_->GetProcTable();
   switch (type_) {
     case Type::kTexture:
-      gl.FramebufferTexture2D(GL_FRAMEBUFFER,            // target
+      gl.FramebufferTexture2D(target,                    // target
                               ToAttachmentPoint(point),  // attachment
                               GL_TEXTURE_2D,             // textarget
                               handle.value(),            // texture
@@ -411,7 +448,7 @@ bool TextureGLES::SetAsFramebufferAttachment(GLuint fbo,
       );
       break;
     case Type::kRenderBuffer:
-      gl.FramebufferRenderbuffer(GL_FRAMEBUFFER,            // target
+      gl.FramebufferRenderbuffer(target,                    // target
                                  ToAttachmentPoint(point),  // attachment
                                  GL_RENDERBUFFER,  // render-buffer target
                                  handle.value()    // render-buffer

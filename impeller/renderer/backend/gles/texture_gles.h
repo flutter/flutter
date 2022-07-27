@@ -33,14 +33,19 @@ class TextureGLES final : public Texture,
   // |Texture|
   ~TextureGLES() override;
 
+  std::optional<GLuint> GetGLHandle() const;
+
   [[nodiscard]] bool Bind() const;
+
+  [[nodiscard]] bool GenerateMipmaps() const;
 
   enum class AttachmentPoint {
     kColor0,
     kDepth,
     kStencil,
   };
-  [[nodiscard]] bool SetAsFramebufferAttachment(GLuint fbo,
+  [[nodiscard]] bool SetAsFramebufferAttachment(GLenum target,
+                                                GLuint fbo,
                                                 AttachmentPoint point) const;
 
   Type GetType() const;

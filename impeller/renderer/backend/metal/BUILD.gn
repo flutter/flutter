@@ -8,6 +8,10 @@ impeller_component("metal") {
   sources = [
     "allocator_mtl.h",
     "allocator_mtl.mm",
+    "blit_command_mtl.h",
+    "blit_command_mtl.mm",
+    "blit_pass_mtl.h",
+    "blit_pass_mtl.mm",
     "command_buffer_mtl.h",
     "command_buffer_mtl.mm",
     "context_mtl.h",

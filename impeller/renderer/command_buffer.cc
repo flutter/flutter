@@ -27,4 +27,13 @@ std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
   return nullptr;
 }
 
+std::shared_ptr<BlitPass> CommandBuffer::CreateBlitPass() const {
+  auto pass = OnCreateBlitPass();
+  if (pass && pass->IsValid()) {
+    pass->SetLabel("BlitPass");
+    return pass;
+  }
+  return nullptr;
+}
+
 }  // namespace impeller

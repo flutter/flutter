@@ -275,6 +275,18 @@ constexpr MTLSamplerMinMagFilter ToMTLSamplerMinMagFilter(MinMagFilter filter) {
   return MTLSamplerMinMagFilterNearest;
 }
 
+constexpr MTLSamplerMipFilter ToMTLSamplerMipFilter(MipFilter filter) {
+  switch (filter) {
+    case MipFilter::kNone:
+      return MTLSamplerMipFilterNotMipmapped;
+    case MipFilter::kNearest:
+      return MTLSamplerMipFilterNearest;
+    case MipFilter::kLinear:
+      return MTLSamplerMipFilterLinear;
+  }
+  return MTLSamplerMipFilterNotMipmapped;
+}
+
 constexpr MTLSamplerAddressMode ToMTLSamplerAddressMode(
     SamplerAddressMode mode) {
   switch (mode) {

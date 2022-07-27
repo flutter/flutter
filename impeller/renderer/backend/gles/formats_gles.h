@@ -163,6 +163,18 @@ constexpr std::optional<GLenum> ToVertexAttribType(ShaderType type) {
   FML_UNREACHABLE();
 }
 
+constexpr GLenum ToTextureType(TextureType type) {
+  switch (type) {
+    case TextureType::kTexture2D:
+      return GL_TEXTURE_2D;
+    case TextureType::kTexture2DMultisample:
+      return GL_TEXTURE_2D_MULTISAMPLE;
+    case TextureType::kTextureCube:
+      return GL_TEXTURE_CUBE_MAP;
+  }
+  FML_UNREACHABLE();
+}
+
 constexpr std::optional<GLenum> ToTextureTarget(TextureType type) {
   switch (type) {
     case TextureType::kTexture2D:

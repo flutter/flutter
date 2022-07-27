@@ -8,6 +8,10 @@ impeller_component("renderer") {
   sources = [
     "allocator.cc",
     "allocator.h",
+    "blit_command.cc",
+    "blit_command.h",
+    "blit_pass.cc",
+    "blit_pass.h",
     "buffer.cc",
     "buffer.h",
     "buffer_view.cc",
