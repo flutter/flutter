@@ -13,7 +13,7 @@
 namespace flutter {
 namespace testing {
 
-/// Mock for the |WindowWin32| base class.
+/// Mock for the |Window| base class.
 class MockWindowBindingHandler : public WindowBindingHandler {
  public:
   MockWindowBindingHandler();

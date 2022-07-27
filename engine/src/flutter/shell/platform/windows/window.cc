@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/window_win32.h"
+#include "flutter/shell/platform/windows/window.h"
 
 #include "base/win/atl.h"  // NOLINT(build/include_order)
 
@@ -53,10 +53,9 @@ static const int kLinesPerScrollWindowsDefault = 3;
 
 }  // namespace
 
-WindowWin32::WindowWin32() : WindowWin32(nullptr) {}
+Window::Window() : Window(nullptr) {}
 
-WindowWin32::WindowWin32(
-    std::unique_ptr<TextInputManagerWin32> text_input_manager)
+Window::Window(std::unique_ptr<TextInputManagerWin32> text_input_manager)
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
       text_input_manager_(std::move(text_input_manager)) {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
@@ -75,13 +74,13 @@ WindowWin32::WindowWin32(
   keyboard_manager_ = std::make_unique<KeyboardManagerWin32>(this);
 }
 
-WindowWin32::~WindowWin32() {
+Window::~Window() {
   Destroy();
 }
 
-void WindowWin32::InitializeChild(const char* title,
-                                  unsigned int width,
-                                  unsigned int height) {
+void Window::InitializeChild(const char* title,
+                             unsigned int width,
+                             unsigned int height) {
   Destroy();
   std::wstring converted_title = NarrowToWide(title);
 
@@ -121,7 +120,7 @@ void WindowWin32::InitializeChild(const char* title,
   direct_manipulation_owner_->Init(width, height);
 }
 
-std::wstring WindowWin32::NarrowToWide(const char* source) {
+std::wstring Window::NarrowToWide(const char* source) {
   size_t length = strlen(source);
   size_t outlen = 0;
   std::wstring wideTitle(length, L'#');
@@ -129,7 +128,7 @@ std::wstring WindowWin32::NarrowToWide(const char* source) {
   return wideTitle;
 }
 
-WNDCLASS WindowWin32::RegisterWindowClass(std::wstring& title) {
+WNDCLASS Window::RegisterWindowClass(std::wstring& title) {
   window_class_name_ = title;
 
   WNDCLASS window_class{};
@@ -147,27 +146,27 @@ WNDCLASS WindowWin32::RegisterWindowClass(std::wstring& title) {
   return window_class;
 }
 
-LRESULT CALLBACK WindowWin32::WndProc(HWND const window,
-                                      UINT const message,
-                                      WPARAM const wparam,
-                                      LPARAM const lparam) noexcept {
+LRESULT CALLBACK Window::WndProc(HWND const window,
+                                 UINT const message,
+                                 WPARAM const wparam,
+                                 LPARAM const lparam) noexcept {
   if (message == WM_NCCREATE) {
     auto cs = reinterpret_cast<CREATESTRUCT*>(lparam);
     SetWindowLongPtr(window, GWLP_USERDATA,
                      reinterpret_cast<LONG_PTR>(cs->lpCreateParams));
 
-    auto that = static_cast<WindowWin32*>(cs->lpCreateParams);
+    auto that = static_cast<Window*>(cs->lpCreateParams);
     that->window_handle_ = window;
     that->text_input_manager_->SetWindowHandle(window);
     RegisterTouchWindow(window, 0);
-  } else if (WindowWin32* that = GetThisFromHandle(window)) {
+  } else if (Window* that = GetThisFromHandle(window)) {
     return that->HandleMessage(message, wparam, lparam);
   }
 
   return DefWindowProc(window, message, wparam, lparam);
 }
 
-void WindowWin32::TrackMouseLeaveEvent(HWND hwnd) {
+void Window::TrackMouseLeaveEvent(HWND hwnd) {
   if (!tracking_mouse_leave_) {
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(tme);
@@ -178,9 +177,9 @@ void WindowWin32::TrackMouseLeaveEvent(HWND hwnd) {
   }
 }
 
-LRESULT WindowWin32::OnGetObject(UINT const message,
-                                 WPARAM const wparam,
-                                 LPARAM const lparam) {
+LRESULT Window::OnGetObject(UINT const message,
+                            WPARAM const wparam,
+                            LPARAM const lparam) {
   LRESULT reference_result = static_cast<LRESULT>(0L);
 
   // Only the lower 32 bits of lparam are valid when checking the object id
@@ -215,24 +214,24 @@ LRESULT WindowWin32::OnGetObject(UINT const message,
   return 0;
 }
 
-void WindowWin32::OnImeSetContext(UINT const message,
-                                  WPARAM const wparam,
-                                  LPARAM const lparam) {
+void Window::OnImeSetContext(UINT const message,
+                             WPARAM const wparam,
+                             LPARAM const lparam) {
   if (wparam != 0) {
     text_input_manager_->CreateImeWindow();
   }
 }
 
-void WindowWin32::OnImeStartComposition(UINT const message,
-                                        WPARAM const wparam,
-                                        LPARAM const lparam) {
+void Window::OnImeStartComposition(UINT const message,
+                                   WPARAM const wparam,
+                                   LPARAM const lparam) {
   text_input_manager_->CreateImeWindow();
   OnComposeBegin();
 }
 
-void WindowWin32::OnImeComposition(UINT const message,
-                                   WPARAM const wparam,
-                                   LPARAM const lparam) {
+void Window::OnImeComposition(UINT const message,
+                              WPARAM const wparam,
+                              LPARAM const lparam) {
   // Update the IME window position.
   text_input_manager_->UpdateImeWindow();
 
@@ -265,26 +264,26 @@ void WindowWin32::OnImeComposition(UINT const message,
   }
 }
 
-void WindowWin32::OnImeEndComposition(UINT const message,
-                                      WPARAM const wparam,
-                                      LPARAM const lparam) {
+void Window::OnImeEndComposition(UINT const message,
+                                 WPARAM const wparam,
+                                 LPARAM const lparam) {
   text_input_manager_->DestroyImeWindow();
   OnComposeEnd();
 }
 
-void WindowWin32::OnImeRequest(UINT const message,
-                               WPARAM const wparam,
-                               LPARAM const lparam) {
+void Window::OnImeRequest(UINT const message,
+                          WPARAM const wparam,
+                          LPARAM const lparam) {
   // TODO(cbracken): Handle IMR_RECONVERTSTRING, IMR_DOCUMENTFEED,
   // and IMR_QUERYCHARPOSITION messages.
   // https://github.com/flutter/flutter/issues/74547
 }
 
-void WindowWin32::AbortImeComposing() {
+void Window::AbortImeComposing() {
   text_input_manager_->AbortComposing();
 }
 
-void WindowWin32::UpdateCursorRect(const Rect& rect) {
+void Window::UpdateCursorRect(const Rect& rect) {
   text_input_manager_->UpdateCaretRect(rect);
 }
 
@@ -313,9 +312,9 @@ static bool IsPrintable(uint32_t c) {
 }
 
 LRESULT
-WindowWin32::HandleMessage(UINT const message,
-                           WPARAM const wparam,
-                           LPARAM const lparam) noexcept {
+Window::HandleMessage(UINT const message,
+                      WPARAM const wparam,
+                      LPARAM const lparam) noexcept {
   LPARAM result_lparam = lparam;
   int xPos = 0, yPos = 0;
   UINT width = 0, height = 0;
@@ -551,27 +550,27 @@ WindowWin32::HandleMessage(UINT const message,
   return Win32DefWindowProc(window_handle_, message, wparam, result_lparam);
 }
 
-UINT WindowWin32::GetCurrentDPI() {
+UINT Window::GetCurrentDPI() {
   return current_dpi_;
 }
 
-UINT WindowWin32::GetCurrentWidth() {
+UINT Window::GetCurrentWidth() {
   return current_width_;
 }
 
-UINT WindowWin32::GetCurrentHeight() {
+UINT Window::GetCurrentHeight() {
   return current_height_;
 }
 
-HWND WindowWin32::GetWindowHandle() {
+HWND Window::GetWindowHandle() {
   return window_handle_;
 }
 
-float WindowWin32::GetScrollOffsetMultiplier() {
+float Window::GetScrollOffsetMultiplier() {
   return scroll_offset_multiplier_;
 }
 
-void WindowWin32::UpdateScrollOffsetMultiplier() {
+void Window::UpdateScrollOffsetMultiplier() {
   UINT lines_per_scroll = kLinesPerScrollWindowsDefault;
 
   // Get lines per scroll wheel value from Windows
@@ -583,7 +582,7 @@ void WindowWin32::UpdateScrollOffsetMultiplier() {
       static_cast<float>(lines_per_scroll) * 100.0 / 3.0;
 }
 
-void WindowWin32::Destroy() {
+void Window::Destroy() {
   if (window_handle_) {
     text_input_manager_->SetWindowHandle(nullptr);
     DestroyWindow(window_handle_);
@@ -593,7 +592,7 @@ void WindowWin32::Destroy() {
   UnregisterClass(window_class_name_.c_str(), nullptr);
 }
 
-void WindowWin32::HandleResize(UINT width, UINT height) {
+void Window::HandleResize(UINT width, UINT height) {
   current_width_ = width;
   current_height_ = height;
   if (direct_manipulation_owner_) {
@@ -602,31 +601,30 @@ void WindowWin32::HandleResize(UINT width, UINT height) {
   OnResize(width, height);
 }
 
-WindowWin32* WindowWin32::GetThisFromHandle(HWND const window) noexcept {
-  return reinterpret_cast<WindowWin32*>(
-      GetWindowLongPtr(window, GWLP_USERDATA));
+Window* Window::GetThisFromHandle(HWND const window) noexcept {
+  return reinterpret_cast<Window*>(GetWindowLongPtr(window, GWLP_USERDATA));
 }
 
-LRESULT WindowWin32::Win32DefWindowProc(HWND hWnd,
-                                        UINT Msg,
-                                        WPARAM wParam,
-                                        LPARAM lParam) {
+LRESULT Window::Win32DefWindowProc(HWND hWnd,
+                                   UINT Msg,
+                                   WPARAM wParam,
+                                   LPARAM lParam) {
   return ::DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
-BOOL WindowWin32::Win32PeekMessage(LPMSG lpMsg,
-                                   UINT wMsgFilterMin,
-                                   UINT wMsgFilterMax,
-                                   UINT wRemoveMsg) {
+BOOL Window::Win32PeekMessage(LPMSG lpMsg,
+                              UINT wMsgFilterMin,
+                              UINT wMsgFilterMax,
+                              UINT wRemoveMsg) {
   return ::PeekMessage(lpMsg, window_handle_, wMsgFilterMin, wMsgFilterMax,
                        wRemoveMsg);
 }
 
-uint32_t WindowWin32::Win32MapVkToChar(uint32_t virtual_key) {
+uint32_t Window::Win32MapVkToChar(uint32_t virtual_key) {
   return ::MapVirtualKey(virtual_key, MAPVK_VK_TO_CHAR);
 }
 
-UINT WindowWin32::Win32DispatchMessage(UINT Msg, WPARAM wParam, LPARAM lParam) {
+UINT Window::Win32DispatchMessage(UINT Msg, WPARAM wParam, LPARAM lParam) {
   return ::SendMessage(window_handle_, Msg, wParam, lParam);
 }
 

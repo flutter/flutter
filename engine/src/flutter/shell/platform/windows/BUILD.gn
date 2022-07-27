@@ -103,13 +103,13 @@ source_set("flutter_windows_source") {
     "text_input_manager_win32.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
+    "window.cc",
+    "window.h",
     "window_binding_handler.h",
     "window_binding_handler_delegate.h",
     "window_proc_delegate_manager_win32.cc",
     "window_proc_delegate_manager_win32.h",
     "window_state.h",
-    "window_win32.cc",
-    "window_win32.h",
   ]
 
   libs = [
@@ -198,10 +198,10 @@ executable("flutter_windows_unittests") {
     "testing/mock_gl_functions.h",
     "testing/mock_text_input_manager_win32.cc",
     "testing/mock_text_input_manager_win32.h",
+    "testing/mock_window.cc",
+    "testing/mock_window.h",
     "testing/mock_window_binding_handler.cc",
     "testing/mock_window_binding_handler.h",
-    "testing/mock_window_win32.cc",
-    "testing/mock_window_win32.h",
     "testing/test_keyboard.cc",
     "testing/test_keyboard.h",
     "testing/test_keyboard_unittests.cc",
@@ -209,7 +209,7 @@ executable("flutter_windows_unittests") {
     "testing/wm_builders.h",
     "text_input_plugin_unittest.cc",
     "window_proc_delegate_manager_win32_unittests.cc",
-    "window_win32_unittests.cc",
+    "window_unittests.cc",
   ]
 
   public_configs = [ "//flutter:config" ]
