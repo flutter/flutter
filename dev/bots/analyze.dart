@@ -581,8 +581,8 @@ Future<int> _verifyNoMissingLicenseForExtension(
   await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (contents.isEmpty) {
-      continue;
-    } // let's not go down the /bin/true rabbit hole
+      continue; // let's not go down the /bin/true rabbit hole
+    }
     if (!contents.startsWith(RegExp(header + licensePattern))) {
       errors.add(file.path);
     }
@@ -1003,8 +1003,8 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   final List<File> files = await _gitFiles(workingDirectory);
   for (final File file in files) {
     if (path.basename(file.path).endsWith('_test.dart') || path.basename(file.path) == 'analyze.dart') {
-      continue;
-    } // Skip tests, they're not public-facing.
+      continue; // Skip tests, they're not public-facing.
+    }
     final Uint8List bytes = file.readAsBytesSync();
     // We allow invalid UTF-8 here so that binaries don't trip us up.
     // There's a separate test in this file that verifies that all text
@@ -1890,13 +1890,13 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
 
 List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T>? seen ]) {
   if (map[start] == null) {
-    return null;
-  } // We catch these separately.
+    return null; // We catch these separately.
+  }
 
   for (final T key in map[start]!) {
     if (key == start) {
-      continue;
-    } // we catch these separately
+      continue; // we catch these separately
+    }
     if (seen != null && seen.contains(key)) {
       return <T>[start, key];
     }

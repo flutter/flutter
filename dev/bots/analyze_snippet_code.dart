@@ -648,8 +648,8 @@ class _SnippetChecker {
           subline = null;
         } else if (block[index].startsWith('// ')) {
           if (buffer.length > 1) {
-            buffer.add('/${block[index]}');
-          } // so that it doesn't start with "// " and get caught in this again
+            buffer.add('/${block[index]}'); // so that it doesn't start with "// " and get caught in this again
+          }
         } else {
           subline ??= _Line(
             code: block[index],
