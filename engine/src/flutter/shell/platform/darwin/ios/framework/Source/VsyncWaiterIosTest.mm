@@ -17,7 +17,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   auto runner = thread->GetTaskRunner();
   return runner;
 }
-}
+}  // namespace
 
 @interface VSyncClient (Testing)
 
@@ -47,7 +47,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     XCTAssertEqual(link.preferredFrameRateRange.maximum, maxFrameRate);
     XCTAssertEqual(link.preferredFrameRateRange.preferred, maxFrameRate);
     XCTAssertEqual(link.preferredFrameRateRange.minimum, maxFrameRate / 2);
-  } else if (@available(iOS 10.0, *)) {
+  } else {
     XCTAssertEqual(link.preferredFramesPerSecond, maxFrameRate);
   }
   [vsyncClient release];
@@ -70,7 +70,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     XCTAssertEqual(link.preferredFrameRateRange.maximum, 0);
     XCTAssertEqual(link.preferredFrameRateRange.preferred, 0);
     XCTAssertEqual(link.preferredFrameRateRange.minimum, 0);
-  } else if (@available(iOS 10.0, *)) {
+  } else {
     XCTAssertEqual(link.preferredFramesPerSecond, 0);
   }
   [vsyncClient release];
@@ -89,7 +89,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     XCTAssertEqual(link.preferredFrameRateRange.maximum, 0);
     XCTAssertEqual(link.preferredFrameRateRange.preferred, 0);
     XCTAssertEqual(link.preferredFrameRateRange.minimum, 0);
-  } else if (@available(iOS 10.0, *)) {
+  } else {
     XCTAssertEqual(link.preferredFramesPerSecond, 0);
   }
   [vsyncClient release];

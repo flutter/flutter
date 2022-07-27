@@ -73,13 +73,9 @@ bool DeviceBufferMTL::SetLabel(const std::string& label, Range range) {
   if (label.empty()) {
     return false;
   }
-  if (@available(macOS 10.12, iOS 10.0, *)) {
-    [buffer_ addDebugMarker:@(label.c_str())
-                      range:NSMakeRange(range.offset, range.length)];
-    return true;
-  } else {
-    return SetLabel(label);
-  }
+  [buffer_ addDebugMarker:@(label.c_str())
+                    range:NSMakeRange(range.offset, range.length)];
+  return true;
   FML_UNREACHABLE();
 }
 

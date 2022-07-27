@@ -160,10 +160,8 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
     return UIReturnKeyNext;
   }
 
-  if (@available(iOS 9.0, *)) {
-    if ([inputType isEqualToString:@"TextInputAction.continueAction"]) {
-      return UIReturnKeyContinue;
-    }
+  if ([inputType isEqualToString:@"TextInputAction.continueAction"]) {
+    return UIReturnKeyContinue;
   }
 
   if ([inputType isEqualToString:@"TextInputAction.join"]) {
@@ -193,100 +191,96 @@ static UITextContentType ToUITextContentType(NSArray<NSString*>* hints) {
   }
 
   NSString* hint = hints[0];
-  if (@available(iOS 10.0, *)) {
-    if ([hint isEqualToString:@"addressCityAndState"]) {
-      return UITextContentTypeAddressCityAndState;
-    }
-
-    if ([hint isEqualToString:@"addressState"]) {
-      return UITextContentTypeAddressState;
-    }
-
-    if ([hint isEqualToString:@"addressCity"]) {
-      return UITextContentTypeAddressCity;
-    }
-
-    if ([hint isEqualToString:@"sublocality"]) {
-      return UITextContentTypeSublocality;
-    }
-
-    if ([hint isEqualToString:@"streetAddressLine1"]) {
-      return UITextContentTypeStreetAddressLine1;
-    }
-
-    if ([hint isEqualToString:@"streetAddressLine2"]) {
-      return UITextContentTypeStreetAddressLine2;
-    }
-
-    if ([hint isEqualToString:@"countryName"]) {
-      return UITextContentTypeCountryName;
-    }
-
-    if ([hint isEqualToString:@"fullStreetAddress"]) {
-      return UITextContentTypeFullStreetAddress;
-    }
-
-    if ([hint isEqualToString:@"postalCode"]) {
-      return UITextContentTypePostalCode;
-    }
-
-    if ([hint isEqualToString:@"location"]) {
-      return UITextContentTypeLocation;
-    }
-
-    if ([hint isEqualToString:@"creditCardNumber"]) {
-      return UITextContentTypeCreditCardNumber;
-    }
-
-    if ([hint isEqualToString:@"email"]) {
-      return UITextContentTypeEmailAddress;
-    }
-
-    if ([hint isEqualToString:@"jobTitle"]) {
-      return UITextContentTypeJobTitle;
-    }
-
-    if ([hint isEqualToString:@"givenName"]) {
-      return UITextContentTypeGivenName;
-    }
-
-    if ([hint isEqualToString:@"middleName"]) {
-      return UITextContentTypeMiddleName;
-    }
-
-    if ([hint isEqualToString:@"familyName"]) {
-      return UITextContentTypeFamilyName;
-    }
-
-    if ([hint isEqualToString:@"name"]) {
-      return UITextContentTypeName;
-    }
-
-    if ([hint isEqualToString:@"namePrefix"]) {
-      return UITextContentTypeNamePrefix;
-    }
-
-    if ([hint isEqualToString:@"nameSuffix"]) {
-      return UITextContentTypeNameSuffix;
-    }
-
-    if ([hint isEqualToString:@"nickname"]) {
-      return UITextContentTypeNickname;
-    }
-
-    if ([hint isEqualToString:@"organizationName"]) {
-      return UITextContentTypeOrganizationName;
-    }
-
-    if ([hint isEqualToString:@"telephoneNumber"]) {
-      return UITextContentTypeTelephoneNumber;
-    }
+  if ([hint isEqualToString:@"addressCityAndState"]) {
+    return UITextContentTypeAddressCityAndState;
   }
 
-  if (@available(iOS 11.0, *)) {
-    if ([hint isEqualToString:@"password"]) {
-      return UITextContentTypePassword;
-    }
+  if ([hint isEqualToString:@"addressState"]) {
+    return UITextContentTypeAddressState;
+  }
+
+  if ([hint isEqualToString:@"addressCity"]) {
+    return UITextContentTypeAddressCity;
+  }
+
+  if ([hint isEqualToString:@"sublocality"]) {
+    return UITextContentTypeSublocality;
+  }
+
+  if ([hint isEqualToString:@"streetAddressLine1"]) {
+    return UITextContentTypeStreetAddressLine1;
+  }
+
+  if ([hint isEqualToString:@"streetAddressLine2"]) {
+    return UITextContentTypeStreetAddressLine2;
+  }
+
+  if ([hint isEqualToString:@"countryName"]) {
+    return UITextContentTypeCountryName;
+  }
+
+  if ([hint isEqualToString:@"fullStreetAddress"]) {
+    return UITextContentTypeFullStreetAddress;
+  }
+
+  if ([hint isEqualToString:@"postalCode"]) {
+    return UITextContentTypePostalCode;
+  }
+
+  if ([hint isEqualToString:@"location"]) {
+    return UITextContentTypeLocation;
+  }
+
+  if ([hint isEqualToString:@"creditCardNumber"]) {
+    return UITextContentTypeCreditCardNumber;
+  }
+
+  if ([hint isEqualToString:@"email"]) {
+    return UITextContentTypeEmailAddress;
+  }
+
+  if ([hint isEqualToString:@"jobTitle"]) {
+    return UITextContentTypeJobTitle;
+  }
+
+  if ([hint isEqualToString:@"givenName"]) {
+    return UITextContentTypeGivenName;
+  }
+
+  if ([hint isEqualToString:@"middleName"]) {
+    return UITextContentTypeMiddleName;
+  }
+
+  if ([hint isEqualToString:@"familyName"]) {
+    return UITextContentTypeFamilyName;
+  }
+
+  if ([hint isEqualToString:@"name"]) {
+    return UITextContentTypeName;
+  }
+
+  if ([hint isEqualToString:@"namePrefix"]) {
+    return UITextContentTypeNamePrefix;
+  }
+
+  if ([hint isEqualToString:@"nameSuffix"]) {
+    return UITextContentTypeNameSuffix;
+  }
+
+  if ([hint isEqualToString:@"nickname"]) {
+    return UITextContentTypeNickname;
+  }
+
+  if ([hint isEqualToString:@"organizationName"]) {
+    return UITextContentTypeOrganizationName;
+  }
+
+  if ([hint isEqualToString:@"telephoneNumber"]) {
+    return UITextContentTypeTelephoneNumber;
+  }
+
+  if ([hint isEqualToString:@"password"]) {
+    return UITextContentTypePassword;
   }
 
   if (@available(iOS 12.0, *)) {
@@ -374,31 +368,27 @@ typedef NS_ENUM(NSInteger, FlutterAutofillType) {
 };
 
 static BOOL IsFieldPasswordRelated(NSDictionary* configuration) {
-  if (@available(iOS 10.0, *)) {
-    // Autofill is explicitly disabled if the id isn't present.
-    if (!AutofillIdFromDictionary(configuration)) {
-      return NO;
-    }
+  // Autofill is explicitly disabled if the id isn't present.
+  if (!AutofillIdFromDictionary(configuration)) {
+    return NO;
+  }
 
-    BOOL isSecureTextEntry = [configuration[kSecureTextEntry] boolValue];
-    if (isSecureTextEntry) {
+  BOOL isSecureTextEntry = [configuration[kSecureTextEntry] boolValue];
+  if (isSecureTextEntry) {
+    return YES;
+  }
+
+  NSDictionary* autofill = configuration[kAutofillProperties];
+  UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
+
+  if ([contentType isEqualToString:UITextContentTypePassword] ||
+      [contentType isEqualToString:UITextContentTypeUsername]) {
+    return YES;
+  }
+
+  if (@available(iOS 12.0, *)) {
+    if ([contentType isEqualToString:UITextContentTypeNewPassword]) {
       return YES;
-    }
-
-    NSDictionary* autofill = configuration[kAutofillProperties];
-    UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
-
-    if (@available(iOS 11.0, *)) {
-      if ([contentType isEqualToString:UITextContentTypePassword] ||
-          [contentType isEqualToString:UITextContentTypeUsername]) {
-        return YES;
-      }
-    }
-
-    if (@available(iOS 12.0, *)) {
-      if ([contentType isEqualToString:UITextContentTypeNewPassword]) {
-        return YES;
-      }
     }
   }
   return NO;
@@ -415,14 +405,10 @@ static FlutterAutofillType AutofillTypeOf(NSDictionary* configuration) {
     return kFlutterAutofillTypePassword;
   }
 
-  if (@available(iOS 10.0, *)) {
-    NSDictionary* autofill = configuration[kAutofillProperties];
-    UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
-    return !autofill || [contentType isEqualToString:@""] ? kFlutterAutofillTypeNone
-                                                          : kFlutterAutofillTypeRegular;
-  }
-
-  return kFlutterAutofillTypeNone;
+  NSDictionary* autofill = configuration[kAutofillProperties];
+  UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
+  return !autofill || [contentType isEqualToString:@""] ? kFlutterAutofillTypeNone
+                                                        : kFlutterAutofillTypeRegular;
 }
 
 static BOOL IsApproximatelyEqual(float x, float y, float delta) {
@@ -774,10 +760,8 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     _enableInteractiveSelection = YES;
     _accessibilityEnabled = NO;
     _decommissioned = NO;
-    if (@available(iOS 11.0, *)) {
-      _smartQuotesType = UITextSmartQuotesTypeYes;
-      _smartDashesType = UITextSmartDashesTypeYes;
-    }
+    _smartQuotesType = UITextSmartQuotesTypeYes;
+    _smartDashesType = UITextSmartDashesTypeYes;
     _selectionRects = [[NSArray alloc] init];
 
     if (@available(iOS 14.0, *)) {
@@ -804,18 +788,14 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   _enableInteractiveSelection = [configuration[kEnableInteractiveSelection] boolValue];
-  if (@available(iOS 11.0, *)) {
-    NSString* smartDashesType = configuration[kSmartDashesType];
-    // This index comes from the SmartDashesType enum in the framework.
-    bool smartDashesIsDisabled = smartDashesType && [smartDashesType isEqualToString:@"0"];
-    self.smartDashesType =
-        smartDashesIsDisabled ? UITextSmartDashesTypeNo : UITextSmartDashesTypeYes;
-    NSString* smartQuotesType = configuration[kSmartQuotesType];
-    // This index comes from the SmartQuotesType enum in the framework.
-    bool smartQuotesIsDisabled = smartQuotesType && [smartQuotesType isEqualToString:@"0"];
-    self.smartQuotesType =
-        smartQuotesIsDisabled ? UITextSmartQuotesTypeNo : UITextSmartQuotesTypeYes;
-  }
+  NSString* smartDashesType = configuration[kSmartDashesType];
+  // This index comes from the SmartDashesType enum in the framework.
+  bool smartDashesIsDisabled = smartDashesType && [smartDashesType isEqualToString:@"0"];
+  self.smartDashesType = smartDashesIsDisabled ? UITextSmartDashesTypeNo : UITextSmartDashesTypeYes;
+  NSString* smartQuotesType = configuration[kSmartQuotesType];
+  // This index comes from the SmartQuotesType enum in the framework.
+  bool smartQuotesIsDisabled = smartQuotesType && [smartQuotesType isEqualToString:@"0"];
+  self.smartQuotesType = smartQuotesIsDisabled ? UITextSmartQuotesTypeNo : UITextSmartQuotesTypeYes;
   if ([keyboardAppearance isEqualToString:@"Brightness.dark"]) {
     self.keyboardAppearance = UIKeyboardAppearanceDark;
   } else if ([keyboardAppearance isEqualToString:@"Brightness.light"]) {
@@ -827,19 +807,17 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   self.autocorrectionType = autocorrect && ![autocorrect boolValue]
                                 ? UITextAutocorrectionTypeNo
                                 : UITextAutocorrectionTypeDefault;
-  if (@available(iOS 10.0, *)) {
-    self.autofillId = AutofillIdFromDictionary(configuration);
-    if (autofill == nil) {
-      self.textContentType = @"";
-    } else {
-      self.textContentType = ToUITextContentType(autofill[kAutofillHints]);
-      [self setTextInputState:autofill[kAutofillEditingValue]];
-      NSAssert(_autofillId, @"The autofill configuration must contain an autofill id");
-    }
-    // The input field needs to be visible for the system autofill
-    // to find it.
-    self.isVisibleToAutofill = autofill || _secureTextEntry;
+  self.autofillId = AutofillIdFromDictionary(configuration);
+  if (autofill == nil) {
+    self.textContentType = @"";
+  } else {
+    self.textContentType = ToUITextContentType(autofill[kAutofillHints]);
+    [self setTextInputState:autofill[kAutofillEditingValue]];
+    NSAssert(_autofillId, @"The autofill configuration must contain an autofill id");
   }
+  // The input field needs to be visible for the system autofill
+  // to find it.
+  self.isVisibleToAutofill = autofill || _secureTextEntry;
 }
 
 - (UITextContentType)textContentType {

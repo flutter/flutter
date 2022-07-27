@@ -101,20 +101,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 @end
 
-// The following conditional compilation defines an API 13 concept on earlier API targets so that
-// a compiler compiling against API 12 or below does not blow up due to non-existent members.
-#if __IPHONE_OS_VERSION_MAX_ALLOWED < 130000
-typedef enum UIAccessibilityContrast : NSInteger {
-  UIAccessibilityContrastUnspecified = 0,
-  UIAccessibilityContrastNormal = 1,
-  UIAccessibilityContrastHigh = 2
-} UIAccessibilityContrast;
-
-@interface UITraitCollection (MethodsFromNewerSDK)
-- (UIAccessibilityContrast)accessibilityContrast;
-@end
-#endif
-
 @interface FlutterKeyboardManager (Tests)
 @property(nonatomic, retain, readonly)
     NSMutableArray<id<FlutterKeyPrimaryResponder>>* primaryResponders;

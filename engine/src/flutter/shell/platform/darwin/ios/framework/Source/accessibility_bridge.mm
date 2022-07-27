@@ -134,17 +134,12 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
       // Android.
       NSString* announcement =
           [[[NSString alloc] initWithUTF8String:object.node.label.c_str()] autorelease];
-      if (@available(iOS 11.0, *)) {
-        UIAccessibilityPostNotification(
-            UIAccessibilityAnnouncementNotification,
-            [[[NSAttributedString alloc]
-                initWithString:announcement
-                    attributes:@{
-                      UIAccessibilitySpeechAttributeQueueAnnouncement : @YES
-                    }] autorelease]);
-      } else {
-        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, announcement);
-      }
+      UIAccessibilityPostNotification(
+          UIAccessibilityAnnouncementNotification,
+          [[[NSAttributedString alloc] initWithString:announcement
+                                           attributes:@{
+                                             UIAccessibilitySpeechAttributeQueueAnnouncement : @YES
+                                           }] autorelease]);
     }
   }
 

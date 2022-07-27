@@ -60,10 +60,6 @@
 
 @end
 
-@interface ObservatoryNSNetServiceDelegate
-    : NSObject <FlutterObservatoryPublisherDelegate, NSNetServiceDelegate>
-@end
-
 @interface ObservatoryDNSServiceDelegate : NSObject <FlutterObservatoryPublisherDelegate>
 @end
 
@@ -116,15 +112,6 @@
   }
 }
 
-/// TODO(aaclarke): Remove this preprocessor macro once infra is moved to Xcode 12.
-static const DNSServiceErrorType kFlutter_DNSServiceErr_PolicyDenied =
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
-    kDNSServiceErr_PolicyDenied;
-#else
-    // Found in usr/include/dns_sd.h.
-    -65570;
-#endif  // __IPHONE_OS_VERSION_MAX_ALLOWED
-
 static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
                                            DNSServiceFlags flags,
                                            DNSServiceErrorType errorCode,
@@ -134,7 +121,7 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
                                            void* context) {
   if (errorCode == kDNSServiceErr_NoError) {
     FML_DLOG(INFO) << "FlutterObservatoryPublisher is ready!";
-  } else if (errorCode == kFlutter_DNSServiceErr_PolicyDenied) {
+  } else if (errorCode == kDNSServiceErr_PolicyDenied) {
     FML_LOG(ERROR)
         << "Could not register as server for FlutterObservatoryPublisher, permission "
         << "denied. Check your 'Local Network' permissions for this app in the Privacy section of "
@@ -143,38 +130,6 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
     FML_LOG(ERROR) << "Could not register as server for FlutterObservatoryPublisher. Check your "
                       "network settings and relaunch the application.";
   }
-}
-
-@end
-
-@implementation ObservatoryNSNetServiceDelegate {
-  fml::scoped_nsobject<NSNetService> _netService;
-}
-
-- (void)stopService {
-  [_netService.get() stop];
-  [_netService.get() setDelegate:nil];
-}
-
-- (void)publishServiceProtocolPort:(NSURL*)url {
-  NSNetService* netServiceTmp =
-      [[NSNetService alloc] initWithDomain:@"local."
-                                      type:@"_dartobservatory._tcp."
-                                      name:FlutterObservatoryPublisher.serviceName
-                                      port:[[url port] intValue]];
-  [netServiceTmp setTXTRecordData:[FlutterObservatoryPublisher createTxtData:url]];
-  _netService.reset(netServiceTmp);
-  [_netService.get() setDelegate:self];
-  [_netService.get() publish];
-}
-
-- (void)netServiceDidPublish:(NSNetService*)sender {
-  FML_DLOG(INFO) << "FlutterObservatoryPublisher is ready!";
-}
-
-- (void)netService:(NSNetService*)sender didNotPublish:(NSDictionary*)errorDict {
-  FML_LOG(ERROR) << "Could not register as server for FlutterObservatoryPublisher. Check your "
-                    "network settings and relaunch the application.";
 }
 
 @end
@@ -188,11 +143,7 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
   self = [super init];
   NSAssert(self, @"Super must not return null on init.");
 
-  if (@available(iOS 9.3, *)) {
-    _delegate.reset([[ObservatoryDNSServiceDelegate alloc] init]);
-  } else {
-    _delegate.reset([[ObservatoryNSNetServiceDelegate alloc] init]);
-  }
+  _delegate.reset([[ObservatoryDNSServiceDelegate alloc] init]);
   _enableObservatoryPublication = enableObservatoryPublication;
   _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterObservatoryPublisher>>(self);
 

@@ -41,11 +41,7 @@ static MTLResourceOptions ToMTLResourceOptions(StorageMode type) {
       return MTLResourceStorageModePrivate;
     case StorageMode::kDeviceTransient:
 #if FML_OS_IOS
-      if (@available(iOS 10.0, *)) {
-        return MTLResourceStorageModeMemoryless;
-      } else {
-        return MTLResourceStorageModePrivate;
-      }
+      return MTLResourceStorageModeMemoryless;
 #else
       return MTLResourceStorageModePrivate;
 #endif
@@ -66,11 +62,7 @@ static MTLStorageMode ToMTLStorageMode(StorageMode mode) {
       return MTLStorageModePrivate;
     case StorageMode::kDeviceTransient:
 #if FML_OS_IOS
-      if (@available(iOS 10.0, *)) {
-        return MTLStorageModeMemoryless;
-      } else {
-        return MTLStorageModePrivate;
-      }
+      return MTLStorageModeMemoryless;
 #else
       return MTLStorageModePrivate;
 #endif

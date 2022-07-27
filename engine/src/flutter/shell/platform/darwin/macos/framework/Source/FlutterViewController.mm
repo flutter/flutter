@@ -380,10 +380,8 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)viewDidLoad {
   [self configureTrackingArea];
-  if (@available(macOS 10.12.2, *)) {
-    [self.view setAllowedTouchTypes:NSTouchTypeMaskIndirect];
-    [self.view setWantsRestingTouches:YES];
-  }
+  [self.view setAllowedTouchTypes:NSTouchTypeMaskIndirect];
+  [self.view setWantsRestingTouches:YES];
 }
 
 - (void)viewWillAppear {
@@ -841,28 +839,25 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)touchesBeganWithEvent:(NSEvent*)event {
-  if (@available(macOS 10.12, *)) {
-    NSTouch* touch = event.allTouches.anyObject;
-    if (touch != nil) {
-      if (_mouseState.system_scroll_inertia_active) {
-        // The trackpad has been touched and a scroll gesture is still sending inertia events.
-        // A scroll inertia cancel message should be sent to the framework.
-        NSPoint locationInView = [self.flutterView convertPoint:event.locationInWindow
-                                                       fromView:nil];
-        NSPoint locationInBackingCoordinates =
-            [self.flutterView convertPointToBacking:locationInView];
-        FlutterPointerEvent flutterEvent = {
-            .struct_size = sizeof(flutterEvent),
-            .timestamp = static_cast<size_t>(event.timestamp * USEC_PER_SEC),
-            .x = locationInBackingCoordinates.x,
-            .y = -locationInBackingCoordinates.y,  // convertPointToBacking makes this negative.
-            .device = kPointerPanZoomDeviceId,
-            .signal_kind = kFlutterPointerSignalKindScrollInertiaCancel,
-            .device_kind = kFlutterPointerDeviceKindTrackpad,
-        };
+  NSTouch* touch = event.allTouches.anyObject;
+  if (touch != nil) {
+    if (_mouseState.system_scroll_inertia_active) {
+      // The trackpad has been touched and a scroll gesture is still sending inertia events.
+      // A scroll inertia cancel message should be sent to the framework.
+      NSPoint locationInView = [self.flutterView convertPoint:event.locationInWindow fromView:nil];
+      NSPoint locationInBackingCoordinates =
+          [self.flutterView convertPointToBacking:locationInView];
+      FlutterPointerEvent flutterEvent = {
+          .struct_size = sizeof(flutterEvent),
+          .timestamp = static_cast<size_t>(event.timestamp * USEC_PER_SEC),
+          .x = locationInBackingCoordinates.x,
+          .y = -locationInBackingCoordinates.y,  // convertPointToBacking makes this negative.
+          .device = kPointerPanZoomDeviceId,
+          .signal_kind = kFlutterPointerSignalKindScrollInertiaCancel,
+          .device_kind = kFlutterPointerDeviceKindTrackpad,
+      };
 
-        [_engine sendPointerEvent:flutterEvent];
-      }
+      [_engine sendPointerEvent:flutterEvent];
     }
   }
 }
