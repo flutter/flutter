@@ -3142,6 +3142,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: external_ui_integration_test_ios
+      ignore_flakiness: "true"
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
