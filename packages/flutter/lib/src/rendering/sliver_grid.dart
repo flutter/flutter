@@ -59,13 +59,19 @@ class SliverGridGeometry {
   /// leading edge of the parent.
   double get trailingScrollOffset => scrollOffset + mainAxisExtent;
 
-  /// Returns a tight [BoxConstraints] that forces the child to have the
+  /// Returns [BoxConstraints] that will be tight if the [SliverGridLayout] has
+  /// provided fixed extents, forcing the child to have the
   /// required size.
+  ///
+  /// If the [mainAxisExtent] is [double.infinity] the child will be allowed to
+  /// chose its own size in the main axis. An infinite [crossAxisExtent] will
+  /// result in the child having a max cross axis size of the provided
+  /// [SliverConstraints.crossAxisExtent].
   BoxConstraints getBoxConstraints(SliverConstraints constraints) {
     return constraints.asBoxConstraints(
-      minExtent: mainAxisExtent,
+      minExtent: mainAxisExtent.isFinite ? mainAxisExtent : 0,
       maxExtent: mainAxisExtent,
-      crossAxisExtent: crossAxisExtent,
+      crossAxisExtent: crossAxisExtent.isFinite ? crossAxisExtent : null,
     );
   }
 
@@ -108,18 +114,78 @@ abstract class SliverGridLayout {
   const SliverGridLayout();
 
   /// The minimum child index that intersects with (or is after) this scroll offset.
-  int? getMinChildIndexForScrollOffset(double scrollOffset);
+  /// TODO Add more docs to redirect to new method
+  @Deprecated(
+    'Replaced by getLeadingChildIndexForScrollOffset, which can return null to represent dynamic tile sizes. '
+    '<Version number>'
+  )
+  int getMinChildIndexForScrollOffset(double scrollOffset);
+
+  /// The leading child index that intersects with (or is after) this scroll
+  /// offset.
+  ///
+  /// Will return null if the index cannot be determined ahead of time for grid
+  /// layouts that allow dynamic tile sizes.
+  int? getLeadingChildIndexForScrollOffset(double scrollOffset) {
+    // Allows customers that have their own custom SliverGridLayout to not be
+    // broken during the deprecation period. RenderSliverGrid.performLayout will
+    // call this method instead of the deprecated one, so this pass through will
+    // maintain any un-migrated customers.
+    return getMinChildIndexForScrollOffset(scrollOffset);
+  }
 
   /// The maximum child index that intersects with (or is before) this scroll offset.
-  int? getMaxChildIndexForScrollOffset(double scrollOffset);
+  /// TODO Add more docs to redirect to new method
+  @Deprecated(
+    'Replaced by getTrailingChildIndexForScrollOffset, which can return null to represent dynamic tile sizes. '
+    '<Version number>'
+  )
+  int getMaxChildIndexForScrollOffset(double scrollOffset);
 
-  /// The size and position of the child with the given index.
+  /// The trailing child index that intersects with (or is before) this scroll
+  /// offset.
+  ///
+  /// Will return null if the index cannot be determined ahead of time for grid
+  /// layouts that allow dynamic tile sizes.
+  int? getTrailingChildIndexForScrollOffset(double scrollOffset) {
+    // Allows customers that have their own custom SliverGridLayout to not be
+    // broken during the deprecation period. RenderSliverGrid.performLayout will
+    // call this method instead of the deprecated one, so this pass through will
+    // maintain any un-migrated customers.
+    return getMaxChildIndexForScrollOffset(scrollOffset);
+  }
+
+
+  /// The  estimated size and position of the child with the given index.
+  ///
+  /// If the [SliverGridLayout] is fixed, like [SliverGridRegularTileLayout],
+  /// this geometry is not an estimate as it can precisely compute the geometry
+  /// of every child.
+  ///
+  /// For dynamic layouts, the [SliverGridGeometry] that is returned will
+  /// provide looser constraints to the child, whose size after layout can be
+  /// reported back to the layout object in [updateGeometryForChildIndex].
   SliverGridGeometry getGeometryForChildIndex(int index);
+
+  /// Update the size and position of the child with the given index,
+  /// considering the size of the child after layout.
+  ///
+  /// This is used to update the layout object after the child has laid out,
+  /// allowing the layout pattern to adapt to the child's size.
+  SliverGridGeometry updateGeometryForChildIndex(int index, Size childSize) {
+    // Allows customers that have their own fixed SliverGridLayout to not be
+    // broken by this method, which facilitates more dynamic layouts. When
+    // RenderSliverGrid.performLayout calls this method, a fixed layout like
+    // SliverGridRegularTileLayout will not change its geometry based on the
+    // child size, so it just returns the same geometry as before.
+    return getGeometryForChildIndex(index);
+  }
 
   /// The scroll extent needed to fully display all the tiles if there are
   /// `childCount` children in total.
   ///
   /// The child count will never be null.
+  /// TODO: Does this need to  be updated for dynamic sizes as well?
   double computeMaxScrollOffset(int childCount);
 }
 
@@ -192,11 +258,19 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   /// the [SliverConstraints.crossAxisDirection].
   final bool reverseCrossAxis;
 
+  @Deprecated(
+    'Replaced by getLeadingChildIndexForScrollOffset, which can return null to represent dynamic tile sizes. '
+    '<Version number>'
+  )
   @override
   int getMinChildIndexForScrollOffset(double scrollOffset) {
     return mainAxisStride > precisionErrorTolerance ? crossAxisCount * (scrollOffset ~/ mainAxisStride) : 0;
   }
 
+  @Deprecated(
+    'Replaced by getTrailingChildIndexForScrollOffset, which can return null to represent dynamic tile sizes. '
+    '<Version number>'
+  )
   @override
   int getMaxChildIndexForScrollOffset(double scrollOffset) {
     if (mainAxisStride > 0.0) {
@@ -567,15 +641,16 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final SliverGridLayout layout = _gridDelegate.getLayout(constraints);
 
     // If firstIndex is != null, we know the layout pattern and can proceed.
-    final int firstIndex = layout.getMinChildIndexForScrollOffset(scrollOffset)
+    final int firstIndex = layout.getLeadingChildIndexForScrollOffset(scrollOffset)
     // If firstIndex == null, we need to find the first index, similar to
     // RenderSliverList.performLayout, walking through the children and laying
     // them out until we intersect with the given scroll offset.
+      // TODO(Piinks): Walk to find where we are
       ?? _findMinIndexForOffset(scrollOffset);
 
     // TODO(Piinks): Does not account for dynamic tile sizes
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
-      layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset) : null;
+      layout.getTrailingChildIndexForScrollOffset(targetEndScrollOffset) : null;
 
     // Clean up any previously laid out children out of range
     // TODO(Piinks): move to end of perform layout
@@ -598,7 +673,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     // If the layout is uniform, the SliverGridLayout can compute this.
     // If the layout is not uniform, the SliverGridLayout should already know at
     // this point what the layout of the given index from walking to it in
-    // _findMixIndexForOffset.
+    // _findMinIndexForOffset.
     final SliverGridGeometry firstChildGridGeometry = layout.getGeometryForChildIndex(firstIndex);
     final double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
     double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
@@ -624,11 +699,14 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     // If the index of the firstChild >= the firstIndex chosen by the
     // SliverGridLayout, then nothing needs to be laid out ahead of firstChild here.
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
-      final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
+      SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
       final RenderBox child = insertAndLayoutLeadingChild(
         gridGeometry.getBoxConstraints(constraints),
       )!;
       final SliverGridParentData childParentData = child.parentData! as SliverGridParentData;
+      if (child.hasSize) {
+        gridGeometry = layout.updateGeometryForChildIndex(index, child.size);
+      }
       childParentData.layoutOffset = gridGeometry.scrollOffset;
       childParentData.crossAxisOffset = gridGeometry.crossAxisOffset;
       assert(childParentData.index == index);
@@ -640,8 +718,11 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     if (trailingChildWithLayout == null) {
       firstChild!.layout(firstChildGridGeometry.getBoxConstraints(constraints));
       final SliverGridParentData childParentData = firstChild!.parentData! as SliverGridParentData;
-      childParentData.layoutOffset = firstChildGridGeometry.scrollOffset;
-      childParentData.crossAxisOffset = firstChildGridGeometry.crossAxisOffset;
+      final SliverGridGeometry actualFirstChildGridGeometry = firstChild!.hasSize
+          ? layout.updateGeometryForChildIndex(firstIndex, firstChild!.size)
+          : firstChildGridGeometry;
+      childParentData.layoutOffset = actualFirstChildGridGeometry.scrollOffset;
+      childParentData.crossAxisOffset = actualFirstChildGridGeometry.crossAxisOffset;
       trailingChildWithLayout = firstChild;
     }
 
@@ -650,7 +731,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     // and progress through the rest.
     // TODO(Piinks): Update use of targetLastIndex
     for (int index = indexOf(trailingChildWithLayout!) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
-      final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
+      SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
       final BoxConstraints childConstraints = gridGeometry.getBoxConstraints(constraints);
       RenderBox? child = childAfter(trailingChildWithLayout!);
       if (child == null || indexOf(child) != index) {
@@ -664,8 +745,10 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       }
       trailingChildWithLayout = child;
       assert(child != null);
-      layout.setFinalGeometryForChildIndex(index, child.size, gridGeometry);
       final SliverGridParentData childParentData = child.parentData! as SliverGridParentData;
+      if (child.hasSize) {
+        gridGeometry = layout.updateGeometryForChildIndex(index, child.size);
+      }
       childParentData.layoutOffset = gridGeometry.scrollOffset;
       childParentData.crossAxisOffset = gridGeometry.crossAxisOffset;
       assert(childParentData.index == index);
@@ -714,6 +797,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
   }
 
   int _findMinIndexForOffset(double scrollOffset) {
+    // TODO
     return 0;
   }
 }
