@@ -1601,7 +1601,8 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildSwitch(useOverlay: false));  // inactive
+    // test inactive Switch, and overlayColor is set to null.
+    await tester.pumpWidget(buildSwitch(useOverlay: false));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 
@@ -1616,6 +1617,7 @@ void main() {
       reason: 'Default inactive pressed Switch should have overlay color from thumbColor',
     );
 
+    // test active Switch, and overlayColor is set to null.
     await tester.pumpWidget(buildSwitch(active: true, useOverlay: false));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
@@ -1631,6 +1633,7 @@ void main() {
       reason: 'Default active pressed Switch should have overlay color from thumbColor',
     );
 
+    // test inactive Switch with an overlayColor
     await tester.pumpWidget(buildSwitch());
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
@@ -1646,6 +1649,7 @@ void main() {
       reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
     );
 
+    // test active Switch with an overlayColor
     await tester.pumpWidget(buildSwitch(active: true));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
