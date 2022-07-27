@@ -5,8 +5,6 @@
 source_root = "//third_party/imgui"
 
 source_set("imgui") {
-  testonly = true
-
   public = [
     "$source_root/imgui.h",
     "$source_root/imgui_internal.h",
@@ -36,8 +34,6 @@ config("imgui_headers") {
 }
 
 source_set("imgui_glfw") {
-  testonly = true
-
   public_deps = [
     ":imgui",
     "//third_party/glfw",
