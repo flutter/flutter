@@ -895,7 +895,6 @@ class SelectionOverlay {
       return;
     }
 
-
     _magnifierController.hide();
 
     if (shouldShowToolbar) {
