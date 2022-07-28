@@ -207,7 +207,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         'To use the command line arguments, delete the l10n.yaml file in the '
         'Flutter project.\n\n'
       );
-      generateLocalizations(
+      await generateLocalizations(
         logger: _logger,
         options: options,
         projectDir: _fileSystem.currentDirectory,
@@ -235,7 +235,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     precacheLanguageAndRegionTags();
 
     try {
-      LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: _fileSystem,
         inputPathString: inputPathString,
         outputPathString: outputPathString,
@@ -256,6 +256,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       )
         ..loadResources()
         ..writeOutputFiles();
+      await generator.formatOutputFiles();
     } on L10nException catch (e) {
       throwToolExit(e.message);
     }

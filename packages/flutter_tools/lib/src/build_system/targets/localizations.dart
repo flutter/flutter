@@ -53,7 +53,7 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       fileSystem: environment.fileSystem,
     );
-    generateLocalizations(
+    await generateLocalizations(
       logger: environment.logger,
       options: options,
       projectDir: environment.projectDir,

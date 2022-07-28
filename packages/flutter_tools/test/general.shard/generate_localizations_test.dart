@@ -803,7 +803,7 @@ void main() {
       );
 
       // Verify that values are correctly passed through the localizations target.
-      final LocalizationsGenerator generator = generateLocalizations(
+      final LocalizationsGenerator generator = await generateLocalizations(
         fileSystem: fs,
         options: options,
         logger: logger,
@@ -884,7 +884,7 @@ flutter:
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Test without headers.
-      generateLocalizations(
+      await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
           arbDirectory: Uri.directory(defaultL10nPathString),
@@ -910,7 +910,7 @@ class AppLocalizationsEn extends AppLocalizations {
 ''');
 
     // Test with headers.
-    generateLocalizations(
+    await generateLocalizations(
       fileSystem: fs,
       options: LocalizationOptions(
         header: 'HEADER',

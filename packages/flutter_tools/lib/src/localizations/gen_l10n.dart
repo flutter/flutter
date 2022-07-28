@@ -4,24 +4,26 @@
 
 import 'package:meta/meta.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
+import '../globals.dart' as globals;
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 
 /// Run the localizations generation script with the configuration [options].
-LocalizationsGenerator generateLocalizations({
+Future<LocalizationsGenerator> generateLocalizations({
   required Directory projectDir,
   Directory? dependenciesDir,
   required LocalizationOptions options,
   required Logger logger,
   required FileSystem fileSystem,
-}) {
+}) async {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
   final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
@@ -68,6 +70,7 @@ LocalizationsGenerator generateLocalizations({
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: true);
+    await generator.formatOutputFiles();
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
@@ -1421,6 +1424,19 @@ class LocalizationsGenerator {
           'outputs': _outputFileList,
         }),
       );
+    }
+  }
+
+  Future<void> formatOutputFiles() async {
+    final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final List<String> command = <String>[
+      dartBinary,
+      'format',
+      outputDirectory.path,
+    ];
+    final int result = await (await globals.processUtils.start(command)).exitCode;
+    if (result != 0) {
+      throwToolExit('Formatting failed: $result', exitCode: result);
     }
   }
 
