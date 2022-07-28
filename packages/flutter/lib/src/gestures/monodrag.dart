@@ -398,9 +398,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     //       and _multiPointerMoveTrackers.add,),
     //     * p1 up (_multiPointerStartTrackers.clear),
     //     * p2 up.
-    //     * It means the last PointerEvent will be lost, this is acceptable.
-    //       If the gesture update the last PointerEvent in the pointer up stage,
-    //       it may cause flickering.
     //
     // In any case, if any accepted pointer becomes up, all other pointers should be given up.
     assert(_state != _DragState.ready);
@@ -428,6 +425,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           _pointerMoveAccept = true;
           _multiPointerMoveTrackers.add(event);
           assert (_multiPointerMoveTrackers.length <= _multiPointerStartTrackers.length);
+          // If this event is the last event of a batch, update the pointers.
           if (event.endOfBatch || _multiPointerMoveTrackers.length == _multiPointerStartTrackers.length) {
             _checkMultiPointerUpdate();
             _multiPointerMoveTrackers.clear();
