@@ -1228,6 +1228,71 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         tester.widget<Text>(find.text('Label ${index + 2}'));
     expect(bodyText2Style, nextLabelTextWidget.style);
   });
+
+   testWidgets('Stepper custom step padding', (WidgetTester tester) async {
+    const EdgeInsets padding = EdgeInsets.all(16.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SizedBox(
+            width: 200,
+            height: 75,
+            child: Stepper(
+              stepPadding: padding,
+              type: StepperType.horizontal,
+              steps: const <Step>[
+                Step(
+                    title: Text('Regular title'),
+                    content: Text('Text content')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Stepper material = tester.firstWidget<Stepper>(
+      find.descendant(
+        of: find.byType(Material),
+        matching: find.byType(Stepper),
+      ),
+    );
+
+    expect(material.stepPadding, equals(padding));
+  });
+
+   testWidgets('Stepper custom step default padding', (WidgetTester tester) async {
+    const EdgeInsets padding = EdgeInsets.all(24.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SizedBox(
+            width: 200,
+            height: 75,
+            child: Stepper(
+              type: StepperType.horizontal,
+              steps: const <Step>[
+                Step(
+                    title: Text('Regular title'),
+                    content: Text('Text content')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Stepper material = tester.firstWidget<Stepper>(
+      find.descendant(
+        of: find.byType(Material),
+        matching: find.byType(Stepper),
+      ),
+    );
+
+    expect(material.stepPadding, equals(padding));
+  });
 }
 
 class _TappableColorWidget extends StatefulWidget {
