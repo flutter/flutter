@@ -113,20 +113,42 @@ abstract class AotAssemblyBase extends Target {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
 
+    // Combine the app lib into a fat framework.
     await _lipo(environment, darwinArchs, 'App.Framework/App', buildOutputPath);
 
-    if (buildMode == BuildMode.profile || buildMode == BuildMode.release) {
-      await _lipo(environment, darwinArchs, 'App.framework.dSYM/Contents/Resources/DWARF/App', buildOutputPath);
-    }
+    // And combine the dSYM for each architecture too, if it was created.
+    await _lipo(
+      environment,
+      darwinArchs,
+      'App.framework.dSYM/Contents/Resources/DWARF/App',
+      buildOutputPath,
+      skipMissingInputs: true
+    );
   }
 
-  Future<void> _lipo(Environment environment, List<DarwinArch> darwinArchs, String path, String buildOutputPath) async {
+  Future<void> _lipo(
+      Environment environment,
+      List<DarwinArch> darwinArchs,
+      String path,
+      String inputDir,
+      {bool skipMissingInputs = false}) async {
+
     final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, path);
     environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
+
+    Iterable<String> inputPaths = darwinArchs.map(
+      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, getNameForDarwinArch(iosArch), path)
+    );
+    if (skipMissingInputs) {
+      inputPaths = inputPaths.where(environment.fileSystem.isFileSync);
+      if (inputPaths.isEmpty) {
+        return;
+      }
+    }
+
     final List<String> lipoArgs = <String>[
       'lipo',
-      ...darwinArchs.map((DarwinArch iosArch) =>
-          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), path)),
+      ...inputPaths,
       '-create',
       '-output',
       resultPath,
@@ -502,7 +524,7 @@ abstract class IosAssetBundle extends Target {
     }
 
     // Copy the dSYM
-    if (buildMode == BuildMode.profile || buildMode == BuildMode.release) {
+    if (environment.buildDir.childDirectory('App.framework.dSYM').existsSync()) {
       final File dsymOutputBinary = environment
         .outputDir
         .childDirectory('App.framework.dSYM')
