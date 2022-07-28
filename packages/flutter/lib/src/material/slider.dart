@@ -144,7 +144,8 @@ class Slider extends StatefulWidget {
        assert(min != null),
        assert(max != null),
        assert(min <= max),
-       assert(value >= min && value <= max),
+       assert(value >= min && value <= max,
+         'Value $value is not between minimum $min and maximum $max'),
        assert(divisions == null || divisions > 0);
 
   /// Creates an adaptive [Slider] based on the target platform, following
