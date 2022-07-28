@@ -209,6 +209,7 @@ class Stepper extends StatefulWidget {
     this.controlsBuilder,
     this.elevation,
     this.margin,
+    this.stepPadding = const EdgeInsets.all(24.0),
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -236,6 +237,9 @@ class Stepper extends StatefulWidget {
 
   /// The index into [steps] of the current step whose content is displayed.
   final int currentStep;
+
+  /// The padding around all Step Widgets
+  final EdgeInsets stepPadding;
 
   /// The callback called when a step is tapped, with its index passed as
   /// an argument.
@@ -799,7 +803,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Material(
           elevation: widget.elevation ?? 2,
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24.0),
+            margin: widget.stepPadding,
             child: Row(
               children: children,
             ),
