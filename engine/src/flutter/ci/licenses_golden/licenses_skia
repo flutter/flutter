@@ -1,4 +1,4 @@
-Signature: af2204ad6330fd6dec869a55b4eb2d68
+Signature: c15d237bf2cacef87d486d057b293c86
 
 UNUSED LICENSES:
 
@@ -5635,6 +5635,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/render/TextDirectRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TextDirectRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TextSDFRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TextSDFRenderStep.h
+FILE: ../../../third_party/skia/src/gpu/graphite/render/VerticesRenderStep.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/render/VerticesRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
