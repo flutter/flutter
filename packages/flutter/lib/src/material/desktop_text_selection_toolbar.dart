@@ -78,10 +78,13 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
         delegate: DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: _defaultToolbarBuilder(context, Column(
-          mainAxisSize: MainAxisSize.min,
-          children: children,
-        )),
+        child: _defaultToolbarBuilder(
+          context,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
+        ),
       ),
     );
   }
