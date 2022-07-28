@@ -331,14 +331,10 @@ class AOTSnapshotter {
 
       if (stripAfterBuild) {
         // See https://www.unix.com/man-page/osx/1/strip/ for arguments
-        result = await _xcode.strip(<String>['-S', '-x', appLib, '-o', '$appLib.stripped']);
+        result = await _xcode.strip(<String>['-S', '-x', appLib, '-o', appLib]);
         if (result.exitCode != 0) {
           _logger.printError('Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${result.exitCode}');
         }
-
-        // Overwrite the original lib file with the stripped one.
-        _fileSystem.file(appLib).deleteSync();
-        _fileSystem.file('$appLib.stripped').renameSync(appLib);
       }
     } else {
       assert(stripAfterBuild == false);
