@@ -602,9 +602,7 @@ void DisplayListBuilder::clipRect(const SkRect& rect,
   switch (clip_op) {
     case SkClipOp::kIntersect:
       Push<ClipIntersectRectOp>(0, 1, rect, is_aa);
-      if (!current_layer_->clip_bounds.intersect(rect)) {
-        current_layer_->clip_bounds.setEmpty();
-      }
+      intersect(rect);
       break;
     case SkClipOp::kDifference:
       Push<ClipDifferenceRectOp>(0, 1, rect, is_aa);
@@ -620,9 +618,7 @@ void DisplayListBuilder::clipRRect(const SkRRect& rrect,
     switch (clip_op) {
       case SkClipOp::kIntersect:
         Push<ClipIntersectRRectOp>(0, 1, rrect, is_aa);
-        if (!current_layer_->clip_bounds.intersect(rrect.getBounds())) {
-          current_layer_->clip_bounds.setEmpty();
-        }
+        intersect(rrect.getBounds());
         break;
       case SkClipOp::kDifference:
         Push<ClipDifferenceRRectOp>(0, 1, rrect, is_aa);
@@ -653,13 +649,23 @@ void DisplayListBuilder::clipPath(const SkPath& path,
   switch (clip_op) {
     case SkClipOp::kIntersect:
       Push<ClipIntersectPathOp>(0, 1, path, is_aa);
-      if (!current_layer_->clip_bounds.intersect(path.getBounds())) {
-        current_layer_->clip_bounds.setEmpty();
+      if (!path.isInverseFillType()) {
+        intersect(path.getBounds());
       }
       break;
     case SkClipOp::kDifference:
       Push<ClipDifferencePathOp>(0, 1, path, is_aa);
+      // Map "kDifference of inverse path" to "kIntersect of the original path".
+      if (path.isInverseFillType()) {
+        intersect(path.getBounds());
+      }
       break;
+  }
+}
+void DisplayListBuilder::intersect(const SkRect& rect) {
+  SkRect devClipBounds = getTransform().mapRect(rect);
+  if (!current_layer_->clip_bounds.intersect(devClipBounds)) {
+    current_layer_->clip_bounds.setEmpty();
   }
 }
 SkRect DisplayListBuilder::getLocalClipBounds() {

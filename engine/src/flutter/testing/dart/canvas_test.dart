@@ -731,6 +731,27 @@ void main() {
     expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
   });
 
+  test('Canvas.clipRect with matrix affects canvas.getClipBounds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    const Rect clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
+
+    canvas.save();
+    canvas.clipRect(clipBounds1);
+    canvas.translate(0, 10.0);
+    canvas.clipRect(clipBounds1);
+    expect(canvas.getDestinationClipBounds().isEmpty, isTrue);
+    canvas.restore();
+
+    canvas.save();
+    canvas.clipRect(clipBounds1);
+    canvas.translate(-10.0, -10.0);
+    canvas.clipRect(clipBounds2);
+    expect(canvas.getDestinationClipBounds(), clipBounds1);
+    canvas.restore();
+  });
+
   test('Canvas.clipRRect affects canvas.getClipBounds', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
@@ -772,6 +793,29 @@ void main() {
     expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
   });
 
+  test('Canvas.clipRRect with matrix affects canvas.getClipBounds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    const Rect clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
+    final RRect clip1 = RRect.fromRectAndRadius(clipBounds1, const Radius.circular(3));
+    final RRect clip2 = RRect.fromRectAndRadius(clipBounds2, const Radius.circular(3));
+
+    canvas.save();
+    canvas.clipRRect(clip1);
+    canvas.translate(0, 10.0);
+    canvas.clipRRect(clip1);
+    expect(canvas.getDestinationClipBounds().isEmpty, isTrue);
+    canvas.restore();
+
+    canvas.save();
+    canvas.clipRRect(clip1);
+    canvas.translate(-10.0, -10.0);
+    canvas.clipRRect(clip2);
+    expect(canvas.getDestinationClipBounds(), clipBounds1);
+    canvas.restore();
+  });
+
   test('Canvas.clipPath affects canvas.getClipBounds', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
@@ -811,6 +855,29 @@ void main() {
     // save/restore returned the values to their original values
     expect(canvas.getLocalClipBounds(), initialLocalBounds);
     expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+  });
+
+  test('Canvas.clipPath with matrix affects canvas.getClipBounds', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    const Rect clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
+    final Path clip1 = Path()..addRect(clipBounds1)..addOval(clipBounds1);
+    final Path clip2 = Path()..addRect(clipBounds2)..addOval(clipBounds2);
+
+    canvas.save();
+    canvas.clipPath(clip1);
+    canvas.translate(0, 10.0);
+    canvas.clipPath(clip1);
+    expect(canvas.getDestinationClipBounds().isEmpty, isTrue);
+    canvas.restore();
+
+    canvas.save();
+    canvas.clipPath(clip1);
+    canvas.translate(-10.0, -10.0);
+    canvas.clipPath(clip2);
+    expect(canvas.getDestinationClipBounds(), clipBounds1);
+    canvas.restore();
   });
 
   test('Canvas.clipRect(diff) does not affect canvas.getClipBounds', () async {

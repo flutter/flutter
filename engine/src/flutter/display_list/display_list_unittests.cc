@@ -2116,6 +2116,25 @@ TEST(DisplayList, ClipRectAffectsClipBounds) {
   ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
 }
 
+TEST(DisplayList, ClipRectAffectsClipBoundsWithMatrix) {
+  DisplayListBuilder builder;
+  SkRect clipBounds1 = SkRect::MakeLTRB(0, 0, 10, 10);
+  SkRect clipBounds2 = SkRect::MakeLTRB(10, 10, 20, 20);
+  builder.save();
+  builder.clipRect(clipBounds1, SkClipOp::kIntersect, false);
+  builder.translate(10, 0);
+  builder.clipRect(clipBounds1, SkClipOp::kIntersect, false);
+  ASSERT_TRUE(builder.getDestinationClipBounds().isEmpty());
+  builder.restore();
+
+  builder.save();
+  builder.clipRect(clipBounds1, SkClipOp::kIntersect, false);
+  builder.translate(-10, -10);
+  builder.clipRect(clipBounds2, SkClipOp::kIntersect, false);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clipBounds1);
+  builder.restore();
+}
+
 TEST(DisplayList, ClipRRectAffectsClipBounds) {
   DisplayListBuilder builder;
   SkRect clipBounds = SkRect::MakeLTRB(10.2, 11.3, 20.4, 25.7);
@@ -2156,6 +2175,28 @@ TEST(DisplayList, ClipRRectAffectsClipBounds) {
   ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
 }
 
+TEST(DisplayList, ClipRRectAffectsClipBoundsWithMatrix) {
+  DisplayListBuilder builder;
+  SkRect clipBounds1 = SkRect::MakeLTRB(0, 0, 10, 10);
+  SkRect clipBounds2 = SkRect::MakeLTRB(10, 10, 20, 20);
+  SkRRect clip1 = SkRRect::MakeRectXY(clipBounds1, 3, 2);
+  SkRRect clip2 = SkRRect::MakeRectXY(clipBounds2, 3, 2);
+
+  builder.save();
+  builder.clipRRect(clip1, SkClipOp::kIntersect, false);
+  builder.translate(10, 0);
+  builder.clipRRect(clip1, SkClipOp::kIntersect, false);
+  ASSERT_TRUE(builder.getDestinationClipBounds().isEmpty());
+  builder.restore();
+
+  builder.save();
+  builder.clipRRect(clip1, SkClipOp::kIntersect, false);
+  builder.translate(-10, -10);
+  builder.clipRRect(clip2, SkClipOp::kIntersect, false);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clipBounds1);
+  builder.restore();
+}
+
 TEST(DisplayList, ClipPathAffectsClipBounds) {
   DisplayListBuilder builder;
   SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
@@ -2194,6 +2235,27 @@ TEST(DisplayList, ClipPathAffectsClipBounds) {
   // save/restore returned the values to their original values
   ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
   ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
+TEST(DisplayList, ClipPathAffectsClipBoundsWithMatrix) {
+  DisplayListBuilder builder;
+  SkRect clipBounds = SkRect::MakeLTRB(0, 0, 10, 10);
+  SkPath clip1 = SkPath().addCircle(2.5, 2.5, 2.5).addCircle(7.5, 7.5, 2.5);
+  SkPath clip2 = SkPath().addCircle(12.5, 12.5, 2.5).addCircle(17.5, 17.5, 2.5);
+
+  builder.save();
+  builder.clipPath(clip1, SkClipOp::kIntersect, false);
+  builder.translate(10, 0);
+  builder.clipPath(clip1, SkClipOp::kIntersect, false);
+  ASSERT_TRUE(builder.getDestinationClipBounds().isEmpty());
+  builder.restore();
+
+  builder.save();
+  builder.clipPath(clip1, SkClipOp::kIntersect, false);
+  builder.translate(-10, -10);
+  builder.clipPath(clip2, SkClipOp::kIntersect, false);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clipBounds);
+  builder.restore();
 }
 
 TEST(DisplayList, DiffClipRectDoesNotAffectClipBounds) {
@@ -2250,6 +2312,30 @@ TEST(DisplayList, DiffClipPathDoesNotAffectClipBounds) {
   builder.clipPath(diff_clip, SkClipOp::kDifference, false);
   ASSERT_EQ(builder.getLocalClipBounds(), initialLocalBounds);
   ASSERT_EQ(builder.getDestinationClipBounds(), initialDestinationBounds);
+}
+
+TEST(DisplayList, ClipPathWithInvertFillTypeDoesNotAffectClipBounds) {
+  SkRect cull_rect = SkRect::MakeLTRB(0, 0, 100.0, 100.0);
+  DisplayListBuilder builder(cull_rect);
+  SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
+  clip.setFillType(SkPathFillType::kInverseWinding);
+  builder.clipPath(clip, SkClipOp::kIntersect, false);
+
+  ASSERT_EQ(builder.getLocalClipBounds(), cull_rect);
+  ASSERT_EQ(builder.getDestinationClipBounds(), cull_rect);
+}
+
+TEST(DisplayList, DiffClipPathWithInvertFillTypeAffectsClipBounds) {
+  SkRect cull_rect = SkRect::MakeLTRB(0, 0, 100.0, 100.0);
+  DisplayListBuilder builder(cull_rect);
+  SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
+  clip.setFillType(SkPathFillType::kInverseWinding);
+  SkRect clip_bounds = SkRect::MakeLTRB(8.2, 9.3, 22.4, 27.7);
+  SkRect clip_expanded_bounds = SkRect::MakeLTRB(8, 9, 23, 28);
+  builder.clipPath(clip, SkClipOp::kDifference, false);
+
+  ASSERT_EQ(builder.getLocalClipBounds(), clip_expanded_bounds);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clip_bounds);
 }
 
 TEST(DisplayList, FlatDrawPointsProducesBounds) {
