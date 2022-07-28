@@ -616,15 +616,23 @@ class SelectionOverlay {
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndpoints = selectionEndpoints,
-       _toolbarLocation = toolbarLocation {
-    final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
-    assert(
-      overlay != null,
-      'No Overlay widget exists above $context.\n'
-      'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
-      'app content was created above the Navigator with the WidgetsApp builder parameter.',
-    );
-  }
+       _toolbarLocation = toolbarLocation,
+       assert(() {
+         final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
+         if (overlay == null) {
+           final List<DiagnosticsNode> information = <DiagnosticsNode>[
+             ErrorSummary('No Overlay widget found.'),
+             ErrorDescription(
+                 'No Overlay widget exists above $context.\n'
+                 'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
+                 'app content was created above the Navigator with the WidgetsApp builder parameter.'
+             ),
+           ];
+
+           throw FlutterError.fromParts(information);
+         }
+         return true;
+       }());
 
   /// The context in which the selection handles should appear.
   ///

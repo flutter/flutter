@@ -176,6 +176,43 @@ void main() {
     );
   }
 
+  testWidgets('throw if no Overlay widget exists above', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errors.add(details);
+    };
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: SelectableText('I love Flutter!'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset textFieldStart = tester.getTopLeft(find.byType(SelectableText));
+    final TestGesture gesture = await tester.startGesture(textFieldStart, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    FlutterError.onError = handler;
+
+    final FlutterError error = errors[0].exception as FlutterError;
+    expect(
+      error.message,
+      contains('No Overlay widget exists above EditableText'),
+    );
+  });
+
   testWidgets('Do not crash when remove SelectableText during handle drag', (WidgetTester tester) async {
     // Regression test https://github.com/flutter/flutter/issues/108242
     bool isShow = true;
