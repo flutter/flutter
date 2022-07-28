@@ -464,7 +464,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
 
    'src/third_party/abseil-cpp':
-   Var('chromium_git') + '/chromium/src/third_party/abseil-cpp.git' + '@' + '2d8c1340f0350828f1287c4eaeebefcf317bcfc9',
+   Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + 'f92f9effc89af7692436c3b9fbb3a67f2239d893',
 
    # Dart packages
   'src/third_party/pkg/archive':
@@ -606,7 +606,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-amd64',
-        'version': '2UxMJ4z6houS9ZJc_5ncts3m-r-zU0wT06pSgY6R3cgC'
+        'version': 'NyopqdQvXY11sckCZIz7FdXLgQZep1ssg1IYBX09ZPwC'
       }
     ],
     'condition': 'host_os == "mac"',
@@ -617,7 +617,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
-        'version': 'paOG_Xw-UvkP8dRq7EF6RD9RQ8r4_R8---bmr1I8H_oC'
+        'version': 'ad2NsyQv7Q0UnDFu6vxeKVumfP-AHmA-ju9u0YCZkwgC'
       }
     ],
     'condition': 'host_os == "linux"',
