@@ -13,20 +13,20 @@ namespace flutter {
 sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
     GrBackend backend,
     sk_sp<const GrGLInterface> gl_interface) {
+#if !OS_FUCHSIA && SK_GL
   if (backend != GrBackend::kOpenGL_GrBackend) {
     return nullptr;
   }
 
   const auto options = MakeDefaultContextOptions(ContextType::kResource);
 
-#if !OS_FUCHSIA
   if (auto context = GrDirectContext::MakeGL(gl_interface, options)) {
     // Do not cache textures created by the image decoder.  These textures
     // should be deleted when they are no longer referenced by an SkImage.
     context->setResourceCacheLimit(0);
     return context;
   }
-#endif
+#endif  // !OS_FUCHSIA && SK_GL
 
   return nullptr;
 }
