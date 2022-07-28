@@ -144,10 +144,11 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               margin: EdgeInsets.zero,
               onDetailsPressed: () {
                 _showDrawerContents = !_showDrawerContents;
-                if (_showDrawerContents)
+                if (_showDrawerContents) {
                   _controller.reverse();
-                else
+                } else {
                   _controller.forward();
+                }
               },
             ),
             MediaQuery.removePadding(
