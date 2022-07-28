@@ -599,8 +599,8 @@ class AndroidProject extends FlutterProjectPlatform {
 Warning
 ──────────────────────────────────────────────────────────────────────────────
 Your Flutter application is created using an older version of the Android
-embedding. It is being deprecated in favor of Android embedding v2. Migrate
-your project by following the steps at
+embedding. It is being deprecated in favor of Android embedding v2. To migrate
+your project, follow the steps at:
 
 https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
 
