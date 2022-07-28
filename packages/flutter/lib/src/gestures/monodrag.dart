@@ -456,7 +456,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         _velocityTrackers.keys.toList().forEach(_giveUpPointer);
         _multiPointerMoveTrackers.clear();
         _pointerMoveAccept = false;
-        // _remainPointers = _multiPointerStartTrackers.toSet();
       } else {
         _giveUpPointer(event.pointer);
       }
