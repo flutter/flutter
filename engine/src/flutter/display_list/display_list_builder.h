@@ -361,6 +361,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
 
   void setAttributesFromDlPaint(const DlPaint& paint,
                                 const DisplayListAttributeFlags flags);
+  void intersect(const SkRect& rect);
 
   // kInvalidSigma is used to indicate that no MaskBlur is currently set.
   static constexpr SkScalar kInvalidSigma = 0.0;
