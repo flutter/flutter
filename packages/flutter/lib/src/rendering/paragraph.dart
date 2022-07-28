@@ -653,9 +653,7 @@ class RenderParagraph extends RenderBox
         }
         _systemFontsChangeScheduled = true;
         SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
-          if (!_systemFontsChangeScheduled) {
-            return;
-          }
+          assert(_systemFontsChangeScheduled);
           _systemFontsChangeScheduled = false;
           assert(
             attached || (debugDisposed ?? true),
