@@ -18,7 +18,7 @@
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-12",
-		"cpu=x86"
+                "cpu=x86"
             ],
             "gclient_custom_vars": {
                 "download_android_deps": false
@@ -60,7 +60,7 @@
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-12",
-		"cpu=x86"
+                "cpu=x86"
             ],
             "gclient_custom_vars": {
                 "download_android_deps": false
@@ -114,7 +114,7 @@
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-12",
-		"cpu=x86"
+                "cpu=x86"
             ],
             "gclient_custom_vars": {
                 "download_android_deps": false
@@ -152,7 +152,7 @@
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-12",
-		"cpu=x86"
+                "cpu=x86"
             ],
             "gclient_custom_vars": {
                 "download_android_deps": false
@@ -182,7 +182,7 @@
                 {
                     "base_path": "out/mac_profile_arm64/zip_archives/",
                     "include_paths": [
-                        "out/mac_profile_arm64/zip_archives/darwin-x64/gen_snapshot.zip"
+                        "out/mac_profile_arm64/zip_archives/darwin-x64-profile/gen_snapshot.zip"
                     ],
                     "name": "mac_profile_arm64"
                 }
@@ -190,7 +190,7 @@
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-12",
-		"cpu=x86"
+                "cpu=x86"
             ],
             "gclient_custom_vars": {
                 "download_android_deps": false
@@ -218,7 +218,7 @@
                 {
                     "base_path": "out/mac_release_arm64/zip_archives/",
                     "include_paths": [
-                        "out/mac_release_arm64/zip_archives/darwin-x64/gen_snapshot.zip"
+                        "out/mac_release_arm64/zip_archives/darwin-x64-release/gen_snapshot.zip"
                     ],
                     "name": "mac_release_arm64"
                 }
@@ -226,7 +226,7 @@
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-12",
-		"cpu=x86"
+                "cpu=x86"
             ],
             "gclient_custom_vars": {
                 "download_android_deps": false
