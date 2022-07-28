@@ -1772,12 +1772,12 @@ typedef SelectableRegionToolbarBuilder = Widget Function(
 class SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
   /// Creates an instance of [SelectableRegionContextMenuButtonItemsBuilder].
   ///
-  /// The [builder] and [delegate] parameters are required.
+  /// The [builder] and [selectableRegionState] parameters are required.
   const SelectableRegionContextMenuButtonItemsBuilder({
     super.key,
     TargetPlatform? targetPlatform,
     required this.builder,
-    required this.delegate,
+    required this.selectableRegionState,
   }) : _targetPlatform = targetPlatform;
 
   /// Builds the context menu given the list of [ContextMenuButtonItem]s that is
@@ -1786,7 +1786,7 @@ class SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
 
   /// The [SelectableRegionState] for the [SelectableRegion] that will display
   /// the context menu.
-  final SelectableRegionState delegate;
+  final SelectableRegionState selectableRegionState;
 
   final TargetPlatform? _targetPlatform;
 
@@ -1806,18 +1806,18 @@ class SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
     return state._selectionDelegate.value.hasContent;
   }
 
-  bool get _canCopy => canCopy(delegate);
+  bool get _canCopy => canCopy(selectableRegionState);
 
-  bool get _canSelectAll => canSelectAll(delegate);
+  bool get _canSelectAll => canSelectAll(selectableRegionState);
 
   void _handleCopy() {
-    delegate._copy();
-    delegate.hideToolbar();
+    selectableRegionState._copy();
+    selectableRegionState.hideToolbar();
   }
 
   void _handleSelectAll() {
-    delegate.selectAll();
-    delegate.hideToolbar();
+    selectableRegionState.selectAll();
+    selectableRegionState.hideToolbar();
   }
 
   @override

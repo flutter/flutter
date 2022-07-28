@@ -36,20 +36,30 @@ class MyApp extends StatelessWidget {
           child: SizedBox(
             width: 200.0,
             child: SelectionArea(
-              contextMenuBuilder: (BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-                return DefaultTextSelectionToolbar(
-                  primaryAnchor: primaryAnchor,
-                  secondaryAnchor: secondaryAnchor,
-                  buttonItems: <ContextMenuButtonItem>[
-                    ...buttonItems,
-                    ContextMenuButtonItem(
-                      onPressed: () {
-                        ContextMenuController.hide();
-                        _showDialog(context);
-                      },
-                      label: 'Print',
-                    ),
-                  ],
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+                Offset primaryAnchor,
+                [Offset? secondaryAnchor]
+              ) {
+                return SelectableRegionContextMenuButtonItemsBuilder(
+                  selectableRegionState: selectableRegionState,
+                  builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+                    return DefaultTextSelectionToolbar(
+                      primaryAnchor: primaryAnchor,
+                      secondaryAnchor: secondaryAnchor,
+                      buttonItems: <ContextMenuButtonItem>[
+                        ...buttonItems,
+                        ContextMenuButtonItem(
+                          onPressed: () {
+                            ContextMenuController.hide();
+                            _showDialog(context);
+                          },
+                          label: 'Print',
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
               child: ListView(
