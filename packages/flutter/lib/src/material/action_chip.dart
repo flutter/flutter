@@ -8,96 +8,67 @@ import 'package:flutter/widgets.dart';
 import 'chip.dart';
 import 'chip_theme.dart';
 import 'debug.dart';
-import 'icons.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// A Material Design input chip.
+/// A Material Design action chip.
 ///
-/// Input chips represent a complex piece of information, such as an entity
-/// (person, place, or thing) or conversational text, in a compact form.
+/// Action chips are a set of options which trigger an action related to primary
+/// content. Action chips should appear dynamically and contextually in a UI.
 ///
-/// Input chips can be made selectable by setting [onSelected], deletable by
-/// setting [onDeleted], and pressable like a button with [onPressed]. They have
-/// a [label], and they can have a leading icon (see [avatar]) and a trailing
-/// icon ([deleteIcon]). Colors and padding can be customized.
+/// Action chips can be tapped to trigger an action or show progress and
+/// confirmation. They cannot be disabled; if the action is not applicable, the
+/// chip should not be included in the interface. (This contrasts with buttons,
+/// where unavailable choices are usually represented as disabled controls.)
+///
+/// Action chips are displayed after primary content, such as below a card or
+/// persistently at the bottom of a screen.
+///
+/// The material button widgets, [ElevatedButton], [TextButton], and
+/// [OutlinedButton], are an alternative to action chips, which should appear
+/// statically and consistently in a UI.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Input chips work together with other UI elements. They can appear:
+/// {@tool dartpad}
+/// This example shows how to create an [ActionChip] with a leading icon.
+/// The icon is updated when the [ActionChip] is pressed.
 ///
-///  * In a [Wrap] widget.
-///  * In a horizontally scrollable list, like a [ListView] whose
-///    scrollDirection is [Axis.horizontal].
-///
-/// {@tool snippet}
-///
-/// ```dart
-/// InputChip(
-///   avatar: CircleAvatar(
-///     backgroundColor: Colors.grey.shade800,
-///     child: const Text('AB'),
-///   ),
-///   label: const Text('Aaron Burr'),
-///   onPressed: () {
-///     print('I am the one thing in life.');
-///   }
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/action_chip/action_chip.0.dart **
 /// {@end-tool}
 ///
 /// ## Material Design 3
 ///
-/// [InputChip] can be used for Input chips from Material Design 3.
-/// If [ThemeData.useMaterial3] is true, then [InputChip]
-/// will be styled to match the Material Design 3 specification for Input
-/// chips.
+/// [ActionChip] can be used for both the Assist and Suggestion chips from
+/// Material Design 3. If [ThemeData.useMaterial3] is true, then [ActionChip]
+/// will be styled to match the Material Design 3 Assist and Suggestion chips.
 ///
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
-///  * [FilterChip], uses tags or descriptive words as a way to filter content.
-///  * [ActionChip], represents an action related to primary content.
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
-class InputChip extends StatelessWidget
-    implements
-        ChipAttributes,
-        DeletableChipAttributes,
-        SelectableChipAttributes,
-        CheckmarkableChipAttributes,
-        DisabledChipAttributes,
-        TappableChipAttributes {
-  /// Creates an [InputChip].
+class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes, DisabledChipAttributes {
+  /// Create a chip that acts like a button.
   ///
-  /// The [onPressed] and [onSelected] callbacks must not both be specified at
-  /// the same time.
-  ///
-  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
-  /// arguments must not be null. The [pressElevation] and [elevation] must be
-  /// null or non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
-  const InputChip({
+  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  const ActionChip({
     super.key,
     this.avatar,
     required this.label,
     this.labelStyle,
     this.labelPadding,
-    this.selected = false,
-    this.isEnabled = true,
-    this.onSelected,
-    this.deleteIcon,
-    this.onDeleted,
-    this.deleteIconColor,
-    this.deleteButtonTooltipMessage,
     this.onPressed,
     this.pressElevation,
-    this.disabledColor,
-    this.selectedColor,
     this.tooltip,
     this.side,
     this.shape,
@@ -105,6 +76,7 @@ class InputChip extends StatelessWidget
     this.focusNode,
     this.autofocus = false,
     this.backgroundColor,
+    this.disabledColor,
     this.padding,
     this.visualDensity,
     this.materialTapTargetSize,
@@ -112,18 +84,7 @@ class InputChip extends StatelessWidget
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
-    this.selectedShadowColor,
-    this.showCheckmark,
-    this.checkmarkColor,
-    this.avatarBorder = const CircleBorder(),
-    @Deprecated(
-      'Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.'
-    )
-    this.useDeleteButtonTooltip = true,
-  }) : assert(selected != null),
-       assert(isEnabled != null),
-       assert(label != null),
+  }) : assert(label != null),
        assert(clipBehavior != null),
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
@@ -138,27 +99,9 @@ class InputChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry? labelPadding;
   @override
-  final bool selected;
-  @override
-  final bool isEnabled;
-  @override
-  final ValueChanged<bool>? onSelected;
-  @override
-  final Widget? deleteIcon;
-  @override
-  final VoidCallback? onDeleted;
-  @override
-  final Color? deleteIconColor;
-  @override
-  final String? deleteButtonTooltipMessage;
-  @override
   final VoidCallback? onPressed;
   @override
   final double? pressElevation;
-  @override
-  final Color? disabledColor;
-  @override
-  final Color? selectedColor;
   @override
   final String? tooltip;
   @override
@@ -174,6 +117,8 @@ class InputChip extends StatelessWidget
   @override
   final Color? backgroundColor;
   @override
+  final Color? disabledColor;
+  @override
   final EdgeInsetsGeometry? padding;
   @override
   final VisualDensity? visualDensity;
@@ -186,70 +131,45 @@ class InputChip extends StatelessWidget
   @override
   final Color? surfaceTintColor;
   @override
-  final Color? selectedShadowColor;
-  @override
-  final bool? showCheckmark;
-  @override
-  final Color? checkmarkColor;
-  @override
-  final ShapeBorder avatarBorder;
-  @override
   final IconThemeData? iconTheme;
+
   @override
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  final bool useDeleteButtonTooltip;
+  bool get isEnabled => onPressed != null;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _InputChipDefaultsM3(context, isEnabled)
+      ? _ActionChipDefaultsM3(context, isEnabled)
       : null;
-    final Widget? resolvedDeleteIcon = deleteIcon
-      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
       label: label,
-      labelStyle: labelStyle,
-      labelPadding: labelPadding,
-      deleteIcon: resolvedDeleteIcon,
-      onDeleted: onDeleted,
-      deleteIconColor: deleteIconColor,
-      useDeleteButtonTooltip: useDeleteButtonTooltip,
-      deleteButtonTooltipMessage: deleteButtonTooltipMessage,
-      onSelected: onSelected,
       onPressed: onPressed,
       pressElevation: pressElevation,
-      selected: selected,
-      disabledColor: disabledColor,
-      selectedColor: selectedColor,
       tooltip: tooltip,
+      labelStyle: labelStyle,
+      backgroundColor: backgroundColor,
       side: side,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      backgroundColor: backgroundColor,
+      disabledColor: disabledColor,
       padding: padding,
       visualDensity: visualDensity,
+      isEnabled: isEnabled,
+      labelPadding: labelPadding,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
-      selectedShadowColor: selectedShadowColor,
-      showCheckmark: showCheckmark,
-      checkmarkColor: checkmarkColor,
-      isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
-      avatarBorder: avatarBorder,
     );
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES - InputChip
+// BEGIN GENERATED TOKEN PROPERTIES - ActionChip
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -258,8 +178,8 @@ class InputChip extends StatelessWidget
 
 // Token database version: v0_101
 
-class _InputChipDefaultsM3 extends ChipThemeData {
-  const _InputChipDefaultsM3(this.context, this.isEnabled)
+class _ActionChipDefaultsM3 extends ChipThemeData {
+  const _ActionChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
@@ -279,10 +199,10 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => null;
 
   @override
-  @override Color? get surfaceTintColor => null;
+  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
-  Color? get selectedColor => Theme.of(context).colorScheme.secondaryContainer;
+  Color? get selectedColor => null;
 
   @override
   Color? get checkmarkColor => null;
@@ -291,7 +211,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get disabledColor => null;
 
   @override
-  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
+  Color? get deleteIconColor => null;
 
   @override
   BorderSide? get side => isEnabled
@@ -301,7 +221,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? null
+      ? Theme.of(context).colorScheme.primary
       : Theme.of(context).colorScheme.onSurface,
     size: 18.0,
   );
@@ -321,4 +241,4 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   )!;
 }
 
-// END GENERATED TOKEN PROPERTIES - InputChip
+// END GENERATED TOKEN PROPERTIES - ActionChip
