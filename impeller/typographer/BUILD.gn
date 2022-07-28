@@ -49,6 +49,6 @@ impeller_component("typographer_unittests") {
 
   deps = [
     ":typographer",
-    "../playground",
+    "../playground:playground_test",
   ]
 }
