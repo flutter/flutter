@@ -1377,7 +1377,6 @@ targets:
   - name: Linux_android color_filter_with_unstable_child_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1996,7 +1995,6 @@ targets:
 
   - name: Linux_android new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2260,17 +2258,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
-
-  - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      openpay: "true"
-      tags: >
-        ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
-      task_name: openpay_benchmarks__scroll_perf
 
   - name: Staging_build_linux analyze
     presubmit: false
@@ -3131,6 +3118,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: external_ui_integration_test_ios
+      ignore_flakiness: "true"
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
@@ -3694,7 +3682,6 @@ targets:
       - .ci.yaml
 
   - name: Windows gradle_plugin_bundle_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/108020
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:

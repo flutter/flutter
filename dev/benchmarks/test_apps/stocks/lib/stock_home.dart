@@ -85,8 +85,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode? value) {
-    if (widget.updater != null)
+    if (widget.updater != null) {
       widget.updater(widget.configuration.copyWith(stockMode: value));
+    }
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -239,8 +240,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
-    if (_searchQuery.text.isEmpty)
+    if (_searchQuery.text.isEmpty) {
       return stocks;
+    }
     final RegExp regexp = RegExp(_searchQuery.text, caseSensitive: false);
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }

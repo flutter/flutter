@@ -444,6 +444,9 @@ class TextSelectionOverlay {
   late Offset _dragEndPosition;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
@@ -451,6 +454,9 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     _dragEndPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
@@ -492,6 +498,9 @@ class TextSelectionOverlay {
   late Offset _dragStartPosition;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
@@ -499,6 +508,9 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
