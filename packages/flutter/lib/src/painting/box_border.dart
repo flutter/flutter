@@ -234,7 +234,7 @@ abstract class BoxBorder extends ShapeBorder {
 
   static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    canvas.drawRect(rect.inflate(side.strokeOffset), side.toPaint());
+    canvas.drawRect(rect.inflate(side.strokeOffset / 2), side.toPaint());
   }
 }
 
@@ -694,10 +694,7 @@ class BorderDirectional extends BoxBorder {
   @override
   EdgeInsetsGeometry get dimensions {
     if (isUniform) {
-      // side.strokeAlign == StrokeAlign.inside => 0 -> side.width
-      // side.strokeAlign == BorderSide.strokeAlignCenter => 0.5 -> side.width / 2
-      // side.strokeAlign == BorderSide.strokeAlignOutside => 1 -> 0
-      return EdgeInsets.all(top.strokeInset);
+      return EdgeInsetsDirectional.all(top.strokeInset);
     }
     return EdgeInsetsDirectional.fromSTEB(start.strokeInset, top.strokeInset, end.strokeInset, bottom.strokeInset);
   }

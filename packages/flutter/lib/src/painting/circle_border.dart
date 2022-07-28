@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'borders.dart';
-import 'edge_insets.dart';
 
 /// A border that fits a circle within the available space.
 ///
@@ -77,7 +76,7 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    return Path()..addOval(_adjustRect(rect).inflate(side.strokeOutset));
+    return Path()..addOval(_adjustRect(rect));
   }
 
   @override
@@ -91,11 +90,11 @@ class CircleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        if (eccentricity != 0.0) {
-          final Rect borderRect = _adjustRect(rect);
-          canvas.drawOval(borderRect.inflate(side.strokeOffset), side.toPaint());
-        } else {
+        if (eccentricity == 0.0) {
           canvas.drawCircle(rect.center, (rect.shortestSide + side.strokeOffset) / 2, side.toPaint());
+        } else {
+          final Rect borderRect = _adjustRect(rect);
+          canvas.drawOval(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
         }
     }
   }

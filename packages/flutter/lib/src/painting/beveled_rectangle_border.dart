@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
-import 'edge_insets.dart';
 
 /// A rectangular border with flattened or "beveled" corners.
 ///
@@ -113,12 +112,12 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect.deflate(side.strokeInset)));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.strokeInset));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOutset));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
@@ -131,7 +130,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
         break;
       case BorderStyle.solid:
         final Path path = _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOffset / 2));
-       canvas.drawPath(path, side.toPaint());
+        canvas.drawPath(path, side.toPaint());
         break;
     }
   }

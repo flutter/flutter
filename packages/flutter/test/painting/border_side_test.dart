@@ -119,7 +119,7 @@ void main() {
   test('BorderSide - toString', () {
     expect(
       const BorderSide(color: Color(0xFFAABBCC), width: 1.2345).toString(),
-      'BorderSide(Color(0xffaabbcc), 1.2, BorderStyle.solid)',
+      'BorderSide(color: Color(0xffaabbcc), width: 1.2)',
     );
   });
 
