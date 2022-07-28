@@ -3,13 +3,10 @@ import 'breakpoint.dart';
 import 'breakpoints.dart';
 import 'package:masonry_grid/masonry_grid.dart';
 
-const double materialPaddingBetweenItems = 8;
-
-Map<Breakpoint, double> materialMinMargin = {
-  CompactBreakpoint(): 8,
-  MediumBreakpoint(): 12,
-  ExpandedBreakpoint(): 32
-};
+const double materialGutterValue = 8;
+const double materialCompactMinMargin = 8;
+const double materialMediumMinMargin = 8;
+const double materialExpandedMinMargin = 8;
 
 class SlotWidget extends StatefulWidget {
   List<Widget>? slotWidgets;
@@ -20,11 +17,9 @@ class SlotWidget extends StatefulWidget {
   AnimatedWidget Function(Widget widget, AnimationController controller)?
       exitAnimation;
 
-  bool? isBody = false;
+  bool? useMaterialBody = false;
 
   double? margin = 20;
-
-  double? gutter = 8;
 
   int? itemColumns = 1;
 
@@ -34,9 +29,8 @@ class SlotWidget extends StatefulWidget {
     this.slotWidgets,
     this.enterAnimation,
     this.exitAnimation,
-    this.isBody,
+    this.useMaterialBody,
     this.margin,
-    this.gutter,
     this.itemColumns,
     this.breakpoints,
     super.key,
@@ -52,12 +46,12 @@ class _SlotWidgetState extends State<SlotWidget> {
     if (widget.slotWidgets != null) {
       if (widget.slotWidgets!.length == 1) {
         return widget.slotWidgets![0];
-      } else if (widget.slotWidgets!.length > 1 && widget.isBody == true) {
+      } else if (widget.slotWidgets!.length > 1 &&
+          widget.useMaterialBody == true) {
         return ResponsiveColumnGrid(
           thisWidgets: widget.slotWidgets!,
           itemColumns: widget.itemColumns!,
           margin: widget.margin!,
-          gutter: (widget.gutter != null) ? widget.gutter! : 8,
           breakpoints: widget.breakpoints!,
         );
       }
@@ -76,8 +70,6 @@ class ResponsiveColumnGrid extends StatefulWidget {
 
   double margin;
 
-  double gutter;
-
   List<Breakpoint> breakpoints;
 
   ResponsiveColumnGrid({
@@ -85,7 +77,6 @@ class ResponsiveColumnGrid extends StatefulWidget {
     required this.thisWidgets,
     required this.itemColumns,
     required this.margin,
-    required this.gutter,
     required this.breakpoints,
   }) : super(key: key);
 
@@ -96,62 +87,47 @@ class ResponsiveColumnGrid extends StatefulWidget {
 class _ResponsiveColumnGridState extends State<ResponsiveColumnGrid> {
   @override
   Widget build(BuildContext context) {
-    if (widget.itemColumns <= 1) {
-      return Container(
-          child: CustomScrollView(
-        primary: false,
-        controller: ScrollController(),
-        shrinkWrap: true,
-        physics: const AlwaysScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(widget.margin),
-              child: MasonryGrid(
-                column: widget.itemColumns,
-                mainAxisSpacing: materialPaddingBetweenItems,
-                children: widget.thisWidgets,
-              ),
-            ),
-          ),
-        ],
-      ));
-    } else {
-      Breakpoint currentBreakpoint = CompactBreakpoint();
-      for (Breakpoint breakpoint in widget.breakpoints) {
-        if (breakpoint.isActive(context)) {
-          currentBreakpoint = breakpoint;
-        }
+    Breakpoint currentBreakpoint = CompactBreakpoint();
+    for (Breakpoint breakpoint in widget.breakpoints) {
+      if (breakpoint.isActive(context)) {
+        currentBreakpoint = breakpoint;
       }
-      double? thisMargin = widget.margin;
-      double? thisGutter = widget.gutter;
-
-      if (materialMinMargin[currentBreakpoint]! > thisMargin) {
-        thisMargin = materialMinMargin[currentBreakpoint]!;
-      }
-
-      return Container(
-          child: CustomScrollView(
-        primary: false,
-        controller: ScrollController(),
-        shrinkWrap: true,
-        physics: const AlwaysScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(thisMargin),
-              child: MasonryGrid(
-                column: widget.itemColumns,
-                crossAxisSpacing: widget.gutter,
-                mainAxisSpacing: materialPaddingBetweenItems,
-                children: widget.thisWidgets,
-              ),
-            ),
-          ),
-        ],
-      ));
     }
+    double? thisMargin = widget.margin;
+
+    if (currentBreakpoint == CompactBreakpoint()) {
+      if (thisMargin < materialCompactMinMargin) {
+        thisMargin = materialCompactMinMargin;
+      }
+    } else if (currentBreakpoint == const MediumBreakpoint()) {
+      if (thisMargin < materialMediumMinMargin) {
+        thisMargin = materialMediumMinMargin;
+      }
+    } else if (currentBreakpoint == const ExpandedBreakpoint()) {
+      if (thisMargin < materialExpandedMinMargin) {
+        thisMargin = materialExpandedMinMargin;
+      }
+    }
+
+    return CustomScrollView(
+      primary: false,
+      controller: ScrollController(),
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      scrollDirection: Axis.vertical,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(thisMargin),
+            child: MasonryGrid(
+              column: widget.itemColumns,
+              crossAxisSpacing: materialGutterValue,
+              mainAxisSpacing: materialGutterValue,
+              children: widget.thisWidgets,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
