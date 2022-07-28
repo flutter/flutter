@@ -13,7 +13,7 @@ namespace flutter {
 sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
     GrBackend backend,
     sk_sp<const GrGLInterface> gl_interface) {
-#if !OS_FUCHSIA && SK_GL
+#if SK_GL
   if (backend != GrBackend::kOpenGL_GrBackend) {
     return nullptr;
   }
@@ -26,7 +26,7 @@ sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
     context->setResourceCacheLimit(0);
     return context;
   }
-#endif  // !OS_FUCHSIA && SK_GL
+#endif  // SK_GL
 
   return nullptr;
 }
