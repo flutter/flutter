@@ -249,11 +249,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   // Used in [handleEvent].
   final Set<int> _multiPointerStartTrackers = HashSet<int>();
 
+  Set<int> _remainPointers = HashSet<int>();
+
   // Record the moving pointers that are yet to fill a batch. The list is cleared
   // once a new batch of [PointerMoveEvent]s is detected. Used in [handleEvent].
   final List<PointerEvent> _multiPointerMoveTrackers = <PointerEvent>[];
 
-  // Whether the recognizer has accepted any pointer. If it is true, any up 
+  // Whether the recognizer has accepted any pointer. If it is true, any up
   // event will cause this recognizer to give up all pointers. Used in [handleEvent].
   bool _pointerMoveAccept = false;
 
@@ -319,28 +321,28 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    // When multiple pointers are down and move, there may be the following 
+    // When multiple pointers are down and move, there may be the following
     // situations depending on the current platform:
     //
     // 1) All pointers move, and therefore each pointer dispatches a PointerMoveEvent
     // (for example on Android and iOS).
     //
-    //  * The gesture should only move after each pointer has dispatched one 
+    //  * The gesture should only move after each pointer has dispatched one
     //    PointerMoveEvent or PointerPanZoomUpdateEvent.
-    //  * The scrolling distance (`delta`) should be delta(combined) = 
+    //  * The scrolling distance (`delta`) should be delta(combined) =
     //     max(delta(i) which are positive) + min(delta(i) which are negative).
     //  * The drag location should be the average of all pointers.
     //
     // Logic:
     //
-    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the 
+    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the
     //    PointerEvent to the _multiPointerMoveTrackers.
-    //  * When all pointers have dispatched PointerMoveEvent, they are considered 
+    //  * When all pointers have dispatched PointerMoveEvent, they are considered
     //    a batch, and the gesture will update by the rules above.
     //
     // Example:
     //
-    //  * When two pointers (p1 and p2) are down, the sequence of PointerMoveEvents 
+    //  * When two pointers (p1 and p2) are down, the sequence of PointerMoveEvents
     //    is: p1 down, p2 down, p1 move +50, p2 move +10,
     //    p1 move +30, p2 move -10 , p1 up and p2 up.
     //    The handleEvent process will be:
@@ -350,12 +352,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     //     * p2 move +10 (_multiPointerMoveTrackers.add, the gesture update +50,
     //       and _multiPointerMoveTrackers.clear),
     //     * p1 move +30 (_multiPointerMoveTrackers.add and the gesture wait),
-    //     * p2 move -10 (_multiPointerMoveTrackers.add, the gesture update +20, 
+    //     * p2 move -10 (_multiPointerMoveTrackers.add, the gesture update +20,
     //       and _multiPointerMoveTrackers.clear),
     //     * p1 up (_multiPointerStartTrackers.clear),
     //     * p2 up.
     //
-    // 2) Only some pointers move, but each pointer still dispatch a PointerMoveEvent 
+    // 2) Only some pointers move, but each pointer still dispatch a PointerMoveEvent
     //    (for example on Android).
     //
     //  * This means that the delta of the not moved pointers' PointerMoveEvent
@@ -409,6 +411,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
          event is PointerMoveEvent ||
          event is PointerPanZoomStartEvent ||
          event is PointerPanZoomUpdateEvent)) {
+      if ((event is PointerDownEvent || event is PointerPanZoomStartEvent) && _remainPointers.contains(event.pointer)) {
+        return;
+      }
+
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       assert(tracker != null);
       if (event is PointerPanZoomStartEvent) {
@@ -424,19 +430,20 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
     }
     if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
+      bool endOfBatch = false;
+      print('${event.pointer} : ${event.endOfBatch}');
       if (_state == _DragState.accepted) {
-        _pointerMoveAccept = true;
-        // When a same pointer is detected, update immediately and add this event.
-        final bool eventExists = _multiPointerMoveTrackers.any((PointerEvent element) => element.pointer == event.pointer);
-        if (eventExists) {
-          _checkMultiPointerUpdate();
-          _multiPointerMoveTrackers.clear();
-          _multiPointerMoveTrackers.add(event);
+        if (_remainPointers.contains(event.pointer)) {
+          if (event.endOfBatch) {
+            _checkMultiPointerUpdate();
+            _multiPointerMoveTrackers.clear();
+          }
+          return;
         } else {
-          // Wait until each pointer dispatches one event to fill up a batch.
+          _pointerMoveAccept = true;
           _multiPointerMoveTrackers.add(event);
           assert (_multiPointerMoveTrackers.length <= _multiPointerStartTrackers.length);
-          if (_multiPointerMoveTrackers.length == _multiPointerStartTrackers.length) {
+          if (event.endOfBatch) {
             _checkMultiPointerUpdate();
             _multiPointerMoveTrackers.clear();
           }
@@ -462,12 +469,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       if (_pointerMoveAccept) {
-        _velocityTrackers.keys.forEach(_giveUpPointer);
+        // _velocityTrackers.keys.toList().forEach(_giveUpPointer);
+        _giveUpPointer(event.pointer);
         _multiPointerMoveTrackers.clear();
         _pointerMoveAccept = false;
+        _remainPointers = _multiPointerStartTrackers.toSet();
       } else {
         _giveUpPointer(event.pointer);
       }
+
     }
   }
 
@@ -683,6 +693,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkMultiPointerUpdate() {
+    if (_multiPointerMoveTrackers.length == 0) {
+      return;
+    }
     final Offset localDelta = _getMultiPointerLocalDelta();
     final Offset position = _getMultiPointerPosition();
     final Offset localPosition = _getMultiPointerLocalPosition();
