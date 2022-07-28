@@ -2134,6 +2134,9 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface_producer.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/text_delegate.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/text_delegate.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/text_delegate_unittests.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/unique_fdio_ns.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_waiter.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_waiter.h

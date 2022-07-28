@@ -34,6 +34,7 @@
 #include "focus_delegate.h"
 #include "pointer_delegate.h"
 #include "pointer_injector_delegate.h"
+#include "text_delegate.h"
 
 namespace flutter_runner {
 
@@ -60,9 +61,7 @@ using OnShaderWarmup = std::function<void(const std::vector<std::string>&,
 // in HandlePlatformMessage.  This communication is bidirectional.  Platform
 // messages are notably responsible for communication related to input and
 // external views / windowing.
-class PlatformView : public flutter::PlatformView,
-                     private fuchsia::ui::input3::KeyboardListener,
-                     private fuchsia::ui::input::InputMethodEditorClient {
+class PlatformView : public flutter::PlatformView {
  public:
   PlatformView(
       bool is_flatland,
@@ -99,33 +98,9 @@ class PlatformView : public flutter::PlatformView,
  protected:
   void RegisterPlatformMessageHandlers();
 
-  // |fuchsia.ui.input3.KeyboardListener|
-  // Called by the embedder every time there is a key event to process.
-  void OnKeyEvent(fuchsia::ui::input3::KeyEvent key_event,
-                  fuchsia::ui::input3::KeyboardListener::OnKeyEventCallback
-                      callback) override;
-
-  // |fuchsia::ui::input::InputMethodEditorClient|
-  void DidUpdateState(
-      fuchsia::ui::input::TextInputState state,
-      std::unique_ptr<fuchsia::ui::input::InputEvent> event) override;
-
-  // |fuchsia::ui::input::InputMethodEditorClient|
-  void OnAction(fuchsia::ui::input::InputMethodAction action) override;
-
   bool OnHandlePointerEvent(const fuchsia::ui::input::PointerEvent& pointer);
 
   bool OnHandleFocusEvent(const fuchsia::ui::input::FocusEvent& focus);
-
-  // Gets a new input method editor from the input connection. Run when both
-  // Scenic has focus and Flutter has requested input with setClient.
-  void ActivateIme();
-
-  // Detaches the input method editor connection, ending the edit session and
-  // closing the onscreen keyboard. Call when input is no longer desired, either
-  // because Scenic says we lost focus or when Flutter no longer has a text
-  // field focused.
-  void DeactivateIme();
 
   // |flutter::PlatformView|
   std::unique_ptr<flutter::VsyncWaiter> CreateVSyncWaiter() override;
@@ -150,10 +125,6 @@ class PlatformView : public flutter::PlatformView,
 
   // Channel handler for kFlutterPlatformChannel
   bool HandleFlutterPlatformChannelPlatformMessage(
-      std::unique_ptr<flutter::PlatformMessage> message);
-
-  // Channel handler for kTextInputChannel
-  bool HandleFlutterTextInputChannelPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kPlatformViewsChannel.
@@ -191,20 +162,8 @@ class PlatformView : public flutter::PlatformView,
   std::shared_ptr<PointerDelegate> pointer_delegate_;
   std::unique_ptr<PointerInjectorDelegate> pointer_injector_delegate_;
 
-  fidl::Binding<fuchsia::ui::input::InputMethodEditorClient> ime_client_;
-  fuchsia::ui::input::InputMethodEditorPtr ime_;
-  fuchsia::ui::input::ImeServicePtr text_sync_service_;
-  int current_text_input_client_ = 0;
-
-  fidl::Binding<fuchsia::ui::input3::KeyboardListener>
-      keyboard_listener_binding_;
-  fuchsia::ui::input3::KeyboardPtr keyboard_;
-  Keyboard keyboard_translator_;
-
-  // last_text_state_ is the last state of the text input as reported by the IME
-  // or initialized by Flutter. We set it to null if Flutter doesn't want any
-  // input, since then there is no text input state at all.
-  std::unique_ptr<fuchsia::ui::input::TextInputState> last_text_state_;
+  // Text delegate is responsible for handling keyboard input and text editing.
+  std::unique_ptr<TextDelegate> text_delegate_;
 
   std::set<int> down_pointers_;
   std::map<std::string /* channel */,
