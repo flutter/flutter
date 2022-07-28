@@ -677,6 +677,21 @@ class TextField extends StatefulWidget {
   final GestureTapCallback? onTap;
 
   /// {@macro flutter.widgets.editableText.onTapOutside}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use a `TextFieldTapRegion` to wrap a set of
+  /// "spinner" buttons that increment and decrement a value in the [TextField]
+  /// without causing the text field to lose keyboard focus.
+  ///
+  /// This example includes a generic `SpinnerField<T>` class that you can copy/paste
+  /// into your own project and customize.
+  ///
+  /// ** See code in examples/api/lib/widgets/tap_region/text_field_tap_region.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion] for how the region group is determined.
   final GestureTapCallback? onTapOutside;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the

@@ -1231,11 +1231,22 @@ class EditableText extends StatefulWidget {
   /// order for an external widget to be considered as part of the text field
   /// for the purposes of tapping "outside" of the field, wrap the control in a
   /// [TextFieldTapRegion].
+  /// {@endtemplate}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use a `TextFieldTapRegion` to wrap a set of
+  /// "spinner" buttons that increment and decrement a value in the [TextField]
+  /// without causing the text field to lose keyboard focus.
+  ///
+  /// This example includes a generic `SpinnerField<T>` class that you can copy/paste
+  /// into your own project and customize.
+  ///
+  /// ** See code in examples/api/lib/widgets/tap_region/text_field_tap_region.0.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
   ///  * [TapRegion] for how the region group is determined.
-  /// {@endtemplate}
   final VoidCallback? onTapOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}

@@ -504,6 +504,17 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
 /// buttons to be associated with a text field without causing the text field to
 /// lose focus when they are interacted with.
 ///
+/// {@tool dartpad}
+/// This example shows how to use a `TextFieldTapRegion` to wrap a set of
+/// "spinner" buttons that increment and decrement a value in the text field
+/// without causing the text field to lose keyboard focus.
+///
+/// This example includes a generic `SpinnerField<T>` class that you can copy/paste
+/// into your own project and customize.
+///
+/// ** See code in examples/api/lib/widgets/tap_region/text_field_tap_region.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TapRegion], the widget that this widget uses to add widgets to the group
