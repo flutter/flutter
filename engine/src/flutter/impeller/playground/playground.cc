@@ -14,7 +14,6 @@
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
 #include "flutter/fml/paths.h"
-#include "flutter/testing/testing.h"
 #include "impeller/base/validation.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
@@ -76,15 +75,11 @@ Playground::Playground()
 
 Playground::~Playground() = default;
 
-PlaygroundBackend Playground::GetBackend() const {
-  return GetParam();
-}
-
 std::shared_ptr<Context> Playground::GetContext() const {
   return renderer_ ? renderer_->GetContext() : nullptr;
 }
 
-static constexpr bool PlatformSupportsBackend(PlaygroundBackend backend) {
+bool Playground::SupportsBackend(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
 #if IMPELLER_ENABLE_METAL
@@ -108,12 +103,10 @@ static constexpr bool PlatformSupportsBackend(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
-void Playground::SetUp() {
-  if (!PlatformSupportsBackend(GetBackend())) {
-    GTEST_SKIP_("This backend is disabled or isn't supported on this platform");
-  }
+void Playground::SetupWindow(PlaygroundBackend backend) {
+  FML_CHECK(SupportsBackend(backend));
 
-  impl_ = PlaygroundImpl::Create(GetParam());
+  impl_ = PlaygroundImpl::Create(backend);
   if (!impl_) {
     return;
   }
@@ -128,7 +121,7 @@ void Playground::SetUp() {
   renderer_ = std::move(renderer);
 }
 
-void Playground::TearDown() {
+void Playground::TeardownWindow() {
   renderer_.reset();
   impl_.reset();
 }
@@ -141,13 +134,6 @@ static void PlaygroundKeyCallback(GLFWwindow* window,
   if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_RELEASE) {
     ::glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
-}
-
-static std::string GetWindowTitle(const std::string& test_name) {
-  std::stringstream stream;
-  stream << "Impeller Playground for '" << test_name
-         << "' (Press ESC or 'q' to quit)";
-  return stream.str();
 }
 
 Point Playground::GetCursorPosition() const {
@@ -190,8 +176,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   if (!window) {
     return false;
   }
-  ::glfwSetWindowTitle(
-      window, GetWindowTitle(flutter::testing::GetCurrentTestName()).c_str());
+  ::glfwSetWindowTitle(window, GetWindowTitle().c_str());
   ::glfwSetWindowUserPointer(window, this);
   ::glfwSetWindowSizeCallback(
       window, [](GLFWwindow* window, int width, int height) -> void {
@@ -309,12 +294,12 @@ bool Playground::OpenPlaygroundHere(SinglePassCallback pass_callback) {
 
 std::optional<DecompressedImage> Playground::LoadFixtureImageRGBA(
     const char* fixture_name) const {
-  if (!renderer_) {
+  if (!renderer_ || fixture_name == nullptr) {
     return std::nullopt;
   }
 
-  auto compressed_image = CompressedImage::Create(
-      flutter::testing::OpenFixtureAsMapping(fixture_name));
+  auto compressed_image =
+      CompressedImage::Create(OpenAssetAsMapping(fixture_name));
   if (!compressed_image) {
     VALIDATION_LOG << "Could not create compressed image.";
     return std::nullopt;

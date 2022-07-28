@@ -186,7 +186,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
 }
 
 TEST_P(RuntimeStageTest, CanRegisterStage) {
-  if (GetBackend() != PlaygroundBackend::kMetal) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
     GTEST_SKIP_("Skipped: https://github.com/flutter/flutter/issues/105538");
   }
   auto fixture =
@@ -212,7 +212,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 }
 
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
-  if (GetBackend() != PlaygroundBackend::kMetal) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
     GTEST_SKIP_("Skipped: https://github.com/flutter/flutter/issues/105538");
   }
   auto stage = CreateStageFromFixture("ink_sparkle.frag.iplr");

@@ -98,7 +98,7 @@ impeller_component("renderer_unittests") {
   deps = [
     ":renderer",
     "../fixtures",
-    "../playground",
+    "../playground:playground_test",
     "//flutter/testing:testing_lib",
   ]
 }

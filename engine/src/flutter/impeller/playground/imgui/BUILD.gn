@@ -12,9 +12,7 @@ impeller_shaders("imgui_shaders") {
   ]
 }
 
-source_set("imgui_impeller_backend") {
-  testonly = true
-
+impeller_component("imgui_impeller_backend") {
   public_deps = [
     ":imgui_shaders",
     "//third_party/imgui",
