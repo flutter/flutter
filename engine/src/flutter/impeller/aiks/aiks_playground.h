@@ -7,11 +7,11 @@
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/aiks/picture.h"
-#include "impeller/playground/playground.h"
+#include "impeller/playground/playground_test.h"
 
 namespace impeller {
 
-class AiksPlayground : public Playground {
+class AiksPlayground : public PlaygroundTest {
  public:
   using AiksPlaygroundCallback =
       std::function<bool(AiksContext& renderer, RenderTarget& render_target)>;

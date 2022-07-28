@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
-#include "impeller/playground/playground.h"
+#include "impeller/playground/playground_test.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -11,7 +11,7 @@
 namespace impeller {
 namespace testing {
 
-using TypographerTest = Playground;
+using TypographerTest = PlaygroundTest;
 INSTANTIATE_PLAYGROUND_SUITE(TypographerTest);
 
 TEST_P(TypographerTest, CanConvertTextBlob) {

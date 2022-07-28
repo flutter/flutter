@@ -41,7 +41,7 @@ impeller_component("aiks_unittests") {
   deps = [
     ":aiks",
     "../geometry:geometry_unittests",
-    "../playground",
+    "../playground:playground_test",
     "//flutter/testing",
   ]
 }

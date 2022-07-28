@@ -31,6 +31,6 @@ impeller_component("display_list_unittests") {
 
   deps = [
     ":display_list",
-    "../playground",
+    "../playground:playground_test",
   ]
 }

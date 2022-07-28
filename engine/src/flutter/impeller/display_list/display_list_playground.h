@@ -7,12 +7,12 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/fml/macros.h"
-#include "impeller/playground/playground.h"
+#include "impeller/playground/playground_test.h"
 #include "third_party/skia/include/core/SkFont.h"
 
 namespace impeller {
 
-class DisplayListPlayground : public Playground {
+class DisplayListPlayground : public PlaygroundTest {
  public:
   using DisplayListPlaygroundCallback =
       std::function<sk_sp<flutter::DisplayList>()>;

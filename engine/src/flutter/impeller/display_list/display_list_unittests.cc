@@ -8,12 +8,6 @@
 #include "display_list/display_list_image_filter.h"
 #include "display_list/display_list_paint.h"
 #include "display_list/display_list_tile_mode.h"
-#include "gtest/gtest.h"
-#include "third_party/imgui/imgui.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkPathBuilder.h"
-
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_mask_filter.h"
 #include "flutter/display_list/types.h"
@@ -22,6 +16,10 @@
 #include "impeller/display_list/display_list_playground.h"
 #include "impeller/geometry/point.h"
 #include "impeller/playground/widgets.h"
+#include "third_party/imgui/imgui.h"
+#include "third_party/skia/include/core/SkClipOp.h"
+#include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/core/SkPathBuilder.h"
 
 namespace impeller {
 namespace testing {

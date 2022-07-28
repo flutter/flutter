@@ -7,11 +7,11 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
-#include "impeller/playground/playground.h"
+#include "impeller/playground/playground_test.h"
 
 namespace impeller {
 
-class EntityPlayground : public Playground {
+class EntityPlayground : public PlaygroundTest {
  public:
   using EntityPlaygroundCallback =
       std::function<bool(ContentContext& context, RenderPass& pass)>;
