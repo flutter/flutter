@@ -3501,6 +3501,8 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"}
         ]
       tags: >
