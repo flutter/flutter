@@ -37,6 +37,8 @@ typedef ToolbarButtonWidgetBuilder = Widget Function(
 ///
 ///  * [ContextMenuBuilder], which is the generic type for any context menu
 ///    builder, not just for the editable text selection toolbar.
+///  * [SelectableRegionToolbarBuilder], which is the builder for
+///    [SelectableRegion].
 typedef EditableTextToolbarBuilder = Widget Function(
   BuildContext,
   EditableTextState,

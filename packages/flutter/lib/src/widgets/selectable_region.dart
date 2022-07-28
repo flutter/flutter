@@ -201,17 +201,18 @@ class SelectableRegion extends StatefulWidget {
   final Widget child;
 
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
-  final ButtonItemsToolbarBuilder? contextMenuBuilder;
+  final SelectableRegionToolbarBuilder? contextMenuBuilder;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
   final TextSelectionControls selectionControls;
 
   @override
-  State<StatefulWidget> createState() => _SelectableRegionState();
+  State<StatefulWidget> createState() => SelectableRegionState();
 }
 
-class _SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
+/// State for a [SelectableRegion].
+class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
@@ -623,12 +624,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // If given a location, just display the context menu there.
     if (location != null) {
       _selectionOverlay!.showToolbar((BuildContext context) {
-        return _SelectableRegionContextMenuButtonItemsBuilder(
-          delegate: this,
-          builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-            return widget.contextMenuBuilder!(context, buttonItems, location);
-          },
-        );
+        return widget.contextMenuBuilder!(context, this, location);
       }, context);
       return true;
     }
@@ -639,21 +635,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
       final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
       final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
-      return _SelectableRegionContextMenuButtonItemsBuilder(
-        delegate: this,
-        builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-          final Rect anchorRect = _selectionOverlay!.getAnchors(
-            renderBox,
-            lineHeightAtStart,
-            endGlyphHeight,
-          );
-          return widget.contextMenuBuilder!(
-            context,
-            buttonItems,
-            anchorRect.topLeft,
-            anchorRect.bottomRight,
-          );
-        },
+      final Rect anchorRect = _selectionOverlay!.getAnchors(
+        renderBox,
+        lineHeightAtStart,
+        endGlyphHeight,
+      );
+      return widget.contextMenuBuilder!(
+        context,
+        this,
+        anchorRect.topLeft,
+        anchorRect.bottomRight,
       );
     }, context);
 
@@ -922,7 +913,7 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
   _SelectAllAction(this.state);
 
-  final _SelectableRegionState state;
+  final SelectableRegionState state;
 
   @override
   void invokeAction(SelectAllTextIntent intent, [BuildContext? context]) {
@@ -933,7 +924,7 @@ class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
 class _CopySelectionAction extends _NonOverrideAction<CopySelectionTextIntent> {
   _CopySelectionAction(this.state);
 
-  final _SelectableRegionState state;
+  final SelectableRegionState state;
 
   @override
   void invokeAction(CopySelectionTextIntent intent, [BuildContext? context]) {
@@ -1751,6 +1742,21 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   }
 }
 
+/// A function that builds a widget to use as the text selection toolbar for
+/// [SelectableRegion].
+///
+/// See also:
+///
+///  * [ContextMenuBuilder], which is the generic type for any context menu
+///    builder, not just for the editable text selection toolbar.
+///  * [EditableTextToolbarBuilder], which is the builder for [EditableText].
+typedef SelectableRegionToolbarBuilder = Widget Function(
+  BuildContext,
+  SelectableRegionState,
+  Offset,
+  [Offset?]
+);
+
 /// Calls [builder] with the [ContextMenuButtonItem]s representing the
 /// buttons in this platform's default text selection menu.
 ///
@@ -1763,35 +1769,40 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 /// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
 /// * [EditableTextContextMenuButtonItemBuilder], which performs a similar role
 ///   but for [EditableText]'s context menu.
-class _SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
-  /// Creates an instance of [_SelectableRegionContextMenuButtonItemsBuilder].
-  const _SelectableRegionContextMenuButtonItemsBuilder({
+class SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
+  /// Creates an instance of [SelectableRegionContextMenuButtonItemsBuilder].
+  ///
+  /// The [builder] and [delegate] parameters are required.
+  const SelectableRegionContextMenuButtonItemsBuilder({
+    super.key,
     TargetPlatform? targetPlatform,
     required this.builder,
     required this.delegate,
   }) : _targetPlatform = targetPlatform;
 
-  /// Called with a list of [ContextMenuButtonItem]s so the context menu can be
-  /// built.
+  /// Builds the context menu given the list of [ContextMenuButtonItem]s that is
+  /// generated by this widget.
   final ToolbarButtonWidgetBuilder builder;
 
-  final _SelectableRegionState delegate;
+  /// The [SelectableRegionState] for the [SelectableRegion] that will display
+  /// the context menu.
+  final SelectableRegionState delegate;
 
   final TargetPlatform? _targetPlatform;
 
   /// The platform to base the button items on.
   TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
 
-  /// Returns true if the given [_SelectableRegionState]
+  /// Returns true if the given [SelectableRegionState]
   /// supports copy.
-  static bool canCopy(_SelectableRegionState state) {
+  static bool canCopy(SelectableRegionState state) {
     final String? selectedText = state._selectionDelegate.getSelectedContent()?.plainText;
     return selectedText != null && selectedText.isNotEmpty;
   }
 
-  /// Returns true if the given [_SelectableRegionState]
+  /// Returns true if the given [SelectableRegionState]
   /// supports select all.
-  static bool canSelectAll(_SelectableRegionState state) {
+  static bool canSelectAll(SelectableRegionState state) {
     return state._selectionDelegate.value.hasContent;
   }
 

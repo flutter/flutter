@@ -61,18 +61,23 @@ class SelectionArea extends StatefulWidget {
   /// See also:
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.
-  final ButtonItemsToolbarBuilder? contextMenuBuilder;
+  final SelectableRegionToolbarBuilder? contextMenuBuilder;
 
   /// The child widget this selection area applies to.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  static Widget _defaultBuildContextMenu(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return DefaultTextSelectionToolbar(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      buttonItems: buttonItems,
+  static Widget _defaultBuildContextMenu(BuildContext context, SelectableRegionState delegate, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return SelectableRegionContextMenuButtonItemsBuilder(
+      delegate: delegate,
+      builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+        return DefaultTextSelectionToolbar(
+          primaryAnchor: primaryAnchor,
+          secondaryAnchor: secondaryAnchor,
+          buttonItems: buttonItems,
+        );
+      },
     );
   }
 

@@ -1140,6 +1140,53 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
+
+  group('SelectableRegionContextMenuButtonItemsBuilder', () {
+    testWidgets('builds the correct button items per-platform', (WidgetTester tester) async {
+      Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionHandleControls,
+            contextMenuBuilder: (
+              BuildContext context,
+              SelectableRegionState delegate,
+              Offset primaryOffset,
+              [Offset? secondaryOffset]
+            ) {
+              return SelectableRegionContextMenuButtonItemsBuilder(
+                delegate: delegate,
+                builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+                  buttonTypes = buttonItems
+                    .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                    .toSet();
+                  return const SizedBox.shrink();
+                },
+              );
+            },
+            child: const Text('How are you?'),
+          ),
+        ),
+      );
+
+      expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      // `are` is selected.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+      await tester.pumpAndSettle();
+
+      expect(buttonTypes, contains(ContextMenuButtonType.copy));
+      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb, // [intended]
+    );
+  });
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
