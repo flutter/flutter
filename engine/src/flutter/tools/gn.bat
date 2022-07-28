@@ -1,1 +1,1 @@
-@call python3 "%~dp0gn" %*
+@call vpython3 "%~dp0gn" %*
