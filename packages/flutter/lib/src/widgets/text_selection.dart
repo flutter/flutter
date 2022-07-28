@@ -1180,6 +1180,7 @@ class SelectionOverlay {
   /// Hides the entire overlay including the toolbar and the handles.
   /// {@endtemplate}
   void hide() {
+    _magnifierController.hide();
     if (_handles != null) {
       _handles![0].remove();
       _handles![1].remove();
@@ -1207,7 +1208,6 @@ class SelectionOverlay {
   /// Disposes this object and release resources.
   /// {@endtemplate}
   void dispose() {
-    _magnifierController.hide();
     hide();
   }
 
