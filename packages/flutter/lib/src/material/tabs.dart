@@ -1024,6 +1024,7 @@ class _TabBarState extends State<TabBar> {
     } else if (widget.indicatorColor != oldWidget.indicatorColor ||
         widget.indicatorWeight != oldWidget.indicatorWeight ||
         widget.indicatorSize != oldWidget.indicatorSize ||
+        widget.indicatorPadding != oldWidget.indicatorPadding ||
         widget.indicator != oldWidget.indicator) {
       _initIndicatorPainter();
     }
