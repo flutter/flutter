@@ -239,7 +239,7 @@ void main() {
         expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
       });
       _testInMemory('Android project no pubspec continues', () async {
-        final FlutterProject project = await someProject(includePubspec: false);
+        final FlutterProject project = await someProject();
         // The default someProject with an empty <manifest> already indicates
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
