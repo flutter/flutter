@@ -106,6 +106,8 @@ template("runner_sources") {
       "surface_producer.h",
       "task_runner_adapter.cc",
       "task_runner_adapter.h",
+      "text_delegate.cc",
+      "text_delegate.h",
       "unique_fdio_ns.h",
       "vsync_waiter.cc",
       "vsync_waiter.h",
@@ -487,6 +489,7 @@ if (enable_unittests) {
       "tests/gfx_session_connection_unittests.cc",
       "tests/pointer_event_utility.cc",
       "tests/pointer_event_utility.h",
+      "text_delegate_unittests.cc",
       "vsync_waiter_unittest.cc",
     ]
 
