@@ -34,7 +34,7 @@ class TextMagnifier extends StatefulWidget {
   /// {@macro widgets.material.magnifier.positionRules}
   const TextMagnifier({
     super.key,
-    required this.magnifierSelectionOverlayInfoBearer
+    required this.magnifierSelectionOverlayInfoBearer,
   });
 
   /// A [TextMagnifierConfiguration] that returns a [CupertinoTextMagnifier] on iOS,
@@ -55,8 +55,8 @@ class TextMagnifier extends StatefulWidget {
           );
         case TargetPlatform.android:
           return TextMagnifier(
-              magnifierSelectionOverlayInfoBearer: magnifierSelectionOverlayInfoBearer);
-
+              magnifierSelectionOverlayInfoBearer: magnifierSelectionOverlayInfoBearer,
+          );
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
@@ -316,12 +316,12 @@ class Magnifier extends StatelessWidget {
   Widget build(BuildContext context) {
     return RawMagnifier(
       decoration: MagnifierDecoration(
-          shape: RoundedRectangleBorder(borderRadius: borderRadius),
-          shadows: shadows),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
+        shadows: shadows,
+      ),
       magnificationScale: _magnification,
       focalPoint: additionalFocalPointOffset +
-          Offset(0,
-              kStandardVerticalFocalPointShift - kDefaultMagnifierSize.height / 2),
+          Offset(0, kStandardVerticalFocalPointShift - kDefaultMagnifierSize.height / 2),
       size: size,
       child: ColoredBox(
         color: filmColor,

@@ -13884,17 +13884,17 @@ class Icons {
   /// <i class="material-icons-outlined md-36">loop</i> &#x2014; material icon named "loop" (outlined).
   static const IconData loop_outlined = IconData(0xf1a1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">magnifier</i> &#x2014; material icon named "magnifier".
-  static const IconData magnifier = IconData(0xe3bc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">loupe</i> &#x2014; material icon named "loupe".
+  static const IconData loupe = IconData(0xe3bc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">magnifier</i> &#x2014; material icon named "magnifier" (sharp).
-  static const IconData magnifier_sharp = IconData(0xeab5, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">loupe</i> &#x2014; material icon named "loupe" (sharp).
+  static const IconData loupe_sharp = IconData(0xeab5, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">magnifier</i> &#x2014; material icon named "magnifier" (round).
-  static const IconData magnifier_rounded = IconData(0xf894, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">loupe</i> &#x2014; material icon named "loupe" (round).
+  static const IconData loupe_rounded = IconData(0xf894, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">magnifier</i> &#x2014; material icon named "magnifier" (outlined).
-  static const IconData magnifier_outlined = IconData(0xf1a2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">loupe</i> &#x2014; material icon named "loupe" (outlined).
+  static const IconData loupe_outlined = IconData(0xf1a2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">low_priority</i> &#x2014; material icon named "low priority".
   static const IconData low_priority = IconData(0xe3bd, fontFamily: 'MaterialIcons');

@@ -17,7 +17,7 @@ import 'package:flutter/widgets.dart';
 ///   that the magnifier is on, shown otherwise.
 /// - follows the X coordinate of the gesture directly (with respect to rule 1).
 /// - has some vertical drag resistance; i.e. if a gesture is detected k units below the field,
-///   then has vertical offset _kDragResistance * k.
+///   then has vertical offset [dragResistance] * k.
 class CupertinoTextMagnifier extends StatefulWidget {
   /// Construct a [RawMagnifier] in the Cupertino style, positioning with respect to
   /// [magnifierOverlayInfoBearer].
@@ -209,8 +209,8 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 ///
 /// {@macro flutter.widgets.magnifier.intro}
 ///
-///
 /// See also:
+///
 /// * [RawMagnifier], the backing implementation.
 /// * [CupertinoTextMagnifier], a widget that positions [CupertinoMagnifier] based on
 /// [MagnifierOverlayInfoBearer].

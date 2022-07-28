@@ -891,6 +891,11 @@ class SelectionOverlay {
   ///
   /// This does nothing if there is no magnifier.
   void hideMagnifier({required bool shouldShowToolbar}) {
+    if (_magnifierController.overlayEntry == null) {
+      return;
+    }
+
+
     _magnifierController.hide();
 
     if (shouldShowToolbar) {

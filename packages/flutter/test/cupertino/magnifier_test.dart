@@ -76,8 +76,8 @@ void main() {
         // Magnifier should be positioned directly over the red square.
         final RenderBox tapPointRenderBox =
             tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
-        final Rect fakeTextFieldRect = tapPointRenderBox.localToGlobal(Offset.zero) &
-          tapPointRenderBox.size;
+        final Rect fakeTextFieldRect =
+            tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifier =
             ValueNotifier<MagnifierOverlayInfoBearer>(

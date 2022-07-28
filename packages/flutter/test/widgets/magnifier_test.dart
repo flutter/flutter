@@ -76,7 +76,7 @@ void main() {
                 size: magnifierSize,
                 focalPoint: magnifierFocalPoint,
                 magnificationScale: magnificationScale,
-                decoration: MagnifierDecoration(opacity: 0.75, shadows: <BoxShadow>[
+                decoration: MagnifierDecoration(shadows: <BoxShadow>[
                   BoxShadow(
                       spreadRadius: 10,
                       blurRadius: 10,
