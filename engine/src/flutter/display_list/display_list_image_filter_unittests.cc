@@ -253,8 +253,8 @@ static void TestBounds(const DlImageFilter& filter,
         ASSERT_TRUE(matrix.invert(nullptr));
         TestBoundsWithMatrix(filter, matrix, sourceBounds,
                              expectedLocalOutputQuad);
-        matrix.setPerspX(0.01);
-        matrix.setPerspY(0.01);
+        matrix.setPerspX(0.001);
+        matrix.setPerspY(0.001);
         ASSERT_TRUE(matrix.invert(nullptr));
         TestBoundsWithMatrix(filter, matrix, sourceBounds,
                              expectedLocalOutputQuad);
@@ -589,6 +589,87 @@ TEST(DisplayListImageFilter, ComposeBounds) {
   SkRect inputBounds = SkRect::MakeLTRB(20, 20, 80, 80);
   SkRect expectOutputBounds = inputBounds.makeOutset(36, 15).makeOutset(5, 10);
   TestBounds(filter, inputBounds, expectOutputBounds);
+}
+
+static void TestUnboundedBounds(DlImageFilter& filter,
+                                const SkRect& sourceBounds,
+                                const SkRect& expectedOutputBounds,
+                                const SkRect& expectedInputBounds) {
+  SkRect bounds;
+  EXPECT_EQ(filter.map_local_bounds(sourceBounds, bounds), nullptr);
+  EXPECT_EQ(bounds, expectedOutputBounds);
+
+  SkIRect ibounds;
+  EXPECT_EQ(
+      filter.map_device_bounds(sourceBounds.roundOut(), SkMatrix::I(), ibounds),
+      nullptr);
+  EXPECT_EQ(ibounds, expectedOutputBounds.roundOut());
+
+  EXPECT_EQ(filter.get_input_device_bounds(sourceBounds.roundOut(),
+                                           SkMatrix::I(), ibounds),
+            nullptr);
+  EXPECT_EQ(ibounds, expectedInputBounds.roundOut());
+}
+
+TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInner) {
+  auto inputBounds = SkRect::MakeLTRB(20, 20, 80, 80);
+  auto expectedBounds = SkRect::MakeLTRB(5, 2, 95, 98);
+
+  DlBlendColorFilter color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
+  auto outer = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
+  auto inner = DlColorFilterImageFilter(color_filter.shared());
+  auto composed = DlComposeImageFilter(outer.shared(), inner.shared());
+
+  TestUnboundedBounds(composed, inputBounds, expectedBounds, expectedBounds);
+}
+
+TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedOuter) {
+  auto inputBounds = SkRect::MakeLTRB(20, 20, 80, 80);
+  auto expectedBounds = SkRect::MakeLTRB(5, 2, 95, 98);
+
+  DlBlendColorFilter color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
+  auto outer = DlColorFilterImageFilter(color_filter.shared());
+  auto inner = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
+  auto composed = DlComposeImageFilter(outer.shared(), inner.shared());
+
+  TestUnboundedBounds(composed, inputBounds, expectedBounds, expectedBounds);
+}
+
+TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInnerAndOuter) {
+  auto inputBounds = SkRect::MakeLTRB(20, 20, 80, 80);
+  auto expectedBounds = inputBounds;
+
+  DlBlendColorFilter color_filter1(DlColor::kRed(), DlBlendMode::kSrcOver);
+  DlBlendColorFilter color_filter2(DlColor::kBlue(), DlBlendMode::kSrcOver);
+  auto outer = DlColorFilterImageFilter(color_filter1.shared());
+  auto inner = DlColorFilterImageFilter(color_filter2.shared());
+  auto composed = DlComposeImageFilter(outer.shared(), inner.shared());
+
+  TestUnboundedBounds(composed, inputBounds, expectedBounds, expectedBounds);
+}
+
+// See https://github.com/flutter/flutter/issues/108433
+TEST(DisplayListImageFilter, Issue_108433) {
+  auto inputBounds = SkIRect::MakeLTRB(20, 20, 80, 80);
+
+  auto sk_filter = SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kSrcOver);
+  auto sk_outer = SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr);
+  auto sk_inner = SkImageFilters::ColorFilter(sk_filter, nullptr);
+  auto sk_compose = SkImageFilters::Compose(sk_outer, sk_inner);
+
+  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
+  auto dl_outer = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
+  auto dl_inner = DlColorFilterImageFilter(dl_color_filter.shared());
+  auto dl_compose = DlComposeImageFilter(dl_outer, dl_inner);
+
+  auto sk_bounds = sk_compose->filterBounds(
+      inputBounds, SkMatrix::I(),
+      SkImageFilter::MapDirection::kForward_MapDirection);
+
+  SkIRect dl_bounds;
+  EXPECT_EQ(dl_compose.map_device_bounds(inputBounds, SkMatrix::I(), dl_bounds),
+            nullptr);
+  ASSERT_EQ(dl_bounds, sk_bounds);
 }
 
 TEST(DisplayListImageFilter, ColorFilterConstructor) {
