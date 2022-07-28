@@ -192,7 +192,7 @@ class MagnifierController {
   /// [rect] will be returned as-is.
   ///
   /// It is perfectly valid for the output rect to have a point along the edge of the
-  /// [bounds]. If the desired output rect requires that no edges are parellel to edges
+  /// [bounds]. If the desired output rect requires that no edges are parallel to edges
   /// of [bounds], see [Rect.deflate] by 1 on [bounds] to achieve this effect.
   static Rect shiftWithinBounds({
     required Rect rect,
@@ -510,12 +510,13 @@ class _RenderMagnification extends RenderProxyBox {
 }
 
 class _MagnificationLayer extends ContainerLayer {
-  _MagnificationLayer(
-      {required this.size,
+  _MagnificationLayer({
+      required this.size,
       required this.globalPosition,
       required this.shape,
       required this.focalPoint,
-      required this.magnificationScale});
+      required this.magnificationScale,
+  });
 
   Offset globalPosition;
   Size size;

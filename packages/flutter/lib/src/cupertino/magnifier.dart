@@ -40,7 +40,7 @@ class CupertinoTextMagnifier extends StatefulWidget {
   /// A drag resistance on the downward Y position of the lens.
   final double dragResistance;
 
-  /// The difference in Y between the gesture position and the carat center
+  /// The difference in Y between the gesture position and the caret center
   /// so that the magnifier hides itself.
   final double hideBelowThreshold;
 

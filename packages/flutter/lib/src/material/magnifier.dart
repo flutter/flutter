@@ -26,7 +26,7 @@ class TextMagnifier extends StatefulWidget {
   /// {@macro widgets.material.magnifier.magnifier}
   ///
   /// {@template widgets.material.magnifier.androidDisclaimer}
-  /// These constants and default paramaters were taken from the
+  /// These constants and default parameters were taken from the
   /// Android 12 source code where directly transferable, and eyeballed on
   /// a Pixel 6 running Android 12 otherwise.
   /// {@endtemplate}
@@ -287,7 +287,7 @@ class Magnifier extends StatelessWidget {
   /// The color to tint the image in this [Magnifier].
   ///
   /// On native Android, there is a almost transparent gray tint to the
-  /// magnifier, in orderoto better distinguish the contents of the lens from
+  /// magnifier, in order to better distinguish the contents of the lens from
   /// the background.
   final Color filmColor;
 

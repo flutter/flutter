@@ -523,7 +523,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
       final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
       final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
-      final Rect caratRect = Rect.fromLTWH(
+      final Rect caretRect = Rect.fromLTWH(
         globalSelectionPointPosition.dx,
         globalSelectionPointPosition.dy - selectionPoint.lineHeight,
         0,
@@ -532,7 +532,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
       return MagnifierOverlayInfoBearer(
         globalGesturePosition: globalGesturePosition,
-        caretRect: caratRect,
+        caretRect: caretRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,
         currentLineBoundries: globalTransformAsOffset & _selectable!.size,
       );

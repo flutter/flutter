@@ -89,7 +89,7 @@ typedef MagnifierBuilder = Widget? Function(
     ValueNotifier<MagnifierOverlayInfoBearer> textSelectionData
 );
 
-/// A data class that allows the SelectionOverlay to delegate
+/// A data class that allows the [SelectionOverlay] to delegate
 /// the magnifier's positioning to the magnifier itself, based on the
 /// info in [MagnifierOverlayInfoBearer].
 @immutable
@@ -108,7 +108,7 @@ class MagnifierOverlayInfoBearer {
     required TextPosition currentTextPosition,
   }) {
     final Offset globalRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero);
-    final Rect localCaratRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+    final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
 
     final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
     final TextPosition positionAtEndOfLine = TextPosition(
@@ -129,7 +129,7 @@ class MagnifierOverlayInfoBearer {
     return MagnifierOverlayInfoBearer(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
-      caretRect: localCaratRect.shift(globalRenderEditableTopLeft),
+      caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
       currentLineBoundries: lineBoundries.shift(globalRenderEditableTopLeft)
     );
   }
@@ -1307,7 +1307,7 @@ class SelectionOverlay {
   /// Update the current magnifier with new selection data, so the magnifier
   /// can respond accordingly.
   ///
-  /// If there magnifier is not shown, this still updates the magnifier position
+  /// If the magnifier is not shown, this still updates the magnifier position
   /// because the magnifier may have hidden itself and is looking for a cue to reshow
   /// itself.
   ///
