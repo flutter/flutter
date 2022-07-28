@@ -398,12 +398,16 @@ def to_gn_args(args):
 
   # Enable Metal on iOS builds.
   if args.target_os == 'ios':
-    gn_args['skia_use_metal'] = True
+    gn_args['shell_enable_gl'] = False
+    gn_args['skia_use_gl'] = False
     gn_args['shell_enable_metal'] = True
+    gn_args['skia_use_metal'] = True
     # Bitcode enabled builds using the current version of the toolchain leak
     # C++ symbols decorated with the availability attribute. Disable these
     # attributes in release modes till the toolchain is updated.
     gn_args['skia_enable_api_available_macro'] = args.runtime_mode != 'release'
+  else:
+    gn_args['skia_use_gl'] = args.target_os != 'fuchsia'
 
   if sys.platform == 'darwin' and args.target_os not in ['android', 'fuchsia',
                                                          'wasm']:
