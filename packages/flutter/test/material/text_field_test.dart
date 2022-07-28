@@ -11783,7 +11783,7 @@ void main() {
                 ValueNotifier<MagnifierOverlayInfoBearer>(
                   const MagnifierOverlayInfoBearer.empty(),
                 )),
-            isA<TextEditingMagnifier>());
+            isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
       testWidgets('should build CupertinoMagnifier on iOS',

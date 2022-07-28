@@ -14,14 +14,15 @@ import 'package:flutter/foundation.dart';
 /// {@template widgets.material.magnifier.positionRules}
 /// Positions itself based on [magnifierSelectionOverlayInfoBearer]. Specifically, follows the
 /// following rules:
-/// - Tracks the gesture's X, but clamped to the beginning and end of the currently editing line.
+/// - Tracks the gesture's x coordinate, but clamped to the beginning and end of the
+///   currently editing line.
 /// - Focal point may never contain anything out of bounds.
 /// - Never goes out of bounds vertically; offset until the entire magnifier is in the screen. The
-///   focal point, regardless of this transformation, always points to the touch Y.
+///   focal point, regardless of this transformation, always points to the touch y coordinate.
 /// - If just jumped between lines (prevY != currentY) then animate for duration
-/// [jumpBetweenLinesAnimationDuration].
+///   [jumpBetweenLinesAnimationDuration].
 /// {@endtemplate}
-class TextEditingMagnifier extends StatefulWidget {
+class TextMagnifier extends StatefulWidget {
   /// {@macro widgets.material.magnifier.magnifier}
   ///
   /// {@template widgets.material.magnifier.androidDisclaimer}
@@ -31,11 +32,13 @@ class TextEditingMagnifier extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// {@macro widgets.material.magnifier.positionRules}
-  const TextEditingMagnifier(
-      {super.key, required this.magnifierSelectionOverlayInfoBearer});
+  const TextMagnifier({
+    super.key,
+    required this.magnifierSelectionOverlayInfoBearer
+  });
 
   /// A [TextMagnifierConfiguration] that returns a [CupertinoTextMagnifier] on iOS,
-  /// [TextEditingMagnifier] on Android, and null on all other platforms, and shows the editing handles
+  /// [TextMagnifier] on Android, and null on all other platforms, and shows the editing handles
   /// only on iOS.
   static TextMagnifierConfiguration adaptiveMagnifierConfiguration = TextMagnifierConfiguration(
     shouldDisplayHandlesInMagnifier: defaultTargetPlatform == TargetPlatform.iOS,
@@ -51,7 +54,7 @@ class TextEditingMagnifier extends StatefulWidget {
             magnifierOverlayInfoBearer: magnifierSelectionOverlayInfoBearer,
           );
         case TargetPlatform.android:
-          return TextEditingMagnifier(
+          return TextMagnifier(
               magnifierSelectionOverlayInfoBearer: magnifierSelectionOverlayInfoBearer);
 
         case TargetPlatform.fuchsia:
@@ -63,31 +66,29 @@ class TextEditingMagnifier extends StatefulWidget {
     }
   );
 
-  /// The duration that the position is animated if [TextEditingMagnifier] just switched
+  /// The duration that the position is animated if [TextMagnifier] just switched
   /// between lines.
   @visibleForTesting
   static const Duration jumpBetweenLinesAnimationDuration =
       Duration(milliseconds: 70);
 
-  /// [TextEditingMagnifier] positions itself based on [magnifierSelectionOverlayInfoBearer].
+  /// [TextMagnifier] positions itself based on [magnifierSelectionOverlayInfoBearer].
   ///
   /// {@macro widgets.material.magnifier.positionRules}
   final ValueNotifier<MagnifierOverlayInfoBearer>
       magnifierSelectionOverlayInfoBearer;
 
   @override
-  State<TextEditingMagnifier> createState() => _TextEditingMagnifierState();
+  State<TextMagnifier> createState() => _TextMagnifierState();
 }
 
-class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
+class _TextMagnifierState extends State<TextMagnifier> {
   // Should _only_ be null on construction. This is because of the animation logic.
   //
-  // {@template flutter.material.materialTextEditingMagnifier.magnifierPosition.nullReason}
   // Animations are added when `last_build_y != current_build_y`. This condition
   // is true on the inital render, which would mean that the inital
   // build would be animated - this is undesired. Thus, this is null for the
   // first frame and the condition becomes `magnifierPosition != null && last_build_y != this_build_y`.
-  // {@endtemplate}
   Offset? _magnifierPosition;
 
   // A timer that unsets itself after an animation duration.
@@ -101,9 +102,9 @@ class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
 
   @override
   void initState() {
+    super.initState();
     widget.magnifierSelectionOverlayInfoBearer
         .addListener(_determineMagnifierPositionAndFocalPoint);
-    super.initState();
   }
 
   @override
@@ -130,7 +131,7 @@ class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
         widget.magnifierSelectionOverlayInfoBearer.value;
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 
-    // Since by default, we draw at the top left corner, this offset
+    // Since by default we draw at the top left corner, this offset
     // shifts the magnifier so we draw at the center, and then also includes
     // the "above touch point" shift.
     final Offset basicMagnifierOffset = Offset(
@@ -149,7 +150,7 @@ class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
     // Place the magnifier at the previously calculated X, and the Y should be
     // exactly at the center of the handle.
     final Rect unadjustedMagnifierRect =
-        Offset(magnifierX, selectionInfo.caratRect.center.dy) - basicMagnifierOffset &
+        Offset(magnifierX, selectionInfo.caretRect.center.dy) - basicMagnifierOffset &
             Magnifier.kDefaultMagnifierSize;
 
     // Shift the magnifier so that, if we are ever out of the screen, we become in bounds.
@@ -184,7 +185,7 @@ class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
           selectionInfo.fieldBounds.right - horizontalMaxFocalPointEdgeInsets);
     }
 
-    // Since the previous value is now a global offset (i.e. `newGlobalFocalPoint
+    // Since the previous value is now a global offset (i.e. `newGlobalFocalPoint`
     // is now a global offset), we must subtract the magnifier's global offset
     // to obtain the relative shift in the focal point.
     final double newRelativeFocalPointX =
@@ -210,7 +211,7 @@ class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
       // Create a timer that deletes itself when the timer is complete.
       // This is `mounted` safe, since the timer is canceled in `dispose`.
       positionShouldBeAnimated = Timer(
-          TextEditingMagnifier.jumpBetweenLinesAnimationDuration,
+          TextMagnifier.jumpBetweenLinesAnimationDuration,
           () => setState(() {
                 _positionShouldBeAnimatedTimer = null;
               }));
@@ -232,9 +233,9 @@ class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
       top: _magnifierPosition!.dy,
       left: _magnifierPosition!.dx,
       // Material magnifier typically does not animate, unless we jump between lines,
-      // in whichcase we animate between lines.
+      // in which case we animate between lines.
       duration: _positionShouldBeAnimated
-          ? TextEditingMagnifier.jumpBetweenLinesAnimationDuration
+          ? TextMagnifier.jumpBetweenLinesAnimationDuration
           : Duration.zero,
       child: Magnifier(
         additionalFocalPointOffset: _extraFocalPointOffset,
@@ -248,7 +249,7 @@ class _TextEditingMagnifierState extends State<TextEditingMagnifier> {
 /// {@macro flutter.widgets.magnifier.intro}
 ///
 /// This widget focuses on mimicking the _style_ of the magnifier on material. For a
-/// widget that is focused on mimicking the behavior of a material magnifier, see [TextEditingMagnifier].
+/// widget that is focused on mimicking the behavior of a material magnifier, see [TextMagnifier].
 class Magnifier extends StatelessWidget {
   /// Creates a [RawMagnifier] in the Material style.
   ///

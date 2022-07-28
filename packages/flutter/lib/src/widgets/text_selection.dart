@@ -79,8 +79,8 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// can wait before removing it from the overlay.
 /// {@endtemplate}
 ///
+/// See also:
 ///
-/// see also:
 /// - [MagnifierOverlayInfoBearer], the dataclass that updates the
 ///   magnifier.
 typedef MagnifierBuilder = Widget? Function(
@@ -97,7 +97,7 @@ class MagnifierOverlayInfoBearer {
   /// Construct a [MagnifierOverlayInfoBearer] from raw values.
   const MagnifierOverlayInfoBearer({
     required this.globalGesturePosition,
-    required this.caratRect,
+    required this.caretRect,
     required this.fieldBounds,
     required this.currentLineBoundries,
   });
@@ -129,7 +129,7 @@ class MagnifierOverlayInfoBearer {
     return MagnifierOverlayInfoBearer(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
-      caratRect: localCaratRect.shift(globalRenderEditableTopLeft),
+      caretRect: localCaratRect.shift(globalRenderEditableTopLeft),
       currentLineBoundries: lineBoundries.shift(globalRenderEditableTopLeft)
     );
   }
@@ -138,7 +138,7 @@ class MagnifierOverlayInfoBearer {
   /// values set to 0.
   const MagnifierOverlayInfoBearer.empty() :
     globalGesturePosition = Offset.zero,
-    caratRect = Rect.zero,
+    caretRect = Rect.zero,
     currentLineBoundries = Rect.zero,
     fieldBounds = Rect.zero;
 
@@ -151,7 +151,7 @@ class MagnifierOverlayInfoBearer {
   final Rect currentLineBoundries;
 
   /// The rect of the handle that the magnifier should follow.
-  final Rect caratRect;
+  final Rect caretRect;
 
   /// The bounds of the entire text field that the magnifier is bound to.
   final Rect fieldBounds;
@@ -167,7 +167,7 @@ class MagnifierOverlayInfoBearer {
     }
 
     return other.globalGesturePosition == globalGesturePosition &&
-        other.caratRect == caratRect &&
+        other.caretRect == caretRect &&
         other.currentLineBoundries == currentLineBoundries &&
         other.fieldBounds == fieldBounds;
   }
@@ -175,7 +175,7 @@ class MagnifierOverlayInfoBearer {
   @override
   int get hashCode => Object.hash(
     globalGesturePosition,
-    caratRect,
+    caretRect,
     fieldBounds,
     currentLineBoundries
   );
@@ -1202,6 +1202,7 @@ class SelectionOverlay {
   /// Disposes this object and release resources.
   /// {@endtemplate}
   void dispose() {
+    _magnifierController.hide();
     hide();
   }
 

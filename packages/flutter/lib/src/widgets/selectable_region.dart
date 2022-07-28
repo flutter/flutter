@@ -532,7 +532,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
       return MagnifierOverlayInfoBearer(
         globalGesturePosition: globalGesturePosition,
-        caratRect: caratRect,
+        caretRect: caratRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,
         currentLineBoundries: globalTransformAsOffset & _selectable!.size,
       );

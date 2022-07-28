@@ -5,18 +5,19 @@
 import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
-/// A [CupertinoMagnifier], specifically for text editing.
+/// A [CupertinoMagnifier], specifically for integrating with [SelectionOverlay].
 ///
-/// Delegates styling to [CupertinoMagnifier] with its positioned depending on
+/// Delegates styling to [CupertinoMagnifier] with its position depending on
 /// [magnifierOverlayInfoBearer].
 ///
 /// Specifically, the [CupertinoTextMagnifier] follows the following rules.
 /// [CupertinoTextMagnifier]:
 /// - is positioned horizontally outside the screen width, with _kHorizontalScreenEdgePadding padding.
-/// - is hidden if a gesture is detected _kHideIfBelowThreshold units below the line that the magnifier is on, shown otherwise.
-/// - follows the X of the gesture directly (with respect to rule 1).
+/// - is hidden if a gesture is detected [hideBelowThreshold] units below the line
+///   that the magnifier is on, shown otherwise.
+/// - follows the X coordinate of the gesture directly (with respect to rule 1).
 /// - has some vertical drag resistance; i.e. if a gesture is detected k units below the field,
-/// then has vertical offset _kDragResistance * k.
+///   then has vertical offset _kDragResistance * k.
 class CupertinoTextMagnifier extends StatefulWidget {
   /// Construct a [RawMagnifier] in the Cupertino style, positioning with respect to
   /// [magnifierOverlayInfoBearer].
@@ -84,6 +85,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
   @override
   void initState() {
+    super.initState();
     _ioAnimationController = AnimationController(
       value: 0,
       vsync: this,
@@ -99,8 +101,6 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
       end: 1.0,
     ).animate(CurvedAnimation(
         parent: _ioAnimationController, curve: widget.animationCurve));
-
-    super.initState();
   }
 
   @override
@@ -123,7 +123,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
     // The exact Y of the center of the current line.
     final double verticalCenterOfCurrentLine =
-        textEditingContext.caratRect.center.dy;
+        textEditingContext.caretRect.center.dy;
 
     // If the magnifier is currently showing, but we have dragged out of threshold,
     // we should hide it.
@@ -236,7 +236,6 @@ class CupertinoMagnifier extends StatelessWidget {
         const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
     this.inOutAnimation,
   });
-  // These constants were eyeballed on an iPhone XR iOS v15.5.
 
   /// The shadows displayed under the magnifier.
   final List<BoxShadow> shadows;
@@ -287,22 +286,23 @@ class CupertinoMagnifier extends StatelessWidget {
     focalPointOffset += additionalFocalPointOffset;
 
     return Transform.translate(
-        offset: Offset.lerp(
-          const Offset(0, -kMagnifierAboveFocalPoint),
-          Offset.zero,
-          inOutAnimation?.value ?? 1,
-        )!,
-        child: RawMagnifier(
-          size: size,
-          focalPoint: focalPointOffset,
-          decoration: MagnifierDecoration(
-            opacity: inOutAnimation?.value ?? 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius,
-              side: borderSide,
-            ),
-            shadows: shadows,
+      offset: Offset.lerp(
+        const Offset(0, -kMagnifierAboveFocalPoint),
+        Offset.zero,
+        inOutAnimation?.value ?? 1,
+      )!,
+      child: RawMagnifier(
+        size: size,
+        focalPoint: focalPointOffset,
+        decoration: MagnifierDecoration(
+          opacity: inOutAnimation?.value ?? 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: borderRadius,
+            side: borderSide,
           ),
-        ));
+          shadows: shadows,
+        ),
+      ),
+    );
   }
 }

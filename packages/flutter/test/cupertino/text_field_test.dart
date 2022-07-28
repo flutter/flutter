@@ -5960,6 +5960,7 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
   group('magnifier', () {
     late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
     final Widget fakeMagnifier = Container(key: UniqueKey());

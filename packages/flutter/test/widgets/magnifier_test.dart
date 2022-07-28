@@ -64,7 +64,7 @@ void main() {
               child: Container(
                 color: Colors.pink,
                 // Since it is the size of the magnifier but over it's
-                // magnificationScale, it should take up the whole magnifier
+                // magnificationScale, it should take up the whole magnifier.
                 width: (magnifierSize.width * 1.5) / magnificationScale,
                 height: (magnifierSize.height * 1.5) / magnificationScale,
               ),
@@ -81,7 +81,8 @@ void main() {
                       spreadRadius: 10,
                       blurRadius: 10,
                       color: Colors.green,
-                      offset: Offset(5, 5))
+                      offset: Offset(5, 5),
+                    ),
                 ]),
               ),
             ),

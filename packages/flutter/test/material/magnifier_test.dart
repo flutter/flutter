@@ -32,11 +32,10 @@ void main() {
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
         context: context,
-        builder: (_) => TextEditingMagnifier(
+        builder: (_) => TextMagnifier(
               magnifierSelectionOverlayInfoBearer: infoBearer,
             ));
 
-    // The magnifier will never be shown if we don't pump the animation
     WidgetsBinding.instance.scheduleFrame();
     await tester.pumpAndSettle();
 
@@ -61,13 +60,13 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+          TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
               context,
               MagnifierController(),
               ValueNotifier<MagnifierOverlayInfoBearer>(
                   const MagnifierOverlayInfoBearer.empty()));
 
-      expect(builtWidget, isA<TextEditingMagnifier>());
+      expect(builtWidget, isA<TextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets('should return a CupertinoMagnifier on iOS',
@@ -80,7 +79,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+          TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
               context,
               MagnifierController(),
               ValueNotifier<MagnifierOverlayInfoBearer>(
@@ -99,7 +98,7 @@ void main() {
           tester.firstElement(find.byType(Placeholder));
 
       final Widget? builtWidget =
-          TextEditingMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+          TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
               context,
               MagnifierController(),
               ValueNotifier<MagnifierOverlayInfoBearer>(
@@ -107,10 +106,12 @@ void main() {
 
       expect(builtWidget, isNull);
     },
-        variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{
+      variant: TargetPlatformVariant.all(
+        excluding: <TargetPlatform>{
           TargetPlatform.iOS,
           TargetPlatform.android
-        }));
+        }),
+      );
   });
 
   group('magnifier', () {
@@ -155,7 +156,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
           currentLineBoundries: fakeTextFieldRect,
           fieldBounds: fakeTextFieldRect,
-          caratRect: fakeTextFieldRect,
+          caretRect: fakeTextFieldRect,
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: fakeTextFieldRect.center,
         ));
@@ -191,7 +192,7 @@ void main() {
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
               fieldBounds: reasonableTextField.inflate(gestureOutsideLine),
-              caratRect: reasonableTextField.inflate(gestureOutsideLine),
+              caretRect: reasonableTextField.inflate(gestureOutsideLine),
               // The tap position is far out of the right side of the app.
               globalGesturePosition:
                   Offset(reasonableTextField.right + gestureOutsideLine, 0),
@@ -223,7 +224,7 @@ void main() {
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
               fieldBounds: reasonableTextField.inflate(gestureOutsideLine),
-              caratRect: reasonableTextField.inflate(gestureOutsideLine),
+              caretRect: reasonableTextField.inflate(gestureOutsideLine),
               // The tap position is far out of the left side of the app.
               globalGesturePosition:
                   Offset(reasonableTextField.left - gestureOutsideLine, 0),
@@ -249,7 +250,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              caratRect: reasonableTextField,
+              caretRect: reasonableTextField,
               globalGesturePosition: reasonableTextField.center,
             )));
 
@@ -276,7 +277,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
-              caratRect: topOfScreenTextFieldRect,
+              caretRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
@@ -307,7 +308,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              caratRect: reasonableTextField,
+              caretRect: reasonableTextField,
 
               // Gesture on the far right of the magnifier.
               globalGesturePosition: reasonableTextField.topLeft,
@@ -337,7 +338,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
-              caratRect: topOfScreenTextFieldRect,
+              caretRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
@@ -368,7 +369,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              caratRect: reasonableTextField,
+              caretRect: reasonableTextField,
               globalGesturePosition: reasonableTextField.center,
             )));
 
@@ -389,7 +390,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          caratRect: reasonableTextField,
+          caretRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
@@ -399,7 +400,7 @@ void main() {
         magnifierPositioner.value = MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          caratRect: reasonableTextField,
+          caretRect: reasonableTextField,
           globalGesturePosition:
               reasonableTextField.center + const Offset(200, 0),
         );
@@ -424,7 +425,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          caratRect: reasonableTextField,
+          caretRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
@@ -435,7 +436,7 @@ void main() {
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
-          caratRect: reasonableTextField.shift(verticalShift),
+          caretRect: reasonableTextField.shift(verticalShift),
           globalGesturePosition: reasonableTextField.center + verticalShift,
         );
 
@@ -459,7 +460,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          caratRect: reasonableTextField,
+          caretRect: reasonableTextField,
           globalGesturePosition: reasonableTextField.center,
         ));
 
@@ -470,13 +471,13 @@ void main() {
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
-          caratRect: reasonableTextField.shift(verticalShift),
+          caretRect: reasonableTextField.shift(verticalShift),
           globalGesturePosition: reasonableTextField.center + verticalShift,
         );
 
         await tester.pump();
         expect(getIsAnimated(tester), true);
-        await tester.pump(TextEditingMagnifier.jumpBetweenLinesAnimationDuration +
+        await tester.pump(TextMagnifier.jumpBetweenLinesAnimationDuration +
             const Duration(seconds: 2));
         expect(getIsAnimated(tester), false);
       });

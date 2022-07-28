@@ -40,11 +40,9 @@ class MagnifierController {
 
   /// The magnifier's [OverlayEntry], if currently in the overlay.
   ///
-  /// It may be possible that this is not null, but
-  ///
   /// This is public in case other overlay entries need to be positioned
   /// above or below this [overlayEntry]. Anything in the paint order after
-  /// the [RawMagnifier] will not be displaued in the magnifier; this means that if it
+  /// the [RawMagnifier] will not be displayed in the magnifier; this means that if it
   /// is desired for an overlay entry to be displayed in the magnifier,
   /// it _must_ be positioned below the magnifier.
   ///
@@ -93,7 +91,7 @@ class MagnifierController {
   /// If the magnifier is shown or not.
   ///
   /// [shown] is:
-  /// - false when nothing is in the overlay
+  /// - false when nothing is in the overlay.
   /// - false when [animationController] is [AnimationStatus.dismissed].
   /// - false when [animationController] is animating out.
   /// and true in all other circumstances.
@@ -225,7 +223,7 @@ class MagnifierController {
 /// A decoration for a [RawMagnifier].
 ///
 /// [MagnifierDecoration] does not expose [ShapeDecoration.color], [ShapeDecoration.image],
-/// or [ShapeDecoration.gradient], since they will be covered by the [RawMagnifier]'s lense.
+/// or [ShapeDecoration.gradient], since they will be covered by the [RawMagnifier]'s lens.
 ///
 /// Also takes an [opacity] (see https://github.com/flutter/engine/pull/34435).
 class MagnifierDecoration extends ShapeDecoration {
@@ -419,7 +417,7 @@ class _Magnifier extends SingleChildRenderObjectWidget {
       this.focalPoint = Offset.zero,
   });
 
-  ///  [focalPoint] of the magnifier is the area the center of the
+  /// [focalPoint] is the area the center of the
   /// [_Magnifier] points to, relative to the center of the magnifier.
   /// If left as [Offset.zero], the magnifier will magnify whatever is directly
   /// below it.

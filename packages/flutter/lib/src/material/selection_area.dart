@@ -45,7 +45,7 @@ class SelectionArea extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextEditingMagnifier] on
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
   /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
   final TextMagnifierConfiguration? magnifierConfiguration;
@@ -105,7 +105,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       focusNode: _effectiveFocusNode,
       selectionControls: controls,
-      magnifierConfiguration: widget.magnifierConfiguration ?? TextEditingMagnifier.adaptiveMagnifierConfiguration,
+      magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       child: widget.child,
     );
   }

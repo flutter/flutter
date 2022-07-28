@@ -787,11 +787,11 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextMagnifier] on iOS nothing on all other
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
   /// platforms. If it is desired to supress the magnifier, consider passing
   /// [TextMagnifierConfiguration.disabled].
   ///
-  // todo(antholeole): once the magnifier PR lands, I should enrich this area of the
+  // TODO(antholeole): once the magnifier PR lands, I should enrich this area of the
   // docs with images of what a magnifier is.
   final TextMagnifierConfiguration? magnifierConfiguration;
 
@@ -846,16 +846,20 @@ class CupertinoTextField extends StatefulWidget {
     MagnifierController controller,
     ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return CupertinoTextMagnifier(
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return CupertinoTextMagnifier(
         controller: controller,
         magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
       );
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return null;
     }
-
-    return null;
-  }
-  );
+  });
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {

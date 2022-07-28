@@ -60,27 +60,31 @@ void main() {
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
               home: Center(
-                  child: Container(
-                key: fakeTextFieldKey,
-                width: 10,
-                height: 10,
-                color: Colors.red,
-                child: const Placeholder(),
-              )),
+                child: Container(
+                  key: fakeTextFieldKey,
+                  width: 10,
+                  height: 10,
+                  color: Colors.red,
+                  child: const Placeholder(),
+                ),
+              ),
             ),
           ),
         );
         final BuildContext context = tester.element(find.byType(Placeholder));
 
         // Magnifier should be positioned directly over the red square.
-        final RenderBox tapPointRenderBox = tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
-        final Rect fakeTextFieldRect = tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
+        final RenderBox tapPointRenderBox =
+            tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
+        final Rect fakeTextFieldRect = tapPointRenderBox.localToGlobal(Offset.zero) &
+          tapPointRenderBox.size;
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifier = ValueNotifier<MagnifierOverlayInfoBearer>(
+        final ValueNotifier<MagnifierOverlayInfoBearer> magnifier =
+            ValueNotifier<MagnifierOverlayInfoBearer>(
           MagnifierOverlayInfoBearer(
             currentLineBoundries: fakeTextFieldRect,
             fieldBounds: fakeTextFieldRect,
-            caratRect: fakeTextFieldRect,
+            caretRect: fakeTextFieldRect,
             // The tap position is dragBelow units below the text field.
             globalGesturePosition: fakeTextFieldRect.center,
           ),
@@ -114,7 +118,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              caratRect: reasonableTextField,
+              caretRect: reasonableTextField,
               // The tap position is far out of the right side of the app.
               globalGesturePosition:
                   Offset(MediaQuery.of(context).size.width + 100, 0),
@@ -146,7 +150,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
-              caratRect: reasonableTextField,
+              caretRect: reasonableTextField,
               // The tap position is dragBelow units below the text field.
               globalGesturePosition: Offset(
                   MediaQuery.of(context).size.width / 2,
@@ -162,8 +166,7 @@ void main() {
     });
 
     group('status', () {
-      testWidgets('should hide if gesture is far below the text field',
-          (WidgetTester tester) async {
+      testWidgets('should hide if gesture is far below the text field', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -179,20 +182,20 @@ void main() {
                 MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          caratRect: reasonableTextField,
+          caretRect: reasonableTextField,
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: Offset(
               MediaQuery.of(context).size.width / 2, reasonableTextField.top),
         ));
 
-        // Show the loumagnifiere initally, so that we get it in a not hidden state
+        // Show the magnifier initally, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierinfo);
 
         // Move the gesture to one that should hide it.
         magnifierinfo.value = MagnifierOverlayInfoBearer(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
-            caratRect: reasonableTextField,
+            caretRect: reasonableTextField,
             globalGesturePosition:
                 magnifierinfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
@@ -218,7 +221,7 @@ void main() {
                 MagnifierOverlayInfoBearer(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
-          caratRect: reasonableTextField,
+          caretRect: reasonableTextField,
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: Offset(
               MediaQuery.of(context).size.width / 2, reasonableTextField.top),
@@ -231,7 +234,7 @@ void main() {
         magnifierInfo.value = MagnifierOverlayInfoBearer(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
-            caratRect: reasonableTextField,
+            caretRect: reasonableTextField,
             globalGesturePosition:
                 magnifierInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
@@ -243,7 +246,7 @@ void main() {
         magnifierInfo.value = MagnifierOverlayInfoBearer(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
-            caratRect: reasonableTextField,
+            caretRect: reasonableTextField,
             globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2,
                 reasonableTextField.top));
         await tester.pumpAndSettle();
