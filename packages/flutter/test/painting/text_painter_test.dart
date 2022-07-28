@@ -1066,7 +1066,7 @@ void main() {
       exception = e;
     }
 
-    expect(exception?.message, contains('The calls that first invalidated the text layout was:'));
+    expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
     exception = null;
   });
 }
