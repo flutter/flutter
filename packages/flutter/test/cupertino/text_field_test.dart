@@ -5993,7 +5993,7 @@ void main() {
       });
 
       group('defaults', () {
-        testWidgets('should build CupertinoMagnifier on iOS', (WidgetTester tester) async {
+        testWidgets('should build CupertinoMagnifier on iOS and Android', (WidgetTester tester) async {
           await tester.pumpWidget(const CupertinoApp(
             home: CupertinoTextField(),
           ));
@@ -6011,10 +6011,10 @@ void main() {
               isA<CupertinoTextMagnifier>());
         },
             variant: const TargetPlatformVariant(
-                <TargetPlatform>{TargetPlatform.iOS}));
+                <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}));
       });
 
-      testWidgets('should build nothing on not iOS', (WidgetTester tester) async {
+      testWidgets('should build nothing on all platforms but iOS and Android', (WidgetTester tester) async {
         await tester.pumpWidget(const CupertinoApp(
           home: CupertinoTextField(),
         ));
@@ -6032,7 +6032,7 @@ void main() {
             isNull);
       },
           variant: TargetPlatformVariant.all(
-              excluding: <TargetPlatform>{TargetPlatform.iOS}));
+              excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}));
     });
 
     testWidgets('Can drag handles to show, unshow, and update magnifier',
