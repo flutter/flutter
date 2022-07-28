@@ -128,6 +128,7 @@ class TestPointer {
     Offset newLocation, {
     Duration timeStamp = Duration.zero,
     int? buttons,
+    bool endOfBatch = true,
   }) {
     assert(!isDown);
     assert(!isPanZoomActive);
@@ -143,6 +144,7 @@ class TestPointer {
       pointer: pointer,
       position: location!,
       buttons: _buttons,
+      endOfBatch: endOfBatch,
     );
   }
 
@@ -160,6 +162,7 @@ class TestPointer {
     Offset newLocation, {
     Duration timeStamp = Duration.zero,
     int? buttons,
+    bool endOfBatch = true,
   }) {
     assert(
         isDown,
@@ -180,6 +183,7 @@ class TestPointer {
       position: newLocation,
       delta: delta,
       buttons: _buttons,
+      endOfBatch: endOfBatch,
     );
   }
 
@@ -189,7 +193,10 @@ class TestPointer {
   /// specific time stamp by passing the `timeStamp` argument.
   ///
   /// The object is no longer usable after this method has been called.
-  PointerUpEvent up({ Duration timeStamp = Duration.zero }) {
+  PointerUpEvent up({
+    Duration timeStamp = Duration.zero,
+    bool endOfBatch = true,
+  }) {
     assert(!isPanZoomActive);
     assert(isDown);
     _isDown = false;
@@ -199,6 +206,7 @@ class TestPointer {
       device: _device,
       pointer: pointer,
       position: location!,
+      endOfBatch: endOfBatch,
     );
   }
 
@@ -208,7 +216,10 @@ class TestPointer {
   /// specific time stamp by passing the `timeStamp` argument.
   ///
   /// The object is no longer usable after this method has been called.
-  PointerCancelEvent cancel({ Duration timeStamp = Duration.zero }) {
+  PointerCancelEvent cancel({
+    Duration timeStamp = Duration.zero,
+    bool endOfBatch = true,
+  }) {
     assert(isDown);
     _isDown = false;
     return PointerCancelEvent(
@@ -217,6 +228,7 @@ class TestPointer {
       device: _device,
       pointer: pointer,
       position: location!,
+      endOfBatch: endOfBatch,
     );
   }
 
