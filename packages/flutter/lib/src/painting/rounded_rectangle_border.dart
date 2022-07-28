@@ -97,7 +97,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-    final RRect adjustedRect = borderRect.deflate(side.strokeInset);
+    final RRect adjustedRect = borderRect.deflateWithRect(side.strokeInset());
     return Path()
       ..addRRect(adjustedRect);
   }
@@ -114,16 +114,16 @@ class RoundedRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        if (borderRadius == BorderRadius.zero) {
-          canvas.drawRect(rect.inflate(side.strokeOffset / 2), side.toPaint());
-        } else {
+        // if (borderRadius == BorderRadius.zero) {
+          // canvas.drawRect(rect.inflateWithRect(side.strokeOffset(divideResultBy: 2)), side.toPaint());
+        // } else {
           final Paint paint = Paint()
             ..color = side.color;
           final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner = borderRect.deflate(side.strokeInset);
-          final RRect outer = borderRect.inflate(side.strokeOutset);
+          final RRect inner = borderRect.deflateWithRect(side.strokeInset());
+          final RRect outer = borderRect.inflateWithRect(side.strokeOutset());
           canvas.drawDRRect(outer, inner, paint);
-        }
+        // }
     }
   }
 
@@ -280,7 +280,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     final RRect borderRect = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
-    final RRect adjustedRect = borderRect.deflate(ui.lerpDouble(side.width, 0, side.strokeAlign)!);
+    final RRect adjustedRect = borderRect.deflateWithRect(side.strokeInset());
     return Path()
       ..addRRect(adjustedRect);
   }
@@ -308,12 +308,12 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         break;
       case BorderStyle.solid:
         final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect, textDirection)!;
-        if (adjustedBorderRadius == BorderRadius.zero) {
-          canvas.drawRect(rect.inflate(side.strokeOffset / 2), side.toPaint());
-        } else {
-          final RRect borderRect = adjustedBorderRadius.toRRect(_adjustRect(rect));
-          canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
-        }
+        // if (adjustedBorderRadius == BorderRadius.zero) {
+        //   canvas.drawRect(rect.inflateWithRect(side.strokeOffset(divideResultBy: 2)), side.toPaint());
+        // } else {
+        final RRect borderRect = adjustedBorderRadius.toRRect(_adjustRect(rect));
+        canvas.drawRRect(borderRect.inflateWithRect(side.strokeOffset(divideResultBy: 2)), side.toPaint());
+        // }
     }
   }
 

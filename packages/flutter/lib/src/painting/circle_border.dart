@@ -71,7 +71,7 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    return Path()..addOval(_adjustRect(rect).deflate(side.strokeInset));
+    return Path()..addOval(_adjustRect(rect).deflateWithRect(side.strokeInset()));
   }
 
   @override
@@ -90,11 +90,11 @@ class CircleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        if (eccentricity == 0.0) {
-          canvas.drawCircle(rect.center, (rect.shortestSide + side.strokeOffset) / 2, side.toPaint());
+        if (eccentricity == 0.0 && side.strokeAlign.isUniform) {
+          canvas.drawCircle(rect.center, (rect.shortestSide + side.strokeOffset().left) / 2, side.toPaint());
         } else {
           final Rect borderRect = _adjustRect(rect);
-          canvas.drawOval(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
+          canvas.drawOval(borderRect.inflateWithRect(side.strokeOffset(divideResultBy: 2)), side.toPaint());
         }
     }
   }

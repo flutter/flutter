@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' as ui show RRect, Rect, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -32,18 +32,273 @@ enum BorderStyle {
 /// - [outside] provides zero padding, as stroke is drawn entirely outside.
 @immutable
 class StrokeAlign {
-  /// Acts as a shortcut.
-  const StrokeAlign();
+  /// Creates insets from offsets from the left, top, right, and bottom.
+  const StrokeAlign.fromLTRB(this.left, this.top, this.right, this.bottom)
+      : isUniform = left == top && top == right && right == bottom;
 
+  /// Creates insets where all the offsets are `value`.
+  const StrokeAlign.all(double value)
+      : left = value,
+        top = value,
+        right = value,
+        bottom = value,
+        isUniform = true;
+
+  /// Creates insets with only the given values non-zero.
+  const StrokeAlign.only({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+  }) : isUniform = left == top && top == right && right == bottom;
+
+  /// Creates insets with symmetrical vertical and horizontal offsets.
+  const StrokeAlign.symmetric({
+    double vertical = 0.0,
+    double horizontal = 0.0,
+  }) : left = horizontal,
+        top = vertical,
+        right = horizontal,
+        bottom = vertical,
+        isUniform = vertical == horizontal;
+  
+  /// Detect if [left], [top], [right] and [bottom] have the same value.
+  final bool isUniform;
+
+  /// The offset from the left.
+  final double left;
+
+  /// The offset from the top.
+  final double top;
+
+  /// The offset from the right.
+  final double right;
+
+  /// The offset from the bottom.
+  final double bottom;
+  
   /// The border is drawn on the inside of the border path.
-  static const double inside = -1.0;
+  static const StrokeAlign inside = StrokeAlign.all(-1.0);
 
   /// The border is drawn on the center of the border path, with half of the
   /// [BorderSide.width] on the inside, and the other half on the outside of the path.
-  static const double center = 0.0;
+  static const StrokeAlign center = StrokeAlign.all(0.0);
 
   /// The border is drawn on the outside of the border path.
-  static const double outside = 1.0;
+  static const StrokeAlign outside = StrokeAlign.all(1.0);
+
+  /// Returns the difference between two [StrokeAlign].
+  StrokeAlign operator -(StrokeAlign other) {
+    return StrokeAlign.fromLTRB(
+      left - other.left,
+      top - other.top,
+      right - other.right,
+      bottom - other.bottom,
+    );
+  }
+
+  /// Returns the sum of two [StrokeAlign].
+  StrokeAlign operator +(StrokeAlign other) {
+    return StrokeAlign.fromLTRB(
+      left + other.left,
+      top + other.top,
+      right + other.right,
+      bottom + other.bottom,
+    );
+  }
+
+  /// Returns the [StrokeAlign] object with each dimension negated.
+  ///
+  /// This is the same as multiplying the object by -1.0.
+  StrokeAlign operator -() {
+    return StrokeAlign.fromLTRB(
+      -left,
+      -top,
+      -right,
+      -bottom,
+    );
+  }
+
+  /// Scales the [StrokeAlign] in each dimension by the given factor.
+  StrokeAlign operator *(double other) {
+    return StrokeAlign.fromLTRB(
+      left * other,
+      top * other,
+      right * other,
+      bottom * other,
+    );
+  }
+
+  /// Divides the [StrokeAlign] in each dimension by the given factor.
+  StrokeAlign operator /(double other) {
+    return StrokeAlign.fromLTRB(
+      left / other,
+      top / other,
+      right / other,
+      bottom / other,
+    );
+  }
+
+  /// Integer divides the [EdgeInsets] in each dimension by the given factor.
+  StrokeAlign operator ~/(double other) {
+    return StrokeAlign.fromLTRB(
+      (left ~/ other).toDouble(),
+      (top ~/ other).toDouble(),
+      (right ~/ other).toDouble(),
+      (bottom ~/ other).toDouble(),
+    );
+  }
+
+  /// Computes the remainder in each dimension by the given factor.
+  StrokeAlign operator %(double other) {
+    return StrokeAlign.fromLTRB(
+      left % other,
+      top % other,
+      right % other,
+      bottom % other,
+    );
+  }
+
+  /// Linearly interpolate between two [StrokeAlign].
+  ///
+  /// If either is null, this function interpolates from zero.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static StrokeAlign? lerp(StrokeAlign? a, StrokeAlign? b, double t) {
+    assert(t != null);
+    if (a == null && b == null) {
+      return null;
+    }
+    if (a == null) {
+      return b! * t;
+    }
+    if (b == null) {
+      return a * (1.0 - t);
+    }
+    return StrokeAlign.fromLTRB(
+      ui.lerpDouble(a.left, b.left, t)!,
+      ui.lerpDouble(a.top, b.top, t)!,
+      ui.lerpDouble(a.right, b.right, t)!,
+      ui.lerpDouble(a.bottom, b.bottom, t)!,
+    );
+  }
+
+  /// Creates a [StrokeAlign] that represents the addition of the two given
+  /// [StrokeAlign] by maximizing each corner.
+  static StrokeAlign merge(StrokeAlign a, StrokeAlign b) {
+    assert(a != null);
+    assert(b != null);
+
+    return StrokeAlign.fromLTRB(
+      math.max(a.left, b.left),
+      math.max(a.top, b.top),
+      math.max(a.right, b.right),
+      math.max(a.bottom, b.bottom),
+    );
+  }
+
+  /// Creates a copy of this [StrokeAlign] but with the given fields replaced
+  /// with the new values.
+  StrokeAlign copyWith({
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
+  }) {
+    return StrokeAlign.only(
+      left: left ?? this.left,
+      top: top ?? this.top,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+    );
+  }
+
+  @override
+  String toString() {
+    if (left == -1.0 && right == -1.0 && top == -1.0 && bottom == -1.0) {
+      return 'StrokeAlign.inside';
+    } else if (left == 0.0 && right == 0.0 && top == 0.0 && bottom == 0.0) {
+      return 'StrokeAlign.center';
+    } else if (left == 1.0 && right == 1.0 && top == 1.0 && bottom == 1.0) {
+      return 'StrokeAlign.outside';
+    } else if (left == right && top == bottom) {
+      return 'StrokeAlign.symmetric(vertical: ${top.toStringAsFixed(1)}, horizontal: ${left.toStringAsFixed(1)})';
+    }
+    return 'StrokeAlign.LTRB(${left.toStringAsFixed(1)}, '
+        '${top.toStringAsFixed(1)}, '
+        '${right.toStringAsFixed(1)}, '
+        '${bottom.toStringAsFixed(1)})';
+  }
+
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is StrokeAlign
+        && other.left == left
+        && other.right == right
+        && other.top == top
+        && other.bottom == bottom;
+  }
+
+  @override
+  int get hashCode => Object.hash(left, top, right, bottom);
+}
+
+/// Expand inflate for StrokeAlign.
+extension StrokeAlignRectExtension on ui.Rect {
+  /// Similar to [ui.Rect.inflate] but receives a [ui.Rect].
+  Rect inflateWithRect(Rect rect) {
+    return Rect.fromLTRB(
+      left - rect.left,
+      top - rect.top,
+      right + rect.right,
+      bottom + rect.bottom,
+    );
+  }
+
+  /// Similar to [ui.Rect.deflate] but receives a [ui.Rect].
+  Rect deflateWithRect(Rect rect) {
+    return Rect.fromLTRB(
+      left + rect.left,
+      top + rect.top,
+      right - rect.right,
+      bottom - rect.bottom,
+    );
+  }
+}
+
+/// Expand inflate for StrokeAlign;
+extension StrokeAlignRRectExtension on ui.RRect {
+  /// Similar to [ui.RRect.inflate] but receives a [ui.Rect].
+  RRect inflateWithRect(Rect rect) {
+    return RRect.fromLTRBAndCorners(
+      left - rect.left,
+      top - rect.top,
+      right + rect.right,
+      bottom + rect.bottom,
+      topLeft: tlRadius + Radius.elliptical(rect.left, rect.top),
+      topRight: trRadius + Radius.elliptical(rect.right, rect.top),
+      bottomRight: brRadius + Radius.elliptical(rect.right, rect.bottom),
+      bottomLeft: blRadius + Radius.elliptical(rect.left, rect.bottom),
+    );
+  }
+
+  /// Similar to [ui.RRect.deflate] but receives a [ui.Rect].
+  RRect deflateWithRect(Rect rect) {
+    return RRect.fromLTRBAndCorners(
+      left + rect.left,
+      top + rect.top,
+      right - rect.right,
+      bottom - rect.bottom,
+      topLeft: tlRadius - Radius.elliptical(rect.left, rect.top),
+      topRight: trRadius - Radius.elliptical(rect.right, rect.top),
+      bottomRight: brRadius - Radius.elliptical(rect.right, rect.bottom),
+      bottomLeft: blRadius - Radius.elliptical(rect.left, rect.bottom),
+    );
+  }
 }
 
 /// A side of a border of a box.
@@ -91,7 +346,7 @@ class BorderSide with Diagnosticable {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
-    this.strokeAlign = strokeAlignInside,
+    this.strokeAlign = StrokeAlign.inside,
   }) : assert(color != null),
        assert(width != null),
        assert(width >= 0.0),
@@ -129,7 +384,7 @@ class BorderSide with Diagnosticable {
     return BorderSide(
       color: a.color, // == b.color
       width: a.width + b.width,
-      strokeAlign: math.max(a.strokeAlign, b.strokeAlign),
+      strokeAlign: StrokeAlign.merge(a.strokeAlign, b.strokeAlign),
       style: a.style, // == b.style
     );
   }
@@ -163,29 +418,78 @@ class BorderSide with Diagnosticable {
   /// can be used in an outside widget to clip it.
   /// If [Container.decoration] has a border, the container may incorporate
   /// [BorderSide.width] as additional padding:
-  /// - [strokeAlignInside] provides padding with full [BorderSide.width].
-  /// - [strokeAlignCenter] provides padding with half [BorderSide.width].
-  /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
-  final double strokeAlign;
+  /// - [StrokeAlign.inside] provides padding with full [BorderSide.width].
+  /// - [StrokeAlign.center] provides padding with half [BorderSide.width].
+  /// - [StrokeAlign.outside] provides zero padding, as stroke is drawn entirely outside.
+  final StrokeAlign strokeAlign;
 
-  /// The border is drawn fully inside of the border path.
+  /// Get the amount of the stroke width that lies inside of the [BorderSide].
   ///
-  /// This is the default.
-  static const double strokeAlignInside = -1.0;
+  /// This will return 0 for a [strokeAlign] of 1, and the width of the stroke for
+  /// a [strokeAlign] of -1.
+  ///
+  /// Example:
+  /// switch (strokeAlign) {
+  ///   case StrokeAlign.inside: // -1
+  ///     return side.width;
+  ///   case StrokeAlign.center: // 0
+  ///     return side.width / 2;
+  ///   case StrokeAlign.outside: // 1
+  ///     return 0;
+  /// }
+  ui.Rect strokeInset({int divideResultBy = 1}) {
+    if (strokeAlign.isUniform) {
+      final double stroke = width * (1 - (1 + strokeAlign.left) / 2);
+      return ui.Rect.fromLTRB(stroke, stroke, stroke, stroke);
+    }
+    return ui.Rect.fromLTRB(
+      width * (1 - (1 + strokeAlign.left) / 2),
+      width * (1 - (1 + strokeAlign.top) / 2),
+      width * (1 - (1 + strokeAlign.right) / 2),
+      width * (1 - (1 + strokeAlign.bottom) / 2),
+    );
+  }
 
-  /// The border is drawn on the center of the border path, with half of the
-  /// [BorderSide.width] on the inside, and the other half on the outside of the path.
-  static const double strokeAlignCenter = 0.0;
+  /// Get the amount of the stroke width that lies outside of the [BorderSide].
+  ///
+  /// This will return 0 for a [strokeAlign] of -1, and the width of the stroke for
+  /// a [strokeAlign] of 1.
+  ui.Rect strokeOutset({int divideResultBy = 1}) {
+    if (strokeAlign.isUniform) {
+      final double stroke = width * (1 + strokeAlign.left) / 2 / divideResultBy;
+      return Rect.fromLTRB(stroke, stroke, stroke, stroke);
+    }
+    return Rect.fromLTRB(
+      width * (1 + strokeAlign.left) / 2 / divideResultBy,
+      width * (1 + strokeAlign.top) / 2 / divideResultBy,
+      width * (1 + strokeAlign.right) / 2 / divideResultBy,
+      width * (1 + strokeAlign.bottom) / 2 / divideResultBy,
+    );
+  }
 
-  /// The border is drawn on the outside of the border path.
-  static const double strokeAlignOutside = 1.0;
+  /// The offset of the stroke, taking into account the stroke alignment.
+  ///
+  /// This will return the width of the stroke for a [strokeAlign] of 1, and the
+  /// negative width for a [strokeAlign] of -1.
+  ui.Rect strokeOffset({int divideResultBy = 1}) {
+    if (strokeAlign.isUniform) {
+      final double stroke = width * strokeAlign.left / divideResultBy;
+      return ui.Rect.fromLTRB(stroke, stroke, stroke, stroke);
+    }
+    return ui.Rect.fromLTRB(
+      width * strokeAlign.left / divideResultBy,
+      width * strokeAlign.top / divideResultBy,
+      width * strokeAlign.right / divideResultBy,
+      width * strokeAlign.bottom / divideResultBy,
+    );
+  }
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
     Color? color,
     double? width,
     BorderStyle? style,
-    double? strokeAlign,
+    StrokeAlign? strokeAlign,
   }) {
     return BorderSide(
       color: color ?? this.color,
@@ -307,7 +611,7 @@ class BorderSide with Diagnosticable {
       return BorderSide(
         color: Color.lerp(colorA, colorB, t)!,
         width: width,
-        strokeAlign: ui.lerpDouble(a.strokeAlign, b.strokeAlign, t)!,
+        strokeAlign: StrokeAlign.lerp(a.strokeAlign, b.strokeAlign, t)!,
       );
     }
     return BorderSide(
@@ -316,30 +620,6 @@ class BorderSide with Diagnosticable {
       strokeAlign: a.strokeAlign, // == b.strokeAlign
     );
   }
-
-  /// Get the amount of the stroke width that lies inside of the [BorderSide].
-  ///
-  /// This will return 0 for a [strokeAlign] of 1, and the width of the stroke for
-  /// a [strokeAlign] of -1.
-  /// 
-  /// Example:
-  /// 
-  /// [strokeAlign] == [strokeAlignInside] (-1.0) => side.width
-  /// [strokeAlign] == [strokeAlignCenter] (0.0) => side.width / 2
-  /// [strokeAlign] == [strokeAlignOutside] (1.0) => 0
-  double get strokeInset => width * (1 - (1 + strokeAlign) / 2);
-
-  /// Get the amount of the stroke width that lies outside of the [BorderSide].
-  ///
-  /// This will return 0 for a [strokeAlign] of -1, and the width of the stroke for
-  /// a [strokeAlign] of 1.
-  double get strokeOutset => width * (1 + strokeAlign) / 2;
-
-  /// The offset of the stroke, taking into account the stroke alignment.
-  ///
-  /// This will return the width of the stroke for a [strokeAlign] of 1, and the
-  /// negative width for a [strokeAlign] of -1.
-  double get strokeOffset => width * strokeAlign;
 
   @override
   bool operator ==(Object other) {
@@ -367,7 +647,7 @@ class BorderSide with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: const Color(0xFF000000)));
     properties.add(DoubleProperty('width', width, defaultValue: 1.0));
-    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: strokeAlignInside));
+    properties.add(DiagnosticsProperty<StrokeAlign>('strokeAlign', strokeAlign, defaultValue: StrokeAlign.inside));
     properties.add(EnumProperty<BorderStyle>('style', style, defaultValue: BorderStyle.solid));
   }
 }
@@ -609,7 +889,19 @@ abstract class OutlinedBorder extends ShapeBorder {
   const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
 
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.all(math.max(side.strokeInset, 0));
+  EdgeInsetsGeometry get dimensions {
+    if (side.strokeAlign.isUniform == true) {
+      return EdgeInsets.all(side.strokeInset().top);
+    } else {
+      final ui.Rect inset = side.strokeInset();
+      return EdgeInsets.fromLTRB(
+        inset.left,
+        inset.top,
+        inset.right,
+        inset.bottom,
+      );
+    }
+  }
 
   /// The border outline's color and weight.
   ///
