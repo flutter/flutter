@@ -66,8 +66,9 @@ class _DateTimePicker extends StatelessWidget {
       firstDate: DateTime(2015, 8),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       selectDate!(picked);
+    }
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -75,8 +76,9 @@ class _DateTimePicker extends StatelessWidget {
       context: context,
       initialTime: selectedTime!,
     );
-    if (picked != null && picked != selectedTime)
+    if (picked != null && picked != selectedTime) {
       selectTime!(picked);
+    }
   }
 
   @override

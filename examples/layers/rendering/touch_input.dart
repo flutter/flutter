@@ -94,8 +94,9 @@ class RenderDots extends RenderBox {
     canvas.drawRect(offset & size, Paint()..color = const Color(0xFFFFFFFF));
 
     // We iterate through our model and paint each dot.
-    for (final Dot dot in _dots.values)
+    for (final Dot dot in _dots.values) {
       dot.paint(canvas, offset);
+    }
   }
 }
 
