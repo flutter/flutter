@@ -283,7 +283,7 @@ void BM_DrawRRect(benchmark::State& state,
   canvas_provider->InitializeSurface(canvas_size, canvas_size);
   auto canvas = canvas_provider->GetSurface()->getCanvas();
 
-  SkVector radii[4];
+  SkVector radii[4] = {};
   switch (type) {
     case SkRRect::Type::kSimple_Type:
       radii[0] = SkVector::Make(5.0f, 5.0f);
@@ -363,7 +363,7 @@ void BM_DrawDRRect(benchmark::State& state,
   canvas_provider->InitializeSurface(canvas_size, canvas_size);
   auto canvas = canvas_provider->GetSurface()->getCanvas();
 
-  SkVector radii[4];
+  SkVector radii[4] = {};
   switch (type) {
     case SkRRect::Type::kSimple_Type:
       radii[0] = SkVector::Make(5.0f, 5.0f);
