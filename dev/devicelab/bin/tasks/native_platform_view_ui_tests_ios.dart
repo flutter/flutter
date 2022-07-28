@@ -26,7 +26,6 @@ Future<void> main() async {
         options: <String>[
           'ios',
           '-v',
-          '--release',
           '--config-only',
         ],
       );

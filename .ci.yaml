@@ -3496,7 +3496,7 @@ targets:
   - name: Mac native_platform_view_ui_tests_ios
     bringup: true
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       dependencies: >-
