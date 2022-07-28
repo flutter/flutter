@@ -412,7 +412,7 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
     if (needsTag) {
       if (!hasTagNotation) {
         errors.add('${file.path}: Files containing golden tests must be tagged using '
-            '`@Tags(...)` at the top of the file before import statements.');
+            "@Tags(<String>['reduced-test-set']) at the top of the file before import statements.");
       } else if (!hasReducedTag) {
         errors.add('${file.path}: Files containing golden tests must be tagged with '
             "'reduced-test-set'.");
