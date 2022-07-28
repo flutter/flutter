@@ -112,7 +112,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflateWithRect(side.strokeInset()));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.strokeInset));
   }
 
   @override
@@ -129,7 +129,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflateWithRect(side.strokeOffset(divideResultBy: 2)));
+        final Path path = _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOffset / 2));
         canvas.drawPath(path, side.toPaint());
         break;
     }

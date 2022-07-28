@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Rect;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -221,21 +220,21 @@ abstract class BoxBorder extends ShapeBorder {
       canvas.drawRRect(borderRadius.toRRect(rect), paint);
     } else {
       final RRect borderRect = borderRadius.toRRect(rect);
-      final RRect inner = borderRect.deflateWithRect(side.strokeInset());
-      final RRect outer = borderRect.inflateWithRect(side.strokeOutset());
+      final RRect inner = borderRect.deflate(side.strokeInset);
+      final RRect outer = borderRect.inflate(side.strokeOutset);
       canvas.drawDRRect(outer, inner, paint);
     }
   }
 
   static void _paintUniformBorderWithCircle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    final double radius = (rect.shortestSide + side.strokeOffset().left) / 2;
+    final double radius = (rect.shortestSide + side.strokeOffset) / 2;
     canvas.drawCircle(rect.center, radius, side.toPaint());
   }
 
   static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    canvas.drawRect(rect.inflateWithRect(side.strokeOffset(divideResultBy: 2)), side.toPaint());
+    canvas.drawRect(rect.inflate(side.strokeOffset / 2), side.toPaint());
   }
 }
 
@@ -349,7 +348,7 @@ class Border extends BoxBorder {
     Color color = const Color(0xFF000000),
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
-    StrokeAlign strokeAlign = StrokeAlign.inside,
+    double strokeAlign = BorderSide.strokeAlignInside,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style, strokeAlign: strokeAlign);
     return Border.fromBorderSide(side);
@@ -392,9 +391,9 @@ class Border extends BoxBorder {
   @override
   EdgeInsetsGeometry get dimensions {
     if (_widthIsUniform) {
-      return EdgeInsets.all(top.strokeInset().top);
+      return EdgeInsets.all(top.strokeInset);
     }
-    return EdgeInsets.fromLTRB(left.strokeInset().left, top.strokeInset().top, right.strokeInset().right, bottom.strokeInset().bottom);
+    return EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset);
   }
 
   @override
@@ -416,7 +415,7 @@ class Border extends BoxBorder {
   }
 
   bool get _strokeAlignIsUniform {
-    final StrokeAlign topStrokeAlign = top.strokeAlign;
+    final double topStrokeAlign = top.strokeAlign;
     return right.strokeAlign == topStrokeAlign
         && bottom.strokeAlign == topStrokeAlign
         && left.strokeAlign == topStrokeAlign;
@@ -561,7 +560,7 @@ class Border extends BoxBorder {
       return true;
     }());
     assert(() {
-      if (!_strokeAlignIsUniform || top.strokeAlign != StrokeAlign.inside) {
+      if (!_strokeAlignIsUniform || top.strokeAlign != BorderSide.strokeAlignInside) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.'),
         ]);
@@ -695,15 +694,9 @@ class BorderDirectional extends BoxBorder {
   @override
   EdgeInsetsGeometry get dimensions {
     if (isUniform) {
-      return EdgeInsetsDirectional.all(top.strokeInset().top);
-    } else {
-      return EdgeInsetsDirectional.fromSTEB(
-        start.strokeInset().left,
-        top.strokeInset().top,
-        end.strokeInset().right,
-        bottom.strokeInset().bottom,
-      );
+      return EdgeInsetsDirectional.all(top.strokeInset);
     }
+    return EdgeInsetsDirectional.fromSTEB(start.strokeInset, top.strokeInset, end.strokeInset, bottom.strokeInset);
   }
 
   @override
@@ -737,7 +730,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   bool get _strokeAlignIsUniform {
-    final StrokeAlign topStrokeAlign = top.strokeAlign;
+    final double topStrokeAlign = top.strokeAlign;
     return start.strokeAlign == topStrokeAlign
         && bottom.strokeAlign == topStrokeAlign
         && end.strokeAlign == topStrokeAlign;
@@ -893,7 +886,7 @@ class BorderDirectional extends BoxBorder {
 
     assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
     assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
-    assert(_strokeAlignIsUniform && top.strokeAlign == StrokeAlign.inside, 'A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.');
+    assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than strokeAlignInside on uniform borders.');
 
     final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
