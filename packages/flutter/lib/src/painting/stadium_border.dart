@@ -423,12 +423,8 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
         break;
       case BorderStyle.solid:
         final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect);
-        if (adjustedBorderRadius == BorderRadius.zero) {
-          canvas.drawRect(rect.inflate(side.strokeOffset / 2), side.toPaint());
-        } else {
-          final RRect borderRect = adjustedBorderRadius.resolve(textDirection).toRRect(rect);
-          canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
-        }
+        final RRect borderRect = adjustedBorderRadius.resolve(textDirection).toRRect(rect);
+        canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
     }
   }
 

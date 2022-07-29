@@ -47,7 +47,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   final BorderRadiusGeometry borderRadius;
 
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.strokeInset);
+  EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
 
   @override
   ShapeBorder scale(double t) {
@@ -123,12 +123,12 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect.deflate(side.strokeInset)));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    // Have to deflate first to get the right radius when we inflate again.
+    // Has to deflate first to get the right radius when we inflate again.
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
@@ -149,7 +149,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOffset / 2));
+        final Path path = getOuterPath(rect, textDirection: textDirection);
         final Paint paint = side.toPaint()..strokeJoin = StrokeJoin.round;
         canvas.drawPath(path, paint);
         break;

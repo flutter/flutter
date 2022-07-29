@@ -2996,7 +2996,7 @@ void main() {
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
     expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
-    expect(find.byType(RawChip), paints..rect(color: selectedBorderSide.color));
+    expect(find.byType(RawChip), paints..drrect(color: selectedBorderSide.color));
   });
 
   testWidgets('Chip responds to density changes.', (WidgetTester tester) async {

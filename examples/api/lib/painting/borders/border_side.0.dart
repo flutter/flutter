@@ -35,6 +35,12 @@ class _BorderSideExampleState extends State<BorderSideExample> with TickerProvid
     animation.addListener(_markDirty);
   }
 
+  @override
+  void dispose() {
+    animation.dispose();
+    super.dispose();
+  }
+
   void _markDirty() {
     setState(() {});
   }
