@@ -3,6 +3,12 @@
 // found in the LICENSE file.
 part of dart.ui;
 
+// Examples can assume:
+// int foo = 0;
+// int bar = 0;
+// List<int> quux = <int>[];
+// int baz = 0;
+
 class _HashEnd { const _HashEnd(); }
 const _HashEnd _hashEnd = _HashEnd();
 
@@ -37,7 +43,26 @@ class _Jenkins {
 /// For example:
 ///
 /// ```dart
-/// int hashCode => hashValues(foo, bar, hashList(quux), baz);
+/// int get hashCode => hashValues(foo, bar, hashList(quux), baz); // ignore: deprecated_member_use
+/// ```
+///
+/// ## Deprecation
+///
+/// This function has been replaced by [Object.hash], so that it can be used
+/// outside of Flutter as well. The new function is a drop-in replacement.
+///
+/// The [hashList] function has also been replaced, [Object.hashAll] is the new
+/// function. The example above therefore is better written as:
+///
+/// ```dart
+/// int get hashCode => Object.hash(foo, bar, Object.hashAll(quux), baz);
+/// ```
+///
+/// If `quux` in this example was nullable, then it would need special handling,
+/// because [Object.hashAll]'s argument is not nullable:
+///
+/// ```dart
+/// int get hashCode => Object.hash(foo, bar, quux == null ? null : Object.hashAll(quux), baz);
 /// ```
 @Deprecated(
   'Use Object.hash() instead. '
@@ -115,6 +140,16 @@ int hashValues(
 /// Combine the [Object.hashCode] values of an arbitrary number of objects from
 /// an [Iterable] into one value. This function will return the same value if
 /// given null as if given an empty list.
+///
+/// ## Deprecation
+///
+/// This function has been replaced by [Object.hashAll], so that it can be used
+/// outside of Flutter as well. The new function is a drop-in replacement, except
+/// that the argument must not be null.
+///
+/// There is also a new function, [Object.hashAllUnordered], which is similar
+/// but returns the same hash code regardless of the order of the elements in
+/// the provided iterable.
 @Deprecated(
   'Use Object.hashAll() or Object.hashAllUnordered() instead. '
   'This feature was deprecated in v3.1.0-0.0.pre.897'
