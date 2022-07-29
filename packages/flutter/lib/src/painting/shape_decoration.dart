@@ -310,8 +310,8 @@ class _ShapeDecorationPainter extends BoxPainter {
   Path? _innerPath;
   Paint? _interiorPaint;
   int? _shadowCount;
-  late List<Path> _shadowPaths;
-  late List<Paint> _shadowPaints;
+  late List<MapEntry<Rect, Paint>> _shadowBounds;
+  late List<MapEntry<Path, Paint>> _shadowPaths;
 
   @override
   VoidCallback get onChanged => super.onChanged!;
@@ -336,19 +336,28 @@ class _ShapeDecorationPainter extends BoxPainter {
       _interiorPaint!.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
     }
     if (_decoration.shadows != null) {
-      if (_shadowCount == null) {
-        _shadowCount = _decoration.shadows!.length;
-        _shadowPaints = <Paint>[
-          ..._decoration.shadows!.map((BoxShadow shadow) => shadow.toPaint()),
+      _shadowCount ??= _decoration.shadows!.length;
+      if (_decoration.shape.preferPaintInterior) {
+        _shadowBounds = <MapEntry<Rect, Paint>>[
+          ..._decoration.shadows!.map((BoxShadow shadow) {
+            return MapEntry<Rect, Paint>(
+              rect.shift(shadow.offset).inflate(shadow.spreadRadius),
+              shadow.toPaint(),
+            );
+          }),
+        ];
+      } else {
+        _shadowPaths = <MapEntry<Path, Paint>>[
+          ..._decoration.shadows!.map((BoxShadow shadow) {
+            return MapEntry<Path, Paint>(
+              _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection),
+              shadow.toPaint(),
+            );
+          }),
         ];
       }
-      _shadowPaths = <Path>[
-        ..._decoration.shadows!.map((BoxShadow shadow) {
-          return _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
-        }),
-      ];
     }
-    if (_interiorPaint != null || _shadowCount != null) {
+    if (!_decoration.shape.preferPaintInterior && (_interiorPaint != null || _shadowCount != null)) {
       _outerPath = _decoration.shape.getOuterPath(rect, textDirection: textDirection);
     }
     if (_decoration.image != null) {
@@ -359,17 +368,27 @@ class _ShapeDecorationPainter extends BoxPainter {
     _lastTextDirection = textDirection;
   }
 
-  void _paintShadows(Canvas canvas) {
+  void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_shadowCount != null) {
-      for (int index = 0; index < _shadowCount!; index += 1) {
-        canvas.drawPath(_shadowPaths[index], _shadowPaints[index]);
+      if (_decoration.shape.preferPaintInterior) {
+        for (int index = 0; index < _shadowCount!; index += 1) {
+          _decoration.shape.paintInterior(canvas, _shadowBounds[index].key, _shadowBounds[index].value, textDirection: textDirection);
+        }
+      } else {
+        for (int index = 0; index < _shadowCount!; index += 1) {
+          canvas.drawPath(_shadowPaths[index].key, _shadowPaths[index].value);
+        }
       }
     }
   }
 
-  void _paintInterior(Canvas canvas) {
+  void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_interiorPaint != null) {
-      canvas.drawPath(_outerPath, _interiorPaint!);
+      if (_decoration.shape.preferPaintInterior) {
+        _decoration.shape.paintInterior(canvas, rect, _interiorPaint!, textDirection: textDirection);
+      } else {
+        canvas.drawPath(_outerPath, _interiorPaint!);
+      }
     }
   }
 
@@ -395,8 +414,8 @@ class _ShapeDecorationPainter extends BoxPainter {
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;
     _precache(rect, textDirection);
-    _paintShadows(canvas);
-    _paintInterior(canvas);
+    _paintShadows(canvas, rect, textDirection);
+    _paintInterior(canvas, rect, textDirection);
     _paintImage(canvas, configuration);
     _decoration.shape.paint(canvas, rect, textDirection: textDirection);
   }

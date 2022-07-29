@@ -533,6 +533,76 @@ abstract class ShapeBorder {
   ///  * [Path.contains], which can tell if an [Offset] is within a [Path].
   Path getInnerPath(Rect rect, { TextDirection? textDirection });
 
+  /// Paint a canvas with the appropriate shape.
+  ///
+  /// On [ShapeBorder] subclasses whose [preferPaintInterior] method returns
+  /// true, this should be faster than using [Canvas.drawPath] with the path
+  /// provided by [getOuterPath]. (If [preferPaintInterior] returns false,
+  /// then this method asserts in debug mode and does nothing in release mode.)
+  ///
+  /// Subclasses are expected to implement this method when the [Canvas] API
+  /// has a dedicated method to draw the relevant shape. For example,
+  /// [CircleBorder] uses this to call [Canvas.drawCircle], and
+  /// [RoundedRectangleBorder] uses this to call [Canvas.drawRRect].
+  ///
+  /// Subclasses that implement this must ensure that calling [paintInterior]
+  /// is semantically equivalent to (i.e. renders the same pixels as) calling
+  /// [Canvas.drawPath] with the same [Paint] and the [Path] returned from
+  /// [getOuterPath], and must also override [preferPaintInterior] to
+  /// return true.
+  ///
+  /// For example, a shape that draws a rectangle might implement
+  /// [getOuterPath], [paintInterior], and [preferPaintInterior] as follows:
+  ///
+  /// ```dart
+  /// class RectangleBorder extends ShapeBorder {
+  ///   ...
+  ///
+  ///   @override
+  ///   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  ///    return Path()
+  ///      ..addRect(rect);
+  ///   }
+  ///
+  ///   @override
+  ///   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
+  ///    canvas.drawRect(rect, paint);
+  ///   }
+  ///
+  ///   @override
+  ///   bool get preferPaintInterior => true;
+  /// }
+  /// ```
+  ///
+  /// When a shape can only be drawn using path, [preferPaintInterior] should
+  /// return false. In that case, classes such as [ShapeDecoration] will cache
+  /// the path from [getOuterPath] and call [Canvas.drawPath] directly.
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
+    assert(!preferPaintInterior, '$runtimeType.preferPaintInterior returns true but $runtimeType.paintInterior is not implemented.');
+    assert(false, '$runtimeType.preferPaintInterior returns false, so it is an error to call its paintInterior method.');
+  }
+
+  /// Reports whether [paintInterior] is implemented.
+  ///
+  /// Classes such as [ShapeDecoration] prefer to use [paintInterior] if this
+  /// getter returns true. This is intended to enable faster painting; instead
+  /// of computing a shape using [getOuterPath] and then drawing it using
+  /// [Canvas.drawPath], the path can be drawn directly to the [Canvas] using
+  /// dedicated methods such as [Canvas.drawRect] or [Canvas.drawCircle].
+  ///
+  /// By default, this getter returns false.
+  ///
+  /// Subclasses that implement [paintInterior] should override this to return
+  /// true. Subclasses should only override [paintInterior] if doing so enables
+  /// faster
+  /// rendering than is possible with [Canvas.drawPath] (so, in particular,
+  /// subclasses should not call [Canvas.drawPath] in [paintInterior]).
+  ///
+  /// See also:
+  ///
+  ///  * [paintInterior], whose API documentation has an example implementation.
+  bool get preferPaintInterior => false;
+
   /// Paints the border within the given [Rect] on the given [Canvas].
   ///
   /// The `textDirection` argument must be provided and non-null if the border
@@ -718,6 +788,14 @@ class _CompoundBorder extends ShapeBorder {
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return borders.first.getOuterPath(rect, textDirection: textDirection);
   }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    borders.first.paintInterior(canvas, rect, paint, textDirection: textDirection);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {

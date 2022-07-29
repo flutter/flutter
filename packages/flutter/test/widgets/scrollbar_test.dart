@@ -2024,7 +2024,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(600.1));
     await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+    expect(find.byType(RawScrollbar), paints..rect()); // Show the bar.
 
     await tester.pumpWidget(buildFrame(600.0));
     await tester.pumpAndSettle();
