@@ -47,7 +47,7 @@ void testMain() {
       expect(requestedItem, null);
     });
 
-    test('Values don\'t survive beyond next frame', () {
+    test("Values don't survive beyond next frame", () {
       final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       final TestItem testItem1 = TestItem('item1');
       cache.cache(testItem1.label, testItem1);
@@ -58,18 +58,18 @@ void testMain() {
     });
 
     test('Values are evicted when not reused', () {
-      final Set<TestItem> _evictedItems = <TestItem>{};
+      final Set<TestItem> evictedItems = <TestItem>{};
       final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       final TestItem testItem1 = TestItem('item1');
       final TestItem testItem2 = TestItem('item2');
-      cache.cache(testItem1.label, testItem1, (TestItem item) {_evictedItems.add(item);});
-      cache.cache(testItem2.label, testItem2, (TestItem item) {_evictedItems.add(item);});
+      cache.cache(testItem1.label, testItem1, (TestItem item) {evictedItems.add(item);});
+      cache.cache(testItem2.label, testItem2, (TestItem item) {evictedItems.add(item);});
       cache.commitFrame();
-      expect(_evictedItems.length, 0);
+      expect(evictedItems.length, 0);
       cache.reuse('item2');
       cache.commitFrame();
-      expect(_evictedItems.contains(testItem1), isTrue);
-      expect(_evictedItems.contains(testItem2), isFalse);
+      expect(evictedItems.contains(testItem1), isTrue);
+      expect(evictedItems.contains(testItem2), isFalse);
     });
   });
 }

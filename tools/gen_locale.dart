@@ -20,16 +20,18 @@ const String registry = 'https://www.iana.org/assignments/language-subtag-regist
 Map<String, List<String>> parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   List<String> lastHeading;
-  for (String line in section.split('\n')) {
-    if (line == '')
+  for (final String line in section.split('\n')) {
+    if (line == '') {
       continue;
+    }
     if (line.startsWith('  ')) {
       lastHeading[lastHeading.length - 1] = '${lastHeading.last}${line.substring(1)}';
       continue;
     }
     final int colon = line.indexOf(':');
-    if (colon <= 0)
+    if (colon <= 0) {
       throw 'not sure how to deal with "$line"';
+    }
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);
     lastHeading = result.putIfAbsent(name, () => <String>[]);
@@ -38,13 +40,13 @@ Map<String, List<String>> parseSection(String section) {
   return result;
 }
 
-Future<Null> main() async {
+Future<void> main() async {
   final HttpClient client = HttpClient();
-  final String body = (await (await (await client.getUrl(Uri.parse(registry))).close()).transform(utf8.decoder).toList()).join('');
+  final String body = (await (await (await client.getUrl(Uri.parse(registry))).close()).transform(utf8.decoder).toList()).join();
   final List<Map<String, List<String>>> sections = body.split('%%').map<Map<String, List<String>>>(parseSection).toList();
   final Map<String, List<String>> outputs = <String, List<String>>{'language': <String>[], 'region': <String>[]};
   String fileDate;
-  for (Map<String, List<String>> section in sections) {
+  for (final Map<String, List<String>> section in sections) {
     if (fileDate == null) {
       // first block should contain a File-Date metadata line.
       fileDate = section['File-Date'].single;
@@ -60,7 +62,7 @@ Future<Null> main() async {
       assert(section.containsKey('Deprecated'));
       final String comment = section.containsKey('Comment') ? section['Comment'].single : 'deprecated ${section['Deprecated'].single}';
       final String preferredValue = section['Preferred-Value'].single;
-      outputs[type].add('\'$subtag\': \'$preferredValue\', // ${descriptions.join(", ")}; $comment');
+      outputs[type].add("'$subtag': '$preferredValue', // ${descriptions.join(", ")}; $comment");
     }
   }
   print('// Mappings generated for language subtag registry as of $fileDate.');

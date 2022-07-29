@@ -519,7 +519,7 @@ void testMain() {
           scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').toList();
       expect(pTags, hasLength(string.length));
       expect(
-        scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').map((DomElement p) => p.innerText).join(''),
+        scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').map((DomElement p) => p.innerText).join(),
         string,
       );
       renderedLayers.removeWhere((String key, ui.EngineLayer value) => !string.contains(key));
@@ -895,7 +895,7 @@ EnginePicture _drawPathImagePath() {
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..color = const ui.Color.fromRGBO(0, 255, 0, 1));
-  canvas.drawImage(createTestImage(), const ui.Offset(0, 0), SurfacePaint());
+  canvas.drawImage(createTestImage(), ui.Offset.zero, SurfacePaint());
   canvas.drawCircle(
       const ui.Offset(offsetX + 10, offsetY + 10), 10,
       SurfacePaint()

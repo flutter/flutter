@@ -193,7 +193,7 @@ class PipelineWatcher {
     watcher.events.listen(_onEvent);
 
     // Listen to the `q` key stroke to stop the pipeline.
-    print('Press \'q\' to exit felt');
+    print("Press 'q' to exit felt");
 
     // Key strokes should be reported immediately and one at a time rather than
     // wait for the user to hit ENTER and report the whole line. To achieve
@@ -220,7 +220,7 @@ class PipelineWatcher {
   Timer? _scheduledPipeline;
 
   void _onEvent(WatchEvent event) {
-    if (ignore?.call(event) == true) {
+    if (ignore?.call(event) ?? false) {
       return;
     }
 
@@ -261,7 +261,7 @@ class PipelineWatcher {
   void _pipelineSucceeded(int pipelineRunCount) {
     if (pipelineRunCount == _pipelineRunCount) {
       print('*** Done! ***');
-      print('Press \'q\' to exit felt');
+      print("Press 'q' to exit felt");
     }
   }
 

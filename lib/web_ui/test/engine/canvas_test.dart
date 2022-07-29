@@ -47,7 +47,7 @@ void runCanvasTests({required bool deviceClipRoundsOut}) {
       } on TestFailure {
         return;
       }
-      throw TestFailure('transforms were too close to equal');
+      throw TestFailure('transforms were too close to equal'); // ignore: only_throw_errors
     }
 
     test('ui.Canvas.translate affects canvas.getTransform', () {
@@ -129,7 +129,7 @@ void runCanvasTests({required bool deviceClipRoundsOut}) {
     } on TestFailure {
       return;
     }
-    throw TestFailure('transforms were too close to equal');
+    throw TestFailure('transforms were too close to equal'); // ignore: only_throw_errors
   }
 
   group('ui.Canvas clip tests', () {

@@ -90,7 +90,6 @@ ArgParser _serupOptions() {
   parser.addFlag(
     'no-upload',
     help: 'Upload the parsed benchmarks.',
-    defaultsTo: false,
   );
   return parser;
 }

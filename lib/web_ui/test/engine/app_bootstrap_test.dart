@@ -57,7 +57,7 @@ void testMain() {
 
     expect(engineInitializer, isNotNull);
 
-    final Object maybeApp = await promiseToFuture<Object>(callMethod<dynamic>(engineInitializer, 'autoStart', <Object?>[]));
+    final Object maybeApp = await promiseToFuture<Object>(callMethod<Object>(engineInitializer, 'autoStart', <Object?>[]));
 
     expect(maybeApp, isA<FlutterApp>());
     expect(initCalled, 1, reason: 'initEngine should be called first.');

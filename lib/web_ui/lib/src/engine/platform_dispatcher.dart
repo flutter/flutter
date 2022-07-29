@@ -1093,7 +1093,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   // https://github.com/flutter/flutter/issues/100277
   ui.ErrorCallback? _onError;
   // ignore: unused_field
-  Zone? _onErrorZone;
+  late Zone _onErrorZone;
   @override
   ui.ErrorCallback? get onError => _onError;
   @override

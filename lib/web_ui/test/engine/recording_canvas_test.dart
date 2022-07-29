@@ -28,7 +28,7 @@ void testMain() {
   });
 
   group('paragraph bounds', () {
-    Paragraph _paragraphForBoundsTest(TextAlign alignment) {
+    Paragraph paragraphForBoundsTest(TextAlign alignment) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
         fontSize: 20,
@@ -39,14 +39,14 @@ void testMain() {
     }
 
     test('not laid out', () {
-      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.start);
+      final Paragraph paragraph = paragraphForBoundsTest(TextAlign.start);
       underTest.drawParagraph(paragraph, Offset.zero);
       underTest.endRecording();
       expect(underTest.pictureBounds, Rect.zero);
     });
 
     test('finite width', () {
-      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.start);
+      final Paragraph paragraph = paragraphForBoundsTest(TextAlign.start);
       paragraph.layout(const ParagraphConstraints(width: 110));
       underTest.drawParagraph(paragraph, Offset.zero);
       underTest.endRecording();
@@ -56,7 +56,7 @@ void testMain() {
     });
 
     test('finite width center-aligned', () {
-      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.center);
+      final Paragraph paragraph = paragraphForBoundsTest(TextAlign.center);
       paragraph.layout(const ParagraphConstraints(width: 110));
       underTest.drawParagraph(paragraph, Offset.zero);
       underTest.endRecording();
@@ -66,7 +66,7 @@ void testMain() {
     });
 
     test('infinite width', () {
-      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.start);
+      final Paragraph paragraph = paragraphForBoundsTest(TextAlign.start);
       paragraph.layout(const ParagraphConstraints(width: double.infinity));
       underTest.drawParagraph(paragraph, Offset.zero);
       underTest.endRecording();

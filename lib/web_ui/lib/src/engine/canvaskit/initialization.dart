@@ -36,7 +36,7 @@ bool _detectCanvasKit() {
 String get canvasKitBuildUrl =>
     configuration.canvasKitBaseUrl + (kProfileMode ? 'profiling/' : '');
 String get canvasKitJavaScriptBindingsUrl =>
-    canvasKitBuildUrl + 'canvaskit.js';
+    '${canvasKitBuildUrl}canvaskit.js';
 String canvasKitWasmModuleUrl(String canvasKitBase, String file) =>
     canvasKitBase + file;
 
@@ -88,7 +88,7 @@ Future<CanvasKit> downloadCanvasKit({String? canvasKitBase}) async {
 /// Downloads the CanvasKit JavaScript file at [canvasKitBase].
 Future<void> _downloadCanvasKitJs({String? canvasKitBase}) {
   final String canvasKitJavaScriptUrl = canvasKitBase != null
-      ? canvasKitBase + 'canvaskit.js'
+      ? '${canvasKitBase}canvaskit.js'
       : canvasKitJavaScriptBindingsUrl;
 
   final DomHTMLScriptElement canvasKitScript = createDomHTMLScriptElement();

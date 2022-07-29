@@ -96,7 +96,7 @@ void testMain() {
 
     test('addRRect with zero radius', () {
       final Path path = Path();
-      path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, const Radius.circular(0)));
+      path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, Radius.zero));
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 600.0));
@@ -125,15 +125,12 @@ void testMain() {
       final double endX = cx + (rx * math.cos(endRad));
       final double endY = cy + (ry * math.sin(endRad));
 
-      const bool clockwise = endAngle > startAngle;
       final bool largeArc = (endAngle - startAngle).abs() > 180.0;
       final Path path = Path()
         ..moveTo(startX, startY)
         ..arcToPoint(Offset(endX, endY),
             radius: const Radius.elliptical(rx, ry),
-            clockwise: clockwise,
-            largeArc: largeArc,
-            rotation: 0.0);
+            largeArc: largeArc);
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 156.827));
@@ -154,15 +151,12 @@ void testMain() {
       final double endX = cx + (rx * math.cos(endRad));
       final double endY = cy + (ry * math.sin(endRad));
 
-      const bool clockwise = endAngle > startAngle;
       final bool largeArc = (endAngle - startAngle).abs() > 180.0;
       final Path path = Path()
         ..moveTo(startX, startY)
         ..arcToPoint(Offset(endX, endY),
             radius: const Radius.elliptical(rx, ry),
-            clockwise: clockwise,
-            largeArc: largeArc,
-            rotation: 0.0);
+            largeArc: largeArc);
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 313.654));
@@ -183,15 +177,12 @@ void testMain() {
       final double endX = cx + (rx * math.cos(endRad));
       final double endY = cy + (ry * math.sin(endRad));
 
-      const bool clockwise = endAngle > startAngle;
       final bool largeArc = (endAngle - startAngle).abs() > 180.0;
       final Path path = Path()
         ..moveTo(startX, startY)
         ..arcToPoint(Offset(endX, endY),
             radius: const Radius.elliptical(rx, ry),
-            clockwise: clockwise,
-            largeArc: largeArc,
-            rotation: 0.0);
+            largeArc: largeArc);
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 470.482));
@@ -212,15 +203,12 @@ void testMain() {
       final double endX = cx + (rx * math.cos(endRad));
       final double endY = cy + (ry * math.sin(endRad));
 
-      const bool clockwise = endAngle > startAngle;
       final bool largeArc = (endAngle - startAngle).abs() > 180.0;
       final Path path = Path()
         ..moveTo(startX, startY)
         ..arcToPoint(Offset(endX, endY),
             radius: const Radius.elliptical(rx, ry),
-            clockwise: clockwise,
-            largeArc: largeArc,
-            rotation: 0.0);
+            largeArc: largeArc);
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 362.733));

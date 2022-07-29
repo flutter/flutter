@@ -493,7 +493,7 @@ Set<NotoFont> findMinimumFontsForCodeUnits(
     for (final NotoFont font in fonts) {
       int codeUnitsCovered = 0;
       for (final int codeUnit in codeUnits) {
-        if (font.resolvedFont?.tree.containsDeep(codeUnit) == true) {
+        if (font.resolvedFont?.tree.containsDeep(codeUnit) ?? false) {
           codeUnitsCovered++;
         }
       }

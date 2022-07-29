@@ -28,7 +28,6 @@ Future<int> run(List<String> args) async {
       'verbose',
       abbr: 'v',
       help: 'Runs with verbose logging',
-      defaultsTo: false,
     );
 
   if (args.isEmpty) {

@@ -36,9 +36,7 @@ EditingState? lastEditingState;
 TextEditingDeltaState? editingDeltaState;
 String? lastInputAction;
 
-final InputConfiguration singlelineConfig = InputConfiguration(
-  inputType: EngineInputType.text,
-);
+final InputConfiguration singlelineConfig = InputConfiguration();
 final Map<String, dynamic> flutterSinglelineConfig =
     createFlutterConfig('text');
 
@@ -179,9 +177,7 @@ Future<void> testMain() async {
     });
 
     test('Knows to turn autocorrect on', () {
-      final InputConfiguration config = InputConfiguration(
-        autocorrect: true,
-      );
+      final InputConfiguration config = InputConfiguration();
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -196,9 +192,7 @@ Future<void> testMain() async {
     });
 
     test('Knows to turn autofill off', () {
-      final InputConfiguration config = InputConfiguration(
-        autofill: null,
-      );
+      final InputConfiguration config = InputConfiguration();
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -247,7 +241,7 @@ Future<void> testMain() async {
       editingStrategy!.setEditingState(
           EditingState(text: 'foo bar baz', baseOffset: 2, extentOffset: 7));
 
-      checkInputEditingState(editingStrategy!.domElement!, 'foo bar baz', 2, 7);
+      checkInputEditingState(editingStrategy!.domElement, 'foo bar baz', 2, 7);
 
       // There should be no input action.
       expect(lastInputAction, isNull);
@@ -332,9 +326,7 @@ Future<void> testMain() async {
     });
 
     test('Triggers input action', () {
-      final InputConfiguration config = InputConfiguration(
-        inputAction: 'TextInputAction.done',
-      );
+      final InputConfiguration config = InputConfiguration();
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -357,7 +349,6 @@ Future<void> testMain() async {
     test('Triggers input action in multi-line mode', () {
       final InputConfiguration config = InputConfiguration(
         inputType: EngineInputType.multiline,
-        inputAction: 'TextInputAction.done',
       );
       editingStrategy!.enable(
         config,
@@ -618,7 +609,7 @@ Future<void> testMain() async {
       // Update the read-only config.
       final MethodCall updateConfig = MethodCall(
         'TextInput.updateConfig',
-        createFlutterConfig('text', readOnly: false),
+        createFlutterConfig('text'),
       );
       sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
 
@@ -1219,8 +1210,7 @@ Future<void> testMain() async {
     test('No capitalization: setClient, setEditingState, show', () {
       // Create a configuration with an AutofillGroup of four text fields.
       final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig(
-          'text',
-          textCapitalization: 'TextCapitalization.none');
+          'text');
       final MethodCall setClient = MethodCall(
           'TextInput.setClient', <dynamic>[123, capitalizeWordsConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -1845,7 +1835,7 @@ Future<void> testMain() async {
       showKeyboard(inputType: 'number');
       expect(getEditingInputMode(), 'numeric');
 
-      showKeyboard(inputType: 'number', decimal: false);
+      showKeyboard(inputType: 'number');
       expect(getEditingInputMode(), 'numeric');
 
       showKeyboard(inputType: 'number', decimal: true);
@@ -1880,7 +1870,7 @@ Future<void> testMain() async {
         showKeyboard(inputType: 'number');
         expect(getEditingInputMode(), 'numeric');
 
-        showKeyboard(inputType: 'number', decimal: false);
+        showKeyboard(inputType: 'number');
         expect(getEditingInputMode(), 'numeric');
 
         showKeyboard(inputType: 'number', decimal: true);
@@ -2206,7 +2196,7 @@ Future<void> testMain() async {
   });
 
   group('EditingState', () {
-    EditingState _editingState;
+    EditingState editingState;
 
     setUp(() {
       editingStrategy =
@@ -2239,10 +2229,10 @@ Future<void> testMain() async {
     test('Configure input element from the editing state', () {
       final DomHTMLInputElement input =
           defaultTextEditingRoot.querySelector('input')! as DomHTMLInputElement;
-      _editingState =
+      editingState =
           EditingState(text: 'Test', baseOffset: 1, extentOffset: 2);
 
-      _editingState.applyToDomElement(input);
+      editingState.applyToDomElement(input);
 
       expect(input.value, 'Test');
       expect(input.selectionStart, 1);
@@ -2259,10 +2249,10 @@ Future<void> testMain() async {
 
       final DomHTMLTextAreaElement textArea =
           defaultTextEditingRoot.querySelector('textarea')! as DomHTMLTextAreaElement;
-      _editingState =
+      editingState =
           EditingState(text: 'Test', baseOffset: 1, extentOffset: 2);
 
-      _editingState.applyToDomElement(textArea);
+      editingState.applyToDomElement(textArea);
 
       expect(textArea.value, 'Test');
       expect(textArea.selectionStart, 1);
@@ -2276,11 +2266,11 @@ Future<void> testMain() async {
       input.selectionStart = 1;
       input.selectionEnd = 2;
 
-      _editingState = EditingState.fromDomElement(input);
+      editingState = EditingState.fromDomElement(input);
 
-      expect(_editingState.text, 'Test');
-      expect(_editingState.baseOffset, 1);
-      expect(_editingState.extentOffset, 2);
+      expect(editingState.text, 'Test');
+      expect(editingState.baseOffset, 1);
+      expect(editingState.extentOffset, 2);
     });
 
     test('Get Editing State from text area element', () {
@@ -2297,11 +2287,11 @@ Future<void> testMain() async {
       input.selectionStart = 1;
       input.selectionEnd = 2;
 
-      _editingState = EditingState.fromDomElement(input);
+      editingState = EditingState.fromDomElement(input);
 
-      expect(_editingState.text, 'Test');
-      expect(_editingState.baseOffset, 1);
-      expect(_editingState.extentOffset, 2);
+      expect(editingState.text, 'Test');
+      expect(editingState.baseOffset, 1);
+      expect(editingState.extentOffset, 2);
     });
 
     group('comparing editing states', () {
@@ -2357,7 +2347,7 @@ Future<void> testMain() async {
     test('Verify correct delta is inferred - deletion', () {
       final EditingState newEditState = EditingState(text: 'worl', baseOffset: 4, extentOffset: 4);
       final EditingState lastEditState = EditingState(text: 'world', baseOffset: 5, extentOffset: 5);
-      final TextEditingDeltaState deltaState = TextEditingDeltaState(oldText: 'world', deltaText: '', deltaStart: 4, deltaEnd: 5, baseOffset: -1, extentOffset: -1, composingOffset: -1, composingExtent: -1);
+      final TextEditingDeltaState deltaState = TextEditingDeltaState(oldText: 'world', deltaStart: 4, deltaEnd: 5, baseOffset: -1, extentOffset: -1, composingOffset: -1, composingExtent: -1);
 
       final TextEditingDeltaState textEditingDeltaState = TextEditingDeltaState.inferDeltaState(newEditState, lastEditState, deltaState);
 

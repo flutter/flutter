@@ -21,7 +21,6 @@ class CleanCommand extends Command<bool> with ArgUtils<bool> {
       )
       ..addFlag(
         'ninja',
-        defaultsTo: false,
         help: 'Also clean up the engine out directory with ninja output. Disabled by default.',
       );
   }

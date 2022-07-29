@@ -495,7 +495,6 @@ class TextLayoutService {
     if (offset.dx <= line.left) {
       return ui.TextPosition(
         offset: line.startIndex,
-        affinity: ui.TextAffinity.downstream,
       );
     }
 
@@ -946,7 +945,6 @@ class SpanBox extends RangeBox {
       // The offset is closer to cutoff.
       return ui.TextPosition(
         offset: cutoff,
-        affinity: ui.TextAffinity.downstream,
       );
     } else {
       // The offset is closer to cutoff + 1.

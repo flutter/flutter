@@ -84,26 +84,36 @@ LicenseType convertLicenseNameToType(String name) {
 }
 
 LicenseType convertBodyToType(String body) {
-  if (body.startsWith(lrApache))
+  if (body.startsWith(lrApache)) {
     return LicenseType.apache;
-  if (body.startsWith(lrMPL))
+  }
+  if (body.startsWith(lrMPL)) {
     return LicenseType.mpl;
-  if (body.startsWith(lrGPL))
+  }
+  if (body.startsWith(lrGPL)) {
     return LicenseType.gpl;
-  if (body.startsWith(lrAPSL))
+  }
+  if (body.startsWith(lrAPSL)) {
     return LicenseType.apsl;
-  if (body.contains(lrOpenSSL))
+  }
+  if (body.contains(lrOpenSSL)) {
     return LicenseType.openssl;
-  if (body.contains(lrBSD))
+  }
+  if (body.contains(lrBSD)) {
     return LicenseType.bsd;
-  if (body.contains(lrMIT))
+  }
+  if (body.contains(lrMIT)) {
     return LicenseType.mit;
-  if (body.contains(lrZlib))
+  }
+  if (body.contains(lrZlib)) {
     return LicenseType.zlib;
-  if (body.contains(lrPNG))
+  }
+  if (body.contains(lrPNG)) {
     return LicenseType.libpng;
-  if (body.contains(lrBison))
+  }
+  if (body.contains(lrBison)) {
     return LicenseType.bison;
+  }
   return LicenseType.unknown;
 }
 
@@ -119,12 +129,14 @@ abstract class License implements Comparable<License> {
     String origin,
     bool yesWeKnowWhatItLooksLikeButItIsNot = false
   }) {
-    if (!reformatted)
+    if (!reformatted) {
       body = _reformat(body);
+    }
     final License result = _registry.putIfAbsent(body, () => UniqueLicense._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot));
     assert(() {
-      if (result is! UniqueLicense || result.type != type)
+      if (result is! UniqueLicense || result.type != type) {
         throw 'tried to add a UniqueLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
+      }
       return true;
     }());
     return result;
@@ -134,12 +146,14 @@ abstract class License implements Comparable<License> {
     bool reformatted = false,
     String origin
   }) {
-    if (!reformatted)
+    if (!reformatted) {
       body = _reformat(body);
+    }
     final License result = _registry.putIfAbsent(body, () => TemplateLicense._(body, type, origin: origin));
     assert(() {
-      if (result is! TemplateLicense || result.type != type)
+      if (result is! TemplateLicense || result.type != type) {
         throw 'tried to add a TemplateLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
+      }
       return true;
     }());
     return result;
@@ -149,12 +163,14 @@ abstract class License implements Comparable<License> {
     bool reformatted = false,
     String origin
   }) {
-    if (!reformatted)
+    if (!reformatted) {
       body = _reformat(body);
+    }
     final License result = _registry.putIfAbsent(body, () => MessageLicense._(body, type, origin: origin));
     assert(() {
-      if (result is! MessageLicense || result.type != type)
+      if (result is! MessageLicense || result.type != type) {
         throw 'tried to add a MessageLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
+      }
       return true;
     }());
     return result;
@@ -163,8 +179,9 @@ abstract class License implements Comparable<License> {
   factory License.blank(String body, LicenseType type, { String origin }) {
     final License result = _registry.putIfAbsent(body, () => BlankLicense._(_reformat(body), type, origin: origin));
     assert(() {
-      if (result is! BlankLicense || result.type != type)
+      if (result is! BlankLicense || result.type != type) {
         throw 'tried to add a BlankLicense $type, but it was a duplicate of a ${result.runtimeType} ${result.type}';
+      }
       return true;
     }());
     return result;
@@ -179,8 +196,9 @@ abstract class License implements Comparable<License> {
     bool reformatted = false,
     String origin
   }) {
-    if (!reformatted)
+    if (!reformatted) {
       body = _reformat(body);
+    }
     final License result = _registry.putIfAbsent(body, () {
       assert(type != null);
       switch (type) {
@@ -222,8 +240,9 @@ abstract class License implements Comparable<License> {
   factory License.fromBodyAndName(String body, String name, { String origin }) {
     body = _reformat(body);
     LicenseType type = convertLicenseNameToType(name);
-    if (type == LicenseType.unknown)
+    if (type == LicenseType.unknown) {
       type = convertBodyToType(body);
+    }
     return License.fromBodyAndType(body, type, origin: origin);
   }
 
@@ -366,17 +385,21 @@ abstract class License implements Comparable<License> {
     final LicenseType detectedType = convertBodyToType(body);
 
     // Fuchsia SDK Vulkan license is Apache 2.0 with some additional BSD-matching copyrights.
-    if (type == LicenseType.vulkan)
+    if (type == LicenseType.vulkan) {
       yesWeKnowWhatItLooksLikeButItIsNot = true;
-
-    if (detectedType != LicenseType.unknown && detectedType != type && !yesWeKnowWhatItLooksLikeButItIsNot)
-      throw 'Created a license of type $type but it looks like $detectedType.';
-    if (type != LicenseType.apache && type != LicenseType.apacheNotice) {
-      if (!yesWeKnowWhatItLooksLikeButItIsNot && body.contains('Apache'))
-        throw 'Non-Apache license (type=$type, detectedType=$detectedType) contains the word "Apache"; maybe it\'s a notice?:\n---\n$body\n---';
     }
-    if (body.contains(trailingColon))
+
+    if (detectedType != LicenseType.unknown && detectedType != type && !yesWeKnowWhatItLooksLikeButItIsNot) {
+      throw 'Created a license of type $type but it looks like $detectedType.';
+    }
+    if (type != LicenseType.apache && type != LicenseType.apacheNotice) {
+      if (!yesWeKnowWhatItLooksLikeButItIsNot && body.contains('Apache')) {
+        throw 'Non-Apache license (type=$type, detectedType=$detectedType) contains the word "Apache"; maybe it\'s a notice?:\n---\n$body\n---';
+      }
+    }
+    if (body.contains(trailingColon)) {
       throw 'incomplete license detected:\n---\n$body\n---';
+    }
     // if (type == LicenseType.unknown)
     //   print('need detector for:\n----\n$body\n----');
     bool isUTF8 = true;
@@ -391,14 +414,16 @@ abstract class License implements Comparable<License> {
         ascii.decode(latin1Encoded);
         isAscii = true;
       } on FormatException { /* Fall through to next encoding check */ }
-      if (isAscii)
+      if (isAscii) {
         return;
+      }
       try {
         utf8.decode(latin1Encoded);
         isUTF8 = true;
       } on FormatException { /* We check isUTF8 below and throw if necessary */ }
-      if (isUTF8)
+      if (isUTF8) {
         throw 'tried to create a License object with text that appears to have been misdecoded as Latin1 instead of as UTF-8:\n$body';
+      }
     }
   }
 
@@ -437,12 +462,7 @@ abstract class License implements Comparable<License> {
     header.add('ORIGIN: $origin');
     header.add('TYPE: $type');
     header.addAll(licensees.map((String s) => 'FILE: $s'));
-    return ('=' * 100) + '\n' +
-           header.join('\n') +
-           '\n' +
-           ('-' * 100) + '\n' +
-           toStringBody() + '\n' +
-           ('=' * 100);
+    return '${'=' * 100}\n${header.join('\n')}\n${'-' * 100}\n${toStringBody()}\n${'=' * 100}';
   }
 
   String toStringBody() => body;
@@ -450,7 +470,7 @@ abstract class License implements Comparable<License> {
   String toStringFormal() {
     final List<String> prefixes = _libraries.toList();
     prefixes.sort();
-    return prefixes.join('\n') + '\n\n' + body;
+    return '${prefixes.join('\n')}\n\n$body';
   }
 
   static final RegExp _copyrightForAuthors = RegExp(
@@ -460,10 +480,12 @@ abstract class License implements Comparable<License> {
 
   static String _readAuthors(String body) {
     final List<Match> matches = _copyrightForAuthors.allMatches(body).toList();
-    if (matches.isEmpty)
+    if (matches.isEmpty) {
       return null;
-    if (matches.length > 1)
+    }
+    if (matches.length > 1) {
       throw 'found too many authors for this copyright:\n$body';
+    }
     return matches[0].group(1);
   }
 }
@@ -480,10 +502,12 @@ final License missingLicense = UniqueLicense._('<missing>', LicenseType.unknown)
 String _reformat(String body) {
   // TODO(ianh): ensure that we're stripping the same amount of leading text on each line
   final List<String> lines = body.split('\n');
-  while (lines.isNotEmpty && lines.first == '')
+  while (lines.isNotEmpty && lines.first == '') {
     lines.removeAt(0);
-  while (lines.isNotEmpty && lines.last == '')
+  }
+  while (lines.isNotEmpty && lines.last == '') {
     lines.removeLast();
+  }
   if (lines.length > 2) {
     if (lines[0].startsWith(beginLicenseBlock) && lines.last.startsWith(endLicenseBlock)) {
       lines.removeAt(0);
@@ -548,13 +572,15 @@ Iterable<_LineRange> _walkLinesBackwards(String body, int start) sync* {
   while (start > 0) {
     start -= 1;
     if (body[start] == '\n') {
-      if (end != null)
+      if (end != null) {
         yield _LineRange(start + 1, end, body);
+      }
       end = start;
     }
   }
-  if (end != null)
+  if (end != null) {
     yield _LineRange(start, end, body);
+  }
 }
 
 Iterable<_LineRange> _walkLinesForwards(String body, { int start = 0, int end }) sync* {
@@ -563,14 +589,16 @@ Iterable<_LineRange> _walkLinesForwards(String body, { int start = 0, int end })
   end ??= body.length;
   while (endIndex < end) {
     if (body[endIndex] == '\n') {
-      if (startIndex != null)
+      if (startIndex != null) {
         yield _LineRange(startIndex, endIndex, body);
+      }
       startIndex = endIndex + 1;
     }
     endIndex += 1;
   }
-  if (startIndex != null)
+  if (startIndex != null) {
     yield _LineRange(startIndex, endIndex, body);
+  }
 }
 
 class _SplitLicense {
@@ -584,65 +612,79 @@ class _SplitLicense {
 
 _SplitLicense _splitLicense(String body, { bool verifyResults = true }) {
   final Iterator<_LineRange> lines = _walkLinesForwards(body).iterator;
-  if (!lines.moveNext())
+  if (!lines.moveNext()) {
     throw 'tried to split empty license';
+  }
   int end = 0;
   while (true) {
     final String line = lines.current.value;
     if (line == 'Author:' ||
         line == 'This code is derived from software contributed to Berkeley by' ||
         line == 'The Initial Developer of the Original Code is') {
-      if (!lines.moveNext())
+      if (!lines.moveNext()) {
         throw 'unexpected end of block instead of author when looking for copyright';
-      if (lines.current.value.trim() == '')
+      }
+      if (lines.current.value.trim() == '') {
         throw 'unexpectedly blank line instead of author when looking for copyright';
+      }
       end = lines.current.end;
-      if (!lines.moveNext())
+      if (!lines.moveNext()) {
         break;
+      }
     } else if (line.startsWith('Authors:') || line == 'Other contributors:') {
       if (line != 'Authors:') {
         // assume this line contained an author as well
         end = lines.current.end;
       }
-      if (!lines.moveNext())
+      if (!lines.moveNext()) {
         throw 'unexpected end of license when reading list of authors while looking for copyright';
+      }
       final String firstAuthor = lines.current.value;
       int subindex = 0;
       while (subindex < firstAuthor.length && (firstAuthor[subindex] == ' ' ||
-                                               firstAuthor[subindex] == '\t'))
+                                               firstAuthor[subindex] == '\t')) {
         subindex += 1;
-      if (subindex == 0 || subindex > firstAuthor.length)
+      }
+      if (subindex == 0 || subindex > firstAuthor.length) {
         throw 'unexpected blank line instead of authors found when looking for copyright';
+      }
       end = lines.current.end;
       final String prefix = firstAuthor.substring(0, subindex);
       while (lines.moveNext() && lines.current.value.startsWith(prefix)) {
         final String nextAuthor = lines.current.value.substring(prefix.length);
-        if (nextAuthor == '' || nextAuthor[0] == ' ' || nextAuthor[0] == '\t')
+        if (nextAuthor == '' || nextAuthor[0] == ' ' || nextAuthor[0] == '\t') {
           throw 'unexpectedly ragged author list when looking for copyright';
+        }
         end = lines.current.end;
       }
-      if (lines.current == null)
+      if (lines.current == null) {
         break;
+      }
     } else if (line.contains(halfCopyrightPattern)) {
       do {
-        if (!lines.moveNext())
+        if (!lines.moveNext()) {
           throw 'unexpected end of block instead of copyright holder when looking for copyright';
-        if (lines.current.value.trim() == '')
+        }
+        if (lines.current.value.trim() == '') {
           throw 'unexpectedly blank line instead of copyright holder when looking for copyright';
+        }
         end = lines.current.end;
       } while (lines.current.value.contains(trailingComma));
-      if (!lines.moveNext())
+      if (!lines.moveNext()) {
         break;
+      }
     } else if (copyrightStatementPatterns.every((RegExp pattern) => !line.contains(pattern))) {
       break;
     } else {
       end = lines.current.end;
-      if (!lines.moveNext())
+      if (!lines.moveNext()) {
         break;
+      }
     }
   }
-  if (verifyResults && 'Copyright ('.allMatches(body, end).isNotEmpty && !body.startsWith('If you modify libpng'))
+  if (verifyResults && 'Copyright ('.allMatches(body, end).isNotEmpty && !body.startsWith('If you modify libpng')) {
     throw 'the license seems to contain a copyright:\n===copyright===\n${body.substring(0, end)}\n===license===\n${body.substring(end)}\n=========';
+  }
   return _SplitLicense(body, end);
 }
 
@@ -658,8 +700,9 @@ class _PartialLicenseMatch {
   String group(int index) => _match.group(index);
   String getAuthors() {
     final Match match = authorPattern.firstMatch(getCopyrights());
-    if (match != null)
+    if (match != null) {
       return match.group(1);
+    }
     return null;
   }
   String getCopyrights() => _body.substring(start, split);
@@ -685,8 +728,9 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
       bool isBlockCommentLine;
       if (line.length > 3 && line.endsWith('*/')) {
         int index = line.length - 3;
-        while (line[index] == ' ')
+        while (line[index] == ' ') {
           index -= 1;
+        }
         line = line.substring(0, index + 1);
         isBlockCommentLine = true;
       } else {
@@ -694,8 +738,9 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
       }
       if (line.isEmpty || fullPrefix.startsWith(line)) {
         // this is blank line
-        if (lastWasBlank && (foundNonBlank || !needsCopyright))
+        if (lastWasBlank && (foundNonBlank || !needsCopyright)) {
           break;
+        }
         lastWasBlank = true;
       } else if ((!isBlockCommentLine && line.startsWith('/*'))
                  || line.startsWith('<!--')
@@ -737,8 +782,9 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
     // At this point we have figured out what might be copyright text before the license.
     int split;
     if (!foundAny) {
-      if (needsCopyright)
+      if (needsCopyright) {
         throw 'could not find copyright before license\nlicense body was:\n---\n${body.substring(match.start, match.end)}\n---\nfile was:\n---\n$body\n---';
+      }
       start = match.start;
       split = match.start;
     } else {
@@ -762,10 +808,12 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
         }
       }
 
-      if (!copyrights.contains(copyrightMentionPattern))
+      if (!copyrights.contains(copyrightMentionPattern)) {
         throw 'could not find copyright before license block:\n---\ncopyrights was:\n---\n$copyrights\n---\nblock was:\n---\n${body.substring(start, match.end)}\n---';
-      if (body[match.start - 1] != '\n')
+      }
+      if (body[match.start - 1] != '\n') {
         print('about to assert; match.start = ${match.start}, match.end = ${match.end}, split at: "${body[match.start - 1]}"');
+      }
       assert(body[match.start - 1] == '\n');
       split = match.start - 1;
     }
@@ -789,22 +837,26 @@ class _LicenseMatch {
 
 Iterable<_LicenseMatch> _expand(License template, String copyright, String body, int start, int end, { String debug = '', String origin }) sync* {
   final List<License> results = template.expandTemplate(_reformat(copyright), body, origin: origin).toList();
-  if (results.isEmpty)
+  if (results.isEmpty) {
     throw 'license could not be expanded';
+  }
   yield _LicenseMatch(results.first, start, end, debug: 'expanding template for $debug');
-  if (results.length > 1)
+  if (results.length > 1) {
     yield* results.skip(1).map((License license) => _LicenseMatch(license, start, end, isDuplicate: true, debug: 'expanding subsequent template for $debug'));
+  }
 }
 
 Iterable<_LicenseMatch> _tryNone(String body, String filename, RegExp pattern, LicenseSource parentDirectory) sync* {
   for (final Match match in pattern.allMatches(body)) {
     final List<License> results = parentDirectory.nearestLicensesFor(filename);
-    if (results == null || results.isEmpty)
+    if (results == null || results.isEmpty) {
       throw 'no default license file found';
+    }
     // TODO(ianh): use _expand if the license asks for the copyright to be included (e.g. BSD)
     yield _LicenseMatch(results.first, match.start, match.end, debug: '_tryNone');
-    if (results.length > 1)
+    if (results.length > 1) {
       yield* results.skip(1).map((License license) => _LicenseMatch(license, match.start, match.end, isDuplicate: true, debug: 'subsequent _tryNone'));
+    }
   }
 }
 
@@ -822,8 +874,9 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(String body, LicenseFileReferenc
       final String authors = pattern.authorIndex != null ? match.group(pattern.authorIndex) : null;
       final String filename = match.group(pattern.fileIndex);
       final License template = parentDirectory.nearestLicenseWithName(filename, authors: authors);
-      if (template == null)
+      if (template == null) {
         throw 'failed to find template $filename in $parentDirectory (authors=$authors)';
+      }
       assert(_reformat(copyright) != '');
       final String entireLicense = body.substring(match.start, match.end);
       yield* _expand(template, copyright, entireLicense, match.start, match.end, debug: '_tryReferenceByFilename (with explicit copyright) looking for $filename', origin: origin);
@@ -832,8 +885,9 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(String body, LicenseFileReferenc
     for (final _PartialLicenseMatch match in _findLicenseBlocks(body, pattern.pattern, pattern.firstPrefixIndex, pattern.indentPrefixIndex, needsCopyright: pattern.needsCopyright)) {
       final String authors = match.getAuthors();
       String filename = match.group(pattern.fileIndex);
-      if (filename == 'modp_b64.c')
-        filename = 'modp_b64.cc'; // it was renamed but other files reference the old name
+      if (filename == 'modp_b64.c') {
+        filename = 'modp_b64.cc';
+      } // it was renamed but other files reference the old name
       final License template = parentDirectory.nearestLicenseWithName(filename, authors: authors);
       if (template == null) {
         throw
@@ -853,17 +907,19 @@ Iterable<_LicenseMatch> _tryReferenceByType(String body, RegExp pattern, License
   for (final _PartialLicenseMatch match in _findLicenseBlocks(body, pattern, 1, 2, needsCopyright: needsCopyright)) {
     final LicenseType type = convertLicenseNameToType(match.group(3));
     final License template = parentDirectory.nearestLicenseOfType(type);
-    if (template == null)
+    if (template == null) {
       throw 'failed to find accompanying $type license in $parentDirectory';
+    }
     assert(() {
       final String copyrights = _reformat(match.getCopyrights());
       assert(needsCopyright && copyrights.isNotEmpty || !needsCopyright && copyrights.isEmpty);
       return true;
     }());
-    if (needsCopyright)
+    if (needsCopyright) {
       yield* _expand(template, match.getCopyrights(), match.getEntireLicense(), match.start, match.end, debug: '_tryReferenceByType', origin: origin);
-    else
+    } else {
       yield _LicenseMatch(template, match.start, match.end, debug: '_tryReferenceByType (without copyrights) for type $type');
+    }
   }
 }
 
@@ -871,8 +927,9 @@ License _dereferenceLicense(int groupIndex, String Function(int index) group, Mu
   License result = pattern.checkLocalFirst ? parentDirectory.nearestLicenseWithName(group(groupIndex)) : null;
   if (result == null) {
     String suffix = '';
-    if (pattern.versionIndices != null && pattern.versionIndices.containsKey(groupIndex))
+    if (pattern.versionIndices != null && pattern.versionIndices.containsKey(groupIndex)) {
       suffix = ':${group(pattern.versionIndices[groupIndex])}';
+    }
     result = License.fromUrl('${group(groupIndex)}$suffix', origin: origin);
   }
   return result;
@@ -915,8 +972,9 @@ Iterable<_LicenseMatch> _tryForwardReferencePattern(String fileContents, Forward
 }
 
 List<License> determineLicensesFor(String fileContents, String filename, LicenseSource parentDirectory, { String origin }) {
-  if (fileContents.length > kMaxSize)
+  if (fileContents.length > kMaxSize) {
     fileContents = fileContents.substring(0, kMaxSize);
+  }
   final List<_LicenseMatch> results = <_LicenseMatch>[];
   fileContents = fileContents.replaceAll('\t', ' ');
   fileContents = fileContents.replaceAll(newlinePattern, '\n');
@@ -932,8 +990,9 @@ List<License> determineLicensesFor(String fileContents, String filename, License
   if (results.length == 1) {
     final _LicenseMatch target = results.single;
     results.addAll(csForwardReferenceLicenses.expand((ForwardReferencePattern pattern) => _tryForwardReferencePattern(fileContents, pattern, target.license, origin: origin)));
-    if (results.length > 1)
+    if (results.length > 1) {
       usedTemplate = target;
+    }
   }
   // It's good to manually sanity check that these are all being correctly used
   // to expand later licenses every now and then:
@@ -945,32 +1004,38 @@ List<License> determineLicensesFor(String fileContents, String filename, License
     // we failed to find a license, so let's look for some corner cases
     results.addAll(csFallbacks.expand((RegExp pattern) => _tryNone(fileContents, filename, pattern, parentDirectory)));
     if (results.isEmpty) {
-      if ((fileContents.contains(copyrightMentionPattern) && fileContents.contains(licenseMentionPattern)) && !fileContents.contains(copyrightMentionOkPattern))
+      if ((fileContents.contains(copyrightMentionPattern) && fileContents.contains(licenseMentionPattern)) && !fileContents.contains(copyrightMentionOkPattern)) {
         throw 'unmatched potential copyright and license statements; first twenty lines:\n----8<----\n${fileContents.split("\n").take(20).join("\n")}\n----8<----';
+      }
     }
   }
   final List<_LicenseMatch> verificationList = results.toList();
-  if (usedTemplate != null && !verificationList.contains(usedTemplate))
+  if (usedTemplate != null && !verificationList.contains(usedTemplate)) {
     verificationList.add(usedTemplate);
+  }
   verificationList.sort((_LicenseMatch a, _LicenseMatch b) {
     final int result = a.start - b.start;
-    if (result != 0)
+    if (result != 0) {
       return result;
+    }
     return a.end - b.end;
   });
   int position = 0;
   for (final _LicenseMatch m in verificationList) {
-    if (m.isDuplicate)
-      continue; // some text expanded into multiple licenses, so overlapping is expected
+    if (m.isDuplicate) {
+      continue;
+    } // some text expanded into multiple licenses, so overlapping is expected
     if (position > m.start) {
-      for (final _LicenseMatch n in results)
+      for (final _LicenseMatch n in results) {
         print('license match: ${n.start}..${n.end}, ${n.debug}, first line: ${n.license.body.split("\n").first}');
+      }
       throw 'overlapping licenses in $filename (one ends at $position, another starts at ${m.start})';
     }
     if (position < m.start) {
       final String substring = fileContents.substring(position, m.start);
-      if (substring.contains(copyrightMentionPattern) && !substring.contains(copyrightMentionOkPattern))
+      if (substring.contains(copyrightMentionPattern) && !substring.contains(copyrightMentionOkPattern)) {
         throw 'there is another unmatched potential copyright statement in $filename:\n  $position..${m.start}: "$substring"';
+      }
     }
     position = m.end;
   }
@@ -991,8 +1056,9 @@ License interpretAsRedirectLicense(String fileContents, LicenseSource parentDire
     if (match != null && match.start == 0 && match.end == body.length) {
       for (final int index in pattern.licenseIndices) {
         final License candidate = _dereferenceLicense(index, match.group, pattern, parentDirectory, origin: origin);
-        if (result != null && candidate != null)
+        if (result != null && candidate != null) {
           throw 'Multiple potential matches in interpretAsRedirectLicense in $parentDirectory; body was:\n------8<------\n$fileContents\n------8<------';
+        }
         result = candidate;
       }
     }

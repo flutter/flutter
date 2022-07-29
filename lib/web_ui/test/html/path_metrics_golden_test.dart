@@ -23,7 +23,7 @@ Future<void> testMain() async {
   const double kDashLength = 5.0;
 
   // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
+  Future<void> checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
         RenderStrategy());
@@ -150,7 +150,7 @@ Future<void> testMain() async {
       }
     }
     rc.drawPath(dashedPath, redPaint);
-    await _checkScreenshot(rc, 'path_dash_quadratic');
+    await checkScreenshot(rc, 'path_dash_quadratic');
   });
 
   // Test for extractPath to draw 5 pixel length dashed line using cubic curve.
@@ -204,6 +204,6 @@ Future<void> testMain() async {
       }
     }
     rc.drawPath(dashedPath, redPaint);
-    await _checkScreenshot(rc, 'path_dash_cubic');
+    await checkScreenshot(rc, 'path_dash_cubic');
   });
 }

@@ -601,13 +601,12 @@ class SurfacePathMetric implements ui.PathMetric {
 ui.Offset _normalizeSlope(double dx, double dy) {
   final double length = math.sqrt(dx * dx + dy * dy);
   return length < kEpsilon
-      ? const ui.Offset(0.0, 0.0)
+      ? ui.Offset.zero
       : ui.Offset(dx / length, dy / length);
 }
 
 class _SurfaceTangent extends ui.Tangent {
-  const _SurfaceTangent(ui.Offset position, ui.Offset vector, this.t)
-      : super(position, vector);
+  const _SurfaceTangent(super.position, super.vector, this.t);
 
   // Normalized distance of tangent point from start of a contour.
   final double t;
@@ -642,9 +641,9 @@ class _PathSegment {
   _SurfaceTangent tangentForQuadAt(double t, double x0, double y0, double x1,
       double y1, double x2, double y2) {
     assert(t >= 0 && t <= 1);
-    final SkQuadCoefficients _quadEval =
+    final SkQuadCoefficients quadEval =
         SkQuadCoefficients(x0, y0, x1, y1, x2, y2);
-    final ui.Offset pos = ui.Offset(_quadEval.evalX(t), _quadEval.evalY(t));
+    final ui.Offset pos = ui.Offset(quadEval.evalX(t), quadEval.evalY(t));
     // Derivative of quad curve is 2(b - a + (a - 2b + c)t).
     // If control point is at start or end point, this yields 0 for t = 0 and
     // t = 1. In that case use the quad end points to compute tangent instead
@@ -660,9 +659,9 @@ class _PathSegment {
   _SurfaceTangent tangentForCubicAt(double t, double x0, double y0, double x1,
       double y1, double x2, double y2, double x3, double y3) {
     assert(t >= 0 && t <= 1);
-    final _SkCubicCoefficients _cubicEval =
+    final _SkCubicCoefficients cubicEval =
         _SkCubicCoefficients(x0, y0, x1, y1, x2, y2, x3, y3);
-    final ui.Offset pos = ui.Offset(_cubicEval.evalX(t), _cubicEval.evalY(t));
+    final ui.Offset pos = ui.Offset(cubicEval.evalX(t), cubicEval.evalY(t));
     // Derivative of cubic is zero when t = 0 or 1 and adjacent control point
     // is on the start or end point of curve. Use the other control point
     // to compute the tangent or if both control points are on end points

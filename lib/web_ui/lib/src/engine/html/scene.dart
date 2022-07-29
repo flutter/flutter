@@ -38,7 +38,7 @@ class SurfaceScene implements ui.Scene {
 
 /// A surface that creates a DOM element for whole app.
 class PersistedScene extends PersistedContainerSurface {
-  PersistedScene(PersistedScene? oldLayer) : super(oldLayer) {
+  PersistedScene(PersistedScene? super.oldLayer) {
     transform = Matrix4.identity();
   }
 

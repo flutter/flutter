@@ -38,7 +38,7 @@ Future<void> testMain() async {
           color: green,
           background: Paint()..color = yellow,
           shadows: <Shadow>[
-            const Shadow(color: black, blurRadius: 10.0),
+            const Shadow(blurRadius: 10.0),
           ],
         ));
         builder.addText('ipsum');

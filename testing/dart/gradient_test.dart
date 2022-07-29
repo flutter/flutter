@@ -31,7 +31,6 @@ void main() {
               TileMode.mirror,
               null,
               Offset.zero,
-              0.0,
             ),
         isNotNull);
   });
@@ -46,7 +45,6 @@ void main() {
               TileMode.mirror,
               null,
               const Offset(2.0, 2.0),
-              0.0,
             ),
         isNotNull);
   });

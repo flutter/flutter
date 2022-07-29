@@ -95,7 +95,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
     String url, WebOnlyImageCodecChunkCallback? chunkCallback) async {
   final Uint8List list = await fetchImage(url, chunkCallback);
   if (browserSupportsImageDecoder) {
-    return CkBrowserImageDecoder.create(data: list, debugSource: url.toString());
+    return CkBrowserImageDecoder.create(data: list, debugSource: url);
   } else {
     return CkAnimatedImage.decodeFromBytes(list, url);
   }
@@ -208,8 +208,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   @override
-  StackTrace get debugStackTrace => _debugStackTrace!;
-  StackTrace? _debugStackTrace;
+  StackTrace get debugStackTrace => _debugStackTrace;
+  late StackTrace _debugStackTrace;
 
   // Use a box because `SkImage` may be deleted either due to this object
   // being garbage-collected, or by an explicit call to [delete].

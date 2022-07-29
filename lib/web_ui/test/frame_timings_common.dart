@@ -28,7 +28,7 @@ Future<void> runFrameTimingsTest() async {
   // Frame 1.
   ui.window.scheduleFrame();
   await frameDone.future;
-  expect(timings, isNull, reason: '100 ms hasn\'t passed yet');
+  expect(timings, isNull, reason: "100 ms hasn't passed yet");
   await Future<void>.delayed(const Duration(milliseconds: 150));
 
   // Frame 2.

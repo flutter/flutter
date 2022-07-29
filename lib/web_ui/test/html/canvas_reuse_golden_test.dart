@@ -30,7 +30,7 @@ Future<void> testMain() async {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/51514
-  test('Canvas is reused and z-index doesn\'t leak across paints', () async {
+  test("Canvas is reused and z-index doesn't leak across paints", () async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
         RenderStrategy());
     const Rect region = Rect.fromLTWH(0, 0, 500, 500);
@@ -77,7 +77,7 @@ Future<void> testMain() async {
     final Path path2 = Path()
       ..moveTo(3, 0)
       ..quadraticBezierTo(100, 0, 100, 100);
-    rc2.drawImage(_createRealTestImage(), const Offset(0, 0), SurfacePaint());
+    rc2.drawImage(_createRealTestImage(), Offset.zero, SurfacePaint());
     rc2.drawPath(path2, testPaint);
     rc2.endRecording();
     rc2.apply(engineCanvas, screenRect);

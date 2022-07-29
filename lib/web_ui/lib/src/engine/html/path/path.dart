@@ -795,7 +795,7 @@ class SurfacePath implements ui.Path {
 
     // The arc may be slightly bigger than 1/4 circle, so allow up to 1/3rd.
     final int segments =
-        (thetaArc / (2.0 * math.pi / 3.0)).abs().ceil().toInt();
+        (thetaArc / (2.0 * math.pi / 3.0)).abs().ceil();
     final double thetaWidth = thetaArc / segments;
     final double t = math.tan(thetaWidth / 2.0);
     if (!t.isFinite) {
@@ -1241,26 +1241,26 @@ class SurfacePath implements ui.Path {
     // check for coincidence. Count coincidence as places where the on curve
     // points have identical tangents.
     final PathIterator iter = PathIterator(pathRef, true);
-    final Float32List _buffer = Float32List(8 + 10);
+    final Float32List buffer = Float32List(8 + 10);
     final List<ui.Offset> tangents = <ui.Offset>[];
     bool done = false;
     do {
       final int oldCount = tangents.length;
-      switch (iter.next(_buffer)) {
+      switch (iter.next(buffer)) {
         case SPath.kMoveVerb:
         case SPath.kCloseVerb:
           break;
         case SPath.kLineVerb:
-          tangentLine(_buffer, x, y, tangents);
+          tangentLine(buffer, x, y, tangents);
           break;
         case SPath.kQuadVerb:
-          tangentQuad(_buffer, x, y, tangents);
+          tangentQuad(buffer, x, y, tangents);
           break;
         case SPath.kConicVerb:
-          tangentConic(_buffer, x, y, iter.conicWeight, tangents);
+          tangentConic(buffer, x, y, iter.conicWeight, tangents);
           break;
         case SPath.kCubicVerb:
-          tangentCubic(_buffer, x, y, tangents);
+          tangentCubic(buffer, x, y, tangents);
           break;
         case SPath.kDoneVerb:
           done = true;

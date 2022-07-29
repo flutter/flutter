@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:scenario_app/src/channel_util.dart';
+import 'channel_util.dart';
 
 import 'platform_echo_mixin.dart';
 import 'scenario.dart';
@@ -64,7 +64,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
   void onPointerDataPacket(PointerDataPacket packet) {
     for (final PointerData data in packet.data) {
       if (data.change == PointerChange.up &&
-          _buttonRect?.contains(Offset(data.physicalX, data.physicalY)) == true
+          (_buttonRect?.contains(Offset(data.physicalX, data.physicalY)) ?? false)
       ) {
         _pop();
       }

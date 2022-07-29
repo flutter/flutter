@@ -54,7 +54,7 @@ class AssetManager {
     if (Uri.parse(asset).hasScheme) {
       return Uri.encodeFull(asset);
     }
-    return Uri.encodeFull((_baseUrl ?? '') + '$assetsDir/$asset');
+    return Uri.encodeFull('${_baseUrl ?? ''}$assetsDir/$asset');
   }
 
   /// Loads an asset using an [DomXMLHttpRequest] and returns data as [ByteData].

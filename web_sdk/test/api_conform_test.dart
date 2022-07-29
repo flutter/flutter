@@ -18,10 +18,7 @@ const Set<String> _kObjectMembers = <String>{
 };
 
 CompilationUnit _parseAndCheckDart(String path) {
-  final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags2(
-    sdkLanguageVersion: Version.parse('2.17.0'),
-    flags: <String>['non-nullable'],
-  );
+  final FeatureSet analyzerFeatures = FeatureSet.latestLanguageVersion();
   if (!analyzerFeatures.isEnabled(Feature.non_nullable)) {
     throw Exception('non-nullable feature is disabled.');
   }

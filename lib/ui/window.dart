@@ -316,8 +316,8 @@ class FlutterWindow extends FlutterView {
 /// [window], or [PlatformDispatcher.instance]. See the documentation for
 /// [PlatformDispatcher.instance] for more details about this recommendation.
 class SingletonFlutterWindow extends FlutterWindow {
-  SingletonFlutterWindow._(Object windowId, PlatformDispatcher platformDispatcher)
-      : super._(windowId, platformDispatcher);
+  SingletonFlutterWindow._(super.windowId, super.platformDispatcher)
+      : super._();
 
   /// A callback that is invoked whenever the [devicePixelRatio],
   /// [physicalSize], [padding], [viewInsets], [PlatformDispatcher.views], or
@@ -842,27 +842,35 @@ class AccessibilityFeatures {
   @override
   String toString() {
     final List<String> features = <String>[];
-    if (accessibleNavigation)
+    if (accessibleNavigation) {
       features.add('accessibleNavigation');
-    if (invertColors)
+    }
+    if (invertColors) {
       features.add('invertColors');
-    if (disableAnimations)
+    }
+    if (disableAnimations) {
       features.add('disableAnimations');
-    if (boldText)
+    }
+    if (boldText) {
       features.add('boldText');
-    if (reduceMotion)
+    }
+    if (reduceMotion) {
       features.add('reduceMotion');
-    if (highContrast)
+    }
+    if (highContrast) {
       features.add('highContrast');
-    if (onOffSwitchLabels)
+    }
+    if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
+    }
     return 'AccessibilityFeatures$features';
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is AccessibilityFeatures
         && other._index == _index;
   }
@@ -975,8 +983,9 @@ class GestureSettings {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is GestureSettings &&
       other.physicalTouchSlop == physicalTouchSlop &&
       other.physicalDoubleTapSlop == physicalDoubleTapSlop;

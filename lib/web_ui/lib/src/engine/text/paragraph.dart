@@ -284,7 +284,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
       // When there's no strut height, always use paragraph style height.
       return height;
     }
-    if (strutStyle._forceStrutHeight == true) {
+    if (strutStyle._forceStrutHeight ?? false) {
       // When strut height is forced, ignore paragraph style height.
       return strutHeight;
     }
@@ -346,7 +346,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
           'fontFamily: ${fontFamily ?? "unspecified"}, '
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"}, '
           'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
-          'ellipsis: ${ellipsis != null ? "\"$ellipsis\"" : "unspecified"}, '
+          'ellipsis: ${ellipsis != null ? '"$ellipsis"' : "unspecified"}, '
           'locale: ${locale ?? "unspecified"}'
           ')';
     } else {

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show utf8, LineSplitter;
+import 'dart:convert' show LineSplitter, utf8;
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';

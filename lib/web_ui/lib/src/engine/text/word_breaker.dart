@@ -64,8 +64,9 @@ abstract class WordBreaker {
 
     // Do not break within CRLF.
     // WB3: CR × LF
-    if (immediateLeft == WordCharProperty.CR && immediateRight == WordCharProperty.LF)
+    if (immediateLeft == WordCharProperty.CR && immediateRight == WordCharProperty.LF) {
       return false;
+    }
 
     // Otherwise break before and after Newlines (including CR and LF)
     // WB3a: (Newline | CR | LF) ÷
@@ -216,12 +217,14 @@ abstract class WordBreaker {
     }
 
     // WB9: AHLetter × Numeric
-    if (_isAHLetter(immediateLeft) && immediateRight == WordCharProperty.Numeric)
+    if (_isAHLetter(immediateLeft) && immediateRight == WordCharProperty.Numeric) {
       return false;
+    }
 
     // WB10: Numeric × AHLetter
-    if (immediateLeft == WordCharProperty.Numeric && _isAHLetter(immediateRight))
+    if (immediateLeft == WordCharProperty.Numeric && _isAHLetter(immediateRight)) {
       return false;
+    }
 
     // Do not break within sequences, such as “3.2” or “3,456.789”.
     // WB11: Numeric (MidNum | MidNumLet | Single_Quote) × Numeric

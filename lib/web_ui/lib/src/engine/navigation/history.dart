@@ -266,7 +266,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
       // there's no need to set up the "origin" and "flutter" entries, we can
       // safely assume they are already set up.
       _setupOriginEntry(strategy);
-      _setupFlutterEntry(strategy, replace: false, path: path);
+      _setupFlutterEntry(strategy, path: path);
     }
   }
 

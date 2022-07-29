@@ -78,8 +78,7 @@ mixin _DomClip on PersistedContainerSurface {
 class PersistedClipRect extends PersistedContainerSurface
     with _DomClip
     implements ui.ClipRectEngineLayer {
-  PersistedClipRect(PersistedClipRect? oldLayer, this.rect, this.clipBehavior)
-      : super(oldLayer);
+  PersistedClipRect(PersistedClipRect? super.oldLayer, this.rect, this.clipBehavior);
   final ui.Clip? clipBehavior;
   final ui.Rect rect;
 
@@ -194,12 +193,11 @@ class PersistedClipRRect extends PersistedContainerSurface
 class PersistedPhysicalShape extends PersistedContainerSurface
     with _DomClip
     implements ui.PhysicalShapeEngineLayer {
-  PersistedPhysicalShape(PersistedPhysicalShape? oldLayer, this.path,
+  PersistedPhysicalShape(PersistedPhysicalShape? super.oldLayer, this.path,
       this.elevation, int color, int shadowColor, this.clipBehavior)
       : color = ui.Color(color),
         shadowColor = ui.Color(shadowColor),
-        pathBounds = path.getBounds(),
-        super(oldLayer);
+        pathBounds = path.getBounds();
 
   final SurfacePath path;
   final ui.Rect pathBounds;
@@ -349,8 +347,6 @@ class PersistedPhysicalShape extends PersistedContainerSurface
             scaleX: 1.0 / pathBounds.width,
             scaleY: 1.0 / pathBounds.height)
         : pathToSvgClipPath(path,
-            offsetX: 0.0,
-            offsetY: 0.0,
             scaleX: 1.0 / pathBounds.right,
             scaleY: 1.0 / pathBounds.bottom);
 
@@ -458,8 +454,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
 class PersistedClipPath extends PersistedContainerSurface
     implements ui.ClipPathEngineLayer {
   PersistedClipPath(
-      PersistedClipPath? oldLayer, this.clipPath, this.clipBehavior)
-      : super(oldLayer);
+      PersistedClipPath? super.oldLayer, this.clipPath, this.clipBehavior);
 
   final ui.Path clipPath;
   final ui.Clip clipBehavior;

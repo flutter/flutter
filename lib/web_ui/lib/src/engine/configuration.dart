@@ -75,7 +75,7 @@ class FlutterConfiguration {
   ///
   /// Using flutter tools option "--web-render=html" would set the value to false.
   static const bool useSkia =
-      bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
+      bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 
   // Runtime parameters.
@@ -121,7 +121,6 @@ class FlutterConfiguration {
   bool get canvasKitForceCpuOnly => _js?.canvasKitForceCpuOnly ?? _defaultCanvasKitForceCpuOnly;
   static const bool _defaultCanvasKitForceCpuOnly = bool.fromEnvironment(
     'FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY',
-    defaultValue: false,
   );
 
   /// The maximum number of overlay surfaces that the CanvasKit renderer will use.
@@ -153,7 +152,6 @@ class FlutterConfiguration {
   bool get debugShowSemanticsNodes => _js?.debugShowSemanticsNodes ?? _defaultDebugShowSemanticsNodes;
   static const bool _defaultDebugShowSemanticsNodes = bool.fromEnvironment(
     'FLUTTER_WEB_DEBUG_SHOW_SEMANTICS',
-    defaultValue: false,
   );
 }
 

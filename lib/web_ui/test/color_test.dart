@@ -11,7 +11,7 @@ void main() {
 }
 
 class NotAColor extends Color {
-  const NotAColor(int value) : super(value);
+  const NotAColor(super.value);
 }
 
 void testMain() {

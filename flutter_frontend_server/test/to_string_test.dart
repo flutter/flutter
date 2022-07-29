@@ -26,7 +26,7 @@ Future<void> main(List<String> args) async {
   final String regularDill = path.join(fixtures, 'toString.dill');
   final String transformedDill = path.join(fixtures, 'toStringTransformed.dill');
 
-  void _checkProcessResult(ProcessResult result) {
+  void checkProcessResult(ProcessResult result) {
     if (result.exitCode != 0) {
       stdout.writeln(result.stdout);
       stderr.writeln(result.stderr);
@@ -35,7 +35,7 @@ Future<void> main(List<String> args) async {
   }
 
   test('Without flag', () {
-    _checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dart, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',
@@ -44,7 +44,7 @@ Future<void> main(List<String> args) async {
       mainDart,
     ]));
     final ProcessResult runResult = Process.runSync(dart, <String>[regularDill]);
-    _checkProcessResult(runResult);
+    checkProcessResult(runResult);
     String paintString = '"Paint.toString":"Paint(Color(0xffffffff))"';
     if (buildDir.contains('release')) {
       paintString = '"Paint.toString":"Instance of \'Paint\'"';
@@ -54,12 +54,12 @@ Future<void> main(List<String> args) async {
       '"Brightness.toString":"Brightness.dark",'
       '"Foo.toString":"I am a Foo",'
       '"Keep.toString":"I am a Keep"}';
-    final String actualStdout = runResult.stdout.trim() as String;
+    final String actualStdout = (runResult.stdout as String).trim();
     expect(actualStdout, equals(expectedStdout));
   });
 
   test('With flag', () {
-    _checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dart, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',
@@ -70,13 +70,13 @@ Future<void> main(List<String> args) async {
       mainDart,
     ]));
     final ProcessResult runResult = Process.runSync(dart, <String>[transformedDill]);
-    _checkProcessResult(runResult);
+    checkProcessResult(runResult);
 
     const String expectedStdout = '{"Paint.toString":"Instance of \'Paint\'",'
       '"Brightness.toString":"Brightness.dark",'
       '"Foo.toString":"Instance of \'Foo\'",'
       '"Keep.toString":"I am a Keep"}';
-    final String actualStdout = runResult.stdout.trim() as String;
+    final String actualStdout = (runResult.stdout as String).trim();
     expect(actualStdout, equals(expectedStdout));
   });
 }

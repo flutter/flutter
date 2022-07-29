@@ -193,12 +193,14 @@ class SurfacePaint implements ui.Paint {
     result.write('Paint(');
     if (style == ui.PaintingStyle.stroke) {
       result.write('$style');
-      if (strokeWidth != 0.0)
+      if (strokeWidth != 0.0) {
         result.write(' $strokeWidth');
-      else
+      } else {
         result.write(' hairline');
-      if (strokeCap != ui.StrokeCap.butt)
+      }
+      if (strokeCap != ui.StrokeCap.butt) {
         result.write(' $strokeCap');
+      }
       semicolon = '; ';
     }
     if (isAntiAlias != true) {

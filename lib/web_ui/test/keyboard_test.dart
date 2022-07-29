@@ -643,7 +643,7 @@ void testMain() {
     testFakeAsync(
       'On non-macOS, do not synthesize keyup for shortcuts',
       (FakeAsync async) {
-        Keyboard.initialize(onMacOs: false);
+        Keyboard.initialize();
 
         final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
         ui.window.onPlatformMessage = (String channel, ByteData? data,

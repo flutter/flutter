@@ -136,11 +136,11 @@ class Scrollable extends RoleManager {
   /// content available.
   void _neutralizeDomScrollPosition() {
     // This value is arbitrary.
-    const int _canonicalNeutralScrollPosition = 10;
+    const int canonicalNeutralScrollPosition = 10;
 
     final DomElement element = semanticsObject.element;
     if (semanticsObject.isVerticalScrollContainer) {
-      element.scrollTop = _canonicalNeutralScrollPosition;
+      element.scrollTop = canonicalNeutralScrollPosition;
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollTop;
       semanticsObject
@@ -148,7 +148,7 @@ class Scrollable extends RoleManager {
             _effectiveNeutralScrollPosition.toDouble()
         ..horizontalContainerAdjustment = 0.0;
     } else {
-      element.scrollLeft = _canonicalNeutralScrollPosition;
+      element.scrollLeft = canonicalNeutralScrollPosition;
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollLeft;
       semanticsObject

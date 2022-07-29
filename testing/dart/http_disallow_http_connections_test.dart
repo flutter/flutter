@@ -9,8 +9,10 @@ import 'dart:io';
 
 import 'package:litetest/litetest.dart';
 
+typedef FutureFunction = Future<Object?> Function();
+
 /// Asserts that `callback` throws an exception of type `T`.
-Future<void> asyncExpectThrows<T>(Function callback) async {
+Future<void> asyncExpectThrows<T>(FutureFunction callback) async {
   bool threw = false;
   try {
     await callback();
@@ -23,7 +25,7 @@ Future<void> asyncExpectThrows<T>(Function callback) async {
 
 Future<String> getLocalHostIP() async {
   final List<NetworkInterface> interfaces = await NetworkInterface.list(
-      includeLoopback: false, type: InternetAddressType.IPv4);
+      type: InternetAddressType.IPv4);
   return interfaces.first.addresses.first.address;
 }
 
@@ -110,7 +112,7 @@ void main() {
 class _MockZoneValue {
   _MockZoneValue(this._value);
 
-  Object? _value;
+  final Object? _value;
   bool _falseChecked = false;
   bool _trueChecked = false;
 

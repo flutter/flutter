@@ -34,7 +34,7 @@ Future<Image> createImage(int width, int height) {
 
 void testCanvas(CanvasCallback callback) {
   try {
-    callback(Canvas(PictureRecorder(), const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)));
+    callback(Canvas(PictureRecorder(), Rect.zero));
   } catch (error) { } // ignore: empty_catches
 }
 
@@ -62,7 +62,7 @@ void testNoCrashes() {
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(1, 1);
 
-    try { Canvas(PictureRecorder(), null); } catch (error) { } // ignore: empty_catches
+    try { Canvas(PictureRecorder()); } catch (error) { } // ignore: empty_catches
     try { Canvas(PictureRecorder(), rect); } catch (error) { } // ignore: empty_catches
 
     try {
@@ -108,8 +108,6 @@ void testNoCrashes() {
     testCanvas((Canvas canvas) => canvas.transform(Float64List(16)));
     testCanvas((Canvas canvas) => canvas.translate(double.nan, double.nan));
     testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[],
-                                                               textureCoordinates: null,
-                                                               colors: null,
                                                                indices: <int>[]), BlendMode.screen, paint));
   });
 }
@@ -138,7 +136,7 @@ Future<void> saveTestImage(Image image, String filename) async {
   final ByteData pngData = (await image.toByteData(format: ImageByteFormat.png))!;
   final String outPath = path.join(imagesPath, filename);
   File(outPath).writeAsBytesSync(pngData.buffer.asUint8List());
-  print('wrote: ' + outPath);
+  print('wrote: $outPath');
 }
 
 /// @returns true When the images are reasonably similar.
@@ -161,7 +159,7 @@ Future<bool> fuzzyGoldenImageCompare(
   }
 
   if (!areEqual) {
-    saveTestImage(image, 'found_' + goldenImageName);
+    saveTestImage(image, 'found_$goldenImageName');
   }
   return areEqual;
 }
@@ -497,7 +495,7 @@ void main() {
     expect(image.width, 6);
     expect(image.height, 8);
 
-    final ByteData? data = await image.toByteData(format: ImageByteFormat.rawRgba);
+    final ByteData? data = await image.toByteData();
 
     expect(data, isNotNull);
     expect(data!.lengthInBytes, 6 * 8 * 4);
@@ -574,7 +572,7 @@ void main() {
 
   Matcher closeToTransform(Float64List expected) => (dynamic v) {
     Expect.type<Float64List>(v);
-    final Float64List value = v;
+    final Float64List value = v as Float64List;
     expect(expected.length, equals(16));
     expect(value.length, equals(16));
     for (int r = 0; r < 4; r++) {
@@ -590,7 +588,7 @@ void main() {
 
   Matcher notCloseToTransform(Float64List expected) => (dynamic v) {
     Expect.type<Float64List>(v);
-    final Float64List value = v;
+    final Float64List value = v as Float64List;
     expect(expected.length, equals(16));
     expect(value.length, equals(16));
     for (int r = 0; r < 4; r++) {
@@ -672,7 +670,7 @@ void main() {
 
   Matcher closeToRect(Rect expected) => (dynamic v) {
     Expect.type<Rect>(v);
-    final Rect value = v;
+    final Rect value = v as Rect;
     expect(value.left,   closeTo(expected.left,   1e-6));
     expect(value.top,    closeTo(expected.top,    1e-6));
     expect(value.right,  closeTo(expected.right,  1e-6));
@@ -681,7 +679,7 @@ void main() {
 
   Matcher notCloseToRect(Rect expected) => (dynamic v) {
     Expect.type<Rect>(v);
-    final Rect value = v;
+    final Rect value = v as Rect;
     if ((value.left - expected.left).abs() > 1e-6 ||
         (value.top - expected.top).abs() > 1e-6 ||
         (value.right - expected.right).abs() > 1e-6 ||
