@@ -32,6 +32,9 @@ enum AnimationStatus {
 /// Signature for listeners attached using [Animation.addStatusListener].
 typedef AnimationStatusListener = void Function(AnimationStatus status);
 
+/// Signature for method used to transform values in [Animation.fromValueListenable].
+typedef ValueListenableTransformer<T> = T Function(T);
+
 /// An animation with a value of type `T`.
 ///
 /// An animation consists of a value (of type `T`) together with a status. The
@@ -55,6 +58,15 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Animation();
+
+  /// Create a new animation from a [ValueListenable].
+  ///
+  /// The returned animation will always have an animations status of
+  /// [AnimationStatus.forward]. The value of the provided listenable can
+  /// be optionally transformed using the [transformer] function.
+  factory Animation.fromValueListenable(ValueListenable<T> listenable, {
+    ValueListenableTransformer<T>? transformer,
+  }) = _ValueListenableDelegateAnimation<T>;
 
   // keep these next five dartdocs in sync with the dartdocs in AnimationWithParentMixin<T>
 
@@ -206,4 +218,39 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
         return '\u23EE'; // |<<
     }
   }
+}
+
+// An implementation of an animation that delegates to a value listenable with a fixed direction.
+class _ValueListenableDelegateAnimation<T> extends Animation<T> {
+  _ValueListenableDelegateAnimation(this._listenable, { ValueListenableTransformer<T>? transformer })
+    : _transformer = transformer;
+
+  final ValueListenable<T> _listenable;
+  final ValueListenableTransformer<T>? _transformer;
+
+  @override
+  void addListener(VoidCallback listener) {
+    _listenable.addListener(listener);
+  }
+
+  @override
+  void addStatusListener(AnimationStatusListener listener) {
+    // status will never change.
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _listenable.removeListener(listener);
+  }
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    // status will never change.
+  }
+
+  @override
+  AnimationStatus get status => AnimationStatus.forward;
+
+  @override
+  T get value => _transformer?.call(_listenable.value) ?? _listenable.value;
 }
