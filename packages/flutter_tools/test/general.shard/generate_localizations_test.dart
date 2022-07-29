@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -910,6 +913,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title => 'Title';
 }
 ''');
+    });
+
+    testUsingContext('files well formatted', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      // Test without headers.
+      await generateLocalizations(
+        fileSystem: fs,
+        options: LocalizationOptions(
+          arbDirectory: Uri.directory(defaultL10nPathString),
+          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+          useSyntheticPackage: false,
+        ),
+        logger: BufferLogger.test(),
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+      );
+
+      final File file = fs.file('/lib/l10n/app_localizations_en.dart');
+      final String original = fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync();
+
+      final Process process = await Process.start(
+        globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+        <String>['format', '--output=show', file.path],
+        workingDirectory: fs.currentDirectory.path,
+      );
+      final String formatted = await process.stdout.transform(utf8.decoder).join();
+      expect(formatted, original);
     });
   });
 
