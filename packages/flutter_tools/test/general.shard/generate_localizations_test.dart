@@ -916,32 +916,44 @@ class AppLocalizationsEn extends AppLocalizations {
     });
 
     testUsingContext('files well formatted', () async {
-      _standardFlutterDirectoryL10nSetup(fs);
+      // Use a physical file system to make generated files format-able.
+      final FileSystem fs = globals.fs;
+      final Directory projectDir = fs.systemTempDirectory.createTempSync(
+        'flutter_tools_generate_localizations_test.',
+      );
+      final String l10nPathString = fs.path.join(projectDir.path, 'lib', 'l10n');
+      final Directory l10nDirectory = fs.directory(l10nPathString);
+      l10nDirectory
+        ..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+        ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
       // Test without headers.
       await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
-          arbDirectory: Uri.directory(defaultL10nPathString),
-          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+          arbDirectory: Uri.directory(l10nPathString),
+          outputDirectory: Uri.directory(l10nPathString, windows: false),
           templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
           useSyntheticPackage: false,
         ),
         logger: BufferLogger.test(),
-        projectDir: fs.currentDirectory,
-        dependenciesDir: fs.currentDirectory,
+        projectDir: projectDir,
+        dependenciesDir: projectDir,
       );
 
-      final File file = fs.file('/lib/l10n/app_localizations_en.dart');
-      final String original = fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync();
-
-      final Process process = await Process.start(
-        globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
-        <String>['format', '--output=show', file.path],
-        workingDirectory: fs.currentDirectory.path,
-      );
-      final String formatted = await process.stdout.transform(utf8.decoder).join();
-      expect(formatted, original);
+      for (final FileSystemEntity file in l10nDirectory.listSync()) {
+        if (file is File && file.basename.endsWith('.dart')) {
+          final String original = file.readAsStringSync();
+          final Process process = await Process.start(
+            globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+            <String>['format', '--output=show', file.path],
+            workingDirectory: l10nDirectory.path,
+          );
+          final String formatted = await process.stdout.transform(utf8.decoder).join();
+          expect(formatted, contains(original), reason: file.path);
+        }
+      }
     });
   });
 
