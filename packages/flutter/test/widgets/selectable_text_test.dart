@@ -177,12 +177,6 @@ void main() {
   }
 
   testWidgets('throw if no Overlay widget exists above', (WidgetTester tester) async {
-    final FlutterExceptionHandler? handler = FlutterError.onError;
-    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    FlutterError.onError = (FlutterErrorDetails details) {
-      errors.add(details);
-    };
-
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -203,14 +197,14 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    await tester.pumpWidget(const SizedBox.shrink());
-    FlutterError.onError = handler;
-
-    final FlutterError error = errors[0].exception as FlutterError;
+    final FlutterError error = tester.takeException() as FlutterError;
     expect(
       error.message,
       contains('No Overlay widget exists above EditableText'),
     );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNotNull);  // side effect exception
   });
 
   testWidgets('Do not crash when remove SelectableText during handle drag', (WidgetTester tester) async {
