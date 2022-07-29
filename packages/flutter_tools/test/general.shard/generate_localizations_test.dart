@@ -928,13 +928,13 @@ class AppLocalizationsEn extends AppLocalizations {
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
         ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-      // Test without headers.
+      final bool isWindows = globals.platform.isWindows;
       await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
-          arbDirectory: Uri.directory(l10nPathString),
-          outputDirectory: Uri.directory(l10nPathString, windows: false),
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+          arbDirectory: Uri.directory(l10nPathString, windows: isWindows),
+          outputDirectory: Uri.directory(l10nPathString, windows: isWindows),
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: isWindows),
           useSyntheticPackage: false,
         ),
         logger: BufferLogger.test(),
