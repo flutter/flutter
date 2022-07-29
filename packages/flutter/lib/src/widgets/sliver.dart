@@ -15,7 +15,8 @@ import 'selection_container.dart';
 export 'package:flutter/rendering.dart' show
   SliverGridDelegate,
   SliverGridDelegateWithFixedCrossAxisCount,
-  SliverGridDelegateWithMaxCrossAxisExtent;
+  SliverGridDelegateWithMaxCrossAxisExtent,
+  SliverGridLayoutType;
 
 // Examples can assume:
 // late SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
@@ -1158,14 +1159,14 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
 ///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
-class SliverGrid extends SliverMultiBoxAdaptorWidget {
+class SliverGrid extends StatelessWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
   const SliverGrid({
     super.key,
-    required super.delegate,
+    required this.delegate,
     required this.gridDelegate,
-  });
+  }) : children = null;
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with a fixed number of tiles in the cross axis.
@@ -1182,14 +1183,13 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
-    List<Widget> children = const <Widget>[],
+    this.children = const <Widget>[],
   }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-         crossAxisCount: crossAxisCount,
-         mainAxisSpacing: mainAxisSpacing,
-         crossAxisSpacing: crossAxisSpacing,
-         childAspectRatio: childAspectRatio,
-       ),
-       super(delegate: SliverChildListDelegate(children));
+    crossAxisCount: crossAxisCount,
+    mainAxisSpacing: mainAxisSpacing,
+    crossAxisSpacing: crossAxisSpacing,
+    childAspectRatio: childAspectRatio,
+  ), delegate = null;
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with tiles that each have a maximum cross-axis extent.
@@ -1206,14 +1206,53 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
-    List<Widget> children = const <Widget>[],
+    this.children = const <Widget>[],
   }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-         maxCrossAxisExtent: maxCrossAxisExtent,
-         mainAxisSpacing: mainAxisSpacing,
-         crossAxisSpacing: crossAxisSpacing,
-         childAspectRatio: childAspectRatio,
-       ),
-       super(delegate: SliverChildListDelegate(children));
+    maxCrossAxisExtent: maxCrossAxisExtent,
+    mainAxisSpacing: mainAxisSpacing,
+    crossAxisSpacing: crossAxisSpacing,
+    childAspectRatio: childAspectRatio,
+  ), delegate = null;
+
+  /// Add templated docs here for super class: SliverMultiBoxAdaptorWidget.delgate
+  final SliverChildDelegate? delegate;
+
+  /// Add docs
+  final List<Widget>? children;
+
+  /// The delegate that controls the size and position of the children.
+  final SliverGridDelegate gridDelegate;
+
+  @override
+  Widget build(BuildContext context) {
+    late final SliverChildDelegate effectiveDelegate;
+    // Adds more docs and assertions around this. This is designed to maintain
+    // a const constructor.
+    if (children != null && delegate == null) {
+      effectiveDelegate = SliverChildListDelegate(children!);
+    } else {
+      assert(delegate != null);
+      effectiveDelegate = delegate!;
+    }
+    switch(gridDelegate.layoutType) {
+
+      case SliverGridLayoutType.fixed:
+        return _FixedSliverGrid(delegate: effectiveDelegate, gridDelegate: gridDelegate);
+      case SliverGridLayoutType.dynamic:
+        return _DynamicSliverGrid(delegate: effectiveDelegate, gridDelegate: gridDelegate);
+    }
+  }
+}
+
+// Renders a fixed grid, having a benefited performance over dynamic grid for
+// knowing the full layout ahead of time.
+class _FixedSliverGrid extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement.
+  const _FixedSliverGrid({
+    required super.delegate,
+    required this.gridDelegate,
+  });
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
@@ -1237,6 +1276,46 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double leadingScrollOffset,
     double trailingScrollOffset,
   ) {
+    return super.estimateMaxScrollOffset(
+      constraints,
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset,
+    ) ?? gridDelegate.getLayout(constraints!).computeMaxScrollOffset(delegate.estimatedChildCount!);
+  }
+}
+
+class _DynamicSliverGrid extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement.
+  const _DynamicSliverGrid({
+    required super.delegate,
+    required this.gridDelegate,
+  });
+
+  /// The delegate that controls the size and position of the children.
+  final SliverGridDelegate gridDelegate;
+
+  @override
+  RenderDynamicSliverGrid createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    return RenderDynamicSliverGrid(childManager: element, gridDelegate: gridDelegate);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDynamicSliverGrid renderObject) {
+    renderObject.gridDelegate = gridDelegate;
+  }
+
+  @override
+  double estimateMaxScrollOffset(
+      SliverConstraints? constraints,
+      int firstIndex,
+      int lastIndex,
+      double leadingScrollOffset,
+      double trailingScrollOffset,
+      ) {
     return super.estimateMaxScrollOffset(
       constraints,
       firstIndex,
