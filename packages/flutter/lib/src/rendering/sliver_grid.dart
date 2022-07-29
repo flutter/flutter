@@ -454,10 +454,10 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   @override
   bool shouldRelayout(SliverGridDelegateWithFixedCrossAxisCount oldDelegate) {
     return oldDelegate.crossAxisCount != crossAxisCount
-      || oldDelegate.mainAxisSpacing != mainAxisSpacing
-      || oldDelegate.crossAxisSpacing != crossAxisSpacing
-      || oldDelegate.childAspectRatio != childAspectRatio
-      || oldDelegate.mainAxisExtent != mainAxisExtent;
+        || oldDelegate.mainAxisSpacing != mainAxisSpacing
+        || oldDelegate.crossAxisSpacing != crossAxisSpacing
+        || oldDelegate.childAspectRatio != childAspectRatio
+        || oldDelegate.mainAxisExtent != mainAxisExtent;
   }
 }
 
@@ -567,10 +567,10 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   @override
   bool shouldRelayout(SliverGridDelegateWithMaxCrossAxisExtent oldDelegate) {
     return oldDelegate.maxCrossAxisExtent != maxCrossAxisExtent
-      || oldDelegate.mainAxisSpacing != mainAxisSpacing
-      || oldDelegate.crossAxisSpacing != crossAxisSpacing
-      || oldDelegate.childAspectRatio != childAspectRatio
-      || oldDelegate.mainAxisExtent != mainAxisExtent;
+        || oldDelegate.mainAxisSpacing != mainAxisSpacing
+        || oldDelegate.crossAxisSpacing != crossAxisSpacing
+        || oldDelegate.childAspectRatio != childAspectRatio
+        || oldDelegate.mainAxisExtent != mainAxisExtent;
   }
 }
 
@@ -609,7 +609,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     required super.childManager,
     required SliverGridDelegate gridDelegate,
   }) : assert(gridDelegate != null),
-        _gridDelegate = gridDelegate;
+       _gridDelegate = gridDelegate;
 
   @override
   void setupParentData(RenderObject child) {
@@ -655,15 +655,15 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     final int firstIndex = layout.getMinChildIndexForScrollOffset(scrollOffset);
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
-    layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset) : null;
+      layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset) : null;
 
     if (firstChild != null) {
       final int oldFirstIndex = indexOf(firstChild!);
       final int oldLastIndex = indexOf(lastChild!);
       final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount); // ignore_clamp_double_lint
       final int trailingGarbage = targetLastIndex == null
-          ? 0
-          : (oldLastIndex - targetLastIndex).clamp(0, childCount); // ignore_clamp_double_lint
+        ? 0
+        : (oldLastIndex - targetLastIndex).clamp(0, childCount); // ignore_clamp_double_lint
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
