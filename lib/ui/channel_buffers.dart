@@ -246,15 +246,13 @@ class _Channel {
 /// message overflows, in debug mode, a message is printed to the
 /// console. The message looks like the following:
 ///
-/// ```
-/// A message on the com.example channel was discarded before it could be
-/// handled.
-/// This happens when a plugin sends messages to the framework side before the
-/// framework has had an opportunity to register a listener. See the
-/// ChannelBuffers API documentation for details on how to configure the channel
-/// to expect more messages, or to expect messages to get discarded:
-///   https://api.flutter.dev/flutter/dart-ui/ChannelBuffers-class.html
-/// ```
+/// > A message on the com.example channel was discarded before it could be
+/// > handled.
+/// > This happens when a plugin sends messages to the framework side before the
+/// > framework has had an opportunity to register a listener. See the
+/// > ChannelBuffers API documentation for details on how to configure the channel
+/// > to expect more messages, or to expect messages to get discarded:
+/// >   https://api.flutter.dev/flutter/dart-ui/ChannelBuffers-class.html
 ///
 /// There are tradeoffs associated with any size. The correct size
 /// should be chosen for the semantics of the channel. To change the

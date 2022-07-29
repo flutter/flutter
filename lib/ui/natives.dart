@@ -100,7 +100,7 @@ void _setupHooks() {
 ///
 /// Here are some examples:
 ///
-/// ```
+/// ```csv
 /// dart:core,Duration,get:inMilliseconds
 /// package:flutter/src/widgets/binding.dart,::,runApp
 /// file:///.../my_app.dart,::,main
@@ -135,6 +135,6 @@ typedef _ScheduleImmediateClosure = void Function(void Function());
 _ScheduleImmediateClosure _getScheduleMicrotaskClosure() => _scheduleMicrotask;
 
 // Used internally to indicate whether the Engine is using Impeller for
-// rendering
+// rendering.
 @pragma('vm:entry-point')
 bool _impellerEnabled = false;
