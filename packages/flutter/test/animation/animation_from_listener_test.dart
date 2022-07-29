@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   test('Animation created from ValueListenable', () {
     final ValueNotifier<double> listenable = ValueNotifier<double>(0.0);
     final Animation<double> animation = Animation<double>.fromValueListenable(listenable);

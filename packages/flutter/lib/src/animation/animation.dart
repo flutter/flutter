@@ -64,6 +64,42 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// The returned animation will always have an animations status of
   /// [AnimationStatus.forward]. The value of the provided listenable can
   /// be optionally transformed using the [transformer] function.
+  ///
+  /// {@tool snippet}
+  ///
+  /// This constructor can be used to replace instances of [ValueListenableBuilder]
+  /// widgets with a corresponding animated widget, like a [FadeTransition].
+  ///
+  /// Before:
+  ///
+  /// ```dart
+  /// ValueNotifier<double> get scrollPosition;
+  ///
+  /// return ValueListenableBuilder<double>(
+  ///   valueListenable: scrollPosition,
+  ///   builder: (BuildContext context, double value, Widget child) {
+  ///     double opacity = (value / 1000).clamp(0, 1);
+  ///     return Opacity(opacity: opacity, child: child);
+  ///   },
+  ///   child: Container(
+  ///     child: Text('Hello, Animation'),
+  ///   ),
+  /// ```
+  ///
+  /// After:
+  ///
+  /// ```dart
+  /// ValueNotifier<double> get scrollPosition;
+  ///
+  /// return FadeTransition(
+  ///   opacity: Animation.fromValueListenable(scrollPosition, transformer: (double value) {
+  ///     return (value / 1000).clamp(0, 1);
+  ///   })
+  ///   child: Container(
+  ///     child: Text('Hello, Animation'),
+  ///   ),
+  /// ```
+  /// {@end-tool}
   factory Animation.fromValueListenable(ValueListenable<T> listenable, {
     ValueListenableTransformer<T>? transformer,
   }) = _ValueListenableDelegateAnimation<T>;
