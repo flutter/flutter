@@ -81,11 +81,14 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.background,
     this.centerTitle,
     this.titlePadding,
+    this.backgroundBuilder,
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
     this.expandedTitleScale = 1.5,
   }) : assert(collapseMode != null),
-       assert(expandedTitleScale >= 1);
+       assert(expandedTitleScale >= 1),
+       assert(background == null || backgroundBuilder == null,
+       'Cannot provide both a background and a backgroundBuilder');
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -96,6 +99,12 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
   final Widget? background;
+
+  /// Shown behind the [title] when expanded.
+  ///
+  /// Compared to `background`, can build background widget more flexibly.
+  final Widget Function(BuildContext context, FlexibleSpaceBarSettings settings,
+      BoxConstraints constraints)? backgroundBuilder;
 
   /// Whether the title should be centered.
   ///
@@ -237,7 +246,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final double t = clampDouble(1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent, 0.0, 1.0);
 
         // background
-        if (widget.background != null) {
+        if (widget.background != null || widget.backgroundBuilder != null) {
           final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
@@ -263,7 +272,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               // through the app bar when it is collapsed.
               alwaysIncludeSemantics: true,
               opacity: opacity,
-              child: widget.background,
+              child: widget.background ??
+                  widget.backgroundBuilder!(context, settings, constraints),
             ),
           ));
 

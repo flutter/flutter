@@ -12,6 +12,31 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('FlexibleSpaceBar use backgroundBuilder build background', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 300,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text('Title'),
+              backgroundBuilder: (BuildContext context,
+                  FlexibleSpaceBarSettings settings,
+                  BoxConstraints constraints){
+                return const Text('Background');
+              },
+              collapseMode: CollapseMode.pin,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder background = find.text('Background');
+    expect(background.precache(), true);
+  });
+
+
   testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
