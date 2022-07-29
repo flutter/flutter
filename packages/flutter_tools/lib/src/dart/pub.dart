@@ -67,29 +67,16 @@ Directory createDependencyDirectory(Directory pubGlobalDirectory, String depende
   return newDirectory;
 }
 
-void tryDeleteCache(String dependencyBaseName, Directory globalCachePub, Logger logger) {
-  final Directory dependency = globalCachePub.childDirectory(dependencyBaseName);
-  if (dependency.existsSync()) {
-    try {
-      globalCachePub.childDirectory(dependencyBaseName).deleteSync(recursive: true);
-    }
-    on FileSystemException {
-      throwToolExit('FileSystemException found while deleting a directory, '
-        'try running "flutter pub cache repair"'
-      );
-    }
-  }
-  logger.printWarning('The join of pub-caches failed');
-}
-
-void tryToDeleteLocalCache(Directory localCache, Logger logger) {
+bool tryDelete(Directory directory, Logger logger) {
   try {
-    if (localCache.existsSync()) {
-      localCache.deleteSync(recursive: true);
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
     }
   } on FileSystemException {
-    logger.printWarning('Failed to delete local cache on : ${localCache.path}');
+    logger.printWarning('Failed to delete directory at: ${directory.path}');
+    return false;
   }
+  return true;
 }
 
 /// When local cache (flutter_root/.pub-cache) and global cache (HOME/.pub-cache) are present a
@@ -614,11 +601,15 @@ class _DefaultPub implements Pub {
               dependencyDirectory: entity,
             );
           } on FileSystemException {
-            tryDeleteCache(entity.basename, globalDirectoryPub, _logger);
+            if (!tryDelete(globalDirectoryPub.childDirectory(entity.basename), _logger)) {
+              _logger.printWarning('The join of pub-caches failed');
+              _logger.printStatus('Running "dart pub cache repair"');
+              _processManager.runSync(<String>['dart', 'pub', 'cache', 'repair']);
+            }
           }
         }
       }
-      tryToDeleteLocalCache(_fileSystem.directory(localCachePath), _logger);
+      tryDelete(_fileSystem.directory(localCachePath), _logger);
       return globalDirectory.path;
     } else if (globalDirectory != null && globalDirectory.existsSync()) {
       return globalDirectory.path;
