@@ -12,6 +12,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -336,6 +337,7 @@ ContextVK::ContextVK(
   }
 
   auto allocator = std::shared_ptr<AllocatorVK>(new AllocatorVK(
+      *this,                             //
       application_info.apiVersion,       //
       physical_device.value(),           //
       device.value.get(),                //
