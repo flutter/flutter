@@ -571,7 +571,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
   /// null.
   ///
-  /// If the order of children` never changes, consider using the constant
+  /// If the order of children never changes, consider using the constant
   /// [SliverChildListDelegate.fixed] constructor.
   SliverChildListDelegate(
     this.children, {
