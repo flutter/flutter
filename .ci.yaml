@@ -306,6 +306,8 @@ targets:
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
+    enabled_branches:
+      - master
     timeout: 60
     properties:
       shard: flutter_plugins
@@ -1377,7 +1379,6 @@ targets:
   - name: Linux_android color_filter_with_unstable_child_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1996,7 +1997,6 @@ targets:
 
   - name: Linux_android new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2250,27 +2250,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
-
-  - name: Linux_android android_lifecycles_test
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: android_lifecycles_test
-
-  - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      openpay: "true"
-      tags: >
-        ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
-      task_name: openpay_benchmarks__scroll_perf
 
   - name: Staging_build_linux analyze
     presubmit: false
@@ -3514,6 +3493,8 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"}
         ]
       tags: >
@@ -3695,7 +3676,6 @@ targets:
       - .ci.yaml
 
   - name: Windows gradle_plugin_bundle_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/108020
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:

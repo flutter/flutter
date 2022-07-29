@@ -99,7 +99,7 @@ linter:
     # - conditional_uri_does_not_exist # not yet tested
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
-    # - curly_braces_in_flow_control_structures # not required by flutter style, but developer-facing code should have this on
+    - curly_braces_in_flow_control_structures
     - depend_on_referenced_packages
     - deprecated_consistency
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)

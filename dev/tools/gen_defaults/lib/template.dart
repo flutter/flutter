@@ -121,8 +121,9 @@ abstract class TokenTemplate {
   ///   * [color], that provides support for looking up a raw color token.
   String componentColor(String componentToken) {
     final String colorToken = '$componentToken.color';
-    if (!tokens.containsKey(colorToken))
+    if (!tokens.containsKey(colorToken)) {
       return 'null';
+    }
     String value = color(colorToken);
     final String opacityToken = '$componentToken.opacity';
     if (tokens.containsKey(opacityToken)) {
