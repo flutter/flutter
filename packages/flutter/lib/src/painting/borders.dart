@@ -133,7 +133,7 @@ class BorderSide with Diagnosticable {
   static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
 
   /// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
-  /// When set to [StrokeAlign.inside], the stroke is drawn completely inside the widget.
+  /// When set to [strokeAlignInside], the stroke is drawn completely inside the widget.
   /// For [strokeAlignCenter] and [strokeAlignOutside], a property such as [Container.clipBehavior]
   /// can be used in an outside widget to clip it.
   /// If [Container.decoration] has a border, the container may incorporate
