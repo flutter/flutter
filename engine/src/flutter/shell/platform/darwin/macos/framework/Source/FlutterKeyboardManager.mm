@@ -196,12 +196,6 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
 }
 
 - (void)performProcessEvent:(NSEvent*)event onFinish:(VoidBlock)onFinish {
-  if (_viewDelegate.isComposing) {
-    [self dispatchTextEvent:event];
-    onFinish();
-    return;
-  }
-
   // Having no primary responders require extra logic, but Flutter hard-codes
   // all primary responders, so this is a situation that Flutter will never
   // encounter.
