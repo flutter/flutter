@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
@@ -785,7 +786,7 @@ void main() {
   });
 
   group('generateLocalizations', () {
-    testWithoutContext('forwards arguments correctly', () async {
+    testUsingContext('forwards arguments correctly', () async {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationOptions options = LocalizationOptions(
         header: 'HEADER',
@@ -842,7 +843,7 @@ class FooEn extends Foo {
 ''');
     });
 
-    testWithoutContext('throws exception on missing flutter: generate: true flag', () async {
+    testUsingContext('throws exception on missing flutter: generate: true flag', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Missing flutter: generate: true should throw exception.
@@ -880,7 +881,7 @@ flutter:
       );
     });
 
-    testWithoutContext('blank lines generated nicely', () async {
+    testUsingContext('blank lines generated nicely', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Test without headers.
