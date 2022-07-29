@@ -2260,16 +2260,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
-  - name: Linux_android android_lifecycles_test
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: android_lifecycles_test
-
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
