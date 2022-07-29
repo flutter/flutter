@@ -12,10 +12,10 @@ import 'package:flutter/widgets.dart';
 ///
 /// Specifically, the [CupertinoTextMagnifier] follows the following rules.
 /// [CupertinoTextMagnifier]:
-/// - is positioned horizontally outside the screen width, with _kHorizontalScreenEdgePadding padding.
+/// - is positioned horizontally outside the screen width, with [horizontalScreenEdgePadding] padding.
 /// - is hidden if a gesture is detected [hideBelowThreshold] units below the line
 ///   that the magnifier is on, shown otherwise.
-/// - follows the X coordinate of the gesture directly (with respect to rule 1).
+/// - follows the x coordinate of the gesture directly (with respect to rule 1).
 /// - has some vertical drag resistance; i.e. if a gesture is detected k units below the field,
 ///   then has vertical offset [dragResistance] * k.
 class CupertinoTextMagnifier extends StatefulWidget {

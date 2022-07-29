@@ -227,7 +227,7 @@ void main() {
               MediaQuery.of(context).size.width / 2, reasonableTextField.top),
         ));
 
-        // Show the magnifier initally, so that we get it in a not hidden state
+        // Show the magnifier initally, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.

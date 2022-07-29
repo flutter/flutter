@@ -84,7 +84,7 @@ class MagnifierController {
   ///
   /// A null check on [overlayEntry] will not suffice to check if a magnifier is in the
   /// overlay or not; instead, you should check [shown]. This is because it is possible,
-  /// such as in cases where [hide] was called with removeFromOverlay false, that the magnifier
+  /// such as in cases where [hide] was called with `removeFromOverlay` false, that the magnifier
   /// is not shown, but the entry is not null.
   OverlayEntry? overlayEntry;
 
@@ -379,7 +379,7 @@ class _MagnifierStyle extends StatelessWidget {
   }
 }
 
-/// A clipPath that looks like a donut if you were to fill its area.
+/// A `clipPath` that looks like a donut if you were to fill its area.
 ///
 /// This is necessary because the shadow must be added after the magnifier is drawn,
 /// so that the shadow does not end up in the magnifier. Without this clip, the magnifier would be
