@@ -25,13 +25,13 @@ namespace flutter {
 // This implementation wraps the Win32 IMM32 APIs and provides a mechanism for
 // creating and positioning the IME window, a system caret, and the candidates
 // list as well as for accessing composing and results string contents.
-class TextInputManagerWin32 {
+class TextInputManager {
  public:
-  TextInputManagerWin32() noexcept = default;
-  virtual ~TextInputManagerWin32() = default;
+  TextInputManager() noexcept = default;
+  virtual ~TextInputManager() = default;
 
-  TextInputManagerWin32(const TextInputManagerWin32&) = delete;
-  TextInputManagerWin32& operator=(const TextInputManagerWin32&) = delete;
+  TextInputManager(const TextInputManager&) = delete;
+  TextInputManager& operator=(const TextInputManager&) = delete;
 
   // Sets the window handle with which the IME is associated.
   void SetWindowHandle(HWND window_handle);

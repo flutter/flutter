@@ -2,27 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/window_proc_delegate_manager_win32.h"
+#include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
-WindowProcDelegateManagerWin32::WindowProcDelegateManagerWin32() = default;
-WindowProcDelegateManagerWin32::~WindowProcDelegateManagerWin32() = default;
+WindowProcDelegateManager::WindowProcDelegateManager() = default;
+WindowProcDelegateManager::~WindowProcDelegateManager() = default;
 
-void WindowProcDelegateManagerWin32::RegisterTopLevelWindowProcDelegate(
+void WindowProcDelegateManager::RegisterTopLevelWindowProcDelegate(
     FlutterDesktopWindowProcCallback delegate,
     void* user_data) {
   top_level_window_proc_handlers_[delegate] = user_data;
 }
 
-void WindowProcDelegateManagerWin32::UnregisterTopLevelWindowProcDelegate(
+void WindowProcDelegateManager::UnregisterTopLevelWindowProcDelegate(
     FlutterDesktopWindowProcCallback delegate) {
   top_level_window_proc_handlers_.erase(delegate);
 }
 
-std::optional<LRESULT> WindowProcDelegateManagerWin32::OnTopLevelWindowProc(
+std::optional<LRESULT> WindowProcDelegateManager::OnTopLevelWindowProc(
     HWND hwnd,
     UINT message,
     WPARAM wparam,

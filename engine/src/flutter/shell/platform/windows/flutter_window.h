@@ -23,12 +23,12 @@ namespace flutter {
 // the future, there will likely be a CoreWindow-based FlutterWindow as well.
 // At the point may make sense to dependency inject the native window rather
 // than inherit.
-class FlutterWindowWin32 : public Window, public WindowBindingHandler {
+class FlutterWindow : public Window, public WindowBindingHandler {
  public:
   // Create flutter Window for use as child window
-  FlutterWindowWin32(int width, int height);
+  FlutterWindow(int width, int height);
 
-  virtual ~FlutterWindowWin32();
+  virtual ~FlutterWindow();
 
   // |Window|
   void OnDpiScale(unsigned int dpi) override;

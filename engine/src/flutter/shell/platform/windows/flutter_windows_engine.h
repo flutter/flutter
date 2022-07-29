@@ -22,7 +22,7 @@
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/settings_plugin.h"
 #include "flutter/shell/platform/windows/task_runner.h"
-#include "flutter/shell/platform/windows/window_proc_delegate_manager_win32.h"
+#include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 #include "flutter/shell/platform/windows/window_state.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
 
@@ -124,7 +124,7 @@ class FlutterWindowsEngine {
     return accessibility_bridge_;
   }
 
-  WindowProcDelegateManagerWin32* window_proc_delegate_manager() {
+  WindowProcDelegateManager* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
   }
 
@@ -263,7 +263,7 @@ class FlutterWindowsEngine {
   std::shared_ptr<AccessibilityBridge> accessibility_bridge_;
 
   // The manager for WindowProc delegate registration and callbacks.
-  std::unique_ptr<WindowProcDelegateManagerWin32> window_proc_delegate_manager_;
+  std::unique_ptr<WindowProcDelegateManager> window_proc_delegate_manager_;
 };
 
 }  // namespace flutter

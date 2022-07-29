@@ -9,22 +9,21 @@
 #include <cstring>
 #include <optional>
 
-#include "flutter/shell/platform/windows/text_input_manager_win32.h"
+#include "flutter/shell/platform/windows/text_input_manager.h"
 #include "gmock/gmock.h"
 
 namespace flutter {
 namespace testing {
 
 /// Mock for the |Window| base class.
-class MockTextInputManagerWin32 : public TextInputManagerWin32 {
+class MockTextInputManager : public TextInputManager {
  public:
-  MockTextInputManagerWin32();
-  virtual ~MockTextInputManagerWin32();
+  MockTextInputManager();
+  virtual ~MockTextInputManager();
 
   // Prevent copying.
-  MockTextInputManagerWin32(MockTextInputManagerWin32 const&) = delete;
-  MockTextInputManagerWin32& operator=(MockTextInputManagerWin32 const&) =
-      delete;
+  MockTextInputManager(MockTextInputManager const&) = delete;
+  MockTextInputManager& operator=(MockTextInputManager const&) = delete;
 
   MOCK_CONST_METHOD0(GetComposingString, std::optional<std::u16string>());
   MOCK_CONST_METHOD0(GetResultString, std::optional<std::u16string>());
