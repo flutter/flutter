@@ -13,6 +13,7 @@ export 'tween.dart' show Animatable;
 
 // Examples can assume:
 // late AnimationController _controller;
+// late ValueNotifier<double> _scrollPosition
 
 /// The status of an animation.
 enum AnimationStatus {
@@ -73,16 +74,14 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Before:
   ///
   /// ```dart
-  /// ValueNotifier<double> get scrollPosition;
-  ///
   /// return ValueListenableBuilder<double>(
-  ///   valueListenable: scrollPosition,
-  ///   builder: (BuildContext context, double value, Widget child) {
-  ///     double opacity = (value / 1000).clamp(0, 1);
+  ///   valueListenable: _scrollPosition,
+  ///   builder: (BuildContext context, double value, Widget? child) {
+  ///     final double opacity = (value / 1000).clamp(0, 1);
   ///     return Opacity(opacity: opacity, child: child);
   ///   },
   ///   child: Container(
-  ///     child: Text('Hello, Animation'),
+  ///     child: const Text('Hello, Animation'),
   ///   ),
   /// );
   /// ```
@@ -90,14 +89,12 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// After:
   ///
   /// ```dart
-  /// ValueNotifier<double> get scrollPosition;
-  ///
   /// return FadeTransition(
-  ///   opacity: Animation.fromValueListenable(scrollPosition, transformer: (double value) {
+  ///   opacity: Animation.fromValueListenable(_scrollPosition, transformer: (double value) {
   ///     return (value / 1000).clamp(0, 1);
   ///   })
   ///   child: Container(
-  ///     child: Text('Hello, Animation'),
+  ///     child: const Text('Hello, Animation'),
   ///   ),
   /// );
   /// ```
