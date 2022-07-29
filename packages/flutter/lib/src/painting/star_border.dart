@@ -167,18 +167,6 @@ class StarBorder extends OutlinedBorder {
   final double squash;
 
   @override
-  EdgeInsetsGeometry get dimensions {
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        return EdgeInsets.all(side.width);
-      case StrokeAlign.center:
-        return EdgeInsets.all(side.width / 2);
-      case StrokeAlign.outside:
-        return EdgeInsets.zero;
-    }
-  }
-
-  @override
   ShapeBorder scale(double t) {
     return StarBorder(
       points: points,
@@ -388,18 +376,7 @@ class StarBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    final Rect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = rect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = rect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = rect;
-        break;
-    }
+    final Rect adjustedRect = rect.deflate(side.strokeInset);
     return _StarGenerator(
       points: points,
       rotation: _rotationRadians,
@@ -428,18 +405,7 @@ class StarBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Rect adjustedRect;
-        switch (side.strokeAlign) {
-          case StrokeAlign.inside:
-            adjustedRect = rect.deflate(side.width / 2);
-            break;
-          case StrokeAlign.center:
-            adjustedRect = rect;
-            break;
-          case StrokeAlign.outside:
-            adjustedRect = rect.inflate(side.width / 2);
-            break;
-        }
+        final Rect adjustedRect = rect.inflate(side.strokeOffset / 2);
         final Path path = _StarGenerator(
           points: points,
           rotation: _rotationRadians,
