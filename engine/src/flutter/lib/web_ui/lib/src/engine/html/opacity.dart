@@ -12,8 +12,7 @@ import 'surface.dart';
 /// A surface that makes its children transparent.
 class PersistedOpacity extends PersistedContainerSurface
     implements ui.OpacityEngineLayer {
-  PersistedOpacity(PersistedOpacity? oldLayer, this.alpha, this.offset)
-      : super(oldLayer);
+  PersistedOpacity(PersistedOpacity? super.oldLayer, this.alpha, this.offset);
 
   final int alpha;
   final ui.Offset offset;

@@ -18,7 +18,7 @@ void main() {
 Future<void> testMain() async {
   await initializeTestFlutterViewEmbedder();
   group('loadFontFromList', () {
-    const String _testFontUrl = '/assets/fonts/ahem.ttf';
+    const String testFontUrl = '/assets/fonts/ahem.ttf';
 
     tearDown(() {
       domDocument.fonts!.clear();
@@ -38,7 +38,7 @@ Future<void> testMain() async {
       expect(_containsFontFamily('Blehm'), isFalse);
 
       final DomXMLHttpRequest response = await domHttpRequest(
-          _testFontUrl,
+          testFontUrl,
           responseType: 'arraybuffer');
       await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
           fontFamily: 'Blehm');
@@ -64,7 +64,7 @@ Future<void> testMain() async {
       // Now, loads a new font using loadFontFromList. This should clear the
       // cache
       final DomXMLHttpRequest response = await domHttpRequest(
-          _testFontUrl,
+          testFontUrl,
           responseType: 'arraybuffer');
       await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
           fontFamily: 'Blehm');
@@ -91,7 +91,7 @@ Future<void> testMain() async {
         message = utf8.decode(list);
       };
       final DomXMLHttpRequest response = await domHttpRequest(
-          _testFontUrl,
+          testFontUrl,
           responseType: 'arraybuffer');
       await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
           fontFamily: 'Blehm');

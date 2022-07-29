@@ -11,7 +11,7 @@ import 'surface.dart';
 /// A surface that applies an [imageFilter] to its children.
 class PersistedImageFilter extends PersistedContainerSurface
     implements ui.ImageFilterEngineLayer {
-  PersistedImageFilter(PersistedImageFilter? oldLayer, this.filter) : super(oldLayer);
+  PersistedImageFilter(PersistedImageFilter? super.oldLayer, this.filter);
 
   final ui.ImageFilter filter;
 

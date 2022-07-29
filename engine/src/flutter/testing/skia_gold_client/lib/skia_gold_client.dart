@@ -86,8 +86,9 @@ class SkiaGoldClient {
   ///
   /// This ensures that the `goldctl` tool is authorized and ready for testing.
   Future<void> auth() async {
-    if (_isAuthorized)
+    if (_isAuthorized) {
       return;
+    }
     final List<String> authCommand = <String>[
       _goldctl,
       'auth',
@@ -380,8 +381,9 @@ class SkiaGoldClient {
         final HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
         final dynamic jsonResponse = json.decode(rawResponse);
-        if (jsonResponse is! Map<String, dynamic>)
+        if (jsonResponse is! Map<String, dynamic>) {
           throw const FormatException('Skia gold expectations do not match expected format.');
+        }
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
         print(

@@ -34,7 +34,7 @@ Future<void> testMain() async {
     final Image testImage = await createTestImageByColor(const Color(0xFFCCDD00));
 
     final ByteData bytes =
-        (await testImage.toByteData(format: ImageByteFormat.rawRgba))!;
+        (await testImage.toByteData())!;
     expect(
       bytes.buffer.asUint32List(),
       <int>[0xFF00DDCC, 0xFF00DDCC, 0xFF00DDCC, 0xFF00DDCC],

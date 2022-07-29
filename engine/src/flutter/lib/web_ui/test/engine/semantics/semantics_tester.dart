@@ -131,147 +131,147 @@ class SemanticsTester {
     List<SemanticsNodeUpdate>? children,
   }) {
     // Flags
-    if (hasCheckedState == true) {
+    if (hasCheckedState ?? false) {
       flags |= ui.SemanticsFlag.hasCheckedState.index;
     }
-    if (isChecked == true) {
+    if (isChecked ?? false) {
       flags |= ui.SemanticsFlag.isChecked.index;
     }
-    if (isSelected == true) {
+    if (isSelected ?? false) {
       flags |= ui.SemanticsFlag.isSelected.index;
     }
-    if (isButton == true) {
+    if (isButton ?? false) {
       flags |= ui.SemanticsFlag.isButton.index;
     }
-    if (isLink == true) {
+    if (isLink ?? false) {
       flags |= ui.SemanticsFlag.isLink.index;
     }
-    if (isTextField == true) {
+    if (isTextField ?? false) {
       flags |= ui.SemanticsFlag.isTextField.index;
     }
-    if (isReadOnly == true) {
+    if (isReadOnly ?? false) {
       flags |= ui.SemanticsFlag.isReadOnly.index;
     }
-    if (isFocusable == true) {
+    if (isFocusable ?? false) {
       flags |= ui.SemanticsFlag.isFocusable.index;
     }
-    if (isFocused == true) {
+    if (isFocused ?? false) {
       flags |= ui.SemanticsFlag.isFocused.index;
     }
-    if (hasEnabledState == true) {
+    if (hasEnabledState ?? false) {
       flags |= ui.SemanticsFlag.hasEnabledState.index;
     }
-    if (isEnabled == true) {
+    if (isEnabled ?? false) {
       flags |= ui.SemanticsFlag.isEnabled.index;
     }
-    if (isInMutuallyExclusiveGroup == true) {
+    if (isInMutuallyExclusiveGroup ?? false) {
       flags |= ui.SemanticsFlag.isInMutuallyExclusiveGroup.index;
     }
-    if (isHeader == true) {
+    if (isHeader ?? false) {
       flags |= ui.SemanticsFlag.isHeader.index;
     }
-    if (isObscured == true) {
+    if (isObscured ?? false) {
       flags |= ui.SemanticsFlag.isObscured.index;
     }
-    if (scopesRoute == true) {
+    if (scopesRoute ?? false) {
       flags |= ui.SemanticsFlag.scopesRoute.index;
     }
-    if (namesRoute == true) {
+    if (namesRoute ?? false) {
       flags |= ui.SemanticsFlag.namesRoute.index;
     }
-    if (isHidden == true) {
+    if (isHidden ?? false) {
       flags |= ui.SemanticsFlag.isHidden.index;
     }
-    if (isImage == true) {
+    if (isImage ?? false) {
       flags |= ui.SemanticsFlag.isImage.index;
     }
-    if (isLiveRegion == true) {
+    if (isLiveRegion ?? false) {
       flags |= ui.SemanticsFlag.isLiveRegion.index;
     }
-    if (hasToggledState == true) {
+    if (hasToggledState ?? false) {
       flags |= ui.SemanticsFlag.hasToggledState.index;
     }
-    if (isToggled == true) {
+    if (isToggled ?? false) {
       flags |= ui.SemanticsFlag.isToggled.index;
     }
-    if (hasImplicitScrolling == true) {
+    if (hasImplicitScrolling ?? false) {
       flags |= ui.SemanticsFlag.hasImplicitScrolling.index;
     }
-    if (isMultiline == true) {
+    if (isMultiline ?? false) {
       flags |= ui.SemanticsFlag.isMultiline.index;
     }
-    if (isSlider == true) {
+    if (isSlider ?? false) {
       flags |= ui.SemanticsFlag.isSlider.index;
     }
-    if (isKeyboardKey == true) {
+    if (isKeyboardKey ?? false) {
       flags |= ui.SemanticsFlag.isKeyboardKey.index;
     }
 
     // Actions
-    if (hasTap == true) {
+    if (hasTap ?? false) {
       actions |= ui.SemanticsAction.tap.index;
     }
-    if (hasLongPress == true) {
+    if (hasLongPress ?? false) {
       actions |= ui.SemanticsAction.longPress.index;
     }
-    if (hasScrollLeft == true) {
+    if (hasScrollLeft ?? false) {
       actions |= ui.SemanticsAction.scrollLeft.index;
     }
-    if (hasScrollRight == true) {
+    if (hasScrollRight ?? false) {
       actions |= ui.SemanticsAction.scrollRight.index;
     }
-    if (hasScrollUp == true) {
+    if (hasScrollUp ?? false) {
       actions |= ui.SemanticsAction.scrollUp.index;
     }
-    if (hasScrollDown == true) {
+    if (hasScrollDown ?? false) {
       actions |= ui.SemanticsAction.scrollDown.index;
     }
-    if (hasIncrease == true) {
+    if (hasIncrease ?? false) {
       actions |= ui.SemanticsAction.increase.index;
     }
-    if (hasDecrease == true) {
+    if (hasDecrease ?? false) {
       actions |= ui.SemanticsAction.decrease.index;
     }
-    if (hasShowOnScreen == true) {
+    if (hasShowOnScreen ?? false) {
       actions |= ui.SemanticsAction.showOnScreen.index;
     }
-    if (hasMoveCursorForwardByCharacter == true) {
+    if (hasMoveCursorForwardByCharacter ?? false) {
       actions |= ui.SemanticsAction.moveCursorForwardByCharacter.index;
     }
-    if (hasMoveCursorBackwardByCharacter == true) {
+    if (hasMoveCursorBackwardByCharacter ?? false) {
       actions |= ui.SemanticsAction.moveCursorBackwardByCharacter.index;
     }
-    if (hasSetSelection == true) {
+    if (hasSetSelection ?? false) {
       actions |= ui.SemanticsAction.setSelection.index;
     }
-    if (hasCopy == true) {
+    if (hasCopy ?? false) {
       actions |= ui.SemanticsAction.copy.index;
     }
-    if (hasCut == true) {
+    if (hasCut ?? false) {
       actions |= ui.SemanticsAction.cut.index;
     }
-    if (hasPaste == true) {
+    if (hasPaste ?? false) {
       actions |= ui.SemanticsAction.paste.index;
     }
-    if (hasDidGainAccessibilityFocus == true) {
+    if (hasDidGainAccessibilityFocus ?? false) {
       actions |= ui.SemanticsAction.didGainAccessibilityFocus.index;
     }
-    if (hasDidLoseAccessibilityFocus == true) {
+    if (hasDidLoseAccessibilityFocus ?? false) {
       actions |= ui.SemanticsAction.didLoseAccessibilityFocus.index;
     }
-    if (hasCustomAction == true) {
+    if (hasCustomAction ?? false) {
       actions |= ui.SemanticsAction.customAction.index;
     }
-    if (hasDismiss == true) {
+    if (hasDismiss ?? false) {
       actions |= ui.SemanticsAction.dismiss.index;
     }
-    if (hasMoveCursorForwardByWord == true) {
+    if (hasMoveCursorForwardByWord ?? false) {
       actions |= ui.SemanticsAction.moveCursorForwardByWord.index;
     }
-    if (hasMoveCursorBackwardByWord == true) {
+    if (hasMoveCursorBackwardByWord ?? false) {
       actions |= ui.SemanticsAction.moveCursorBackwardByWord.index;
     }
-    if (hasSetText == true) {
+    if (hasSetText ?? false) {
       actions |= ui.SemanticsAction.setText.index;
     }
 

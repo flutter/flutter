@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This is testing some of the named constants.
+// ignore_for_file: use_named_constants
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
@@ -289,7 +292,7 @@ Future<void> testMain() async {
   group('TextRange', () {
     test('empty ranges are correct', () {
       const TextRange range = TextRange(start: -1, end: -1);
-      expect(range, equals(const TextRange.collapsed(-1)));
+      expect(range, equals(TextRange.collapsed(-1))); // ignore: prefer_const_constructors
       expect(range, equals(TextRange.empty));
     });
     test('isValid works', () {

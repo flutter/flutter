@@ -4,8 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:scenario_app/src/texture.dart';
-
 import 'animated_color_square.dart';
 import 'bogus_font_text.dart';
 import 'initial_route_reply.dart';
@@ -13,6 +11,7 @@ import 'locale_initialization.dart';
 import 'platform_view.dart';
 import 'poppable_screen.dart';
 import 'scenario.dart';
+import 'texture.dart';
 import 'touches_scenario.dart';
 
 typedef ScenarioFactory = Scenario Function(); // ignore: public_member_api_docs

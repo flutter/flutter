@@ -23,8 +23,9 @@ class CallbackHandle {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is CallbackHandle
         && other._handle == _handle;
   }

@@ -105,17 +105,14 @@ class Options {
     ..addFlag(
       'lint-all',
       help: 'lint all of the sources, regardless of FLUTTER_NOLINT.',
-      defaultsTo: false,
     )
     ..addFlag(
       'fix',
       help: 'Apply suggested fixes.',
-      defaultsTo: false,
     )
     ..addFlag(
       'verbose',
       help: 'Print verbose output.',
-      defaultsTo: false,
     )
     ..addOption(
       'compile-commands',

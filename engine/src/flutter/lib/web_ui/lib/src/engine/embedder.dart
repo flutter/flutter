@@ -303,12 +303,12 @@ class FlutterViewEmbedder {
     _semanticsHostElement = semanticsHostElement;
     updateSemanticsScreenProperties();
 
-    final DomElement _accessibilityPlaceholder = EngineSemanticsOwner
+    final DomElement accessibilityPlaceholder = EngineSemanticsOwner
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
     glassPaneElementHostNode.appendAll(<DomNode>[
-      _accessibilityPlaceholder,
+      accessibilityPlaceholder,
       _sceneHostElement!,
 
       // The semantic host goes last because hit-test order-wise it must be

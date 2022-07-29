@@ -443,7 +443,7 @@ Future<void> testMain() async {
       );
       // At the top left corner of the line.
       expect(
-        paragraph.getPositionForOffset(const ui.Offset(0, 0)),
+        paragraph.getPositionForOffset(ui.Offset.zero),
         pos(0, ui.TextAffinity.downstream),
       );
       // At the beginning of the line.
@@ -511,7 +511,7 @@ Future<void> testMain() async {
       );
       // At the top left corner of the line.
       expect(
-        paragraph.getPositionForOffset(const ui.Offset(0, 0)),
+        paragraph.getPositionForOffset(ui.Offset.zero),
         pos(0, ui.TextAffinity.downstream),
       );
       // At the beginning of the first line.

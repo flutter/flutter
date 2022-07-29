@@ -426,14 +426,17 @@ class CanvasKitCanvas implements ui.Canvas {
     assert(paint != null); // ignore: unnecessary_null_comparison
 
     final int rectCount = rects.length;
-    if (rstTransforms.length != rectCount)
+    if (rstTransforms.length != rectCount) {
       throw ArgumentError('"rstTransforms" and "rects" lengths must match.');
-    if (rectCount % 4 != 0)
+    }
+    if (rectCount % 4 != 0) {
       throw ArgumentError(
           '"rstTransforms" and "rects" lengths must be a multiple of four.');
-    if (colors != null && colors.length * 4 != rectCount)
+    }
+    if (colors != null && colors.length * 4 != rectCount) {
       throw ArgumentError(
           'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
+    }
 
     _drawAtlas(paint, atlas, rstTransforms, rects,
         colors?.buffer.asUint32List(), blendMode ?? ui.BlendMode.src);

@@ -11,7 +11,6 @@ import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/initialization.dart';
 import 'package:ui/src/engine/text_editing/composition_aware_mixin.dart';
-import 'package:ui/src/engine/text_editing/input_type.dart';
 import 'package:ui/src/engine/text_editing/text_editing.dart';
 
 void main() {
@@ -36,7 +35,7 @@ GloballyPositionedTextEditingStrategy _enableEditingStrategy({
   }) {
   final HybridTextEditing owner = HybridTextEditing();
 
-  owner.configuration = InputConfiguration(inputType: EngineInputType.text, enableDeltaModel: deltaModel);
+  owner.configuration = InputConfiguration(enableDeltaModel: deltaModel);
 
   final GloballyPositionedTextEditingStrategy editingStrategy =
       GloballyPositionedTextEditingStrategy(owner);

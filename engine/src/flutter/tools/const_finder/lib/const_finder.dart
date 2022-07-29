@@ -29,7 +29,7 @@ class _ConstVisitor extends RecursiveVisitor<void> {
   final List<Map<String, dynamic>> nonConstantLocations;
 
   // A cache of previously evaluated classes.
-  static Map<Class, bool> _classHeirarchyCache = <Class, bool>{};
+  static final Map<Class, bool> _classHeirarchyCache = <Class, bool>{};
   bool _matches(Class node) {
     final bool? result = _classHeirarchyCache[node];
     if (result != null) {
@@ -44,7 +44,7 @@ class _ConstVisitor extends RecursiveVisitor<void> {
   }
 
   // Avoid visiting the same constant more than once.
-  Set<Constant> _cache = LinkedHashSet<Constant>.identity();
+  final Set<Constant> _cache = LinkedHashSet<Constant>.identity();
 
   @override
   void defaultConstant(Constant node) {

@@ -162,7 +162,7 @@ Future<void> copyCanvasKitFiles() async {
     ));
 
     final Iterable<io.File> canvasKitFiles = canvasKitDir
-        .listSync(recursive: true, followLinks: true)
+        .listSync(recursive: true)
         .whereType<io.File>();
 
     for (final io.File file in canvasKitFiles) {

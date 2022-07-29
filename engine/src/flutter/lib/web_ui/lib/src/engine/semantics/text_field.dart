@@ -38,8 +38,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Creates a [SemanticsTextEditingStrategy] that eagerly instantiates
   /// [domElement] so the caller can insert it before calling
   /// [SemanticsTextEditingStrategy.enable].
-  SemanticsTextEditingStrategy(HybridTextEditing owner)
-      : super(owner);
+  SemanticsTextEditingStrategy(super.owner);
 
   /// The text field whose DOM element is currently used for editing.
   ///

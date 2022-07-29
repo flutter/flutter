@@ -71,9 +71,9 @@ double _lastWidth = -1;
 /// [start] (inclusive) to [end] (exclusive).
 ///
 /// This method assumes that the correct font has already been set on
-/// [_canvasContext].
+/// [canvasContext].
 double measureSubstring(
-  DomCanvasRenderingContext2D _canvasContext,
+  DomCanvasRenderingContext2D canvasContext,
   String text,
   int start,
   int end, {
@@ -87,7 +87,7 @@ double measureSubstring(
     return 0;
   }
 
-  final String cssFont = _canvasContext.font;
+  final String cssFont = canvasContext.font;
   double width;
 
   // TODO(mdebbar): Explore caching all widths in a map, not only the last one.
@@ -102,7 +102,7 @@ double measureSubstring(
   } else {
     final String sub =
       start == 0 && end == text.length ? text : text.substring(start, end);
-    width = _canvasContext.measureText(sub).width!.toDouble();
+    width = canvasContext.measureText(sub).width!.toDouble();
   }
 
   _lastStart = start;

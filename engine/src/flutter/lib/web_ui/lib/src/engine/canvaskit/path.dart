@@ -24,7 +24,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
     skiaObject.setFillType(toSkFillType(_fillType));
   }
 
-  CkPath.fromSkPath(SkPath skPath, this._fillType) : super(skPath) {
+  CkPath.fromSkPath(SkPath super.skPath, this._fillType) {
     skiaObject.setFillType(toSkFillType(_fillType));
   }
 
@@ -321,7 +321,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
     return path;
   }
 
-  List<dynamic>? _cachedCommands;
+  late List<dynamic> _cachedCommands;
 
   @override
   void delete() {
@@ -331,7 +331,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
 
   @override
   SkPath resurrect() {
-    final SkPath path = canvasKit.Path.MakeFromCmds(_cachedCommands!);
+    final SkPath path = canvasKit.Path.MakeFromCmds(_cachedCommands);
     path.setFillType(toSkFillType(_fillType));
     return path;
   }

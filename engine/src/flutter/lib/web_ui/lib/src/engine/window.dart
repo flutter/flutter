@@ -151,7 +151,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     _customUrlStrategy = null;
   }
 
-  Future<void> _endOfTheLine = Future<void>.value(null);
+  Future<void> _endOfTheLine = Future<void>.value();
 
   Future<bool> _waitInTheLine(_HandleMessageCallBack callback) async {
     final Future<void> currentPosition = _endOfTheLine;
@@ -363,8 +363,7 @@ UrlStrategy? _createDefaultUrlStrategy() {
 /// The Web implementation of [ui.SingletonFlutterWindow].
 class EngineSingletonFlutterWindow extends EngineFlutterWindow {
   EngineSingletonFlutterWindow(
-      Object windowId, ui.PlatformDispatcher platformDispatcher)
-      : super(windowId, platformDispatcher);
+      super.windowId, super.platformDispatcher);
 
   @override
   double get devicePixelRatio =>

@@ -110,18 +110,18 @@ void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
   }
 
   if (_debugSurfaceStatsOverlayCtx == null) {
-    final DomCanvasElement _debugSurfaceStatsOverlay = createDomCanvasElement(
+    final DomCanvasElement debugSurfaceStatsOverlay = createDomCanvasElement(
       width: overlayWidth,
       height: overlayHeight,
     );
-    _debugSurfaceStatsOverlay.style
+    debugSurfaceStatsOverlay.style
       ..position = 'fixed'
       ..left = '0'
       ..top = '0'
       ..zIndex = '1000'
       ..opacity = '0.8';
-    _debugSurfaceStatsOverlayCtx = _debugSurfaceStatsOverlay.context2D;
-    domDocument.body!.append(_debugSurfaceStatsOverlay);
+    _debugSurfaceStatsOverlayCtx = debugSurfaceStatsOverlay.context2D;
+    domDocument.body!.append(debugSurfaceStatsOverlay);
   }
 
   _debugSurfaceStatsOverlayCtx!

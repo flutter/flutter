@@ -93,9 +93,9 @@ class KeyData {
     const int valueMaskWidth = 32;
 
     // Equivalent to assert(divisorForValueMask == (1 << valueMaskWidth)).
-    const int _firstDivisorWidth = 28;
+    const int firstDivisorWidth = 28;
     assert(divisorForValueMask ==
-      (1 << _firstDivisorWidth) * (1 << (valueMaskWidth - _firstDivisorWidth)));
+      (1 << firstDivisorWidth) * (1 << (valueMaskWidth - firstDivisorWidth)));
 
     // JS only supports up to 2^53 - 1, therefore non-value bits can only
     // contain (maxSafeIntegerWidth - valueMaskWidth) bits.
@@ -163,8 +163,9 @@ class KeyData {
   }
 
   String? _quotedCharCode() {
-    if (character == null)
+    if (character == null) {
       return '';
+    }
     final Iterable<String> hexChars = character!.codeUnits
         .map((int code) => code.toRadixString(16).padLeft(2, '0'));
     return ' (0x${hexChars.join(' ')})';

@@ -119,7 +119,7 @@ abstract class OffsetBase {
 class Offset extends OffsetBase {
   /// Creates an offset. The first argument sets [dx], the horizontal component,
   /// and the second sets [dy], the vertical component.
-  const Offset(double dx, double dy) : super(dx, dy);
+  const Offset(super.dx, super.dy);
 
   /// Creates an offset from its [direction] and [distance].
   ///
@@ -350,7 +350,7 @@ class Offset extends OffsetBase {
 /// You can think of this as an [Offset] from the origin.
 class Size extends OffsetBase {
   /// Creates a [Size] with the given [width] and [height].
-  const Size(double width, double height) : super(width, height);
+  const Size(super.width, super.height);
 
   /// Creates an instance of [Size] that has the same values as another.
   // Used by the rendering library's _DebugSize hack.
@@ -362,7 +362,7 @@ class Size extends OffsetBase {
   ///
   ///  * [Size.fromRadius], which is more convenient when the available size
   ///    is the radius of a circle.
-  const Size.square(double dimension) : super(dimension, dimension);
+  const Size.square(double dimension) : super(dimension, dimension); // ignore: use_super_parameters
 
   /// Creates a [Size] with the given [width] and an infinite [height].
   const Size.fromWidth(double width) : super(width, double.infinity);
@@ -401,12 +401,15 @@ class Size extends OffsetBase {
   ///  * [FittedBox], a widget that (in most modes) attempts to maintain a
   ///    child widget's aspect ratio while changing its size.
   double get aspectRatio {
-    if (height != 0.0)
+    if (height != 0.0) {
       return width / height;
-    if (width > 0.0)
+    }
+    if (width > 0.0) {
       return double.infinity;
-    if (width < 0.0)
+    }
+    if (width < 0.0) {
       return double.negativeInfinity;
+    }
     return 0.0;
   }
 
@@ -443,10 +446,12 @@ class Size extends OffsetBase {
   /// left-hand-side operand minus the [Offset.dy] dimension of the
   /// right-hand-side operand.
   OffsetBase operator -(OffsetBase other) {
-    if (other is Size)
+    if (other is Size) {
       return Offset(width - other.width, height - other.height);
-    if (other is Offset)
+    }
+    if (other is Offset) {
       return Size(width - other.dx, height - other.dy);
+    }
     throw ArgumentError(other);
   }
 
@@ -782,10 +787,12 @@ class Rect {
 
   /// Whether `other` has a nonzero area of overlap with this rectangle.
   bool overlaps(Rect other) {
-    if (right <= other.left || other.right <= left)
+    if (right <= other.left || other.right <= left) {
       return false;
-    if (bottom <= other.top || other.bottom <= top)
+    }
+    if (bottom <= other.top || other.bottom <= top) {
       return false;
+    }
     return true;
   }
 
@@ -893,10 +900,12 @@ class Rect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is Rect
         && other.left   == left
         && other.top    == top
@@ -1020,10 +1029,12 @@ class Radius {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
 
     return other is Radius
         && other.x == x
@@ -1440,8 +1451,9 @@ class RRect {
   // should be scaled with in order not to exceed the limit.
   double _getMin(double min, double radius1, double radius2, double limit) {
     final double sum = radius1 + radius2;
-    if (sum > limit && sum != 0.0)
+    if (sum > limit && sum != 0.0) {
       return math.min(min, limit / sum);
+    }
     return min;
   }
 
@@ -1502,8 +1514,9 @@ class RRect {
   /// using this method, prefer to reuse existing [RRect]s rather than
   /// recreating the object each time.
   bool contains(Offset point) {
-    if (point.dx < left || point.dx >= right || point.dy < top || point.dy >= bottom)
-      return false; // outside bounding box
+    if (point.dx < left || point.dx >= right || point.dy < top || point.dy >= bottom) {
+      return false;
+    } // outside bounding box
 
     final RRect scaled = scaleRadii();
 
@@ -1544,8 +1557,9 @@ class RRect {
     x = x / radiusX;
     y = y / radiusY;
     // check if the point is outside the unit circle
-    if (x * x + y * y > 1.0)
+    if (x * x + y * y > 1.0) {
       return false;
+    }
     return true;
   }
 
@@ -1623,10 +1637,12 @@ class RRect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is RRect
         && other.left      == left
         && other.top       == top
@@ -1656,8 +1672,9 @@ class RRect {
     if (tlRadius == trRadius &&
         trRadius == brRadius &&
         brRadius == blRadius) {
-      if (tlRadius.x == tlRadius.y)
+      if (tlRadius.x == tlRadius.y) {
         return 'RRect.fromLTRBR($rect, ${tlRadius.x.toStringAsFixed(1)})';
+      }
       return 'RRect.fromLTRBXY($rect, ${tlRadius.x.toStringAsFixed(1)}, ${tlRadius.y.toStringAsFixed(1)})';
     }
     return 'RRect.fromLTRBAndCorners('

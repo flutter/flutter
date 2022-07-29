@@ -192,8 +192,9 @@ class FontVariation {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FontVariation
         && other.axis == axis
         && other.value == value;

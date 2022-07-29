@@ -21,6 +21,7 @@ dependencies:
   meta: any
   path: any
   process_runner: any
+  process: any
 
 dependency_overrides:
   args:

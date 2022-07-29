@@ -18,8 +18,7 @@ import 'surface.dart';
 /// A surface that applies an [ColorFilter] to its children.
 class PersistedColorFilter extends PersistedContainerSurface
     implements ui.ColorFilterEngineLayer {
-  PersistedColorFilter(PersistedColorFilter? oldLayer, this.filter)
-      : super(oldLayer);
+  PersistedColorFilter(PersistedColorFilter? super.oldLayer, this.filter);
 
   @override
   DomElement? get childContainer => _childContainer;

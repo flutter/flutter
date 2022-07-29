@@ -22,11 +22,13 @@ bool _matrix4IsValid(Float32List matrix4) {
 
 void _validateColorStops(List<Color> colors, List<double>? colorStops) {
   if (colorStops == null) {
-    if (colors.length != 2)
+    if (colors.length != 2) {
       throw ArgumentError('"colors" must have length 2 if "colorStops" is omitted.');
+    }
   } else {
-    if (colors.length != colorStops.length)
+    if (colors.length != colorStops.length) {
       throw ArgumentError('"colors" and "colorStops" arguments must have equal length.');
+    }
   }
 }
 
@@ -420,8 +422,9 @@ class ImageFilter {
   }
 
   factory ImageFilter.matrix(Float64List matrix4, {FilterQuality filterQuality = FilterQuality.low}) {
-    if (matrix4.length != 16)
+    if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
+    }
     if (engine.useCanvasKit) {
       return engine.CkImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
     }
@@ -559,7 +562,7 @@ Future<Codec> _createBmp(
   final int bufferSize = headerSize + (width * height * 4);
   final ByteData bmpData = ByteData(bufferSize);
   // 'BM' header
-  bmpData.setUint16(0x00, 0x424D, Endian.big);
+  bmpData.setUint16(0x00, 0x424D);
   // Size of data
   bmpData.setUint32(0x02, bufferSize, Endian.little);
   // Offset where pixel array begins
@@ -712,10 +715,12 @@ class Shadow {
     b ??= <Shadow>[];
     final List<Shadow> result = <Shadow>[];
     final int commonLength = math.min(a.length, b.length);
-    for (int i = 0; i < commonLength; i += 1)
+    for (int i = 0; i < commonLength; i += 1) {
       result.add(Shadow.lerp(a[i], b[i], t)!);
-    for (int i = commonLength; i < a.length; i += 1)
+    }
+    for (int i = commonLength; i < a.length; i += 1) {
       result.add(a[i].scale(1.0 - t));
+    }
     for (int i = commonLength; i < b.length; i += 1) {
       result.add(b[i].scale(t));
     }

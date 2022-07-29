@@ -154,7 +154,7 @@ Future<void> testMain() async {
     });
   }
 
-  testMaskFilterBlur(isWebkit: false);
+  testMaskFilterBlur();
   testMaskFilterBlur(isWebkit: true);
 
   for (final int testDpr in <int>[1, 2, 4]) {

@@ -20,7 +20,7 @@ import 'util.dart';
 // Only supported in profile/release mode. Allows Flutter to use MSAA but
 // removes the ability for disabling AA on Paint objects.
 const bool _kUsingMSAA =
-    bool.fromEnvironment('flutter.canvaskit.msaa', defaultValue: false);
+    bool.fromEnvironment('flutter.canvaskit.msaa');
 
 typedef SubmitCallback = bool Function(SurfaceFrame, CkCanvas);
 

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
-import 'dart:io' as io show Directory, File, stdout, stderr;
+import 'dart:io' as io show Directory, File, stderr, stdout;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;

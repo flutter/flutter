@@ -18,15 +18,15 @@ void main() {
 }
 
 void testMain() {
-  engine.TestUrlStrategy? _strategy;
+  engine.TestUrlStrategy? strategy;
 
   setUp(() async {
-    _strategy = engine.TestUrlStrategy();
-    await engine.window.debugInitializeHistory(_strategy, useSingle: true);
+    strategy = engine.TestUrlStrategy();
+    await engine.window.debugInitializeHistory(strategy, useSingle: true);
   });
 
   tearDown(() async {
-    _strategy = null;
+    strategy = null;
     await engine.window.resetHistory();
   });
 
@@ -41,6 +41,6 @@ void testMain() {
       (_) => completer.complete(),
     );
     await completer.future;
-    expect(_strategy!.getPath(), '/foo');
+    expect(strategy!.getPath(), '/foo');
   });
 }

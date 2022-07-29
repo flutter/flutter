@@ -31,7 +31,7 @@ export 'package:js/js.dart' show allowInterop;
 /// This is equivalent to writing `{}` in plain JavaScript.
 Object createPlainJsObject([Map<String, Object?>? properties]) {
   if (properties != null) {
-    return js_util.jsify(properties);
+    return js_util.jsify(properties) as Object;
   } else {
     return js_util.newObject<Object>();
   }
@@ -908,8 +908,8 @@ void setupVertexTransforms(
   // Set uniform to scale 0..width/height pixels coordinates to -1..1
   // clipspace range and flip the Y axis.
   final Object resolution = gl.getUniformLocation(glProgram.program, 'u_scale');
-  gl.setUniform4f(resolution, 2.0 / widthInPixels.toDouble(),
-      -2.0 / heightInPixels.toDouble(), 1, 1);
+  gl.setUniform4f(resolution, 2.0 / widthInPixels,
+      -2.0 / heightInPixels, 1, 1);
   final Object shift = gl.getUniformLocation(glProgram.program, 'u_shift');
   gl.setUniform4f(shift, -1, 1, 0, 0);
 }

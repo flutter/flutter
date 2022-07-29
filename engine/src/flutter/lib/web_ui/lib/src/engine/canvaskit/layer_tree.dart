@@ -4,7 +4,7 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show kProfilePrerollFrame, kProfileApplyFrame;
+import '../../engine.dart' show kProfileApplyFrame, kProfilePrerollFrame;
 import '../profiler.dart';
 import '../vector_math.dart';
 import 'canvas.dart';

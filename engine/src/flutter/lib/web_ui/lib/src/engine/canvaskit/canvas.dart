@@ -322,7 +322,7 @@ class CkCanvas {
     final Float32List matrix4 = Float32List(16);
     for (int r = 0; r < 4; r++) {
       for (int c = 0; c < 4; c++) {
-        matrix4[c * 4 + r] = list[r * 4 + c].toDouble();
+        matrix4[c * 4 + r] = (list[r * 4 + c] as num).toDouble();
       }
     }
     return matrix4;
@@ -332,9 +332,8 @@ class CkCanvas {
 }
 
 class RecordingCkCanvas extends CkCanvas {
-  RecordingCkCanvas(SkCanvas skCanvas, ui.Rect bounds)
-      : pictureSnapshot = CkPictureSnapshot(bounds),
-        super(skCanvas);
+  RecordingCkCanvas(super.skCanvas, ui.Rect bounds)
+      : pictureSnapshot = CkPictureSnapshot(bounds);
 
   @override
   final CkPictureSnapshot pictureSnapshot;

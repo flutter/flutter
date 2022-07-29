@@ -69,7 +69,7 @@ void testMain() {
       final Path subPath = Path();
       subPath.moveTo(50.0, 60.0);
       subPath.lineTo(200.0, 200.0);
-      path.extendWithPath(subPath, const Offset(0.0, 0.0));
+      path.extendWithPath(subPath, Offset.zero);
       path.reset();
       path.relativeLineTo(5.0, 5.0);
       expect(path.pathRef.countPoints(), 2);
@@ -191,7 +191,6 @@ void testMain() {
       expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
-          topLeft: const Radius.elliptical(0, 0),
           topRight: const Radius.elliptical(3, 4),
           bottomLeft: const Radius.elliptical(5, 6),
           bottomRight: const Radius.elliptical(7, 8));
@@ -201,7 +200,6 @@ void testMain() {
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: const Radius.elliptical(1, 2),
-          topRight: const Radius.elliptical(0, 0),
           bottomLeft: const Radius.elliptical(5, 6),
           bottomRight: const Radius.elliptical(7, 8));
       path.addRRect(rrect);
@@ -211,7 +209,6 @@ void testMain() {
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: const Radius.elliptical(1, 2),
           topRight: const Radius.elliptical(3, 4),
-          bottomLeft: const Radius.elliptical(0, 0),
           bottomRight: const Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
@@ -220,8 +217,7 @@ void testMain() {
       rrect = RRect.fromRectAndCorners(bounds,
           topLeft: const Radius.elliptical(1, 2),
           topRight: const Radius.elliptical(3, 4),
-          bottomLeft: const Radius.elliptical(5, 6),
-          bottomRight: const Radius.elliptical(0, 0));
+          bottomLeft: const Radius.elliptical(5, 6));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
       expect(path.toRoundedRect(), rrect);
