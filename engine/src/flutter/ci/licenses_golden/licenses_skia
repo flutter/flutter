@@ -1,4 +1,4 @@
-Signature: e044cef4a37bd880f1638a014b148ee7
+Signature: 7055e9c8cce7a9d7e79f368c213bfc60
 
 UNUSED LICENSES:
 
@@ -5652,6 +5652,7 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinFunctions.cpp
 FILE: ../../../third_party/skia/src/text/StrikeForGPU.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.h
