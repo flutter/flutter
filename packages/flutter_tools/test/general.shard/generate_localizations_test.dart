@@ -1903,15 +1903,17 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           .writeAsStringSync(pluralMessageWithIncorrectPlaceholderFormat);
 
         expect(
-          () => LocalizationsGenerator(
-            fileSystem: fs,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-            logger: logger,
-          ).generate(),
+          () async {
+            await LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+            ).generate();
+          },
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
