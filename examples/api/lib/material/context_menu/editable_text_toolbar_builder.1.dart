@@ -77,6 +77,11 @@ class MyApp extends StatelessWidget {
 }
 
 bool _isValidEmail(String text) {
-  return RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
-    .hasMatch(text);
+  return RegExp(
+    r'(?<name>[a-zA-Z0-9]+)'
+    r'@'
+    r'(?<domain>[a-zA-Z0-9]+)'
+    r'\.'
+    r'(?<topLevelDomain>[a-zA-Z0-9]+)',
+  ).hasMatch(text);
 }
