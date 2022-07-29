@@ -701,8 +701,13 @@ class PlatformViewForTouchIOSScenario extends Scenario
 
   late void Function() _nextFrame;
 
+  /// Whether gestures should be accepted or rejected.
   final bool accept;
+
+  /// The platform view identifier.
   final int id;
+
+  /// Whether touches should be rejected until the gesture ends.
   final bool rejectUntilTouchesEnded;
 
   @override

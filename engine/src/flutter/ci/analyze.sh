@@ -46,31 +46,31 @@ echo "Using dart from $DART_BIN"
 "$DART" --version
 echo ""
 
-"$DART" analyze "$FLUTTER_DIR/lib/ui"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/ui"
 
-"$DART" analyze "$FLUTTER_DIR/lib/spirv"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/spirv"
 
-"$DART" analyze "$FLUTTER_DIR/ci"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/ci"
 
-"$DART" analyze "$FLUTTER_DIR/flutter_frontend_server"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/flutter_frontend_server"
 
-"$DART" analyze "$FLUTTER_DIR/tools/licenses"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools/licenses"
 
-"$DART" analyze "$FLUTTER_DIR/testing/litetest"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/litetest"
 
-"$DART" analyze "$FLUTTER_DIR/testing/benchmark"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/benchmark"
 
-"$DART" analyze "$FLUTTER_DIR/testing/smoke_test_failure"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/smoke_test_failure"
 
-"$DART" analyze "$FLUTTER_DIR/testing/dart"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/dart"
 
-"$DART" analyze "$FLUTTER_DIR/testing/scenario_app"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/scenario_app"
 
-"$DART" analyze "$FLUTTER_DIR/testing/symbols"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/symbols"
 
-"$DART" analyze "$FLUTTER_DIR/tools/githooks"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools/githooks"
 
-"$DART" analyze "$FLUTTER_DIR/tools/clang_tidy"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools/clang_tidy"
 
 echo ""
 
