@@ -67,10 +67,8 @@ Future<LocalizationsGenerator> generateLocalizations({
       untranslatedMessagesFile: options.untranslatedMessagesFile?.toFilePath(),
       usesNullableGetter: options.usesNullableGetter,
       logger: logger,
-    )
-      ..loadResources()
-      ..writeOutputFiles(isFromYaml: true);
-    await generator.formatOutputFiles();
+    );
+    await generator.generate(isFromYaml: true);
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
@@ -1082,6 +1080,12 @@ class LocalizationsGenerator {
     return true;
   }
 
+  Future<void> generate({bool isFromYaml = false}) async {
+    loadResources();
+    _writeOutputFiles(isFromYaml: isFromYaml);
+    await _formatOutputFiles();
+  }
+
   // Load _allMessages from templateArbFile and _allBundles from all of the ARB
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
@@ -1342,7 +1346,7 @@ class LocalizationsGenerator {
         || message.placeholdersRequireFormatting;
   });
 
-  void writeOutputFiles({ bool isFromYaml = false }) {
+  void _writeOutputFiles({bool isFromYaml = false}) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1427,7 +1431,7 @@ class LocalizationsGenerator {
     }
   }
 
-  Future<void> formatOutputFiles() async {
+  Future<void> _formatOutputFiles() async {
     final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[
       dartBinary,
