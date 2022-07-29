@@ -306,6 +306,8 @@ targets:
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
+    enabled_branches:
+      - master
     timeout: 60
     properties:
       shard: flutter_plugins
