@@ -4,22 +4,53 @@
 
 #pragma once
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/device_buffer.h"
 
 namespace impeller {
 
+class DeviceBufferAllocationVK {
+ public:
+  DeviceBufferAllocationVK(const VmaAllocator& allocator,
+                           VkBuffer buffer,
+                           VmaAllocation allocation,
+                           VmaAllocationInfo allocation_info);
+
+  ~DeviceBufferAllocationVK();
+
+  vk::Buffer GetBufferHandle() const;
+
+  void* GetMapping() const;
+
+ private:
+  const VmaAllocator& allocator_;
+  vk::Buffer buffer_;
+  VmaAllocation allocation_;
+  VmaAllocationInfo allocation_info_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DeviceBufferAllocationVK);
+};
+
 class DeviceBufferVK final : public DeviceBuffer,
                              public BackendCast<DeviceBufferVK, DeviceBuffer> {
  public:
+  DeviceBufferVK(size_t size,
+                 StorageMode mode,
+                 ContextVK& context,
+                 std::unique_ptr<DeviceBufferAllocationVK> device_allocation);
+
   // |DeviceBuffer|
   ~DeviceBufferVK() override;
 
  private:
   friend class AllocatorVK;
 
-  DeviceBufferVK(size_t size, StorageMode mode);
+  ContextVK& context_;
+  std::unique_ptr<DeviceBufferAllocationVK> device_allocation_;
 
   // |DeviceBuffer|
   bool CopyHostBuffer(const uint8_t* source,
