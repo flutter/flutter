@@ -4259,9 +4259,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
     assert(ancestor != null);
+    // The dirty check is meant to disable the assert outside of the widget
+    // life-cycles (so after build has completed).
+    // That enables support for things like using context.dependOnInheritedElement
+    // inside ListView.builder/LayoutBuilder (as they do layout on demand,
+    // which happens after the widget's build method has completed).
     assert(
        !ancestor.clearDependencyOnRebuild || debugDoingBuild || !dirty,
-      'Cannot depend on an InheritedElement with clearDependencyOnRebuild: true '
+      'Cannot depend on an InheritedElement with clearDependencyOnRebuild: true'
       ' in Widget life-cycles other than `build`.',
     );
     _hasDependencyWhichNeedsClearingOnRebuild = _hasDependencyWhichNeedsClearingOnRebuild || ancestor.clearDependencyOnRebuild;
@@ -5456,6 +5461,7 @@ class InheritedElement extends ProxyElement {
   ///  * [InheritedModel], which is an example of a class that uses this method
   ///    to manage dependency values.
   @protected
+  @mustCallSuper
   void removeDependent(Element dependent) {
     _dependents.remove(dependent);
   }
