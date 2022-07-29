@@ -688,10 +688,6 @@ static void CommonInit(FlutterViewController* controller) {
 
 #pragma mark - FlutterKeyboardViewDelegate
 
-- (BOOL)isComposing {
-  return [_textInputPlugin isComposing];
-}
-
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
             callback:(nullable FlutterKeyEventCallback)callback
             userData:(nullable void*)userData {

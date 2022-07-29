@@ -252,7 +252,6 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 
 @property(nonatomic) FlutterKeyboardManager* manager;
 @property(nonatomic) NSResponder* nextResponder;
-@property(nonatomic, assign) BOOL isComposing;
 
 #pragma mark - Private
 
@@ -289,7 +288,6 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   [self respondChannelCallsWith:FALSE];
   [self respondEmbedderCallsWith:FALSE];
   [self respondTextInputWith:FALSE];
-  _isComposing = NO;
 
   _currentLayout = &kUsLayout;
 
@@ -304,7 +302,6 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   OCMStub([viewDelegateMock onTextInputKeyEvent:[OCMArg any]])
       .andCall(self, @selector(handleTextInputKeyEvent:));
   OCMStub([viewDelegateMock getBinaryMessenger]).andReturn(messengerMock);
-  OCMStub([viewDelegateMock isComposing]).andCall(self, @selector(isComposing));
   OCMStub([viewDelegateMock sendKeyEvent:FlutterKeyEvent {} callback:nil userData:nil])
       .ignoringNonObjectArgs()
       .andCall(self, @selector(handleEmbedderEvent:callback:userData:));
@@ -430,7 +427,6 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (bool)singlePrimaryResponder;
 - (bool)doublePrimaryResponder;
 - (bool)textInputPlugin;
-- (bool)forwardKeyEventsToSystemWhenComposing;
 - (bool)emptyNextResponder;
 - (bool)racingConditionBetweenKeyAndText;
 - (bool)correctLogicalKeyForLayouts;
@@ -447,10 +443,6 @@ TEST(FlutterKeyboardManagerUnittests, DoublePrimaryResponder) {
 
 TEST(FlutterKeyboardManagerUnittests, SingleFinalResponder) {
   ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] textInputPlugin]);
-}
-
-TEST(FlutterKeyboardManagerUnittests, handlingComposingText) {
-  ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] forwardKeyEventsToSystemWhenComposing]);
 }
 
 TEST(FlutterKeyboardManagerUnittests, EmptyNextResponder) {
@@ -593,31 +585,6 @@ TEST(FlutterKeyboardManagerUnittests, CorrectLogicalKeyForLayouts) {
   callbacks[0](FALSE);
   OCMVerify([tester.nextResponder keyDown:checkKeyDownEvent(0x50)]);
   [callbacks removeAllObjects];
-
-  return true;
-}
-
-- (bool)forwardKeyEventsToSystemWhenComposing {
-  KeyboardTester* tester = OCMPartialMock([[KeyboardTester alloc] init]);
-
-  NSMutableArray<FlutterAsyncKeyCallback>* channelCallbacks =
-      [NSMutableArray<FlutterAsyncKeyCallback> array];
-  NSMutableArray<FlutterAsyncKeyCallback>* embedderCallbacks =
-      [NSMutableArray<FlutterAsyncKeyCallback> array];
-  [tester recordEmbedderCallsTo:embedderCallbacks];
-  [tester recordChannelCallsTo:channelCallbacks];
-  // The event shouldn't propagate further even if TextInputPlugin does not
-  // claim the event.
-  [tester respondTextInputWith:NO];
-
-  tester.isComposing = YES;
-  // Send a down event with composing == YES.
-  [tester.manager handleEvent:keyUpEvent(0x50)];
-
-  // Nobody gets the event except for the text input plugin.
-  EXPECT_EQ([channelCallbacks count], 0u);
-  EXPECT_EQ([embedderCallbacks count], 0u);
-  OCMVerify(times(1), [tester handleTextInputKeyEvent:checkKeyDownEvent(0x50)]);
 
   return true;
 }
