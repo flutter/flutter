@@ -157,6 +157,7 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   @Override
   public void onTrimMemory(int level) {
+    super.onTrimMemory(level);
     eventDelegate.onTrimMemory(level);
   }
 
