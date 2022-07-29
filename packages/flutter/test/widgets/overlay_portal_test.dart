@@ -325,7 +325,7 @@ void main() {
         return SizedBox.square(
           dimension: 50,
           child: OverlayPortal.forOverlay(
-            overlayLocation: OverlayLocation.after(context),
+            overlayLocation: OverlayLocation.above(context),
             overlayChild: const SizedBox(),
             child: const SizedBox(),
           ),
@@ -585,7 +585,7 @@ void main() {
                               OverlayEntry(builder: (BuildContext innerEntryContext) {
                                 return OverlayPortal.forOverlay(
                                   key: widgetOuterKey,
-                                  overlayLocation: OverlayLocation.after(outerEntryContext), // The outer widget targets the outer Overlay.
+                                  overlayLocation: OverlayLocation.above(outerEntryContext), // The outer widget targets the outer Overlay.
                                   overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                     layoutCountOuter += 1;
                                     // Both overlays need to be clean at this point.
@@ -595,7 +595,7 @@ void main() {
                                     );
                                     return OverlayPortal.forOverlay(
                                       key: widgetInnerKey,
-                                      overlayLocation: OverlayLocation.after(innerEntryContext),
+                                      overlayLocation: OverlayLocation.above(innerEntryContext),
                                       overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                         layoutCountInner += 1;
                                         // Both overlays need to be clean at this point.
@@ -687,7 +687,7 @@ void main() {
                                 OverlayEntry(builder: (BuildContext innerEntryContext) {
                                   return OverlayPortal.forOverlay(
                                     key: widgetOuterKey,
-                                    overlayLocation: OverlayLocation.after(outerEntryContext), // The outer widget targets the outer Overlay.
+                                    overlayLocation: OverlayLocation.above(outerEntryContext), // The outer widget targets the outer Overlay.
                                     overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                       layoutCountOuter += 1;
                                       // Both overlays need to be clean at this point.
@@ -697,7 +697,7 @@ void main() {
                                       );
                                       return OverlayPortal.forOverlay(
                                         key: widgetInnerKey,
-                                        overlayLocation: OverlayLocation.after(innerEntryContext),
+                                        overlayLocation: OverlayLocation.above(innerEntryContext),
                                         overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                           layoutCountInner += 1;
                                           // Both overlays need to be clean at this point.

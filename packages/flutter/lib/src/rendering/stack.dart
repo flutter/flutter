@@ -374,7 +374,7 @@ class RenderStack extends RenderBox
   }
 
   Alignment? _alignmentCache;
-  Alignment get _resolvedAlignment => _alignmentCache ??= AlignmentDirectional.topStart.resolve(textDirection);
+  Alignment get _resolvedAlignment => _alignmentCache ??= alignment.resolve(textDirection);
 
   void _markNeedResolution() {
     _alignmentCache = null;
