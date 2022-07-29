@@ -52,7 +52,7 @@ typedef EditableTextToolbarBuilder = Widget Function(
 ///
 /// {@tool dartpad}
 /// This example shows how to use a GestureDetector to show a context menu
-//  anywhere in a widget subtree that receives a right click or long press.
+/// anywhere in a widget subtree that receives a right click or long press.
 ///
 /// ** See code in examples/api/lib/material/context_menu/context_menu_controller.0.dart **
 /// {@end-tool}
@@ -63,7 +63,7 @@ class ContextMenuController {
   // at one time.
   static OverlayEntry? _menuOverlayEntry;
 
-  /// True iff the menu is currently being displayed.
+  /// True if the menu is currently being displayed.
   static bool get isShown => _menuOverlayEntry != null && _menuOverlayEntry!.mounted;
 
   /// Shows the given context menu at the location.
