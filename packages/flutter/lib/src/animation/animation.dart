@@ -77,7 +77,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Widget build(BuildContext context) {
   ///   return ValueListenableBuilder<double>(
   ///     valueListenable: _scrollPosition,
-  ///     builder: (BuildContext context, double value, Widget child) {
+  ///     builder: (BuildContext context, double value, Widget? child) {
   ///       final double opacity = (value / 1000).clamp(0, 1);
   ///       return Opacity(opacity: opacity, child: child);
   ///     },
@@ -95,7 +95,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///   return FadeTransition(
   ///     opacity: Animation.fromValueListenable(_scrollPosition, transformer: (double value) {
   ///       return (value / 1000).clamp(0, 1);
-  ///     })
+  ///     }),
   ///     child: Container(
   ///       child: const Text('Hello, Animation'),
   ///     ),
