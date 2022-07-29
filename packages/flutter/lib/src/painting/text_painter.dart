@@ -99,6 +99,18 @@ class PlaceholderDimensions {
   final TextBaseline? baseline;
 
   @override
+  bool operator ==(Object other) {
+    return other is PlaceholderDimensions
+        && other.size == size
+        && other.alignment == alignment
+        && other.baseline == baseline
+        && other.baselineOffset == baselineOffset;
+  }
+
+  @override
+  int get hashCode => Object.hash(size, alignment, baseline, baselineOffset);
+
+  @override
   String toString() {
     return 'PlaceholderDimensions($size, $baseline)';
   }
