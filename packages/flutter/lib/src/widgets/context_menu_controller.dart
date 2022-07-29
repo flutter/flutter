@@ -54,7 +54,7 @@ typedef EditableTextToolbarBuilder = Widget Function(
 /// This example shows how to use a GestureDetector to show a context menu
 //  anywhere in a widget subtree that receives a right click or long press.
 ///
-/// ** See code in examples/api/lib/material/context_menu/anywhere.dart **
+/// ** See code in examples/api/lib/material/context_menu/context_menu_controller.0.dart **
 /// {@end-tool}
 class ContextMenuController {
   ContextMenuController._();

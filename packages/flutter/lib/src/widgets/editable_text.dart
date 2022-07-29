@@ -1527,14 +1527,14 @@ class EditableText extends StatefulWidget {
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/custom_button_appearance.dart **
+  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad}
   /// This example shows how to show a custom button only when an email address
   /// is currently selected.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/with_specific_selection.dart **
+  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart **
   /// {@end-tool}
   ///
   /// See also:
