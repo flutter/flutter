@@ -113,10 +113,11 @@ class ComplexLayoutState extends State<ComplexLayout> {
               key: const Key('complex-scroll'), // this key is used by the driver test
               controller: ScrollController(),  // So that the scroll offset can be tracked
               itemBuilder: (BuildContext context, int index) {
-                if (index.isEven)
+                if (index.isEven) {
                   return FancyImageItem(index, key: PageStorageKey<int>(index));
-                else
+                } else {
                   return FancyGalleryItem(index, key: PageStorageKey<int>(index));
+                }
               },
             ),
           ),

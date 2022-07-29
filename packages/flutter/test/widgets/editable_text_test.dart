@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonDecode;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -395,6 +396,53 @@ void main() {
       action: TextInputAction.emergencyCall,
       serializedActionName: 'TextInputAction.emergencyCall',
     );
+  });
+
+  testWidgets('onAppPrivateCommand does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+
+    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'args': <dynamic>[
+        -1, // The magic clint id that points to the current client.
+        jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}'),
+      ],
+      'method': 'TextInputClient.performPrivateCommand',
+    });
+
+    Object? error;
+    try {
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
   });
 
   group('Infer keyboardType from autofillHints', () {
@@ -3937,42 +3985,6 @@ void main() {
     await tester.pump();
 
     expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
-  });
-
-  testWidgets('password briefly does not show last character on Android if turned off', (WidgetTester tester) async {
-    final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
-    EditableText.debugDeterministicCursor = false;
-    addTearDown(() {
-      EditableText.debugDeterministicCursor = debugDeterministicCursor;
-    });
-
-    await tester.pumpWidget(MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        controller: controller,
-        obscureText: true,
-        focusNode: focusNode,
-        style: textStyle,
-        cursorColor: cursorColor,
-      ),
-    ));
-
-    await tester.enterText(find.byType(EditableText), 'AA');
-    await tester.pump();
-    await tester.enterText(find.byType(EditableText), 'AAA');
-    await tester.pump();
-
-    tester.binding.platformDispatcher.brieflyShowPasswordTestValue = false;
-    addTearDown(() {
-      tester.binding.platformDispatcher.brieflyShowPasswordTestValue = true;
-    });
-    expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
-    await tester.pump(const Duration(milliseconds: 500));
-    expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
@@ -12583,13 +12595,22 @@ class MockTextFormatter extends TextInputFormatter {
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
-    return Container();
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox();
   }
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    return Container();
+    return const SizedBox();
   }
 
   @override
@@ -12659,7 +12680,16 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   final VoidCallback? onCut;
 
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
     final Offset selectionMidpoint = position;
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
     final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1

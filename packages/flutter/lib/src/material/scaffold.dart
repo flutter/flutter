@@ -2029,7 +2029,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
-    if (_drawerOpened.value != isOpened) {
+    if (_drawerOpened.value != isOpened && _drawerKey.currentState != null) {
       setState(() {
         _drawerOpened.value = isOpened;
       });
@@ -2038,7 +2038,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    if (_endDrawerOpened.value != isOpened) {
+    if (_endDrawerOpened.value != isOpened && _endDrawerKey.currentState != null) {
       setState(() {
         _endDrawerOpened.value = isOpened;
       });
@@ -2182,7 +2182,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             ),
           );
         },
-        true,
+        isPersistent: true,
         animationController: animationController,
       );
     }
@@ -2225,8 +2225,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   PersistentBottomSheetController<T> _buildBottomSheet<T>(
-    WidgetBuilder builder,
-    bool isPersistent, {
+    WidgetBuilder builder, {
+    required bool isPersistent,
     required AnimationController animationController,
     Color? backgroundColor,
     double? elevation,
@@ -2412,7 +2412,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(
         builder,
-        false,
+        isPersistent: false,
         animationController: controller,
         backgroundColor: backgroundColor,
         elevation: elevation,
@@ -2578,6 +2578,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
     _scaffoldMessenger?._unregister(this);
+    _drawerOpened.dispose();
+    _endDrawerOpened.dispose();
     super.dispose();
   }
 
@@ -3165,7 +3167,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       },
       child: Semantics(
         container: true,
-        onDismiss: close,
+        onDismiss: !widget.isPersistent ? close : null,
         child:  NotificationListener<DraggableScrollableNotification>(
           onNotification: extentChanged,
           child: BottomSheet(

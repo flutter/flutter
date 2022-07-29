@@ -5,16 +5,15 @@
 import 'template.dart';
 
 class ChipInputTemplate extends TokenTemplate {
-  const ChipInputTemplate(super.fileName, super.tokens);
+  const ChipInputTemplate(super.blockName, super.fileName, super.tokens);
 
   static const String tokenGroup = 'md.comp.input-chip';
   static const String variant = '';
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends ChipThemeData {
-  const _TokenDefaultsM3(this.context, this.isEnabled)
+class _${blockName}DefaultsM3 extends ChipThemeData {
+  const _${blockName}DefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: ${elevation("$tokenGroup$variant.container")},
         shape: ${shape("$tokenGroup.container")},
