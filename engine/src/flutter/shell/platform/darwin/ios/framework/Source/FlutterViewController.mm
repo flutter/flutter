@@ -507,7 +507,7 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)removeSplashScreenView:(dispatch_block_t _Nullable)onComplete {
   NSAssert(_splashScreenView, @"The splash screen view must not be null");
-  UIView* splashScreen = _splashScreenView.get();
+  UIView* splashScreen = [_splashScreenView.get() retain];
   _splashScreenView.reset();
   [UIView animateWithDuration:0.2
       animations:^{
@@ -515,6 +515,7 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
       }
       completion:^(BOOL finished) {
         [splashScreen removeFromSuperview];
+        [splashScreen release];
         if (onComplete) {
           onComplete();
         }

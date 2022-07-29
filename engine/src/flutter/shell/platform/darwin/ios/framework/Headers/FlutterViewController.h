@@ -197,7 +197,7 @@ FLUTTER_DARWIN_EXPORT
 
 /**
  * Specifies the view to use as a splash screen. Flutter's rendering is asynchronous, so the first
- * frame rendered by the Flutter application might not immediately appear when theFlutter view is
+ * frame rendered by the Flutter application might not immediately appear when the Flutter view is
  * initially placed in the view hierarchy. The splash screen view will be used as
  * a replacement until the first frame is rendered.
  *
