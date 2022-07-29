@@ -105,5 +105,7 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/vm
   vm_service:
     path: ../../third_party/dart/pkg/vm_service
+  vm_snapshot_analysis:
+    path: ../../third_party/dart/pkg/vm_snapshot_analysis
   yaml:
     path: ../../third_party/dart/third_party/pkg/yaml
