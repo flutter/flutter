@@ -228,13 +228,13 @@ abstract class BoxBorder extends ShapeBorder {
 
   static void _paintUniformBorderWithCircle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    final double radius = (rect.shortestSide + side.strokeOffset) / 2;
+    final double radius = (rect.shortestSide + side.width * side.strokeAlign) / 2;
     canvas.drawCircle(rect.center, radius, side.toPaint());
   }
 
   static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    canvas.drawRect(rect.inflate(side.strokeOffset / 2), side.toPaint());
+    canvas.drawRect(rect.inflate(side.halfStrokeOffset), side.toPaint());
   }
 }
 

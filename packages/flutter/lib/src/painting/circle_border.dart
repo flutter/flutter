@@ -91,10 +91,10 @@ class CircleBorder extends OutlinedBorder {
         break;
       case BorderStyle.solid:
         if (eccentricity == 0.0) {
-          canvas.drawCircle(rect.center, (rect.shortestSide + side.strokeOffset) / 2, side.toPaint());
+          canvas.drawCircle(rect.center, (rect.shortestSide + side.width * side.strokeAlign) / 2, side.toPaint());
         } else {
           final Rect borderRect = _adjustRect(rect);
-          canvas.drawOval(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
+          canvas.drawOval(borderRect.inflate(side.halfStrokeOffset), side.toPaint());
         }
     }
   }

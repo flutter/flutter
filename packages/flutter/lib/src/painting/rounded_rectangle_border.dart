@@ -305,7 +305,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
       case BorderStyle.solid:
         final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect, textDirection)!;
         final RRect borderRect = adjustedBorderRadius.toRRect(_adjustRect(rect));
-        canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
+        canvas.drawRRect(borderRect.inflate(side.halfStrokeOffset), side.toPaint());
     }
   }
 

@@ -298,10 +298,15 @@ class BorderSide with Diagnosticable {
   /// a [strokeAlign] of -1.
   ///
   /// Example:
-  ///
-  /// [strokeAlign] == [strokeAlignInside] (-1.0) => side.width
-  /// [strokeAlign] == [strokeAlignCenter] (0.0) => side.width / 2
-  /// [strokeAlign] == [strokeAlignOutside] (1.0) => 0
+  /// 
+  /// switch(strokeAlign) {
+  ///   case BorderSide.strokeAlignInside: // -1
+  ///     return width;
+  ///  case BorderSide.strokeAlignCenter: // 0
+  ///    return width / 2;
+  /// case BorderSide.strokeAlignOutside: // 1
+  ///   return 0;
+  /// }
   double get strokeInset => width * (1 - (1 + strokeAlign) / 2);
 
   /// Get the amount of the stroke width that lies outside of the [BorderSide].
@@ -312,9 +317,9 @@ class BorderSide with Diagnosticable {
 
   /// The offset of the stroke, taking into account the stroke alignment.
   ///
-  /// This will return the width of the stroke for a [strokeAlign] of 1, and the
-  /// negative width for a [strokeAlign] of -1.
-  double get strokeOffset => width * strokeAlign;
+  /// This will return half width of the stroke for a [strokeAlign] of 1, and the
+  /// negative half width for a [strokeAlign] of -1.
+  double get halfStrokeOffset => width * strokeAlign / 2;
 
   @override
   bool operator ==(Object other) {
