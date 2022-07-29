@@ -1094,7 +1094,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   FileSystem? get fileSystem => globals.fs;
 
   @override
-  final List<FlutterDevice?> flutterDevices;
+  final List<FlutterDevice> flutterDevices;
 
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -1171,7 +1171,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   //
   // Would be null if there is no device connected or
   // there is no devFS associated with the first device.
-  Uri? get uri => flutterDevices.first?.devFS?.baseUri;
+  Uri? get uri => flutterDevices.first.devFS?.baseUri;
 
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;
@@ -1257,7 +1257,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final String address = flutterDevices.first!.vmService!.wsAddress.toString();
+        final String address = flutterDevices.first.vmService!.wsAddress.toString();
         final File vmserviceOutFile = globals.fs.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);

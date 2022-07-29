@@ -81,7 +81,7 @@ const String kExitMessage = 'Failed to establish connection with the application
 
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
-    FlutterDevice? device, {
+    FlutterDevice device, {
     String? target,
     bool stayResident = true,
     bool machine = false,
@@ -100,7 +100,7 @@ class ResidentWebRunner extends ResidentRunner {
        _usage = usage,
        _urlTunneller = urlTunneller,
        super(
-          <FlutterDevice?>[device],
+          <FlutterDevice>[device],
           target: target ?? fileSystem!.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
@@ -439,8 +439,8 @@ class ResidentWebRunner extends ResidentRunner {
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
         final String parent = _fileSystem!.file(mainUri).parent.path;
-        flutterDevices.first!.generator!.addFileSystemRoot(parent);
-        flutterDevices.first!.generator!.addFileSystemRoot(_fileSystem!.directory('test').absolute.path);
+        flutterDevices.first.generator!.addFileSystemRoot(parent);
+        flutterDevices.first.generator!.addFileSystemRoot(_fileSystem!.directory('test').absolute.path);
         importedEntrypoint = Uri(
           scheme: 'org-dartlang-app',
           path: '/${mainUri.pathSegments.last}',

@@ -736,7 +736,7 @@ class AppDomain extends Domain {
     if (app == null) {
       throw DaemonException("app '$appId' not found");
     }
-    final FlutterDevice device = app.runner!.flutterDevices.first!;
+    final FlutterDevice device = app.runner!.flutterDevices.first;
     final List<FlutterView> views = await device.vmService!.getFlutterViews();
     final Map<String, dynamic>? result = await device
       .vmService!

@@ -141,7 +141,7 @@ class HotRunner extends ResidentRunner {
     }
 
     if (flutterDevices.length == 1) {
-      final Device device = flutterDevices.first!.device!;
+      final Device device = flutterDevices.first.device!;
       _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
       _sdkName = await device.sdkNameAndVersion;
       _emulator = await device.isLocalEmulator;
@@ -257,8 +257,8 @@ class HotRunner extends ResidentRunner {
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first!.vmService!.httpAddress,
-            wsUri: flutterDevices.first!.vmService!.wsAddress,
+            httpUri: flutterDevices.first.vmService!.httpAddress,
+            wsUri: flutterDevices.first.vmService!.wsAddress,
             baseUri: baseUris.first.toString(),
           ),
         );
@@ -455,11 +455,11 @@ class HotRunner extends ResidentRunner {
 
     final Stopwatch findInvalidationTimer = _stopwatchFactory.createStopwatch('updateDevFS')..start();
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
-      lastCompiled: flutterDevices[0]!.devFS!.lastCompiled,
-      urisToMonitor: flutterDevices[0]!.devFS!.sources,
+      lastCompiled: flutterDevices[0].devFS!.lastCompiled,
+      urisToMonitor: flutterDevices[0].devFS!.sources,
       packagesPath: packagesFilePath,
       asyncScanning: hotRunnerConfig!.asyncScanning,
-      packageConfig: flutterDevices[0]!.devFS!.lastPackageConfig
+      packageConfig: flutterDevices[0].devFS!.lastPackageConfig
           ?? debuggingOptions.buildInfo.packageConfig,
     );
     findInvalidationTimer.stop();
@@ -474,7 +474,7 @@ class HotRunner extends ResidentRunner {
     }
     final UpdateFSReport results = UpdateFSReport(
       success: true,
-      scannedSourcesCount: flutterDevices[0]!.devFS!.sources.length,
+      scannedSourcesCount: flutterDevices[0].devFS!.sources.length,
       findInvalidatedDuration: findInvalidationTimer.elapsed,
     );
     for (final FlutterDevice? device in flutterDevices) {
@@ -498,8 +498,8 @@ class HotRunner extends ResidentRunner {
 
   void _resetDirtyAssets() {
     for (final FlutterDevice? device in flutterDevices) {
-      device!.devFS!.assetPathsToEvict.clear();
-      device.devFS!.shaderPathsToEvict.clear();
+      device!.devFS?.assetPathsToEvict.clear();
+      device.devFS?.shaderPathsToEvict.clear();
     }
   }
 
