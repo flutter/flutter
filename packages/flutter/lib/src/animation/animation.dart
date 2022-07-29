@@ -75,16 +75,18 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// ```dart
   /// ValueNotifier<double> get scrollPosition;
   ///
-  /// return ValueListenableBuilder<double>(
-  ///   valueListenable: scrollPosition,
-  ///   builder: (BuildContext context, double value, Widget child) {
-  ///     double opacity = (value / 1000).clamp(0, 1);
-  ///     return Opacity(opacity: opacity, child: child);
-  ///   },
-  ///   child: Container(
-  ///     child: Text('Hello, Animation'),
-  ///   ),
-  /// );
+  /// Widget build(BuildContext context) {
+  ///   return ValueListenableBuilder<double>(
+  ///     valueListenable: scrollPosition,
+  ///     builder: (BuildContext context, double value, Widget child) {
+  ///       double opacity = (value / 1000).clamp(0, 1);
+  ///       return Opacity(opacity: opacity, child: child);
+  ///     },
+  ///     child: Container(
+  ///       child: Text('Hello, Animation'),
+  ///     ),
+  ///   );
+  /// }
   /// ```
   ///
   /// After:
@@ -92,14 +94,16 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// ```dart
   /// ValueNotifier<double> get scrollPosition;
   ///
-  /// return FadeTransition(
-  ///   opacity: Animation.fromValueListenable(scrollPosition, transformer: (double value) {
-  ///     return (value / 1000).clamp(0, 1);
-  ///   })
-  ///   child: Container(
-  ///     child: Text('Hello, Animation'),
-  ///   ),
-  /// );
+  /// Widget build(BuildContext context) {
+  ///   return FadeTransition(
+  ///     opacity: Animation.fromValueListenable(scrollPosition, transformer: (double value) {
+  ///       return (value / 1000).clamp(0, 1);
+  ///     })
+  ///     child: Container(
+  ///       child: Text('Hello, Animation'),
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   factory Animation.fromValueListenable(ValueListenable<T> listenable, {
