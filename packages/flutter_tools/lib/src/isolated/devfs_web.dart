@@ -27,6 +27,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/targets/shader_compiler.dart';
 import '../build_system/targets/web.dart';
 import '../bundle_builder.dart';
 import '../cache.dart';
@@ -792,6 +793,7 @@ class WebDevFS implements DevFS {
     required List<Uri> invalidatedFiles,
     required PackageConfig packageConfig,
     required String dillOutputPath,
+    required DevelopmentShaderCompiler shaderCompiler,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -923,6 +925,9 @@ class WebDevFS implements DevFS {
   void resetLastCompiled() {
     // Not used for web compilation.
   }
+
+  @override
+  Set<String> get shaderPathsToEvict => <String>{};
 }
 
 class ReleaseAssetServer {

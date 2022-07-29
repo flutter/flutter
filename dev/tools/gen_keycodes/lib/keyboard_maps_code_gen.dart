@@ -13,8 +13,9 @@ import 'physical_key_data.dart';
 import 'utils.dart';
 
 bool _isAsciiLetter(String? char) {
-  if (char == null)
+  if (char == null) {
     return false;
+  }
   const int charUpperA = 0x41;
   const int charUpperZ = 0x5A;
   const int charLowerA = 0x61;
@@ -26,8 +27,9 @@ bool _isAsciiLetter(String? char) {
 }
 
 bool _isDigit(String? char) {
-  if (char == null)
+  if (char == null) {
     return false;
+  }
   final int charDigit0 = '0'.codeUnitAt(0);
   final int charDigit9 = '9'.codeUnitAt(0);
   assert(char.length == 1);

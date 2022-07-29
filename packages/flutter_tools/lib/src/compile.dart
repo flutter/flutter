@@ -276,6 +276,13 @@ class KernelCompiler {
         ? buildDir?.parent.childFile('dart_plugin_registrant.dart')
         : null;
 
+    String? dartPluginRegistrantUri;
+    if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
+      final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
+      dartPluginRegistrantUri = packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
+        toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
+    }
+
     final List<String> command = <String>[
       engineDartPath,
       '--disable-dart-dev',
@@ -323,12 +330,12 @@ class KernelCompiler {
         '--platform',
         platformDill,
       ],
-      if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) ...<String>[
+      if (dartPluginRegistrantUri != null) ...<String>[
         '--source',
-        dartPluginRegistrant.path,
+        dartPluginRegistrantUri,
         '--source',
         'package:flutter/src/dart_plugin_registrant.dart',
-        '-Dflutter.dart_plugin_registrant=${toMultiRootPath(dartPluginRegistrant.uri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\')}',
+        '-Dflutter.dart_plugin_registrant=$dartPluginRegistrantUri',
       ],
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',

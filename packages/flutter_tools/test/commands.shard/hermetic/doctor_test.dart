@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210723"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -17,6 +11,7 @@ import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -25,7 +20,6 @@ import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -743,10 +737,15 @@ void main() {
   });
 
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
-    expect(DoctorValidatorsProvider.defaultInstance.workflows,
-      contains(isA<WebWorkflow>()));
+    final List<Workflow> workflows = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      platform: FakePlatform(),
+    ).workflows;
+    expect(
+      workflows,
+      contains(isA<WebWorkflow>()),
+    );
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => fakeProcessManager,
   });
@@ -769,12 +768,29 @@ void main() {
   }, initializeFlutterRoot: false);
 
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
-    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<AndroidStudioValidator>())));
-    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+    final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+    );
+    expect(provider.validators, isNot(contains(isA<AndroidStudioValidator>())));
+    expect(provider.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+    AndroidWorkflow: () => FakeAndroidWorkflow(appliesToHostPlatform: false),
   });
 }
+
+class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
+  FakeAndroidWorkflow({
+    this.canListDevices = true,
+    this.appliesToHostPlatform = true,
+  });
+
+  @override
+  final bool canListDevices;
+
+  @override
+  final bool appliesToHostPlatform;
+}
+
 
 class NoOpDoctor implements Doctor {
   @override

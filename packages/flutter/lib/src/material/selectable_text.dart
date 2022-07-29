@@ -509,7 +509,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   @override
   void dispose() {
     _focusNode?.dispose();
-    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
     super.dispose();
   }
 
