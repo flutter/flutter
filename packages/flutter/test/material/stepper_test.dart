@@ -1185,7 +1185,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     Color? circleFillColor() {
       final Finder container = find.widgetWithText(AnimatedContainer, '1');
-      return (tester.widget<AnimatedContainer>(container).decoration as BoxDecoration?)?.color;
+      return (tester.widget<AnimatedContainer>(container).decoration as ShapeDecoration?)?.color;
     }
 
     // Light theme

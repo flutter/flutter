@@ -2366,7 +2366,7 @@ class _MonthItemState extends State<_MonthItem> {
 
     final bool isDisabled = dayToBuild.isAfter(widget.lastDate) || dayToBuild.isBefore(widget.firstDate);
 
-    BoxDecoration? decoration;
+    ShapeDecoration? decoration;
     TextStyle? itemStyle = textTheme.bodyMedium;
 
     final bool isRangeSelected = widget.selectedDateStart != null && widget.selectedDateEnd != null;
@@ -2410,9 +2410,9 @@ class _MonthItemState extends State<_MonthItem> {
       // The selected start and end dates gets a circle background
       // highlight, and a contrasting text color.
       itemStyle = textTheme.bodyMedium?.apply(color: dayForegroundColor);
-      decoration = BoxDecoration(
+      decoration = ShapeDecoration(
         color: dayBackgroundColor,
-        shape: BoxShape.circle,
+        shape: const CircleBorder(),
       );
 
       if (isRangeSelected && widget.selectedDateStart != widget.selectedDateEnd) {
@@ -2438,9 +2438,11 @@ class _MonthItemState extends State<_MonthItem> {
       // The current day gets a different text color and a circle stroke
       // border.
       itemStyle = textTheme.bodyMedium?.apply(color: colorScheme.primary);
-      decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary),
-        shape: BoxShape.circle,
+      decoration = ShapeDecoration(
+        color: colorScheme.primary,
+        shape: CircleBorder(
+          side: BorderSide(color: colorScheme.primary),
+        ),
       );
     }
 

@@ -97,9 +97,9 @@ class ProductPreview extends StatelessWidget {
           Container(
             margin: const EdgeInsets.all(23),
             padding: const EdgeInsets.all(18),
-            decoration: const BoxDecoration(
+            decoration: const ShapeDecoration(
               color: Color(0xfff9f9f9),
-              shape: BoxShape.circle,
+              shape: CircleBorder(),
             ),
             child: Image.network(
               'assets/assets/Icon-192.png',

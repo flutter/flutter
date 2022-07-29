@@ -94,6 +94,11 @@ class BoxDecoration extends Decoration {
     this.boxShadow,
     this.gradient,
     this.backgroundBlendMode,
+    @Deprecated(
+      'Replace BoxDecoration(shape: BoxShape.circle) with ShapeDecoration(shape: const CircleBorder()). '
+      'ShapeDecoration is more efficient (by caching shapes) and allows code to be tree-shaken, unlike BoxDecoration.shape. '
+      'This feature was deprecated after v3.4.0-34.1.pre.',
+    )
     this.shape = BoxShape.rectangle,
   }) : assert(
          backgroundBlendMode == null || color != null || gradient != null,
@@ -111,6 +116,11 @@ class BoxDecoration extends Decoration {
     List<BoxShadow>? boxShadow,
     Gradient? gradient,
     BlendMode? backgroundBlendMode,
+    @Deprecated(
+      'Replace BoxDecoration(shape: BoxShape.circle) with ShapeDecoration(shape: const CircleBorder()). '
+      'ShapeDecoration is more efficient (by caching shapes) and allows code to be tree-shaken, unlike BoxDecoration.shape. '
+      'This feature was deprecated after v3.4.0-34.1.pre.',
+    )
     BoxShape? shape,
   }) {
     return BoxDecoration(
@@ -207,6 +217,11 @@ class BoxDecoration extends Decoration {
   /// [BoxShape.rectangle].
   ///
   /// {@macro flutter.painting.BoxDecoration.clip}
+  @Deprecated(
+    'Replace BoxDecoration(shape: BoxShape.circle) with ShapeDecoration(shape: const CircleBorder()). '
+    'ShapeDecoration is more efficient (by caching shapes) and allows code to be tree-shaken, unlike BoxDecoration.shape. '
+    'This feature was deprecated after v3.4.0-34.1.pre.',
+  )
   final BoxShape shape;
 
   @override

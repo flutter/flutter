@@ -14,10 +14,17 @@ import 'edge_insets.dart';
 
 /// The shape to use when rendering a [Border] or [BoxDecoration].
 ///
+/// [BoxDecoration.shape] (the main [BoxShape] usage) is now deprecated.
 /// Consider using [ShapeBorder] subclasses directly (with [ShapeDecoration]),
 /// instead of using [BoxShape] and [Border], if the shapes will need to be
 /// interpolated or animated. The [Border] class cannot interpolate between
 /// different shapes.
+///
+/// [BoxShape] is also used to determine the shape of the highlight
+/// produced by [InkWell], [InkResponse] and [InkHighlight] widgets.
+/// See also:
+///
+///  * [InkWell.highlightShape], how BoxShape determines the highlight drawn.
 enum BoxShape {
   /// An axis-aligned, 2D rectangle. May have rounded corners (described by a
   /// [BorderRadius]). The edges of the rectangle will match the edges of the box

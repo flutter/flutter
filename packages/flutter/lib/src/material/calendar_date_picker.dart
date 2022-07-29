@@ -986,18 +986,17 @@ class _DayPickerState extends State<_DayPicker> {
         final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
           (Set<MaterialState> states) => effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
         );
-        final BoxDecoration decoration = isToday
-          ? BoxDecoration(
+        final ShapeDecoration decoration = isToday
+          ? ShapeDecoration(
               color: dayBackgroundColor,
-              border: Border.fromBorderSide(
-                (datePickerTheme.todayBorder ?? defaults.todayBorder!)
-                  .copyWith(color: dayForegroundColor)
+              shape: CircleBorder(
+                side: (datePickerTheme.todayBorder ?? defaults.todayBorder!)
+                  .copyWith(color: dayForegroundColor),
               ),
-              shape: BoxShape.circle,
             )
-          : BoxDecoration(
+          : ShapeDecoration(
               color: dayBackgroundColor,
-              shape: BoxShape.circle,
+              shape: const CircleBorder(),
             );
 
         Widget dayWidget = Container(

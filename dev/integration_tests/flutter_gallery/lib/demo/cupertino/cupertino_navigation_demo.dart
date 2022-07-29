@@ -539,28 +539,28 @@ class Tab2Header extends StatelessWidget {
                           Container(
                             width: 44.0,
                             height: 44.0,
-                            decoration: const BoxDecoration(
+                            decoration: const ShapeDecoration(
                               image: DecorationImage(
                                 image: AssetImage(
                                   'people/square/trevor.png',
                                   package: _kGalleryAssetsPackage,
                                 ),
                               ),
-                              shape: BoxShape.circle,
+                              shape: CircleBorder(),
                             ),
                           ),
                           const Padding(padding: EdgeInsets.only(left: 8.0)),
                           Container(
                             width: 44.0,
                             height: 44.0,
-                            decoration: const BoxDecoration(
+                            decoration: const ShapeDecoration(
                               image: DecorationImage(
                                 image: AssetImage(
                                   'people/square/sandra.png',
                                   package: _kGalleryAssetsPackage,
                                 ),
                               ),
-                              shape: BoxShape.circle,
+                              shape: CircleBorder(),
                             ),
                           ),
                           const Padding(padding: EdgeInsets.only(left: 2.0)),
@@ -639,8 +639,8 @@ class Tab2ConversationAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
+      decoration: ShapeDecoration(
+        shape: const CircleBorder(),
         gradient: LinearGradient(
           begin: FractionalOffset.topCenter,
           end: FractionalOffset.bottomCenter,

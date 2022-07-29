@@ -224,8 +224,8 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 Container(
                   width: 100.0,
                   height: 100.0,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
+                  decoration: const ShapeDecoration(
+                    shape: CircleBorder(),
                     image: DecorationImage(
                       image: AssetImage(
                         _kAsset0,

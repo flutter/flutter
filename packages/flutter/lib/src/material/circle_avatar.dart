@@ -228,7 +228,7 @@ class CircleAvatar extends StatelessWidget {
         maxHeight: maxDiameter,
       ),
       duration: kThemeChangeDuration,
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: effectiveBackgroundColor,
         image: backgroundImage != null
           ? DecorationImage(
@@ -237,16 +237,16 @@ class CircleAvatar extends StatelessWidget {
               fit: BoxFit.cover,
             )
           : null,
-        shape: BoxShape.circle,
+        shape: const CircleBorder(),
       ),
       foregroundDecoration: foregroundImage != null
-          ? BoxDecoration(
+          ? ShapeDecoration(
               image: DecorationImage(
                 image: foregroundImage!,
                 onError: onForegroundImageError,
                 fit: BoxFit.cover,
               ),
-              shape: BoxShape.circle,
+              shape: const CircleBorder(),
             )
           : null,
       child: child == null
