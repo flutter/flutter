@@ -107,7 +107,7 @@ void main() {
     await testBorder(tester, 'side_align_center',
         const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
     await testBorder(tester, 'side_align_outside',
-        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside));
+        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
   testWidgets('StarBorder.polygon parameters', (WidgetTester tester) async {

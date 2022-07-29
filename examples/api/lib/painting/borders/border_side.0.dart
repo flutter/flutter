@@ -24,13 +24,15 @@ class BorderSideExample extends StatefulWidget {
   State<BorderSideExample> createState() => _BorderSideExampleState();
 }
 
-class _BorderSideExampleState extends State<BorderSideExample> with TickerProviderStateMixin {
+class _BorderSideExampleState extends State<BorderSideExample>
+    with TickerProviderStateMixin {
   late final AnimationController animation;
 
   @override
   void initState() {
     super.initState();
-    animation = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    animation =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
     animation.repeat(reverse: true);
     animation.addListener(_markDirty);
   }
@@ -47,7 +49,7 @@ class _BorderSideExampleState extends State<BorderSideExample> with TickerProvid
 
   static const double borderWidth = 10;
   static const double cornerRadius = 10;
-  static final Color borderColor = Colors.red.shade500;
+  static const Color borderColor = Color(0x8000b4fc);
 
   @override
   Widget build(BuildContext context) {
@@ -65,20 +67,11 @@ class _BorderSideExampleState extends State<BorderSideExample> with TickerProvid
                 ),
               ),
             ),
-            TestBox(
-              shape: CircleBorder(
-                side: BorderSide(
-                  color: borderColor,
-                  width: borderWidth,
-                  strokeAlign: (animation.value * 2) - 1,
-                ),
-              ),
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 TestBox(
-                  shape: ContinuousRectangleBorder(
+                  shape: CircleBorder(
                     side: BorderSide(
                       color: borderColor,
                       width: borderWidth,
@@ -87,8 +80,7 @@ class _BorderSideExampleState extends State<BorderSideExample> with TickerProvid
                   ),
                 ),
                 TestBox(
-                  shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(cornerRadius),
+                  shape: OvalBorder(
                     side: BorderSide(
                       color: borderColor,
                       width: borderWidth,
@@ -137,6 +129,43 @@ class _BorderSideExampleState extends State<BorderSideExample> with TickerProvid
                 TestBox(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(cornerRadius),
+                    side: BorderSide(
+                      color: borderColor,
+                      width: borderWidth,
+                      strokeAlign: (animation.value * 2) - 1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                TestBox(
+                  shape: StarBorder(
+                    side: BorderSide(
+                      color: borderColor,
+                      width: borderWidth,
+                      strokeAlign: (animation.value * 2) - 1,
+                    ),
+                  ),
+                ),
+                TestBox(
+                  shape: StarBorder(
+                    pointRounding: 1,
+                    innerRadiusRatio: 0.5,
+                    points: 8,
+                    side: BorderSide(
+                      color: borderColor,
+                      width: borderWidth,
+                      strokeAlign: (animation.value * 2) - 1,
+                    ),
+                  ),
+                ),
+                TestBox(
+                  shape: StarBorder.polygon(
+                    sides: 6,
+                    pointRounding: 0.5,
                     side: BorderSide(
                       color: borderColor,
                       width: borderWidth,
@@ -167,7 +196,7 @@ class TestBox extends StatelessWidget {
       width: 100,
       height: 50,
       decoration: ShapeDecoration(
-        color: Colors.blue.shade500,
+        color: const Color(0xff012677),
         shape: shape,
       ),
     );
