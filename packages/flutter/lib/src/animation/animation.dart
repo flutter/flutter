@@ -84,6 +84,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///   child: Container(
   ///     child: Text('Hello, Animation'),
   ///   ),
+  /// );
   /// ```
   ///
   /// After:
@@ -98,6 +99,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///   child: Container(
   ///     child: Text('Hello, Animation'),
   ///   ),
+  /// );
   /// ```
   /// {@end-tool}
   factory Animation.fromValueListenable(ValueListenable<T> listenable, {
