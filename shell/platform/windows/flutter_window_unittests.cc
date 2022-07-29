@@ -137,7 +137,7 @@ class MockFlutterWindow : public FlutterWindow {
   MOCK_METHOD1(Win32MapVkToChar, uint32_t(uint32_t));
 
  protected:
-  // |KeyboardManagerWin32::WindowDelegate|
+  // |KeyboardManager::WindowDelegate|
   LRESULT Win32DefWindowProc(HWND hWnd,
                              UINT Msg,
                              WPARAM wParam,

@@ -10,7 +10,7 @@
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_handler.h"
-#include "flutter/shell/platform/windows/keyboard_manager_win32.h"
+#include "flutter/shell/platform/windows/keyboard_manager.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
@@ -94,10 +94,10 @@ UINT LayoutFrench(UINT uCode, UINT uMapType) {
   }
 }
 
-class TestKeyboardManagerWin32 : public KeyboardManagerWin32 {
+class TestKeyboardManager : public KeyboardManager {
  public:
-  explicit TestKeyboardManagerWin32(WindowDelegate* delegate)
-      : KeyboardManagerWin32(delegate) {}
+  explicit TestKeyboardManager(WindowDelegate* delegate)
+      : KeyboardManager(delegate) {}
 
   bool DuringRedispatch() { return during_redispatch_; }
 
@@ -105,7 +105,7 @@ class TestKeyboardManagerWin32 : public KeyboardManagerWin32 {
   void RedispatchEvent(std::unique_ptr<PendingEvent> event) override {
     assert(!during_redispatch_);
     during_redispatch_ = true;
-    KeyboardManagerWin32::RedispatchEvent(std::move(event));
+    KeyboardManager::RedispatchEvent(std::move(event));
     during_redispatch_ = false;
   }
 
@@ -175,18 +175,17 @@ class TestKeystate {
   std::map<uint32_t, SHORT> state_;
 };
 
-class MockKeyboardManagerWin32Delegate
-    : public KeyboardManagerWin32::WindowDelegate,
-      protected MockMessageQueue {
+class MockKeyboardManagerDelegate : public KeyboardManager::WindowDelegate,
+                                    protected MockMessageQueue {
  public:
-  MockKeyboardManagerWin32Delegate(WindowBindingHandlerDelegate* view,
-                                   MapVirtualKeyToChar map_vk_to_char)
+  MockKeyboardManagerDelegate(WindowBindingHandlerDelegate* view,
+                              MapVirtualKeyToChar map_vk_to_char)
       : view_(view), map_vk_to_char_(std::move(map_vk_to_char)) {
-    keyboard_manager_ = std::make_unique<TestKeyboardManagerWin32>(this);
+    keyboard_manager_ = std::make_unique<TestKeyboardManager>(this);
   }
-  virtual ~MockKeyboardManagerWin32Delegate() {}
+  virtual ~MockKeyboardManagerDelegate() {}
 
-  // |KeyboardManagerWin32::WindowDelegate|
+  // |KeyboardManager::WindowDelegate|
   void OnKey(int key,
              int scancode,
              int action,
@@ -198,7 +197,7 @@ class MockKeyboardManagerWin32Delegate
                  callback);
   }
 
-  // |KeyboardManagerWin32::WindowDelegate|
+  // |KeyboardManager::WindowDelegate|
   void OnText(const std::u16string& text) override { view_->OnText(text); }
 
   SHORT GetKeyState(int virtual_key) { return key_state_.Get(virtual_key); }
@@ -306,7 +305,7 @@ class MockKeyboardManagerWin32Delegate
   };
 
   WindowBindingHandlerDelegate* view_;
-  std::unique_ptr<TestKeyboardManagerWin32> keyboard_manager_;
+  std::unique_ptr<TestKeyboardManager> keyboard_manager_;
   std::list<ForgedMessageExpectation> forged_message_expectations_;
   MapVirtualKeyToChar map_vk_to_char_;
   TestKeystate key_state_;
@@ -446,14 +445,14 @@ class KeyboardTester {
           });
           callback_handler(event, callback);
         }));
-    window_ = std::make_unique<MockKeyboardManagerWin32Delegate>(
+    window_ = std::make_unique<MockKeyboardManagerDelegate>(
         view_.get(), [this](UINT virtual_key) -> SHORT {
           return map_virtual_key_layout_(virtual_key, MAPVK_VK_TO_CHAR);
         });
   }
 
   TestFlutterWindowsView& GetView() { return *view_; }
-  MockKeyboardManagerWin32Delegate& GetWindow() { return *window_; }
+  MockKeyboardManagerDelegate& GetWindow() { return *window_; }
 
   // Set all events to be handled (true) or unhandled (false).
   void Responding(bool response) { callback_handler_ = RespondValue(response); }
@@ -489,7 +488,7 @@ class KeyboardTester {
 
  private:
   std::unique_ptr<TestFlutterWindowsView> view_;
-  std::unique_ptr<MockKeyboardManagerWin32Delegate> window_;
+  std::unique_ptr<MockKeyboardManagerDelegate> window_;
   MockKeyResponseController::EmbedderCallbackHandler callback_handler_;
   MapVirtualKeyLayout map_virtual_key_layout_;
 

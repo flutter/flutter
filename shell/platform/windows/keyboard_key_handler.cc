@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#include "flutter/shell/platform/windows/keyboard_win32_common.h"
+#include "flutter/shell/platform/windows/keyboard_utils.h"
 
 namespace flutter {
 

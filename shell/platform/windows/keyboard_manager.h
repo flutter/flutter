@@ -15,17 +15,17 @@ namespace flutter {
 
 // Handles keyboard and text messages on Win32.
 //
-// |KeyboardManagerWin32| consumes raw Win32 messages related to key and chars,
-// and converts them to key calls (|WindowDelegate::OnKey|) and possibly
-// text calls (|WindowDelegate::OnText|).
+// |KeyboardManager| consumes raw Win32 messages related to key and chars, and
+// converts them to key calls (|WindowDelegate::OnKey|) and possibly text calls
+// (|WindowDelegate::OnText|).
 //
-// |KeyboardManagerWin32| requires a |WindowDelegate| to define how to
-// access Win32 system calls (to allow mocking) and where to send the results
-// of key calls and text calls to.
+// |KeyboardManager| requires a |WindowDelegate| to define how to access Win32
+// system calls (to allow mocking) and where to send the results of key calls
+// and text calls to.
 //
-// Typically, |KeyboardManagerWin32| is owned by a |Window|, which also
-// implements the window delegate. The key calls and text calls are forwarded
-// to those of |Window|'s, and consequently, those of |FlutterWindowsView|'s.
+// Typically, |KeyboardManager| is owned by a |Window|, which also implements
+// the window delegate. The key calls and text calls are forwarded to those of
+// |Window|'s, and consequently, those of |FlutterWindowsView|'s.
 //
 // ## Terminology
 //
@@ -40,7 +40,7 @@ namespace flutter {
 //  * Event: A FlutterKeyEvent/ui.KeyData sent to the framework.
 //  * Call: A call to |WindowDelegate::OnKey| or |WindowDelegate::OnText|,
 //    which contains semi-processed messages.
-class KeyboardManagerWin32 {
+class KeyboardManager {
  public:
   // Define how the keyboard manager accesses Win32 system calls (to allow
   // mocking) and sends key calls and and text calls.
@@ -89,7 +89,7 @@ class KeyboardManagerWin32 {
 
   using KeyEventCallback = WindowDelegate::KeyEventCallback;
 
-  explicit KeyboardManagerWin32(WindowDelegate* delegate);
+  explicit KeyboardManager(WindowDelegate* delegate);
 
   // Processes Win32 messages related to keyboard and text.
   //

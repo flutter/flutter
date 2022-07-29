@@ -7,9 +7,8 @@
 #include <memory>
 #include <string>
 
-#include "keyboard_manager_win32.h"
-
-#include "keyboard_win32_common.h"
+#include "flutter/shell/platform/windows/keyboard_manager.h"
+#include "flutter/shell/platform/windows/keyboard_utils.h"
 
 namespace flutter {
 
@@ -104,14 +103,13 @@ static bool IsSysAction(UINT action) {
 
 }  // namespace
 
-KeyboardManagerWin32::KeyboardManagerWin32(WindowDelegate* delegate)
+KeyboardManager::KeyboardManager(WindowDelegate* delegate)
     : window_delegate_(delegate),
       last_key_is_ctrl_left_down(false),
       should_synthesize_ctrl_left_up(false),
       processing_event_(false) {}
 
-void KeyboardManagerWin32::RedispatchEvent(
-    std::unique_ptr<PendingEvent> event) {
+void KeyboardManager::RedispatchEvent(std::unique_ptr<PendingEvent> event) {
   for (const Win32Message& message : event->session) {
     // Never redispatch sys keys, because their original messages have been
     // passed to the system default processor.
@@ -134,9 +132,9 @@ void KeyboardManagerWin32::RedispatchEvent(
   }
 }
 
-bool KeyboardManagerWin32::RemoveRedispatchedMessage(UINT const action,
-                                                     WPARAM const wparam,
-                                                     LPARAM const lparam) {
+bool KeyboardManager::RemoveRedispatchedMessage(UINT const action,
+                                                WPARAM const wparam,
+                                                LPARAM const lparam) {
   for (auto iter = pending_redispatches_.begin();
        iter != pending_redispatches_.end(); ++iter) {
     if (action == iter->action && wparam == iter->wparam) {
@@ -147,9 +145,9 @@ bool KeyboardManagerWin32::RemoveRedispatchedMessage(UINT const action,
   return false;
 }
 
-bool KeyboardManagerWin32::HandleMessage(UINT const action,
-                                         WPARAM const wparam,
-                                         LPARAM const lparam) {
+bool KeyboardManager::HandleMessage(UINT const action,
+                                    WPARAM const wparam,
+                                    LPARAM const lparam) {
   if (RemoveRedispatchedMessage(action, wparam, lparam)) {
     return false;
   }
@@ -331,7 +329,7 @@ bool KeyboardManagerWin32::HandleMessage(UINT const action,
   return false;
 }
 
-void KeyboardManagerWin32::ProcessNextEvent() {
+void KeyboardManager::ProcessNextEvent() {
   if (processing_event_ || pending_events_.empty()) {
     return;
   }
@@ -345,9 +343,8 @@ void KeyboardManagerWin32::ProcessNextEvent() {
   });
 }
 
-void KeyboardManagerWin32::PerformProcessEvent(
-    std::unique_ptr<PendingEvent> event,
-    std::function<void()> callback) {
+void KeyboardManager::PerformProcessEvent(std::unique_ptr<PendingEvent> event,
+                                          std::function<void()> callback) {
   // PendingEvent::action being WM_CHAR means this is a char message without
   // a preceding key message, and should be dispatched immediately.
   if (event->action == WM_CHAR) {
@@ -369,9 +366,8 @@ void KeyboardManagerWin32::PerformProcessEvent(
       });
 }
 
-void KeyboardManagerWin32::HandleOnKeyResult(
-    std::unique_ptr<PendingEvent> event,
-    bool framework_handled) {
+void KeyboardManager::HandleOnKeyResult(std::unique_ptr<PendingEvent> event,
+                                        bool framework_handled) {
   const UINT last_action = event->session.back().action;
   // SYS messages must not be redispached, and their text content is not
   // dispatched either.
@@ -391,7 +387,7 @@ void KeyboardManagerWin32::HandleOnKeyResult(
   RedispatchEvent(std::move(event));
 }
 
-void KeyboardManagerWin32::DispatchText(const PendingEvent& event) {
+void KeyboardManager::DispatchText(const PendingEvent& event) {
   // Check if the character is printable based on the last wparam, which works
   // even if the last wparam is a low surrogate, because the only unprintable
   // keys defined by `IsPrintable` are certain characters at lower ASCII range.
@@ -406,8 +402,8 @@ void KeyboardManagerWin32::DispatchText(const PendingEvent& event) {
   }
 }
 
-UINT KeyboardManagerWin32::PeekNextMessageType(UINT wMsgFilterMin,
-                                               UINT wMsgFilterMax) {
+UINT KeyboardManager::PeekNextMessageType(UINT wMsgFilterMin,
+                                          UINT wMsgFilterMax) {
   MSG next_message;
   BOOL has_msg = window_delegate_->Win32PeekMessage(
       &next_message, wMsgFilterMin, wMsgFilterMax, PM_NOREMOVE);

@@ -15,7 +15,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/direct_manipulation.h"
-#include "flutter/shell/platform/windows/keyboard_manager_win32.h"
+#include "flutter/shell/platform/windows/keyboard_manager.h"
 #include "flutter/shell/platform/windows/sequential_id_generator.h"
 #include "flutter/shell/platform/windows/text_input_manager.h"
 #include "flutter/third_party/accessibility/gfx/native_widget_types.h"
@@ -25,7 +25,7 @@ namespace flutter {
 // A class abstraction for a high DPI aware Win32 Window.  Intended to be
 // inherited from by classes that wish to specialize with custom
 // rendering and input handling.
-class Window : public KeyboardManagerWin32::WindowDelegate {
+class Window : public KeyboardManager::WindowDelegate {
  public:
   Window();
   Window(std::unique_ptr<TextInputManager> text_input_manager);
@@ -40,16 +40,16 @@ class Window : public KeyboardManagerWin32::WindowDelegate {
 
   HWND GetWindowHandle();
 
-  // |KeyboardManagerWin32::WindowDelegate|
+  // |KeyboardManager::WindowDelegate|
   virtual BOOL Win32PeekMessage(LPMSG lpMsg,
                                 UINT wMsgFilterMin,
                                 UINT wMsgFilterMax,
                                 UINT wRemoveMsg) override;
 
-  // |KeyboardManagerWin32::WindowDelegate|
+  // |KeyboardManager::WindowDelegate|
   virtual uint32_t Win32MapVkToChar(uint32_t virtual_key) override;
 
-  // |KeyboardManagerWin32::WindowDelegate|
+  // |KeyboardManager::WindowDelegate|
   virtual UINT Win32DispatchMessage(UINT Msg,
                                     WPARAM wParam,
                                     LPARAM lParam) override;
@@ -270,7 +270,7 @@ class Window : public KeyboardManagerWin32::WindowDelegate {
   std::unique_ptr<TextInputManager> text_input_manager_;
 
   // Manages IME state.
-  std::unique_ptr<KeyboardManagerWin32> keyboard_manager_;
+  std::unique_ptr<KeyboardManager> keyboard_manager_;
 
   // Used for temporarily storing the WM_TOUCH-provided touch points.
   std::vector<TOUCHINPUT> touch_points_;
