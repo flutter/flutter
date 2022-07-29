@@ -28,7 +28,7 @@ Future<void> testMain() async {
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
 
   // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
+  Future<void> checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 240),
         double maxDiffRatePercent = 0.0, bool write = false}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
@@ -139,7 +139,7 @@ Future<void> testMain() async {
     canvas.drawRect(rectBounds, borderPaint);
 
     canvas.restore();
-    await _checkScreenshot(canvas, 'sweep_gradient_rect');
+    await checkScreenshot(canvas, 'sweep_gradient_rect');
   }, skip: isFirefox);
 
   test('Paints sweep gradient ovals', () async {
@@ -218,7 +218,7 @@ Future<void> testMain() async {
     canvas.drawRect(rectBounds, borderPaint);
 
     canvas.restore();
-    await _checkScreenshot(canvas, 'sweep_gradient_oval');
+    await checkScreenshot(canvas, 'sweep_gradient_oval');
   }, skip: isFirefox);
 
   test('Paints sweep gradient paths', () async {
@@ -302,7 +302,7 @@ Future<void> testMain() async {
     canvas.drawRect(rectBounds, borderPaint);
 
     canvas.restore();
-    await _checkScreenshot(canvas, 'sweep_gradient_path');
+    await checkScreenshot(canvas, 'sweep_gradient_path');
   }, skip: isFirefox);
 
   /// Regression test for https://github.com/flutter/flutter/issues/74137.
@@ -350,7 +350,7 @@ Future<void> testMain() async {
     canvas.drawRect(rectBounds, borderPaint);
 
     canvas.restore();
-    await _checkScreenshot(canvas, 'linear_gradient_rect_shifted');
+    await checkScreenshot(canvas, 'linear_gradient_rect_shifted');
   }, skip: isFirefox);
 
   /// Regression test for https://github.com/flutter/flutter/issues/82748.
@@ -389,7 +389,7 @@ Future<void> testMain() async {
     canvas.apply(engineCanvas, screenRect);
   });
 
-  test('Creating lots of gradients doesn\'t create too many webgl contexts',
+  test("Creating lots of gradients doesn't create too many webgl contexts",
       () async {
     final DomCanvasElement sideCanvas =
         createDomCanvasElement(width: 5, height: 5);
@@ -407,7 +407,7 @@ Future<void> testMain() async {
         ];
 
         final GradientLinear linearGradient = GradientLinear(
-            const Offset(0, 0),
+            Offset.zero,
             const Offset(10, 10),
             colors,
             null,
@@ -465,7 +465,7 @@ Future<void> testMain() async {
     canvas.drawRect(rectBounds, borderPaint);
 
     canvas.restore();
-    await _checkScreenshot(canvas, 'linear_gradient_rect_clamp_rotated');
+    await checkScreenshot(canvas, 'linear_gradient_rect_clamp_rotated');
   });
 
   test('Paints linear gradient properly when within svg context', () async {
@@ -499,7 +499,7 @@ Future<void> testMain() async {
     canvas.drawRect(rectBounds, borderPaint);
 
     canvas.restore();
-    await _checkScreenshot(canvas, 'linear_gradient_in_svg_context');
+    await checkScreenshot(canvas, 'linear_gradient_in_svg_context');
   });
 }
 

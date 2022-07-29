@@ -12,9 +12,7 @@ import 'package:ui/ui.dart' as ui;
 
 import 'semantics_tester.dart';
 
-final InputConfiguration singlelineConfig = InputConfiguration(
-  inputType: EngineInputType.text,
-);
+final InputConfiguration singlelineConfig = InputConfiguration();
 
 final InputConfiguration multilineConfig = InputConfiguration(
   inputType: EngineInputType.multiline,
@@ -124,7 +122,7 @@ void testMain() {
       expect(domDocument.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
       expect(textField.editableElement, strategy.domElement);
-      expect((textField.editableElement as dynamic).value, 'hello');
+      expect((textField.editableElement as dynamic).value, 'hello'); // ignore: avoid_dynamic_calls
       expect(textField.editableElement.getAttribute('aria-label'), 'greeting');
       expect(textField.editableElement.style.width, '10px');
       expect(textField.editableElement.style.height, '15px');
@@ -133,14 +131,13 @@ void testMain() {
       createTextFieldSemantics(
         value: 'bye',
         label: 'farewell',
-        isFocused: false,
         rect: const ui.Rect.fromLTWH(0, 0, 12, 17),
       );
 
       expect(domDocument.activeElement, domDocument.body);
       expect(appHostNode.activeElement, null);
       expect(strategy.domElement, null);
-      expect((textField.editableElement as dynamic).value, 'bye');
+      expect((textField.editableElement as dynamic).value, 'bye'); // ignore: avoid_dynamic_calls
       expect(textField.editableElement.getAttribute('aria-label'), 'farewell');
       expect(textField.editableElement.style.width, '12px');
       expect(textField.editableElement.style.height, '17px');
@@ -335,7 +332,6 @@ void testMain() {
       createTextFieldSemantics(
         value: 'hello',
         isFocused: true,
-        rect: semanticsRect,
       );
 
       // Checks that the placement attributes come from semantics and not from

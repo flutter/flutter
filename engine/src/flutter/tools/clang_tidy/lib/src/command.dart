@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show utf8, LineSplitter;
+import 'dart:convert' show LineSplitter, utf8;
 import 'dart:io' as io;
 
 import 'package:meta/meta.dart';

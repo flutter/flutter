@@ -125,11 +125,11 @@ typedef _ListStringArgFunction(List<String> args);
 void _runMain(Function startMainIsolateFunction,
               Function userMainFunction,
               List<String> args) {
-  startMainIsolateFunction(() {
+  startMainIsolateFunction(() { // ignore: avoid_dynamic_calls
     if (userMainFunction is _ListStringArgFunction) {
       userMainFunction(args);
     } else {
-      userMainFunction();
+      userMainFunction(); // ignore: avoid_dynamic_calls
     }
   }, null);
 }

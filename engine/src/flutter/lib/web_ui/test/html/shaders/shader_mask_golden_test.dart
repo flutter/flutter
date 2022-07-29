@@ -5,7 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart'
-    hide ClipRectEngineLayer, BackdropFilterEngineLayer;
+    hide BackdropFilterEngineLayer, ClipRectEngineLayer;
 import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
@@ -155,8 +155,7 @@ void _renderCirclesScene(BlendMode blendMode) {
       Offset(320 - shaderBounds.left, 150 - shaderBounds.top),
       colors, stops, TileMode.clamp, Matrix4.identity().storage);
 
-  builder.pushShaderMask(shader, shaderBounds, blendMode,
-      oldLayer: null);
+  builder.pushShaderMask(shader, shaderBounds, blendMode);
   final Picture circles2 = _drawTestPictureWithCircles(region, 180, 10);
   builder.addPicture(Offset.zero, circles2);
   builder.pop();
@@ -210,8 +209,7 @@ void _renderTextScene(BlendMode blendMode) {
       Offset(320 - shaderBounds.left, 150 - shaderBounds.top),
       colors, stops, TileMode.clamp, Matrix4.identity().storage);
 
-  builder.pushShaderMask(shader, shaderBounds, blendMode,
-      oldLayer: null);
+  builder.pushShaderMask(shader, shaderBounds, blendMode);
 
   final Picture textPicture2 = _drawTestPictureWithText(region, 180, 10);
   builder.addPicture(Offset.zero, textPicture2);

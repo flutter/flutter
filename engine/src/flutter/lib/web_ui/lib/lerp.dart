@@ -11,7 +11,7 @@ part of ui;
 /// `a`, `b`, and `t` are required to be finite or null, and the result of `a +
 /// (b - a) * t` is returned, where nulls are defaulted to 0.0.
 double? lerpDouble(num? a, num? b, double t) {
-  if (a == b || (a?.isNaN == true) && (b?.isNaN == true)) {
+  if (a == b || (a?.isNaN ?? false) && (b?.isNaN ?? false)) {
     return a?.toDouble();
   }
   a ??= 0.0;

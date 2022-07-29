@@ -11,7 +11,7 @@ void main() {
   String greeting = 'hello';
   Future<void> changeGreeting() async {
     greeting += ' 1';
-    await Future<void>.value(null);
+    await Future<void>.value();
     greeting += ' 2';
   }
   test('execution of async method starts synchronously', () async {

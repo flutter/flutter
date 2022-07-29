@@ -10,8 +10,8 @@ import 'package:apicheck/apicheck.dart';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 
-main(List<String> arguments) {
-  if (arguments.length < 1) {
+void main(List<String> arguments) {
+  if (arguments.isEmpty) {
     print('usage: dart bin/apicheck.dart path/to/engine/src/flutter');
     exit(1);
   }
@@ -36,7 +36,7 @@ main(List<String> arguments) {
 /// CANNOT be removed without breaking backward compatibility, which we have
 /// never done. See the note at the top of `shell/platform/embedder/embedder.h`
 /// for further details.
-checkApiConsistency(String flutterRoot) {
+void checkApiConsistency(String flutterRoot) {
   test('AccessibilityFeatures enums match', () {
     // Dart values: _kFooBarIndex = 1 << N
     final List<String> uiFields = getDartClassFields(
@@ -139,8 +139,8 @@ checkApiConsistency(String flutterRoot) {
 
 /// Returns the CamelCase equivalent of an ALL_CAPS identifier.
 String allCapsToCamelCase(String identifier) {
-  StringBuffer buffer = StringBuffer();
-  for (String word in identifier.split('_')) {
+  final StringBuffer buffer = StringBuffer();
+  for (final String word in identifier.split('_')) {
     if (word.isNotEmpty) {
       buffer.write(word[0]);
     }
@@ -163,7 +163,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitNativeFunctionBody(NativeFunctionBody node) {
-    MethodDeclaration? method = node.thisOrAncestorOfType<MethodDeclaration>();
+    final MethodDeclaration? method = node.thisOrAncestorOfType<MethodDeclaration>();
     if (method != null) {
       if (method.parameters != null) {
         check(method.toString(), method.parameters!);
@@ -171,9 +171,9 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    FunctionDeclaration? func = node.thisOrAncestorOfType<FunctionDeclaration>();
+    final FunctionDeclaration? func = node.thisOrAncestorOfType<FunctionDeclaration>();
     if (func != null) {
-      FunctionExpression funcExpr = func.functionExpression;
+      final FunctionExpression funcExpr = func.functionExpression;
       if (funcExpr.parameters != null) {
         check(func.toString(), funcExpr.parameters!);
       }
@@ -184,7 +184,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
   }
 
   void check(String description, FormalParameterList parameters) {
-    for (FormalParameter parameter in parameters.parameters) {
+    for (final FormalParameter parameter in parameters.parameters) {
       TypeAnnotation? type;
       if (parameter is SimpleFormalParameter) {
         type = parameter.type;
@@ -192,7 +192,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
         type = (parameter.parameter as SimpleFormalParameter).type;
       }
       if (type! is NamedType) {
-        String name = (type as NamedType).name.name;
+        final String name = (type as NamedType).name.name;
         if (type.question != null && simpleTypes.contains(name)) {
           errors.add(description);
           return;
@@ -204,7 +204,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
 
 void checkNativeApi(String flutterRoot) {
   test('Native API does not pass nullable parameters of simple types', () {
-    NativeFunctionVisitor visitor = NativeFunctionVisitor();
+    final NativeFunctionVisitor visitor = NativeFunctionVisitor();
     visitUIUnits(flutterRoot, visitor);
     expect(visitor.errors, isEmpty);
   });

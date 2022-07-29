@@ -319,23 +319,23 @@ void testMain() {
       //   Render: up to cache size platform views.
       //   Expect: main canvas plus platform view overlays.
       renderTestScene(viewCount: 8);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       // Frame 2:
@@ -343,27 +343,27 @@ void testMain() {
       //   Expect: main canvas, no overlays.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(viewCount: 0);
-      expectSceneMatches(<_EmbeddedViewMarker>[overlay]);
+      _expectSceneMatches(<_EmbeddedViewMarker>[_overlay]);
 
       // Frame 3:
       //   Render: less than cache size platform views.
       //   Expect: overlays reused.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(viewCount: 6);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
       ]);
 
       // Frame 4:
@@ -371,31 +371,31 @@ void testMain() {
       //   Expect: main canvas, backup overlay, maximum overlays.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(viewCount: 16);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       // Frame 5:
@@ -403,7 +403,7 @@ void testMain() {
       //   Expect: main canvas, no overlays.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(viewCount: 0);
-      expectSceneMatches(<_EmbeddedViewMarker>[overlay]);
+      _expectSceneMatches(<_EmbeddedViewMarker>[_overlay]);
 
       // Frame 6:
       //   Render: deleted platform views.
@@ -437,7 +437,7 @@ void testMain() {
       //   Expect: success. Just checking the system is not left in a corrupted state.
       await createPlatformView(0, 'test-platform-view');
       renderTestScene(viewCount: 0);
-      expectSceneMatches(<_EmbeddedViewMarker>[overlay]);
+      _expectSceneMatches(<_EmbeddedViewMarker>[_overlay]);
       // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
     }, skip: isSafari);
 
@@ -476,25 +476,25 @@ void testMain() {
       //   Expect: main canvas plus platform view overlays; empty cache.
       renderTestScene(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       expect(SurfaceFactory.instance.numAvailableOverlays, 0);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       // Frame 2:
@@ -503,25 +503,25 @@ void testMain() {
       await Future<void>.delayed(Duration.zero);
       renderTestScene(<int>[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
       expect(SurfaceFactory.instance.numAvailableOverlays, 0);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       // Frame 3:
@@ -529,25 +529,25 @@ void testMain() {
       //   Expect: main canvas plus platform view overlays; empty cache.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(<int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       // Frame 4:
@@ -555,25 +555,25 @@ void testMain() {
       //   Expect: main canvas plus platform view overlays; empty cache.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(<int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
@@ -593,10 +593,10 @@ void testMain() {
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
       ]);
 
       expect(
@@ -611,8 +611,8 @@ void testMain() {
       sb.pushOffset(0, 0);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
       ]);
 
       expect(
@@ -636,10 +636,10 @@ void testMain() {
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
       ]);
 
       expect(
@@ -654,10 +654,10 @@ void testMain() {
       sb.pushOffset(0, 0);
       sb.addPlatformView(1, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
       ]);
 
       expect(
@@ -670,8 +670,8 @@ void testMain() {
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
       ]);
 
       // The actual contents of the platform view are kept in the dom, until
@@ -738,8 +738,8 @@ void testMain() {
       sb.pop();
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
       ]);
     });
 
@@ -760,9 +760,9 @@ void testMain() {
       sb.pop();
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
       ]);
       HtmlViewEmbedder.debugDisableOverlays = false;
     });
@@ -792,10 +792,10 @@ void testMain() {
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -806,11 +806,11 @@ void testMain() {
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       // Reset configuration
@@ -838,10 +838,10 @@ void testMain() {
       sb.pop();
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
       ]);
 
       sb = LayerSceneBuilder();
@@ -850,9 +850,9 @@ void testMain() {
       sb.pop();
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
       ]);
 
       HtmlViewEmbedder.debugDisableOverlays = false;
@@ -888,10 +888,10 @@ void testMain() {
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -900,27 +900,11 @@ void testMain() {
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        overlay,
-      ]);
-
-      sb = LayerSceneBuilder();
-      sb.pushOffset(0, 0);
-      sb.addPlatformView(0, width: 10, height: 10);
-      sb.addPlatformView(1, width: 10, height: 10);
-      sb.addPlatformView(2, width: 10, height: 10);
-      sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        overlay,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -928,17 +912,15 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.addPlatformView(2, width: 10, height: 10);
-      sb.addPlatformView(3, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -947,18 +929,16 @@ void testMain() {
       sb.addPlatformView(1, width: 10, height: 10);
       sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(3, width: 10, height: 10);
-      sb.addPlatformView(4, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -968,19 +948,17 @@ void testMain() {
       sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
-      sb.addPlatformView(5, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -991,39 +969,61 @@ void testMain() {
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
       sb.addPlatformView(5, width: 10, height: 10);
-      sb.addPlatformView(6, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
+      sb.addPlatformView(0, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
+      sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
       sb.addPlatformView(5, width: 10, height: 10);
       sb.addPlatformView(6, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
+      ]);
+
+      sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(1, width: 10, height: 10);
+      sb.addPlatformView(3, width: 10, height: 10);
+      sb.addPlatformView(4, width: 10, height: 10);
+      sb.addPlatformView(5, width: 10, height: 10);
+      sb.addPlatformView(6, width: 10, height: 10);
+      sb.pop();
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -1034,13 +1034,13 @@ void testMain() {
       sb.addPlatformView(4, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
 
       sb = LayerSceneBuilder();
@@ -1051,13 +1051,13 @@ void testMain() {
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expectSceneMatches(<_EmbeddedViewMarker>[
-        overlay,
-        platformView,
-        platformView,
-        platformView,
-        platformView,
-        overlay,
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
       ]);
     });
     // TODO(dit): https://github.com/flutter/flutter/issues/60040
@@ -1071,10 +1071,10 @@ enum _EmbeddedViewMarker {
   platformView,
 }
 
-_EmbeddedViewMarker get overlay => _EmbeddedViewMarker.overlay;
-_EmbeddedViewMarker get platformView => _EmbeddedViewMarker.platformView;
+_EmbeddedViewMarker get _overlay => _EmbeddedViewMarker.overlay;
+_EmbeddedViewMarker get _platformView => _EmbeddedViewMarker.platformView;
 
-void expectSceneMatches(List<_EmbeddedViewMarker> markers) {
+void _expectSceneMatches(List<_EmbeddedViewMarker> markers) {
   final List<DomElement> sceneElements = flutterViewEmbedder
       .sceneElement!.children
       .where((DomElement element) => element.tagName != 'svg')

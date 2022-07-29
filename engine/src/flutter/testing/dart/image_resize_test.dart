@@ -49,7 +49,7 @@ void main() {
 
   test('upscale image by 5x', () async {
     final Uint8List bytes = await readFile('2x2.png');
-    final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10, allowUpscaling: true);
+    final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
@@ -70,7 +70,7 @@ void main() {
   test('upscale image varying width and height', () async {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec =
-        await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1, allowUpscaling: true);
+        await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;

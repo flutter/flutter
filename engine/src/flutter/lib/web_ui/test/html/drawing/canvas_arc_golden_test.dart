@@ -28,20 +28,16 @@ Future<void> testMain() async {
   });
 
   test('draws arcs with largeArc , anticlockwise variations', () async {
-    paintArc(canvas, const Offset(0, 0),
-        largeArc: false, clockwise: false, distance: 20);
+    paintArc(canvas, Offset.zero, distance: 20);
     paintArc(canvas, const Offset(200, 0),
-        largeArc: true, clockwise: false, distance: 20);
-    paintArc(canvas, const Offset(0, 150),
-        largeArc: false, clockwise: true, distance: 20);
+        largeArc: true, distance: 20);
+    paintArc(canvas, const Offset(0, 150), clockwise: true, distance: 20);
     paintArc(canvas, const Offset(200, 150),
         largeArc: true, clockwise: true, distance: 20);
-    paintArc(canvas, const Offset(0, 300),
-        largeArc: false, clockwise: false, distance: -20);
+    paintArc(canvas, const Offset(0, 300), distance: -20);
     paintArc(canvas, const Offset(200, 300),
-        largeArc: true, clockwise: false, distance: -20);
-    paintArc(canvas, const Offset(0, 400),
-        largeArc: false, clockwise: true, distance: -20);
+        largeArc: true, distance: -20);
+    paintArc(canvas, const Offset(0, 400), clockwise: true, distance: -20);
     paintArc(canvas, const Offset(200, 400),
         largeArc: true, clockwise: true, distance: -20);
 

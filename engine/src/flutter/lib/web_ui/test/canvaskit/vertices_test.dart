@@ -72,12 +72,12 @@ CkVertices _testVertices() {
   return ui.Vertices(
     ui.VertexMode.triangles,
     const <ui.Offset>[
-      ui.Offset(0, 0),
+      ui.Offset.zero,
       ui.Offset(10, 10),
       ui.Offset(0, 20),
     ],
     textureCoordinates: const <ui.Offset>[
-      ui.Offset(0, 0),
+      ui.Offset.zero,
       ui.Offset(10, 10),
       ui.Offset(0, 20),
     ],

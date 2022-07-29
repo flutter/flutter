@@ -50,12 +50,10 @@ void main(List<String> args) {
         help: 'The class name for the class to find.', valueHelp: 'IconData')
     ..addSeparator('Optional arguments:')
     ..addFlag('pretty',
-        defaultsTo: false,
         negatable: false,
         help: 'Pretty print JSON output (defaults to false).')
     ..addFlag('help',
         abbr: 'h',
-        defaultsTo: false,
         negatable: false,
         help: 'Print usage and exit');
 

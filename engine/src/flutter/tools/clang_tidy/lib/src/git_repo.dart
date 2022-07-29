@@ -53,7 +53,7 @@ class GitRepo {
         'merge-base',
         'FETCH_HEAD',
         'HEAD',
-      ], failOk: false);
+      ]);
     }
     final String mergeBase = mergeBaseResult.stdout.trim();
     final ProcessRunnerResult masterResult = await processRunner

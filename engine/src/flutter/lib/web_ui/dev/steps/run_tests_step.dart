@@ -166,7 +166,7 @@ Future<void> _runTestBatch({
     '--precompiled=${environment.webUiBuildDir.path}',
     '--configuration=$configurationFilePath',
     '--',
-    ...testFiles.map((FilePath f) => f.relativeToWebUi).toList(),
+    ...testFiles.map((FilePath f) => f.relativeToWebUi),
   ];
 
   if (expectFailure) {

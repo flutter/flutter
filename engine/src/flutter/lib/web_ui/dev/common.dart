@@ -37,7 +37,7 @@ abstract class PlatformBinding {
     if (io.Platform.isWindows) {
       return WindowsPlatformBinding();
     }
-    throw '${io.Platform.operatingSystem} is not supported';
+    throw UnsupportedError('${io.Platform.operatingSystem} is not supported');
   }
 
   String getChromeBuild(ChromeLock chromeLock);

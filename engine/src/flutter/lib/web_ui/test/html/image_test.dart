@@ -13,27 +13,16 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-typedef _ListPredicate<T> = bool Function(List<T>);
-_ListPredicate<T> deepEqualList<T>(List<T> a) {
-  return (List<T> b) {
-    if (a.length != b.length)
-      return false;
-    for (int i = 0; i < a.length; i += 1) {
-      if (a[i] != b[i])
-        return false;
-    }
-    return true;
-  };
-}
-
 Matcher listEqual(List<int> source, {int tolerance = 0}) {
   return predicate(
     (List<int> target) {
-      if (source.length != target.length)
+      if (source.length != target.length) {
         return false;
+      }
       for (int i = 0; i < source.length; i += 1) {
-        if ((source[i] - target[i]).abs() > tolerance)
+        if ((source[i] - target[i]).abs() > tolerance) {
           return false;
+        }
       }
       return true;
     },

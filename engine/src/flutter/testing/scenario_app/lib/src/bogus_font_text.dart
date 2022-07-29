@@ -18,7 +18,7 @@ class BogusFontText extends Scenario {
         super(dispatcher);
 
   // Semi-arbitrary.
-  double _screenWidth = 700;
+  final double _screenWidth = 700;
 
   @override
   void onBeginFrame(Duration duration) {

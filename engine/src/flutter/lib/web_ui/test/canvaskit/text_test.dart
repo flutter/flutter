@@ -22,22 +22,18 @@ void testMain() {
         fontSize: 16,
         shadows: <ui.Shadow>[
           const ui.Shadow(
-            color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(3.0, 3.0),
           ),
           const ui.Shadow(
-            color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(-3.0, 3.0),
           ),
           const ui.Shadow(
-            color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(3.0, -3.0),
           ),
           const ui.Shadow(
-            color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(-3.0, -3.0),
           ),

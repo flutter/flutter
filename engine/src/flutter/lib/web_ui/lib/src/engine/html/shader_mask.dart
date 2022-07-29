@@ -26,12 +26,12 @@ import 'surface.dart';
 class PersistedShaderMask extends PersistedContainerSurface
     implements ui.ShaderMaskEngineLayer {
   PersistedShaderMask(
-    PersistedShaderMask? oldLayer,
+    PersistedShaderMask? super.oldLayer,
     this.shader,
     this.maskRect,
     this.blendMode,
     this.filterQuality,
-  ) : super(oldLayer);
+  );
 
   DomElement? _childContainer;
   final ui.Shader shader;

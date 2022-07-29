@@ -127,7 +127,7 @@ void testMain() {
     });
 
     test(
-        'calls onTextScaleFactorChanged when the <html> element\'s font-size changes',
+        "calls onTextScaleFactorChanged when the <html> element's font-size changes",
         () async {
       final DomElement root = domDocument.documentElement!;
       final String oldFontSize = root.style.fontSize;

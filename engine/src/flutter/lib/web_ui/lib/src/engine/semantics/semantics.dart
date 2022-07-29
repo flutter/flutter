@@ -1337,7 +1337,7 @@ class SemanticsObject {
       } else {
         // Clone to avoid mutating _transform.
         effectiveTransform = Matrix4.fromFloat32List(transform).clone()
-          ..translate(_rect!.left, _rect!.top, 0.0);
+          ..translate(_rect!.left, _rect!.top);
         effectiveTransformIsIdentity = effectiveTransform.isIdentity();
       }
     } else if (!hasIdentityTransform) {
@@ -1652,8 +1652,8 @@ class EngineSemanticsOwner {
   /// This is used to deduplicate gestures detected by Flutter and gestures
   /// detected by the browser. Flutter-detected gestures have higher precedence.
   void _temporarilyDisableBrowserGestureMode() {
-    const Duration _kDebounceThreshold = Duration(milliseconds: 500);
-    _getGestureModeClock()!.datetime = _now().add(_kDebounceThreshold);
+    const Duration kDebounceThreshold = Duration(milliseconds: 500);
+    _getGestureModeClock()!.datetime = _now().add(kDebounceThreshold);
     if (_gestureMode != GestureMode.pointerEvents) {
       _gestureMode = GestureMode.pointerEvents;
       _notifyGestureModeListeners();
@@ -1694,7 +1694,7 @@ class EngineSemanticsOwner {
     // For pointer event reference see:
     //
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
-    const List<String> _pointerEventTypes = <String>[
+    const List<String> pointerEventTypes = <String>[
       'pointerdown',
       'pointermove',
       'pointerleave',
@@ -1712,7 +1712,7 @@ class EngineSemanticsOwner {
       'keydown',
     ];
 
-    if (_pointerEventTypes.contains(event.type)) {
+    if (pointerEventTypes.contains(event.type)) {
       _temporarilyDisableBrowserGestureMode();
     }
 

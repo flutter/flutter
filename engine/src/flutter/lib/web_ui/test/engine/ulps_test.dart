@@ -13,7 +13,7 @@ void main() {
 
 void testMain() {
   group('Float Int conversions', (){
-    test('Should convert signbit to 2\'s compliment', () {
+    test("Should convert signbit to 2's compliment", () {
       expect(signBitTo2sCompliment(0), 0);
       expect(signBitTo2sCompliment(0x7fffffff).toUnsigned(32), 0x7fffffff);
       expect(signBitTo2sCompliment(0x80000000), 0);

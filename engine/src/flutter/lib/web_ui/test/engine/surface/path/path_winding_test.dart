@@ -81,7 +81,7 @@ void testMain() {
       const List<Offset> nonFinitePts = <Offset>[
         Offset(double.infinity, 0),
         Offset(0, double.infinity),
-        Offset(double.infinity, double.infinity),
+        Offset.infinite,
         Offset(double.negativeInfinity, 0),
         Offset(0, double.negativeInfinity),
         Offset(double.negativeInfinity, double.negativeInfinity),

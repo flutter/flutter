@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: use_raw_strings
+// ignore_for_file: use_raw_strings, prefer_interpolation_to_compose_strings
 
 // COMMON PATTERNS
 
@@ -288,7 +288,6 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    needsCopyright: true,
     pattern: RegExp(
       kIndent +
       r'This code is released under the libpng license. For conditions of distribution and use, see the disclaimer and license in (png.h)\b'.replaceAll(' ', _linebreak),
@@ -507,7 +506,6 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     fileIndex: 3,
-    needsCopyright: true,
     pattern: RegExp(
       kIndent +
       r'Licensed under the OpenSSL license \(the "License"\)\. You may not use '

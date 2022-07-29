@@ -436,7 +436,7 @@ class BrowserPlatform extends PlatformPlugin {
     final String path = p.fromUri(request.url);
 
     if (path.endsWith('.html')) {
-      final String test = p.withoutExtension(path) + '.dart';
+      final String test = '${p.withoutExtension(path)}.dart';
 
       // Link to the Dart wrapper.
       final String scriptBase = htmlEscape.convert(p.basename(test));
@@ -488,9 +488,8 @@ class BrowserPlatform extends PlatformPlugin {
     }
     _checkNotClosed();
 
-    final Uri suiteUrl = url.resolveUri(p.toUri(p.withoutExtension(
-            p.relative(path, from: env.environment.webUiBuildDir.path)) +
-        '.html'));
+    final Uri suiteUrl = url.resolveUri(p.toUri('${p.withoutExtension(
+            p.relative(path, from: env.environment.webUiBuildDir.path))}.html'));
     _checkNotClosed();
 
     final BrowserManager? browserManager = await _startBrowserManager();
@@ -554,7 +553,7 @@ class BrowserPlatform extends PlatformPlugin {
   @override
   Future<void> closeEphemeral() async {
     if (_browserManager != null) {
-      final BrowserManager? result = await _browserManager!;
+      final BrowserManager? result = await _browserManager;
       await result?.close();
     }
   }
@@ -569,7 +568,7 @@ class BrowserPlatform extends PlatformPlugin {
       final List<Future<void>> futures = <Future<void>>[];
       futures.add(Future<void>.microtask(() async {
         if (_browserManager != null) {
-          final BrowserManager? result = await _browserManager!;
+          final BrowserManager? result = await _browserManager;
           await result?.close();
         }
       }));

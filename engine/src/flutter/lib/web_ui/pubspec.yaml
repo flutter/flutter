@@ -11,16 +11,32 @@ dependencies:
 
 dev_dependencies:
   archive: 3.1.2
+  args: any
+  async: any
   html: 0.15.0
   http: 0.13.0
+  http_multi_server: any
   image: 3.0.1
+  package_config: any
   path: 1.8.0
+  pool: any
   quiver: 3.0.0
+  shelf: any
+  shelf_packages_handler: any
+  shelf_static: any
+  shelf_web_socket: any
+  stack_trace: any
+  stream_channel: any
   test: 1.17.7
+  test_api: any
+  test_core: any
+  typed_data: any
   uuid: 3.0.6
-  yaml: 3.0.0
   watcher: 1.0.0
+  web_socket_channel: any
   webdriver: 3.0.0
+  webkit_inspection_protocol: any
+  yaml: 3.0.0
   web_test_utils:
     path: ../../web_sdk/web_test_utils
   web_engine_tester:

@@ -27,7 +27,7 @@ void testMain() {
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
       canvas.translate(10, 10);
 
-      void _drawTextWithOutline(String text, {
+      void drawTextWithOutline(String text, {
         String? paragraphFontFamily,
         String? textFontFamily,
         List<String>? textFontFallbacks,
@@ -82,25 +82,25 @@ void testMain() {
         );
       }
 
-      _drawTextWithOutline('default');
-      _drawTextWithOutline(
+      drawTextWithOutline('default');
+      drawTextWithOutline(
         'roboto paragraph',
         paragraphFontFamily: 'Roboto',
       );
-      _drawTextWithOutline(
+      drawTextWithOutline(
         'roboto text',
         textFontFamily: 'Roboto',
       );
-      _drawTextWithOutline(
+      drawTextWithOutline(
         'roboto text fallback',
         textFontFallbacks: <String>['Roboto'],
       );
-      _drawTextWithOutline(
+      drawTextWithOutline(
         'roboto strut style',
         strutStyleFontFamily: 'Roboto',
         strutStyleFontSize: 40,
       );
-      _drawTextWithOutline(
+      drawTextWithOutline(
         'roboto strut style fallback',
         strutStyleFontFallbacks: <String>['Roboto'],
         strutStyleFontSize: 40,

@@ -110,7 +110,7 @@ void main() {
     expect(p.getBounds(),
         equals(const Rect.fromLTRB(0.0, 0.0, 20 + (10 * 2.5), 20 + (10 * .5))));
 
-    p.extendWithPath(p2, const Offset(0.0, 0.0));
+    p.extendWithPath(p2, Offset.zero);
     expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 45.0, 25.0)));
 
     p.extendWithPath(p2, const Offset(45.0, 25.0), matrix4: scaleMatrix);

@@ -112,20 +112,16 @@ Future<void> testMain() async {
 
   test('render arcs', () async {
     final List<ArcSample> arcs = <ArcSample>[
-      ArcSample(const Offset(0, 0),
-          largeArc: false, clockwise: false, distance: 20),
+      ArcSample(Offset.zero, distance: 20),
       ArcSample(const Offset(200, 0),
-          largeArc: true, clockwise: false, distance: 20),
-      ArcSample(const Offset(0, 0),
-          largeArc: false, clockwise: true, distance: 20),
+          largeArc: true, distance: 20),
+      ArcSample(Offset.zero, clockwise: true, distance: 20),
       ArcSample(const Offset(200, 0),
           largeArc: true, clockwise: true, distance: 20),
-      ArcSample(const Offset(0, 0),
-          largeArc: false, clockwise: false, distance: -20),
+      ArcSample(Offset.zero, distance: -20),
       ArcSample(const Offset(200, 0),
-          largeArc: true, clockwise: false, distance: -20),
-      ArcSample(const Offset(0, 0),
-          largeArc: false, clockwise: true, distance: -20),
+          largeArc: true, distance: -20),
+      ArcSample(Offset.zero, clockwise: true, distance: -20),
       ArcSample(const Offset(200, 0),
           largeArc: true, clockwise: true, distance: -20)
     ];
@@ -151,9 +147,7 @@ Future<void> testMain() async {
     path.quadraticBezierTo(98, 0, 99.97, 7.8);
     path.arcToPoint(const Offset(162, 7.8),
         radius: const Radius.circular(32),
-        largeArc: false,
-        clockwise: false,
-        rotation: 0);
+        clockwise: false);
     path.lineTo(200, 7.8);
     path.lineTo(200, 80);
     path.lineTo(0, 80);

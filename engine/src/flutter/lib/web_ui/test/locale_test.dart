@@ -12,10 +12,9 @@ void main() {
 
 void testMain() {
   test('Locale', () {
-    const String? $null = null;
     expect(const Locale('en').toString(), 'en');
-    expect(const Locale('en'), const Locale('en', $null));
-    expect(const Locale('en').hashCode, const Locale('en', $null).hashCode);
+    expect(const Locale('en'), const Locale('en'));
+    expect(const Locale('en').hashCode, const Locale('en').hashCode);
     expect(const Locale('en'), isNot(const Locale('en', '')));
     // TODO(het): This fails on web because "".hashCode == null.hashCode == 0
     //expect(const Locale('en').hashCode, isNot(const Locale('en', '').hashCode));

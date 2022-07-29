@@ -276,7 +276,7 @@ void testMain() {
       return true;
     });
 
-    converter.handleEvent(keyDownEvent('', 'Shift', kShift, kLocationStandard));
+    converter.handleEvent(keyDownEvent('', 'Shift', kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
       physical: kPhysicalEmptyCode,
@@ -284,7 +284,7 @@ void testMain() {
       character: null,
     );
 
-    converter.handleEvent(keyUpEvent('', 'Shift', kShift, kLocationStandard));
+    converter.handleEvent(keyUpEvent('', 'Shift', kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
       physical: kPhysicalEmptyCode,
@@ -292,7 +292,7 @@ void testMain() {
       character: null,
     );
 
-    converter.handleEvent(keyDownEvent('', 'Control', kCtrl, kLocationStandard));
+    converter.handleEvent(keyDownEvent('', 'Control', kCtrl));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
       physical: kPhysicalEmptyCode,
@@ -300,7 +300,7 @@ void testMain() {
       character: null,
     );
 
-    converter.handleEvent(keyUpEvent('', 'Control', kCtrl, kLocationStandard));
+    converter.handleEvent(keyUpEvent('', 'Control', kCtrl));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
       physical: kPhysicalEmptyCode,
@@ -308,7 +308,7 @@ void testMain() {
       character: null,
     );
 
-    converter.handleEvent(keyDownEvent('', 'Alt', kAlt, kLocationStandard));
+    converter.handleEvent(keyDownEvent('', 'Alt', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
       physical: kPhysicalEmptyCode,
@@ -316,7 +316,7 @@ void testMain() {
       character: null,
     );
 
-    converter.handleEvent(keyUpEvent('', 'Alt', kAlt, kLocationStandard));
+    converter.handleEvent(keyUpEvent('', 'Alt', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
       physical: kPhysicalEmptyCode,
@@ -324,7 +324,7 @@ void testMain() {
       character: null,
     );
 
-    converter.handleEvent(keyDownEvent('', 'Meta', kMeta, kLocationStandard));
+    converter.handleEvent(keyDownEvent('', 'Meta', kMeta));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
       physical: kPhysicalEmptyCode,
@@ -332,7 +332,7 @@ void testMain() {
       character: null,
     );
 
-    converter.handleEvent(keyUpEvent('', 'Meta', kMeta, kLocationStandard));
+    converter.handleEvent(keyUpEvent('', 'Meta', kMeta));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
       physical: kPhysicalEmptyCode,
@@ -348,7 +348,7 @@ void testMain() {
       return true;
     });
 
-    converter.handleEvent(keyDownEvent('Digit1', '1', 0, 0));
+    converter.handleEvent(keyDownEvent('Digit1', '1'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
       physical: kPhysicalDigit1,
@@ -364,7 +364,7 @@ void testMain() {
       character: '1',
     );
 
-    converter.handleEvent(keyUpEvent('Digit1', '1', 0, 0));
+    converter.handleEvent(keyUpEvent('Digit1', '1'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
       physical: kPhysicalDigit1,
@@ -647,7 +647,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, onMacOs: false);
+    });
 
     converter.handleEvent(keyDownEvent('CapsLock', 'CapsLock'));
     expect(keyDataList, hasLength(1));
@@ -881,7 +881,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, onMacOs: false);
+    });
 
     converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100);
     async.elapse(const Duration(milliseconds: 100));
@@ -905,7 +905,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, onMacOs: false);
+    });
 
     converter.handleEvent(keyDownEvent('ScrollLock', 'ScrollLock'));
     expect(keyDataList, hasLength(1));
@@ -952,7 +952,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, onMacOs: false);
+    });
 
     converter.handleEvent(keyDownEvent('ShiftRight', 'Shift', kShift, kLocationRight));
     expectKeyData(keyDataList.last,
@@ -1008,7 +1008,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, onMacOs: false);
+    });
 
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
@@ -1174,8 +1174,9 @@ void expectKeyData(
   expect(target.logical, logical);
   expect(target.character, character);
   expect(target.synthesized, synthesized);
-  if (timeStamp != null)
+  if (timeStamp != null) {
     expect(target.timeStamp, equals(timeStamp));
+  }
 }
 
 typedef FakeAsyncTest = void Function(FakeAsync);

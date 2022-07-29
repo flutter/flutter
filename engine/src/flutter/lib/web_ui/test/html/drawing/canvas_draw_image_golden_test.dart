@@ -30,7 +30,7 @@ Future<void> testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    rc.drawImage(createTestImage(), const Offset(0, 0), SurfacePaint());
+    rc.drawImage(createTestImage(), Offset.zero, SurfacePaint());
     rc.restore();
     await canvasScreenshot(rc, 'draw_image',
         region: const Rect.fromLTWH(0, 0, 500, 500));
@@ -42,7 +42,7 @@ Future<void> testMain() async {
     rc.save();
     rc.translate(50.0, 100.0);
     rc.rotate(math.pi / 4.0);
-    rc.drawImage(createTestImage(), const Offset(0, 0), SurfacePaint());
+    rc.drawImage(createTestImage(), Offset.zero, SurfacePaint());
     rc.restore();
     await canvasScreenshot(rc, 'draw_image_with_transform',
         region: const Rect.fromLTWH(0, 0, 500, 500));
@@ -358,7 +358,7 @@ Future<void> testMain() async {
     final Picture picture = recorder.endRecording();
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-    builder.addPicture(const Offset(0, 0), picture);
+    builder.addPicture(Offset.zero, picture);
 
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final DomElement sceneElement = createDomElement('flt-scene');
@@ -397,7 +397,7 @@ Future<void> testMain() async {
     final Picture picture = recorder.endRecording();
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-    builder.addPicture(const Offset(0, 0), picture);
+    builder.addPicture(Offset.zero, picture);
 
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final DomElement sceneElement = createDomElement('flt-scene');
@@ -445,7 +445,7 @@ Future<void> testMain() async {
     const Rect region = Rect.fromLTRB(0, 0, 200, 200);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.translate(10, 10);
-    canvas.drawImage(createTestImage(), const Offset(0, 0), SurfacePaint());
+    canvas.drawImage(createTestImage(), Offset.zero, SurfacePaint());
     final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.0005); // perspective
@@ -463,7 +463,7 @@ Future<void> testMain() async {
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawRect(region, SurfacePaint()..color = const Color(0xFFE0E0E0));
     canvas.translate(10, 10);
-    canvas.drawImage(createTestImage(), const Offset(0, 0), SurfacePaint());
+    canvas.drawImage(createTestImage(), Offset.zero, SurfacePaint());
     final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.0005); // perspective

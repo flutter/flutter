@@ -51,12 +51,14 @@ bool radiusIsValid(ui.Radius radius) {
 /// Validates color and color stops used for a gradient.
 void validateColorStops(List<ui.Color> colors, List<double>? colorStops) {
   if (colorStops == null) {
-    if (colors.length != 2)
+    if (colors.length != 2) {
       throw ArgumentError(
           '"colors" must have length 2 if "colorStops" is omitted.');
+    }
   } else {
-    if (colors.length != colorStops.length)
+    if (colors.length != colorStops.length) {
       throw ArgumentError(
           '"colors" and "colorStops" arguments must have equal length.');
+    }
   }
 }

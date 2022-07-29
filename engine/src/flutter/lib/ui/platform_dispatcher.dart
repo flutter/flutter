@@ -523,8 +523,9 @@ class PlatformDispatcher {
   void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) {
     final String? error =
         _sendPlatformMessage(name, _zonedPlatformMessageResponseCallback(callback), data);
-    if (error != null)
+    if (error != null) {
       throw Exception(error);
+    }
   }
 
   String? _sendPlatformMessage(String name,PlatformMessageResponseCallback? callback, ByteData? data) =>
@@ -823,8 +824,9 @@ class PlatformDispatcher {
   void _updateLifecycleState(String state) {
     // We do not update the state if the state has already been used to initialize
     // the lifecycleState.
-    if (!_initialLifecycleStateAccessed)
+    if (!_initialLifecycleStateAccessed) {
       _initialLifecycleState = state;
+    }
   }
 
   /// The setting indicating whether time should always be shown in the 24-hour
@@ -1703,10 +1705,12 @@ class DisplayFeature {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DisplayFeature
         && bounds == other.bounds
         && type == other.type
@@ -2026,8 +2030,9 @@ class Locale {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     if (other is! Locale) {
       return false;
     }
@@ -2070,10 +2075,12 @@ class Locale {
 
   String _rawToString(String separator) {
     final StringBuffer out = StringBuffer(languageCode);
-    if (scriptCode != null && scriptCode!.isNotEmpty)
+    if (scriptCode != null && scriptCode!.isNotEmpty) {
       out.write('$separator$scriptCode');
-    if (_countryCode != null && _countryCode!.isNotEmpty)
+    }
+    if (_countryCode != null && _countryCode!.isNotEmpty) {
       out.write('$separator$countryCode');
+    }
     return out.toString();
   }
 }

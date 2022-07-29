@@ -81,11 +81,11 @@ class CanvasPool extends _SaveStackTracking {
     DomCanvasRenderingContext2D? ctx = _context;
     if (ctx == null) {
       _createCanvas();
-      ctx = _context!;
+      ctx = _context;
       assert(_context != null);
       assert(_canvas != null);
     }
-    return ctx;
+    return ctx!;
   }
 
   /// Returns [ContextStateHandle] API to efficiently update state of
@@ -398,7 +398,7 @@ class CanvasPool extends _SaveStackTracking {
 
   /// Returns a "data://" URI containing a representation of the image in this
   /// canvas in PNG format.
-  String toDataUrl() => _canvas?.toDataURL('image/png') ?? '';
+  String toDataUrl() => _canvas?.toDataURL() ?? '';
 
   @override
   void save() {
@@ -1028,9 +1028,9 @@ class ContextStateHandle {
         context.shadowBlur = convertSigmaToRadius(maskFilter.webOnlySigma);
         if (paint.color != null) {
           // Shadow color must be fully opaque.
-          context.shadowColor = colorToCssString(paint.color!.withAlpha(255))!;
+          context.shadowColor = colorToCssString(paint.color!.withAlpha(255));
         } else {
-          context.shadowColor = colorToCssString(const ui.Color(0xFF000000))!;
+          context.shadowColor = colorToCssString(const ui.Color(0xFF000000));
         }
 
         // On the web a shadow must always be painted together with the shape

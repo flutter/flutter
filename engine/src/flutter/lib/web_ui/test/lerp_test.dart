@@ -136,13 +136,15 @@ void testMain() {
   });
 }
 
+typedef DoubleFunction = double? Function();
+
 /// Asserts that `callback` throws an [AssertionError].
 ///
 /// Verifies that the specified callback throws an [AssertionError] when
 /// running in with assertions enabled. When asserts are not enabled, such as
 /// when running using a release-mode VM with default settings, this acts as a
 /// no-op.
-void expectAssertion(Function callback) {
+void expectAssertion(DoubleFunction callback) {
   bool assertsEnabled = false;
   assert(() {
     assertsEnabled = true;

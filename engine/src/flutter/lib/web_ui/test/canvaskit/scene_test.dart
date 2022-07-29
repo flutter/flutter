@@ -39,7 +39,7 @@ void testMain() {
       expect(builder, isA<LayerSceneBuilder>());
 
       builder.pushOffset(0, 0);
-      builder.addPicture(const ui.Offset(0, 0), picture);
+      builder.addPicture(ui.Offset.zero, picture);
 
       final ui.Scene scene = builder.build();
 

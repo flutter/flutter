@@ -80,8 +80,9 @@ class FontWeight {
   /// an [AnimationController].
   static FontWeight? lerp(FontWeight? a, FontWeight? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return values[_lerpInt((a ?? normal).index, (b ?? normal).index, t).round().clamp(0, 8)];
   }
 
@@ -917,8 +918,9 @@ class FontFeature {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FontFeature
         && other.feature == feature
         && other.value == value;
@@ -978,8 +980,9 @@ class FontVariation {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FontVariation
         && other.axis == axis
         && other.value == value;
@@ -1041,8 +1044,9 @@ class TextDecoration {
   /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     int mask = 0;
-    for (final TextDecoration decoration in decorations)
+    for (final TextDecoration decoration in decorations) {
       mask |= decoration._mask;
+    }
     return TextDecoration._(mask);
   }
 
@@ -1076,17 +1080,22 @@ class TextDecoration {
 
   @override
   String toString() {
-    if (_mask == 0)
+    if (_mask == 0) {
       return 'TextDecoration.none';
+    }
     final List<String> values = <String>[];
-    if (_mask & underline._mask != 0)
+    if (_mask & underline._mask != 0) {
       values.add('underline');
-    if (_mask & overline._mask != 0)
+    }
+    if (_mask & overline._mask != 0) {
       values.add('overline');
-    if (_mask & lineThrough._mask != 0)
+    }
+    if (_mask & lineThrough._mask != 0) {
       values.add('lineThrough');
-    if (values.length == 1)
+    }
+    if (values.length == 1) {
       return 'TextDecoration.${values[0]}';
+    }
     return 'TextDecoration.combine([${values.join(", ")}])';
   }
 }
@@ -1224,8 +1233,9 @@ class TextHeightBehavior {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextHeightBehavior
         && other.applyHeightToFirstAscent == applyHeightToFirstAscent
         && other.applyHeightToLastDescent == applyHeightToLastDescent
@@ -1257,13 +1267,16 @@ class TextHeightBehavior {
 /// the same length, and contain the same elements in the same order. Returns
 /// false otherwise.
 bool _listEquals<T>(List<T>? a, List<T>? b) {
-  if (a == null)
+  if (a == null) {
     return b == null;
-  if (b == null || a.length != b.length)
+  }
+  if (b == null || a.length != b.length) {
     return false;
+  }
   for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index])
+    if (a[index] != b[index]) {
       return false;
+    }
   }
   return true;
 }
@@ -1517,8 +1530,9 @@ class TextStyle {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is TextStyle
         && other._leadingDistribution == _leadingDistribution
         && other._fontFamily == _fontFamily
@@ -1783,10 +1797,12 @@ class ParagraphStyle {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ParagraphStyle
         && other._fontFamily == _fontFamily
         && other._fontSize == _fontSize
@@ -1815,7 +1831,7 @@ class ParagraphStyle {
              'fontFamily: ${    _encoded[0] & 0x080 == 0x080 ? _fontFamily                       : "unspecified"}, '
              'fontSize: ${      _encoded[0] & 0x100 == 0x100 ? _fontSize                         : "unspecified"}, '
              'height: ${        _encoded[0] & 0x200 == 0x200 ? "${_height}x"                     : "unspecified"}, '
-             'ellipsis: ${      _encoded[0] & 0x400 == 0x400 ? "\"$_ellipsis\""                  : "unspecified"}, '
+             'ellipsis: ${      _encoded[0] & 0x400 == 0x400 ? '"$_ellipsis"'                    : "unspecified"}, '
              'locale: ${        _encoded[0] & 0x800 == 0x800 ? _locale                           : "unspecified"}'
            ')';
   }
@@ -1847,8 +1863,9 @@ ByteData _encodeStrut(
     leading == null &&
     fontWeight == null &&
     fontStyle == null &&
-    forceStrutHeight == null)
+    forceStrutHeight == null) {
     return ByteData(0);
+  }
 
   final ByteData data = ByteData(16); // Max size is 16 bytes
   int bitmask = 0; // 8 bit mask
@@ -1980,10 +1997,12 @@ class StrutStyle {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is StrutStyle
         && other._fontFamily == _fontFamily
         && other._leadingDistribution == _leadingDistribution
@@ -2145,10 +2164,12 @@ class TextBox {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextBox
         && other.left == left
         && other.top == top
@@ -2257,8 +2278,9 @@ class TextPosition {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextPosition
         && other.offset == offset
         && other.affinity == affinity;
@@ -2341,8 +2363,9 @@ class TextRange {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is TextRange
         && other.start == start
         && other.end == end;
@@ -2393,8 +2416,9 @@ class ParagraphConstraints {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ParagraphConstraints
         && other.width == width;
   }
@@ -2961,8 +2985,9 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
   void pushStyle(TextStyle style) {
     final List<String> fullFontFamilies = <String>[];
     fullFontFamilies.add(style._fontFamily);
-    if (style._fontFamilyFallback != null)
+    if (style._fontFamilyFallback != null) {
       fullFontFamilies.addAll(style._fontFamilyFallback!);
+    }
 
     final Int32List encoded = style._encoded;
     final TextLeadingDistribution finalLeadingDistribution = style._leadingDistribution ?? _defaultLeadingDistribution;
@@ -3066,8 +3091,9 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
   /// The text will be styled according to the current stack of text styles.
   void addText(String text) {
     final String? error = _addText(text);
-    if (error != null)
+    if (error != null) {
       throw ArgumentError(error);
+    }
   }
 
   @FfiNative<Handle Function(Pointer<Void>, Handle)>('ParagraphBuilder::addText')

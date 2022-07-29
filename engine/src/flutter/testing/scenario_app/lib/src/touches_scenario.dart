@@ -32,13 +32,7 @@ class TouchesScenario extends Scenario {
         dispatcher: dispatcher,
         channel: 'display_data',
         json: <String, dynamic>{
-          'data': _sequenceNo.toString() +
-              ',' +
-              datum.change.toString() +
-              ',device=' +
-              deviceId.toString() +
-              ',buttons=' +
-              datum.buttons.toString(),
+          'data': '$_sequenceNo,${datum.change},device=$deviceId,buttons=${datum.buttons}',
         },
       );
       _sequenceNo++;

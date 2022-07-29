@@ -31,7 +31,7 @@ Future<void> testMain() async {
     await fontCollection.ensureFontsLoaded();
   });
 
-  void _drawShapes(RecordingCanvas rc, SurfacePaint paint, Rect shaderRect) {
+  void drawShapes(RecordingCanvas rc, SurfacePaint paint, Rect shaderRect) {
     /// Rect.
     rc.drawRect(shaderRect, paint);
     shaderRect = shaderRect.translate(100, 0);
@@ -76,7 +76,7 @@ Future<void> testMain() async {
         ImageShader(testImage, tmx, tmy, Matrix4.identity().toFloat64()
             , filterQuality: FilterQuality.high);
 
-    _drawShapes(rc, paint, shaderRect);
+    drawShapes(rc, paint, shaderRect);
 
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, fileName,

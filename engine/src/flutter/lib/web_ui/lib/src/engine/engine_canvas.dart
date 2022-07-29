@@ -100,7 +100,7 @@ Matrix4 transformWithOffset(Matrix4 transform, ui.Offset offset) {
 
   // Clone to avoid mutating transform.
   final Matrix4 effectiveTransform = transform.clone();
-  effectiveTransform.translate(offset.dx, offset.dy, 0.0);
+  effectiveTransform.translate(offset.dx, offset.dy);
   return effectiveTransform;
 }
 

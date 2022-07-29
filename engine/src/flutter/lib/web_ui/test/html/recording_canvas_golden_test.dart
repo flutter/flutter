@@ -31,7 +31,7 @@ Future<void> testMain() async {
   final SurfacePaint testPaint = SurfacePaint()..color = const Color(0xFFFF0000);
 
   // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
+  Future<void> checkScreenshot(RecordingCanvas rc, String fileName,
       { Rect region = const Rect.fromLTWH(0, 0, 500, 500),
         bool write = false }) async {
 
@@ -77,7 +77,7 @@ Future<void> testMain() async {
         RecordingCanvas(const Rect.fromLTWH(1, 2, 300, 400));
     rc.endRecording();
     expect(rc.pictureBounds, Rect.zero);
-    await _checkScreenshot(rc, 'empty_canvas');
+    await checkScreenshot(rc, 'empty_canvas');
   });
 
   test('Computes paint bounds for draw line', () async {
@@ -86,7 +86,7 @@ Future<void> testMain() async {
     rc.endRecording();
     // The off by one is due to the minimum stroke width of 1.
     expect(rc.pictureBounds, const Rect.fromLTRB(49, 99, 121, 141));
-    await _checkScreenshot(rc, 'draw_line');
+    await checkScreenshot(rc, 'draw_line');
   });
 
   test('Computes paint bounds for draw line when line exceeds limits',
@@ -99,7 +99,7 @@ Future<void> testMain() async {
     // The off by one is due to the minimum stroke width of 1.
     expect(
         rc.pictureBounds, const Rect.fromLTRB(49.0, 99.0, screenWidth, 141.0));
-    await _checkScreenshot(rc, 'draw_line_exceeding_limits');
+    await checkScreenshot(rc, 'draw_line_exceeding_limits');
   });
 
   test('Computes paint bounds for draw rect', () async {
@@ -107,7 +107,7 @@ Future<void> testMain() async {
     rc.drawRect(const Rect.fromLTRB(10, 20, 30, 40), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(10, 20, 30, 40));
-    await _checkScreenshot(rc, 'draw_rect');
+    await checkScreenshot(rc, 'draw_rect');
   });
 
   test('Computes paint bounds for draw rect when exceeds limits', () async {
@@ -124,7 +124,7 @@ Future<void> testMain() async {
     rc.drawRect(const Rect.fromLTRB(-200, -100, 30, 40), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(0, 0, 30, 40));
-    await _checkScreenshot(rc, 'draw_rect_exceeding_limits');
+    await checkScreenshot(rc, 'draw_rect_exceeding_limits');
   });
 
   test('Computes paint bounds for translate', () async {
@@ -133,7 +133,7 @@ Future<void> testMain() async {
     rc.drawRect(const Rect.fromLTRB(10, 20, 30, 40), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(15, 27, 35, 47));
-    await _checkScreenshot(rc, 'translate');
+    await checkScreenshot(rc, 'translate');
   });
 
   test('Computes paint bounds for scale', () async {
@@ -142,7 +142,7 @@ Future<void> testMain() async {
     rc.drawRect(const Rect.fromLTRB(10, 20, 30, 40), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(20, 40, 60, 80));
-    await _checkScreenshot(rc, 'scale');
+    await checkScreenshot(rc, 'scale');
   });
 
   test('Computes paint bounds for rotate', () async {
@@ -154,7 +154,7 @@ Future<void> testMain() async {
     // The extra 0.7 is due to stroke width of 1 rotated by 45 degrees.
     expect(rc.pictureBounds,
         within(distance: 0.1, from: const Rect.fromLTRB(0, 0, 50.7, 50.7)));
-    await _checkScreenshot(rc, 'rotate');
+    await checkScreenshot(rc, 'rotate');
   });
 
   test('Computes paint bounds for horizontal skew', () async {
@@ -166,7 +166,7 @@ Future<void> testMain() async {
         rc.pictureBounds,
         within(
             distance: 0.1, from: const Rect.fromLTRB(40.0, 20.0, 80.0, 40.0)));
-    await _checkScreenshot(rc, 'skew_horizontally');
+    await checkScreenshot(rc, 'skew_horizontally');
   });
 
   test('Computes paint bounds for vertical skew', () async {
@@ -178,7 +178,7 @@ Future<void> testMain() async {
         rc.pictureBounds,
         within(
             distance: 0.1, from: const Rect.fromLTRB(20.0, 40.0, 40.0, 80.0)));
-    await _checkScreenshot(rc, 'skew_vertically');
+    await checkScreenshot(rc, 'skew_vertically');
   });
 
   test('Computes paint bounds for a complex transform', () async {
@@ -209,7 +209,7 @@ Future<void> testMain() async {
         within(
             distance: 0.001,
             from: const Rect.fromLTRB(168.0, 283.6, 224.0, 368.4)));
-    await _checkScreenshot(rc, 'complex_transform');
+    await checkScreenshot(rc, 'complex_transform');
   });
 
   test('drawPaint should cover full size', () async {
@@ -218,7 +218,7 @@ Future<void> testMain() async {
     rc.drawRect(const Rect.fromLTRB(10, 20, 30, 40), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, screenRect);
-    await _checkScreenshot(rc, 'draw_paint');
+    await checkScreenshot(rc, 'draw_paint');
   });
 
   test('drawColor should cover full size', () async {
@@ -229,7 +229,7 @@ Future<void> testMain() async {
     rc.drawRect(const Rect.fromLTRB(10, 60, 30, 80), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, screenRect);
-    await _checkScreenshot(rc, 'draw_color');
+    await checkScreenshot(rc, 'draw_color');
   });
 
   test('Computes paint bounds for draw oval', () async {
@@ -237,7 +237,7 @@ Future<void> testMain() async {
     rc.drawOval(const Rect.fromLTRB(10, 20, 30, 40), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(10, 20, 30, 40));
-    await _checkScreenshot(rc, 'draw_oval');
+    await checkScreenshot(rc, 'draw_oval');
   });
 
   test('Computes paint bounds for draw round rect', () async {
@@ -248,7 +248,7 @@ Future<void> testMain() async {
         testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(10, 20, 30, 40));
-    await _checkScreenshot(rc, 'draw_round_rect');
+    await checkScreenshot(rc, 'draw_round_rect');
   });
 
   test(
@@ -258,8 +258,8 @@ Future<void> testMain() async {
     rc.drawDRRect(RRect.fromRectAndCorners(const Rect.fromLTRB(10, 20, 30, 40)),
         RRect.fromRectAndCorners(const Rect.fromLTRB(1, 2, 3, 4)), testPaint);
     rc.endRecording();
-    expect(rc.pictureBounds, const Rect.fromLTRB(0, 0, 0, 0));
-    await _checkScreenshot(rc, 'draw_drrect_empty');
+    expect(rc.pictureBounds, Rect.zero);
+    await checkScreenshot(rc, 'draw_drrect_empty');
   });
 
   test('Computes paint bounds using outer rect for drawDRRect', () async {
@@ -270,7 +270,7 @@ Future<void> testMain() async {
         testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(10, 20, 30, 40));
-    await _checkScreenshot(rc, 'draw_drrect');
+    await checkScreenshot(rc, 'draw_drrect');
   });
 
   test('Computes paint bounds for draw circle', () async {
@@ -286,7 +286,7 @@ Future<void> testMain() async {
     rc.drawCircle(const Offset(200, 300), 100.0, testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(10.0, 10.0, 300.0, 400.0));
-    await _checkScreenshot(rc, 'draw_circle');
+    await checkScreenshot(rc, 'draw_circle');
   });
 
   test('Computes paint bounds for draw image', () {
@@ -324,7 +324,7 @@ Future<void> testMain() async {
       rc.pictureBounds,
       Rect.fromLTRB(textLeft, textTop, textLeft + paragraph.maxIntrinsicWidth, 21.0),
     );
-    await _checkScreenshot(rc, 'draw_paragraph');
+    await checkScreenshot(rc, 'draw_paragraph');
   },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789
       skip: browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.iOs);
@@ -356,7 +356,7 @@ Future<void> testMain() async {
       rc.pictureBounds,
       const Rect.fromLTRB(textLeft, textTop, textLeft + longestLineWidth, 35.0),
     );
-    await _checkScreenshot(rc, 'draw_paragraph_multi_line');
+    await checkScreenshot(rc, 'draw_paragraph_multi_line');
   },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789
       skip: browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.iOs);
@@ -378,7 +378,7 @@ Future<void> testMain() async {
 
     // Extra pixel due to default line length
     expect(rc.pictureBounds, const Rect.fromLTRB(51, 52, 56, 57));
-    await _checkScreenshot(rc, 'clip_rect_simple');
+    await checkScreenshot(rc, 'clip_rect_simple');
   });
 
   test('Should include intersection of clipRect and painting', () async {
@@ -387,14 +387,14 @@ Future<void> testMain() async {
     rc.drawRect(const Rect.fromLTRB(20, 60, 120, 70), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(50, 60, 100, 70));
-    await _checkScreenshot(rc, 'clip_rect_intersects_paint_left_to_right');
+    await checkScreenshot(rc, 'clip_rect_intersects_paint_left_to_right');
 
     rc = RecordingCanvas(screenRect);
     rc.clipRect(const Rect.fromLTRB(50, 50, 100, 100), ClipOp.intersect);
     rc.drawRect(const Rect.fromLTRB(60, 20, 70, 200), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds, const Rect.fromLTRB(60, 50, 70, 100));
-    await _checkScreenshot(rc, 'clip_rect_intersects_paint_top_to_bottom');
+    await checkScreenshot(rc, 'clip_rect_intersects_paint_top_to_bottom');
   });
 
   test('Should intersect rects for multiple clipRect calls', () async {
@@ -406,7 +406,7 @@ Future<void> testMain() async {
     rc.endRecording();
 
     expect(rc.pictureBounds, const Rect.fromLTRB(60, 60, 90, 70));
-    await _checkScreenshot(rc, 'clip_rects_intersect');
+    await checkScreenshot(rc, 'clip_rects_intersect');
   });
 
   // drawShadow
@@ -422,7 +422,7 @@ Future<void> testMain() async {
       within(
           distance: 0.05, from: const Rect.fromLTRB(17.9, 28.5, 103.5, 114.1)),
     );
-    await _checkScreenshot(rc, 'path_with_shadow');
+    await checkScreenshot(rc, 'path_with_shadow');
   });
 
   test('Clip with negative scale reports correct paint bounds', () async {
@@ -442,7 +442,7 @@ Future<void> testMain() async {
     rc.endRecording();
 
     expect(rc.pictureBounds, const Rect.fromLTRB(0.0, 50.0, 100.0, 100.0));
-    await _checkScreenshot(rc, 'scale_negative');
+    await checkScreenshot(rc, 'scale_negative');
   });
 
   test('Clip with a rotation reports correct paint bounds', () async {
@@ -462,7 +462,7 @@ Future<void> testMain() async {
           from: Rect.fromCircle(
               center: const Offset(50, 50), radius: 20 * math.sqrt(2))),
     );
-    await _checkScreenshot(rc, 'clip_rect_rotated');
+    await checkScreenshot(rc, 'clip_rect_rotated');
   });
 
   test('Rotated line reports correct paint bounds', () async {
@@ -471,14 +471,14 @@ Future<void> testMain() async {
     rc
       ..translate(50, 50)
       ..rotate(math.pi / 4.0)
-      ..drawLine(const Offset(0, 0), const Offset(20, 20), SurfacePaint());
+      ..drawLine(Offset.zero, const Offset(20, 20), SurfacePaint());
     rc.endRecording();
 
     expect(
       rc.pictureBounds,
       within(distance: 0.1, from: const Rect.fromLTRB(34.4, 48.6, 65.6, 79.7)),
     );
-    await _checkScreenshot(rc, 'line_rotated');
+    await checkScreenshot(rc, 'line_rotated');
   });
 
   test('Should support reusing path and reset when drawing into canvas.',
@@ -505,7 +505,7 @@ Future<void> testMain() async {
           ..strokeWidth = 2.0
           ..color = const Color(0xFF00FF00));
     rc.endRecording();
-    await _checkScreenshot(rc, 'reuse_path');
+    await checkScreenshot(rc, 'reuse_path');
   });
 
   test('Should draw RRect after line when beginning new path.', () async {
@@ -528,7 +528,7 @@ Future<void> testMain() async {
           ..color = const Color(0xFF404000));
     rc.restore();
     rc.endRecording();
-    await _checkScreenshot(rc, 'path_with_line_and_roundrect');
+    await checkScreenshot(rc, 'path_with_line_and_roundrect');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/64371.
@@ -552,7 +552,7 @@ Future<void> testMain() async {
           ..color = const Color(0xFF404000));
     rc.restore();
     rc.endRecording();
-    await _checkScreenshot(rc, 'path_with_addpolygon');
+    await checkScreenshot(rc, 'path_with_addpolygon');
   });
 
   test('should include paint spread in bounds estimates', () async {
@@ -561,7 +561,7 @@ Future<void> testMain() async {
     final List<PaintSpreadPainter> painters = <PaintSpreadPainter>[
       (RecordingCanvas canvas, SurfacePaint paint) {
         canvas.drawLine(
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(20.0, 20.0),
           paint,
         );

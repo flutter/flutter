@@ -8,10 +8,9 @@ import 'package:litetest/litetest.dart';
 
 void main() {
   test('Locale', () {
-    const Null $null = null; // ignore: prefer_void_to_null
     expect(const Locale('en').toLanguageTag(), 'en');
-    expect(const Locale('en'), const Locale('en', $null));
-    expect(const Locale('en').hashCode, const Locale('en', $null).hashCode);
+    expect(const Locale('en'), const Locale('en'));
+    expect(const Locale('en').hashCode, const Locale('en').hashCode);
     expect(const Locale('en', 'US').toLanguageTag(), 'en-US');
     expect(const Locale('en', 'US').toString(), 'en_US');
     expect(const Locale('iw').toLanguageTag(), 'he');
@@ -61,7 +60,7 @@ void main() {
     expect(const Locale('en', 'GB'), notEquals(const Locale('en')));
   });
 
-  test('Locale toString does not include separator for \'\'', () {
+  test("Locale toString does not include separator for ''", () {
     expect(const Locale('en').toString(), 'en');
     expect(const Locale('en', '').toString(), 'en');
     expect(const Locale('en', 'US').toString(), 'en_US');

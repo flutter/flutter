@@ -124,8 +124,9 @@ class KeyData {
   }
 
   String? _quotedCharCode() {
-    if (character == null)
+    if (character == null) {
       return '';
+    }
     final Iterable<String> hexChars = character!.codeUnits
         .map((int code) => code.toRadixString(16).padLeft(2, '0'));
     return ' (0x${hexChars.join(' ')})';

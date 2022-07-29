@@ -21,20 +21,17 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     argParser
       ..addFlag(
         'debug',
-        defaultsTo: false,
         help: 'Pauses the browser before running a test, giving you an '
             'opportunity to add breakpoints or inspect loaded code before '
             'running the code.',
       )
       ..addFlag(
         'watch',
-        defaultsTo: false,
         abbr: 'w',
         help: 'Run in watch mode so the tests re-run whenever a change is '
             'made.',
       )
       ..addFlag('use-system-flutter',
-          defaultsTo: false,
           help:
               'integration tests are using flutter repository for various tasks'
               ', such as flutter drive, flutter pub get. If this flag is set, felt '
@@ -42,19 +39,17 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
               'can save internet bandwidth. However use with caution. Note that '
               'since flutter repo is always synced to youngest commit older than '
               'the engine commit for the tests running in CI, the tests results '
-              'won\'t be consistent with CIs when this flag is set. flutter '
+              "won't be consistent with CIs when this flag is set. flutter "
               'command should be set in the PATH for this flag to be useful.'
               'This flag can also be used to test local Flutter changes.')
       ..addFlag(
         'require-skia-gold',
-        defaultsTo: false,
         help:
             'Whether we require Skia Gold to be available or not. When this '
             'flag is true, the tests will fail if Skia Gold is not available.',
       )
       ..addFlag(
         'update-screenshot-goldens',
-        defaultsTo: false,
         help:
             'When running screenshot tests writes them to the file system into '
             '.dart_tool/goldens. Use this option to bulk-update all screenshots, '
@@ -68,8 +63,6 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       )
       ..addFlag(
         'fail-early',
-        defaultsTo: false,
-        negatable: true,
         help: 'If set, causes the test runner to exit upon the first test '
               'failure. If not set, the test runner will continue running '
               'test despite failures and will report them after all tests '

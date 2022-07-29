@@ -265,8 +265,8 @@ UnicodePropertyLookup<${prefix}CharProperty> ${prefix.toLowerCase()}Lookup =
 
 /// Syncs Unicode's word break properties.
 class WordBreakPropertiesSyncer extends PropertiesSyncer {
-  WordBreakPropertiesSyncer(String src, String dest) : super(src, dest);
-  WordBreakPropertiesSyncer.dry(String src) : super.dry(src);
+  WordBreakPropertiesSyncer(super.src, String super.dest);
+  WordBreakPropertiesSyncer.dry(super.src) : super.dry();
 
   @override
   final String prefix = 'Word';
@@ -281,8 +281,8 @@ class WordBreakPropertiesSyncer extends PropertiesSyncer {
 
 /// Syncs Unicode's line break properties.
 class LineBreakPropertiesSyncer extends PropertiesSyncer {
-  LineBreakPropertiesSyncer(String src, String dest) : super(src, dest);
-  LineBreakPropertiesSyncer.dry(String src) : super.dry(src);
+  LineBreakPropertiesSyncer(super.src, String super.dest);
+  LineBreakPropertiesSyncer.dry(super.src) : super.dry();
 
   @override
   final String prefix = 'Line';

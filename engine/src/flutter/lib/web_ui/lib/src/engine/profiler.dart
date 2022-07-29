@@ -65,7 +65,6 @@ class Profiler {
 
   static bool isBenchmarkMode = const bool.fromEnvironment(
     'FLUTTER_WEB_ENABLE_PROFILING',
-    defaultValue: false,
   );
 
   static Profiler ensureInitialized() {
@@ -254,7 +253,6 @@ class Instrumentation {
   }
   static bool _enabled = const bool.fromEnvironment(
     'FLUTTER_WEB_ENABLE_INSTRUMENTATION',
-    defaultValue: false,
   );
 
   /// Returns the singleton that provides instrumentation API.
@@ -263,7 +261,7 @@ class Instrumentation {
     return _instance;
   }
 
-  static late final Instrumentation _instance = Instrumentation._();
+  static final Instrumentation _instance = Instrumentation._();
 
   static void _checkInstrumentationEnabled() {
     if (!enabled) {

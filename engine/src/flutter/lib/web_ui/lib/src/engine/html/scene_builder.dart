@@ -376,7 +376,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ) {
     if (!_webOnlyDidWarnAboutPerformanceOverlay) {
       _webOnlyDidWarnAboutPerformanceOverlay = true;
-      printWarning('The performance overlay isn\'t supported on the web');
+      printWarning("The performance overlay isn't supported on the web");
     }
   }
 

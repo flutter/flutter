@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This is testing some of the named constants.
+// ignore_for_file: use_named_constants
+
 import 'dart:math' as math show sqrt;
 import 'dart:math' show pi;
 import 'dart:ui';
@@ -210,7 +213,6 @@ void main() {
       topLeft: const Radius.circular(0.5),
       topRight: const Radius.circular(0.25),
       bottomRight: const Radius.elliptical(0.25, 0.75),
-      bottomLeft: Radius.zero,
     );
 
     expect(rrect.contains(const Offset(1.0, 1.0)), isFalse);
@@ -229,7 +231,6 @@ void main() {
       topLeft: const Radius.circular(5000.0),
       topRight: const Radius.circular(2500.0),
       bottomRight: const Radius.elliptical(2500.0, 7500.0),
-      bottomLeft: Radius.zero,
     );
 
     expect(rrect.contains(const Offset(1.0, 1.0)), isFalse);
@@ -248,7 +249,6 @@ void main() {
       topLeft: const Radius.circular(0.5),
       topRight: const Radius.circular(0.25),
       bottomRight: const Radius.elliptical(0.25, 0.75),
-      bottomLeft: Radius.zero,
     ).scaleRadii();
 
     // check sides
@@ -274,7 +274,6 @@ void main() {
       topLeft: const Radius.circular(5000.0),
       topRight: const Radius.circular(2500.0),
       bottomRight: const Radius.elliptical(2500.0, 7500.0),
-      bottomLeft: Radius.zero,
     ).scaleRadii();
 
     // check sides

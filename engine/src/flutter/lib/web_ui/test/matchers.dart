@@ -234,7 +234,7 @@ String canonicalizeHtml(
     return '';
   }
 
-  String? _unusedAttribute(String name) {
+  String? unusedAttribute(String name) {
     if (throwOnUnusedAttributes) {
       fail('Provided HTML contains style attribute "$name" which '
           'is not used for comparison in the test. The HTML was:\n\n$htmlContent');
@@ -243,7 +243,7 @@ String canonicalizeHtml(
     return null;
   }
 
-  html_package.Element _cleanup(html_package.Element original) {
+  html_package.Element cleanup(html_package.Element original) {
     String replacementTag = original.localName!;
     switch (replacementTag) {
       case 'flt-scene':
@@ -306,7 +306,7 @@ String canonicalizeHtml(
     if (mode != HtmlComparisonMode.noAttributes) {
       original.attributes.forEach((dynamic name, String value) {
         if (name is! String) {
-          throw '"$name" should be String but was ${name.runtimeType}.';
+          throw ArgumentError('"$name" should be String but was ${name.runtimeType}.');
         }
         if (name == 'style') {
           return;
@@ -348,7 +348,7 @@ String canonicalizeHtml(
                   ].contains(name);
 
                   if (isStaticAttribute) {
-                    return _unusedAttribute(name);
+                    return unusedAttribute(name);
                   }
 
                   // Whether the attribute is set by the layout system.
@@ -368,7 +368,7 @@ String canonicalizeHtml(
 
                   if (forLayout && !isLayoutAttribute ||
                       !forLayout && isLayoutAttribute) {
-                    return _unusedAttribute(name);
+                    return unusedAttribute(name);
                   }
                 }
               }
@@ -394,7 +394,7 @@ String canonicalizeHtml(
       }
 
       if (child is html_package.Element) {
-        replacement.append(_cleanup(child));
+        replacement.append(cleanup(child));
       } else {
         replacement.append(child.clone(true));
       }
@@ -409,7 +409,7 @@ String canonicalizeHtml(
   final html_package.DocumentFragment cleanDom =
       html_package.DocumentFragment();
   for (final html_package.Element child in originalDom.children) {
-    cleanDom.append(_cleanup(child));
+    cleanDom.append(cleanup(child));
   }
 
   return cleanDom.outerHtml;

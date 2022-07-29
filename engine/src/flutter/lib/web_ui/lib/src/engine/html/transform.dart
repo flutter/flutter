@@ -14,8 +14,7 @@ import 'surface.dart';
 /// A surface that transforms its children using CSS transform.
 class PersistedTransform extends PersistedContainerSurface
     implements ui.TransformEngineLayer {
-  PersistedTransform(PersistedTransform? oldLayer, this._matrixStorage)
-      : super(oldLayer);
+  PersistedTransform(PersistedTransform? super.oldLayer, this._matrixStorage);
 
   /// The storage representing the transform of this surface.
   final Float32List _matrixStorage;

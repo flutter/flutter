@@ -647,7 +647,7 @@ extension JsonExtensions on Map<dynamic, dynamic> {
 ///     Input: [0, 1, 2, 3]
 ///     Output: 0x00 0x01 0x02 0x03
 String bytesToHexString(List<int> data) {
-  return data.map((int byte) => '0x' + byte.toRadixString(16).padLeft(2, '0')).join(' ');
+  return data.map((int byte) => '0x${byte.toRadixString(16).padLeft(2, '0')}').join(' ');
 }
 
 /// Sets a style property on [element].

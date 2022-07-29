@@ -8,7 +8,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:image/image.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
@@ -280,7 +279,7 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
     final HttpClientResponse response = await request.close();
     final List<dynamic>? jsonObject =
         await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
-    return base.resolve(jsonObject!.first['devtoolsFrontendUrl'] as String);
+    return base.resolve((jsonObject!.first as Map<dynamic, dynamic>)['devtoolsFrontendUrl'] as String);
   } catch (_) {
     // If we fail to talk to the remote debugger protocol, give up and return
     // the raw URL rather than crashing.

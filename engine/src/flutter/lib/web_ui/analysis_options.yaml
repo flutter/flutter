@@ -8,5 +8,12 @@ include: ../../analysis_options.yaml
 
 linter:
   rules:
+    avoid_dynamic_calls: false
+    avoid_print: false
+    avoid_setters_without_getters: false
+    library_private_types_in_public_api: false
+    no_default_cases: false
+    prefer_relative_imports: false
     public_member_api_docs: false
     unawaited_futures: true
+    use_setters_to_change_properties: false

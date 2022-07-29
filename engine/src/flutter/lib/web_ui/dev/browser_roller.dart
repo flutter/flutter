@@ -15,7 +15,6 @@ import 'utils.dart';
 final ArgParser _argParser = ArgParser(allowTrailingOptions: false)
   ..addFlag(
     'dry-run',
-    defaultsTo: false,
     help: 'Whether or not to push changes to CIPD. When --dry-run is set, the '
           'script will download everything and attempt to prepare the bundle '
           'but will stop before publishing. When not set, the bundle will be '
@@ -24,7 +23,6 @@ final ArgParser _argParser = ArgParser(allowTrailingOptions: false)
   )..addFlag(
     'verbose',
     abbr: 'v',
-    defaultsTo: false,
     help: 'Enable verbose output.',
     negatable: false,
   );
@@ -161,7 +159,7 @@ data:
     // Use the hash of the Url to temporarily store a file under tmp
     final io.File downloadedFile = io.File(path.join(
         io.Directory.systemTemp.path,
-        'download_' + url.hashCode.toRadixString(16),
+        'download_${url.hashCode.toRadixString(16)}',
       ));
     vprint('  Downloading [$url] into [${downloadedFile.path}]');
     final StreamedResponse download = await _client.send(
@@ -233,7 +231,7 @@ data:
       '--pkg-def',
       path.basename(config.path),
       '--json-output',
-      path.basenameWithoutExtension(config.path)+'.json',
+      '${path.basenameWithoutExtension(config.path)}.json',
       '--log-level',
       logLevel,
       if (!dryRun) ...<String>[
@@ -244,7 +242,7 @@ data:
       ],
       if (dryRun) ...<String>[
         '--out',
-        path.basenameWithoutExtension(config.path)+'.zip',
+        '${path.basenameWithoutExtension(config.path)}.zip',
       ],
     ], workingDirectory: _rollDir.path);
   }

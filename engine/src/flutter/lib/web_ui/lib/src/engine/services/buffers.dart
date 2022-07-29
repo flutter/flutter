@@ -326,7 +326,7 @@ abstract class _TypedDataBuffer<E> extends ListBase<E> {
 }
 
 abstract class _IntBuffer extends _TypedDataBuffer<int> {
-  _IntBuffer(List<int> buffer) : super(buffer);
+  _IntBuffer(super.buffer);
 
   @override
   int get _defaultValue => 0;

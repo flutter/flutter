@@ -15,8 +15,7 @@ import 'surface_stats.dart';
 /// A surface that applies an image filter to background.
 class PersistedBackdropFilter extends PersistedContainerSurface
     implements ui.BackdropFilterEngineLayer {
-  PersistedBackdropFilter(PersistedBackdropFilter? oldLayer, this.filter)
-      : super(oldLayer);
+  PersistedBackdropFilter(PersistedBackdropFilter? super.oldLayer, this.filter);
 
   final EngineImageFilter filter;
 

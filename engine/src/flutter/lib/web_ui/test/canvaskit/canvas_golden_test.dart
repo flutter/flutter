@@ -959,7 +959,7 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.translate(0, 60);
   canvas.save();
 
-  canvas.drawLine(const ui.Offset(0, 0), const ui.Offset(40, 30), CkPaint());
+  canvas.drawLine(ui.Offset.zero, const ui.Offset(40, 30), CkPaint());
 
   canvas.translate(60, 0);
   canvas.drawOval(

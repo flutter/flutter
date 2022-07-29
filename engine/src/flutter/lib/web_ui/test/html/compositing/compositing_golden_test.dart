@@ -172,7 +172,6 @@ Future<void> testMain() async {
     builder.pushPhysicalShape(
       path: ui.Path()
         ..addRRect(ui.RRect.fromLTRBR(10, 10, 60, 60, const ui.Radius.circular(5))),
-      clipBehavior: ui.Clip.none,
       color: const ui.Color.fromRGBO(0, 0, 0, 0.3),
       elevation: 0,
     );

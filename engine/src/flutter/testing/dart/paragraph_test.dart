@@ -77,7 +77,6 @@ void main() {
 
     const TextPosition wrapPositionDown = TextPosition(
       offset: 5,
-      affinity: TextAffinity.downstream,
     );
     TextRange line = paragraph.getLineBoundary(wrapPositionDown);
     expect(line.start, 5);
@@ -93,7 +92,6 @@ void main() {
 
     const TextPosition wrapPositionStart = TextPosition(
       offset: 0,
-      affinity: TextAffinity.downstream,
     );
     line = paragraph.getLineBoundary(wrapPositionStart);
     expect(line.start, 0);
@@ -101,7 +99,6 @@ void main() {
 
     const TextPosition wrapPositionEnd = TextPosition(
       offset: 9,
-      affinity: TextAffinity.downstream,
     );
     line = paragraph.getLineBoundary(wrapPositionEnd);
     expect(line.start, 5);
@@ -126,7 +123,6 @@ void main() {
 
     const TextPosition wrapPositionDown = TextPosition(
       offset: 5,
-      affinity: TextAffinity.downstream,
     );
     TextRange line = paragraph.getLineBoundary(wrapPositionDown);
     expect(line.start, 5);
@@ -142,7 +138,6 @@ void main() {
 
     const TextPosition wrapPositionStart = TextPosition(
       offset: 0,
-      affinity: TextAffinity.downstream,
     );
     line = paragraph.getLineBoundary(wrapPositionStart);
     expect(line.start, 0);
@@ -150,7 +145,6 @@ void main() {
 
     const TextPosition wrapPositionEnd = TextPosition(
       offset: 9,
-      affinity: TextAffinity.downstream,
     );
     line = paragraph.getLineBoundary(wrapPositionEnd);
     expect(line.start, 5);
@@ -175,7 +169,6 @@ void main() {
 
     const TextPosition emptyLinePosition = TextPosition(
       offset: 5,
-      affinity: TextAffinity.downstream,
     );
     TextRange line = paragraph.getLineBoundary(emptyLinePosition);
     expect(line.start, 5);
@@ -192,7 +185,6 @@ void main() {
 
     const TextPosition endOfFirstLinePosition = TextPosition(
       offset: 4,
-      affinity: TextAffinity.downstream,
     );
     line = paragraph.getLineBoundary(endOfFirstLinePosition);
     expect(line.start, 0);
@@ -200,7 +192,6 @@ void main() {
 
     const TextPosition startOfLastLinePosition = TextPosition(
       offset: 6,
-      affinity: TextAffinity.downstream,
     );
     line = paragraph.getLineBoundary(startOfLastLinePosition);
     expect(line.start, 6);

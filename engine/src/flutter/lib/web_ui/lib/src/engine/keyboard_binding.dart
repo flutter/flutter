@@ -324,8 +324,9 @@ class KeyboardConverter {
   final Map<int, _VoidCallback> _keyGuards = <int, _VoidCallback>{};
   // Call this method on the down or repeated event of a non-modifier key.
   void _startGuardingKey(int physicalKey, int logicalKey, Duration currentTimeStamp) {
-    if (!_shouldDoKeyGuard())
+    if (!_shouldDoKeyGuard()) {
       return;
+    }
     final _VoidCallback cancelingCallback = _scheduleAsyncEvent(
       _kKeydownCancelDurationMac,
       () => ui.KeyData(
@@ -357,15 +358,17 @@ class KeyboardConverter {
     final bool logicalKeyIsCharacter = !_eventKeyIsKeyname(eventKey);
     final String? character = logicalKeyIsCharacter ? eventKey : null;
     final int logicalKey = () {
-      if (kWebLogicalLocationMap.containsKey(event.key!)) {
+      if (kWebLogicalLocationMap.containsKey(event.key)) {
         final int? result = kWebLogicalLocationMap[event.key!]?[event.location!];
         assert(result != null, 'Invalid modifier location: ${event.key}, ${event.location}');
         return result!;
       }
-      if (character != null)
+      if (character != null) {
         return _characterToLogicalKey(character);
-      if (eventKey == _kLogicalDead)
+      }
+      if (eventKey == _kLogicalDead) {
         return _deadKeyToLogicalKey(physicalKey, event);
+      }
       return _otherLogicalKey(eventKey);
     }();
 
@@ -487,8 +490,9 @@ class KeyboardConverter {
       }
       if (_pressingRecords.containsValue(testeeLogicalKey) && !getModifier(event)) {
         _pressingRecords.removeWhere((int physicalKey, int logicalRecord) {
-          if (logicalRecord != testeeLogicalKey)
+          if (logicalRecord != testeeLogicalKey) {
             return false;
+          }
 
           _dispatchKeyData!(ui.KeyData(
             timeStamp: timeStamp,

@@ -140,21 +140,18 @@ ArgParser setupOptions() {
       'help',
       help: 'Print usage of the command.',
       negatable: false,
-      defaultsTo: false,
     )
     ..addFlag(
       'rebaseline',
       help: 'Recalculates the baseline for errors and warnings '
           'in this project.',
       negatable: false,
-      defaultsTo: false,
     )
     ..addFlag(
       'html',
       help: 'Creates an HTML output for this report instead of printing '
           'command line output.',
       negatable: false,
-      defaultsTo: false,
     )
     ..addOption(
       'out',

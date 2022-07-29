@@ -21,7 +21,7 @@ Future<void> testMain() async {
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
 
   // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(engine.RecordingCanvas rc, String fileName,
+  Future<void> checkScreenshot(engine.RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
     final engine.EngineCanvas engineCanvas = engine.BitmapCanvas(screenRect,
         engine.RenderStrategy());
@@ -83,7 +83,7 @@ Future<void> testMain() async {
     // The rectangle should paint without clipping since we restored
     // context.
     rc.drawRect(const Rect.fromLTWH(0, 0, 4, 200), paint);
-    await _checkScreenshot(rc, 'context_save_restore_transform');
+    await checkScreenshot(rc, 'context_save_restore_transform');
   });
 
   test('Should restore clip path', () async {
@@ -108,6 +108,6 @@ Future<void> testMain() async {
     // The rectangle should paint without clipping since we restored
     // context.
     rc.drawRect(const Rect.fromLTWH(0, 0, 200, 200), goodPaint as engine.SurfacePaint);
-    await _checkScreenshot(rc, 'context_save_restore_clip');
+    await checkScreenshot(rc, 'context_save_restore_clip');
   });
 }

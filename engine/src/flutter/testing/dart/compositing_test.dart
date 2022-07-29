@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show Float64List, ByteData;
+import 'dart:typed_data' show ByteData, Float64List;
 import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
@@ -372,7 +372,7 @@ void main() {
     testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushShaderMask(
         Gradient.radial(
-          const Offset(0, 0),
+          Offset.zero,
           10,
           const <Color>[Color.fromARGB(0, 0, 0, 0), Color.fromARGB(0, 255, 255, 255)],
         ),

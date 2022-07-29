@@ -26,12 +26,10 @@ class RunCommand extends Command<bool> with ArgUtils<bool> {
     argParser.addFlag(
       'list',
       abbr: 'l',
-      defaultsTo: false,
       help: 'Lists all available build steps.',
     );
     argParser.addFlag(
       'require-skia-gold',
-      defaultsTo: false,
       help: 'Whether we require Skia Gold to be available or not. When this '
             'flag is true, the tests will fail if Skia Gold is not available.',
     );

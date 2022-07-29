@@ -698,8 +698,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   double _width = 0;
 
   @override
-  List<ui.TextBox> getBoxesForPlaceholders() => _boxesForPlaceholders!;
-  List<ui.TextBox>? _boxesForPlaceholders;
+  List<ui.TextBox> getBoxesForPlaceholders() => _boxesForPlaceholders;
+  late List<ui.TextBox> _boxesForPlaceholders;
 
   @override
   List<ui.TextBox> getBoxesForRange(
@@ -783,7 +783,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         return ui.TextRange(start: metric.startIndex, end: metric.endIndex);
       }
     }
-    return const ui.TextRange(start: -1, end: -1);
+    return ui.TextRange.empty;
   }
 
   @override

@@ -36,7 +36,7 @@ void testMain() {
 
   test('PathRef.getRRect with zero radius', () {
     final SurfacePath path = SurfacePath();
-    final RRect rrect = RRect.fromLTRBR(0, 0, 10, 10, const Radius.circular(0));
+    final RRect rrect = RRect.fromLTRBR(0, 0, 10, 10, Radius.zero);
     path.addRRect(rrect);
     expect(path.toRoundedRect(), isNull);
     expect(path.toRect(), rrect.outerRect);

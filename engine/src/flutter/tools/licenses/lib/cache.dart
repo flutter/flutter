@@ -10,8 +10,9 @@ T cache<T>(Key key, T Function() getter) {
   if (result != null) {
     _cache.remove(key);
   } else {
-    if (_cache.length == _maxSize)
+    if (_cache.length == _maxSize) {
       _cache.remove(_cache.keys.first);
+    }
     result = getter();
     assert(result is! Function);
   }
@@ -26,10 +27,12 @@ abstract class Key {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is Key
         && other._value == _value;
   }

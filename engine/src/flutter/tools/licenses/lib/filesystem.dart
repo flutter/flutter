@@ -30,26 +30,32 @@ class UTF8Of extends Key { UTF8Of(dynamic value) : super(value); }
 class Latin1Of extends Key { Latin1Of(dynamic value) : super(value); }
 
 bool matchesSignature(List<int> bytes, List<int> signature) {
-  if (bytes.length < signature.length)
+  if (bytes.length < signature.length) {
     return false;
+  }
   for (int index = 0; index < signature.length; index += 1) {
-    if (signature[index] != -1 && bytes[index] != signature[index])
+    if (signature[index] != -1 && bytes[index] != signature[index]) {
       return false;
+    }
   }
   return true;
 }
 
 bool hasSubsequence(List<int> bytes, List<int> signature, int limit) {
-  if (bytes.length < limit)
+  if (bytes.length < limit) {
     limit = bytes.length;
+  }
   for (int index = 0; index < limit; index += 1) {
-    if (bytes.length - index < signature.length)
+    if (bytes.length - index < signature.length) {
       return false;
+    }
     for (int offset = 0; offset < signature.length; offset += 1) {
-      if (signature[offset] != -1 && bytes[index + offset] != signature[offset])
+      if (signature[offset] != -1 && bytes[index + offset] != signature[offset]) {
         break;
-      if (offset + 1 == signature.length)
+      }
+      if (offset + 1 == signature.length) {
         return true;
+      }
     }
   }
   return false;
@@ -67,22 +73,26 @@ FileType identifyFile(String name, Reader reader) {
   if ((path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/extra/uconv/README') || // This specific ICU README isn't in UTF-8.
       (path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/samples/uresb/sr.txt') || // This specific sample contains non-UTF-8 data (unlike other sr.txt files).
       (path.split(name).reversed.take(2).toList().reversed.join('/') == 'builds/detect.mk') || // This specific freetype sample contains non-UTF-8 data (unlike other .mk files).
-      (path.split(name).reversed.take(3).toList().reversed.join('/') == 'third_party/cares/cares.rc')) // This file has a copyright symbol in Latin1 in it
+      (path.split(name).reversed.take(3).toList().reversed.join('/') == 'third_party/cares/cares.rc')) {
     return FileType.latin1Text;
+  }
   if (path.split(name).reversed.take(6).toList().reversed.join('/') == 'dart/runtime/tests/vm/dart/bad_snapshot' || // Not any particular format
-      path.split(name).reversed.take(8).toList().reversed.join('/') == 'third_party/android_tools/ndk/sources/cxx-stl/stlport/src/stlport.rc') // uses the word "copyright" but doesn't have a copyright header
+      path.split(name).reversed.take(8).toList().reversed.join('/') == 'third_party/android_tools/ndk/sources/cxx-stl/stlport/src/stlport.rc') {
     return FileType.binary;
+  }
   final String base = path.basename(name);
   if (base.startsWith('._')) {
     bytes ??= reader();
-    if (matchesSignature(bytes, <int>[0x00, 0x05, 0x16, 0x07, 0x00, 0x02, 0x00, 0x00, 0x4d, 0x61, 0x63, 0x20, 0x4f, 0x53, 0x20, 0x58]))
-      return FileType.metadata; // The ._* files in Mac OS X archives that gives icons and stuff
+    if (matchesSignature(bytes, <int>[0x00, 0x05, 0x16, 0x07, 0x00, 0x02, 0x00, 0x00, 0x4d, 0x61, 0x63, 0x20, 0x4f, 0x53, 0x20, 0x58])) {
+      return FileType.metadata;
+    } // The ._* files in Mac OS X archives that gives icons and stuff
   }
   if (path.split(name).contains('cairo')) {
     bytes ??= reader();
     // "Copyright <latin1 copyright symbol> "
-    if (hasSubsequence(bytes, <int>[0x43, 0x6f, 0x70, 0x79, 0x72, 0x69, 0x67, 0x68, 0x74, 0x20, 0xA9, 0x20], kMaxSize))
+    if (hasSubsequence(bytes, <int>[0x43, 0x6f, 0x70, 0x79, 0x72, 0x69, 0x67, 0x68, 0x74, 0x20, 0xA9, 0x20], kMaxSize)) {
       return FileType.latin1Text;
+    }
   }
   switch (base) {
     // Build files
@@ -171,8 +181,9 @@ FileType identifyFile(String name, Reader reader) {
       // # -*- coding: Latin-1 -*-
       if (matchesSignature(bytes, <int>[0x23, 0x20, 0x2d, 0x2a, 0x2d, 0x20, 0x63, 0x6f, 0x64,
                                         0x69, 0x6e, 0x67, 0x3a, 0x20, 0x4c, 0x61, 0x74, 0x69,
-                                        0x6e, 0x2d, 0x31, 0x20, 0x2d, 0x2a, 0x2d]))
+                                        0x6e, 0x2d, 0x31, 0x20, 0x2d, 0x2a, 0x2d])) {
         return FileType.latin1Text;
+      }
       return FileType.text;
     case '.pyc': return FileType.binary; // compiled Python bytecode
     // Machine code
@@ -245,58 +256,82 @@ FileType identifyFile(String name, Reader reader) {
   }
   bytes ??= reader();
   assert(bytes.isNotEmpty);
-  if (matchesSignature(bytes, <int>[0x1F, 0x8B]))
-    return FileType.gz; // GZip archive
-  if (matchesSignature(bytes, <int>[0x42, 0x5A]))
-    return FileType.bzip2; // BZip2 archive
-  if (matchesSignature(bytes, <int>[0x42, 0x43]))
-    return FileType.binary; // LLVM Bitcode
-  if (matchesSignature(bytes, <int>[0xAC, 0xED]))
-    return FileType.binary; // Java serialized object
-  if (matchesSignature(bytes, <int>[0x4D, 0x5A]))
-    return FileType.binary; // MZ executable (DOS, Windows PEs, etc)
-  if (matchesSignature(bytes, <int>[0xFF, 0xD8, 0xFF]))
-    return FileType.binary; // JPEG
-  if (matchesSignature(bytes, <int>[-1, -1, 0xda, 0x27])) // -1 is a wildcard
-    return FileType.binary; // ICU data files (.brk, .dict, etc)
-  if (matchesSignature(bytes, <int>[0x03, 0x00, 0x08, 0x00]))
-    return FileType.binary; // Android Binary XML
-  if (matchesSignature(bytes, <int>[0x25, 0x50, 0x44, 0x46]))
-    return FileType.binary; // PDF
-  if (matchesSignature(bytes, <int>[0x43, 0x72, 0x32, 0x34]))
-    return FileType.binary; // Chrome extension
-  if (matchesSignature(bytes, <int>[0x4F, 0x67, 0x67, 0x53]))
-    return FileType.binary; // Ogg media
-  if (matchesSignature(bytes, <int>[0x50, 0x4B, 0x03, 0x04]))
-    return FileType.zip; // ZIP archive
-  if (matchesSignature(bytes, <int>[0x7F, 0x45, 0x4C, 0x46]))
-    return FileType.binary; // ELF
-  if (matchesSignature(bytes, <int>[0xCA, 0xFE, 0xBA, 0xBE]))
-    return FileType.binary; // compiled Java bytecode (usually found inside .jar archives)
-  if (matchesSignature(bytes, <int>[0xCE, 0xFA, 0xED, 0xFE]))
-    return FileType.binary; // Mach-O binary, 32 bit, reverse byte ordering scheme
-  if (matchesSignature(bytes, <int>[0xCF, 0xFA, 0xED, 0xFE]))
-    return FileType.binary; // Mach-O binary, 64 bit, reverse byte ordering scheme
-  if (matchesSignature(bytes, <int>[0xFE, 0xED, 0xFA, 0xCE]))
-    return FileType.binary; // Mach-O binary, 32 bit
-  if (matchesSignature(bytes, <int>[0xFE, 0xED, 0xFA, 0xCF]))
-    return FileType.binary; // Mach-O binary, 64 bit
-  if (matchesSignature(bytes, <int>[0x75, 0x73, 0x74, 0x61, 0x72]))
-    return FileType.bzip2; // Tar
-  if (matchesSignature(bytes, <int>[0x47, 0x49, 0x46, 0x38, 0x37, 0x61]))
-    return FileType.binary; // GIF87a
-  if (matchesSignature(bytes, <int>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61]))
-    return FileType.binary; // GIF89a
-  if (matchesSignature(bytes, <int>[0x64, 0x65, 0x78, 0x0A, 0x30, 0x33, 0x35, 0x00]))
-    return FileType.binary; // Dalvik Executable
+  if (matchesSignature(bytes, <int>[0x1F, 0x8B])) {
+    return FileType.gz;
+  } // GZip archive
+  if (matchesSignature(bytes, <int>[0x42, 0x5A])) {
+    return FileType.bzip2;
+  } // BZip2 archive
+  if (matchesSignature(bytes, <int>[0x42, 0x43])) {
+    return FileType.binary;
+  } // LLVM Bitcode
+  if (matchesSignature(bytes, <int>[0xAC, 0xED])) {
+    return FileType.binary;
+  } // Java serialized object
+  if (matchesSignature(bytes, <int>[0x4D, 0x5A])) {
+    return FileType.binary;
+  } // MZ executable (DOS, Windows PEs, etc)
+  if (matchesSignature(bytes, <int>[0xFF, 0xD8, 0xFF])) {
+    return FileType.binary;
+  } // JPEG
+  if (matchesSignature(bytes, <int>[-1, -1, 0xda, 0x27])) {
+    return FileType.binary;
+  } // ICU data files (.brk, .dict, etc)
+  if (matchesSignature(bytes, <int>[0x03, 0x00, 0x08, 0x00])) {
+    return FileType.binary;
+  } // Android Binary XML
+  if (matchesSignature(bytes, <int>[0x25, 0x50, 0x44, 0x46])) {
+    return FileType.binary;
+  } // PDF
+  if (matchesSignature(bytes, <int>[0x43, 0x72, 0x32, 0x34])) {
+    return FileType.binary;
+  } // Chrome extension
+  if (matchesSignature(bytes, <int>[0x4F, 0x67, 0x67, 0x53])) {
+    return FileType.binary;
+  } // Ogg media
+  if (matchesSignature(bytes, <int>[0x50, 0x4B, 0x03, 0x04])) {
+    return FileType.zip;
+  } // ZIP archive
+  if (matchesSignature(bytes, <int>[0x7F, 0x45, 0x4C, 0x46])) {
+    return FileType.binary;
+  } // ELF
+  if (matchesSignature(bytes, <int>[0xCA, 0xFE, 0xBA, 0xBE])) {
+    return FileType.binary;
+  } // compiled Java bytecode (usually found inside .jar archives)
+  if (matchesSignature(bytes, <int>[0xCE, 0xFA, 0xED, 0xFE])) {
+    return FileType.binary;
+  } // Mach-O binary, 32 bit, reverse byte ordering scheme
+  if (matchesSignature(bytes, <int>[0xCF, 0xFA, 0xED, 0xFE])) {
+    return FileType.binary;
+  } // Mach-O binary, 64 bit, reverse byte ordering scheme
+  if (matchesSignature(bytes, <int>[0xFE, 0xED, 0xFA, 0xCE])) {
+    return FileType.binary;
+  } // Mach-O binary, 32 bit
+  if (matchesSignature(bytes, <int>[0xFE, 0xED, 0xFA, 0xCF])) {
+    return FileType.binary;
+  } // Mach-O binary, 64 bit
+  if (matchesSignature(bytes, <int>[0x75, 0x73, 0x74, 0x61, 0x72])) {
+    return FileType.bzip2;
+  } // Tar
+  if (matchesSignature(bytes, <int>[0x47, 0x49, 0x46, 0x38, 0x37, 0x61])) {
+    return FileType.binary;
+  } // GIF87a
+  if (matchesSignature(bytes, <int>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61])) {
+    return FileType.binary;
+  } // GIF89a
+  if (matchesSignature(bytes, <int>[0x64, 0x65, 0x78, 0x0A, 0x30, 0x33, 0x35, 0x00])) {
+    return FileType.binary;
+  } // Dalvik Executable
   if (matchesSignature(bytes, <int>[0x21, 0x3C, 0x61, 0x72, 0x63, 0x68, 0x3E, 0x0A])) {
     // TODO(ianh): implement .ar parser, https://github.com/flutter/flutter/issues/25633
     return FileType.binary; // Unix archiver (ar)
   }
-  if (matchesSignature(bytes, <int>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0a]))
-    return FileType.binary; // PNG
-  if (matchesSignature(bytes, <int>[0x58, 0x50, 0x43, 0x4f, 0x4d, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x4c, 0x69, 0x62, 0x0d, 0x0a, 0x1a]))
-    return FileType.binary; // XPCOM Type Library
+  if (matchesSignature(bytes, <int>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0a])) {
+    return FileType.binary;
+  } // PNG
+  if (matchesSignature(bytes, <int>[0x58, 0x50, 0x43, 0x4f, 0x4d, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x4c, 0x69, 0x62, 0x0d, 0x0a, 0x1a])) {
+    return FileType.binary;
+  } // XPCOM Type Library
   return FileType.text;
 }
 
@@ -341,8 +376,9 @@ mixin Latin1TextFile implements TextFile {
   String readString() {
     return cache(Latin1Of(this), () {
       final List<int> bytes = readBytes();
-      if (bytes.any((int byte) => byte == 0x00))
+      if (bytes.any((int byte) => byte == 0x00)) {
         throw '$fullName contains a U+0000 NULL and is probably not actually encoded as Win1252';
+      }
       bool isUTF8 = false;
       try {
         cache(UTF8Of(this), () => utf8.decode(readBytes()));
@@ -351,8 +387,9 @@ mixin Latin1TextFile implements TextFile {
         // Exceptions are fine/expected for non-UTF8 text, which we test for
         // immediately below.
       }
-      if (isUTF8)
+      if (isUTF8) {
         throw '$fullName contains valid UTF-8 and is probably not actually encoded as Win1252';
+      }
       return latin1.decode(bytes);
     });
   }
@@ -403,9 +440,10 @@ mixin GZipFile on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse(fullName + '!' + innerName, a.GZipDecoder().decodeBytes(readBytes()));
-      if (_data != null)
+      _data ??= InMemoryFile.parse('$fullName!$innerName', a.GZipDecoder().decodeBytes(readBytes()));
+      if (_data != null) {
         yield _data;
+      }
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
       rethrow;
@@ -420,9 +458,10 @@ mixin BZip2File on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse(fullName + '!' + innerName, a.BZip2Decoder().decodeBytes(readBytes()));
-      if (_data != null)
+      _data ??= InMemoryFile.parse('$fullName!$innerName', a.BZip2Decoder().decodeBytes(readBytes()));
+      if (_data != null) {
         yield _data;
+      }
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
       rethrow;
@@ -558,7 +597,7 @@ class ArchiveDirectory extends IoNode implements Directory {
       )._add(entry, remainingPath);
     } else {
       if (entry.size > 0) {
-        final String entryFullName = fullName + '/' + path.basename(entry.name);
+        final String entryFullName = '$fullName/${path.basename(entry.name)}';
         switch (identifyFile(entry.name, () => entry.content as List<int>)) {
           case FileType.binary: _files.add(ArchiveFile(entryFullName, entry)); break;
           case FileType.zip: _files.add(ArchiveZipFile(entryFullName, entry)); break;
@@ -576,8 +615,9 @@ class ArchiveDirectory extends IoNode implements Directory {
   static ArchiveDirectory parseArchive(a.Archive archive, String ownerPath) {
     final ArchiveDirectory root = ArchiveDirectory('$ownerPath!', '');
     for (final a.ArchiveFile file in archive.files) {
-      if (file.size > 0)
+      if (file.size > 0) {
         root._add(file, file.name.split('/'));
+      }
     }
     return root;
   }
@@ -637,8 +677,9 @@ class InMemoryFile extends IoNode implements File {
   InMemoryFile(this.fullName, this._bytes);
 
   static InMemoryFile parse(String fullName, List<int> bytes) {
-    if (bytes.isEmpty)
+    if (bytes.isEmpty) {
       return null;
+    }
     switch (identifyFile(fullName, () => bytes)) {
       case FileType.binary: return InMemoryFile(fullName, bytes); break;
       case FileType.zip: return InMemoryZipFile(fullName, bytes); break;

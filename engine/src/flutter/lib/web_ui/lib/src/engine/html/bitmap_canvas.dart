@@ -585,7 +585,7 @@ class BitmapCanvas extends EngineCanvas {
         }
       }
       _applyFilter(svgElm, paint);
-      _drawElement(svgElm, const ui.Offset(0, 0), paint);
+      _drawElement(svgElm, ui.Offset.zero, paint);
     } else {
       setUpPaint(paint, paint.shader != null ? path.getBounds() : null);
       if (paint.style == null && paint.strokeWidth != null) {
@@ -915,7 +915,7 @@ class BitmapCanvas extends EngineCanvas {
     if (shadows != null) {
       ctx.save();
       for (final ui.Shadow shadow in shadows) {
-        ctx.shadowColor = colorToCssString(shadow.color)!;
+        ctx.shadowColor = colorToCssString(shadow.color);
         ctx.shadowBlur = shadow.blurRadius;
         ctx.shadowOffsetX = shadow.offset.dx;
         ctx.shadowOffsetY = shadow.offset.dy;

@@ -30,7 +30,7 @@ class FormattingException implements Exception {
     final StringBuffer output = StringBuffer(runtimeType.toString());
     output.write(': $message');
     final String? stderr = result?.stderr as String?;
-    if (stderr?.isNotEmpty == true) {
+    if (stderr?.isNotEmpty ?? false) {
       output.write(':\n$stderr');
     }
     return output.toString();
@@ -228,7 +228,6 @@ abstract class FormatChecker {
       return WorkerJob(
         <String>['patch', '-p0'],
         stdinRaw: codeUnitsAsStream(patch.codeUnits),
-        failOk: true,
       );
     }).toList();
     final List<WorkerJob> completedJobs = await patchPool.runToCompletion(jobs);
@@ -401,7 +400,7 @@ class ClangFormatChecker extends FormatChecker {
       if (completedJob.result.exitCode == 0) {
         diffJobs.add(
           WorkerJob(<String>['diff', '-u', completedJob.command.last, '-'],
-              stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw), failOk: true),
+              stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw)),
         );
       }
     }
@@ -548,7 +547,6 @@ class JavaFormatChecker extends FormatChecker {
           WorkerJob(
             <String>['diff', '-u', completedJob.command.last, '-'],
             stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw),
-            failOk: true,
           ),
         );
       }
@@ -949,13 +947,11 @@ Future<int> main(List<String> arguments) async {
   parser.addFlag('help', help: 'Print help.', abbr: 'h');
   parser.addFlag('fix',
       abbr: 'f',
-      help: 'Instead of just checking for formatting errors, fix them in place.',
-      defaultsTo: false);
+      help: 'Instead of just checking for formatting errors, fix them in place.');
   parser.addFlag('all-files',
       abbr: 'a',
       help: 'Instead of just checking for formatting errors in changed files, '
-          'check for them in all files.',
-      defaultsTo: false);
+          'check for them in all files.');
   parser.addMultiOption('check',
       abbr: 'c',
       allowed: formatCheckNames(),
@@ -1012,7 +1008,6 @@ Future<int> main(List<String> arguments) async {
       final FormatCheck check = nameToFormatCheck(checkName);
       final String humanCheckName = formatCheckToName(check);
       final FormatChecker checker = FormatChecker.ofType(check,
-          processManager: processManager,
           baseGitRef: baseGitRef,
           repoDir: repoDir,
           srcDir: srcDir,

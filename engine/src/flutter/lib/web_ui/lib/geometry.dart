@@ -35,7 +35,7 @@ abstract class OffsetBase {
 }
 
 class Offset extends OffsetBase {
-  const Offset(double dx, double dy) : super(dx, dy);
+  const Offset(super.dx, super.dy);
   factory Offset.fromDirection(double direction, [ double distance = 1.0 ]) {
     return Offset(distance * math.cos(direction), distance * math.sin(direction));
   }
@@ -89,22 +89,25 @@ class Offset extends OffsetBase {
 }
 
 class Size extends OffsetBase {
-  const Size(double width, double height) : super(width, height);
+  const Size(super.width, super.height);
   // Used by the rendering library's _DebugSize hack.
   Size.copy(Size source) : super(source.width, source.height);
-  const Size.square(double dimension) : super(dimension, dimension);
+  const Size.square(double dimension) : super(dimension, dimension); // ignore: use_super_parameters
   const Size.fromWidth(double width) : super(width, double.infinity);
   const Size.fromHeight(double height) : super(double.infinity, height);
   const Size.fromRadius(double radius) : super(radius * 2.0, radius * 2.0);
   double get width => _dx;
   double get height => _dy;
   double get aspectRatio {
-    if (height != 0.0)
+    if (height != 0.0) {
       return width / height;
-    if (width > 0.0)
+    }
+    if (width > 0.0) {
       return double.infinity;
-    if (width < 0.0)
+    }
+    if (width < 0.0) {
       return double.negativeInfinity;
+    }
     return 0.0;
   }
 
@@ -112,10 +115,12 @@ class Size extends OffsetBase {
   static const Size infinite = Size(double.infinity, double.infinity);
   bool get isEmpty => width <= 0.0 || height <= 0.0;
   OffsetBase operator -(OffsetBase other) {
-    if (other is Size)
+    if (other is Size) {
       return Offset(width - other.width, height - other.height);
-    if (other is Offset)
+    }
+    if (other is Offset) {
       return Size(width - other.dx, height - other.dy);
+    }
     throw ArgumentError(other);
   }
 
@@ -262,10 +267,12 @@ class Rect {
   }
 
   bool overlaps(Rect other) {
-    if (right <= other.left || other.right <= left)
+    if (right <= other.left || other.right <= left) {
       return false;
-    if (bottom <= other.top || other.bottom <= top)
+    }
+    if (bottom <= other.top || other.bottom <= top) {
       return false;
+    }
     return true;
   }
 
@@ -309,10 +316,12 @@ class Rect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is Rect
         && other.left   == left
         && other.top    == top
@@ -363,10 +372,12 @@ class Radius {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
 
     return other is Radius
         && other.x == x
@@ -696,8 +707,9 @@ class RRect {
   // should be scaled with in order not to exceed the limit.
   double _getMin(double min, double radius1, double radius2, double limit) {
     final double sum = radius1 + radius2;
-    if (sum > limit && sum != 0.0)
+    if (sum > limit && sum != 0.0) {
       return math.min(min, limit / sum);
+    }
     return min;
   }
 
@@ -744,8 +756,9 @@ class RRect {
   }
 
   bool contains(Offset point) {
-    if (point.dx < left || point.dx >= right || point.dy < top || point.dy >= bottom)
-      return false; // outside bounding box
+    if (point.dx < left || point.dx >= right || point.dy < top || point.dy >= bottom) {
+      return false;
+    } // outside bounding box
 
     final RRect scaled = scaleRadii();
 
@@ -786,8 +799,9 @@ class RRect {
     x = x / radiusX;
     y = y / radiusY;
     // check if the point is outside the unit circle
-    if (x * x + y * y > 1.0)
+    if (x * x + y * y > 1.0) {
       return false;
+    }
     return true;
   }
 
@@ -850,10 +864,12 @@ class RRect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is RRect
         && other.left      == left
         && other.top       == top
@@ -883,8 +899,9 @@ class RRect {
     if (tlRadius == trRadius &&
         trRadius == brRadius &&
         brRadius == blRadius) {
-      if (tlRadius.x == tlRadius.y)
+      if (tlRadius.x == tlRadius.y) {
         return 'RRect.fromLTRBR($rect, ${tlRadius.x.toStringAsFixed(1)})';
+      }
       return 'RRect.fromLTRBXY($rect, ${tlRadius.x.toStringAsFixed(1)}, ${tlRadius.y.toStringAsFixed(1)})';
     }
     return 'RRect.fromLTRBAndCorners('

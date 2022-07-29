@@ -381,8 +381,9 @@ class SurfaceCanvas implements ui.Canvas {
     assert(rectIsValid(dst));
     assert(paint != null); // ignore: unnecessary_null_comparison
 
-    if (dst.isEmpty)
+    if (dst.isEmpty) {
       return;
+    }
 
     final List<double> hSlices = _initSlices(
       0,

@@ -14,7 +14,7 @@ void main() {
 void testMain() {
   group('$FontManager', () {
     late FontManager fontManager;
-    const String _testFontUrl = '/assets/fonts/ahem.ttf';
+    const String testFontUrl = '/assets/fonts/ahem.ttf';
 
     setUp(() {
       fontManager = FontManager();
@@ -26,11 +26,11 @@ void testMain() {
 
     group('regular special characters', () {
       test('Register Asset with no special characters', () async {
-        const String _testFontFamily = 'Ahem';
+        const String testFontFamily = 'Ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
-            _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
@@ -44,11 +44,11 @@ void testMain() {
           skip: browserEngine == BrowserEngine.edge);
 
       test('Register Asset with white space in the family name', () async {
-        const String _testFontFamily = 'Ahem ahem ahem';
+        const String testFontFamily = 'Ahem ahem ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
-            _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
@@ -64,11 +64,11 @@ void testMain() {
               browserEngine == BrowserEngine.webkit);
 
       test('Register Asset with capital case letters', () async {
-        const String _testFontFamily = 'AhEm';
+        const String testFontFamily = 'AhEm';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
-            _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
@@ -84,11 +84,11 @@ void testMain() {
 
     group('fonts with special characters', () {
       test('Register Asset twice with special character slash', () async {
-        const String _testFontFamily = '/Ahem';
+        const String testFontFamily = '/Ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
-            _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
@@ -97,7 +97,7 @@ void testMain() {
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
-          expect(fontFamilyList, contains('\'/Ahem\''));
+          expect(fontFamilyList, contains("'/Ahem'"));
           expect(fontFamilyList, contains('/Ahem'));
         } else {
           expect(fontFamilyList.length, equals(1));
@@ -110,11 +110,11 @@ void testMain() {
               browserEngine == BrowserEngine.webkit);
 
       test('Register Asset twice with exclamation mark', () async {
-        const String _testFontFamily = 'Ahem!!ahem';
+        const String testFontFamily = 'Ahem!!ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
-            _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
@@ -123,7 +123,7 @@ void testMain() {
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
-          expect(fontFamilyList, contains('\'Ahem!!ahem\''));
+          expect(fontFamilyList, contains("'Ahem!!ahem'"));
           expect(fontFamilyList, contains('Ahem!!ahem'));
         } else {
           expect(fontFamilyList.length, equals(1));
@@ -136,11 +136,11 @@ void testMain() {
               browserEngine == BrowserEngine.webkit);
 
       test('Register Asset twice with comma', () async {
-        const String _testFontFamily = 'Ahem ,ahem';
+        const String testFontFamily = 'Ahem ,ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
-            _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
@@ -149,7 +149,7 @@ void testMain() {
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
-          expect(fontFamilyList, contains('\'Ahem ,ahem\''));
+          expect(fontFamilyList, contains("'Ahem ,ahem'"));
           expect(fontFamilyList, contains('Ahem ,ahem'));
         } else {
           expect(fontFamilyList.length, equals(1));
@@ -167,7 +167,7 @@ void testMain() {
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
-            testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
         await fontManager.ensureFontsLoaded();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
@@ -177,7 +177,7 @@ void testMain() {
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
           expect(fontFamilyList, contains('Ahem 1998'));
-          expect(fontFamilyList, contains('\'Ahem 1998\''));
+          expect(fontFamilyList, contains("'Ahem 1998'"));
         } else {
           expect(fontFamilyList.length, equals(1));
           expect(fontFamilyList.first, '"Ahem 1998"');

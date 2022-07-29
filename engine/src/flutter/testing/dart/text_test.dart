@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This is testing some of the named constants.
+// ignore_for_file: use_named_constants
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -199,41 +202,41 @@ void testLoadFontFromList() {
 
 void testFontFeatureClass() {
   test('FontFeature class', () {
-    expect(const FontFeature.alternative(1), const FontFeature('aalt', 1));
+    expect(const FontFeature.alternative(1), const FontFeature('aalt'));
     expect(const FontFeature.alternative(5), const FontFeature('aalt', 5));
-    expect(const FontFeature.alternativeFractions(), const FontFeature('afrc', 1));
-    expect(const FontFeature.contextualAlternates(), const FontFeature('calt', 1));
-    expect(const FontFeature.caseSensitiveForms(), const FontFeature('case', 1));
-    expect(      FontFeature.characterVariant(1), const FontFeature('cv01', 1));
-    expect(      FontFeature.characterVariant(18), const FontFeature('cv18', 1));
-    expect(      FontFeature.characterVariant(99), const FontFeature('cv99', 1));
-    expect(const FontFeature.denominator(), const FontFeature('dnom', 1));
-    expect(const FontFeature.fractions(), const FontFeature('frac', 1));
-    expect(const FontFeature.historicalForms(), const FontFeature('hist', 1));
-    expect(const FontFeature.historicalLigatures(), const FontFeature('hlig', 1));
-    expect(const FontFeature.liningFigures(), const FontFeature('lnum', 1));
-    expect(const FontFeature.localeAware(), const FontFeature('locl', 1));
-    expect(const FontFeature.localeAware(enable: true), const FontFeature('locl', 1));
+    expect(const FontFeature.alternativeFractions(), const FontFeature('afrc'));
+    expect(const FontFeature.contextualAlternates(), const FontFeature('calt'));
+    expect(const FontFeature.caseSensitiveForms(), const FontFeature('case'));
+    expect(      FontFeature.characterVariant(1), const FontFeature('cv01'));
+    expect(      FontFeature.characterVariant(18), const FontFeature('cv18'));
+    expect(      FontFeature.characterVariant(99), const FontFeature('cv99'));
+    expect(const FontFeature.denominator(), const FontFeature('dnom'));
+    expect(const FontFeature.fractions(), const FontFeature('frac'));
+    expect(const FontFeature.historicalForms(), const FontFeature('hist'));
+    expect(const FontFeature.historicalLigatures(), const FontFeature('hlig'));
+    expect(const FontFeature.liningFigures(), const FontFeature('lnum'));
+    expect(const FontFeature.localeAware(), const FontFeature('locl'));
+    expect(const FontFeature.localeAware(), const FontFeature('locl'));
     expect(const FontFeature.localeAware(enable: false), const FontFeature('locl', 0));
-    expect(const FontFeature.notationalForms(), const FontFeature('nalt', 1));
+    expect(const FontFeature.notationalForms(), const FontFeature('nalt'));
     expect(const FontFeature.notationalForms(5), const FontFeature('nalt', 5));
-    expect(const FontFeature.numerators(), const FontFeature('numr', 1));
-    expect(const FontFeature.oldstyleFigures(), const FontFeature('onum', 1));
-    expect(const FontFeature.ordinalForms(), const FontFeature('ordn', 1));
-    expect(const FontFeature.proportionalFigures(), const FontFeature('pnum', 1));
-    expect(const FontFeature.randomize(), const FontFeature('rand', 1));
-    expect(const FontFeature.stylisticAlternates(), const FontFeature('salt', 1));
-    expect(const FontFeature.scientificInferiors(), const FontFeature('sinf', 1));
-    expect(      FontFeature.stylisticSet(1), const FontFeature('ss01', 1));
-    expect(      FontFeature.stylisticSet(18), const FontFeature('ss18', 1));
-    expect(const FontFeature.subscripts(), const FontFeature('subs', 1));
-    expect(const FontFeature.superscripts(), const FontFeature('sups', 1));
-    expect(const FontFeature.swash(), const FontFeature('swsh', 1));
+    expect(const FontFeature.numerators(), const FontFeature('numr'));
+    expect(const FontFeature.oldstyleFigures(), const FontFeature('onum'));
+    expect(const FontFeature.ordinalForms(), const FontFeature('ordn'));
+    expect(const FontFeature.proportionalFigures(), const FontFeature('pnum'));
+    expect(const FontFeature.randomize(), const FontFeature('rand'));
+    expect(const FontFeature.stylisticAlternates(), const FontFeature('salt'));
+    expect(const FontFeature.scientificInferiors(), const FontFeature('sinf'));
+    expect(      FontFeature.stylisticSet(1), const FontFeature('ss01'));
+    expect(      FontFeature.stylisticSet(18), const FontFeature('ss18'));
+    expect(const FontFeature.subscripts(), const FontFeature('subs'));
+    expect(const FontFeature.superscripts(), const FontFeature('sups'));
+    expect(const FontFeature.swash(), const FontFeature('swsh'));
     expect(const FontFeature.swash(0), const FontFeature('swsh', 0));
     expect(const FontFeature.swash(5), const FontFeature('swsh', 5));
-    expect(const FontFeature.tabularFigures(), const FontFeature('tnum', 1));
-    expect(const FontFeature.slashedZero(), const FontFeature('zero', 1));
-    expect(const FontFeature.enable('TEST'), const FontFeature('TEST', 1));
+    expect(const FontFeature.tabularFigures(), const FontFeature('tnum'));
+    expect(const FontFeature.slashedZero(), const FontFeature('zero'));
+    expect(const FontFeature.enable('TEST'), const FontFeature('TEST'));
     expect(const FontFeature.disable('TEST'), const FontFeature('TEST', 0));
     expect(const FontFeature('FEAT', 1000).feature, 'FEAT');
     expect(const FontFeature('FEAT', 1000).value, 1000);

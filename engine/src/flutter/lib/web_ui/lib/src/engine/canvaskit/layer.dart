@@ -487,7 +487,7 @@ class PhysicalShapeEngineLayer extends ContainerLayer
     implements ui.PhysicalShapeEngineLayer {
   final double _elevation;
   final ui.Color _color;
-  final ui.Color? _shadowColor;
+  final ui.Color? _shadowColor; // ignore: use_late_for_private_fields_and_variables
   final CkPath _path;
   final ui.Clip _clipBehavior;
 

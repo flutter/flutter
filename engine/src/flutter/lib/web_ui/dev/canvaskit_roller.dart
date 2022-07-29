@@ -64,7 +64,7 @@ data:
     canvaskitDirectory.path,
     'result.json',
   )).readAsStringSync()) as Map<String, dynamic>;
-  final String cipdInstanceId = cipdResult['result']['instance_id'] as String;
+  final String cipdInstanceId = (cipdResult['result'] as Map<dynamic, dynamic>)['instance_id'] as String;
 
   print('CIPD instance information:');
   final String cipdInfo = await evalProcess('cipd', <String>[
@@ -105,7 +105,7 @@ Future<void> _updateDepsFile(String cipdInstanceId) async {
 
   final String originalDepsCode = await depsFile.readAsString();
   final List<String> rewrittenDepsCode = <String>[];
-  const String kCanvasKitDependencyKeyInDeps = '\'canvaskit_cipd_instance\': \'';
+  const String kCanvasKitDependencyKeyInDeps = "'canvaskit_cipd_instance': '";
   bool canvaskitDependencyFound = false;
   for (final String line in originalDepsCode.split('\n')) {
     if (line.trim().startsWith(kCanvasKitDependencyKeyInDeps)) {
@@ -124,7 +124,7 @@ Future<void> _updateDepsFile(String cipdInstanceId) async {
       'Could not to locate CanvasKit dependency in the DEPS file. Make sure the '
       'DEPS file contains a line like this:\n'
       '\n'
-      '  \'canvaskit_cipd_instance\': \'SOME_VALUE\','
+      "  'canvaskit_cipd_instance': 'SOME_VALUE',"
     );
     exit(1);
   }
@@ -160,7 +160,7 @@ Future<void> _updateCanvaskitInitializationCode(String canvaskitVersion) async {
       'Could not to locate the constant that defines the version. Make sure the '
       '$kPathToConfigurationCode file contains a line like this:\n'
       '\n'
-      'const String _canvaskitVersion = \'VERSION\';'
+      "const String _canvaskitVersion = 'VERSION';"
     );
     exit(1);
   }
