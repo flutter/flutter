@@ -21,9 +21,11 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String flutterRoot = r'C:\flutter';
-const String buildFilePath = r'C:\windows\CMakeLists.txt';
-const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-const String _cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String buildFilePath = r'windows\CMakeLists.txt';
+const String visualStudioPath =
+    r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
+const String _cmakePath = visualStudioPath +
+    r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 const String _defaultGenerator = 'Visual Studio 16 2019';
 
 final Platform windowsPlatform = FakePlatform(
@@ -80,7 +82,7 @@ void main() {
       command: <String>[
         _cmakePath,
         '-S',
-        fileSystem.path.dirname(buildFilePath),
+        fileSystem.path.absolute(fileSystem.path.dirname(buildFilePath)),
         '-B',
         r'build\windows',
         '-G',
@@ -923,7 +925,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
     expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(usage.events, contains(
-       const TestUsageEvent('code-size-analysis', 'windows'),
+        const TestUsageEvent('code-size-analysis', 'windows'),
     ));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
@@ -932,6 +934,35 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Platform: () => windowsPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
     Usage: () => usage,
+  });
+
+  // Confirms that running for Windows in a directory with a
+  // bad character (' in this case) throws the desired error message
+  // If the issue https://github.com/flutter/flutter/issues/104802 ever
+  // is resolved on the VS side, we can allow these paths again
+  testUsingContext('Test bad path characters', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    fileSystem.currentDirectory = fileSystem.directory("test_'path")
+      ..createSync();
+    final String absPath = fileSystem.currentDirectory.absolute.path;
+    setUpMockCoreProjectFiles();
+
+    expect(
+        createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
+        throwsToolExit(
+          message:
+              'Path $absPath contains invalid characters in "\'#!\$^&*=|,;<>?". '
+              'Please rename your directory so as to not include any of these characters '
+              'and retry.',
+        ),
+    );
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 }
 

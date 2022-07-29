@@ -19,7 +19,7 @@ import 'watcher.dart';
 
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryNames, this.verbose = true, required this.packagesPath});
+  CoverageCollector({this.libraryNames, this.verbose = true, required this.packagesPath, this.resolver});
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -34,6 +34,19 @@ class CoverageCollector extends TestWatcher {
   /// The names of the libraries to gather coverage for. If null, all libraries
   /// will be accepted.
   Set<String>? libraryNames;
+
+  final coverage.Resolver? resolver;
+  final Map<String, List<List<int>>> _ignoredLinesInFilesCache = <String, List<List<int>>>{};
+
+  static Future<coverage.Resolver> getResolver(String? packagesPath) async {
+    try {
+      return await coverage.Resolver.create(packagesPath: packagesPath);
+    } on FileSystemException {
+      // When given a bad packages path (as for instance done in some tests)
+      // just ignore it and return one without a packages path.
+      return coverage.Resolver.create();
+    }
+  }
 
   @override
   Future<void> handleFinishedTest(TestDevice testDevice) async {
@@ -104,7 +117,7 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverage(TestDevice testDevice) async {
+  Future<void> collectCoverage(TestDevice testDevice, {@visibleForTesting Future<FlutterVmService> Function(Uri?)? connector}) async {
     assert(testDevice != null);
 
     Map<String, dynamic>? data;
@@ -119,7 +132,7 @@ class CoverageCollector extends TestWatcher {
     final Future<void> collectionComplete = testDevice.observatoryUri
       .then((Uri? observatoryUri) {
         _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri, libraryNames)
+        return collect(observatoryUri, libraryNames, connector: connector ?? _defaultConnect)
           .then<void>((Map<String, dynamic> result) {
             if (result == null) {
               throw Exception('Failed to collect coverage.');
@@ -133,11 +146,12 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     _logMessage('Merging coverage data...');
-    _addHitmap(await coverage.HitMap.parseJson(
-      data!['coverage'] as List<Map<String, dynamic>>,
-      packagePath: packageDirectory,
-      checkIgnoredLines: true,
-    ));
+    final Map<String, coverage.HitMap> hitmap = coverage.HitMap.parseJsonSync(
+        data!['coverage'] as List<Map<String, dynamic>>,
+        checkIgnoredLines: true,
+        resolver: resolver ?? await CoverageCollector.getResolver(packageDirectory),
+        ignoredLinesInFilesCache: _ignoredLinesInFilesCache);
+    _addHitmap(hitmap);
     _logMessage('Done merging coverage data into global coverage map.');
   }
 
@@ -154,13 +168,13 @@ class CoverageCollector extends TestWatcher {
       return null;
     }
     if (formatter == null) {
-      resolver ??= await coverage.Resolver.create(packagesPath: packagesPath);
+      final coverage.Resolver usedResolver = resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
           ? <String>[globals.fs.path.join(packagePath, 'lib')]
           : <String>[coverageDirectory.path];
       formatter = (Map<String, coverage.HitMap> hitmap) => hitmap
-          .formatLcov(resolver!, reportOn: reportOn, basePath: packagePath);
+          .formatLcov(usedResolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = formatter(_globalHitmap!);
     _globalHitmap = null;

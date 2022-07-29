@@ -157,12 +157,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  void handleBeginFrame(Duration? rawTimeStamp) {
-    _window.incrementFrameNumber();
-    super.handleBeginFrame(rawTimeStamp);
-  }
-
-  @override
   TestWindow get window => _window;
   final TestWindow _window;
 
@@ -957,7 +951,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner!.focusManager.dispose();
+
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
@@ -1054,6 +1051,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
       _phase = newPhase;
       if (hasScheduledFrame) {
+        addTime(const Duration(milliseconds: 500));
         _currentFakeAsync!.flushMicrotasks();
         handleBeginFrame(Duration(
           milliseconds: _clock!.now().millisecondsSinceEpoch,
@@ -1097,6 +1095,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         },
       ),
     );
+
+    addTime(additionalTime);
 
     return realAsyncZone.run<Future<T?>>(() async {
       _pendingAsyncTasks = Completer<void>();

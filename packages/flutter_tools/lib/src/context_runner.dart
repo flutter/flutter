@@ -42,7 +42,7 @@ import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
-import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
+import 'fuchsia/fuchsia_sdk.dart' show FuchsiaArtifacts, FuchsiaSdk;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';

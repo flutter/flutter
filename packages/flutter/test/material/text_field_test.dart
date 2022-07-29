@@ -24,7 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition, OverflowWidgetTextEditingController;
+import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController, findRenderEditable, globalize, textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -608,42 +608,6 @@ void main() {
     expect(tester.state(find.byType(EditableText)), editableText);
     await checkCursorToggle();
   });
-
-  testWidgets('Cursor animates', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: TextField(),
-        ),
-      ),
-    );
-
-    final Finder textFinder = find.byType(TextField);
-    await tester.tap(textFinder);
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    expect(renderEditable.cursorColor!.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(renderEditable.cursorColor!.alpha, 255);
-
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor!.alpha, 110);
-
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(renderEditable.cursorColor!.alpha, 16);
-    await tester.pump(const Duration(milliseconds: 50));
-
-    expect(renderEditable.cursorColor!.alpha, 0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/78918.
   testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
@@ -1331,7 +1295,7 @@ void main() {
 
     editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('desktop obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1715,7 +1679,7 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
     final RenderBox container = tester.renderObject(find.descendant(
-      of: find.byType(FadeTransition),
+      of: find.byType(RasterWidget),
       matching: find.byType(SizedBox),
     ).first);
     expect(container.size, Size.zero);
@@ -1985,7 +1949,7 @@ void main() {
 
     // Selection should stay the same since it is set on tap up for mobile platforms.
     await touchGesture.down(gPos);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
     expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
 
@@ -7143,6 +7107,57 @@ void main() {
     expect(editableText.style.color, isNull);
   });
 
+  testWidgets('TextField style is merged with theme in Material 3', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/23994
+
+    final ThemeData themeData = ThemeData(
+      useMaterial3: true,
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(
+          color: Colors.blue[500],
+        ),
+      ),
+    );
+
+    Widget buildFrame(TextStyle style) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: TextField(
+              style: style,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Empty TextStyle is overridden by theme
+    await tester.pumpWidget(buildFrame(const TextStyle()));
+    EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, themeData.textTheme.bodyLarge!.color);
+    expect(editableText.style.background, themeData.textTheme.bodyLarge!.background);
+    expect(editableText.style.shadows, themeData.textTheme.bodyLarge!.shadows);
+    expect(editableText.style.decoration, themeData.textTheme.bodyLarge!.decoration);
+    expect(editableText.style.locale, themeData.textTheme.bodyLarge!.locale);
+    expect(editableText.style.wordSpacing, themeData.textTheme.bodyLarge!.wordSpacing);
+
+    // Properties set on TextStyle override theme
+    const Color setColor = Colors.red;
+    await tester.pumpWidget(buildFrame(const TextStyle(color: setColor)));
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, setColor);
+
+    // inherit: false causes nothing to be merged in from theme
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      fontSize: 24.0,
+      textBaseline: TextBaseline.alphabetic,
+      inherit: false,
+    )));
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, isNull);
+  });
+
   testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
@@ -7692,6 +7707,56 @@ void main() {
       expect(find.text('Paste'), findsNothing);
     },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
+  );
+
+  testWidgets('Drag selection hides the selection menu', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+    final Offset midBlah2 = textOffsetToPosition(tester, 8);
+
+    // Right click the second word.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah2,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The toolbar is shown.
+    expect(find.text('Paste'), findsOneWidget);
+
+    // Drag the mouse to the first word.
+    final TestGesture gesture2 = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    await gesture2.moveTo(midBlah2);
+    await tester.pump();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+
+    // The toolbar is hidden.
+    expect(find.text('Paste'), findsNothing);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets(

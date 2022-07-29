@@ -21,7 +21,7 @@ import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
 
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(
@@ -1063,7 +1063,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             || cause == SelectionChangedCause.drag) {
           _editableText?.bringIntoView(selection.extent);
         }
-        return;
+        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
@@ -1071,7 +1071,21 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         if (cause == SelectionChangedCause.drag) {
           _editableText?.bringIntoView(selection.extent);
         }
-        return;
+        break;
+    }
+
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        if (cause == SelectionChangedCause.drag) {
+          _editableText?.hideToolbar();
+        }
+        break;
     }
   }
 
@@ -1126,7 +1140,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = theme.textTheme.subtitle1!.merge(widget.style);
+    final TextStyle style = (theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.subtitle1!).merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
@@ -1168,7 +1182,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         forcePressEnabled = false;
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
-        cursorOpacityAnimates = true;
+        cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
@@ -1354,3 +1368,18 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     );
   }
 }
+
+// BEGIN GENERATED TOKEN PROPERTIES - TextField
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+// Generated version v0_101
+
+TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
+
+// END GENERATED TOKEN PROPERTIES - TextField
