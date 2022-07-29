@@ -297,28 +297,55 @@ class BorderSide with Diagnosticable {
   /// This will return 0 for a [strokeAlign] of 1, and the width of the stroke for
   /// a [strokeAlign] of -1.
   ///
-  /// Example:
-  /// 
+  /// Simplified example:
+  ///
+  /// ```dart
   /// switch(strokeAlign) {
   ///   case BorderSide.strokeAlignInside: // -1
   ///     return width;
-  ///  case BorderSide.strokeAlignCenter: // 0
-  ///    return width / 2;
-  /// case BorderSide.strokeAlignOutside: // 1
-  ///   return 0;
+  ///   case BorderSide.strokeAlignCenter: // 0
+  ///     return width / 2;
+  ///   case BorderSide.strokeAlignOutside: // 1
+  ///     return 0;
   /// }
+  /// ```
   double get strokeInset => width * (1 - (1 + strokeAlign) / 2);
 
   /// Get the amount of the stroke width that lies outside of the [BorderSide].
   ///
   /// This will return 0 for a [strokeAlign] of -1, and the width of the stroke for
   /// a [strokeAlign] of 1.
+  ///
+  /// Simplified example:
+  /// ```dart
+  /// switch(strokeAlign) {
+  ///   case BorderSide.strokeAlignInside: // -1
+  ///     return 0;
+  ///   case BorderSide.strokeAlignCenter: // 0
+  ///     return width / 2;
+  ///   case BorderSide.strokeAlignOutside: // 1
+  ///     return width;
+  /// }
+  /// ```
   double get strokeOutset => width * (1 + strokeAlign) / 2;
 
   /// The offset of the stroke, taking into account the stroke alignment.
   ///
   /// This will return half width of the stroke for a [strokeAlign] of 1, and the
   /// negative half width for a [strokeAlign] of -1.
+  ///
+  /// Simplified example:
+  ///
+  /// ```dart
+  /// switch(strokeAlign) {
+  ///   case BorderSide.strokeAlignInside: // -1
+  ///     return -width / 2;
+  ///   case BorderSide.strokeAlignCenter: // 0
+  ///     return 0;
+  ///   case BorderSide.strokeAlignOutside: // 1
+  ///     return width / 2;
+  /// }
+  /// ```
   double get halfStrokeOffset => width * strokeAlign / 2;
 
   @override
