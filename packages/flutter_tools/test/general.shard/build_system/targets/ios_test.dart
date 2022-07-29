@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 
 final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 
@@ -110,7 +111,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -147,7 +148,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -202,7 +203,7 @@ void main() {
     );
 
     await const DebugIosApplicationBundle().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
@@ -247,7 +248,7 @@ void main() {
     );
 
     await const ReleaseIosApplicationBundle().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
@@ -286,7 +287,7 @@ void main() {
         contains('release/profile builds are only supported for physical devices.'),
       )
     ));
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -313,7 +314,7 @@ void main() {
       'description',
       contains('required define SdkRoot but it was not provided'),
     )));
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -414,7 +415,7 @@ void main() {
       await const DebugUnpackIOS().build(environment);
 
       expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('fails when frameworks missing', () async {
@@ -565,7 +566,7 @@ void main() {
 
       expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('thins fat framework', () async {
@@ -613,7 +614,7 @@ void main() {
       ]);
 
       await const DebugUnpackIOS().build(environment);
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('fails when bitcode strip fails', () async {
@@ -656,7 +657,7 @@ void main() {
         )),
       );
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('strips framework', () async {
@@ -685,7 +686,7 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('fails when codesign fails', () async {
@@ -730,7 +731,7 @@ void main() {
         )),
       );
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('codesigns framework', () async {
@@ -767,7 +768,7 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }

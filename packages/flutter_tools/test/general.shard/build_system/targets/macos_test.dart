@@ -338,7 +338,7 @@ void main() {
     );
 
     await const DebugMacOSFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -370,7 +370,7 @@ void main() {
     );
 
     await const DebugMacOSFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -434,7 +434,7 @@ void main() {
     ]);
 
     await const CompileMacOSFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
 
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
