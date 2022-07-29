@@ -562,7 +562,7 @@ class Border extends BoxBorder {
     assert(() {
       if (!_strokeAlignIsUniform || top.strokeAlign != BorderSide.strokeAlignInside) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.'),
+          ErrorSummary('A Border can only draw strokeAlign different than strokeAlignOutside on uniform borders.'),
         ]);
       }
       return true;

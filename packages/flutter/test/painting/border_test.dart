@@ -274,7 +274,7 @@ void main() {
     expect(error.diagnostics.length, 1);
     expect(
       error.diagnostics[0].toStringDeep(),
-      'A Border can only draw strokeAlign different than\nStrokeAlign.inside on uniform borders.\n',
+      'A Border can only draw strokeAlign different than\strokeAlignOutside on uniform borders.\n',
     );
   });
 
