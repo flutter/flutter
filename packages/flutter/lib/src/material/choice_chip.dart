@@ -11,87 +11,27 @@ import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// A Material Design filter chip.
+/// A Material Design choice chip.
 ///
-/// Filter chips use tags or descriptive words as a way to filter content.
+/// [ChoiceChip]s represent a single choice from a set. Choice chips contain
+/// related descriptive text or categories.
 ///
-/// Filter chips are a good alternative to [Checkbox] or [Switch] widgets.
-/// Unlike these alternatives, filter chips allow for clearly delineated and
-/// exposed options in a compact area.
+/// Requires one of its ancestors to be a [Material] widget. The [selected] and
+/// [label] arguments must not be null.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// {@tool dartpad}
+/// This example shows how to create [ChoiceChip]s with [onSelected]. When the
+/// user taps, the chip will be selected.
 ///
-/// {@tool snippet}
-///
-/// ```dart
-/// class ActorFilterEntry {
-///   const ActorFilterEntry(this.name, this.initials);
-///   final String name;
-///   final String initials;
-/// }
-///
-/// class CastFilter extends StatefulWidget {
-///   const CastFilter({super.key});
-///
-///   @override
-///   State createState() => CastFilterState();
-/// }
-///
-/// class CastFilterState extends State<CastFilter> {
-///   final List<ActorFilterEntry> _cast = <ActorFilterEntry>[
-///     const ActorFilterEntry('Aaron Burr', 'AB'),
-///     const ActorFilterEntry('Alexander Hamilton', 'AH'),
-///     const ActorFilterEntry('Eliza Hamilton', 'EH'),
-///     const ActorFilterEntry('James Madison', 'JM'),
-///   ];
-///   final List<String> _filters = <String>[];
-///
-///   Iterable<Widget> get actorWidgets {
-///     return _cast.map((ActorFilterEntry actor) {
-///       return Padding(
-///         padding: const EdgeInsets.all(4.0),
-///         child: FilterChip(
-///           avatar: CircleAvatar(child: Text(actor.initials)),
-///           label: Text(actor.name),
-///           selected: _filters.contains(actor.name),
-///           onSelected: (bool value) {
-///             setState(() {
-///               if (value) {
-///                 _filters.add(actor.name);
-///               } else {
-///                 _filters.removeWhere((String name) {
-///                   return name == actor.name;
-///                 });
-///               }
-///             });
-///           },
-///         ),
-///       );
-///     });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Column(
-///       mainAxisAlignment: MainAxisAlignment.center,
-///       children: <Widget>[
-///         Wrap(
-///           children: actorWidgets.toList(),
-///         ),
-///         Text('Look for: ${_filters.join(', ')}'),
-///       ],
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/choice_chip/choice_chip.0.dart **
 /// {@end-tool}
 ///
 /// ## Material Design 3
 ///
-/// [FilterChip] can be used for multiple select Filter chip from
-/// Material Design 3. If [ThemeData.useMaterial3] is true, then [FilterChip]
+/// [ChoiceChip] can be used for single select Filter chips from
+/// Material Design 3. If [ThemeData.useMaterial3] is true, then [ChoiceChip]
 /// will be styled to match the Material Design 3 specification for Filter
-/// chips. Use [ChoiceChip] for single select Filter chips.
+/// chips. Use [FilterChip] for multiple select Filter chips.
 ///
 /// See also:
 ///
@@ -99,35 +39,33 @@ import 'theme_data.dart';
 ///  * [InputChip], a chip that represents a complex piece of information, such
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
-///  * [ChoiceChip], allows a single selection from a set of options. Choice
-///    chips contain related descriptive text or categories.
+///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
-class FilterChip extends StatelessWidget
+class ChoiceChip extends StatelessWidget
     implements
         ChipAttributes,
         SelectableChipAttributes,
-        CheckmarkableChipAttributes,
         DisabledChipAttributes {
-  /// Create a chip that acts like a checkbox.
+  /// Create a chip that acts like a radio button.
   ///
-  /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
+  /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
   /// not be null. The [pressElevation] and [elevation] must be null or
   /// non-negative. Typically, [pressElevation] is greater than [elevation].
-  const FilterChip({
+  const ChoiceChip({
     super.key,
     this.avatar,
     required this.label,
     this.labelStyle,
     this.labelPadding,
-    this.selected = false,
-    required this.onSelected,
+    this.onSelected,
     this.pressElevation,
-    this.disabledColor,
+    required this.selected,
     this.selectedColor,
+    this.disabledColor,
     this.tooltip,
     this.side,
     this.shape,
@@ -143,8 +81,6 @@ class FilterChip extends StatelessWidget
     this.surfaceTintColor,
     this.iconTheme,
     this.selectedShadowColor,
-    this.showCheckmark,
-    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
@@ -162,11 +98,11 @@ class FilterChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry? labelPadding;
   @override
-  final bool selected;
-  @override
   final ValueChanged<bool>? onSelected;
   @override
   final double? pressElevation;
+  @override
+  final bool selected;
   @override
   final Color? disabledColor;
   @override
@@ -200,10 +136,6 @@ class FilterChip extends StatelessWidget
   @override
   final Color? selectedShadowColor;
   @override
-  final bool? showCheckmark;
-  @override
-  final Color? checkmarkColor;
-  @override
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
@@ -214,6 +146,7 @@ class FilterChip extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final ChipThemeData chipTheme = ChipTheme.of(context);
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
       ? _FilterChipDefaultsM3(context, isEnabled, selected)
       : null;
@@ -221,20 +154,21 @@ class FilterChip extends StatelessWidget
       defaultProperties: defaults,
       avatar: avatar,
       label: label,
-      labelStyle: labelStyle,
+      labelStyle: labelStyle ?? (selected ? chipTheme.secondaryLabelStyle : null),
       labelPadding: labelPadding,
       onSelected: onSelected,
       pressElevation: pressElevation,
       selected: selected,
+      showCheckmark: Theme.of(context).useMaterial3,
       tooltip: tooltip,
       side: side,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      backgroundColor: backgroundColor,
       disabledColor: disabledColor,
-      selectedColor: selectedColor,
+      selectedColor: selectedColor ?? chipTheme.secondarySelectedColor,
+      backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
       isEnabled: isEnabled,
@@ -243,8 +177,6 @@ class FilterChip extends StatelessWidget
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       selectedShadowColor: selectedShadowColor,
-      showCheckmark: showCheckmark,
-      checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
     );
   }
