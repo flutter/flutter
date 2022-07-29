@@ -14,8 +14,7 @@
 
 #include <cstring>
 
-#include "dpi_utils.h"
-#include "keyboard_win32_common.h"
+#include "flutter/shell/platform/windows/dpi_utils.h"
 
 namespace flutter {
 
@@ -71,7 +70,7 @@ Window::Window(std::unique_ptr<TextInputManager> text_input_manager)
   if (text_input_manager_ == nullptr) {
     text_input_manager_ = std::make_unique<TextInputManager>();
   }
-  keyboard_manager_ = std::make_unique<KeyboardManagerWin32>(this);
+  keyboard_manager_ = std::make_unique<KeyboardManager>(this);
 }
 
 Window::~Window() {
