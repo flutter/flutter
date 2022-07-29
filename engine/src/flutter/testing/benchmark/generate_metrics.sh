@@ -13,4 +13,5 @@ set -ex
 ./fml_benchmarks --benchmark_format=json > fml_benchmarks.json
 ./shell_benchmarks --benchmark_format=json > shell_benchmarks.json
 ./ui_benchmarks --benchmark_format=json > ui_benchmarks.json
+./display_list_builder_benchmarks --benchmark_format=json > display_list_builder_benchmarks.json
 
