@@ -18,7 +18,7 @@ namespace testing {
 class MockWindow : public Window {
  public:
   MockWindow();
-  MockWindow(std::unique_ptr<TextInputManagerWin32> text_input_manager);
+  MockWindow(std::unique_ptr<TextInputManager> text_input_manager);
   virtual ~MockWindow();
 
   // Prevent copying.

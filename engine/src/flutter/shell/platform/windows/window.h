@@ -17,7 +17,7 @@
 #include "flutter/shell/platform/windows/direct_manipulation.h"
 #include "flutter/shell/platform/windows/keyboard_manager_win32.h"
 #include "flutter/shell/platform/windows/sequential_id_generator.h"
-#include "flutter/shell/platform/windows/text_input_manager_win32.h"
+#include "flutter/shell/platform/windows/text_input_manager.h"
 #include "flutter/third_party/accessibility/gfx/native_widget_types.h"
 
 namespace flutter {
@@ -28,7 +28,7 @@ namespace flutter {
 class Window : public KeyboardManagerWin32::WindowDelegate {
  public:
   Window();
-  Window(std::unique_ptr<TextInputManagerWin32> text_input_manager);
+  Window(std::unique_ptr<TextInputManager> text_input_manager);
   virtual ~Window();
 
   // Initializes as a child window with size using |width| and |height| and
@@ -267,7 +267,7 @@ class Window : public KeyboardManagerWin32::WindowDelegate {
   double mouse_y_ = 0;
 
   // Manages IME state.
-  std::unique_ptr<TextInputManagerWin32> text_input_manager_;
+  std::unique_ptr<TextInputManager> text_input_manager_;
 
   // Manages IME state.
   std::unique_ptr<KeyboardManagerWin32> keyboard_manager_;

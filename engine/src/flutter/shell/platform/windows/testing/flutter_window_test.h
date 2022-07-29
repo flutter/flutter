@@ -5,20 +5,20 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_WIN32_FLUTTER_WINDOW_TEST_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_WIN32_FLUTTER_WINDOW_TEST_H_
 
-#include "flutter/shell/platform/windows/flutter_window_win32.h"
+#include "flutter/shell/platform/windows/flutter_window.h"
 
 namespace flutter {
 namespace testing {
 
-/// Test class for FlutterWindowWin32.
-class FlutterWindowWin32Test : public FlutterWindowWin32 {
+/// Test class for FlutterWindow.
+class FlutterWindowTest : public FlutterWindow {
  public:
-  FlutterWindowWin32Test(int width, int height);
-  virtual ~FlutterWindowWin32Test();
+  FlutterWindowTest(int width, int height);
+  virtual ~FlutterWindowTest();
 
   // Prevent copying.
-  FlutterWindowWin32Test(FlutterWindowWin32Test const&) = delete;
-  FlutterWindowWin32Test& operator=(FlutterWindowWin32Test const&) = delete;
+  FlutterWindowTest(FlutterWindowTest const&) = delete;
+  FlutterWindowTest& operator=(FlutterWindowTest const&) = delete;
 };
 
 }  // namespace testing

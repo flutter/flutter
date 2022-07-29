@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/testing/mock_text_input_manager_win32.h"
+#include "flutter/shell/platform/windows/testing/flutter_window_test.h"
 
 namespace flutter {
 namespace testing {
 
-MockTextInputManagerWin32::MockTextInputManagerWin32()
-    : TextInputManagerWin32(){};
+FlutterWindowTest::FlutterWindowTest(int width, int height)
+    : FlutterWindow(width, height){};
 
-MockTextInputManagerWin32::~MockTextInputManagerWin32() = default;
+FlutterWindowTest::~FlutterWindowTest() = default;
 
 }  // namespace testing
 }  // namespace flutter

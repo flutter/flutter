@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/accessibility_bridge_delegate_win32.h"
+#include "flutter/shell/platform/windows/accessibility_bridge_delegate_windows.h"
 
 #include <comdef.h>
 #include <comutil.h>
@@ -12,7 +12,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
-#include "flutter/shell/platform/windows/flutter_platform_node_delegate_win32.h"
+#include "flutter/shell/platform/windows/flutter_platform_node_delegate_windows.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
@@ -28,25 +28,25 @@ namespace {
 
 // A structure representing a Win32 MSAA event targeting a specified node.
 struct MsaaEvent {
-  std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate;
+  std::shared_ptr<FlutterPlatformNodeDelegateWindows> node_delegate;
   DWORD event_type;
 };
 
 // Accessibility bridge delegate that captures events dispatched to the OS.
-class AccessibilityBridgeDelegateWin32Spy
-    : public AccessibilityBridgeDelegateWin32 {
+class AccessibilityBridgeDelegateWindowsSpy
+    : public AccessibilityBridgeDelegateWindows {
  public:
-  explicit AccessibilityBridgeDelegateWin32Spy(FlutterWindowsEngine* engine)
-      : AccessibilityBridgeDelegateWin32(engine) {}
+  explicit AccessibilityBridgeDelegateWindowsSpy(FlutterWindowsEngine* engine)
+      : AccessibilityBridgeDelegateWindows(engine) {}
 
   void DispatchWinAccessibilityEvent(
-      std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate,
+      std::shared_ptr<FlutterPlatformNodeDelegateWindows> node_delegate,
       DWORD event_type) override {
     dispatched_events_.push_back({node_delegate, event_type});
   }
 
-  void SetFocus(std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate)
-      override {
+  void SetFocus(std::shared_ptr<FlutterPlatformNodeDelegateWindows>
+                    node_delegate) override {
     focused_nodes_.push_back(node_delegate->GetAXNode()->id());
   }
 
@@ -154,7 +154,7 @@ void ExpectWinEventFromAXEvent(int32_t node_id,
   auto bridge = view.GetEngine()->accessibility_bridge().lock();
   PopulateAXTree(bridge);
 
-  AccessibilityBridgeDelegateWin32Spy spy(view.GetEngine());
+  AccessibilityBridgeDelegateWindowsSpy spy(view.GetEngine());
   spy.OnAccessibilityEvent({AXNodeFromID(bridge, node_id),
                             {ax_event, ax::mojom::EventFrom::kNone, {}}});
   ASSERT_EQ(spy.dispatched_events().size(), 1);
@@ -163,7 +163,7 @@ void ExpectWinEventFromAXEvent(int32_t node_id,
 
 }  // namespace
 
-TEST(AccessibilityBridgeDelegateWin32, GetParent) {
+TEST(AccessibilityBridgeDelegateWindows, GetParent) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
   FlutterWindowsView view(std::move(window_binding_handler));
@@ -179,7 +179,7 @@ TEST(AccessibilityBridgeDelegateWin32, GetParent) {
             node1_delegate->GetParent());
 }
 
-TEST(AccessibilityBridgeDelegateWin32, GetParentOnRootRetunsNullptr) {
+TEST(AccessibilityBridgeDelegateWindows, GetParentOnRootRetunsNullptr) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
   FlutterWindowsView view(std::move(window_binding_handler));
@@ -193,7 +193,7 @@ TEST(AccessibilityBridgeDelegateWin32, GetParentOnRootRetunsNullptr) {
   ASSERT_TRUE(node0_delegate->GetParent() == nullptr);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, DispatchAccessibilityAction) {
+TEST(AccessibilityBridgeDelegateWindows, DispatchAccessibilityAction) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
   FlutterWindowsView view(std::move(window_binding_handler));
@@ -214,22 +214,22 @@ TEST(AccessibilityBridgeDelegateWin32, DispatchAccessibilityAction) {
         return kSuccess;
       }));
 
-  AccessibilityBridgeDelegateWin32 delegate(view.GetEngine());
+  AccessibilityBridgeDelegateWindows delegate(view.GetEngine());
   delegate.DispatchAccessibilityAction(1, kFlutterSemanticsActionCopy, {});
   EXPECT_EQ(actual_action, kFlutterSemanticsActionCopy);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventAlert) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityEventAlert) {
   ExpectWinEventFromAXEvent(0, ui::AXEventGenerator::Event::ALERT,
                             EVENT_SYSTEM_ALERT);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventChildrenChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityEventChildrenChanged) {
   ExpectWinEventFromAXEvent(0, ui::AXEventGenerator::Event::CHILDREN_CHANGED,
                             EVENT_OBJECT_REORDER);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventFocusChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityEventFocusChanged) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
   FlutterWindowsView view(std::move(window_binding_handler));
@@ -239,7 +239,7 @@ TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventFocusChanged) {
   auto bridge = view.GetEngine()->accessibility_bridge().lock();
   PopulateAXTree(bridge);
 
-  AccessibilityBridgeDelegateWin32Spy spy(view.GetEngine());
+  AccessibilityBridgeDelegateWindowsSpy spy(view.GetEngine());
   spy.OnAccessibilityEvent({AXNodeFromID(bridge, 1),
                             {ui::AXEventGenerator::Event::FOCUS_CHANGED,
                              ax::mojom::EventFrom::kNone,
@@ -251,62 +251,64 @@ TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventFocusChanged) {
   EXPECT_EQ(spy.focused_nodes()[0], 1);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventIgnoredChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityEventIgnoredChanged) {
   // Static test nodes with no text, hint, or scrollability are ignored.
   ExpectWinEventFromAXEvent(4, ui::AXEventGenerator::Event::IGNORED_CHANGED,
                             EVENT_OBJECT_HIDE);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityImageAnnotationChanged) {
+TEST(AccessibilityBridgeDelegateWindows,
+     OnAccessibilityImageAnnotationChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::IMAGE_ANNOTATION_CHANGED,
       EVENT_OBJECT_NAMECHANGE);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityLiveRegionChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityLiveRegionChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::LIVE_REGION_CHANGED,
                             EVENT_OBJECT_LIVEREGIONCHANGED);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityNameChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityNameChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::NAME_CHANGED,
                             EVENT_OBJECT_NAMECHANGE);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityHScrollPosChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityHScrollPosChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::SCROLL_HORIZONTAL_POSITION_CHANGED,
       EVENT_SYSTEM_SCROLLINGEND);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityVScrollPosChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityVScrollPosChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::SCROLL_VERTICAL_POSITION_CHANGED,
       EVENT_SYSTEM_SCROLLINGEND);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilitySelectedChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilitySelectedChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::SELECTED_CHANGED,
                             EVENT_OBJECT_VALUECHANGE);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilitySelectedChildrenChanged) {
+TEST(AccessibilityBridgeDelegateWindows,
+     OnAccessibilitySelectedChildrenChanged) {
   ExpectWinEventFromAXEvent(
       2, ui::AXEventGenerator::Event::SELECTED_CHILDREN_CHANGED,
       EVENT_OBJECT_SELECTIONWITHIN);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilitySubtreeCreated) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilitySubtreeCreated) {
   ExpectWinEventFromAXEvent(0, ui::AXEventGenerator::Event::SUBTREE_CREATED,
                             EVENT_OBJECT_SHOW);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityValueChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityValueChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::VALUE_CHANGED,
                             EVENT_OBJECT_VALUECHANGE);
 }
 
-TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityStateChanged) {
+TEST(AccessibilityBridgeDelegateWindows, OnAccessibilityStateChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::WIN_IACCESSIBLE_STATE_CHANGED,
       EVENT_OBJECT_STATECHANGE);

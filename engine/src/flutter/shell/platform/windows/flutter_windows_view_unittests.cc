@@ -14,7 +14,7 @@
 
 #include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
-#include "flutter/shell/platform/windows/flutter_window_win32.h"
+#include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
@@ -582,8 +582,7 @@ TEST(FlutterWindowsViewTest, WindowRepaintTests) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
-  FlutterWindowsView view(
-      std::make_unique<flutter::FlutterWindowWin32>(100, 100));
+  FlutterWindowsView view(std::make_unique<flutter::FlutterWindow>(100, 100));
   view.SetEngine(std::move(engine));
   view.CreateRenderSurface();
 

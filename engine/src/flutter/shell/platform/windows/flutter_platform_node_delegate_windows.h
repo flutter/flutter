@@ -14,14 +14,14 @@ namespace flutter {
 
 class FlutterWindowsEngine;
 
-// The Win32 implementation of FlutterPlatformNodeDelegate.
+// The Windows implementation of FlutterPlatformNodeDelegate.
 //
-// This class implements a wrapper around the Win32 accessibility objects that
-// compose the accessibility tree.
-class FlutterPlatformNodeDelegateWin32 : public FlutterPlatformNodeDelegate {
+// This class implements a wrapper around the Windows accessibility objects
+// that compose the accessibility tree.
+class FlutterPlatformNodeDelegateWindows : public FlutterPlatformNodeDelegate {
  public:
-  explicit FlutterPlatformNodeDelegateWin32(FlutterWindowsEngine* engine);
-  virtual ~FlutterPlatformNodeDelegateWin32();
+  explicit FlutterPlatformNodeDelegateWindows(FlutterWindowsEngine* engine);
+  virtual ~FlutterPlatformNodeDelegateWindows();
 
   // |ui::AXPlatformNodeDelegate|
   void Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node) override;

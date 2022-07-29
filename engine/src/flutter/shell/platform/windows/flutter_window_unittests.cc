@@ -9,7 +9,7 @@
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_handler.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
-#include "flutter/shell/platform/windows/testing/flutter_window_win32_test.h"
+#include "flutter/shell/platform/windows/testing/flutter_window_test.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
@@ -94,17 +94,17 @@ class SpyTextInputPlugin : public TextInputPlugin,
   std::unique_ptr<TextInputPlugin> real_implementation_;
 };
 
-class MockFlutterWindowWin32 : public FlutterWindowWin32 {
+class MockFlutterWindow : public FlutterWindow {
  public:
-  MockFlutterWindowWin32() : FlutterWindowWin32(800, 600) {
+  MockFlutterWindow() : FlutterWindow(800, 600) {
     ON_CALL(*this, GetDpiScale())
-        .WillByDefault(Return(this->FlutterWindowWin32::GetDpiScale()));
+        .WillByDefault(Return(this->FlutterWindow::GetDpiScale()));
   }
-  virtual ~MockFlutterWindowWin32() {}
+  virtual ~MockFlutterWindow() {}
 
   // Prevent copying.
-  MockFlutterWindowWin32(MockFlutterWindowWin32 const&) = delete;
-  MockFlutterWindowWin32& operator=(MockFlutterWindowWin32 const&) = delete;
+  MockFlutterWindow(MockFlutterWindow const&) = delete;
+  MockFlutterWindow& operator=(MockFlutterWindow const&) = delete;
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi() { return GetCurrentDPI(); }
@@ -206,13 +206,13 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
 
 }  // namespace
 
-TEST(FlutterWindowWin32Test, CreateDestroy) {
-  FlutterWindowWin32Test window(800, 600);
+TEST(FlutterWindowTest, CreateDestroy) {
+  FlutterWindowTest window(800, 600);
   ASSERT_TRUE(TRUE);
 }
 
-TEST(FlutterWindowWin32Test, OnBitmapSurfaceUpdated) {
-  FlutterWindowWin32 win32window(100, 100);
+TEST(FlutterWindowTest, OnBitmapSurfaceUpdated) {
+  FlutterWindow win32window(100, 100);
   int old_handle_count = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
 
   constexpr size_t row_bytes = 100 * 4;
@@ -228,8 +228,8 @@ TEST(FlutterWindowWin32Test, OnBitmapSurfaceUpdated) {
 // Tests that composing rect updates are transformed from Flutter logical
 // coordinates to device coordinates and passed to the text input manager
 // when the DPI scale is 100% (96 DPI).
-TEST(FlutterWindowWin32Test, OnCursorRectUpdatedRegularDPI) {
-  MockFlutterWindowWin32 win32window;
+TEST(FlutterWindowTest, OnCursorRectUpdatedRegularDPI) {
+  MockFlutterWindow win32window;
   ON_CALL(win32window, GetDpiScale()).WillByDefault(Return(1.0));
   EXPECT_CALL(win32window, GetDpiScale()).Times(1);
 
@@ -242,8 +242,8 @@ TEST(FlutterWindowWin32Test, OnCursorRectUpdatedRegularDPI) {
 // Tests that composing rect updates are transformed from Flutter logical
 // coordinates to device coordinates and passed to the text input manager
 // when the DPI scale is 150% (144 DPI).
-TEST(FlutterWindowWin32Test, OnCursorRectUpdatedHighDPI) {
-  MockFlutterWindowWin32 win32window;
+TEST(FlutterWindowTest, OnCursorRectUpdatedHighDPI) {
+  MockFlutterWindow win32window;
   ON_CALL(win32window, GetDpiScale()).WillByDefault(Return(1.5));
   EXPECT_CALL(win32window, GetDpiScale()).Times(1);
 
@@ -254,8 +254,8 @@ TEST(FlutterWindowWin32Test, OnCursorRectUpdatedHighDPI) {
   win32window.OnCursorRectUpdated(cursor_rect);
 }
 
-TEST(FlutterWindowWin32Test, OnPointerStarSendsDeviceType) {
-  FlutterWindowWin32 win32window(100, 100);
+TEST(FlutterWindowTest, OnPointerStarSendsDeviceType) {
+  FlutterWindow win32window(100, 100);
   MockWindowBindingHandlerDelegate delegate;
   win32window.SetView(&delegate);
   // Move
@@ -349,8 +349,8 @@ TEST(FlutterWindowWin32Test, OnPointerStarSendsDeviceType) {
 
 // Tests that calls to OnScroll in turn calls GetScrollOffsetMultiplier
 // for mapping scroll ticks to pixels.
-TEST(FlutterWindowWin32Test, OnScrollCallsGetScrollOffsetMultiplier) {
-  MockFlutterWindowWin32 win32window;
+TEST(FlutterWindowTest, OnScrollCallsGetScrollOffsetMultiplier) {
+  MockFlutterWindow win32window;
   MockWindowBindingHandlerDelegate delegate;
   win32window.SetView(&delegate);
 
@@ -367,8 +367,8 @@ TEST(FlutterWindowWin32Test, OnScrollCallsGetScrollOffsetMultiplier) {
                        kDefaultPointerDeviceId);
 }
 
-TEST(FlutterWindowWin32Test, OnWindowRepaint) {
-  MockFlutterWindowWin32 win32window;
+TEST(FlutterWindowTest, OnWindowRepaint) {
+  MockFlutterWindow win32window;
   MockWindowBindingHandlerDelegate delegate;
   win32window.SetView(&delegate);
 

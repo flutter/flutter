@@ -4,7 +4,7 @@
 
 #include <oleacc.h>
 
-#include "flutter/shell/platform/windows/flutter_platform_node_delegate_win32.h"
+#include "flutter/shell/platform/windows/flutter_platform_node_delegate_windows.h"
 
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/third_party/accessibility/ax/ax_clipping_behavior.h"
@@ -12,21 +12,21 @@
 
 namespace flutter {
 
-FlutterPlatformNodeDelegateWin32::FlutterPlatformNodeDelegateWin32(
+FlutterPlatformNodeDelegateWindows::FlutterPlatformNodeDelegateWindows(
     FlutterWindowsEngine* engine)
     : engine_(engine) {
   assert(engine_);
 }
 
-FlutterPlatformNodeDelegateWin32::~FlutterPlatformNodeDelegateWin32() {
+FlutterPlatformNodeDelegateWindows::~FlutterPlatformNodeDelegateWindows() {
   if (ax_platform_node_) {
     ax_platform_node_->Destroy();
   }
 }
 
 // |ui::AXPlatformNodeDelegate|
-void FlutterPlatformNodeDelegateWin32::Init(std::weak_ptr<OwnerBridge> bridge,
-                                            ui::AXNode* node) {
+void FlutterPlatformNodeDelegateWindows::Init(std::weak_ptr<OwnerBridge> bridge,
+                                              ui::AXNode* node) {
   FlutterPlatformNodeDelegate::Init(bridge, node);
   ax_platform_node_ = ui::AXPlatformNode::Create(this);
   assert(ax_platform_node_);
@@ -34,13 +34,13 @@ void FlutterPlatformNodeDelegateWin32::Init(std::weak_ptr<OwnerBridge> bridge,
 
 // |ui::AXPlatformNodeDelegate|
 gfx::NativeViewAccessible
-FlutterPlatformNodeDelegateWin32::GetNativeViewAccessible() {
+FlutterPlatformNodeDelegateWindows::GetNativeViewAccessible() {
   assert(ax_platform_node_);
   return ax_platform_node_->GetNativeViewAccessible();
 }
 
 // |ui::AXPlatformNodeDelegate|
-gfx::NativeViewAccessible FlutterPlatformNodeDelegateWin32::HitTestSync(
+gfx::NativeViewAccessible FlutterPlatformNodeDelegateWindows::HitTestSync(
     int screen_physical_pixel_x,
     int screen_physical_pixel_y) const {
   // If this node doesn't contain the point, return.
@@ -56,8 +56,8 @@ gfx::NativeViewAccessible FlutterPlatformNodeDelegateWin32::HitTestSync(
   auto bridge = engine_->accessibility_bridge().lock();
   assert(bridge);
   for (const ui::AXNode* child : GetAXNode()->children()) {
-    std::shared_ptr<FlutterPlatformNodeDelegateWin32> win_delegate =
-        std::static_pointer_cast<FlutterPlatformNodeDelegateWin32>(
+    std::shared_ptr<FlutterPlatformNodeDelegateWindows> win_delegate =
+        std::static_pointer_cast<FlutterPlatformNodeDelegateWindows>(
             bridge->GetFlutterPlatformNodeDelegateFromID(child->id()).lock());
     assert(win_delegate);
     auto hit_view = win_delegate->HitTestSync(screen_physical_pixel_x,
@@ -72,7 +72,7 @@ gfx::NativeViewAccessible FlutterPlatformNodeDelegateWin32::HitTestSync(
 }
 
 // |FlutterPlatformNodeDelegate|
-gfx::Rect FlutterPlatformNodeDelegateWin32::GetBoundsRect(
+gfx::Rect FlutterPlatformNodeDelegateWindows::GetBoundsRect(
     const ui::AXCoordinateSystem coordinate_system,
     const ui::AXClippingBehavior clipping_behavior,
     ui::AXOffscreenResult* offscreen_result) const {
@@ -86,7 +86,7 @@ gfx::Rect FlutterPlatformNodeDelegateWin32::GetBoundsRect(
                    extent.y - origin.y);
 }
 
-void FlutterPlatformNodeDelegateWin32::DispatchWinAccessibilityEvent(
+void FlutterPlatformNodeDelegateWindows::DispatchWinAccessibilityEvent(
     DWORD event_type) {
   FlutterWindowsView* view = engine_->view();
   if (!view) {
@@ -101,7 +101,7 @@ void FlutterPlatformNodeDelegateWin32::DispatchWinAccessibilityEvent(
                    -ax_platform_node_->GetUniqueId());
 }
 
-void FlutterPlatformNodeDelegateWin32::SetFocus() {
+void FlutterPlatformNodeDelegateWindows::SetFocus() {
   VARIANT varchild{};
   varchild.vt = VT_I4;
   varchild.lVal = CHILDID_SELF;

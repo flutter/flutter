@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/window_proc_delegate_manager_win32.h"
+#include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -44,8 +44,8 @@ bool TestWindowProcCallback2(HWND hwnd,
 
 }  // namespace
 
-TEST(WindowProcDelegateManagerWin32Test, CallsCorrectly) {
-  WindowProcDelegateManagerWin32 manager;
+TEST(WindowProcDelegateManagerTest, CallsCorrectly) {
+  WindowProcDelegateManager manager;
   HWND dummy_hwnd;
 
   bool called = false;
@@ -66,8 +66,8 @@ TEST(WindowProcDelegateManagerWin32Test, CallsCorrectly) {
   EXPECT_FALSE(result);
 }
 
-TEST(WindowProcDelegateManagerWin32Test, ReplacementRegister) {
-  WindowProcDelegateManagerWin32 manager;
+TEST(WindowProcDelegateManagerTest, ReplacementRegister) {
+  WindowProcDelegateManager manager;
 
   bool called_a = false;
   TestWindowProcDelegate delegate_a =
@@ -92,8 +92,8 @@ TEST(WindowProcDelegateManagerWin32Test, ReplacementRegister) {
   EXPECT_TRUE(called_b);
 }
 
-TEST(WindowProcDelegateManagerWin32Test, RegisterMultiple) {
-  WindowProcDelegateManagerWin32 manager;
+TEST(WindowProcDelegateManagerTest, RegisterMultiple) {
+  WindowProcDelegateManager manager;
 
   bool called_a = false;
   TestWindowProcDelegate delegate_a =
@@ -118,8 +118,8 @@ TEST(WindowProcDelegateManagerWin32Test, RegisterMultiple) {
   EXPECT_TRUE(called_b);
 }
 
-TEST(WindowProcDelegateManagerWin32Test, ConflictingDelegates) {
-  WindowProcDelegateManagerWin32 manager;
+TEST(WindowProcDelegateManagerTest, ConflictingDelegates) {
+  WindowProcDelegateManager manager;
 
   bool called_a = false;
   TestWindowProcDelegate delegate_a =
@@ -147,8 +147,8 @@ TEST(WindowProcDelegateManagerWin32Test, ConflictingDelegates) {
   EXPECT_NE(called_a, called_b);
 }
 
-TEST(WindowProcDelegateManagerWin32Test, Unregister) {
-  WindowProcDelegateManagerWin32 manager;
+TEST(WindowProcDelegateManagerTest, Unregister) {
+  WindowProcDelegateManager manager;
 
   bool called = false;
   TestWindowProcDelegate delegate = [&called](HWND hwnd, UINT message,
