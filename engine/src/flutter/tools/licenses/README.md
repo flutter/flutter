@@ -27,7 +27,7 @@ To update the goldens, make sure you've rebased your branch to the
 latest upstream main and then run the following in this directory:
 
 ```
-pub get
+dart pub get
 gclient sync -D
 rm -rf ../../../out/licenses
 dart lib/main.dart --src ../../.. --out ../../../out/licenses --golden ../../ci/licenses_golden
@@ -58,7 +58,7 @@ time the golden file changes in a way that involves changes to
 anything other than the `FILE` lines. To update this file, run:
 
 ```
-pub get
+dart pub get
 gclient sync
 dart lib/main.dart --release --src ../../.. --out ../../../out/licenses > ../../sky/packages/sky_engine/LICENSE
 ```
