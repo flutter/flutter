@@ -58,7 +58,7 @@ BuildApp() {
   # arguments.
   local flutter_args=("${FLUTTER_ROOT}/bin/flutter")
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
-    flutter_args+=('--verbose')
+  flutter_args+=('--verbose')
   fi
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_args+=("--local-engine-src-path=${FLUTTER_ENGINE}")
@@ -77,6 +77,7 @@ BuildApp() {
     "-dDartObfuscation=${DART_OBFUSCATION}"
     "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
     "-dTrackWidgetCreation=${TRACK_WIDGET_CREATION}"
+    "-dAction=${ACTION}"
     "--DartDefines=${DART_DEFINES}"
     "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
     "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"
