@@ -1767,7 +1767,7 @@ typedef SelectableRegionToolbarBuilder = Widget Function(
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextMenuButtonItem]s.
 /// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
-/// * [EditableTextContextMenuButtonItemBuilder], which performs a similar role
+/// * [EditableTextContextMenuButtonItemsBuilder], which performs a similar role
 ///   but for [EditableText]'s context menu.
 class SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
   /// Creates an instance of [SelectableRegionContextMenuButtonItemsBuilder].
