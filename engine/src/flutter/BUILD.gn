@@ -126,6 +126,7 @@ group("flutter") {
   if (enable_unittests && !is_win && !is_fuchsia) {
     public_deps += [
       "//flutter/display_list:display_list_benchmarks",
+      "//flutter/display_list:display_list_builder_benchmarks",
       "//flutter/fml:fml_benchmarks",
       "//flutter/lib/ui:ui_benchmarks",
       "//flutter/shell/common:shell_benchmarks",
