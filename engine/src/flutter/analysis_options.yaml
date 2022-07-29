@@ -29,6 +29,8 @@ analyzer:
     import_internal_library: ignore
     # Turned off until null-safe rollout is complete.
     unnecessary_null_comparison: ignore
+    # TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/49563 is fixed.
+    ffi_native_unexpected_number_of_parameters: ignore
 
 linter:
   rules:
