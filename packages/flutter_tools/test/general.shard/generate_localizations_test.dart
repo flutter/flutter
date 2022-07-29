@@ -922,22 +922,21 @@ class AppLocalizationsEn extends AppLocalizations {
         'flutter_tools_generate_localizations_test.',
       );
       final String l10nPathString = fs.path.join(projectDir.path, 'lib', 'l10n');
-      final Directory l10nDirectory = fs.directory(l10nPathString);
-      l10nDirectory
+      final Directory l10nDirectory = fs.directory(l10nPathString)
         ..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
         ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-      final bool isWindows = globals.platform.isWindows;
+      final bool? isWindows = globals.platform.isWindows ? true : null;
       await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
           arbDirectory: Uri.directory(l10nPathString, windows: isWindows),
-          outputDirectory: Uri.directory(l10nPathString, windows: isWindows),
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: isWindows),
+          outputDirectory: Uri.directory(l10nPathString, windows: false),
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
           useSyntheticPackage: false,
         ),
-        logger: BufferLogger.test(),
+        logger: logger,
         projectDir: projectDir,
         dependenciesDir: projectDir,
       );
