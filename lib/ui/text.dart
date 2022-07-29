@@ -2384,7 +2384,7 @@ class ParagraphConstraints {
   /// follows).
   ///
   /// The width influences how ellipses are applied. See the discussion at
-  /// [new ParagraphStyle] for more details.
+  /// [ParagraphStyle.new] for more details.
   ///
   /// This width is also used to position glyphs according to the [TextAlign]
   /// alignment described in the [ParagraphStyle] used when building the
@@ -2717,7 +2717,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
   /// constraint.
   ///
   /// See the discussion of the `maxLines` and `ellipsis` arguments at
-  /// [new ParagraphStyle].
+  /// [ParagraphStyle.new].
   @FfiNative<Bool Function(Pointer<Void>)>('Paragraph::didExceedMaxLines', isLeaf: true)
   external bool get didExceedMaxLines;
 
@@ -2886,7 +2886,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
 ///
 /// To set the paragraph's alignment, truncation, and ellipsizing behavior, pass
 /// an appropriately-configured [ParagraphStyle] object to the
-/// [new ParagraphBuilder] constructor.
+/// [ParagraphBuilder.new] constructor.
 ///
 /// Then, call combinations of [pushStyle], [addText], and [pop] to add styled
 /// text to the object.
@@ -3164,6 +3164,7 @@ Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
   return _futurize(
     (_Callback<void> callback) {
       _loadFontFromList(list, callback, fontFamily ?? '');
+      return null;
     }
   ).then((_) => _sendFontChangeMessage());
 }
