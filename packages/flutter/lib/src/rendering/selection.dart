@@ -282,6 +282,20 @@ enum SelectionEventType {
   /// Used by [SelectionEdgeUpdateEvent].
   endEdgeUpdate,
 
+  /// An event to expand the selection end edge or
+  /// start edge, depending on which is closer to
+  /// [ExpandSelectionSelectionEvent.globalPosition].
+  /// 
+  /// Used by [ExpandSelectionSelectionEvent].
+  expandSelection,
+
+  /// An event to extend the selection end edge. This
+  /// holds the selection start edge in place.
+  /// [ExtendSelectionSelectionEvent.globalPosition].
+  /// 
+  /// Used by [ExtendSelectionSelectionEvent].
+  extendSelection,
+
   /// An event to clear the current selection.
   ///
   /// Used by [ClearSelectionEvent].
@@ -291,12 +305,6 @@ enum SelectionEventType {
   ///
   /// Used by [SelectAllSelectionEvent].
   selectAll,
-
-  /// An event to select the location at 
-  /// [SelectPositionSelectionEvent.globalPosition].
-  ///
-  /// Used by [SelectPositionSelectionEvent].
-  selectPosition,
 
   /// An event to select a word at the location
   /// [SelectWordSelectionEvent.globalPosition].
@@ -338,15 +346,36 @@ abstract class SelectionEvent {
   final SelectionEventType type;
 }
 
-class SelectPositionSelectionEvent extends SelectionEvent {
-  /// Creates a select position selection event at the [globalPosition].
-  const SelectPositionSelectionEvent({required this.globalPosition, required this.cause}): super._(SelectionEventType.selectPosition);
+/// Expands the selection to the given [globalPosition] either from the
+/// base or the extent, which ever is closest to the [globalPosition].
+///
+/// This event can be sent as the result of a shift + mouse click.
+class ExpandSelectionSelectionEvent extends SelectionEvent {
+  /// Creates a select word event at the [globalPosition].
+  const ExpandSelectionSelectionEvent({required this.globalPosition, this.fromSelection, this.cause}): super._(SelectionEventType.expandSelection);
 
-  /// The position in global coordinates to select.
+  /// The position in global coordinates to extend the selection to.
+  final Offset globalPosition;
+
+  /// The starting selection that should be expanded.
+  final TextSelection? fromSelection;
+
+  /// The cause of the selection change.
+  final SelectionChangedCause? cause;
+}
+
+/// Extends the selection to the given [globalPosition] while holding the base.
+///
+/// This event can be sent as the result of a shift + mouse click.
+class ExtendSelectionSelectionEvent extends SelectionEvent {
+  /// Creates a select word event at the [globalPosition].
+  const ExtendSelectionSelectionEvent({required this.globalPosition, this.cause}): super._(SelectionEventType.extendSelection);
+
+  /// The position in global coordinates to extend the selection to.
   final Offset globalPosition;
 
   /// The cause of the selection change.
-  final SelectionChangedCause cause;
+  final SelectionChangedCause? cause;
 }
 
 /// Selects all selectable contents.
@@ -379,6 +408,9 @@ class SelectWordSelectionEvent extends SelectionEvent {
   final SelectionChangedCause? cause;
 }
 
+/// Selects the word edge closest to the [globalPosition].
+/// 
+/// This event can be sent as the result of a tap of some mobile platforms like iOS.
 class SelectWordEdgeSelectionEvent extends SelectionEvent {
   /// Creates a select word edge event at the [globalPosition].
   const SelectWordEdgeSelectionEvent({required this.globalPosition, required this.cause}): super._(SelectionEventType.selectWordEdge);
@@ -422,18 +454,23 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [globalPosition] contains the location of the selection start edge.
   const SelectionEdgeUpdateEvent.forStart({
-    required this.globalPosition
+    required this.globalPosition,
+    this.cause,
   }) : super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
   const SelectionEdgeUpdateEvent.forEnd({
-    required this.globalPosition
+    required this.globalPosition,
+    this.cause,
   }) : super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
+
+  /// The cause of the selection change.
+  final SelectionChangedCause? cause;
 }
 
 /// A registrar that keeps track of [Selectable]s in the subtree.

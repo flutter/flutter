@@ -1010,8 +1010,6 @@ abstract class ShiftAwareDragGestureRecognizer extends OneSequenceGestureRecogni
         primaryDelta: primaryDelta,
         globalPosition: globalPosition,
         localPosition: localPosition,
-        offsetFromOrigin: globalPosition - _initialPosition.global,
-        localOffsetFromOrigin: localPosition! - _initialPosition.local,
       );
       invokeCallback<void>('onUpdate', () => onUpdate!(details, _isShiftTapping));
     }

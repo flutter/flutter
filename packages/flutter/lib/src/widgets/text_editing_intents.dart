@@ -601,59 +601,6 @@ class SelectionOnDragStartControlIntent extends Intent {
   final bool store;
 }
 
-/// An [Intent] that saves or clears the selection when a drag starts.
-class ViewportOffsetOnDragStartControlIntent extends Intent {
-  /// Creates an [ViewportOffsetOnDragStartControlIntent].
-  const ViewportOffsetOnDragStartControlIntent._({required this.store});
-
-  /// Creates an [ViewportOffsetOnDragStartControlIntent] that requests the viewport
-  /// offset be saved at the beginning of a drag gesture.
-  static const ViewportOffsetOnDragStartControlIntent save = ViewportOffsetOnDragStartControlIntent._(store: true);
-
-  /// Creates an [ViewportOffsetOnDragStartControlIntent] that requests the viewport
-  /// offset be cleared, usually at the end of a drag gesture.
-  static const ViewportOffsetOnDragStartControlIntent clear = ViewportOffsetOnDragStartControlIntent._(store: false);
-
-  /// Whether the viewport offset should be saved or not.
-  final bool store;
-}
-
-/// An [Intent] that requests the selection in an input field be moved to the
-/// given [from] and [to] positions when a drag gesture occurs.
-class SelectDragPositionIntent extends Intent {
-  /// Creates an [SelectDragPositionIntent].
-  const SelectDragPositionIntent({required this.cause, required this.from, this.to});
-
-  /// {@macro flutter.widgets.TextEditingIntents.cause}
-  final SelectionChangedCause cause;
-
-  /// {@template flutter.widgets.TextEditingIntents.from}
-  /// The starting position of the requested selection.
-  /// {@endtemplate}
-  final Offset from;
-
-  /// {@template flutter.widgets.TextEditingIntents.to}
-  /// The ending position of the requested selection.
-  /// {@endtemplate}
-  final Offset? to;
-}
-
-/// An [Intent] that requests the selection in an input field be moved to the
-/// given [from] and [to] positions.
-class SelectPositionIntent extends Intent {
-  /// Creates an [SelectPositionIntent].
-  const SelectPositionIntent({required this.cause, required this.from, this.to});
-
-  /// {@macro flutter.widgets.TextEditingIntents.cause}
-  final SelectionChangedCause cause;
-
-  /// {@macro flutter.widgets.TextEditingIntents.from}
-  final Offset from;
-
-  /// {@macro flutter.widgets.TextEditingIntents.to}
-  final Offset? to;
-}
-
 /// An [Intent] that represents a user interaction that attempts to select the
 /// edge of the word closest to the [position] in an input field.
 class SelectWordEdgeIntent extends Intent {
@@ -688,6 +635,32 @@ class SelectWordsInRangeIntent extends Intent {
 class SelectWordIntent extends Intent {
   /// Creates an [SelectWordIntent].
   const SelectWordIntent({required this.cause, required this.globalPosition});
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+
+  /// {@macro flutter.widgets.TextEditingIntents.from}
+  final Offset globalPosition;
+}
+
+/// An [Intent] that represents a user interaction that attempts to select the
+/// the word in an input field at the location of the [globalPosition].
+class SelectStartEdgeIntent extends Intent {
+  /// Creates an [SelectStartEdgeIntent].
+  const SelectStartEdgeIntent({required this.cause, required this.globalPosition});
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+
+  /// {@macro flutter.widgets.TextEditingIntents.from}
+  final Offset globalPosition;
+}
+
+/// An [Intent] that represents a user interaction that attempts to select the
+/// the word in an input field at the location of the [globalPosition].
+class SelectEndEdgeIntent extends Intent {
+  /// Creates an [SelectEndEdgeIntent].
+  const SelectEndEdgeIntent({required this.cause, required this.globalPosition});
 
   /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;

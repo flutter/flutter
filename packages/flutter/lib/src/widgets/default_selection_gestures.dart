@@ -88,7 +88,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       context, 
                       TapDownIntent(
                         intents: <Intent>[
-                          SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                          SelectStartEdgeIntent(cause: SelectionChangedCause.tap, globalPosition: details.globalPosition),
                           if (tapCount < 2) const KeyboardRequestIntent(),
                           if (tapCount < 2) const UserOnTapCallbackIntent(),
                         ], 
@@ -159,7 +159,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                       case PointerDeviceKind.stylus:
                       case PointerDeviceKind.invertedStylus:
                       // Precise devices should place the cursor at a precise position.
-                        selectionUpdateIntent = SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition);
+                        selectionUpdateIntent = SelectStartEdgeIntent(cause: SelectionChangedCause.tap, globalPosition: details.globalPosition);
                         break;
                       case PointerDeviceKind.touch:
                       case PointerDeviceKind.unknown:
@@ -209,7 +209,6 @@ class DefaultSelectionGestures extends StatelessWidget {
                       intents: <Intent>[
                         ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition),
                         SelectionOnDragStartControlIntent.save,
-                        ViewportOffsetOnDragStartControlIntent.save,
                       ],
                       enabledContext: context,
                       details: details,
@@ -220,8 +219,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                     context,
                     DragStartIntent(
                       intents: <Intent>[
-                        SelectPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition),
-                        ViewportOffsetOnDragStartControlIntent.save,
+                        SelectStartEdgeIntent(cause: SelectionChangedCause.drag, globalPosition: details.globalPosition),
                       ],
                       enabledContext: context,
                       details: details,
@@ -237,7 +235,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                     context,
                     ShiftTappingOnDragUpdateIntent(
                       intents: <Intent>[
-                        SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
+                        SelectEndEdgeIntent(cause: SelectionChangedCause.drag, globalPosition: details.globalPosition),
                       ],
                       enabledContext: context,
                       details: details,
@@ -271,7 +269,6 @@ class DefaultSelectionGestures extends StatelessWidget {
                     ShiftTappingOnDragEndIntent(
                       intents: <Intent>[
                         SelectionOnDragStartControlIntent.clear,
-                        ViewportOffsetOnDragStartControlIntent.clear,
                       ],
                       enabledContext: context,
                       details: details,
@@ -283,7 +280,6 @@ class DefaultSelectionGestures extends StatelessWidget {
                   context,
                   DragEndIntent(
                     intents: <Intent>[
-                      ViewportOffsetOnDragStartControlIntent.clear,
                     ],
                     enabledContext: context,
                     details: details,
@@ -303,7 +299,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                   context, 
                   LongPressStartIntent(
                     intents: <Intent>[
-                      SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                      SelectStartEdgeIntent(cause: SelectionChangedCause.longPress, globalPosition: details.globalPosition),
                     ], 
                     enabledContext: context,
                     details: details,
@@ -316,7 +312,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                   context, 
                   LongPressMoveUpdateIntent(
                     intents: <Intent>[
-                      SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
+                      SelectStartEdgeIntent(cause: SelectionChangedCause.longPress, globalPosition: details.globalPosition),
                     ], 
                     enabledContext: context,
                     details: details,
@@ -383,7 +379,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                     context, 
                     SecondaryTapUpIntent(
                       intents: <Intent>[
-                        SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),//renderEditable doesn't have focus
+                        SelectStartEdgeIntent(cause: SelectionChangedCause.tap, globalPosition: details.globalPosition),//renderEditable doesn't have focus
                         SelectionToolbarControlIntent.toggle(position: details.globalPosition),
                       ],
                       enabledContext: context,
@@ -427,7 +423,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                           context, 
                           TapDownIntent(
                             intents: <Intent>[
-                              SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                              SelectStartEdgeIntent(cause: SelectionChangedCause.tap, globalPosition: details.globalPosition),
                               if (tapCount < 2) const KeyboardRequestIntent(),
                               if (tapCount < 2) const UserOnTapCallbackIntent(),
                             ], 
@@ -498,7 +494,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                           context,
                           TapUpIntent(
                             intents: <Intent>[
-                              SelectPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition),
+                              SelectStartEdgeIntent(cause: SelectionChangedCause.tap, globalPosition: details.globalPosition),
                               const KeyboardRequestIntent(),
                               const UserOnTapCallbackIntent(),
                             ],
@@ -585,7 +581,6 @@ class DefaultSelectionGestures extends StatelessWidget {
                     intents: <Intent>[
                       ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition),
                       SelectionOnDragStartControlIntent.save,
-                      ViewportOffsetOnDragStartControlIntent.save,
                     ],
                     enabledContext: context,
                     details: details,
@@ -596,8 +591,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                   context,
                   DragStartIntent(
                     intents: <Intent>[
-                      SelectPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition),
-                      ViewportOffsetOnDragStartControlIntent.save,
+                      SelectStartEdgeIntent(cause: SelectionChangedCause.drag, globalPosition: details.globalPosition),
                     ],
                     enabledContext: context,
                     details: details,
@@ -613,7 +607,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                   context,
                   ShiftTappingOnDragUpdateIntent(
                     intents: <Intent>[
-                      SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
+                      SelectEndEdgeIntent(cause: SelectionChangedCause.drag, globalPosition: details.globalPosition),
                     ],
                     enabledContext: context,
                     details: details,
@@ -644,7 +638,6 @@ class DefaultSelectionGestures extends StatelessWidget {
                   ShiftTappingOnDragEndIntent(
                     intents: <Intent>[
                       SelectionOnDragStartControlIntent.clear,
-                      ViewportOffsetOnDragStartControlIntent.clear,
                     ],
                     enabledContext: context,
                     details: details,
@@ -656,7 +649,6 @@ class DefaultSelectionGestures extends StatelessWidget {
                 context,
                 DragEndIntent(
                   intents: <Intent>[
-                    ViewportOffsetOnDragStartControlIntent.clear,
                   ],
                   enabledContext: context,
                   details: details,

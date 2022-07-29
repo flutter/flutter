@@ -2054,6 +2054,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // Selectable implementation:
+  TextPosition? _textSelectionStart;
+  TextPosition? _textSelectionEnd;
+
   @override
   Matrix4 getTransformTo(RenderObject? ancestor) => renderEditable.getTransformTo(ancestor);
 
@@ -2104,25 +2107,54 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    if (event.type == SelectionEventType.selectPosition) {
-      final SelectPositionSelectionEvent selectPositionEvent = event as SelectPositionSelectionEvent;
-      _selectPosition(selectPositionEvent.globalPosition, null, selectPositionEvent.cause);
+    final TextPosition? existingSelectionStart = _textSelectionStart;
+    final TextPosition? existingSelectionEnd = _textSelectionEnd;
+    late final SelectionChangedCause eventCause;
+
+    switch (event.type) {
+      case SelectionEventType.startEdgeUpdate:
+      case SelectionEventType.endEdgeUpdate:
+        final SelectionEdgeUpdateEvent edgeUpdateEvent = event as SelectionEdgeUpdateEvent;
+        _updateSelectionEdge(edgeUpdateEvent.globalPosition, isEnd: edgeUpdateEvent.type == SelectionEventType.endEdgeUpdate);
+        eventCause = edgeUpdateEvent.cause!;
+        break;
+      case SelectionEventType.clear:
+        break;
+      case SelectionEventType.expandSelection:
+        final ExpandSelectionSelectionEvent expandSelectionEvent =  event as ExpandSelectionSelectionEvent;
+        _handleExpandSelection(expandSelectionEvent.globalPosition, expandSelectionEvent.fromSelection);
+        eventCause = expandSelectionEvent.cause!;
+        break;
+      case SelectionEventType.extendSelection:
+        final ExtendSelectionSelectionEvent extendSelectionEvent =  event as ExtendSelectionSelectionEvent;
+        _handleExtendSelection(extendSelectionEvent.globalPosition);
+        eventCause = extendSelectionEvent.cause!;
+        break;
+      case SelectionEventType.selectAll:
+        break;
+      case SelectionEventType.selectWord:
+        final SelectWordSelectionEvent selectWordEvent = event as SelectWordSelectionEvent;
+        _handleSelectWord(globalPosition: selectWordEvent.globalPosition);
+        eventCause = selectWordEvent.cause!;
+        break;
+      case SelectionEventType.selectWordEdge:
+        final SelectWordEdgeSelectionEvent selectWordEdgeEvent = event as SelectWordEdgeSelectionEvent;
+        _handleSelectWordEdge(selectWordEdgeEvent.globalPosition);
+        eventCause = selectWordEdgeEvent.cause;
+        break;
+      case SelectionEventType.selectWordsInRange:
+        final SelectWordsInRangeSelectionEvent selectWordsInRangeEvent = event as SelectWordsInRangeSelectionEvent;
+        _handleSelectWordsInRange(from: selectWordsInRangeEvent.from, to: selectWordsInRangeEvent.to);
+        eventCause = selectWordsInRangeEvent.cause!;
+        break;
     }
 
-    if (event.type == SelectionEventType.selectWord) {
-      final SelectWordSelectionEvent selectWordEvent = event as SelectWordSelectionEvent;
-      _selectWord(globalPosition: selectWordEvent.globalPosition, cause: selectWordEvent.cause!);
+    if (existingSelectionStart != _textSelectionStart ||
+        existingSelectionEnd != _textSelectionEnd) {
+      final TextSelection newSelection = TextSelection(baseOffset: _textSelectionStart!.offset, extentOffset: _textSelectionEnd!.offset, affinity: _textSelectionStart!.affinity);
+      _validateAndSetSelection(newSelection, eventCause);
     }
 
-    if (event.type == SelectionEventType.selectWordEdge) {
-      final SelectWordEdgeSelectionEvent selectWordEdgeEvent = event as SelectWordEdgeSelectionEvent;
-      _selectWordEdge(selectWordEdgeEvent.globalPosition, selectWordEdgeEvent.cause);
-    }
-
-    if (event.type == SelectionEventType.selectWordsInRange) {
-      final SelectWordsInRangeSelectionEvent selectWordsInRangeEvent = event as SelectWordsInRangeSelectionEvent;
-      _selectWordsInRange(from: selectWordsInRangeEvent.from, to: selectWordsInRangeEvent.to, cause: selectWordsInRangeEvent.cause!);
-    }
     return SelectionResult.none;
   }
   // End of SelectionHandler implementation
@@ -3323,8 +3355,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 
   // --------------------------- Selection Actions ---------------------------
-  // The viewport offset pixels of the [RenderEditable] at the last drag start.
-  double _dragStartViewportOffset = 0.0;
 
   // For a shift + tap + drag gesture, the TextSelection at the point of the
   // tap. Mac uses this value to reset to the original selection when an
@@ -3341,44 +3371,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Saves the viewport offset when a drag has started, or clears it depending on the
-  /// given intent's `store` parameter.
-  void controlViewportOffsetOnDragStart(ViewportOffsetOnDragStartControlIntent intent) {
-    if (intent.store) {
-      _dragStartViewportOffset = renderEditable.offset.pixels;
-    } else {
-      _dragStartViewportOffset = 0.0;
-    }
-  }
-
-  /// Expand the selection to the given intent's global `position` parameter.
+  /// Expand the selection to the given `position` parameter.
   ///
   /// Either base or extent will be moved to the given position, whichever
   /// is closest. The selection will never shrink or pivot, only grow.
   ///
-  /// If fromSelection is given, will expand from that selection instead of the
+  /// If `fromSelection` is given, will expand from that selection instead of the
   /// current selection in renderEditable.
   ///
   /// See also:
   ///
-  ///   * [_extendSelection], which is similar but pivots the selection around
+  ///   * [_handleExtendSelection], which is similar but pivots the selection around
   ///     the base.
-  void expandSelection(ExpandSelectionToPositionIntent intent) {
-    final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
-    final TextSelection selection = intent.fromSelection ?? textEditingValue.selection;
+  void _handleExpandSelection(Offset position, TextSelection? fromSelection) {
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(position);
+    final TextSelection selection = fromSelection ?? textEditingValue.selection;
     final bool baseIsCloser = (tappedPosition.offset - selection.baseOffset).abs()
         < (tappedPosition.offset - selection.extentOffset).abs();
-    final TextSelection nextSelection = selection.copyWith(
-      baseOffset: baseIsCloser ? selection.extentOffset : selection.baseOffset,
-      extentOffset: tappedPosition.offset,
-    );
-
-    userUpdateTextEditingValue(
-      textEditingValue.copyWith(
-        selection: nextSelection,
-      ),
-      intent.cause,
-    );
+    
+    _textSelectionStart = baseIsCloser ? TextPosition(offset: selection.extentOffset) : TextPosition(offset: selection.baseOffset);
+    _textSelectionEnd = tappedPosition;
   }
 
   /// Extend the selection to the given intent's global `position` parameter.
@@ -3387,98 +3399,64 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// See also:
   ///
-  ///   * [_expandSelection], which is similar but always increases the size of
+  ///   * [_handleExpandSelection], which is similar but always increases the size of
   ///     the selection.
-  void extendSelection(ExtendSelectionToPositionIntent intent) {
-    final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
-    final TextSelection selection = textEditingValue.selection;
-    final TextSelection nextSelection = selection.copyWith(
-      extentOffset: tappedPosition.offset,
-    );
-
-    userUpdateTextEditingValue(
-      textEditingValue.copyWith(
-        selection: nextSelection,
-      ),
-      intent.cause,
-    );
+  void _handleExtendSelection(Offset position) {
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(position);
+    _textSelectionEnd = tappedPosition;
   }
 
-  /// Similar to selectPosition, but adjusts the start offset based on the
-  /// viewport offset saved at the beginning of a drag. This is to keep the
-  /// [TextSelection.baseOffset] at the same position it was when the drag began.
-  void selectDragPosition(SelectDragPositionIntent intent) {
-    final Offset startOffset = renderEditable.maxLines == 1
-        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
-        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-
-    _selectPosition(intent.from, intent.to, intent.cause);
+  /// Updates the start or end edge of the selection, based on the `isEnd` parameter.
+  void _updateSelectionEdge(Offset globalPosition, {required bool isEnd}) {
+    _setSelectionPosition(null, isEnd: isEnd);
+    final TextPosition position = renderEditable.getPositionForPoint(globalPosition);
+    _setSelectionPosition(position, isEnd: isEnd);
+    if (!isEnd) {
+      _textSelectionEnd = position;
+    }
   }
 
-  /// Select text between the given intent's `from` and `to` global position
-  /// parameters.
-  ///
-  /// `from` corresponds to the [TextSelection.baseOffset], and `to`
-  /// corresponds to the [TextSelection.extentOffset].
-  ///
-  /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void _selectPosition(Offset from, Offset? to, SelectionChangedCause cause) {
-    final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
-    final TextPosition? toPosition = to == null
-      ? null
-      : renderEditable.getPositionForPoint(to!);
-
-    final int baseOffset = fromPosition.offset;
-    final int extentOffset = toPosition?.offset ?? fromPosition.offset;
-
-    final TextSelection newSelection = TextSelection(
-      baseOffset: baseOffset,
-      extentOffset: extentOffset,
-      affinity: fromPosition.affinity,
-    );
-
-    _validateAndSetSelection(newSelection, cause);
+  void _setSelectionPosition(TextPosition? position, {required bool isEnd}) {
+    if (isEnd) {
+      _textSelectionEnd = position;
+    } else {
+      _textSelectionStart = position;
+    }
   }
 
   /// Move the selection to the beginning or end of a word closest to the given
-  /// intent's `position` parameter.
+  /// `position` parameter.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void _selectWordEdge(Offset position, SelectionChangedCause cause) {
+  void _handleSelectWordEdge(Offset position) {
     final TextPosition textPosition = renderEditable.getPositionForPoint(position);
     final TextRange word = renderEditable.getWordBoundary(textPosition);
-    late TextSelection newSelection;
     if (textPosition.offset - word.start <= 1) {
-      newSelection = TextSelection.collapsed(offset: word.start);
+      _textSelectionStart = TextPosition(offset: word.start);
+      _textSelectionEnd = TextPosition(offset: word.start);
     } else {
-      newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
+      _textSelectionStart = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
+      _textSelectionEnd = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     }
-
-    _validateAndSetSelection(newSelection, cause);
   }
 
   /// Select a word around the location of the [globalPosition].
-  void _selectWord({ required Offset globalPosition, required SelectionChangedCause cause }) {
-    _selectWordsInRange(from: globalPosition, cause: cause);
+  void _handleSelectWord({ required Offset globalPosition }) {
+    _handleSelectWordsInRange(from: globalPosition);
   }
 
   /// Selects the set words of a paragraph in a given range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
-  void _selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+  void _handleSelectWordsInRange({ required Offset from, Offset? to}) {
     final TextPosition firstPosition = renderEditable.getPositionForPoint(from);
     final TextSelection firstWord = renderEditable.getWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
         firstWord : renderEditable.getWordAtOffset(renderEditable.getPositionForPoint(to!));
-
-    final TextSelection newSelection = TextSelection(
-      baseOffset: firstWord.base.offset,
-      extentOffset: lastWord.extent.offset,
-      affinity: firstWord.affinity,
-    );
-
-    _validateAndSetSelection(newSelection, cause);
+    
+    _textSelectionStart = TextPosition(offset: firstWord.base.offset, affinity: firstWord.affinity);
+    _textSelectionEnd = TextPosition(offset: lastWord.extent.offset, affinity: firstWord.affinity);
   }
 
   void _validateAndSetSelection(TextSelection newSelection, SelectionChangedCause cause) {
@@ -3698,7 +3676,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ExpandSelectionToDocumentBoundaryIntent>(onInvoke: _expandSelectionToDocumentBoundary)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
-    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
+    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_handleExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
 
     // Copy Paste
@@ -4635,8 +4613,8 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
   bool get isActionEnabled => state._value.selection.isValid;
 }
 
-class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent> {
-  _ExtendSelectionOrCaretPositionAction(this.state, this.getTextBoundariesForIntent);
+class _handleExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent> {
+  _handleExtendSelectionOrCaretPositionAction(this.state, this.getTextBoundariesForIntent);
 
   final EditableTextState state;
   final _TextBoundary Function(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent) getTextBoundariesForIntent;

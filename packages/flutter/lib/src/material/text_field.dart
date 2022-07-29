@@ -1034,128 +1034,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
   // AutofillClient implementation end.
 
-  static final ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer> _iOSForcePressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-    (BuildContext context) => ForcePressGestureRecognizer(debugOwner: context),
-    (ForcePressGestureRecognizer instance, BuildContext context) {
-      instance
-        ..onStart = (ForcePressDetails details) {
-          Actions.invoke(
-            context, 
-            ForcePressStartIntent(
-              intents: <Intent>[
-                SelectWordsInRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition), //can we call super of gesture recognizer? 
-                SelectionToolbarControlIntent.show(position: details.globalPosition),
-              ], 
-              enabledContext: context,
-              details: details,
-            ),
-          );
-        }
-        ..onEnd = (ForcePressDetails details) {/*Should this invoke an empty ForcePressEndIntent for the sake of being overridable?*/};
-    },
-  );
-
-  static final ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer> _iOSLongPressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-    (BuildContext context) => LongPressGestureRecognizer(debugOwner: context),
-    (LongPressGestureRecognizer instance, BuildContext context) {
-      instance
-        ..onLongPressStart = (LongPressStartDetails details) {
-          Actions.invoke(
-            context,
-            LongPressStartIntent(
-              intents: <Intent>[
-                SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
-              ],
-              enabledContext: context,
-              details: details,
-            ),
-          );
-        }
-        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-          Actions.invoke(
-            context,
-            LongPressMoveUpdateIntent(
-              intents: <Intent>[
-                SelectPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
-              ],
-              enabledContext: context,
-              details: details,
-            ),
-          );
-        }
-        ..onLongPressEnd = (LongPressEndDetails details) {/* Should an empty LongPressEndIntent be invoked for the sake of overriding? */};
-    }
-  );
-
-  static final Map<Type, ContextGestureRecognizerFactory> _iOSMaterialGestureDefaults = <Type, ContextGestureRecognizerFactory>{
-    ForcePressGestureRecognizer : _iOSForcePressGestureRecognizer,
-    LongPressGestureRecognizer : _iOSLongPressGestureRecognizer,
-  };
-
-  static final ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer> _commonLongPressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-    (BuildContext context) => LongPressGestureRecognizer(debugOwner: context),
-    (LongPressGestureRecognizer instance, BuildContext context) {
-      instance
-        ..onLongPressStart = (LongPressStartDetails details) {
-          Actions.invoke(
-            context,
-            LongPressStartIntent(
-              intents: <Intent>[
-                SelectWordsInRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition),
-                const FeedbackRequestIntent(),
-              ],
-              enabledContext: context,
-              details: details,
-            ),
-          );
-        }
-        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-          Actions.invoke(
-            context,
-            LongPressMoveUpdateIntent(
-              intents: <Intent>[
-                SelectWordsInRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition),
-              ],
-              enabledContext: context,
-              details: details,
-            ),
-          );
-        }
-        ..onLongPressEnd = (LongPressEndDetails details) {
-          Actions.invoke(
-            context, 
-            LongPressEndIntent(
-              intents: <Intent>[
-                SelectionToolbarControlIntent.show(position: details.globalPosition),
-              ], 
-              enabledContext: context,
-              details: details,
-            ),
-          );
-        };
-    }
-  );
-
-  static final Map<Type, ContextGestureRecognizerFactory> _commonMaterialGestureDefaults = <Type, ContextGestureRecognizerFactory>{
-    LongPressGestureRecognizer : _commonLongPressGestureRecognizer,
-  };
-
-  static Map<Type, ContextGestureRecognizerFactory> get _materialDefaultsForPlatform {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        return _iOSMaterialGestureDefaults;
-      case TargetPlatform.macOS:
-        // ForcePress is disabled so does not need ForcePressGestureRecognizer
-        // LongPress isnt available on macOS afaik so does not need LongPressGestureRecognizer
-        return <Type, ContextGestureRecognizerFactory>{};
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return _commonMaterialGestureDefaults;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1382,17 +1260,17 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       LongPressStartIntent : _makeOverridable(ListedAction<LongPressStartIntent>()),
       LongPressMoveUpdateIntent : _makeOverridable(ListedAction<LongPressMoveUpdateIntent>()),
       LongPressEndIntent : _makeOverridable(ListedAction<LongPressEndIntent>()),
-      ForcePressStartIntent : _makeOverridable(MaterialForcePressStartAction()),
-      ForcePressEndIntent : _makeOverridable(DoNothingAction()),
+      ForcePressStartIntent : _makeOverridable(ListedAction<ForcePressStartIntent>()),
+      ForcePressEndIntent : _makeOverridable(ListedAction<ForcePressEndIntent>()),
 
       ExpandSelectionToPositionIntent : SelectionGestureCallbackAction<ExpandSelectionToPositionIntent>(
-          onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.expandSelection(intent),
+          onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.dispatchSelectionEvent(ExpandSelectionSelectionEvent(globalPosition: intent.position, fromSelection: intent.fromSelection, cause: intent.cause)),
           enabledPredicate: (ExpandSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           },
       ),
       ExtendSelectionToPositionIntent : SelectionGestureCallbackAction<ExtendSelectionToPositionIntent>(
-          onInvoke: (ExtendSelectionToPositionIntent intent) => _editableText!.extendSelection(intent),
+          onInvoke: (ExtendSelectionToPositionIntent intent) => _editableText!.dispatchSelectionEvent(ExtendSelectionSelectionEvent(globalPosition: intent.position, cause: intent.cause)),
           enabledPredicate: (ExtendSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           }
@@ -1413,10 +1291,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         onInvoke: (SelectAllTextIntent intent) => _editableText!.selectAll(intent.cause),
         enabledPredicate: (SelectAllTextIntent intent) => widget.selectionEnabled,
       ),
-      SelectDragPositionIntent : SelectionGestureCallbackAction<SelectDragPositionIntent>(
-        onInvoke: (SelectDragPositionIntent intent) => _editableText!.selectDragPosition(intent),
-        enabledPredicate: (SelectDragPositionIntent intent) => widget.selectionEnabled,
-      ),
       SelectWordsInRangeIntent : SelectionGestureCallbackAction<SelectWordsInRangeIntent>(
           onInvoke: (SelectWordsInRangeIntent intent) => _editableText!.dispatchSelectionEvent(SelectWordsInRangeSelectionEvent(from: intent.from, to: intent.to, cause: intent.cause)),
           enabledPredicate: (SelectWordsInRangeIntent intent) => widget.selectionEnabled,
@@ -1429,9 +1303,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onInvoke: (SelectWordEdgeIntent intent) => _editableText!.dispatchSelectionEvent(SelectWordEdgeSelectionEvent(globalPosition: intent.position, cause: intent.cause)),
           enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
       ),
-      SelectPositionIntent : SelectionGestureCallbackAction<SelectPositionIntent>(
-          onInvoke: (SelectPositionIntent intent) => _editableText!.dispatchSelectionEvent(SelectPositionSelectionEvent(globalPosition: intent.from, cause: intent.cause)),
-          enabledPredicate: (SelectPositionIntent intent) => widget.selectionEnabled,
+      SelectStartEdgeIntent : SelectionGestureCallbackAction<SelectStartEdgeIntent>(
+          onInvoke: (SelectStartEdgeIntent intent) => _editableText!.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: intent.globalPosition, cause: intent.cause)),
+          enabledPredicate: (SelectStartEdgeIntent intent) => widget.selectionEnabled,
+      ),
+      SelectEndEdgeIntent : SelectionGestureCallbackAction<SelectEndEdgeIntent>(
+          onInvoke: (SelectEndEdgeIntent intent) => _editableText!.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: intent.globalPosition, cause: intent.cause)),
+          enabledPredicate: (SelectEndEdgeIntent intent) => widget.selectionEnabled,
       ),
       SelectionOnDragStartControlIntent : SelectionGestureCallbackAction<SelectionOnDragStartControlIntent>(
         onInvoke: (SelectionOnDragStartControlIntent intent) {
@@ -1458,12 +1336,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           },
           enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
         ),
-      ),
-      ViewportOffsetOnDragStartControlIntent : SelectionGestureCallbackAction<ViewportOffsetOnDragStartControlIntent>(
-        onInvoke: (ViewportOffsetOnDragStartControlIntent intent) {
-          _editableText!.controlViewportOffsetOnDragStart(intent);
-        },
-        enabledPredicate: (ViewportOffsetOnDragStartControlIntent intent) => widget.selectionEnabled,
       ),
       UserOnTapCallbackIntent : _makeOverridable(
         SelectionGestureCallbackAction<UserOnTapCallbackIntent>(
@@ -1499,11 +1371,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                   child: child,
                 );
               },
-              child: SelectionGestures(
-                gestures: _materialDefaultsForPlatform,
-                child: SelectionGesturesDetector(              
-                  child: child,
-                ),
+              child: SelectionGesturesDetector(              
+                child: child,
               ),
             ),
           ),
@@ -1530,14 +1399,4 @@ class SelectionGestureCallbackAction<T extends Intent> extends Action<T> {
 
   @override
   bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
-}
-
-class MaterialForcePressStartAction extends ListedAction<ForcePressStartIntent> {
-  @override
-  void onInvoke(ForcePressStartIntent intent) {
-    assert(callingMap != null);
-    final Intent showToolbar = SelectionToolbarControlIntent.show(position: intent.details.globalPosition);
-    callingMap![showToolbar] = Actions.find(intent.enabledContext, intent: showToolbar);
-    super.invoke(intent);
-  }
 }
