@@ -3522,7 +3522,7 @@ class _ErodeImageFilter implements ImageFilter {
   }
 
   @override
-  int get hashCode => hashValues(radiusX, radiusY);
+  int get hashCode => Object.hash(radiusX, radiusY);
 }
 
 class _ComposeImageFilter implements ImageFilter {
@@ -4042,7 +4042,7 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   /// compiler. The constructed object should then be reused via the [shader]
   /// method to create [Shader] objects that can be used by [Shader.paint].
   static Future<FragmentProgram> fromAsset(String assetKey) {
-    FragmentProgram? program = _shaderRegistry[assetKey]?.target;
+    final FragmentProgram? program = _shaderRegistry[assetKey]?.target;
     if (program != null) {
       return Future<FragmentProgram>.value(program);
     }
@@ -4060,13 +4060,6 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   // cache.
   static Map<String, WeakReference<FragmentProgram>> _shaderRegistry =
       <String, WeakReference<FragmentProgram>>{};
-
-  FragmentProgram._() {
-    assert(
-      false,
-      'FragmentProgram should only be initialized via "fromAsset".',
-    );
-  }
 
   @pragma('vm:entry-point')
   FragmentProgram._fromAsset(String assetKey) {
@@ -4093,7 +4086,7 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
       return;
     }
 
-    final result = program._initFromAsset(assetKey);
+    final String result = program._initFromAsset(assetKey);
     if (result.isNotEmpty) {
       throw result;
     }
@@ -4164,9 +4157,7 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
     Float32List? floatUniforms,
     List<ImageShader>? samplerUniforms,
   }) {
-    if (floatUniforms == null) {
-      floatUniforms = Float32List(_uniformFloatCount);
-    }
+    floatUniforms ??= Float32List(_uniformFloatCount);
     if (floatUniforms.length != _uniformFloatCount) {
       throw ArgumentError(
         'floatUniforms size: ${floatUniforms.length} must match given shader '
@@ -4291,7 +4282,7 @@ class Vertices extends NativeFieldWrapperClass1 {
   }
 
   /// Creates a set of vertex data for use with [Canvas.drawVertices], directly
-  /// using the encoding methods of [new Vertices].
+  /// using the encoding methods of [Vertices.new].
   /// Note that this constructor uses raw typed data lists,
   /// so it runs faster than the [Vertices()] constructor
   /// because it doesn't require any conversion from Dart lists.
@@ -5057,8 +5048,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// first.
   ///
   /// To align the text, set the `textAlign` on the [ParagraphStyle] object
-  /// passed to the [new ParagraphBuilder] constructor. For more details see
-  /// [TextAlign] and the discussion at [new ParagraphStyle].
+  /// passed to the [ParagraphBuilder.new] constructor. For more details see
+  /// [TextAlign] and the discussion at [ParagraphStyle.new].
   ///
   /// If the text is left aligned or justified, the left margin will be at the
   /// position specified by the `offset` argument's [Offset.dx] coordinate.
@@ -5129,7 +5120,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// All parameters must not be null.
   ///
   /// See also:
-  ///   * [new Vertices], which creates a set of vertices to draw on the canvas.
+  ///   * [Vertices.new], which creates a set of vertices to draw on the canvas.
   ///   * [Vertices.raw], which creates the vertices using typed data lists
   ///     rather than unencoded lists.
   ///   * [paint], Image shaders can be used to draw images on a triangular mesh.
