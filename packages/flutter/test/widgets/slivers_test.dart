@@ -1035,7 +1035,7 @@ class _TestArbitrarySliverGridDelegate implements SliverGridDelegate {
   }
 }
 
-class _TestArbitrarySliverGridLayout implements SliverGridLayout {
+class _TestArbitrarySliverGridLayout extends SliverGridLayout {
   @override
   double computeMaxScrollOffset(int childCount) => 1000;
 

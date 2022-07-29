@@ -904,9 +904,10 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     // Now find the first child that ends after our end.
     // TODO(Piinks): In a dynamic grid with tiles of many sizes, one could reach
-    //  the end offset, but there could still be room for more tiles, especially
-    //  in the crossAxis. We may want to add a way for layout to affirm we have
-    //  laid out all of the visible tiles.
+    //  the end main axis offset, but there could still be room for more tiles
+    //  in the crossAxis. Either we should change the end of layout condition,
+    //  or add a way for the SliverGridLayout to tell us to keep going/affirm we
+    //  have actually reaached the end.
     while (endScrollOffset < targetEndScrollOffset) { // && layout.reachedEndGeometry ?
       if (!advance()) {
         reachedEnd = true;
