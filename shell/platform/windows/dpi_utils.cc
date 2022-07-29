@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dpi_utils_win32.h"
+#include "dpi_utils.h"
 
 namespace flutter {
 
@@ -26,11 +26,11 @@ bool AssignProcAddress(HMODULE comBaseModule, const char* name, T*& outProc) {
 
 /// A helper class for abstracting various Windows DPI related functions across
 /// Windows OS versions.
-class DpiHelperWin32 {
+class DpiHelper {
  public:
-  DpiHelperWin32();
+  DpiHelper();
 
-  ~DpiHelperWin32();
+  ~DpiHelper();
 
   /// Returns the DPI for |hwnd|. Supports all DPI awareness modes, and is
   /// backward compatible down to Windows Vista. If |hwnd| is nullptr, returns
@@ -60,7 +60,7 @@ class DpiHelperWin32 {
   bool dpi_for_monitor_supported_ = false;
 };
 
-DpiHelperWin32::DpiHelperWin32() {
+DpiHelper::DpiHelper() {
   if ((user32_module_ = LoadLibraryA("User32.dll")) != nullptr) {
     dpi_for_window_supported_ = (AssignProcAddress(
         user32_module_, "GetDpiForWindow", get_dpi_for_window_));
@@ -71,7 +71,7 @@ DpiHelperWin32::DpiHelperWin32() {
   }
 }
 
-DpiHelperWin32::~DpiHelperWin32() {
+DpiHelper::~DpiHelper() {
   if (user32_module_ != nullptr) {
     FreeLibrary(user32_module_);
   }
@@ -80,7 +80,7 @@ DpiHelperWin32::~DpiHelperWin32() {
   }
 }
 
-UINT DpiHelperWin32::GetDpiForWindow(HWND hwnd) {
+UINT DpiHelper::GetDpiForWindow(HWND hwnd) {
   // GetDpiForWindow returns the DPI for any awareness mode. If not available,
   // or no |hwnd| is provided, fallback to a per monitor, system, or default
   // DPI.
@@ -101,7 +101,7 @@ UINT DpiHelperWin32::GetDpiForWindow(HWND hwnd) {
   return dpi;
 }
 
-UINT DpiHelperWin32::GetDpiForMonitor(HMONITOR monitor) {
+UINT DpiHelper::GetDpiForMonitor(HMONITOR monitor) {
   if (dpi_for_monitor_supported_) {
     if (monitor == nullptr) {
       const POINT target_point = {0, 0};
@@ -117,8 +117,8 @@ UINT DpiHelperWin32::GetDpiForMonitor(HMONITOR monitor) {
   return kDefaultDpi;
 }  // namespace
 
-DpiHelperWin32* GetHelper() {
-  static DpiHelperWin32* dpi_helper = new DpiHelperWin32();
+DpiHelper* GetHelper() {
+  static DpiHelper* dpi_helper = new DpiHelper();
   return dpi_helper;
 }
 }  // namespace

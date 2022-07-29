@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/event_watcher_win32.h"
+#include "flutter/shell/platform/windows/event_watcher.h"
 
 namespace flutter {
 
-EventWatcherWin32::EventWatcherWin32(std::function<void()> callback)
+EventWatcher::EventWatcher(std::function<void()> callback)
     : callback_(callback) {
   handle_ = CreateEvent(NULL, TRUE, FALSE, NULL);
 
@@ -15,18 +15,18 @@ EventWatcherWin32::EventWatcherWin32(std::function<void()> callback)
                               WT_EXECUTEONLYONCE | WT_EXECUTEINWAITTHREAD);
 }
 
-EventWatcherWin32::~EventWatcherWin32() {
+EventWatcher::~EventWatcher() {
   UnregisterWait(handle_for_wait_);
   CloseHandle(handle_);
 }
 
-HANDLE EventWatcherWin32::GetHandle() {
+HANDLE EventWatcher::GetHandle() {
   return handle_;
 }
 
 // static
-VOID CALLBACK EventWatcherWin32::CallbackForWait(PVOID context, BOOLEAN) {
-  EventWatcherWin32* self = reinterpret_cast<EventWatcherWin32*>(context);
+VOID CALLBACK EventWatcher::CallbackForWait(PVOID context, BOOLEAN) {
+  EventWatcher* self = reinterpret_cast<EventWatcher*>(context);
   ResetEvent(self->handle_);
   self->callback_();
 }

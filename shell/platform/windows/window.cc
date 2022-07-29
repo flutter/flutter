@@ -14,7 +14,7 @@
 
 #include <cstring>
 
-#include "dpi_utils_win32.h"
+#include "dpi_utils.h"
 #include "keyboard_win32_common.h"
 
 namespace flutter {
@@ -55,7 +55,7 @@ static const int kLinesPerScrollWindowsDefault = 3;
 
 Window::Window() : Window(nullptr) {}
 
-Window::Window(std::unique_ptr<TextInputManagerWin32> text_input_manager)
+Window::Window(std::unique_ptr<TextInputManager> text_input_manager)
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
       text_input_manager_(std::move(text_input_manager)) {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
@@ -69,7 +69,7 @@ Window::Window(std::unique_ptr<TextInputManagerWin32> text_input_manager)
   UpdateScrollOffsetMultiplier();
 
   if (text_input_manager_ == nullptr) {
-    text_input_manager_ = std::make_unique<TextInputManagerWin32>();
+    text_input_manager_ = std::make_unique<TextInputManager>();
   }
   keyboard_manager_ = std::make_unique<KeyboardManagerWin32>(this);
 }

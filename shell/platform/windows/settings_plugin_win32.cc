@@ -93,7 +93,7 @@ SettingsPluginWin32::GetPreferredBrightness() {
 
 void SettingsPluginWin32::WatchPreferredBrightnessChanged() {
   preferred_brightness_changed_watcher_ =
-      std::make_unique<EventWatcherWin32>([this]() {
+      std::make_unique<EventWatcher>([this]() {
         task_runner_->PostTask([this]() {
           SendSettings();
           WatchPreferredBrightnessChanged();
@@ -106,13 +106,12 @@ void SettingsPluginWin32::WatchPreferredBrightnessChanged() {
 }
 
 void SettingsPluginWin32::WatchTextScaleFactorChanged() {
-  text_scale_factor_changed_watcher_ =
-      std::make_unique<EventWatcherWin32>([this]() {
-        task_runner_->PostTask([this]() {
-          SendSettings();
-          WatchTextScaleFactorChanged();
-        });
-      });
+  text_scale_factor_changed_watcher_ = std::make_unique<EventWatcher>([this]() {
+    task_runner_->PostTask([this]() {
+      SendSettings();
+      WatchTextScaleFactorChanged();
+    });
+  });
 
   RegNotifyChangeKeyValue(
       text_scale_factor_reg_hkey_, FALSE, REG_NOTIFY_CHANGE_LAST_SET,
