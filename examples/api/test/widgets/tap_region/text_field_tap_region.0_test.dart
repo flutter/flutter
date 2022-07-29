@@ -17,6 +17,7 @@ void main() {
     expect(find.byIcon(Icons.add), findsOneWidget);
     expect(find.byIcon(Icons.remove), findsOneWidget);
   });
+
   testWidgets('tapping increment/decrement works', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TapRegionApp(),
@@ -49,6 +50,7 @@ void main() {
       equals(const TextSelection(baseOffset: 0, extentOffset: 2)),
     );
   });
+
   testWidgets('entering text and then incrementing/decrementing works', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TapRegionApp(),
@@ -82,6 +84,14 @@ void main() {
       getFieldValue(tester).selection,
       equals(const TextSelection(baseOffset: 0, extentOffset: 3)),
     );
+    final FocusNode textFieldFocusNode = Focus.of(
+      tester.element(
+        find.byWidgetPredicate((Widget widget) {
+          return widget.runtimeType.toString() == '_Editable';
+        }),
+      ),
+    );
+    expect(textFieldFocusNode.hasPrimaryFocus, isTrue);
   });
 }
 

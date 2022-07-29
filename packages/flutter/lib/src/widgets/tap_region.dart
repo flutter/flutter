@@ -25,6 +25,12 @@ bool _tapRegionDebug(String message, [Iterable<String>? details]) {
   return true;
 }
 
+/// The type of callback that [TapRegion.onTapOutside] and
+/// [TapRegion.onTapInside] take.
+///
+/// The event is the pointer event that caused the callback to be called.
+typedef TapRegionCallback = void Function(PointerDownEvent event);
+
 /// An interface for registering and unregistering a [RenderTapRegion]
 /// (typically created with a [TapRegion] widget) with a
 /// [RenderTapRegionSurface] (typically created with a [TapRegionSurface]
@@ -264,11 +270,11 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior with TapR
 
     for (final RenderTapRegion region in outsideRegions) {
       assert(_tapRegionDebug('Calling onTapOutside for $region'));
-      region.onTapOutside?.call();
+      region.onTapOutside?.call(event);
     }
     for (final RenderTapRegion region in insideRegions) {
       assert(_tapRegionDebug('Calling onTapInside for $region'));
-      region.onTapInside?.call();
+      region.onTapInside?.call(event);
     }
   }
 
@@ -316,13 +322,22 @@ class TapRegion extends SingleChildRenderObjectWidget {
   final bool enabled;
 
   /// A callback to be invoked when a tap is detected outside of this
-  /// [RenderTapRegion] and any other region with the same [groupId], if any.
-  final VoidCallback? onTapOutside;
+  /// [TapRegion] and any other region with the same [groupId], if any.
+  ///
+  /// The [PointerDownEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  final TapRegionCallback? onTapOutside;
 
   /// A callback to be invoked when a tap is detected inside of this
-  /// [RenderTapRegion], or any other tap region with the same [groupId], if
-  /// any.
-  final VoidCallback? onTapInside;
+  /// [TapRegion], or any other tap region with the same [groupId], if any.
+  ///
+  /// The [PointerDownEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  final TapRegionCallback? onTapInside;
 
   /// An optional group ID that groups [TapRegion]s together so that they
   /// operate as one region. If any member of a group is hit by a particular
@@ -408,12 +423,22 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   bool _isRegistered = false;
 
   /// A callback to be invoked when a tap is detected outside of this
-  /// [RenderTapRegion] and all other regions with the same [groupId].
-  VoidCallback? onTapOutside;
+  /// [RenderTapRegion] and any other region with the same [groupId], if any.
+  ///
+  /// The [PointerDownEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  TapRegionCallback? onTapOutside;
 
   /// A callback to be invoked when a tap is detected inside of this
-  /// [RenderTapRegion] or any region with the same [groupId].
-  VoidCallback? onTapInside;
+  /// [RenderTapRegion], or any other tap region with the same [groupId], if any.
+  ///
+  /// The [PointerDownEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  TapRegionCallback? onTapInside;
 
   /// A label used in debug builds. Will be null in release builds.
   String? debugLabel;
@@ -431,7 +456,10 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   /// An optional group ID that groups [RenderTapRegion]s together so that they
   /// operate as one region. If any member of a group is hit by a particular
   /// tap, then the [onTapOutside] will not be called for any members of the
-  /// group.
+  /// group. If any member of the group is hit, then all members will have their
+  /// [onTapInside] called.
+  ///
+  /// If the group id is null, then only this region is hit tested.
   Object? get groupId => _groupId;
   Object? _groupId;
   set groupId(Object? value) {

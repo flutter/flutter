@@ -21,21 +21,21 @@ void main() {
                 children: <Widget>[
                   const Text('Outside'),
                   TapRegion(
-                    onTapOutside: () {
+                    onTapOutside: (PointerEvent event) {
                       clickedOutside.add('No Group');
                     },
                     child: const Text('No Group'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapOutside: () {
+                    onTapOutside: (PointerEvent event) {
                       clickedOutside.add('Group 1 A');
                     },
                     child: const Text('Group 1 A'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapOutside: () {
+                    onTapOutside: (PointerEvent event) {
                       clickedOutside.add('Group 1 B');
                     },
                     child: const Text('Group 1 B'),
@@ -62,30 +62,38 @@ void main() {
     expect(clickedOutside, isEmpty);
 
     await click(find.text('No Group'));
-    expect(clickedOutside, unorderedEquals(<String>{
-      'Group 1 A',
-      'Group 1 B',
-    }));
+    expect(
+        clickedOutside,
+        unorderedEquals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
     clickedOutside.clear();
 
     await click(find.text('Group 1 A'));
-    expect(clickedOutside, equals(<String>{
-      'No Group',
-    }));
+    expect(
+        clickedOutside,
+        equals(<String>{
+          'No Group',
+        }));
     clickedOutside.clear();
 
     await click(find.text('Group 1 B'));
-    expect(clickedOutside, equals(<String>{
-      'No Group',
-    }));
+    expect(
+        clickedOutside,
+        equals(<String>{
+          'No Group',
+        }));
     clickedOutside.clear();
 
     await click(find.text('Outside'));
-    expect(clickedOutside, unorderedEquals(<String>{
-      'No Group',
-      'Group 1 A',
-      'Group 1 B',
-    }));
+    expect(
+        clickedOutside,
+        unorderedEquals(<String>{
+          'No Group',
+          'Group 1 A',
+          'Group 1 B',
+        }));
     clickedOutside.clear();
 
     await click(find.text('Outside Surface'));
@@ -104,21 +112,21 @@ void main() {
                 children: <Widget>[
                   const Text('Outside'),
                   TapRegion(
-                    onTapInside: () {
+                    onTapInside: (PointerEvent event) {
                       clickedInside.add('No Group');
                     },
                     child: const Text('No Group'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapInside: () {
+                    onTapInside: (PointerEvent event) {
                       clickedInside.add('Group 1 A');
                     },
                     child: const Text('Group 1 A'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapInside: () {
+                    onTapInside: (PointerEvent event) {
                       clickedInside.add('Group 1 B');
                     },
                     child: const Text('Group 1 B'),
@@ -145,23 +153,29 @@ void main() {
     expect(clickedInside, isEmpty);
 
     await click(find.text('No Group'));
-    expect(clickedInside, unorderedEquals(<String>{
-      'No Group',
-    }));
+    expect(
+        clickedInside,
+        unorderedEquals(<String>{
+          'No Group',
+        }));
     clickedInside.clear();
 
     await click(find.text('Group 1 A'));
-    expect(clickedInside, equals(<String>{
-      'Group 1 A',
-      'Group 1 B',
-    }));
+    expect(
+        clickedInside,
+        equals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
     clickedInside.clear();
 
     await click(find.text('Group 1 B'));
-    expect(clickedInside, equals(<String>{
-      'Group 1 A',
-      'Group 1 B',
-    }));
+    expect(
+        clickedInside,
+        equals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
     clickedInside.clear();
 
     await click(find.text('Outside'));

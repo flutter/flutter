@@ -11944,5 +11944,65 @@ void main() {
 
       expect(focusNode.hasPrimaryFocus, isTrue);
     }, variant: TargetPlatformVariant.all());
+
+    // PointerDownEvents can't be trackpad events, apparently, so we skip that one.
+    for (final PointerDeviceKind pointerDeviceKind in PointerDeviceKind.values.toSet()..remove(PointerDeviceKind.trackpad)) {
+      testWidgets('Default TextField handling of onTapOutside follows platform conventions for ${pointerDeviceKind.name}', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test');
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: <Widget>[
+                  const Text('Outside'),
+                  TextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        Future<void> click(Finder finder) async {
+          final TestGesture gesture = await tester.startGesture(
+            tester.getCenter(finder),
+            kind: pointerDeviceKind,
+          );
+          await gesture.up();
+          await gesture.removePointer();
+        }
+
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        await click(find.text('Outside'));
+
+        switch(pointerDeviceKind) {
+          case PointerDeviceKind.touch:
+            switch(defaultTargetPlatform) {
+              case TargetPlatform.iOS:
+              case TargetPlatform.android:
+              case TargetPlatform.fuchsia:
+                expect(focusNode.hasPrimaryFocus, equals(!kIsWeb));
+                break;
+              case TargetPlatform.linux:
+              case TargetPlatform.macOS:
+              case TargetPlatform.windows:
+                expect(focusNode.hasPrimaryFocus, isFalse);
+                break;
+            }
+            break;
+          case PointerDeviceKind.mouse:
+          case PointerDeviceKind.stylus:
+          case PointerDeviceKind.invertedStylus:
+          case PointerDeviceKind.trackpad:
+          case PointerDeviceKind.unknown:
+            expect(focusNode.hasPrimaryFocus, isFalse);
+            break;
+        }
+    }, variant: TargetPlatformVariant.all());
+  }
   });
 }
