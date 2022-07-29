@@ -606,10 +606,21 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-amd64',
-        'version': 'NyopqdQvXY11sckCZIz7FdXLgQZep1ssg1IYBX09ZPwC'
+        'version': 'git_revision:3a20597776a5d2920e511d81653b4d2b6ca0c855'
       }
     ],
     'condition': 'host_os == "mac"',
+    'dep_type': 'cipd',
+  },
+
+  'src/buildtools/mac-arm64/clang': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/clang/mac-arm64',
+        'version': 'git_revision:3a20597776a5d2920e511d81653b4d2b6ca0c855'
+      }
+    ],
+    'condition': 'host_os == "mac" and host_cpu == "arm64"',
     'dep_type': 'cipd',
   },
 
@@ -617,10 +628,21 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
-        'version': 'ad2NsyQv7Q0UnDFu6vxeKVumfP-AHmA-ju9u0YCZkwgC'
+        'version': 'git_revision:3a20597776a5d2920e511d81653b4d2b6ca0c855'
       }
     ],
-    'condition': 'host_os == "linux"',
+    'condition': 'host_os == "linux" and host_cpu == "x64"',
+    'dep_type': 'cipd',
+  },
+
+  'src/buildtools/linux-arm64/clang': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/clang/linux-amd64',
+        'version': 'git_revision:3a20597776a5d2920e511d81653b4d2b6ca0c855'
+      }
+    ],
+    'condition': 'host_os == "linux" and host_cpu == "arm64"',
     'dep_type': 'cipd',
   },
 
@@ -628,7 +650,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/windows-amd64',
-        'version': '4H1CWy95NO6tWA96OvQIMCA-s9tZfSMLa9RoghEuXqgC'
+        'version': 'git_revision:3a20597776a5d2920e511d81653b4d2b6ca0c855'
       }
     ],
     'condition': 'download_windows_deps',
