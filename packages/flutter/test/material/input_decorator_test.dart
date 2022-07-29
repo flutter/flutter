@@ -5417,7 +5417,7 @@ void main() {
 
     final double floatedLabelWidth = getLabelRect(tester).width;
 
-    expect(floatedLabelWidth > labelWidth, isTrue);
+    expect(floatedLabelWidth, greaterThan(labelWidth));
 
     final Widget target = getLabeledInputDecorator(FloatingLabelBehavior.auto);
     await tester.pumpWidget(target);
@@ -5430,8 +5430,8 @@ void main() {
     // Default animation duration is 200 millisecond.
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
 
-    expect(getLabelRect(tester).width > labelWidth, isTrue);
-    expect(getLabelRect(tester).width < floatedLabelWidth, isTrue);
+    expect(getLabelRect(tester).width, greaterThan(labelWidth));
+    expect(getLabelRect(tester).width, lessThanOrEqualTo(floatedLabelWidth));
 
     await tester.pumpAndSettle();
 

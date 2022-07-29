@@ -129,6 +129,7 @@ export 'src/widgets/spacer.dart';
 export 'src/widgets/spell_check.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
+export 'src/widgets/tap_region.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_editing_intents.dart';
 export 'src/widgets/text_selection.dart';

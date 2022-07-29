@@ -5960,4 +5960,144 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
+  group('TapRegion integration', () {
+    testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: CupertinoTextField(
+                autofocus: true,
+                focusNode: focusNode,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      // Tap outside the border.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets("Tapping outside doesn't lose focus on mobile", (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: CupertinoTextField(
+                autofocus: true,
+                focusNode: focusNode,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      // Tap just outside the border, but not inside the EditableText.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pump();
+
+      // Focus is lost on mobile browsers, but not mobile apps.
+      expect(focusNode.hasPrimaryFocus, kIsWeb ? isFalse : isTrue);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets("tapping on toolbar doesn't lose focus", (WidgetTester tester) async {
+      final TextEditingController controller;
+      final EditableTextState state;
+
+      controller = TextEditingController(text: 'A B C');
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  autofocus: true,
+                  focusNode: focusNode,
+                  controller: controller,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Select the first 2 words.
+      state.renderEditable.selectPositionAt(
+        from: textOffsetToPosition(tester, 0),
+        to: textOffsetToPosition(tester, 2),
+        cause: SelectionChangedCause.tap,
+      );
+
+      final Offset midSelection = textOffsetToPosition(tester, 2);
+
+      // Right click the selection.
+      final TestGesture gesture = await tester.startGesture(
+        midSelection,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copy'), findsOneWidget);
+
+      // Copy the first word.
+      await tester.tap(find.text('Copy'));
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb, // [intended] The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
+    );
+    testWidgets("Tapping on border doesn't lose focus", (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: CupertinoTextField(
+                autofocus: true,
+                focusNode: focusNode,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      final Rect borderBox = tester.getRect(find.byType(CupertinoTextField));
+      // Tap just inside the border, but not inside the EditableText.
+      await tester.tapAt(borderBox.topLeft + const Offset(1, 1));
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    }, variant: TargetPlatformVariant.all());
+  });
 }
