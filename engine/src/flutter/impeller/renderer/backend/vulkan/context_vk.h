@@ -10,7 +10,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/base/backend_cast.h"
-#include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_library_vk.h"
@@ -34,12 +33,33 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   // |Context|
   bool IsValid() const override;
 
+  template <typename T>
+  bool SetDebugName(T handle, std::string_view label) const {
+    uint64_t handle_ptr =
+        reinterpret_cast<uint64_t>(static_cast<typename T::NativeType>(handle));
+
+    std::string label_str = std::string(label);
+
+    auto ret = device_->setDebugUtilsObjectNameEXT(
+        vk::DebugUtilsObjectNameInfoEXT()
+            .setObjectType(T::objectType)
+            .setObjectHandle(handle_ptr)
+            .setPObjectName(label_str.c_str()));
+
+    if (ret != vk::Result::eSuccess) {
+      VALIDATION_LOG << "unable to set debug name";
+      return false;
+    }
+
+    return true;
+  }
+
  private:
   std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   vk::UniqueInstance instance_;
   vk::UniqueDebugUtilsMessengerEXT debug_messenger_;
   vk::UniqueDevice device_;
-  std::shared_ptr<AllocatorVK> allocator_;
+  std::shared_ptr<Allocator> allocator_;
   std::shared_ptr<ShaderLibraryVK> shader_library_;
   std::shared_ptr<SamplerLibraryVK> sampler_library_;
   std::shared_ptr<PipelineLibraryVK> pipeline_library_;
