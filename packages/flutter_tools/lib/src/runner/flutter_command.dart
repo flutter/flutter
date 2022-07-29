@@ -1343,6 +1343,7 @@ abstract class FlutterCommand extends Command<void> {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );
