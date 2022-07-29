@@ -1990,8 +1990,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
       cause,
     );
+
     if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          bringIntoView(textEditingValue.selection.extent);
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          break;
+      }
     }
   }
 

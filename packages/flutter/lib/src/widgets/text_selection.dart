@@ -208,7 +208,6 @@ abstract class TextSelectionControls {
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
 
@@ -578,7 +577,7 @@ class TextSelectionOverlay {
   }
 }
 
-/// An object that manages a pair of selection handles.
+/// An object that manages a pair of selection handles and a toolbar.
 ///
 /// The selection handles are displayed in the [Overlay] that most closely
 /// encloses the given [BuildContext].
