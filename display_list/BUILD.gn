@@ -154,6 +154,20 @@ if (enable_unittests) {
           [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
     }
   }
+
+  executable("display_list_builder_benchmarks") {
+    testonly = true
+
+    sources = [ "display_list_builder_benchmarks.cc" ]
+
+    deps = [
+      ":display_list",
+      ":display_list_fixtures",
+      ":display_list_testing",
+      "//flutter/benchmarking",
+      "//flutter/testing:testing_lib",
+    ]
+  }
 }
 
 fixtures_location("display_list_benchmarks_fixtures") {
