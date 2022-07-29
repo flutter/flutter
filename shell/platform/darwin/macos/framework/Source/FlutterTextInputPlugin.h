@@ -46,15 +46,6 @@
 - (BOOL)isFirstResponder;
 
 /**
- * Whether this plugin has composing text.
- *
- * This is only true when the text input plugin is actively taking user input with composing text.
- */
-// TODO (LongCatIsLooong): remove this method and implement a long-term fix for
-// https://github.com/flutter/flutter/issues/85328.
-- (BOOL)isComposing;
-
-/**
  * Handles key down events received from the view controller, responding YES if
  * the event was handled.
  *
@@ -73,4 +64,5 @@
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange;
 - (NSDictionary*)editingState;
+@property(readwrite, nonatomic) NSString* customRunLoopMode;
 @end
