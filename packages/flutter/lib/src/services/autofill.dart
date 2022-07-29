@@ -22,7 +22,6 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_LOCALITY](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS_LOCALITY).
   /// * iOS: [addressCity](https://developer.apple.com/documentation/uikit/uitextcontenttype).
   /// * Otherwise, the hint string will be used as-is.
   static const String addressCity = 'addressCity';
@@ -418,8 +417,7 @@ class AutofillHints {
   ///
   /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_POSTAL_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_POSTAL_CODE).
   /// * Otherwise, the hint string will be used as-is.
-  static const String postalAddressExtendedPostalCode =
-      'postalAddressExtendedPostalCode';
+  static const String postalAddressExtendedPostalCode = 'postalAddressExtendedPostalCode';
 
   /// The input field expects a postal code.
   ///
