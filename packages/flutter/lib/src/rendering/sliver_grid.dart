@@ -658,7 +658,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       leadingScrollOffset: leadingScrollOffset,
       trailingScrollOffset: trailingScrollOffset,
     );
-
     final double paintExtent = calculatePaintOffset(
       constraints,
       from: math.min(constraints.scrollOffset, leadingScrollOffset),
@@ -675,8 +674,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       paintExtent: paintExtent,
       maxPaintExtent: estimatedTotalExtent,
       cacheExtent: cacheExtent,
-      // Conservative to avoid complexity.
-      hasVisualOverflow: true,
+      hasVisualOverflow: estimatedTotalExtent > paintExtent || constraints.scrollOffset > 0.0 || constraints.overlap != 0.0,
     );
 
     // We may have started the layout while scrolled to the end, which

@@ -129,6 +129,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         delegate: TextSelectionToolbarLayoutDelegate(
           anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
           anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
+          fitsAbove: fitsAbove,
         ),
         child: _CupertinoTextSelectionToolbarContent(
           anchor: fitsAbove ? anchorAbove : anchorBelow,
@@ -1009,7 +1010,7 @@ enum _CupertinoTextSelectionToolbarItemsSlot {
 }
 
 class _NullElement extends Element {
-  _NullElement() : super(_NullWidget());
+  _NullElement() : super(const _NullWidget());
 
   static _NullElement instance = _NullElement();
 
@@ -1021,6 +1022,8 @@ class _NullElement extends Element {
 }
 
 class _NullWidget extends Widget {
+  const _NullWidget();
+
   @override
   Element createElement() => throw UnimplementedError();
 }

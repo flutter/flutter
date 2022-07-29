@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -33,6 +33,12 @@ class TestAssetBundle extends CachingAssetBundle {
         ..setInt8(0, 49);
     }
     throw FlutterError('key not found');
+  }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
   }
 }
 

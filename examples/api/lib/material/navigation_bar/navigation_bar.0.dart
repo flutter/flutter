@@ -35,7 +35,7 @@ class RootPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyle headline5 = Theme.of(context).textTheme.headline5!;
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
-      primary: destination.color,
+      backgroundColor: destination.color,
       visualDensity: VisualDensity.comfortable,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       textStyle: headline5,
@@ -125,7 +125,7 @@ class ListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     const int itemCount = 50;
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
-      primary: destination.color,
+      foregroundColor: destination.color,
       fixedSize: const Size.fromHeight(128),
       textStyle: Theme.of(context).textTheme.headline5,
     );

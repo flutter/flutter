@@ -57,8 +57,9 @@ class GalleryOptions {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is GalleryOptions
         && other.themeMode == themeMode
         && other.textScaleFactor == textScaleFactor
@@ -177,7 +178,7 @@ class _TextButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return TextButton(
       style: TextButton.styleFrom(
-        primary: theme.colorScheme.onPrimary,
+        foregroundColor: theme.colorScheme.onPrimary,
         textStyle: theme.textTheme.subtitle1,
         padding: EdgeInsets.zero,
       ),
@@ -480,8 +481,9 @@ class GalleryOptionsPage extends StatelessWidget {
   List<Widget> _enabledDiagnosticItems() {
     // Boolean showFoo options with a value of null: don't display
     // the showFoo option at all.
-    if (options == null)
+    if (options == null) {
       return const <Widget>[];
+    }
 
     return <Widget>[
       const Divider(),

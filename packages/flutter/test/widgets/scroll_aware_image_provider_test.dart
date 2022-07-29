@@ -322,7 +322,7 @@ void main() {
     // If we miss the early return, we will fail.
     testImageProvider.complete();
 
-    imageCache.putIfAbsent(testImageProvider, () => testImageProvider.load(testImageProvider, PaintingBinding.instance.instantiateImageCodec));
+    imageCache.putIfAbsent(testImageProvider, () => testImageProvider.loadBuffer(testImageProvider, PaintingBinding.instance.instantiateImageCodecFromBuffer));
     // We've stopped scrolling fast.
     physics.recommendDeferredLoadingValue = false;
     await tester.idle();
@@ -377,7 +377,7 @@ void main() {
 
     // Complete the original image while we're still scrolling fast.
     testImageProvider.complete();
-    stream.setCompleter(testImageProvider.load(testImageProvider, PaintingBinding.instance.instantiateImageCodec));
+    stream.setCompleter(testImageProvider.loadBuffer(testImageProvider, PaintingBinding.instance.instantiateImageCodecFromBuffer));
 
     // Verify that this hasn't changed the cache state yet
     expect(imageCache.containsKey(testImageProvider), false);

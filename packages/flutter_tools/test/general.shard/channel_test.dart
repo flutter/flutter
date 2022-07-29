@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210723"
-@Tags(<String>['no-shuffle'])
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -24,7 +16,7 @@ import '../src/test_flutter_command_runner.dart';
 
 void main() {
   group('channel', () {
-    FakeProcessManager fakeProcessManager;
+    late FakeProcessManager fakeProcessManager;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -35,6 +27,9 @@ void main() {
     });
 
     Future<void> simpleChannelTest(List<String> args) async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'branch', '-r'], stdout: '  branch-1\n  branch-2'),
+      ]);
       final ChannelCommand command = ChannelCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
@@ -50,10 +45,16 @@ void main() {
 
     testUsingContext('list', () async {
       await simpleChannelTest(<String>['channel']);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => fakeProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('verbose list', () async {
       await simpleChannelTest(<String>['channel', '-v']);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => fakeProcessManager,
+      FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('sorted by stability', () async {
@@ -159,7 +160,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.trim())
-        .where((String line) => line?.isNotEmpty == true)
+        .where((String line) => line.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);
@@ -190,7 +191,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.trim())
-        .where((String line) => line?.isNotEmpty == true)
+        .where((String line) => line.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);

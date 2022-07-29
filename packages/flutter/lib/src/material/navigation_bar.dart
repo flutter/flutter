@@ -48,12 +48,15 @@ import 'tooltip.dart';
 ///  * [NavigationDestination]
 ///  * [BottomNavigationBar]
 ///  * <https://api.flutter.dev/flutter/material/NavigationDestination-class.html>
+///  * <https://m3.material.io/components/navigation-bar>
 class NavigationBar extends StatelessWidget {
   /// Creates a Material 3 Navigation Bar component.
   ///
   /// The value of [destinations] must be a list of two or more
   /// [NavigationDestination] values.
-  const NavigationBar({
+  // TODO(goderbauer): This class cannot be const constructed, https://github.com/dart-lang/linter/issues/3366.
+  // ignore: prefer_const_constructors_in_immutables
+  NavigationBar({
     super.key,
     this.animationDuration,
     this.selectedIndex = 0,
@@ -1172,11 +1175,12 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 }
 
 NavigationBarThemeData _defaultsFor(BuildContext context) {
-  return Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _Defaults(context);
+  return Theme.of(context).useMaterial3 ? _NavigationBarDefaultsM3(context) : _NavigationBarDefaultsM2(context);
 }
 
-class _Defaults extends NavigationBarThemeData {
-  _Defaults(BuildContext context)
+// Hand coded defaults based on Material Design 2.
+class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
+  _NavigationBarDefaultsM2(BuildContext context)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(
@@ -1189,7 +1193,7 @@ class _Defaults extends NavigationBarThemeData {
   final ThemeData _theme;
   final ColorScheme _colors;
 
-  // With Material 3, the NavigationBar uses an overlay blend for the
+  // With Material 2, the NavigationBar uses an overlay blend for the
   // default color regardless of light/dark mode.
   @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
@@ -1205,15 +1209,17 @@ class _Defaults extends NavigationBarThemeData {
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - NavigationBar
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
-class _TokenDefaultsM3 extends NavigationBarThemeData {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
+  _NavigationBarDefaultsM3(this.context)
       : super(
           height: 80.0,
           elevation: 3.0,
@@ -1253,4 +1259,4 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
   }
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - NavigationBar

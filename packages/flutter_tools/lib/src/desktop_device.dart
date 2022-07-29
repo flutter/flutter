@@ -44,7 +44,7 @@ abstract class DesktopDevice extends Device {
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 

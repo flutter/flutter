@@ -396,12 +396,14 @@ class _SnippetChecker {
         }
       }
     }
-    if (!silent)
+    if (!silent) {
       print('Found ${sections.length} snippet code blocks');
+    }
     for (final _Section section in sections) {
       final String path = _writeSection(section).path;
-      if (sectionMap != null)
+      if (sectionMap != null) {
         sectionMap[path] = section;
+      }
     }
   }
 
@@ -448,8 +450,9 @@ class _SnippetChecker {
 
   /// Invokes the analyzer on the given [directory] and returns the stdout.
   int _runAnalyzer(Directory directory, {bool silent = true, required List<String> output}) {
-    if (!silent)
+    if (!silent) {
       print('Starting analysis of code snippets.');
+    }
     _createConfigurationFiles(directory);
     final ProcessResult result = Process.runSync(
       _flutter,
@@ -461,7 +464,8 @@ class _SnippetChecker {
     // Remove output from building the flutter tool.
     stderr.removeWhere((String line) {
       return line.startsWith('Building flutter tool...')
-          || line.startsWith('Waiting for another flutter command to release the startup lock...');
+          || line.startsWith('Waiting for another flutter command to release the startup lock...')
+          || line.startsWith('Flutter assets will be downloaded from ');
     });
     // Check out the stderr to see if the analyzer had it's own issues.
     if (stderr.isNotEmpty && stderr.first.contains(RegExp(r' issues? found\. \(ran in '))) {
@@ -597,8 +601,9 @@ class _SnippetChecker {
       exitCode = 0;
     }
     if (exitCode == 0) {
-      if (!silent)
+      if (!silent) {
         print('No analysis errors in snippets!');
+      }
       assert(analysisErrors.isEmpty);
     }
     return _AnalysisResult(exitCode, analysisErrors);
@@ -632,17 +637,19 @@ class _SnippetChecker {
         // Each section of the dart code that is either split by a blank line, or with '// ...' is
         // treated as a separate code block.
         if (block[index] == '' || block[index] == '// ...') {
-          if (subline == null)
+          if (subline == null) {
             throw _SnippetCheckerException('${_Line(filename: line.filename, line: line.line + index, indent: line.indent)}: '
                 'Unexpected blank line or "// ..." line near start of subblock in snippet code.');
+          }
           subblocks += 1;
           subsections.add(_processBlock(subline, buffer));
           buffer.clear();
           assert(buffer.isEmpty);
           subline = null;
         } else if (block[index].startsWith('// ')) {
-          if (buffer.length > 1) // don't include leading comments
+          if (buffer.length > 1) {
             buffer.add('/${block[index]}'); // so that it doesn't start with "// " and get caught in this again
+          }
         } else {
           subline ??= _Line(
             code: block[index],

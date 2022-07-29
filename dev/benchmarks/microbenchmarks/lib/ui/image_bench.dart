@@ -87,9 +87,7 @@ Future<void> main() async {
     for (int i = 0; i < 10; i += 1) {
       await Future.wait(<Future<ui.ImmutableBuffer>>[
         for (String asset in assets)
-          rootBundle.load(asset).then((ByteData data) {
-            return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
-          })
+          rootBundle.loadBuffer(asset)
       ]);
     }
     watch.stop();

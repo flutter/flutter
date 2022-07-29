@@ -92,6 +92,21 @@ abstract class WidgetController {
     });
   }
 
+  /// Find all layers that are children of the provided [finder].
+  ///
+  /// The [finder] must match exactly one element.
+  Iterable<Layer> layerListOf(Finder finder) {
+    TestAsyncUtils.guardSync();
+    final Element element = finder.evaluate().single;
+    final RenderObject object = element.renderObject!;
+    RenderObject current = object;
+    while (current.debugLayer == null) {
+      current = current.parent! as RenderObject;
+    }
+    final ContainerLayer layer = current.debugLayer!;
+    return _walkLayers(layer);
+  }
+
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
   /// The returned iterable is lazy. It does not walk the entire widget tree
@@ -781,6 +796,12 @@ abstract class WidgetController {
   ///
   /// You can use [createGesture] if your gesture doesn't begin with an initial
   /// down gesture.
+  ///
+  /// See also:
+  ///  * [WidgetController.drag], a method to simulate a drag.
+  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given widget in a given duration.
+  ///    It sends move events at a given frequency and it is useful when there are listeners involved.
+  ///  * [WidgetController.fling], a method to simulate a fling.
   Future<TestGesture> startGesture(
     Offset downLocation, {
     int? pointer,

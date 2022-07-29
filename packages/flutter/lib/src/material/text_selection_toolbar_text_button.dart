@@ -109,11 +109,11 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
-    final Color primary = isDark ? Colors.white : Colors.black87;
+    final Color foregroundColor = isDark ? Colors.white : Colors.black87;
 
     return TextButton(
       style: TextButton.styleFrom(
-        primary: primary,
+        foregroundColor: foregroundColor,
         shape: const RoundedRectangleBorder(),
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
         padding: padding,

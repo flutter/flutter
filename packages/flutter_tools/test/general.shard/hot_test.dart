@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -138,7 +139,8 @@ void main() {
           ..writeAsStringSync('\n');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = FakeDevFs(),
+          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler())
+            ..devFS = FakeDevFs(),
         ];
         final OperationResult result = await HotRunner(
           devices,
@@ -208,7 +210,7 @@ void main() {
           ..writeAsStringSync('\n');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug),
+          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler()),
         ];
         await HotRunner(
           devices,
@@ -230,7 +232,7 @@ void main() {
           ..writeAsStringSync('\n');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug),
+          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler()),
         ];
         await HotRunner(
           devices,
@@ -514,7 +516,7 @@ void main() {
       final int exitCode = await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).attach();
+      ).attach(needsFullRestart: false);
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => TestHotRunnerConfig(),
@@ -566,6 +568,9 @@ class FakeDevFs extends Fake implements DevFS {
 
   @override
   Set<String> assetPathsToEvict = <String>{};
+
+  @override
+  Set<String> shaderPathsToEvict= <String>{};
 
   @override
   Uri baseUri;
@@ -661,7 +666,7 @@ class TestFlutterDevice extends FlutterDevice {
     @required this.exception,
     @required ResidentCompiler generator,
   })  : assert(exception != null),
-        super(device, buildInfo: BuildInfo.debug, generator: generator);
+        super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
@@ -738,4 +743,16 @@ class FakeVmService extends Fake implements vm_service.VmService {
 class FakeVm extends Fake implements vm_service.VM {
   @override
   List<vm_service.IsolateRef> get isolates => <vm_service.IsolateRef>[];
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
 }

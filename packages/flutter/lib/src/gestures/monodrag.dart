@@ -3,14 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
 
-import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show PointerDeviceKind;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'drag.dart' show DragEndDetails, DragUpdateDetails;
+export 'drag_details.dart' show DragDownDetails, DragStartDetails, DragUpdateDetails, GestureDragDownCallback, GestureDragStartCallback, GestureDragUpdateCallback;
+export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEvent;
+export 'recognizer.dart' show DragStartBehavior;
+export 'velocity_tracker.dart' show VelocityEstimate, VelocityTracker;
 
 enum _DragState {
   ready,

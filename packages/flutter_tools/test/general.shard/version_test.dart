@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,8 +22,8 @@ final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAg
 final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
 
 void main() {
-  FakeCache cache;
-  FakeProcessManager processManager;
+  late FakeCache cache;
+  late FakeProcessManager processManager;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -323,15 +321,15 @@ void main() {
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
-      VersionCheckError runUpstreamValidator({
-        String versionUpstreamUrl,
-        String flutterGitUrl,
+      VersionCheckError? runUpstreamValidator({
+        String? versionUpstreamUrl,
+        String? flutterGitUrl,
       }){
         final Platform testPlatform = FakePlatform(environment: <String, String> {
           if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl,
         });
         return VersionUpstreamValidator(
-          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
+          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl, channel: 'master'),
           platform: testPlatform,
         ).run();
       }
@@ -339,7 +337,7 @@ void main() {
       testWithoutContext('returns error if repository url is null', () {
         final VersionCheckError error = runUpstreamValidator(
           // repositoryUrl is null by default
-        );
+        )!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -352,7 +350,7 @@ void main() {
       });
 
       testWithoutContext('returns error at non-standard remote url with FLUTTER_GIT_URL unset', () {
-        final VersionCheckError error = runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit);
+        final VersionCheckError error = runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit)!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -375,7 +373,7 @@ void main() {
         final VersionCheckError error = runUpstreamValidator(
             versionUpstreamUrl: flutterStandardUrlDotGit,
             flutterGitUrl: flutterNonStandardUrlDotGit,
-        );
+        )!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -673,7 +671,7 @@ void main() {
 }
 
 class FakeCache extends Fake implements Cache {
-  String versionStamp;
+  String? versionStamp;
   bool setVersionStamp = false;
 
   @override
@@ -689,7 +687,7 @@ class FakeCache extends Fake implements Cache {
   void checkLockAcquired() { }
 
   @override
-  String getStampFor(String artifactName) {
+  String? getStampFor(String artifactName) {
     if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
       return versionStamp;
     }
@@ -705,11 +703,11 @@ class FakeCache extends Fake implements Cache {
 }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
-  FakeFlutterVersion({this.channel, this.repositoryUrl});
+  FakeFlutterVersion({required this.channel, this.repositoryUrl});
 
   @override
   final String channel;
 
   @override
-  final String repositoryUrl;
+  final String? repositoryUrl;
 }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -102,9 +101,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    throw UnimplementedError();
-  }
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {}
 
   @override
   Future<void> sendMotionEvent(AndroidMotionEvent event) {

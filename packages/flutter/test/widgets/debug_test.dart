@@ -285,7 +285,7 @@ void main() {
                   child: Placeholder(),
                 ),
                 const Opacity(
-                  opacity: 1.0,
+                  opacity: 0.9,
                   child: Placeholder(),
                 ),
                 ImageFiltered(

@@ -65,11 +65,25 @@ const ShapeBorder _kDefaultShape = RoundedRectangleBorder(borderRadius: _kDefaul
 /// TimePickerEntryMode.input] mode, [TextField]s are displayed and the user
 /// types in the time they wish to select.
 enum TimePickerEntryMode {
-  /// Tapping/dragging on a clock dial.
+  /// User picks time from a clock dial.
+  ///
+  /// Can switch to [input] by activating a mode button in the dialog.
   dial,
 
-  /// Text input.
+  /// User can input the time by typing it into text fields.
+  ///
+  /// Can switch to [dial] by activating a mode button in the dialog.
   input,
+
+  /// User can only pick time from a clock dial.
+  ///
+  /// There is no user interface to switch to another mode.
+  dialOnly,
+
+  /// User can only input the time by typing it into text fields.
+  ///
+  /// There is no user interface to switch to another mode.
+  inputOnly
 }
 
 /// Provides properties for rendering time picker header fragments.
@@ -2055,6 +2069,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
           _autofocusMinute.value = false;
           _entryMode.value = TimePickerEntryMode.dial;
           break;
+        case TimePickerEntryMode.dialOnly:
+        case TimePickerEntryMode.inputOnly:
+          FlutterError('Can not change entry mode from $_entryMode');
+          break;
       }
     });
   }
@@ -2118,7 +2136,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   }
 
   void _handleOk() {
-    if (_entryMode.value == TimePickerEntryMode.input) {
+    if (_entryMode.value == TimePickerEntryMode.input || _entryMode.value == TimePickerEntryMode.inputOnly) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
         setState(() { _autovalidateMode.value = AutovalidateMode.always; });
@@ -2141,6 +2159,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final double timePickerHeight;
     switch (_entryMode.value) {
       case TimePickerEntryMode.dial:
+      case TimePickerEntryMode.dialOnly:
         switch (orientation) {
           case Orientation.portrait:
             timePickerWidth = _kTimePickerWidthPortrait;
@@ -2157,6 +2176,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         }
         break;
       case TimePickerEntryMode.input:
+      case TimePickerEntryMode.inputOnly:
         timePickerWidth = _kTimePickerWidthPortrait;
         timePickerHeight = _kTimePickerHeightInput;
         break;
@@ -2177,16 +2197,17 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final Widget actions = Row(
       children: <Widget>[
         const SizedBox(width: 10.0),
-        IconButton(
-          color: TimePickerTheme.of(context).entryModeIconColor ?? theme.colorScheme.onSurface.withOpacity(
-            theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
+        if (_entryMode.value == TimePickerEntryMode.dial || _entryMode.value == TimePickerEntryMode.input)
+          IconButton(
+            color: TimePickerTheme.of(context).entryModeIconColor ?? theme.colorScheme.onSurface.withOpacity(
+              theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
+            ),
+            onPressed: _handleEntryModeToggle,
+            icon: Icon(_entryMode.value == TimePickerEntryMode.dial ? Icons.keyboard : Icons.access_time),
+            tooltip: _entryMode.value == TimePickerEntryMode.dial
+                ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
+                : MaterialLocalizations.of(context).dialModeButtonLabel,
           ),
-          onPressed: _handleEntryModeToggle,
-          icon: Icon(_entryMode.value == TimePickerEntryMode.dial ? Icons.keyboard : Icons.access_time),
-          tooltip: _entryMode.value == TimePickerEntryMode.dial
-              ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
-              : MaterialLocalizations.of(context).dialModeButtonLabel,
-        ),
         Expanded(
           child: Container(
             alignment: AlignmentDirectional.centerEnd,
@@ -2214,6 +2235,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final Widget picker;
     switch (_entryMode.value) {
       case TimePickerEntryMode.dial:
+      case TimePickerEntryMode.dialOnly:
         final Widget dial = Padding(
           padding: orientation == Orientation.portrait ? const EdgeInsets.symmetric(horizontal: 36, vertical: 24) : const EdgeInsets.all(24),
           child: ExcludeSemantics(
@@ -2280,6 +2302,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         }
         break;
       case TimePickerEntryMode.input:
+      case TimePickerEntryMode.inputOnly:
         picker = Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode.value,
@@ -2313,7 +2336,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       backgroundColor: TimePickerTheme.of(context).backgroundColor ?? theme.colorScheme.surface,
       insetPadding: EdgeInsets.symmetric(
         horizontal: 16.0,
-        vertical: _entryMode.value == TimePickerEntryMode.input ? 0.0 : 24.0,
+        vertical: (_entryMode.value == TimePickerEntryMode.input || _entryMode.value == TimePickerEntryMode.inputOnly) ? 0.0 : 24.0,
       ),
       child: AnimatedContainer(
         width: dialogSize.width,

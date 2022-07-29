@@ -111,8 +111,9 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// ```
 /// {@end-tool}
 ///
-/// An open drawer can be closed by calling [Navigator.pop]. For example
-/// a drawer item might close the drawer when tapped:
+/// An open drawer may be closed with a swipe to close gesture, pressing the
+/// the escape key, by tapping the scrim, or by calling pop route function such as
+/// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
 ///
 /// ```dart
 /// ListTile(
@@ -565,6 +566,19 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
     final EdgeInsets padding = MediaQuery.of(context).padding;
     final TextDirection textDirection = Directionality.of(context);
+    final bool isDesktop;
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        isDesktop = false;
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        isDesktop = true;
+        break;
+    }
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
@@ -581,7 +595,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
 
     if (_controller.status == AnimationStatus.dismissed) {
-      if (widget.enableOpenDragGesture) {
+      if (widget.enableOpenDragGesture && !isDesktop) {
         return Align(
           alignment: _drawerOuterAlignment,
           child: GestureDetector(
@@ -612,6 +626,47 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
       }
       assert(platformHasBackButton != null);
+
+      final Widget child =  RepaintBoundary(
+        child: Stack(
+          children: <Widget>[
+            BlockSemantics(
+              child: ExcludeSemantics(
+                // On Android, the back button is used to dismiss a modal.
+                excluding: platformHasBackButton,
+                child: GestureDetector(
+                  onTap: close,
+                  child: Semantics(
+                    label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                    child: Container( // The drawer's "scrim"
+                      color: _scrimColorTween.evaluate(_controller),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: _drawerOuterAlignment,
+              child: Align(
+                alignment: _drawerInnerAlignment,
+                widthFactor: _controller.value,
+                child: RepaintBoundary(
+                  child: FocusScope(
+                    key: _drawerKey,
+                    node: _focusScopeNode,
+                    child: widget.child,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (isDesktop) {
+        return child;
+      }
+
       return GestureDetector(
         key: _gestureDetectorKey,
         onHorizontalDragDown: _handleDragDown,
@@ -620,43 +675,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         onHorizontalDragCancel: _handleDragCancel,
         excludeFromSemantics: true,
         dragStartBehavior: widget.dragStartBehavior,
-        child: RepaintBoundary(
-          child: Stack(
-            children: <Widget>[
-              BlockSemantics(
-                child: ExcludeSemantics(
-                  // On Android, the back button is used to dismiss a modal.
-                  excluding: platformHasBackButton,
-                  child: GestureDetector(
-                    onTap: close,
-                    child: Semantics(
-                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: MouseRegion(
-                        child: Container( // The drawer's "scrim"
-                          color: _scrimColorTween.evaluate(_controller),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Align(
-                alignment: _drawerOuterAlignment,
-                child: Align(
-                  alignment: _drawerInnerAlignment,
-                  widthFactor: _controller.value,
-                  child: RepaintBoundary(
-                    child: FocusScope(
-                      key: _drawerKey,
-                      node: _focusScopeNode,
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: child,
       );
     }
   }
@@ -664,7 +683,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    return ListTileTheme(
+    return ListTileTheme.merge(
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),
     );

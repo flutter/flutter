@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonDecode;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -395,6 +396,53 @@ void main() {
       action: TextInputAction.emergencyCall,
       serializedActionName: 'TextInputAction.emergencyCall',
     );
+  });
+
+  testWidgets('onAppPrivateCommand does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+
+    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'args': <dynamic>[
+        -1, // The magic clint id that points to the current client.
+        jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}'),
+      ],
+      'method': 'TextInputClient.performPrivateCommand',
+    });
+
+    Object? error;
+    try {
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
   });
 
   group('Infer keyboardType from autofillHints', () {
@@ -3937,42 +3985,6 @@ void main() {
     await tester.pump();
 
     expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
-  });
-
-  testWidgets('password briefly does not show last character on Android if turned off', (WidgetTester tester) async {
-    final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
-    EditableText.debugDeterministicCursor = false;
-    addTearDown(() {
-      EditableText.debugDeterministicCursor = debugDeterministicCursor;
-    });
-
-    await tester.pumpWidget(MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        controller: controller,
-        obscureText: true,
-        focusNode: focusNode,
-        style: textStyle,
-        cursorColor: cursorColor,
-      ),
-    ));
-
-    await tester.enterText(find.byType(EditableText), 'AA');
-    await tester.pump();
-    await tester.enterText(find.byType(EditableText), 'AAA');
-    await tester.pump();
-
-    tester.binding.platformDispatcher.brieflyShowPasswordTestValue = false;
-    addTearDown(() {
-      tester.binding.platformDispatcher.brieflyShowPasswordTestValue = true;
-    });
-    expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
-    await tester.pump(const Duration(milliseconds: 500));
-    expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
@@ -12339,6 +12351,198 @@ void main() {
       skip: kIsWeb, // [intended] on web these keys are handled by the browser.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
+
+    group('ctrl-T to transpose', () {
+      Future<void> ctrlT(WidgetTester tester, String platform) async {
+        await tester.sendKeyDownEvent(
+          LogicalKeyboardKey.controlLeft,
+          platform: platform,
+        );
+        await tester.pump();
+        await tester.sendKeyEvent(LogicalKeyboardKey.keyT, platform: platform);
+        await tester.pump();
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+        await tester.pump();
+      }
+
+      testWidgets('with normal characters', (WidgetTester tester) async {
+        final String targetPlatformString = defaultTargetPlatform.toString();
+        final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+
+        final TextEditingController controller = TextEditingController(text: testText);
+        controller.selection = const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+          affinity: TextAffinity.upstream,
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 400,
+              child: EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: FocusNode(),
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ),
+        ));
+
+        await tester.pump(); // Wait for autofocus to take effect.
+
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 0);
+
+        // ctrl-T does nothing at the start of the field.
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 0);
+
+        controller.selection = const TextSelection(
+          baseOffset: 1,
+          extentOffset: 4,
+        );
+        await tester.pump();
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, 1);
+        expect(controller.selection.extentOffset, 4);
+
+        // ctrl-T does nothing when the selection isn't collapsed.
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, 1);
+        expect(controller.selection.extentOffset, 4);
+
+        controller.selection = const TextSelection.collapsed(offset: 5);
+        await tester.pump();
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 5);
+
+        // ctrl-T swaps the previous and next characters when they exist.
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 6);
+        expect(controller.text.substring(0, 19), 'Now si the time for');
+
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 7);
+        expect(controller.text.substring(0, 19), 'Now s ithe time for');
+
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 8);
+        expect(controller.text.substring(0, 19), 'Now s tihe time for');
+
+        controller.selection = TextSelection.collapsed(
+          offset: controller.text.length,
+        );
+        await tester.pump();
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, controller.text.length);
+        expect(controller.text.substring(55, 72), 'of their country.');
+
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, controller.text.length);
+        expect(controller.text.substring(55, 72), 'of their countr.y');
+      },
+        skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+      );
+
+      testWidgets('with extended grapheme clusters', (WidgetTester tester) async {
+        final String targetPlatformString = defaultTargetPlatform.toString();
+        final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+
+        final TextEditingController controller = TextEditingController(
+          // One extended grapheme cluster of length 8 and one surrogate pair of
+          // length 2.
+          text: '👨‍👩‍👦😆',
+        );
+        controller.selection = const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+          affinity: TextAffinity.upstream,
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 400,
+              child: EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: FocusNode(),
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ),
+        ));
+
+        await tester.pump(); // Wait for autofocus to take effect.
+
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 0);
+
+        // ctrl-T does nothing at the start of the field.
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.text, '👨‍👩‍👦😆');
+
+        controller.selection = const TextSelection(
+          baseOffset: 8,
+          extentOffset: 10,
+        );
+        await tester.pump();
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, 8);
+        expect(controller.selection.extentOffset, 10);
+
+        // ctrl-T does nothing when the selection isn't collapsed.
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, 8);
+        expect(controller.selection.extentOffset, 10);
+        expect(controller.text, '👨‍👩‍👦😆');
+
+        controller.selection = const TextSelection.collapsed(offset: 8);
+        await tester.pump();
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 8);
+
+        // ctrl-T swaps the previous and next characters when they exist.
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 10);
+        expect(controller.text, '😆👨‍👩‍👦');
+
+        await ctrlT(tester, platform);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, 10);
+        expect(controller.text, '👨‍👩‍👦😆');
+      },
+        skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+      );
+    });
   });
 }
 

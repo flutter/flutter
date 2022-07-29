@@ -557,9 +557,9 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
         break;
+      case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -1041,7 +1041,7 @@ void main() {
         clipboardStatus: FakeClipboardStatusNotifier(),
         selectionDelegate: FakeTextSelectionDelegate(),
         selectionControls: selectionControls,
-        selectionEndPoints: const <TextSelectionPoint>[],
+        selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
       );
     }
@@ -1055,7 +1055,7 @@ void main() {
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
         ..endHandleType = TextSelectionHandleType.right
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1100,7 +1100,7 @@ void main() {
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.collapsed
         ..endHandleType = TextSelectionHandleType.collapsed
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1122,7 +1122,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1159,7 +1159,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1206,7 +1206,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1391,12 +1391,14 @@ class FakeRenderEditable extends RenderEditable {
   @override
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     selectWordsInRangeCalled = true;
+    hasFocus = true;
   }
 
   bool selectWordEdgeCalled = false;
   @override
   void selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
+    hasFocus = true;
   }
 
   bool selectPositionAtCalled = false;
@@ -1407,6 +1409,7 @@ class FakeRenderEditable extends RenderEditable {
     selectPositionAtCalled = true;
     selectPositionAtFrom = from;
     selectPositionAtTo = to;
+    hasFocus = true;
   }
 
   bool selectPositionCalled = false;
@@ -1420,6 +1423,7 @@ class FakeRenderEditable extends RenderEditable {
   @override
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
+    hasFocus = true;
   }
 
   @override

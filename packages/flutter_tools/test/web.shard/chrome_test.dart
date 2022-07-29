@@ -328,6 +328,32 @@ void main() {
     );
   });
 
+  testWithoutContext('can launch chrome with arbitrary flags', () async {
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=12345',
+        ...kChromeArgs,
+        '--autoplay-policy=no-user-gesture-required',
+        '--incognito',
+        '--auto-select-desktop-capture-source="Entire screen"',
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
+
+    await expectReturnsNormallyLater(chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      webBrowserFlags: <String>[
+        '--autoplay-policy=no-user-gesture-required',
+        '--incognito',
+        '--auto-select-desktop-capture-source="Entire screen"',
+      ],
+    ));
+  });
+
   testWithoutContext('can launch chrome headless', () async {
     processManager.addCommand(const FakeCommand(
       command: <String>[

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +10,12 @@ import 'package:flutter/gestures.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
+
+export 'dart:ui' show Offset, Size, TextDirection, VoidCallback;
+
+export 'package:flutter/gestures.dart' show PointerEvent;
+
+export 'message_codec.dart' show MessageCodec;
 
 /// Converts a given point from the global coordinate system in logical pixels
 /// to the local coordinate system for a box.
