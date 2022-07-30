@@ -927,18 +927,11 @@ class AppLocalizationsEn extends AppLocalizations {
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
         ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-      final bool? isWindows = globals.platform.isWindows ? true : null;
       await generateLocalizations(
         fileSystem: fs,
-        options: LocalizationOptions(
-          arbDirectory: Uri.directory(l10nPathString, windows: isWindows),
-          outputDirectory: Uri.directory(l10nPathString, windows: false),
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
-          useSyntheticPackage: false,
-        ),
+        options: const LocalizationOptions(useSyntheticPackage: false),
         logger: logger,
         projectDir: projectDir,
-        dependenciesDir: projectDir,
       );
 
       for (final FileSystemEntity file in l10nDirectory.listSync()) {
