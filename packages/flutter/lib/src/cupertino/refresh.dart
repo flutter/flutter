@@ -422,7 +422,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         return CupertinoActivityIndicator(radius: radius * percentageComplete);
       case RefreshIndicatorMode.inactive:
         // Anything else doesn't show anything.
-        return Container();
+        return const SizedBox.shrink();
     }
   }
 
@@ -567,7 +567,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
               widget.refreshIndicatorExtent,
             );
           }
-          return Container();
+          return const SizedBox();
         },
       ),
     );

@@ -574,7 +574,7 @@ class _LocalizationsState extends State<Localizations> {
   @override
   Widget build(BuildContext context) {
     if (_locale == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     return Semantics(
       textDirection: _textDirection,
