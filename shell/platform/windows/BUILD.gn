@@ -88,8 +88,6 @@ source_set("flutter_windows_source") {
     "sequential_id_generator.h",
     "settings_plugin.cc",
     "settings_plugin.h",
-    "settings_plugin_win32.cc",
-    "settings_plugin_win32.h",
     "system_utils.cc",
     "system_utils.h",
     "task_runner.cc",

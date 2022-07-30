@@ -2422,8 +2422,6 @@ FILE: ../../../flutter/shell/platform/windows/sequential_id_generator_unittests.
 FILE: ../../../flutter/shell/platform/windows/settings_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/settings_plugin.h
 FILE: ../../../flutter/shell/platform/windows/settings_plugin_unittests.cc
-FILE: ../../../flutter/shell/platform/windows/settings_plugin_win32.cc
-FILE: ../../../flutter/shell/platform/windows/settings_plugin_win32.h
 FILE: ../../../flutter/shell/platform/windows/system_utils.cc
 FILE: ../../../flutter/shell/platform/windows/system_utils.h
 FILE: ../../../flutter/shell/platform/windows/system_utils_unittests.cc
