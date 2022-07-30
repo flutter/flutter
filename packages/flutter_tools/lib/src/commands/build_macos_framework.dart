@@ -204,6 +204,7 @@ end
         logger: globals.logger,
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         engineVersion: globals.artifacts!.isLocalEngine ? null : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
