@@ -1070,7 +1070,6 @@ void main() {
     exception = null;
   });
 
-
   test('TextPainter requires layout after providing different placeholder dimensions', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
