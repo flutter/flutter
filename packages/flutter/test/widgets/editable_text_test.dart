@@ -11233,38 +11233,13 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
-  testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+  group('Selection changed scroll into view', () {
     final String text = List<int>.generate(64, (int index) => index).join('\n');
     final TextEditingController controller = TextEditingController(text: text);
     final ScrollController scrollController = ScrollController();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SizedBox(
-              height: 32,
-              child: EditableText(
-                key: key,
-                focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                controller: controller,
-                scrollController: scrollController,
-                maxLines: 2,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final TextSelectionDelegate textSelectionDelegate = key.currentState!;
-
     late double maxScrollExtent;
-    Future<void> resetSelectionAndScrollOffset([bool setMaxScrollExtent = true]) async {
+
+    Future<void> resetSelectionAndScrollOffset(WidgetTester tester, {required bool setMaxScrollExtent}) async {
       controller.value = controller.value.copyWith(
         text: text,
         selection: controller.selection.copyWith(baseOffset: 0, extentOffset: 1),
@@ -11277,49 +11252,93 @@ void main() {
       expect(scrollController.offset, targetOffset);
     }
 
-    // Cut
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, maxScrollExtent);
 
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), 0.0);
+    Future<TextSelectionDelegate> pumpLongScrollableText(WidgetTester tester) async {
+      final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
 
-    // Paste
-    await resetSelectionAndScrollOffset();
-    await textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, maxScrollExtent);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                height: 32,
+                child: EditableText(
+                  key: key,
+                  focusNode: focusNode,
+                  style: Typography.material2018().black.subtitle1!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  scrollController: scrollController,
+                  maxLines: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 
-    await resetSelectionAndScrollOffset();
-    await textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), 0.0);
+      // Populate [maxScrollExtent].
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      return key.currentState!;
+    }
 
-    // Select all
-    await resetSelectionAndScrollOffset(false);
-    textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, 0.0);
+    testWidgets('SelectAll toolbar action will not set max scroll on designated platforms', (WidgetTester tester) async {
+      final TextSelectionDelegate textSelectionDelegate = await pumpLongScrollableText(tester);
 
-    await resetSelectionAndScrollOffset(false);
-    textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), maxScrollExtent);
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset, 0.0);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    // Copy
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, maxScrollExtent);
+    testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
+      final TextSelectionDelegate textSelectionDelegate = await pumpLongScrollableText(tester);
 
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), 0.0);
+      // Cut
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, maxScrollExtent);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), 0.0);
+
+      // Paste
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      await textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, maxScrollExtent);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      await textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), 0.0);
+
+      // Select all
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, 0.0);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), maxScrollExtent);
+
+      // Copy
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, maxScrollExtent);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), 0.0);
+    }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
   testWidgets('Should not scroll on paste if caret already visible', (WidgetTester tester) async {

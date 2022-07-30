@@ -124,6 +124,7 @@ class PackagesGetCommand extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         projectDir: flutterProject.directory,
         generateDartPluginRegistry: true,
       );
@@ -332,6 +333,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
           outputDir: globals.fs.directory(getBuildDirectory()),
           processManager: globals.processManager,
           platform: globals.platform,
+          usage: globals.flutterUsage,
           projectDir: flutterProject.directory,
           generateDartPluginRegistry: true,
         );

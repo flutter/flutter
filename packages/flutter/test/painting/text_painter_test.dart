@@ -1035,6 +1035,42 @@ void main() {
     expect(lines.length, 1);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/62819
 
+  test('TextPainter throws with stack trace when accessing text layout', () {
+    final TextPainter painter = TextPainter()
+      ..text = const TextSpan(text: 'TEXT')
+      ..textDirection = TextDirection.ltr;
+
+    FlutterError? exception;
+    try {
+      painter.getPositionForOffset(Offset.zero);
+    } on FlutterError catch (e) {
+      exception = e;
+    }
+    expect(exception?.message, contains('The TextPainter has never been laid out.'));
+    exception = null;
+
+    try {
+      painter.layout();
+      painter.getPositionForOffset(Offset.zero);
+    } on FlutterError catch (e) {
+      exception = e;
+    }
+
+    expect(exception, isNull);
+    exception = null;
+
+    try {
+      painter.markNeedsLayout();
+      painter.getPositionForOffset(Offset.zero);
+    } on FlutterError catch (e) {
+      exception = e;
+    }
+
+    expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
+    exception = null;
+  });
+
+
   test('TextPainter requires layout after providing different placeholder dimensions', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
