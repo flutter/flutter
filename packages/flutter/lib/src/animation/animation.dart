@@ -95,9 +95,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// After:
   ///
   /// ```dart
-  /// Widget build(BuildContext context) {
+  /// Widget build2(BuildContext context) {
   ///   return FadeTransition(
-  ///     opacity: Animation.fromValueListenable(_scrollPosition, transformer: (double value) {
+  ///     opacity: Animation<double>.fromValueListenable(_scrollPosition, transformer: (double value) {
   ///       return (value / 1000).clamp(0, 1);
   ///     }),
   ///     child: Container(
