@@ -3361,6 +3361,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
 
+  - name: Mac_ios native_platform_view_ui_tests_ios
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: native_platform_view_ui_tests_ios
+
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3495,22 +3505,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-
-  - name: Mac native_platform_view_ui_tests_ios
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"}
-        ]
-      tags: >
-        ["devicelab", "hostonly"]
-      task_name: native_platform_view_ui_tests_ios
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
