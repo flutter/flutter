@@ -36,6 +36,9 @@ typedef AnimationStatusListener = void Function(AnimationStatus status);
 /// Signature for method used to transform values in [Animation.fromValueListenable].
 typedef ValueListenableTransformer<T> = T Function(T);
 
+/// Signature for method used to transform animations in [Animation.map].
+typedef AnimationMapper<S, T> = T Function(S);
+
 /// An animation with a value of type `T`.
 ///
 /// An animation consists of a value (of type `T`) together with a status. The
@@ -230,6 +233,32 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
     return child.animate(this as Animation<double>);
   }
 
+  /// Create a new [Animation] that transforms this animation using the provided
+  /// [mapper].
+  ///
+  /// This method can be used to change the type of an animation without using
+  /// a [Tween]. This can be useful if the animation does not have a meaningful
+  /// start or end, or is controlled such that it does not have a given duration.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The following code uses [Animation.fromValueListenable] to construct an
+  /// [Animation] that is controlled by a scroll position. Then [Animation.map]
+  /// is used to transform this animation value from a [double] to an [Offset].
+  ///
+  /// ```dart
+  /// Animation<Offset> _offsetAnimation = Animation
+  ///   .fromValueListenable(_scrollPosition)
+  ///   .map((double position) {
+  ///     return Offset(0.0, position / 100.0);
+  ///   });
+  /// ```
+  ///
+  /// {@end-tool}
+  Animation<S> map<S>(AnimationMapper<T, S> mapper) {
+    return _MappedAnimation<T, S>(this, mapper);
+  }
+
   @override
   String toString() {
     return '${describeIdentity(this)}(${toStringDetails()})';
@@ -266,8 +295,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
 // An implementation of an animation that delegates to a value listenable with a fixed direction.
 class _ValueListenableDelegateAnimation<T> extends Animation<T> {
-  _ValueListenableDelegateAnimation(this._listenable, { ValueListenableTransformer<T>? transformer })
-    : _transformer = transformer;
+  _ValueListenableDelegateAnimation(this._listenable, {
+    ValueListenableTransformer<T>? transformer,
+  }) : _transformer = transformer;
 
   final ValueListenable<T> _listenable;
   final ValueListenableTransformer<T>? _transformer;
@@ -297,4 +327,31 @@ class _ValueListenableDelegateAnimation<T> extends Animation<T> {
 
   @override
   T get value => _transformer?.call(_listenable.value) ?? _listenable.value;
+}
+
+// An implementation of an animation that delegates to a parent animation and applies a
+// potentially type-changing transform.
+class _MappedAnimation<S, T> extends Animation<T> {
+  _MappedAnimation(this.source, this.mapper);
+
+  final AnimationMapper<S, T> mapper;
+  final Animation<S> source;
+
+  @override
+  void addListener(VoidCallback listener) => source.addListener(listener);
+
+  @override
+  void addStatusListener(AnimationStatusListener listener) => source.addStatusListener(listener);
+
+  @override
+  void removeListener(VoidCallback listener) => source.removeListener(listener);
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) => source.removeStatusListener(listener);
+
+  @override
+  AnimationStatus get status => source.status;
+
+  @override
+  T get value => mapper(source.value);
 }
