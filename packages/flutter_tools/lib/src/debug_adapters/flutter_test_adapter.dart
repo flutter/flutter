@@ -249,6 +249,6 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
       return;
     }
     final Uri vmServiceUri = Uri.parse(vmServiceUriString);
-    connectDebugger(vmServiceUri, resumeIfStarting: true);
+    connectDebugger(vmServiceUri);
   }
 }
