@@ -115,7 +115,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -152,7 +152,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -207,7 +207,7 @@ void main() {
     );
 
     await const DebugIosApplicationBundle().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
