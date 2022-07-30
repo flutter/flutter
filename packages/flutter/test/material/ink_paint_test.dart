@@ -15,8 +15,13 @@ void main() {
         child: Ink(),
       ),
     );
-    expect(tester.getSize(find.byType(SizedBox)).height, 600.0);
-    expect(tester.getSize(find.byType(SizedBox)).width, 800.0);
+    Finder sizedBox = find.byWidgetPredicate(
+      (Widget widget) => widget is SizedBox
+          && widget.height == null
+          && widget.width == null
+    );
+    expect(tester.getSize(sizedBox).height, 600.0);
+    expect(tester.getSize(sizedBox).width, 800.0);
 
     const double height = 150.0;
     const double width = 200.0;
@@ -31,8 +36,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(SizedBox)).height, height);
-    expect(tester.getSize(find.byType(SizedBox)).width, width);
+    sizedBox = find.byWidgetPredicate(
+      (Widget widget) => widget is SizedBox
+          && widget.height == null
+          && widget.width == null
+    );
+    expect(tester.getSize(sizedBox).height, height);
+    expect(tester.getSize(sizedBox).width, width);
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
