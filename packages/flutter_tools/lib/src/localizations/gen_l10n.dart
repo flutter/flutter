@@ -857,6 +857,9 @@ class LocalizationsGenerator {
   final List<String> _inputFileList = <String>[];
   final List<String> _outputFileList = <String>[];
 
+  /// The list of generated localizations files that need to be formatted.
+  final List<String> _formatFileList = <String>[];
+
   /// Whether or not resource attributes are required for each corresponding
   /// resource id.
   ///
@@ -1382,9 +1385,11 @@ class LocalizationsGenerator {
       if (inputsAndOutputsListFile != null) {
         _outputFileList.add(file.absolute.path);
       }
+      _formatFileList.add(file.absolute.path);
     });
 
     baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
+    _formatFileList.add(baseOutputFile.path);
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
@@ -1432,12 +1437,11 @@ class LocalizationsGenerator {
   }
 
   Future<void> _formatOutputFiles() async {
+    if (_formatFileList.isEmpty) {
+      return;
+    }
     final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
-    final List<String> command = <String>[
-      dartBinary,
-      'format',
-      outputDirectory.path,
-    ];
+    final List<String> command = <String>[dartBinary, 'format', ..._formatFileList];
     final int result = await (await globals.processUtils.start(command)).exitCode;
     if (result != 0) {
       throwToolExit('Formatting failed: $result', exitCode: result);

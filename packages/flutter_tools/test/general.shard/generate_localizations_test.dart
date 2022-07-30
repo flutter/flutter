@@ -916,7 +916,7 @@ class AppLocalizationsEn extends AppLocalizations {
     });
 
     testUsingContext('files well formatted', () async {
-      // Use a physical file system to make generated files format-able.
+      // Use a local file system to make generated files accessible for format.
       final FileSystem fs = globals.fs;
       final Directory projectDir = fs.systemTempDirectory.createTempSync(
         'flutter_tools_generate_localizations_test.',
