@@ -470,19 +470,14 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// a [GridView] and have the bottom sheet be draggable, you should set this
 /// parameter to true.
 ///
-/// The `useRootNavigator` parameter ensures that the root navigator is used to
-/// display the [BottomSheet] when set to `true`. This is useful in the case
-/// that a modal [BottomSheet] needs to be displayed above all other content
-/// but the caller is inside another [Navigator].
-///
 /// The [isDismissible] parameter specifies whether the bottom sheet will be
 /// dismissed when user taps on the scrim.
 ///
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
-/// The [useSafeArea] parameter specifies whether a SafeArea is inserted. Defaults to false.
-/// If false, no SafeArea is added and the top padding is consumed using MediaQuery.removePadding.
+/// The [useSafeArea] parameter specifies whether a [SafeArea] is inserted. Defaults to false.
+/// If false, no SafeArea is added and the top padding is consumed using [MediaQuery.removePadding].
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
 /// [constraints] and [transitionAnimationController]
@@ -513,7 +508,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 class ModalBottomSheetRoute<T> extends PopupRoute<T> {
-  /// Shows a modal Material Design bottom sheet.
+  /// A modal bottom sheet route.
   ModalBottomSheetRoute({
     this.builder,
     required this.capturedThemes,
@@ -545,11 +540,10 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// bottom sheet.
   final CapturedThemes capturedThemes;
 
-  /// Specifies whether this is a route for
-  /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
-  /// to have a bottom sheet that has a scrollable child such as a [ListView] or
-  /// a [GridView] and have the bottom sheet be draggable, you should set this
-  /// parameter to true.
+  /// Specifies whether this is a route fo a bottom sheet that will utilize
+  /// [DraggableScrollableSheet]. Consider setting this parameter to true
+  /// if this bottom sheet has a scrollable child, such as a [ListView] or
+  /// a [GridView], to have the bottom sheet be draggable.
   final bool isScrollControlled;
 
   /// The bottom sheet's background color.
