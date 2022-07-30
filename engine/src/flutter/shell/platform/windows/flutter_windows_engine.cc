@@ -187,8 +187,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   // Set up internal channels.
   // TODO: Replace this with an embedder.h API. See
   // https://github.com/flutter/flutter/issues/71099
-  settings_plugin_ =
-      SettingsPlugin::Create(messenger_wrapper_.get(), task_runner_.get());
+  settings_plugin_ = std::make_unique<SettingsPlugin>(messenger_wrapper_.get(),
+                                                      task_runner_.get());
 }
 
 FlutterWindowsEngine::~FlutterWindowsEngine() {
