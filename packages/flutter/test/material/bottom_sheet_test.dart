@@ -1380,11 +1380,12 @@ void main() {
 
     // Bring up bottom sheet.
     bool showBottomSheetThenCalled = false;
-    final Navigator navigator = Navigator.of(savedContext);
+    final NavigatorState navigator = Navigator.of(savedContext);
     navigator.push(
       ModalBottomSheetRoute(
+        isScrollControlled: false,
         capturedThemes: InheritedTheme.capture(
-          from: context, to: navigator.context,
+          from: savedContext, to: navigator.context,
         ),
       ),
     ).then<void>((void value) {
