@@ -58,7 +58,7 @@ BuildApp() {
   # arguments.
   local flutter_args=("${FLUTTER_ROOT}/bin/flutter")
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
-  flutter_args+=('--verbose')
+    flutter_args+=('--verbose')
   fi
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_args+=("--local-engine-src-path=${FLUTTER_ENGINE}")
