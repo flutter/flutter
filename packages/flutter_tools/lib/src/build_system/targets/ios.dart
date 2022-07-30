@@ -13,6 +13,7 @@ import '../../build_info.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
+import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -570,6 +571,30 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
   List<Target> get dependencies => const <Target>[
     AotAssemblyRelease(),
   ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    bool buildSuccess = true;
+    try {
+      await super.build(environment);
+    } catch (_) {  // ignore: avoid_catches_without_on_clauses
+      buildSuccess = false;
+      rethrow;
+    } finally {
+      // Send a usage event when the app is being archived.
+      // Since assemble is run during a `flutter build`/`run` as well as an out-of-band
+      // archive command from Xcode, this is a more accurate count than `flutter build ipa` alone.
+      if (environment.defines[kXcodeAction]?.toLowerCase() == 'install') {
+        environment.logger.printTrace('Sending archive event if usage enabled.');
+        UsageEvent(
+          'assemble',
+          'ios-archive',
+          label: buildSuccess ? 'success' : 'fail',
+          flutterUsage: environment.usage,
+        ).send();
+      }
+    }
+  }
 }
 
 /// Create an App.framework for debug iOS targets.

@@ -165,8 +165,9 @@ const Set<String> _iconsMirroredWhenRTL = <String>{
 
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
-  if (path.basename(Directory.current.path) == 'tools')
+  if (path.basename(Directory.current.path) == 'tools') {
     Directory.current = Directory.current.parent.parent;
+  }
 
   final ArgResults argResults = _handleArguments(args);
 

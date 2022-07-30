@@ -306,6 +306,8 @@ targets:
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
+    enabled_branches:
+      - master
     timeout: 60
     properties:
       shard: flutter_plugins
@@ -2249,16 +2251,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
-  - name: Linux_android android_lifecycles_test
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: android_lifecycles_test
-
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -3501,6 +3493,8 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"}
         ]
       tags: >
