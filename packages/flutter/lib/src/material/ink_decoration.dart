@@ -292,7 +292,7 @@ class _InkState extends State<Ink> {
       _ink!.decoration = widget.decoration;
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? const SizedBox.shrink();
+    return widget.child ?? const SizedBox();
   }
 
   @override

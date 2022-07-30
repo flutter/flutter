@@ -9,14 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('The Ink widget renders a Container by default', (WidgetTester tester) async {
+  testWidgets('The Ink widget renders a SizedBox by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: Ink(),
       ),
     );
-    expect(tester.getSize(find.byType(Container)).height, 600.0);
-    expect(tester.getSize(find.byType(Container)).width, 800.0);
+    expect(tester.getSize(find.byType(SizedBox)).height, 600.0);
+    expect(tester.getSize(find.byType(SizedBox)).width, 800.0);
 
     const double height = 150.0;
     const double width = 200.0;
@@ -31,8 +31,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(Container)).height, height);
-    expect(tester.getSize(find.byType(Container)).width, width);
+    expect(tester.getSize(find.byType(SizedBox)).height, height);
+    expect(tester.getSize(find.byType(SizedBox)).width, width);
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
