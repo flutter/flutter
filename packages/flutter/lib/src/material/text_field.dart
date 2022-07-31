@@ -853,11 +853,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
-    final InputDecorationTheme defaultInputDecorationTheme =
-      Theme.of(context).useMaterial3 ? InputDecoratorDefaultsM3(context) :  InputDecoratorDefaultsM2(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(themeData.inputDecorationTheme)
-      .applyDefaults(defaultInputDecorationTheme)
       .copyWith(
         enabled: _isEnabled,
         hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
@@ -908,9 +905,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     if (_hasIntrinsicError) {
+      final TextStyle defaultErrorStyle= Theme.of(context).useMaterial3 ? _m3CounterErrorStyle(context): _m2CounterErrorStyle(context);
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',
-        counterStyle: effectiveDecoration.errorStyle,
+        counterStyle: effectiveDecoration.errorStyle ?? defaultErrorStyle,
         counterText: counterText,
         semanticCounterText: semanticCounterText,
       );
@@ -1371,6 +1369,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
+TextStyle _m2CounterErrorStyle(BuildContext context) =>
+    Theme.of(context).textTheme.caption!.copyWith(color:Theme.of(context).errorColor);
+
 // BEGIN GENERATED TOKEN PROPERTIES - TextField
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
@@ -1383,5 +1384,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 // Generated version v0_101
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
+
+TextStyle _m3CounterErrorStyle(BuildContext context) =>
+  (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(color:Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
