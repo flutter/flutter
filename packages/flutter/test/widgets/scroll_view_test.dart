@@ -146,8 +146,11 @@ void main() {
   testWidgets('ListView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
+        itemCount: 42,
         itemBuilder: (BuildContext context, int index) {
-          if (index == 5) return null;
+          if (index == 5) {
+            return null;
+          }
 
           return const Text('item');
         },
@@ -155,6 +158,25 @@ void main() {
     ));
 
     expect(find.text('item'), findsNWidgets(5));
+  });
+
+  testWidgets('ListView.separated supports null items in itemBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView.separated(
+        itemCount: 42,
+        separatorBuilder: (BuildContext context, int index) => const Text('separator'),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 5) {
+            return null;
+          }
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(5));
+    expect(find.text('separator'), findsNWidgets(4));
   });
 
   testWidgets('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {

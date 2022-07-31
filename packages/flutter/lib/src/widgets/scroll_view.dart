@@ -1186,11 +1186,11 @@ class ListView extends BoxScrollView {
   /// The `separatorBuilder` callback will be called with indices greater than
   /// or equal to zero and less than `itemCount - 1`.
   ///
-  /// The `itemBuilder` and `separatorBuilder` callbacks should always return a
-  /// non-null widget, and actually create widget instances when called. Avoid
-  /// using a builder that returns a previously-constructed widget; if the list
-  /// view's children are created in advance, or all at once when the [ListView]
-  /// itself is created, it is more efficient to use the [ListView] constructor.
+  /// The `itemBuilder` and `separatorBuilder` callbacks should always
+  /// actually create widget instances when called. Avoid using a builder that
+  /// returns a previously-constructed widget; if the list view's children are
+  /// created in advance, or all at once when the [ListView] itself is created,
+  /// it is more efficient to use the [ListView] constructor.
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
@@ -1228,7 +1228,7 @@ class ListView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
@@ -1248,7 +1248,7 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           final Widget widget;
+           final Widget? widget;
            if (index.isEven) {
              widget = itemBuilder(context, itemIndex);
            } else {
