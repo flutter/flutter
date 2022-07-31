@@ -2120,7 +2120,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final InputDecorationTheme defaults =
-      Theme.of(context).useMaterial3 ? _InputDecoratorDefaultsM3(context) :  _InputDecoratorDefaultsM2(context);
+      Theme.of(context).useMaterial3 ? InputDecoratorDefaultsM3(context) :  InputDecoratorDefaultsM2(context);
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
     final TextBaseline textBaseline = labelStyle.textBaseline!;
@@ -4310,11 +4310,12 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: defaultTheme.constraints));
   }
 }
-
-class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
-  const _InputDecoratorDefaultsM2(this.context)
+/// M2
+class InputDecoratorDefaultsM2 extends InputDecorationTheme {
+  /// Constructor
+  const InputDecoratorDefaultsM2(this.context)
       : super();
-
+  /// Build Context
   final BuildContext context;
 
   @override
@@ -4445,10 +4446,13 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Token database version: v0_101
 
 // Generated version v0_101
-class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
-   _InputDecoratorDefaultsM3(this.context)
+/// Build Context
+class InputDecoratorDefaultsM3 extends InputDecorationTheme {
+  /// Build Context
+  InputDecoratorDefaultsM3(this.context)
     : super();
 
+  /// Build Context
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
