@@ -143,6 +143,22 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
+  testWidgets('ListView.builder supports null items', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 5) return null;
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(5));
+  });
+
   testWidgets('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
