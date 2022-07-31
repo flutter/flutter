@@ -1382,7 +1382,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     final NavigatorState navigator = Navigator.of(savedContext);
     navigator.push(
-      ModalBottomSheetRoute(
+      ModalBottomSheetRoute<void>(
         isScrollControlled: false,
         capturedThemes: InheritedTheme.capture(
           from: savedContext, to: navigator.context,
