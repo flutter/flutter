@@ -1110,13 +1110,15 @@ class ListView extends BoxScrollView {
   /// The `itemBuilder` callback will be called only with indices greater than
   /// or equal to zero and less than `itemCount`.
   ///
-  /// The `itemBuilder` should always return a non-null widget, and actually
-  /// create the widget instances when called. Avoid using a builder that
-  /// returns a previously-constructed widget; if the list view's children are
-  /// created in advance, or all at once when the [ListView] itself is created,
-  /// it is more efficient to use the [ListView] constructor. Even more
-  /// efficient, however, is to create the instances on demand using this
-  /// constructor's `itemBuilder` callback.
+  /// It is legal for `itemBuilder` to return `null`. If it does, [ListView]
+  /// will stop calling `itemBuilder`, even if it has yet to reach `itemCount`.
+  ///
+  /// The `itemBuilder` should always create the widget instances when called.
+  /// Avoid using a builder that returns a previously-constructed widget; if the
+  /// list view's children are created in advance, or all at once when the
+  /// [ListView] itself is created, it is more efficient to use the [ListView]
+  /// constructor. Even more efficient, however, is to create the instances on
+  /// demand using this constructor's `itemBuilder` callback.
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
