@@ -21,6 +21,33 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
+/// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
+/// When set to [inside], the stroke is drawn completely inside the widget.
+/// For [center] and [outside], a property such as [Container.clipBehavior]
+/// can be used in an outside widget to clip it.
+/// If [Container.decoration] has a border, the container may incorporate
+/// [BorderSide.width] as additional padding:
+/// - [inside] provides padding with full [BorderSide.width].
+/// - [center] provides padding with half [BorderSide.width].
+/// - [outside] provides zero padding, as stroke is drawn entirely outside.
+@immutable
+class StrokeAlign {
+  /// Acts as a shortcut.
+  const StrokeAlign();
+
+  /// The border is drawn on the inside of the border path.
+  ///
+  /// This is the default.
+  static const double inside = -1.0;
+
+  /// The border is drawn on the center of the border path, with half of the
+  /// [BorderSide.width] on the inside, and the other half on the outside of the path.
+  static const double center = 0.0;
+
+  /// The border is drawn on the outside of the border path.
+  static const double outside = 1.0;
+}
+
 /// A side of a border of a box.
 ///
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
@@ -66,7 +93,7 @@ class BorderSide with Diagnosticable {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
-    this.strokeAlign = strokeAlignInside,
+    this.strokeAlign = StrokeAlign.inside,
   }) : assert(color != null),
        assert(width != null),
        assert(width >= 0.0),
@@ -133,27 +160,15 @@ class BorderSide with Diagnosticable {
   static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
 
   /// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
-  /// When set to [strokeAlignInside], the stroke is drawn completely inside the widget.
-  /// For [strokeAlignCenter] and [strokeAlignOutside], a property such as [Container.clipBehavior]
-  /// can be used in an outside widget to clip it.
+  /// When set to [StrokeAlign.inside], the stroke is drawn completely inside the widget.
+  /// For [StrokeAlign.center] and [StrokeAlign.outside], a property such as
+  /// [Container.clipBehavior] can be used in an outside widget to clip it.
   /// If [Container.decoration] has a border, the container may incorporate
   /// [width] as additional padding:
-  /// - [strokeAlignInside] provides padding with full [width].
-  /// - [strokeAlignCenter] provides padding with half [width].
-  /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
+  /// - [StrokeAlign.inside] provides padding with full [width].
+  /// - [StrokeAlign.center] provides padding with half [width].
+  /// - [StrokeAlign.outside] provides zero padding, as stroke is drawn entirely outside.
   final double strokeAlign;
-
-  /// The border is drawn fully inside of the border path.
-  ///
-  /// This is the default.
-  static const double strokeAlignInside = -1.0;
-
-  /// The border is drawn on the center of the border path, with half of the
-  /// [BorderSide.width] on the inside, and the other half on the outside of the path.
-  static const double strokeAlignCenter = 0.0;
-
-  /// The border is drawn on the outside of the border path.
-  static const double strokeAlignOutside = 1.0;
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
@@ -301,11 +316,11 @@ class BorderSide with Diagnosticable {
   ///
   /// ```dart
   /// switch(strokeAlign) {
-  ///   case BorderSide.strokeAlignInside: // -1
+  ///   case StrokeAlign.inside: // -1
   ///     return width;
-  ///   case BorderSide.strokeAlignCenter: // 0
+  ///   case StrokeAlign.center: // 0
   ///     return width / 2;
-  ///   case BorderSide.strokeAlignOutside: // 1
+  ///   case StrokeAlign.outside: // 1
   ///     return 0;
   /// }
   /// ```
@@ -319,11 +334,11 @@ class BorderSide with Diagnosticable {
   /// Simplified example:
   /// ```dart
   /// switch(strokeAlign) {
-  ///   case BorderSide.strokeAlignInside: // -1
+  ///   case StrokeAlign.inside: // -1
   ///     return 0;
-  ///   case BorderSide.strokeAlignCenter: // 0
+  ///   case StrokeAlign.center: // 0
   ///     return width / 2;
-  ///   case BorderSide.strokeAlignOutside: // 1
+  ///   case StrokeAlign.outside: // 1
   ///     return width;
   /// }
   /// ```
@@ -338,11 +353,11 @@ class BorderSide with Diagnosticable {
   ///
   /// ```dart
   /// switch(strokeAlign) {
-  ///   case BorderSide.strokeAlignInside: // -1
-  ///     return -width / 2;
-  ///   case BorderSide.strokeAlignCenter: // 0
+  ///   case StrokeAlign.inside: // -1
+  ///     return -(width / 2);
+  ///   case StrokeAlign.center: // 0
   ///     return 0;
-  ///   case BorderSide.strokeAlignOutside: // 1
+  ///   case StrokeAlign.outside: // 1
   ///     return width / 2;
   /// }
   /// ```
@@ -374,7 +389,7 @@ class BorderSide with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: const Color(0xFF000000)));
     properties.add(DoubleProperty('width', width, defaultValue: 1.0));
-    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: strokeAlignInside));
+    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: StrokeAlign.inside));
     properties.add(EnumProperty<BorderStyle>('style', style, defaultValue: BorderStyle.solid));
   }
 }

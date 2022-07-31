@@ -135,26 +135,26 @@ void main() {
     const RoundedRectangleBorder insideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10));
     expect(insideRoundedRectangleBorder.dimensions, const EdgeInsets.all(10));
 
-    const RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter));
+    const RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
     expect(centerRoundedRectangleBorder.dimensions, const EdgeInsets.all(5));
 
-    const RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside));
+    const RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
     expect(outsideRoundedRectangleBorder.dimensions, EdgeInsets.zero);
 
     const CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
     expect(insideCircleBorder.dimensions, const EdgeInsets.all(10));
 
-    const CircleBorder centerCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter));
+    const CircleBorder centerCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
     expect(centerCircleBorder.dimensions, const EdgeInsets.all(5));
 
-    const CircleBorder outsideCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside));
+    const CircleBorder outsideCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
     expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
   });
 
   test('RoundedRectangleBorder.lerp with different StrokeAlign', () {
     const RoundedRectangleBorder rInside = RoundedRectangleBorder(side: BorderSide(width: 10.0));
-    const RoundedRectangleBorder rOutside = RoundedRectangleBorder(side: BorderSide(width: 20.0, strokeAlign: BorderSide.strokeAlignOutside));
-    const RoundedRectangleBorder rCenter = RoundedRectangleBorder(side: BorderSide(width: 15.0, strokeAlign: BorderSide.strokeAlignCenter));
+    const RoundedRectangleBorder rOutside = RoundedRectangleBorder(side: BorderSide(width: 20.0, strokeAlign: StrokeAlign.outside));
+    const RoundedRectangleBorder rCenter = RoundedRectangleBorder(side: BorderSide(width: 15.0, strokeAlign: StrokeAlign.center));
     expect(ShapeBorder.lerp(rInside, rOutside, 0.5), rCenter);
   });
 }

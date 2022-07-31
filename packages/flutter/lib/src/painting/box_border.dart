@@ -348,7 +348,7 @@ class Border extends BoxBorder {
     Color color = const Color(0xFF000000),
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
-    double strokeAlign = BorderSide.strokeAlignInside,
+    double strokeAlign = StrokeAlign.inside,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style, strokeAlign: strokeAlign);
     return Border.fromBorderSide(side);
@@ -560,9 +560,9 @@ class Border extends BoxBorder {
       return true;
     }());
     assert(() {
-      if (!_strokeAlignIsUniform || top.strokeAlign != BorderSide.strokeAlignInside) {
+      if (!_strokeAlignIsUniform || top.strokeAlign != StrokeAlign.inside) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only draw strokeAlign different than BorderSide.strokeAlignInside on uniform borders.'),
+          ErrorSummary('A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.'),
         ]);
       }
       return true;
@@ -886,7 +886,7 @@ class BorderDirectional extends BoxBorder {
 
     assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
     assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
-    assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than strokeAlignInside on uniform borders.');
+    assert(_strokeAlignIsUniform && top.strokeAlign == StrokeAlign.inside, 'A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.');
 
     final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
