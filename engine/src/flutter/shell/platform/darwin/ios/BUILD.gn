@@ -381,11 +381,7 @@ copy("copy_license") {
 shared_library("copy_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
-  cflags_objc = [
-    "-F$framework_search_path",
-    "-fmodules",
-    "-Wnon-modular-include-in-framework-module",
-  ]
+  cflags_objc = [ "-F$framework_search_path" ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
   deps = [
