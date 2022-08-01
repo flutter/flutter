@@ -607,13 +607,12 @@ abstract class _IosAssetBundleWithDSYM extends IosAssetBundle {
 
   @override
   List<Source> get inputs => super.inputs + const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Resources/DWARF/App'),
+    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 
   @override
   List<Source> get outputs => super.outputs + const <Source>[
-    Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Resources/DWARF/App'),
-    Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Info.plist'),
+    Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 }
 
