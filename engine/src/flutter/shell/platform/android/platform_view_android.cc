@@ -10,14 +10,10 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
-#if IMPELLER_SUPPORTS_PLATFORM
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
-#endif
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
-#if IMPELLER_SUPPORTS_PLATFORM
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
-#endif
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -46,17 +42,13 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
       return std::make_unique<AndroidSurfaceSoftware>(android_context_,
                                                       jni_facade_);
     case AndroidRenderingAPI::kOpenGLES:
-#if IMPELLER_SUPPORTS_PLATFORM
       if (enable_impeller_) {
         return std::make_unique<AndroidSurfaceGLImpeller>(android_context_,
                                                           jni_facade_);
       } else {
-#endif
         return std::make_unique<AndroidSurfaceGLSkia>(android_context_,
                                                       jni_facade_);
-#if IMPELLER_SUPPORTS_PLATFORM
       }
-#endif
     default:
       FML_DCHECK(false);
       return nullptr;
@@ -71,11 +63,9 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
   if (use_software_rendering) {
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   }
-#if IMPELLER_SUPPORTS_PLATFORM
   if (enable_impeller) {
     return std::make_unique<AndroidContextGLImpeller>();
   }
-#endif
   return std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES,               //
       fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
