@@ -12282,7 +12282,7 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
             return Column(
               children: <Widget>[
                 TextField(
-                    obscureText:_obscureText,
+                    obscureText: _obscureText,
                     controller: widget.controller,
                 ),
                 ElevatedButton(
