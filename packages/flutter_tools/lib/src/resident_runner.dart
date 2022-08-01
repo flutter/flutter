@@ -240,7 +240,7 @@ class FlutterDevice {
     bool cacheStartupProfile = false,
     bool enableDds = true,
     required bool allowExistingDdsInstance,
-    bool? ipv6 = false,
+    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     late StreamSubscription<void> subscription;
@@ -930,11 +930,11 @@ abstract class ResidentHandlers {
     final List<FlutterView> views = await flutterDevices
       .first!
       .vmService!.getFlutterViews();
-    final Map<String, Object> data = await (flutterDevices.first!.vmService!.getSkSLs(
+    final Map<String, Object?>? data = await flutterDevices.first!.vmService!.getSkSLs(
       viewId: views.first.id,
-    ) as FutureOr<Map<String, Object>>);
+    );
     final Device device = flutterDevices.first!.device!;
-    return sharedSkSlWriter(device, data);
+    return sharedSkSlWriter(device, data!);
   }
 
   /// Take a screenshot on the provided [device].
@@ -1359,7 +1359,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
-        ipv6: ipv6,
+        ipv6: ipv6 ?? false,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
         cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );

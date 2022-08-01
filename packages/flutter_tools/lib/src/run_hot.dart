@@ -756,7 +756,7 @@ class HotRunner extends ResidentRunner {
     String? restartEvent;
     try {
       final Stopwatch restartTimer = _stopwatchFactory.createStopwatch('fullRestartHelper')..start();
-      if (!(await (hotRunnerConfig!.setupHotRestart() as FutureOr<bool>))) {
+      if ((await hotRunnerConfig!.setupHotRestart()) != true) {
         return OperationResult(1, 'setupHotRestart failed');
       }
       result = await _restartFromSources(reason: reason);
@@ -885,7 +885,7 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch reloadTimer = _stopwatchFactory.createStopwatch('reloadSources:reload')..start();
-    if (!(await (hotRunnerConfig!.setupHotReload() as FutureOr<bool>))) {
+    if ((await hotRunnerConfig!.setupHotReload()) != true) {
       return OperationResult(1, 'setupHotReload failed');
     }
     final Stopwatch devFSTimer = Stopwatch()..start();
