@@ -7,6 +7,7 @@
 #include <limits>
 
 #include "flutter/testing/testing.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/path_component.h"
@@ -28,7 +29,7 @@ TEST(GeometryTest, ScalarNearlyEqual) {
 }
 
 TEST(GeometryTest, RotationMatrix) {
-  auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
+  auto rotation = Matrix::MakeRotationZ(Radians{kPiOver4});
   auto expect = Matrix{0.707,  0.707, 0, 0,  //
                        -0.707, 0.707, 0, 0,  //
                        0,      0,     1, 0,  //
@@ -38,7 +39,7 @@ TEST(GeometryTest, RotationMatrix) {
 
 TEST(GeometryTest, InvertMultMatrix) {
   {
-    auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
+    auto rotation = Matrix::MakeRotationZ(Radians{kPiOver4});
     auto invert = rotation.Invert();
     auto expect = Matrix{0.707, -0.707, 0, 0,  //
                          0.707, 0.707,  0, 0,  //
@@ -71,7 +72,7 @@ TEST(GeometryTest, MatrixBasis) {
 }
 
 TEST(GeometryTest, MutliplicationMatrix) {
-  auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
+  auto rotation = Matrix::MakeRotationZ(Radians{kPiOver4});
   auto invert = rotation.Invert();
   ASSERT_MATRIX_NEAR(rotation * invert, Matrix{});
 }
@@ -98,7 +99,7 @@ TEST(GeometryTest, InvertMatrix) {
 }
 
 TEST(GeometryTest, TestDecomposition) {
-  auto rotated = Matrix::MakeRotationZ(Radians{M_PI_4});
+  auto rotated = Matrix::MakeRotationZ(Radians{kPiOver4});
 
   auto result = rotated.Decompose();
 
@@ -106,12 +107,12 @@ TEST(GeometryTest, TestDecomposition) {
 
   MatrixDecomposition res = result.value();
 
-  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, kPiOver4};
   ASSERT_QUATERNION_NEAR(res.rotation, quaternion);
 }
 
 TEST(GeometryTest, TestDecomposition2) {
-  auto rotated = Matrix::MakeRotationZ(Radians{M_PI_4});
+  auto rotated = Matrix::MakeRotationZ(Radians{kPiOver4});
   auto scaled = Matrix::MakeScale({2.0, 3.0, 1.0});
   auto translated = Matrix::MakeTranslation({-200, 750, 20});
 
@@ -121,7 +122,7 @@ TEST(GeometryTest, TestDecomposition2) {
 
   MatrixDecomposition res = result.value();
 
-  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, kPiOver4};
 
   ASSERT_QUATERNION_NEAR(res.rotation, quaternion);
 
@@ -138,7 +139,7 @@ TEST(GeometryTest, TestRecomposition) {
   /*
    *  Decomposition.
    */
-  auto rotated = Matrix::MakeRotationZ(Radians{M_PI_4});
+  auto rotated = Matrix::MakeRotationZ(Radians{kPiOver4});
 
   auto result = rotated.Decompose();
 
@@ -146,7 +147,7 @@ TEST(GeometryTest, TestRecomposition) {
 
   MatrixDecomposition res = result.value();
 
-  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+  auto quaternion = Quaternion{{0.0, 0.0, 1.0}, kPiOver4};
 
   ASSERT_QUATERNION_NEAR(res.rotation, quaternion);
 
@@ -158,7 +159,7 @@ TEST(GeometryTest, TestRecomposition) {
 
 TEST(GeometryTest, TestRecomposition2) {
   auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                Matrix::MakeRotationZ(Radians{M_PI_4}) *
+                Matrix::MakeRotationZ(Radians{kPiOver4}) *
                 Matrix::MakeScale({2.0, 2.0, 2.0});
 
   auto result = matrix.Decompose();
@@ -171,7 +172,7 @@ TEST(GeometryTest, TestRecomposition2) {
 TEST(GeometryTest, MatrixVectorMultiplication) {
   {
     auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeRotationZ(Radians{kPiOver2}) *
                   Matrix::MakeScale({2.0, 2.0, 2.0});
     auto vector = Vector4(10, 20, 30, 2);
 
@@ -182,7 +183,7 @@ TEST(GeometryTest, MatrixVectorMultiplication) {
 
   {
     auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeRotationZ(Radians{kPiOver2}) *
                   Matrix::MakeScale({2.0, 2.0, 2.0});
     auto vector = Vector3(10, 20, 30);
 
@@ -193,7 +194,7 @@ TEST(GeometryTest, MatrixVectorMultiplication) {
 
   {
     auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeRotationZ(Radians{kPiOver2}) *
                   Matrix::MakeScale({2.0, 2.0, 2.0});
     auto vector = Point(10, 20);
 
@@ -206,7 +207,7 @@ TEST(GeometryTest, MatrixVectorMultiplication) {
 TEST(GeometryTest, MatrixTransformDirection) {
   {
     auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeRotationZ(Radians{kPiOver2}) *
                   Matrix::MakeScale({2.0, 2.0, 2.0});
     auto vector = Vector4(10, 20, 30, 2);
 
@@ -217,7 +218,7 @@ TEST(GeometryTest, MatrixTransformDirection) {
 
   {
     auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeRotationZ(Radians{kPiOver2}) *
                   Matrix::MakeScale({2.0, 2.0, 2.0});
     auto vector = Vector3(10, 20, 30);
 
@@ -228,7 +229,7 @@ TEST(GeometryTest, MatrixTransformDirection) {
 
   {
     auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeRotationZ(Radians{kPiOver2}) *
                   Matrix::MakeScale({2.0, 2.0, 2.0});
     auto vector = Point(10, 20);
 
@@ -303,11 +304,11 @@ TEST(GeometryTest, MatrixMakePerspective) {
 
 TEST(GeometryTest, QuaternionLerp) {
   auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
-  auto q2 = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
+  auto q2 = Quaternion{{0.0, 0.0, 1.0}, kPiOver4};
 
   auto q3 = q1.Slerp(q2, 0.5);
 
-  auto expected = Quaternion{{0.0, 0.0, 1.0}, M_PI_4 / 2.0};
+  auto expected = Quaternion{{0.0, 0.0, 1.0}, kPiOver4 / 2.0};
 
   ASSERT_QUATERNION_NEAR(q3, expected);
 }
