@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
 
@@ -479,6 +481,51 @@ void main() {
     expect(columnRect.top, paddingRect.top + 8);
     expect(columnRect.right, paddingRect.right - 12);
     expect(columnRect.bottom, paddingRect.bottom - 4);
+  });
+
+  testWidgets('ExpansionTile adds a Material widget above its children when expanded', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107030
+    const Color childColor = Color(0xff4caf50);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              title: Text('title'),
+              childrenPadding: EdgeInsets.fromLTRB(10, 8, 12, 4),
+              children: <Widget>[
+                ListTile(tileColor: childColor),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder rootMaterialFinder = find.ancestor(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    final Finder expansionTileMaterialFinder = find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    // ExpansionTile should not add a Material widget when it is not expanded
+    expect(expansionTileMaterialFinder, findsNothing);
+
+    // Expand
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // ExpansionTile adds a Material widget when it is expanded
+    expect(expansionTileMaterialFinder, findsOneWidget);
+
+    // Child color is painted on the inner Material widget
+    expect(rootMaterialFinder, isNot(paints..path()..path(color: childColor)));
+    expect(expansionTileMaterialFinder, paints..path(color: childColor));
   });
 
   testWidgets('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
