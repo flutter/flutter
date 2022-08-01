@@ -121,7 +121,7 @@ void main() {
         expect(flutterVersion.getBranchName(redactUnknownBranches: true), channel);
 
         expect(testLogger.statusText, isEmpty);
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => processManager,
@@ -428,7 +428,7 @@ void main() {
     expect(flutterVersion.getBranchName(), 'feature-branch');
     expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
     expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FlutterVersion: () => FlutterVersion(clock: _testClock),
     ProcessManager: () => processManager,

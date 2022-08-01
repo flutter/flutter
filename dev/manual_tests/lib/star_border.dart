@@ -501,9 +501,9 @@ ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to
   switch (target) {
     case LerpTarget.circle:
       if (to) {
-        return border.lerpTo(const CircleBorder(side: lerpToBorder), t);
+        return border.lerpTo(const CircleBorder(side: lerpToBorder, eccentricity: 0.5), t);
       } else {
-        return border.lerpFrom(const CircleBorder(side: lerpToBorder), t);
+        return border.lerpFrom(const CircleBorder(side: lerpToBorder, eccentricity: 0.5), t);
       }
     case LerpTarget.roundedRect:
       if (to) {
