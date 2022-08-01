@@ -109,33 +109,31 @@ PlatformView::PlatformView(
   });
 
   // Begin watching for pointer events.
-  if (is_flatland) {  // TODO(fxbug.dev/85125): make unconditional
-    pointer_delegate_->WatchLoop([weak = weak_factory_.GetWeakPtr()](
-                                     std::vector<flutter::PointerData> events) {
-      if (!weak) {
-        FML_LOG(WARNING) << "PlatformView use-after-free attempted. Ignoring.";
-        return;
-      }
+  pointer_delegate_->WatchLoop([weak = weak_factory_.GetWeakPtr()](
+                                   std::vector<flutter::PointerData> events) {
+    if (!weak) {
+      FML_LOG(WARNING) << "PlatformView use-after-free attempted. Ignoring.";
+      return;
+    }
 
-      if (events.size() == 0) {
-        return;  // No work, bounce out.
-      }
+    if (events.empty()) {
+      return;  // No work, bounce out.
+    }
 
-      // If pixel ratio hasn't been set, use a default value of 1.
-      const float pixel_ratio = weak->view_pixel_ratio_.value_or(1.f);
-      auto packet = std::make_unique<flutter::PointerDataPacket>(events.size());
-      for (size_t i = 0; i < events.size(); ++i) {
-        auto& event = events[i];
-        // Translate logical to physical coordinates, as per
-        // flutter::PointerData contract. Done here because pixel ratio comes
-        // from the graphics API.
-        event.physical_x = event.physical_x * pixel_ratio;
-        event.physical_y = event.physical_y * pixel_ratio;
-        packet->SetPointerData(i, event);
-      }
-      weak->DispatchPointerDataPacket(std::move(packet));
-    });
-  }
+    // If pixel ratio hasn't been set, use a default value of 1.
+    const float pixel_ratio = weak->view_pixel_ratio_.value_or(1.f);
+    auto packet = std::make_unique<flutter::PointerDataPacket>(events.size());
+    for (size_t i = 0; i < events.size(); ++i) {
+      auto& event = events[i];
+      // Translate logical to physical coordinates, as per
+      // flutter::PointerData contract. Done here because pixel ratio comes
+      // from the graphics API.
+      event.physical_x = event.physical_x * pixel_ratio;
+      event.physical_y = event.physical_y * pixel_ratio;
+      packet->SetPointerData(i, event);
+    }
+    weak->DispatchPointerDataPacket(std::move(packet));
+  });
 
   // Configure the pointer injector delegate.
   pointer_injector_delegate_ = std::make_unique<PointerInjectorDelegate>(
