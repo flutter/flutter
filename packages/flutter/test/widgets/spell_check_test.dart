@@ -22,9 +22,9 @@ void main() {
   test(
       'buildTextSpanWithSpellCheckSuggestions ignores composing region when composing region out of range',
       () {
-    final String text = 'Hello, wrold! Hey';
+    const String text = 'Hello, wrold! Hey';
     final TextEditingValue value = TextEditingValue(text: text);
-    final bool composingRegionOutOfRange = true;
+    const bool composingRegionOutOfRange = true;
     final SpellCheckResults spellCheckResults =
       SpellCheckResults(text, const <SuggestionSpan>[
         SuggestionSpan(
@@ -52,10 +52,10 @@ void main() {
   test(
       'buildTextSpanWithSpellCheckSuggestions, isolated misspelled word with separate composing region example',
       () {
-    final String text = 'Hello, wrold! Hey';
+    const String text = 'Hello, wrold! Hey';
     final TextEditingValue value = TextEditingValue(
         text: text, composing: const TextRange(start: 14, end: 17));
-    final bool composingRegionOutOfRange = false;
+    const bool composingRegionOutOfRange = false;
     final SpellCheckResults spellCheckResults =
       SpellCheckResults(text, const <SuggestionSpan>[
         SuggestionSpan(

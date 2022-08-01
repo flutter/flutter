@@ -12581,7 +12581,7 @@ void main() {
             backgroundCursorColor: Colors.grey,
             cursorOpacityAnimates: true,
             autofillHints: null,
-            spellCheckConfiguration: SpellCheckConfiguration.disabled(),
+            spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
           ),
         ),
       );
@@ -12604,7 +12604,7 @@ void main() {
                 backgroundCursorColor: Colors.grey,
                 cursorOpacityAnimates: true,
                 autofillHints: null,
-                spellCheckConfiguration: SpellCheckConfiguration(),
+                spellCheckConfiguration: const SpellCheckConfiguration(),
             );
           },
           throwsAssertionError,
@@ -12628,7 +12628,7 @@ void main() {
               cursorOpacityAnimates: true,
               autofillHints: null,
               spellCheckConfiguration:
-                SpellCheckConfiguration(
+                const SpellCheckConfiguration(
                   misspelledTextStyle: TextField.materialMisspelledTextStyle,
               ),
             ),
@@ -12704,7 +12704,7 @@ void main() {
                 cursorOpacityAnimates: true,
                 autofillHints: null,
                 spellCheckConfiguration:
-                  SpellCheckConfiguration(
+                  const SpellCheckConfiguration(
                     misspelledTextStyle: TextField.materialMisspelledTextStyle,
                 ),
             ));

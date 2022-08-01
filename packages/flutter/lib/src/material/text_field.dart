@@ -776,7 +776,7 @@ class TextField extends StatefulWidget {
 
   /// The [TextStyle] used to indicate misspelled words in the Material style.
   static const TextStyle materialMisspelledTextStyle =
-    const TextStyle(
+    TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: Colors.red,
       decorationStyle: TextDecorationStyle.wavy,

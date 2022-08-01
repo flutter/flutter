@@ -703,8 +703,8 @@ class EditableText extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        assert(
           spellCheckConfiguration == null ||
-          spellCheckConfiguration == SpellCheckConfiguration.disabled() ||
-          spellCheckConfiguration!.misspelledTextStyle != null,
+          spellCheckConfiguration == const SpellCheckConfiguration.disabled() ||
+          spellCheckConfiguration.misspelledTextStyle != null,
           'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
        ),
        _strutStyle = strutStyle,
@@ -1963,15 +1963,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_updateSelectionOverlayForScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
-
-    // Spell check setup
-    if (widget.spellCheckConfiguration == null || widget.spellCheckConfiguration! == SpellCheckConfiguration.disabled()) {
-      return;
+    _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+  }
+  
+  /// Tries to infer default values for the parameters of
+  /// [SpellCheckConfiguration] if spell check is enabled and one or both of the
+  /// [SpellCheckService] and [SpellCheckSuggestionsHandler] are left
+  /// unspecified.
+  SpellCheckConfiguration? _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
+    if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
+      // Spell check is disabled.
+      return null;
     }
 
     _spellCheckEnabled = true;
-    SpellCheckService? spellCheckService = widget.spellCheckConfiguration!.spellCheckService;
-    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckConfiguration!.spellCheckSuggestionsHandler;
+    SpellCheckService? spellCheckService = configuration.spellCheckService;
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = configuration.spellCheckSuggestionsHandler;
 
     assert(
       spellCheckService != null
@@ -1983,7 +1990,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     spellCheckSuggestionsHandler =
       spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler();
 
-    _spellCheckConfiguration = widget.spellCheckConfiguration!.copyWith(
+    return configuration.copyWith(
       spellCheckService: spellCheckService,
       spellCheckSuggestionsHandler: spellCheckSuggestionsHandler,
     );

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
@@ -13,6 +12,7 @@ import 'package:flutter/services.dart'
 /// [List<SuggestionSpan>] spell check results and the
 /// [SpellCheckSuggestionsHandler] used to mark and display replacement
 /// suggestions for misspelled words within text input.
+@immutable
 class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
@@ -119,7 +119,7 @@ mixin SpellCheckSuggestionsHandler {
 class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   /// Creates a handler to use for spell checking text input based on the
   /// provided platform.
-  DefaultSpellCheckSuggestionsHandler() {}
+  DefaultSpellCheckSuggestionsHandler();
 
   /// Adjusts spell check results to correspond to [newText] if the only results
   /// that the handler has access to are the [results] corresponding to
@@ -140,7 +140,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     String currentSpanText;
     String newSpanText = '';
     bool currentSpanValid = false;
-    bool foundCurrentSpan = false;
     RegExp regex;
 
     // Assumes that the order of spans has not been jumbled for optimization

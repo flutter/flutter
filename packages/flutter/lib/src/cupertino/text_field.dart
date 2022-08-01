@@ -788,7 +788,7 @@ class CupertinoTextField extends StatefulWidget {
 
   /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
   static const TextStyle cupertinoMisspelledTextStyle =
-    const TextStyle(
+    TextStyle(
       decoration: TextDecoration.underline,
       decorationColor: CupertinoColors.systemRed,
       decorationStyle: TextDecorationStyle.dotted
@@ -1261,11 +1261,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     // unless a custom style is specified.
     final SpellCheckConfiguration spellCheckConfiguration =
       widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != SpellCheckConfiguration.disabled()
+      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? CupertinoTextField.cupertinoMisspelledTextStyle)
-        : SpellCheckConfiguration.disabled();
+        : const SpellCheckConfiguration.disabled();
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
