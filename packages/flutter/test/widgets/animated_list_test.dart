@@ -357,6 +357,55 @@ void main() {
       expect(find.text('removing'), findsNothing);
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
     });
+
+    testWidgets('passes correctly derived index of findChildIndexCallback to inner SliverChildBuilderDelegate', (WidgetTester tester) async {
+      final List<int> items = <int>[0, 1, 2];
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                key: listKey,
+                initialItemCount: items.length,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                    return Text(key: ValueKey(index), 'item ${items[index]}');
+                },
+                findChildIndexCallback: (Key key) {
+                  final int index = items.indexOf((key as ValueKey<int>).value);
+                  return index == -1 ? null : index;
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // get all list entries in order
+      final List<Text> listEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+
+      // check that the list is rendered in the correct order
+      expect(listEntries[0].data, equals('item 0'));
+      expect(listEntries[1].data, equals('item 1'));
+      expect(listEntries[2].data, equals('item 2'));
+
+      // reorder the items
+      items.insert(0, items.removeLast());
+
+      // trigger a re-render
+      listKey.currentState!.setState(() {});
+      await tester.pumpAndSettle();
+
+      // get all list entries in order
+      final List<Text> reorderedListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+
+      // check that the list is rendered in the order provided by findChildIndexCallback
+      expect(reorderedListEntries[0].data, equals('item 2'));
+      expect(reorderedListEntries[1].data, equals('item 0'));
+      expect(reorderedListEntries[2].data, equals('item 1'));
+    });
   });
 
   testWidgets(
