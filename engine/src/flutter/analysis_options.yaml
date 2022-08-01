@@ -5,9 +5,6 @@
 # "DIFFERENT FROM FLUTTER/FLUTTER" below.
 
 analyzer:
-  exclude:
-    # Fixture depends on dart:ui and raises false positives.
-    - flutter_frontend_server/test/fixtures/lib/main.dart
   language:
     strict-casts: true
     strict-raw-types: true
@@ -27,6 +24,9 @@ analyzer:
     unnecessary_null_comparison: ignore
     # TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/49563 is fixed.
     ffi_native_unexpected_number_of_parameters: ignore # DIFFERENT FROM FLUTTER/FLUTTER
+  exclude: # DIFFERENT FROM FLUTTER/FLUTTER
+    # Fixture depends on dart:ui and raises false positives.
+    - flutter_frontend_server/test/fixtures/lib/main.dart
 
 linter:
   rules:
