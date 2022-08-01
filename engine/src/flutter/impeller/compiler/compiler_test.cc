@@ -6,6 +6,11 @@
 
 #include <algorithm>
 
+#include "flutter/fml/file.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/mapping.h"
+#include "flutter/fml/unique_fd.h"
+
 namespace impeller {
 namespace compiler {
 namespace testing {
@@ -56,6 +61,13 @@ static std::string SLFileName(const char* fixture_name,
   std::stringstream stream;
   stream << fixture_name << "." << TargetPlatformSLExtension(platform);
   return stream.str();
+}
+
+std::unique_ptr<fml::FileMapping> CompilerTest::GetReflectionJson(
+    const char* fixture_name) const {
+  auto filename = ReflectionJSONName(fixture_name);
+  auto fd = fml::OpenFileReadOnly(intermediates_directory_, filename.c_str());
+  return fml::FileMapping::CreateReadOnly(fd);
 }
 
 bool CompilerTest::CanCompileAndReflect(const char* fixture_name,

@@ -43,6 +43,7 @@ test_fixtures("file_fixtures") {
     "embarcadero.jpg",
     "kalimba.jpg",
     "sample.comp",
+    "sample.frag",
     "sample.tesc",
     "sample.tese",
     "sample.vert",
