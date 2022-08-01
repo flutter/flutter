@@ -49,46 +49,46 @@ void main() {
       const double magnificationScale = 2;
 
       await tester.pumpWidget(MaterialApp(
+          key: appKey,
           home: Container(
-        key: appKey,
-        color: Colors.orange,
-        width: double.infinity,
-        height: double.infinity,
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              // Positioned so that it is right in the center of the magnifier
-              // focal point.
-              left: magnifierPosition.dx - magnifierFocalPoint.dx,
-              top: magnifierPosition.dy - magnifierFocalPoint.dy,
-              child: Container(
-                color: Colors.pink,
-                // Since it is the size of the magnifier but over it's
-                // magnificationScale, it should take up the whole magnifier.
-                width: (magnifierSize.width * 1.5) / magnificationScale,
-                height: (magnifierSize.height * 1.5) / magnificationScale,
-              ),
+            color: Colors.orange,
+            width: double.infinity,
+            height: double.infinity,
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  // Positioned so that it is right in the center of the magnifier
+                  // focal point.
+                  left: magnifierPosition.dx + magnifierFocalPoint.dx,
+                  top: magnifierPosition.dy + magnifierFocalPoint.dy,
+                  child: Container(
+                    color: Colors.pink,
+                    // Since it is the size of the magnifier but over it's
+                    // magnificationScale, it should take up the whole magnifier.
+                    width: (magnifierSize.width * 1.5) / magnificationScale,
+                    height: (magnifierSize.height * 1.5) / magnificationScale,
+                  ),
+                ),
+                Positioned(
+                  left: magnifierPosition.dx,
+                  top: magnifierPosition.dy,
+                  child: const RawMagnifier(
+                    size: magnifierSize,
+                    focalPointOffset: magnifierFocalPoint,
+                    magnificationScale: magnificationScale,
+                    decoration: MagnifierDecoration(shadows: <BoxShadow>[
+                      BoxShadow(
+                        spreadRadius: 10,
+                        blurRadius: 10,
+                        color: Colors.green,
+                        offset: Offset(5, 5),
+                      ),
+                    ]),
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              left: magnifierPosition.dx,
-              top: magnifierPosition.dy,
-              child: const RawMagnifier(
-                size: magnifierSize,
-                focalPoint: magnifierFocalPoint,
-                magnificationScale: magnificationScale,
-                decoration: MagnifierDecoration(shadows: <BoxShadow>[
-                  BoxShadow(
-                      spreadRadius: 10,
-                      blurRadius: 10,
-                      color: Colors.green,
-                      offset: Offset(5, 5),
-                    ),
-                ]),
-              ),
-            ),
-          ],
-        ),
-      )));
+          )));
 
       await tester.pumpAndSettle();
 

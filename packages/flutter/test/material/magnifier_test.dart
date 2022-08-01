@@ -342,7 +342,7 @@ void main() {
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
             )));
 
-        expect(getMagnifierAdditionalFocalPoint(tester).dy, greaterThanOrEqualTo(0));
+        expect(getMagnifierAdditionalFocalPoint(tester).dy, lessThan(0));
       });
     });
 

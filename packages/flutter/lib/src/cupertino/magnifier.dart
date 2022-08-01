@@ -183,7 +183,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
       _currentAdjustedMagnifierPosition = adjustedMagnifierPosition;
       // The lens should always point to the center of the line.
       _verticalFocalPointAdjustment =
-          verticalPositionOfLens - verticalCenterOfCurrentLine;
+          verticalCenterOfCurrentLine - verticalPositionOfLens;
     });
   }
 
@@ -281,7 +281,7 @@ class CupertinoMagnifier extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Offset focalPointOffset =
-        Offset(0, kMagnifierAboveFocalPoint - kDefaultSize.height / 2);
+        Offset(0, (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint);
     focalPointOffset.scale(1, inOutAnimation?.value ?? 1);
     focalPointOffset += additionalFocalPointOffset;
 
@@ -293,7 +293,7 @@ class CupertinoMagnifier extends StatelessWidget {
       )!,
       child: RawMagnifier(
         size: size,
-        focalPoint: focalPointOffset,
+        focalPointOffset: focalPointOffset,
         decoration: MagnifierDecoration(
           opacity: inOutAnimation?.value ?? 1,
           shape: RoundedRectangleBorder(

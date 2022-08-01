@@ -281,7 +281,7 @@ class RawMagnifier extends StatelessWidget {
       super.key,
       this.magnificationScale = 1,
       required this.size,
-      this.focalPoint = Offset.zero,
+      this.focalPointOffset = Offset.zero,
       this.child,
       this.decoration = const MagnifierDecoration()
       }) : assert(magnificationScale != 0,
@@ -300,9 +300,15 @@ class RawMagnifier extends StatelessWidget {
 
   /// The offset of the magnifier from [RawMagnifier]'s center.
   ///
-  /// If [focalPoint] is [Offset.zero], then the [focalPoint]
-  /// will point directly below this [RawMagnifier].
-  final Offset focalPoint;
+  /// {@template flutter.widgets.magnifier.offset}
+  /// For example, if [RawMagnifier] is globally positioned at Offset(100, 100),
+  /// and [focalPointOffset] is Offset(-20, -20), then [RawMagnifier] will see
+  /// the content at global offset (80, 80).
+  ///
+  /// If left as [Offset.zero], the [RawMagnifier] will show the content that
+  /// is directly below it.
+  /// {@endtemplate}
+  final Offset focalPointOffset;
 
   /// An optional widget to posiiton inside the len of the [RawMagnifier].
   ///
@@ -323,7 +329,7 @@ class RawMagnifier extends StatelessWidget {
             opacity: decoration.opacity,
             child: _Magnifier(
               shape: decoration.shape,
-              focalPoint: focalPoint,
+              focalPointOffset: focalPointOffset,
               magnificationScale: magnificationScale,
               child: SizedBox.fromSize(
                 size: size,
@@ -414,34 +420,36 @@ class _Magnifier extends SingleChildRenderObjectWidget {
       super.child,
       required this.shape,
       this.magnificationScale = 1,
-      this.focalPoint = Offset.zero,
+      this.focalPointOffset = Offset.zero,
   });
 
-  /// [focalPoint] is the area the center of the
+  /// [focalPointOffset] is the area the center of the
   /// [_Magnifier] points to, relative to the center of the magnifier.
-  /// If left as [Offset.zero], the magnifier will magnify whatever is directly
-  /// below it.
-  final Offset focalPoint;
+  ///
+  /// {@macro flutter.widgets.magnifier.offset}
+  final Offset focalPointOffset;
 
   /// The scale of the magnification.
   ///
-  /// A [magnificationScale] of 1 means that the content magi
+  /// A [magnificationScale] of 1 means that the content in the magnifier
+  /// is true to it's real size. Anything greater than one will appear bigger
+  /// in the magnifier, and anything less than one will appear smaller in
+  /// the magnifier.
   final double magnificationScale;
 
-  /// The shape of the magnifier is dictated by [clip], which clips
-  /// the magnifier to the shape. If null, the shape will be rectangular.
+  /// The shape of the magnifier is dictated by [shape.getOuterPath].
   final ShapeBorder shape;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderMagnification(focalPoint, magnificationScale, shape);
+    return _RenderMagnification(focalPointOffset, magnificationScale, shape);
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderProxyBox renderObject) {
-    (renderObject as _RenderMagnification)
-      ..focalPoint = focalPoint
+      BuildContext context, _RenderMagnification renderObject) {
+    renderObject
+      ..focalPointOffset = focalPointOffset
       ..shape = shape
       ..magnificationScale = magnificationScale;
   }
@@ -449,20 +457,20 @@ class _Magnifier extends SingleChildRenderObjectWidget {
 
 class _RenderMagnification extends RenderProxyBox {
   _RenderMagnification(
-    this._focalPoint,
+    this._focalPointOffset,
     this._magnificationScale,
     this._shape, {
     RenderBox? child,
   }) : super(child);
 
-  Offset get focalPoint => _focalPoint;
-  Offset _focalPoint;
-  set focalPoint(Offset value) {
-    if (_focalPoint == value) {
+  Offset get focalPointOffset => _focalPointOffset;
+  Offset _focalPointOffset;
+  set focalPointOffset(Offset value) {
+    if (_focalPointOffset == value) {
       return;
     }
-    _focalPoint = value;
-    markNeedsLayout();
+    _focalPointOffset = value;
+    markNeedsPaint();
   }
 
   double get magnificationScale => _magnificationScale;
@@ -472,7 +480,7 @@ class _RenderMagnification extends RenderProxyBox {
       return;
     }
     _magnificationScale = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   ShapeBorder get shape => _shape;
@@ -482,7 +490,7 @@ class _RenderMagnification extends RenderProxyBox {
       return;
     }
     _shape = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   @override
@@ -494,7 +502,7 @@ class _RenderMagnification extends RenderProxyBox {
       layer = _MagnificationLayer(
           size: size,
           globalPosition: offset,
-          focalPoint: focalPoint,
+          focalPointOffset: focalPointOffset,
           shape: shape,
           magnificationScale: magnificationScale);
     } else {
@@ -502,7 +510,7 @@ class _RenderMagnification extends RenderProxyBox {
         ..magnificationScale = magnificationScale
         ..size = size
         ..globalPosition = offset
-        ..focalPoint = focalPoint;
+        ..focalPointOffset = focalPointOffset;
     }
 
     context.pushLayer(layer!, super.paint, offset);
@@ -511,30 +519,85 @@ class _RenderMagnification extends RenderProxyBox {
 
 class _MagnificationLayer extends ContainerLayer {
   _MagnificationLayer({
-      required this.size,
-      required this.globalPosition,
-      required this.shape,
-      required this.focalPoint,
-      required this.magnificationScale,
-  });
+    required Size size,
+    required Offset globalPosition,
+    required ShapeBorder shape,
+    required Offset focalPointOffset,
+    required double magnificationScale,
+  })  : _size = size,
+        _globalPosition = globalPosition,
+        _shape = shape,
+        _focalPointOffset = focalPointOffset,
+        _magnificationScale = magnificationScale;
 
-  Offset globalPosition;
-  Size size;
+  RRect? get clipRRect => _clipRRect;
+  RRect? _clipRRect;
+  set clipRRect(RRect? value) {
+    if (value != _clipRRect) {
+      _clipRRect = value;
+      markNeedsAddToScene();
+    }
+  }
 
-  Offset focalPoint;
-  double magnificationScale;
+  Offset get globalPosition => _globalPosition;
+  Offset _globalPosition;
+  set globalPosition(Offset value) {
+    if (_globalPosition == value) {
+      return;
+    }
 
-  ShapeBorder shape;
+    _globalPosition = value;
+    markNeedsAddToScene();
+  }
+
+  Size get size => _size;
+  Size _size;
+  set size(Size value) {
+    if (_size == value) {
+      return;
+    }
+    _size = value;
+    markNeedsAddToScene();
+  }
+
+  Offset get focalPointOffset => _focalPointOffset;
+  Offset _focalPointOffset;
+  set focalPointOffset(Offset value) {
+    if (_focalPointOffset == value) {
+      return;
+    }
+    _focalPointOffset = value;
+    markNeedsAddToScene();
+  }
+
+  double get magnificationScale => _magnificationScale;
+  double _magnificationScale;
+  set magnificationScale(double value) {
+    if (_magnificationScale == value) {
+      return;
+    }
+    _magnificationScale = value;
+    markNeedsAddToScene();
+  }
+
+  ShapeBorder get shape => _shape;
+  ShapeBorder _shape;
+  set shape(ShapeBorder value) {
+    if (_shape == value) {
+      return;
+    }
+    _shape = value;
+    markNeedsAddToScene();
+  }
 
   @override
   void addToScene(SceneBuilder builder) {
     builder.pushClipPath(shape.getOuterPath(globalPosition & size));
-
     final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
     final Matrix4 matrix = Matrix4.identity()
       ..translate(
-          magnificationScale * (focalPoint.dx - thisCenter.dx) + thisCenter.dx,
-          magnificationScale * (focalPoint.dy - thisCenter.dy) + thisCenter.dy)
+          magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
+          magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
     builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high));
     builder.pop();

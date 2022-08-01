@@ -136,7 +136,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // the "above touch point" shift.
     final Offset basicMagnifierOffset = Offset(
         Magnifier.kDefaultMagnifierSize.width / 2,
-        Magnifier.kDefaultMagnifierSize.height -
+        Magnifier.kDefaultMagnifierSize.height +
             Magnifier.kStandardVerticalFocalPointShift);
 
     // Since the magnifier should not go past the edges of the line,
@@ -189,7 +189,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // is now a global offset), we must subtract the magnifier's global offset
     // to obtain the relative shift in the focal point.
     final double newRelativeFocalPointX =
-        screenBoundsAdjustedMagnifierRect.center.dx - newGlobalFocalPointX;
+        newGlobalFocalPointX - screenBoundsAdjustedMagnifierRect.center.dx;
 
     // The Y component means that if we are pressed up against the top of the screen,
     // then we should adjust the focal point such that it now points to how far we moved
@@ -198,7 +198,8 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // the amount that we shifted from our "natural" position.
     final Offset focalPointAdjustmentForScreenBoundsAdjustment = Offset(
         newRelativeFocalPointX,
-        screenBoundsAdjustedMagnifierRect.top - unadjustedMagnifierRect.top);
+        unadjustedMagnifierRect.top - screenBoundsAdjustedMagnifierRect.top,
+    );
 
     Timer? positionShouldBeAnimated = _positionShouldBeAnimatedTimer;
 
@@ -282,7 +283,7 @@ class Magnifier extends StatelessWidget {
   /// [kStandardVerticalFocalPointShift] is an unmodifiable constant so that positioning of this
   /// [Magnifier] can be done with a garunteed size, as opposed to an estimate.
   @visibleForTesting
-  static const double kStandardVerticalFocalPointShift = -18;
+  static const double kStandardVerticalFocalPointShift = 18;
 
   /// The color to tint the image in this [Magnifier].
   ///
@@ -320,8 +321,8 @@ class Magnifier extends StatelessWidget {
         shadows: shadows,
       ),
       magnificationScale: _magnification,
-      focalPoint: additionalFocalPointOffset +
-          Offset(0, kStandardVerticalFocalPointShift - kDefaultMagnifierSize.height / 2),
+      focalPointOffset: additionalFocalPointOffset +
+          Offset(0, kStandardVerticalFocalPointShift + kDefaultMagnifierSize.height / 2),
       size: size,
       child: ColoredBox(
         color: filmColor,
