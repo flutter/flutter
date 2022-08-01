@@ -232,6 +232,7 @@ class StarBorder extends OutlinedBorder {
         return StarBorder(
           side: BorderSide.lerp(a.side, side, t),
           points: lerpedPoints,
+          squash: ui.lerpDouble(a.eccentricity, squash, t)!,
           rotation: rotation,
           innerRadiusRatio: ui.lerpDouble(math.cos(math.pi / lerpedPoints), innerRadiusRatio, t)!,
           pointRounding: ui.lerpDouble(1.0, pointRounding, t)!,
@@ -244,6 +245,7 @@ class StarBorder extends OutlinedBorder {
         return StarBorder(
           side: BorderSide.lerp(a.side, side, t),
           points: lerpedPoints,
+          squash: ui.lerpDouble(a.eccentricity, squash, t)!,
           rotation: rotation,
           innerRadiusRatio: ui.lerpDouble(1, innerRadiusRatio, t)!,
           pointRounding: ui.lerpDouble(0.5, pointRounding, t)!,
