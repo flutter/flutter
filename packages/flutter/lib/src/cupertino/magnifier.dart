@@ -5,14 +5,15 @@
 import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
-/// A [CupertinoMagnifier], specifically for integrating with [SelectionOverlay].
+/// A [CupertinoMagnifier] used for magnifying text in cases where a user's
+/// finger may be blocking the point of interest, like a selection handle.
 ///
 /// Delegates styling to [CupertinoMagnifier] with its position depending on
 /// [magnifierOverlayInfoBearer].
 ///
 /// Specifically, the [CupertinoTextMagnifier] follows the following rules.
 /// [CupertinoTextMagnifier]:
-/// - is positioned horizontally outside the screen width, with [horizontalScreenEdgePadding] padding.
+/// - is positioned horizontally inside the screen width, with [horizontalScreenEdgePadding] padding.
 /// - is hidden if a gesture is detected [hideBelowThreshold] units below the line
 ///   that the magnifier is on, shown otherwise.
 /// - follows the x coordinate of the gesture directly (with respect to rule 1).
@@ -26,16 +27,23 @@ class CupertinoTextMagnifier extends StatefulWidget {
   /// an iPhone XR iOS v15.5.
   const CupertinoTextMagnifier({
     super.key,
-    required this.controller,
-    required this.magnifierOverlayInfoBearer,
-    this.dragResistance = 10.0,
-    this.hideBelowThreshold = -48.0,
-    this.horizontalScreenEdgePadding = 10.0,
     this.animationCurve = Curves.easeOut,
+    required this.controller,
+    this.dragResistance = 10.0,
+    this.hideBelowThreshold = 48.0,
+    this.horizontalScreenEdgePadding = 10.0,
+    required this.magnifierOverlayInfoBearer,
   });
 
   /// The curve used for the in / out animations.
   final Curve animationCurve;
+
+  /// This magnifier's controller.
+  ///
+  /// The [CupertinoTextMagnifier] requires a [MagnifierController]
+  /// in order to show / hide itself without removing itself from the
+  /// overlay.
+  final MagnifierController controller;
 
   /// A drag resistance on the downward Y position of the lens.
   final double dragResistance;
@@ -47,26 +55,20 @@ class CupertinoTextMagnifier extends StatefulWidget {
   /// The padding on either edge of the screen that any part of the magnifier
   /// cannot exist past.
   ///
-  /// This includes the entire magnifier, not just the center.
+  /// This includes any part of the magnifier, not just the center; for example,
+  /// the left edge of the magnifier cannot be outside the [horizontalScreenEdgePadding].v
   ///
   /// If the screen has width w, then the magnifier is bound to
   /// `_kHorizontalScreenEdgePadding, w - _kHorizontalScreenEdgePadding`.
   final double horizontalScreenEdgePadding;
 
-  /// The duration that the magnifier drags behind its final position.
-  static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
-
-  /// This magnifier's controller.
-  ///
-  /// The [CupertinoTextMagnifier] requires a [MagnifierController]
-  /// in order to show / hide itself without removing itself from the
-  /// overlay.
-  final MagnifierController controller;
-
   /// [CupertinoTextMagnifier] will determine its own positioning
   /// based on the [MagnifierOverlayInfoBearer] of this notifier.
   final ValueNotifier<MagnifierOverlayInfoBearer>
       magnifierOverlayInfoBearer;
+
+  /// The duration that the magnifier drags behind its final position.
+  static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
 
   @override
   State<CupertinoTextMagnifier> createState() =>
@@ -100,7 +102,9 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
-        parent: _ioAnimationController, curve: widget.animationCurve));
+      parent: _ioAnimationController,
+      curve: widget.animationCurve,
+    ));
   }
 
   @override
@@ -109,6 +113,15 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     widget.magnifierOverlayInfoBearer
         .removeListener(_determineMagnifierPositionAndFocalPoint);
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(CupertinoTextMagnifier oldWidget) {
+    if (oldWidget.magnifierOverlayInfoBearer != widget.magnifierOverlayInfoBearer) {
+      oldWidget.magnifierOverlayInfoBearer.removeListener(_determineMagnifierPositionAndFocalPoint);
+      widget.magnifierOverlayInfoBearer.removeListener(_determineMagnifierPositionAndFocalPoint);
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -129,7 +142,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     // we should hide it.
     if (verticalCenterOfCurrentLine -
             textEditingContext.globalGesturePosition.dy <
-        widget.hideBelowThreshold) {
+        -widget.hideBelowThreshold) {
       // Only signal a hide if we are currently showing.
       if (widget.controller.shown) {
         widget.controller.hide(removeFromOverlay: false);
@@ -202,7 +215,8 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   }
 }
 
-/// A [RawMagnifier] in the Cupertino style.
+/// A [RawMagnifier] used for magnifying text in cases where a user's
+/// finger may be blocking the point of interest, like a selection handle.
 ///
 /// [CupertinoMagnifier] is a wrapper around [RawMagnifier] that handles styling
 /// and transitions.
@@ -226,12 +240,12 @@ class CupertinoMagnifier extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.elliptical(60, 50)),
     this.additionalFocalPointOffset = Offset.zero,
     this.shadows = const <BoxShadow>[
-              BoxShadow(
-                color: Color.fromARGB(25, 0, 0, 0),
-                blurRadius: 11,
-                spreadRadius: 0.2,
-              )
-            ],
+      BoxShadow(
+        color: Color.fromARGB(25, 0, 0, 0),
+        blurRadius: 11,
+        spreadRadius: 0.2,
+      ),
+    ],
     this.borderSide =
         const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
     this.inOutAnimation,
@@ -243,7 +257,7 @@ class CupertinoMagnifier extends StatelessWidget {
   /// The border, or "rim", of this magnifier.
   final BorderSide borderSide;
 
-  /// The vertical offset, that the magnifier is along the Y axis above
+  /// The vertical offset that the magnifier is along the Y axis above
   /// the focal point.
   @visibleForTesting
   static const double kMagnifierAboveFocalPoint = -30;

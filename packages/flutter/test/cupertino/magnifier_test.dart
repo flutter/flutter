@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final Offset basicOffset = Offset(CupertinoMagnifier.kDefaultSize.width / 2,
-      CupertinoMagnifier.kDefaultSize.height - CupertinoMagnifier.kMagnifierAboveFocalPoint);
+      CupertinoMagnifier.kDefaultSize.height + CupertinoMagnifier.kMagnifierAboveFocalPoint);
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
   final MagnifierController magnifierController = MagnifierController();
 
@@ -35,10 +35,7 @@ void main() {
   }
 
   tearDown(() async {
-    if (magnifierController.overlayEntry != null) {
-      magnifierController.overlayEntry!.remove();
-      magnifierController.overlayEntry = null;
-    }
+      magnifierController.removeFromOverlay();
   });
 
   group('CupertinoTextEditingMagnifier', () {
@@ -100,8 +97,7 @@ void main() {
         );
       });
 
-      testWidgets('should never horizontally be outside of Screen Padding',
-          (WidgetTester tester) async {
+      testWidgets('should never horizontally be outside of Screen Padding', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -112,25 +108,26 @@ void main() {
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
         await showCupertinoMagnifier(
-            context,
-            tester,
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-                MagnifierOverlayInfoBearer(
+          context,
+          tester,
+          ValueNotifier<MagnifierOverlayInfoBearer>(
+            MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
               // The tap position is far out of the right side of the app.
               globalGesturePosition:
                   Offset(MediaQuery.of(context).size.width + 100, 0),
-            )));
+            ),
+          ),
+        );
 
         // Should be less than the right edge, since we have padding.
         expect(getMagnifierPosition(tester).dx,
             lessThan(MediaQuery.of(context).size.width));
       });
 
-      testWidgets('should have some vertical drag',
-          (WidgetTester tester) async {
+      testWidgets('should have some vertical drag', (WidgetTester tester) async {
         final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
@@ -144,10 +141,10 @@ void main() {
             tester.firstElement(find.byType(Placeholder));
 
         await showCupertinoMagnifier(
-            context,
-            tester,
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-                MagnifierOverlayInfoBearer(
+          context,
+          tester,
+          ValueNotifier<MagnifierOverlayInfoBearer>(
+            MagnifierOverlayInfoBearer(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -155,7 +152,9 @@ void main() {
               globalGesturePosition: Offset(
                   MediaQuery.of(context).size.width / 2,
                   dragPositionBelowTextField),
-            )));
+            ),
+          ),
+        );
 
         // The magnifier Y should be greater than the text field, since we "dragged" it down.
         expect(getMagnifierPosition(tester).dy + basicOffset.dy,
@@ -179,14 +178,15 @@ void main() {
 
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierinfo =
             ValueNotifier<MagnifierOverlayInfoBearer>(
-                MagnifierOverlayInfoBearer(
-          currentLineBoundries: reasonableTextField,
-          fieldBounds: reasonableTextField,
-          caretRect: reasonableTextField,
-          // The tap position is dragBelow units below the text field.
-          globalGesturePosition: Offset(
-              MediaQuery.of(context).size.width / 2, reasonableTextField.top),
-        ));
+          MagnifierOverlayInfoBearer(
+            currentLineBoundries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is dragBelow units below the text field.
+            globalGesturePosition: Offset(
+                MediaQuery.of(context).size.width / 2, reasonableTextField.top),
+          ),
+        );
 
         // Show the magnifier initally, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierinfo);
@@ -196,8 +196,8 @@ void main() {
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition:
-                magnifierinfo.value.globalGesturePosition + const Offset(0, 100));
+            globalGesturePosition: magnifierinfo.value.globalGesturePosition + const Offset(0, 100),
+        );
         await tester.pumpAndSettle();
 
         expect(magnifierController.shown, false);
@@ -218,14 +218,14 @@ void main() {
 
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierInfo =
             ValueNotifier<MagnifierOverlayInfoBearer>(
-                MagnifierOverlayInfoBearer(
-          currentLineBoundries: reasonableTextField,
-          fieldBounds: reasonableTextField,
-          caretRect: reasonableTextField,
-          // The tap position is dragBelow units below the text field.
-          globalGesturePosition: Offset(
-              MediaQuery.of(context).size.width / 2, reasonableTextField.top),
-        ));
+          MagnifierOverlayInfoBearer(
+            currentLineBoundries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is dragBelow units below the text field.
+            globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2, reasonableTextField.top),
+          ),
+        );
 
         // Show the magnifier initally, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierInfo);

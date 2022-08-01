@@ -63,7 +63,7 @@ void main() {
                   top: magnifierPosition.dy + magnifierFocalPoint.dy,
                   child: Container(
                     color: Colors.pink,
-                    // Since it is the size of the magnifier but over it's
+                    // Since it is the size of the magnifier but over its
                     // magnificationScale, it should take up the whole magnifier.
                     width: (magnifierSize.width * 1.5) / magnificationScale,
                     height: (magnifierSize.height * 1.5) / magnificationScale,
@@ -111,10 +111,7 @@ void main() {
         animationController.value = 0;
         magnifierController.hide();
 
-        if (magnifierController.overlayEntry != null) {
-          magnifierController.overlayEntry!.remove();
-          magnifierController.overlayEntry = null;
-        }
+        magnifierController.removeFromOverlay();
       });
 
       testWidgets(
@@ -212,8 +209,7 @@ void main() {
 
     tearDown(() {
       magnifierController.overlayEntry?.remove();
-      magnifierController.animationController = null;
-      magnifierController.overlayEntry = null;
+      magnifierController.removeFromOverlay();
     });
 
     group('show', () {

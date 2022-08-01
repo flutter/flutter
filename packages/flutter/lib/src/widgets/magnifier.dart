@@ -56,15 +56,15 @@ class MagnifierController {
   ///       builder: (BuildContext context) => const Text('I WILL display in the magnifier')));
   ///
   ///   // Will display in the magnifier, since this entry was passed to show.
-  ///   final OverlayEntry displayInMagnifierEvenThoughPlacedBeforeChronologically = OverlayEntry(
+  ///   final OverlayEntry displayInMagnifier = OverlayEntry(
   ///       builder: (BuildContext context) =>
   ///           const Text('I WILL display in the magnifier'));
   ///
   ///   Overlay.of(context)!
-  ///       .insert(displayInMagnifierEvenThoughPlacedBeforeChronologically);
+  ///       .insert(displayInMagnifier);
   ///   myMagnifierController.show(
   ///       context: context,
-  ///       below: displayInMagnifierEvenThoughPlacedBeforeChronologically,
+  ///       below: displayInMagnifier,
   ///       builder: (BuildContext context) => const RawMagnifier(
   ///             size: Size(100, 100),
   ///           ));
@@ -86,7 +86,8 @@ class MagnifierController {
   /// overlay or not; instead, you should check [shown]. This is because it is possible,
   /// such as in cases where [hide] was called with `removeFromOverlay` false, that the magnifier
   /// is not shown, but the entry is not null.
-  OverlayEntry? overlayEntry;
+  OverlayEntry? get overlayEntry => _overlayEntry;
+  OverlayEntry? _overlayEntry;
 
   /// If the magnifier is shown or not.
   ///
@@ -117,7 +118,8 @@ class MagnifierController {
   /// [overlayEntry] for more details on how to utilize [below].
   ///
   /// If the magnifier already exists (i.e. [overlayEntry] != null), then [show] will
-  /// reshow the old overlay.
+  /// override the old overlay and not play an exit animation. Consider awaiting [hide]
+  /// first, to guarantee
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -125,11 +127,7 @@ class MagnifierController {
     OverlayEntry? below,
   }) async {
     if (overlayEntry != null) {
-      if (animationController?.status == AnimationStatus.dismissed) {
-        await animationController!.forward();
-      }
-
-      return;
+        overlayEntry!.remove();
     }
 
     final OverlayState? overlayState = Overlay.of(
@@ -143,7 +141,7 @@ class MagnifierController {
       to: Navigator.maybeOf(context)?.context,
     );
 
-    overlayEntry = OverlayEntry(
+   _overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
     overlayState!.insert(overlayEntry!, below: below);
@@ -172,9 +170,22 @@ class MagnifierController {
     }
 
     if (removeFromOverlay) {
-      overlayEntry?.remove();
-      overlayEntry = null;
+      this.removeFromOverlay();
     }
+  }
+
+  /// Remove the [OverlayEntry] from the [Overlay].
+  ///
+  /// This method removes the [OverlayEntry] synchronously,
+  /// regardless of exit animation: this leads to abrupt removals
+  /// of [OverlayEntry]s with animations.
+  ///
+  /// To allow the [OverlayEntry] to play its exit animation, consider calling
+  /// [hide] with `removeFromOverlay` true, and optionally awaiting the future
+  @visibleForTesting
+  void removeFromOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
   }
 
   /// A utility for calculating a new [Rect] from [rect] such that
@@ -253,7 +264,7 @@ class MagnifierDecoration extends ShapeDecoration {
   int get hashCode => Object.hash(super.hashCode, opacity);
 }
 
-/// A common building base for magnifiers.
+/// A common base class for magnifiers.
 ///
 /// {@template flutter.widgets.magnifier.intro}
 /// This magnifying glass is useful for scenarios on mobile devices where
@@ -279,24 +290,25 @@ class RawMagnifier extends StatelessWidget {
   /// {@endtemplate}
   const RawMagnifier({
       super.key,
+      this.child,
+      this.decoration = const MagnifierDecoration(),
+      this.focalPointOffset = Offset.zero,
       this.magnificationScale = 1,
       required this.size,
-      this.focalPointOffset = Offset.zero,
-      this.child,
-      this.decoration = const MagnifierDecoration()
       }) : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
+
+  /// An optional widget to posiiton inside the len of the [RawMagnifier].
+  ///
+  /// This is positioned over the [RawMagnifier] - it may be useful for tinting the
+  /// [RawMagnifier], or drawing a crosshair like UI.
+  final Widget? child;
 
   /// This magnifier's decoration.
   ///
   /// {@macro flutter.widgets.magnifier.RawMagnifier.invisibility_warning}
   final MagnifierDecoration decoration;
 
-  /// The size of the magnifier.
-  ///
-  /// This does not include added border; it only includes
-  /// the size of the magnifier.
-  final Size size;
 
   /// The offset of the magnifier from [RawMagnifier]'s center.
   ///
@@ -310,14 +322,14 @@ class RawMagnifier extends StatelessWidget {
   /// {@endtemplate}
   final Offset focalPointOffset;
 
-  /// An optional widget to posiiton inside the len of the [RawMagnifier].
-  ///
-  /// This is positioned over the [RawMagnifier] - it may be useful for tinting the
-  /// [RawMagnifier], or drawing a crosshair like UI.
-  final Widget? child;
-
   /// How "zoomed in" the magnification subject is in the lens.
   final double magnificationScale;
+
+  /// The size of the magnifier.
+  ///
+  /// This does not include added border; it only includes
+  /// the size of the magnifier.
+  final Size size;
 
   @override
   Widget build(BuildContext context) {
@@ -325,27 +337,26 @@ class RawMagnifier extends StatelessWidget {
       clipBehavior: Clip.none,
       alignment: Alignment.center,
       children: <Widget>[
-          Opacity(
-            opacity: decoration.opacity,
-            child: _Magnifier(
-              shape: decoration.shape,
-              focalPointOffset: focalPointOffset,
-              magnificationScale: magnificationScale,
-              child: SizedBox.fromSize(
-                size: size,
-                child: child,
-              ),
+        Opacity(
+          opacity: decoration.opacity,
+          child: _Magnifier(
+            shape: decoration.shape,
+            focalPointOffset: focalPointOffset,
+            magnificationScale: magnificationScale,
+            child: SizedBox.fromSize(
+              size: size,
+              child: child,
             ),
+          ),
         ),
-
-      // Because `BackdropFilter` will filter any widgets before it, we should
-      // apply the style after (i.e. in a younger sibling) to avoid the magnifier
-      // from seeing its own styling.
+        // Because `BackdropFilter` will filter any widgets before it, we should
+        // apply the style after (i.e. in a younger sibling) to avoid the magnifier
+        // from seeing its own styling.
         Opacity(
           opacity: decoration.opacity,
           child: _MagnifierStyle(
-              decoration,
-              size: size,
+            decoration,
+            size: size,
           ),
         )
       ],
@@ -590,16 +601,25 @@ class _MagnificationLayer extends ContainerLayer {
     markNeedsAddToScene();
   }
 
+  BackdropFilterEngineLayer? _backdropFilterEngineLayer;
+
   @override
   void addToScene(SceneBuilder builder) {
-    builder.pushClipPath(shape.getOuterPath(globalPosition & size));
+    engineLayer = builder.pushClipPath(
+        shape.getOuterPath(globalPosition & size),
+        oldLayer: engineLayer as ClipPathEngineLayer?,
+    );
+
     final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
     final Matrix4 matrix = Matrix4.identity()
       ..translate(
           magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
           magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
-    builder.pushBackdropFilter(ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high));
+    _backdropFilterEngineLayer = builder.pushBackdropFilter(
+      ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high),
+      oldLayer: _backdropFilterEngineLayer
+    );
     builder.pop();
 
     super.addToScene(builder);

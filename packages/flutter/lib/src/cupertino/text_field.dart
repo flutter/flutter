@@ -791,7 +791,8 @@ class CupertinoTextField extends StatefulWidget {
   /// platforms. If it is desired to supress the magnifier, consider passing
   /// [TextMagnifierConfiguration.disabled].
   ///
-  // TODO(antholeole): once the magnifier PR lands, I should enrich this area of the
+  // TODO(antholeole): https://github.com/flutter/flutter/issues/108041
+  // once the magnifier PR lands, I should enrich this area of the
   // docs with images of what a magnifier is.
   final TextMagnifierConfiguration? magnifierConfiguration;
 

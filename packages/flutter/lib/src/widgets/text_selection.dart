@@ -71,7 +71,7 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 }
 
 /// {@template flutter.widgets.textSelection.MagnifierBuilder}
-/// A builder that builds a Widget with a [MagnifierController].
+/// Signature for a builder that builds a Widget with a [MagnifierController].
 ///
 /// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
 /// required, although if a Widget intends to have entry or exit animations, it should take
@@ -122,8 +122,8 @@ class MagnifierOverlayInfoBearer {
     );
 
     final Rect lineBoundries = Rect.fromPoints(
-      renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topLeft,
-      renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomRight
+      renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
+      renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter
     );
 
     return MagnifierOverlayInfoBearer(
@@ -848,7 +848,6 @@ class SelectionOverlay {
   /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
-
   /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]
   /// was called. This is safe to call on platforms not mobile, since
   /// a magnifierBuilder will not be provided, or the magnifierBuilder will return null
@@ -865,7 +864,7 @@ class SelectionOverlay {
     // Start from empty, so we don't utilize any rememnant values.
     _magnifierOverlayInfoBearer.value = initalInfoBearer;
 
-    // pre-build the magnifiers so we can tell if we've built something
+    // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
     // insert anything in the overlay.
     final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
@@ -891,6 +890,9 @@ class SelectionOverlay {
   ///
   /// This does nothing if there is no magnifier.
   void hideMagnifier({required bool shouldShowToolbar}) {
+    // This cannot be a check on `MagnifierController.shown`, since
+    // it's possible that the magnifier is still in the overlay, but
+    // not shown in cases where the magnifier hides itself.
     if (_magnifierController.overlayEntry == null) {
       return;
     }

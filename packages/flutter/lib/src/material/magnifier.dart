@@ -12,7 +12,7 @@ import 'package:flutter/foundation.dart';
 /// {@endtemplate}
 ///
 /// {@template widgets.material.magnifier.positionRules}
-/// Positions itself based on [magnifierSelectionOverlayInfoBearer]. Specifically, follows the
+/// Positions itself based on [magnifierInfo]. Specifically, follows the
 /// following rules:
 /// - Tracks the gesture's x coordinate, but clamped to the beginning and end of the
 ///   currently editing line.
@@ -34,7 +34,7 @@ class TextMagnifier extends StatefulWidget {
   /// {@macro widgets.material.magnifier.positionRules}
   const TextMagnifier({
     super.key,
-    required this.magnifierSelectionOverlayInfoBearer,
+    required this.magnifierInfo,
   });
 
   /// A [TextMagnifierConfiguration] that returns a [CupertinoTextMagnifier] on iOS,
@@ -45,17 +45,17 @@ class TextMagnifier extends StatefulWidget {
     magnifierBuilder: (
       BuildContext context,
       MagnifierController controller,
-      ValueNotifier<MagnifierOverlayInfoBearer> magnifierSelectionOverlayInfoBearer,
+      ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
     ) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           return CupertinoTextMagnifier(
             controller: controller,
-            magnifierOverlayInfoBearer: magnifierSelectionOverlayInfoBearer,
+            magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
           );
         case TargetPlatform.android:
           return TextMagnifier(
-              magnifierSelectionOverlayInfoBearer: magnifierSelectionOverlayInfoBearer,
+              magnifierInfo: magnifierOverlayInfoBearer,
           );
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -72,11 +72,11 @@ class TextMagnifier extends StatefulWidget {
   static const Duration jumpBetweenLinesAnimationDuration =
       Duration(milliseconds: 70);
 
-  /// [TextMagnifier] positions itself based on [magnifierSelectionOverlayInfoBearer].
+  /// [TextMagnifier] positions itself based on [magnifierInfo].
   ///
   /// {@macro widgets.material.magnifier.positionRules}
   final ValueNotifier<MagnifierOverlayInfoBearer>
-      magnifierSelectionOverlayInfoBearer;
+      magnifierInfo;
 
   @override
   State<TextMagnifier> createState() => _TextMagnifierState();
@@ -103,19 +103,15 @@ class _TextMagnifierState extends State<TextMagnifier> {
   @override
   void initState() {
     super.initState();
-    widget.magnifierSelectionOverlayInfoBearer
+    widget.magnifierInfo
         .addListener(_determineMagnifierPositionAndFocalPoint);
   }
 
   @override
   void dispose() {
-    widget.magnifierSelectionOverlayInfoBearer
+    widget.magnifierInfo
         .removeListener(_determineMagnifierPositionAndFocalPoint);
-
-    if (_positionShouldBeAnimatedTimer != null) {
-      _positionShouldBeAnimatedTimer!.cancel();
-    }
-
+    _positionShouldBeAnimatedTimer?.cancel();
     super.dispose();
   }
 
@@ -125,10 +121,19 @@ class _TextMagnifierState extends State<TextMagnifier> {
     super.didChangeDependencies();
   }
 
+  @override
+  void didUpdateWidget(TextMagnifier oldWidget) {
+    if (oldWidget.magnifierInfo != widget.magnifierInfo) {
+      oldWidget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
+      widget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
   /// {@macro widgets.material.magnifier.positionRules}
   void _determineMagnifierPositionAndFocalPoint() {
     final MagnifierOverlayInfoBearer selectionInfo =
-        widget.magnifierSelectionOverlayInfoBearer.value;
+        widget.magnifierInfo.value;
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 
     // Since by default we draw at the top left corner, this offset
@@ -257,10 +262,9 @@ class Magnifier extends StatelessWidget {
   /// {@macro widgets.material.magnifier.androidDisclaimer}
   const Magnifier({
     super.key,
-    this.filmColor = const Color.fromARGB(8, 158, 158, 158),
     this.additionalFocalPointOffset = Offset.zero,
     this.borderRadius = const BorderRadius.all(Radius.circular(_borderRadius)),
-    this.size = Magnifier.kDefaultMagnifierSize,
+    this.filmColor = const Color.fromARGB(8, 158, 158, 158),
     this.shadows = const <BoxShadow>[
       BoxShadow(
           blurRadius: 1.5,
@@ -268,6 +272,7 @@ class Magnifier extends StatelessWidget {
           spreadRadius: 0.75,
           color: Color.fromARGB(25, 0, 0, 0))
     ],
+    this.size = Magnifier.kDefaultMagnifierSize,
   });
 
   /// The default size of this [Magnifier].
@@ -285,26 +290,9 @@ class Magnifier extends StatelessWidget {
   @visibleForTesting
   static const double kStandardVerticalFocalPointShift = 18;
 
-  /// The color to tint the image in this [Magnifier].
-  ///
-  /// On native Android, there is a almost transparent gray tint to the
-  /// magnifier, in order to better distinguish the contents of the lens from
-  /// the background.
-  final Color filmColor;
-
   static const double _borderRadius = 40;
   static const double _magnification = 1.25;
 
-  /// The [Size] of this [Magnifier].
-  ///
-  /// This size does not include the border.
-  final Size size;
-
-  /// The shadows for this [Magnifier].
-  final List<BoxShadow> shadows;
-
-  /// The border radius for this magnifier.
-  final BorderRadius borderRadius;
 
   /// Any additional offset the focal point requires to "point"
   /// to the correct place.
@@ -312,6 +300,25 @@ class Magnifier extends StatelessWidget {
   /// This is useful for instances where the magnifier is not pointing to something
   /// directly below it.
   final Offset additionalFocalPointOffset;
+
+
+  /// The border radius for this magnifier.
+  final BorderRadius borderRadius;
+
+  /// The color to tint the image in this [Magnifier].
+  ///
+  /// On native Android, there is a almost transparent gray tint to the
+  /// magnifier, in order to better distinguish the contents of the lens from
+  /// the background.
+  final Color filmColor;
+
+  /// The shadows for this [Magnifier].
+  final List<BoxShadow> shadows;
+
+  /// The [Size] of this [Magnifier].
+  ///
+  /// This size does not include the border.
+  final Size size;
 
   @override
   Widget build(BuildContext context) {
