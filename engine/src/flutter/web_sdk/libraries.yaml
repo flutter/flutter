@@ -34,3 +34,14 @@ dart2js:
 
     _engine:
       uri: "lib/_engine/engine.dart"
+
+wasm:
+  include:
+    - {path: "../dart-sdk/lib/libraries.json", target: wasm}
+
+  libraries:
+    ui:
+      uri: "lib/ui/ui.dart"
+
+    _engine:
+      uri: "lib/_engine/engine.dart"
