@@ -413,6 +413,37 @@ void main() {
     expect(controller.index, 0);
   });
 
+  testWidgets('Make the tab be at current index when controller changed', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: GroupOfTabs()));
+    expect(find.text('Group 1'), findsOneWidget);
+    expect(find.text('Group 2'), findsOneWidget);
+    expect(find.text('Tab 0-0'), findsOneWidget);
+    await tester.tap(find.text('Group 2'));
+    await tester.pumpAndSettle();
+
+    // Now that we are in the second group drag to the end and 
+    // click the last tab.
+    expect(find.text('Tab 1-0'), findsOneWidget);
+
+    await tester.drag(find.byType(TabBar), const Offset(-1000, 0));
+    await tester.tap(find.text('Tab 1-9'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1-9'), findsOneWidget);
+    expect(find.text('Content 1-9'), findsOneWidget);
+
+    // Go back to the first group
+    await tester.tap(find.text('Group 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 0-0'), findsOneWidget);
+    expect(find.text('Content 0-0'), findsOneWidget);
+
+    // Check if the other group is still at the final tab
+    await tester.tap(find.text('Group 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1-9'), findsOneWidget);
+    expect(find.text('Content 1-9'), findsOneWidget);
+  });
+
   testWidgets('Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     const Key tabBarKey = Key('TabBar');
@@ -4907,6 +4938,77 @@ class TabBodyState extends State<TabBody> {
   Widget build(BuildContext context) {
     return Center(
       child: Text('${widget.index}'),
+    );
+  }
+}
+
+class GroupOfTabs extends StatefulWidget {
+  const GroupOfTabs({super.key});
+
+  @override
+  _GroupOfTabsState createState() => _GroupOfTabsState();
+}
+
+class _GroupOfTabsState extends State<GroupOfTabs> with TickerProviderStateMixin {
+  late List<TabController> _controllers;
+  late List<List<Tab>> _tabGroups;
+  late List<List<Widget>> _tabContents;
+  int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = [];
+    _tabGroups = [];
+    _tabContents = [];
+    for (int i = 0; i < 5; i++) {
+      
+      final List<Tab> tabs = List<Tab>.generate(10, (j) => Tab(text: 'Tab $i-$j'));
+      final List<Widget> contents = List<Widget>.generate(10, (j) => Text('Content $i-$j'));
+
+      _tabGroups.add(tabs);
+      _tabContents.add(contents);
+      _controllers.add(
+        TabController(
+          length: 10,
+          vsync: this,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        bottom: TabBar(
+          isScrollable: true,
+          controller: _controllers[_index],
+          tabs: _tabGroups[_index],
+        ),
+      ),
+      body: TabBarView(
+        controller: _controllers[_index],
+        children: _tabContents[_index],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _index,
+          onTap: (value) {
+            setState(() {
+              _index = value;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Group 1',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Group 2',
+            ),
+          ]),
     );
   }
 }

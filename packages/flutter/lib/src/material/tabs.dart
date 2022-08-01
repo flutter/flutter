@@ -993,6 +993,10 @@ class _TabBarState extends State<TabBar> {
       _controller!.animation!.addListener(_handleTabControllerAnimationTick);
       _controller!.addListener(_handleTabControllerTick);
       _currentIndex = _controller!.index;
+  
+      if (widget.isScrollable && _scrollController != null) {
+        _scrollToCurrentIndex();
+      }
     }
   }
 
