@@ -2428,10 +2428,8 @@ FILE: ../../../flutter/shell/platform/windows/system_utils_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner.h
 FILE: ../../../flutter/shell/platform/windows/task_runner_unittests.cc
-FILE: ../../../flutter/shell/platform/windows/task_runner_win32.cc
-FILE: ../../../flutter/shell/platform/windows/task_runner_win32.h
-FILE: ../../../flutter/shell/platform/windows/task_runner_win32_window.cc
-FILE: ../../../flutter/shell/platform/windows/task_runner_win32_window.h
+FILE: ../../../flutter/shell/platform/windows/task_runner_window.cc
+FILE: ../../../flutter/shell/platform/windows/task_runner_window.h
 FILE: ../../../flutter/shell/platform/windows/text_input_manager.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_manager.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
