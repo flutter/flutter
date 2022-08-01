@@ -17,6 +17,7 @@ import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
+import 'tool_subsharding.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -339,16 +340,28 @@ Future<void> _runTestHarnessTests() async {
 final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
 Future<void> _runGeneralToolTests() async {
-  await _dartRunTest(
-    _toolsPath,
-    testPaths: <String>[path.join('test', 'general.shard')],
-    enableFlutterToolAsserts: false,
+  const String fileName = 'output.json';
+  if (!File(fileName).existsSync()) {
+    throw Exception('TODO');
+    // TODO(jasguerrero): create output file, https://github.com/flutter/flutter/issues/97539
+  }
 
-    // Detect unit test time regressions (poor time delay handling, etc).
-    // This overrides the 15 minute default for tools tests.
-    // See the README.md and dart_test.yaml files in the flutter_tools package.
-    perTestTimeout: const Duration(seconds: 2),
-  );
+  final Map<String, dynamic> fileContent = readJsonTestsSubShardFile(fileName);
+  final List<dynamic> allSubShards = fileContent['general.shard'] as List<dynamic>;
+
+  for (final dynamic shardsDynamic in allSubShards) {
+    final List<String> shards = (shardsDynamic as List<dynamic>).map((e) => e.toString()).toList();
+    await _dartRunTest(
+      _toolsPath,
+      testPaths: shards,
+      enableFlutterToolAsserts: false,
+
+      // Detect unit test time regressions (poor time delay handling, etc).
+      // This overrides the 15 minute default for tools tests.
+      // See the README.md and dart_test.yaml files in the flutter_tools package.
+      perTestTimeout: const Duration(seconds: 2),
+    );
+  }
 }
 
 Future<void> _runCommandsToolTests() async {
