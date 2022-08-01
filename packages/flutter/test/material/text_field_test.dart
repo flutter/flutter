@@ -11841,7 +11841,7 @@ void main() {
   });
 }
 
-/// Simple test app for testing the obscure text.
+/// A Simple widget for testing the obscure text.
 class _ObscureTextTestWidget extends StatefulWidget {
    const _ObscureTextTestWidget({ required this.controller,
    });
@@ -11854,7 +11854,7 @@ class _ObscureTextTestWidget extends StatefulWidget {
 
 class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
 
-  bool _obscureText= false;
+  bool _obscureText = false;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -11864,7 +11864,7 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
             return Column(
               children: <Widget>[
                 TextField(
-                    obscureText:_obscureText,
+                    obscureText: _obscureText,
                     controller: widget.controller,
                 ),
                 ElevatedButton(
