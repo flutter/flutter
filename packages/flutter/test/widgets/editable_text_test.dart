@@ -12686,7 +12686,7 @@ void main() {
             spellCheckConfiguration:
               SpellCheckConfiguration(
                 spellCheckService: fakeSpellCheckService,
-\                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
             ),
           ),
         ),
