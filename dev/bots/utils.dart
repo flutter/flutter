@@ -59,8 +59,9 @@ String get clock {
 String prettyPrintDuration(Duration duration) {
   String result = '';
   final int minutes = duration.inMinutes;
-  if (minutes > 0)
+  if (minutes > 0) {
     result += '${minutes}min ';
+  }
   final int seconds = duration.inSeconds - minutes * 60;
   final int milliseconds = duration.inMilliseconds - (seconds * 1000 + minutes * 60 * 1000);
   result += '$seconds.${milliseconds.toString().padLeft(3, "0")}s';

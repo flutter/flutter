@@ -518,7 +518,7 @@ class _SnackBarState extends State<SnackBar> {
               child: TextButtonTheme(
                 data: TextButtonThemeData(
                   style: TextButton.styleFrom(
-                    primary: buttonColor,
+                    foregroundColor: buttonColor,
                     padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   ),
                 ),

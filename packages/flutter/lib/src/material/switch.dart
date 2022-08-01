@@ -751,7 +751,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
         ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+        ?? effectiveInactiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)

@@ -34141,7 +34141,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get alertDialogLabel => 'விழிப்பூட்டல்';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => 'முற்பகல்';
 
   @override
   String get backButtonTooltip => 'முந்தைய பக்கம்';
@@ -34432,7 +34432,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get popupMenuLabel => 'பாப்-அப் மெனு';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => 'பிற்பகல்';
 
   @override
   String get previousMonthTooltip => 'முந்தைய மாதம்';
