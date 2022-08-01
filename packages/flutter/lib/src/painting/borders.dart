@@ -23,7 +23,7 @@ enum BorderStyle {
 
 /// The relative position of the stroke on a [BorderSide] in an
 /// [OutlinedBorder] or [Border].
-/// 
+///
 /// When set to [inside], the stroke is drawn completely inside the widget.
 /// For [center] and [outside], a property such as [Container.clipBehavior]
 /// can be used in an outside widget to clip it.
@@ -164,11 +164,11 @@ class BorderSide with Diagnosticable {
 
   /// The relative position of the stroke on a [BorderSide] in an
   /// [OutlinedBorder] or [Border].
-  /// 
+  ///
   /// Values typically range from -1.0 (inside border, default) to
   /// 1.0 (outside border), without any bound constraints (e.g., a
   /// value of -2.0 is unexpected, but possible).
-  /// 
+  ///
   /// See also:
   ///
   ///  * [StrokeAlign], a class that acts as a shortcut for specifying
