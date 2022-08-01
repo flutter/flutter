@@ -269,9 +269,9 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
   }
 
   // Derive key mapping for each key code based on their layout clues.
-  // Max key code is 127 for ADB keyboards.
-  // https://developer.apple.com/documentation/coreservices/1390584-uckeytranslate?language=objc#parameters
-  const uint16_t kMaxKeyCode = 127;
+  // Key code 0x00 - 0x32 are typewriter keys (letters, digits, and symbols.)
+  // See keyCodeToPhysicalKey.
+  const uint16_t kMaxKeyCode = 0x32;
 #ifdef DEBUG_PRINT_LAYOUT
   NSString* debugLayoutData = @"";
 #endif
@@ -303,8 +303,10 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
     }
     bool hasAnyEascii = isEascii(thisKeyClues[0]) || isEascii(thisKeyClues[1]);
     // See if any produced char meets the requirement as a logical key.
-    if (_layoutMap[@(keyCode)] == nil && !hasAnyEascii) {
-      _layoutMap[@(keyCode)] = @(usLayoutGoalsByKeyCode[keyCode].keyChar);
+    auto foundUsLayoutGoal = usLayoutGoalsByKeyCode.find(keyCode);
+    if (foundUsLayoutGoal != usLayoutGoalsByKeyCode.end() && _layoutMap[@(keyCode)] == nil &&
+        !hasAnyEascii) {
+      _layoutMap[@(keyCode)] = @(foundUsLayoutGoal->second.keyChar);
     }
   }
 #ifdef DEBUG_PRINT_LAYOUT
