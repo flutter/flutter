@@ -90,7 +90,7 @@ linter:
     # - close_sinks # not reliable enough
     - combinators_ordering
     # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
-    # - conditional_uri_does_not_exist # not yet tested
+    - conditional_uri_does_not_exist
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     - curly_braces_in_flow_control_structures
