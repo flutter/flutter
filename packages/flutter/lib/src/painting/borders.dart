@@ -167,7 +167,7 @@ class BorderSide with Diagnosticable {
   ///
   /// Values typically range from -1.0 (inside border, default) to
   /// 1.0 (outside border), without any bound constraints (e.g., a
-  /// value of -2.0 is unexpected, but possible).
+  /// value of -2.0 is is not typical, but allowed).
   ///
   /// See also:
   ///
@@ -315,37 +315,21 @@ class BorderSide with Diagnosticable {
 
   /// Get the amount of the stroke width that lies inside of the [BorderSide].
   ///
-  /// This will return 0 for a [strokeAlign] of 1, and the width of the stroke for
-  /// a [strokeAlign] of -1.
-  ///
-  /// Example of results:
-  /// StrokeAlign.inside (-1) => width
-  /// StrokeAlign.center  (0) => width / 2
-  /// StrokeAlign.outside (1) => 0
-  /// ```
+  /// For example, this will return the [wdith] for a [strokeAlign] of -1, half
+  /// the [width] for a [strokeAlign] of 0, and 0 for a [strokeAlign] of 1.
   double get strokeInset => width * (1 - (1 + strokeAlign) / 2);
 
   /// Get the amount of the stroke width that lies outside of the [BorderSide].
   ///
-  /// This will return 0 for a [strokeAlign] of -1, and the width of the stroke for
-  /// a [strokeAlign] of 1.
-  ///
-  /// Example of results:
-  /// StrokeAlign.inside (-1) => 0
-  /// StrokeAlign.center  (0) => width / 2
-  /// StrokeAlign.outside (1) => width
+  /// This will return 0 for a [strokeAlign] of -1, half the [width] for a
+  /// [strokeAlign] of 0, and the [width] for a [strokeAlign] of 1.
   double get strokeOutset => width * (1 + strokeAlign) / 2;
 
   /// The offset of the stroke, taking into account the stroke alignment.
   ///
-  /// This will return half width of the stroke for a [strokeAlign] of 1, and the
-  /// negative half width for a [strokeAlign] of -1.
-  ///
-  /// Example of results:
-  /// StrokeAlign.inside (-1) => - (width / 2)
-  /// StrokeAlign.center  (0) => 0
-  /// StrokeAlign.outside (1) => width / 2
-  /// ```
+  /// This will return the negative half [width] of the stroke for a
+  /// [strokeAlign] of -1, 0 for a [strokeAlign] of 0, and half the
+  /// [width] for a [strokeAlign] of -1.
   double get halfStrokeOffset => width * strokeAlign / 2;
 
   @override
