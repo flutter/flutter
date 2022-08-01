@@ -208,13 +208,11 @@ void main() {
     final MagnifierController magnifierController = MagnifierController();
 
     tearDown(() {
-      magnifierController.overlayEntry?.remove();
       magnifierController.removeFromOverlay();
     });
 
     group('show', () {
-      testWidgets('should insert below below widget',
-          (WidgetTester tester) async {
+      testWidgets('should insert below below widget', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Text('text'),
         ));
@@ -247,13 +245,16 @@ void main() {
         expect(allOverlayChildren.first.widget.key, fakeMagnifier.key);
       });
 
-      testWidgets('should re-insert without animating if magnifier already shown',
+      testWidgets('should insert newly built widget without animating out if overlay != null',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =
               _MockAnimationController();
 
           const RawMagnifier testMagnifier = RawMagnifier(
+            size: Size(100, 100),
+          );
+          const RawMagnifier testMagnifier2 = RawMagnifier(
             size: Size(100, 100),
           );
 
@@ -275,7 +276,7 @@ void main() {
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          magnifierController.show(context: context, builder: (_) => testMagnifier);
+          magnifierController.show(context: context, builder: (_) => testMagnifier2);
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
@@ -283,6 +284,8 @@ void main() {
           expect(animationController.reverseCalls, 0,
               reason:
                   'should not have called reverse on animation controller due to force remove');
+
+          expect(find.byWidget(testMagnifier2), findsOneWidget);
         });
       });
     });
