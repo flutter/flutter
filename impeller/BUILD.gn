@@ -35,8 +35,6 @@ config("impeller_public_config") {
 
   if (is_win) {
     defines += [
-      "_USE_MATH_DEFINES",
-
       # TODO(dnfield): https://github.com/flutter/flutter/issues/50053
       "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
     ]
