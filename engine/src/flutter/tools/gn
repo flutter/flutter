@@ -94,11 +94,17 @@ def cpu_for_target_arch(arch):
 
 def is_host_build(args):
   # If target_os == None, then this is a host build.
-  # However, for linux arm64 builds, we cross compile from x64 hosts, so the
+  if args.target_os is None:
+    return True
+  # For linux arm64 builds, we cross compile from x64 hosts, so the
   # target_os='linux' and linux-cpu='arm64'
-  return args.target_os is None or (
-      args.target_os == 'linux' and args.linux_cpu == 'arm64'
-  )
+  if args.target_os == 'linux' and args.linux_cpu == 'arm64':
+    return True
+  # The Mac and host targets are redundant. Again, necessary to disambiguate
+  # during cross-compilation.
+  if args.target_os == 'mac':
+    return True
+  return False
 
 
 # Determines whether a prebuilt Dart SDK can be used instead of building one.
