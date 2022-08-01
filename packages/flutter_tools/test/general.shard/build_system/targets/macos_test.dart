@@ -421,7 +421,6 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
-        '--strip',
         environment.buildDir.childFile('app.dill').path,
       ]),
       FakeCommand(command: <String>[
@@ -429,7 +428,6 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
-        '--strip',
         environment.buildDir.childFile('app.dill').path,
       ]),
       FakeCommand(command: <String>[
@@ -457,6 +455,36 @@ void main() {
         '-install_name', '@rpath/App.framework/App',
         '-o', environment.buildDir.childFile('x86_64/App.framework/App').path,
         environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'dsymutil',
+        '-o',
+        environment.buildDir.childFile('arm64/App.framework.dSYM').path,
+        environment.buildDir.childFile('arm64/App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'dsymutil',
+        '-o',
+        environment.buildDir.childFile('x86_64/App.framework.dSYM').path,
+        environment.buildDir.childFile('x86_64/App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'strip',
+        '-S',
+        environment.buildDir.childFile('arm64/App.framework/App').path,
+        '-o',
+        environment.buildDir.childFile('arm64/App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'strip',
+        '-S',
+        environment.buildDir.childFile('x86_64/App.framework/App').path,
+        '-o',
+        environment.buildDir.childFile('x86_64/App.framework/App').path,
       ]),
       FakeCommand(command: <String>[
         'lipo',

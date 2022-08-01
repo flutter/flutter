@@ -114,7 +114,7 @@ abstract class AotAssemblyBase extends Target {
     }
 
     // Combine the app lib into a fat framework.
-    await _lipo(environment, darwinArchs, 'App.Framework/App', buildOutputPath);
+    await _lipo(environment, darwinArchs, 'App.framework/App', buildOutputPath);
 
     // And combine the dSYM for each architecture too, if it was created.
     await _lipo(
