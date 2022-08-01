@@ -447,7 +447,9 @@ void PointerDelegate::WatchLoop(
   // Start watching both channels.
   touch_source_->Watch(std::move(touch_responses_), /*copy*/ touch_responder_);
   touch_responses_.clear();
-  mouse_source_->Watch(/*copy*/ mouse_responder_);
+  if (mouse_source_) {
+    mouse_source_->Watch(/*copy*/ mouse_responder_);
+  }
 }
 
 }  // namespace flutter_runner
