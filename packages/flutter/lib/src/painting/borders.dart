@@ -594,9 +594,9 @@ abstract class ShapeBorder {
   ///
   /// Subclasses that implement [paintInterior] should override this to return
   /// true. Subclasses should only override [paintInterior] if doing so enables
-  /// faster
-  /// rendering than is possible with [Canvas.drawPath] (so, in particular,
-  /// subclasses should not call [Canvas.drawPath] in [paintInterior]).
+  /// faster rendering than is possible with [Canvas.drawPath] (so, in
+  /// particular, subclasses should not call [Canvas.drawPath] in
+  /// [paintInterior]).
   ///
   /// See also:
   ///
