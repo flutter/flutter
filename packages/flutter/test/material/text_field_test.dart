@@ -11826,7 +11826,7 @@ void main() {
   });
 }
 
-/// Simple test app for testing the obscure text.
+/// A Simple widget for testing the obscure text.
 class _ObscureTextTestWidget extends StatefulWidget {
    const _ObscureTextTestWidget({ required this.controller,
    });
