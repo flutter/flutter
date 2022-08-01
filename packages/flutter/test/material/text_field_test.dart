@@ -6122,6 +6122,21 @@ void main() {
       )
     );
 
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(
+        semantics,
+        includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          value: 'Hello',
+        )
+    );
+
     semantics.dispose();
   });
 
