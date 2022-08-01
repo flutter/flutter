@@ -110,6 +110,9 @@ class PlaceholderDimensions {
 
   @override
   bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
     return other is PlaceholderDimensions
         && other.size == size
         && other.alignment == alignment
