@@ -11843,13 +11843,11 @@ void main() {
 
 /// A Simple widget for testing the obscure text.
 class _ObscureTextTestWidget extends StatefulWidget {
-   const _ObscureTextTestWidget({ required this.controller,
-   });
+   const _ObscureTextTestWidget({ required this.controller });
 
   final TextEditingController controller;
   @override
-  _ObscureTextTestWidgetState createState() =>
-      _ObscureTextTestWidgetState();
+  _ObscureTextTestWidgetState createState() => _ObscureTextTestWidgetState();
 }
 
 class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
@@ -11868,9 +11866,7 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
                     controller: widget.controller,
                 ),
                 ElevatedButton(
-                  onPressed: () => setState(() {
-                    _obscureText = !_obscureText;
-                  }),
+                  onPressed: () => setState(() {_obscureText = !_obscureText;}),
                   child: const SizedBox.shrink(),
                 ),
               ],
