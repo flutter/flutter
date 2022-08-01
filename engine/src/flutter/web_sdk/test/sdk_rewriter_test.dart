@@ -33,7 +33,6 @@ import 'dart:developer' as developer;
 import 'dart:js_util' as js_util;
 import 'dart:_js_annotations';
 import 'dart:math' as math;
-import 'dart:svg' as svg;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
