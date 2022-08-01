@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
-import 'package:meta/meta.dart';
 
 /// Controls how spell check is performed for text input.
 ///
@@ -66,6 +66,18 @@ class SpellCheckConfiguration {
   }
 
   @override
+  String toString() {
+    final List<String> properties = <String>[
+      '$_spellCheckEnabled',
+      '$spellCheckService',
+      '$spellCheckSuggestionsHandler',
+      '$misspelledTextStyle',
+    ];
+
+    return 'SpellCheckConfiguration(${properties.join(', ')})';
+  }
+
+  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
         return true;
@@ -100,7 +112,7 @@ mixin SpellCheckSuggestionsHandler {
     bool composingWithinCurrentTextRange,
     TextStyle? style,
     TextStyle misspelledTextStyle,
-    SpellCheckResults spellCheckResults
+    SpellCheckResults spellCheckResults,
   );
 }
 
