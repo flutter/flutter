@@ -12272,7 +12272,7 @@ class _ObscureTextTestWidget extends StatefulWidget {
 
 class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
 
-  bool _obscureText= false;
+  bool _obscureText = false;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
