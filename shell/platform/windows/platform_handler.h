@@ -5,6 +5,13 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_PLATFORM_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_PLATFORM_HANDLER_H_
 
+#include <Windows.h>
+
+#include <functional>
+#include <memory>
+#include <optional>
+#include <variant>
+
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "rapidjson/document.h"
@@ -12,39 +19,40 @@
 namespace flutter {
 
 class FlutterWindowsView;
+class ScopedClipboardInterface;
 
 // Handler for internal system channels.
 class PlatformHandler {
  public:
-  explicit PlatformHandler(BinaryMessenger* messenger);
+  explicit PlatformHandler(
+      BinaryMessenger* messenger,
+      FlutterWindowsView* view,
+      std::optional<std::function<std::unique_ptr<ScopedClipboardInterface>()>>
+          scoped_clipboard_provider = std::nullopt);
 
   virtual ~PlatformHandler();
-
-  // Creates a new platform handler using the given messenger and view.
-  static std::unique_ptr<PlatformHandler> Create(BinaryMessenger* messenger,
-                                                 FlutterWindowsView* view);
 
  protected:
   // Gets plain text from the clipboard and provides it to |result| as the
   // value in a dictionary with the given |key|.
   virtual void GetPlainText(
       std::unique_ptr<MethodResult<rapidjson::Document>> result,
-      std::string_view key) = 0;
+      std::string_view key);
 
   // Provides a boolean to |result| as the value in a dictionary at key
   // "value" representing whether or not the clipboard has a non-empty string.
   virtual void GetHasStrings(
-      std::unique_ptr<MethodResult<rapidjson::Document>> result) = 0;
+      std::unique_ptr<MethodResult<rapidjson::Document>> result);
 
   // Sets the clipboard's plain text to |text|, and reports the result (either
   // an error, or null for success) to |result|.
   virtual void SetPlainText(
       const std::string& text,
-      std::unique_ptr<MethodResult<rapidjson::Document>> result) = 0;
+      std::unique_ptr<MethodResult<rapidjson::Document>> result);
 
   virtual void SystemSoundPlay(
       const std::string& sound_type,
-      std::unique_ptr<MethodResult<rapidjson::Document>> result) = 0;
+      std::unique_ptr<MethodResult<rapidjson::Document>> result);
 
   // A error type to use for error responses.
   static constexpr char kClipboardError[] = "Clipboard error";
@@ -59,6 +67,42 @@ class PlatformHandler {
 
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<MethodChannel<rapidjson::Document>> channel_;
+
+  // A reference to the Flutter view.
+  FlutterWindowsView* view_;
+
+  // A scoped clipboard provider that can be passed in for mocking in tests.
+  // Use this to acquire clipboard in each operation to avoid blocking clipboard
+  // unnecessarily. See flutter/flutter#103205.
+  std::function<std::unique_ptr<ScopedClipboardInterface>()>
+      scoped_clipboard_provider_;
+};
+
+// A public interface for ScopedClipboard, so that it can be injected into
+// PlatformHandler.
+class ScopedClipboardInterface {
+ public:
+  virtual ~ScopedClipboardInterface(){};
+
+  // Attempts to open the clipboard for the given window, returning the error
+  // code in the case of failure and 0 otherwise.
+  virtual int Open(HWND window) = 0;
+
+  // Returns true if there is string data available to get.
+  virtual bool HasString() = 0;
+
+  // Returns string data from the clipboard.
+  //
+  // If getting a string fails, returns the error code.
+  //
+  // Open(...) must have succeeded to call this method.
+  virtual std::variant<std::wstring, int> GetString() = 0;
+
+  // Sets the string content of the clipboard, returning the error code on
+  // failure and 0 otherwise.
+  //
+  // Open(...) must have succeeded to call this method.
+  virtual int SetString(const std::wstring string) = 0;
 };
 
 }  // namespace flutter
