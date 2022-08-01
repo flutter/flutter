@@ -936,10 +936,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     if (_hasIntrinsicError) {
-      final TextStyle defaultErrorStyle= Theme.of(context).useMaterial3 ? _m3CounterErrorStyle(context): _m2CounterErrorStyle(context);
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',
-        counterStyle: effectiveDecoration.errorStyle ?? defaultErrorStyle,
+        counterStyle: effectiveDecoration.errorStyle
+          ?? (Theme.of(context).useMaterial3 ? _m3CounterErrorStyle(context): _m2CounterErrorStyle(context)),
         counterText: counterText,
         semanticCounterText: semanticCounterText,
       );
@@ -1402,7 +1402,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 }
 
 TextStyle _m2CounterErrorStyle(BuildContext context) =>
-    Theme.of(context).textTheme.caption!.copyWith(color:Theme.of(context).errorColor);
+  Theme.of(context).textTheme.caption!.copyWith(color: Theme.of(context).errorColor);
 
 // BEGIN GENERATED TOKEN PROPERTIES - TextField
 
@@ -1418,6 +1418,6 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
 TextStyle _m3CounterErrorStyle(BuildContext context) =>
-  (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(color:Theme.of(context).colorScheme.error);
+  Theme.of(context).textTheme.bodySmall!.copyWith(color:Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
