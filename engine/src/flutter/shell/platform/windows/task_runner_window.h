@@ -15,14 +15,18 @@
 namespace flutter {
 
 // Hidden HWND responsible for processing flutter tasks on main thread
-class TaskRunnerWin32Window {
+class TaskRunnerWindow {
  public:
   class Delegate {
    public:
+    // Executes expired task, and returns the duration until the next task
+    // deadline if exists, otherwise returns `std::chrono::nanoseconds::max()`.
+    //
+    // Each platform implementation must call this to schedule the tasks.
     virtual std::chrono::nanoseconds ProcessTasks() = 0;
   };
 
-  static std::shared_ptr<TaskRunnerWin32Window> GetSharedInstance();
+  static std::shared_ptr<TaskRunnerWindow> GetSharedInstance();
 
   // Triggers processing delegate tasks on main thread
   void WakeUp();
@@ -30,10 +34,10 @@ class TaskRunnerWin32Window {
   void AddDelegate(Delegate* delegate);
   void RemoveDelegate(Delegate* delegate);
 
-  ~TaskRunnerWin32Window();
+  ~TaskRunnerWindow();
 
  private:
-  TaskRunnerWin32Window();
+  TaskRunnerWindow();
 
   void ProcessTasks();
 
