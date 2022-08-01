@@ -492,12 +492,12 @@ void main() {
 
 
 class _StatefulListItem extends StatefulWidget {
-  final int index;
-
   const _StatefulListItem({
-    Key? key,
+    super.key,
     required this.index,
-  }) : super(key: key);
+  });
+
+  final int index;
 
   @override
   _StatefulListItemState createState() => _StatefulListItemState();
