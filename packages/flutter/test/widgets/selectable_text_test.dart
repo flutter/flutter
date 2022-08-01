@@ -200,7 +200,7 @@ void main() {
     final FlutterError error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('No Overlay widget exists above EditableText'),
+      contains('EditableText widgets require an Overlay widget ancestor'),
     );
 
     await tester.pumpWidget(const SizedBox.shrink());

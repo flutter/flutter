@@ -16,6 +16,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -617,22 +618,7 @@ class SelectionOverlay {
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
-       assert(() {
-         final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
-         if (overlay == null) {
-           final List<DiagnosticsNode> information = <DiagnosticsNode>[
-             ErrorSummary('No Overlay widget found.'),
-             ErrorDescription(
-                 'No Overlay widget exists above $context.\n'
-                 'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
-                 'app content was created above the Navigator with the WidgetsApp builder parameter.'
-             ),
-           ];
-
-           throw FlutterError.fromParts(information);
-         }
-         return true;
-       }());
+       assert(debugCheckHasOverlay(context));
 
   /// The context in which the selection handles should appear.
   ///
