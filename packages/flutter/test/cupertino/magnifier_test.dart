@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final Offset basicOffset = Offset(CupertinoMagnifier.kDefaultSize.width / 2,
-      CupertinoMagnifier.kDefaultSize.height + CupertinoMagnifier.kMagnifierAboveFocalPoint);
+       CupertinoMagnifier.kDefaultSize.height - CupertinoMagnifier.kMagnifierAboveFocalPoint);
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
   final MagnifierController magnifierController = MagnifierController();
 
