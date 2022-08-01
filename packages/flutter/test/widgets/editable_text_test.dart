@@ -12631,7 +12631,7 @@ void main() {
     });
 
     testWidgets(
-      'Spell check configured properly when spell check enabled without specified spell check service and handler',
+      'Spell check configured properly when spell check enabled without specified spell check service and native spell check service defined',
           (WidgetTester tester) async {
         tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
           true;
@@ -12662,18 +12662,16 @@ void main() {
           equals(DefaultSpellCheckService),
         );
         expect(
-          state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
-          equals(DefaultSpellCheckSuggestionsHandler),
+          state.spellCheckSuggestionsHandler.runtimeType,
+          equals(SpellCheckSuggestionsHandler),
         );
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
     testWidgets(
-      'Spell check configured properly with specified spell check service and handler',
+      'Spell check configured properly with specified spell check service',
         (WidgetTester tester) async {
       final FakeSpellCheckService fakeSpellCheckService = FakeSpellCheckService();
-      final FakeSpellCheckSuggestionsHandler fakeSpellCheckSuggestionsHandler =
-      FakeSpellCheckSuggestionsHandler();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -12688,8 +12686,7 @@ void main() {
             spellCheckConfiguration:
               SpellCheckConfiguration(
                 spellCheckService: fakeSpellCheckService,
-                spellCheckSuggestionsHandler: fakeSpellCheckSuggestionsHandler,
-                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+\                misspelledTextStyle: TextField.materialMisspelledTextStyle,
             ),
           ),
         ),
@@ -12702,8 +12699,8 @@ void main() {
         equals(FakeSpellCheckService),
       );
       expect(
-        state.spellCheckConfiguration!.spellCheckSuggestionsHandler.runtimeType,
-        equals(FakeSpellCheckSuggestionsHandler),
+        state.spellCheckSuggestionsHandler.runtimeType,
+        equals(SpellCheckSuggestionsHandler),
       );
     });
 
@@ -13099,4 +13096,3 @@ class _TestScrollController extends ScrollController {
 }
 
 class FakeSpellCheckService extends DefaultSpellCheckService {}
-class FakeSpellCheckSuggestionsHandler extends DefaultSpellCheckSuggestionsHandler {}

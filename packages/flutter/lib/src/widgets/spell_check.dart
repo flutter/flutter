@@ -10,16 +10,14 @@ import 'package:flutter/services.dart'
 /// Controls how spell check is performed for text input.
 ///
 /// This configuration determines the [SpellCheckService] used to fetch the
-/// [List<SuggestionSpan>] spell check results and the
-/// [SpellCheckSuggestionsHandler] used to mark and display replacement
-/// suggestions for misspelled words within text input.
+/// [List<SuggestionSpan>] spell check results and the [TextStyle] used to
+/// mark misspelled words within text input.
 @immutable
 class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
   const SpellCheckConfiguration({
     this.spellCheckService,
-    this.spellCheckSuggestionsHandler,
     this.misspelledTextStyle,
   }) : _spellCheckEnabled = true;
 
@@ -30,15 +28,10 @@ class SpellCheckConfiguration {
     TextStyle? misspelledTextStyle,
   }) : _spellCheckEnabled = false,
        spellCheckService = null,
-       spellCheckSuggestionsHandler = null,
        misspelledTextStyle = null;
 
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
-
-  /// The handler used to mark misspelled words in text input and display
-  /// a menu of the replacement suggestions for these misspelled words.
-  final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
 
   /// Style used to indicate misspelled words.
   ///
@@ -55,12 +48,9 @@ class SpellCheckConfiguration {
   /// specified overrides.
   SpellCheckConfiguration copyWith({
     SpellCheckService? spellCheckService,
-    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler,
     TextStyle? misspelledTextStyle}) {
     return SpellCheckConfiguration(
       spellCheckService: spellCheckService ?? this.spellCheckService,
-      spellCheckSuggestionsHandler:
-        spellCheckSuggestionsHandler ?? this.spellCheckSuggestionsHandler,
       misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
     );
   }
@@ -68,12 +58,9 @@ class SpellCheckConfiguration {
   @override
   String toString() {
     final List<String> properties = <String>[
-      '$_spellCheckEnabled',
       '$spellCheckService',
-      '$spellCheckSuggestionsHandler',
       '$misspelledTextStyle',
     ];
-
     return 'SpellCheckConfiguration(${properties.join(', ')})';
   }
 
@@ -83,40 +70,18 @@ class SpellCheckConfiguration {
         return true;
     }
 
-    return other is SpellCheckConfiguration &&
-        other.spellCheckService == spellCheckService &&
-        other.spellCheckSuggestionsHandler == spellCheckSuggestionsHandler &&
-        other.misspelledTextStyle == misspelledTextStyle &&
-        other._spellCheckEnabled == _spellCheckEnabled;
+    return other is SpellCheckConfiguration
+      && other.spellCheckService == spellCheckService
+      && other.misspelledTextStyle == misspelledTextStyle
+      && other._spellCheckEnabled == _spellCheckEnabled;
   }
 
   @override
-  int get hashCode => Object.hash(spellCheckService, spellCheckSuggestionsHandler, misspelledTextStyle, _spellCheckEnabled);
+  int get hashCode => Object.hash(spellCheckService, misspelledTextStyle, _spellCheckEnabled);
 }
 
 /// Determines how misspelled words are indicated in text input and how
 /// replacement suggestions for misspelled words are displayed via menu.
-mixin SpellCheckSuggestionsHandler {
-  /// Builds the [TextSpan] tree given the current state of the text input and
-  /// spell check results.
-  ///
-  /// The [value] is the current [TextEditingValue] requested to be rendered
-  /// by a text input widget. The [composingWithinCurrentTextRange] value
-  /// represents whether or not there is a valid composing region in the
-  /// [value]. The [style] is the [TextStyle] to render the [value]'s text with,
-  /// and the [misspelledTextStyle] is the [TextStyle] to render misspelled
-  /// words within the [value]'s text with. The [spellCheckResults] are the
-  /// results of spell checking the [value]'s text.
-  TextSpan buildTextSpanWithSpellCheckSuggestions(
-    TextEditingValue value,
-    bool composingWithinCurrentTextRange,
-    TextStyle? style,
-    TextStyle misspelledTextStyle,
-    SpellCheckResults spellCheckResults,
-  );
-}
-
-/// The handler used by default for spell checking text input.
 ///
 /// Any widget may use this handler to build a [TextSpan] tree with
 /// [SpellCheckResults] indicated in a style based on the platform by calling
@@ -125,14 +90,12 @@ mixin SpellCheckSuggestionsHandler {
 ///
 /// See also:
 ///
-///  * [SpellCheckSuggestionsHandler], the handler that this implements and
-///    may be overriden for use by [EditableText].
 ///  * [EditableText], which uses this handler to display spell check results
-///     by default if spell check is enabled.
-class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
+///     by if spell check is enabled.
+class SpellCheckSuggestionsHandler {
   /// Creates a handler to use for spell checking text input based on the
   /// provided platform.
-  DefaultSpellCheckSuggestionsHandler();
+  SpellCheckSuggestionsHandler();
 
   /// Adjusts spell check results to correspond to [newText] if the only results
   /// that the handler has access to are the [results] corresponding to
@@ -211,7 +174,16 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     return correctedSpellCheckResults;
   }
 
-  @override
+  /// Builds the [TextSpan] tree given the current state of the text input and
+  /// spell check results.
+  ///
+  /// The [value] is the current [TextEditingValue] requested to be rendered
+  /// by a text input widget. The [composingWithinCurrentTextRange] value
+  /// represents whether or not there is a valid composing region in the
+  /// [value]. The [style] is the [TextStyle] to render the [value]'s text with,
+  /// and the [misspelledTextStyle] is the [TextStyle] to render misspelled
+  /// words within the [value]'s text with. The [spellCheckResults] are the
+  /// results of spell checking the [value]'s text.
   TextSpan buildTextSpanWithSpellCheckSuggestions(
       TextEditingValue value,
       bool composingWithinCurrentTextRange,

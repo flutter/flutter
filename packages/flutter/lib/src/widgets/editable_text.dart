@@ -1561,16 +1561,12 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
   /// Configuration that details how spell check should be performed.
   ///
-  /// Specifies the [SpellCheckService] used to spell check text input, the
-  /// [SpellCheckSuggestionsHandler] used to style text with misspelled words,
-  /// and the [TextStyle] that handler uses to indicate misspelled words.
+  /// Specifies the [SpellCheckService] used to spell check text input and the
+  /// [TextStyle] used to style text with misspelled words.
   ///
-  /// If the [SpellCheckService] is left null, the [DefaultSpellCheckService] is
-  /// used if the platform is supported. It is currently supported only on
-  /// Android. If the [SpellCheckSuggestionsHandler] is left null, the
-  /// [DefaultSpellCheckSuggestionsHandler] is used. If neither the
-  /// [SpellCheckService] nor the [SpellCheckSuggestionsHandler] is specified,
-  /// then spell check is disabled by default.
+  /// If the [SpellCheckService] is left null, spell check is disabled by
+  /// default unless the [DefaultSpellCheckService] is used, in which case it is
+  /// used. It is currently supported only on Android.
   ///
   /// If this configuration is left null, then spell check is diabled by default.
   /// {@endtemplate}
@@ -1791,17 +1787,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late SpellCheckConfiguration? _spellCheckConfiguration;
 
+  late SpellCheckSuggestionsHandler? _spellCheckSuggestionsHandler;
+
   /// Configuration that determines how spell check will be performed.
   ///
-  /// This configuration will attempt to provide defaults for the
-  /// [SpellCheckService] and the [SpellCheckSuggestionsHandler] if either are
-  /// left null.
+  /// This configuration will attempt to provide a default for the
+  /// [SpellCheckService] if it is not specified.
   ///
   /// See also:
   ///  * [DefaultSpellCheckService], the default spell check service.
-  ///  * [DefaultSpellCheckSuggestionsHandler], the default spell check
-  ///    suggestions handler.
+  @visibleForTesting
   SpellCheckConfiguration? get spellCheckConfiguration => _spellCheckConfiguration;
+
+  /// The hander used to display spell check results.
+  ///
+  /// This is only initialized if spell check is enabled.
+  @visibleForTesting
+  SpellCheckSuggestionsHandler? get spellCheckSuggestionsHandler => _spellCheckSuggestionsHandler;
 
   bool _spellCheckEnabled = false;
 
@@ -1815,7 +1817,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// The most up-to-date spell check results for text input.
   ///
   /// These results will be updated via calls to spell check through a
-  /// [SpellCheckService] and used by a [SpellCheckSuggestionsHandler] to
+  /// [SpellCheckService] and used by the [SpellCheckSuggestionsHandler] to
   /// build the [TextSpan] tree for text input and menus for replacement
   /// suggestions of misspelled words.
   SpellCheckResults? _spellCheckResults;
@@ -2018,11 +2020,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
   }
-  
-  /// Tries to infer default values for the parameters of
-  /// [SpellCheckConfiguration] if spell check is enabled and one or both of the
-  /// [SpellCheckService] and [SpellCheckSuggestionsHandler] are left
-  /// unspecified.
+
+  /// If spell check is enabled, this will try to infer a value for
+  /// [SpellCheckService] if left unspecified and initialize the
+  /// [SpellCheckSuggestionsHandler] used to mark misspelled words and display
+  /// suggestions.
   SpellCheckConfiguration? _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
       // Spell check is disabled.
@@ -2031,7 +2033,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _spellCheckEnabled = true;
     SpellCheckService? spellCheckService = configuration.spellCheckService;
-    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = configuration.spellCheckSuggestionsHandler;
 
     assert(
       spellCheckService != null
@@ -2040,13 +2041,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
 
     spellCheckService = spellCheckService ?? DefaultSpellCheckService();
-    spellCheckSuggestionsHandler =
-      spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler();
 
-    return configuration.copyWith(
-      spellCheckService: spellCheckService,
-      spellCheckSuggestionsHandler: spellCheckSuggestionsHandler,
-    );
+    // Initialize handler for displaying spell check results.
+    _spellCheckSuggestionsHandler = SpellCheckSuggestionsHandler();
+
+    return configuration.copyWith(spellCheckService: spellCheckService);
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -3821,7 +3820,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final bool composingRegionOutOfRange = !_value.isComposingRangeValid || !withComposing;
 
-      return _spellCheckConfiguration!.spellCheckSuggestionsHandler!
+      return _spellCheckSuggestionsHandler!
                 .buildTextSpanWithSpellCheckSuggestions(
                   _value,
                   composingRegionOutOfRange,

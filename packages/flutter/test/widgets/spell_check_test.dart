@@ -6,16 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-late DefaultSpellCheckSuggestionsHandler defaultSpellCheckSuggestionsHandler;
+late SpellCheckSuggestionsHandler spellCheckSuggestionsHandler;
 late TextStyle composingStyle;
 late TextStyle misspelledTextStyle;
 
 void main() {
   setUp(() {
-    // Using Android handling for testing.
-    defaultSpellCheckSuggestionsHandler = DefaultSpellCheckSuggestionsHandler();
-
+    spellCheckSuggestionsHandler = SpellCheckSuggestionsHandler();
     composingStyle = const TextStyle(decoration: TextDecoration.underline);
+
+    // Using Android handling for testing.
     misspelledTextStyle = TextField.materialMisspelledTextStyle;
   });
 
@@ -37,7 +37,7 @@ void main() {
       const TextSpan(text: '! Hey')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -69,7 +69,7 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -104,7 +104,7 @@ void main() {
       const TextSpan(text: ' right'),
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -138,7 +138,7 @@ void main() {
       const TextSpan(text: ' right'),
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -171,7 +171,7 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -206,7 +206,7 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -236,7 +236,7 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -269,7 +269,7 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -302,7 +302,7 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
@@ -339,7 +339,7 @@ void main() {
       const TextSpan(text: '!')
     ]);
     final TextSpan textSpanTree =
-      defaultSpellCheckSuggestionsHandler
+      spellCheckSuggestionsHandler
         .buildTextSpanWithSpellCheckSuggestions(
           value,
           composingRegionOutOfRange,
