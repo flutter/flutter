@@ -21,7 +21,9 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
-/// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
+/// The relative position of the stroke on a [BorderSide] in an
+/// [OutlinedBorder] or [Border].
+/// 
 /// When set to [inside], the stroke is drawn completely inside the widget.
 /// For [center] and [outside], a property such as [Container.clipBehavior]
 /// can be used in an outside widget to clip it.
@@ -41,7 +43,8 @@ class StrokeAlign {
   static const double inside = -1.0;
 
   /// The border is drawn on the center of the border path, with half of the
-  /// [BorderSide.width] on the inside, and the other half on the outside of the path.
+  /// [BorderSide.width] on the inside, and the other half on the outside
+  /// of the path.
   static const double center = 0.0;
 
   /// The border is drawn on the outside of the border path.
@@ -159,15 +162,18 @@ class BorderSide with Diagnosticable {
   /// A hairline black border that is not rendered.
   static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
 
-  /// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
-  /// When set to [StrokeAlign.inside], the stroke is drawn completely inside the widget.
-  /// For [StrokeAlign.center] and [StrokeAlign.outside], a property such as
-  /// [Container.clipBehavior] can be used in an outside widget to clip it.
-  /// If [Container.decoration] has a border, the container may incorporate
-  /// [width] as additional padding:
-  /// - [StrokeAlign.inside] provides padding with full [width].
-  /// - [StrokeAlign.center] provides padding with half [width].
-  /// - [StrokeAlign.outside] provides zero padding, as stroke is drawn entirely outside.
+  /// The relative position of the stroke on a [BorderSide] in an
+  /// [OutlinedBorder] or [Border].
+  /// 
+  /// Values typically range from -1.0 (inside border, default) to
+  /// 1.0 (outside border), without any bound constraints (e.g., a
+  /// value of -2.0 is unexpected, but possible).
+  /// 
+  /// See also:
+  ///
+  ///  * [StrokeAlign], a class that acts as a shortcut for specifying
+  ///    strokeAlign values. It provides [StrokeAlign.inside] for -1.0,
+  ///    [StrokeAlign.center] for 0.0, and [StrokeAlign.outside] for 1.0.
   final double strokeAlign;
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
@@ -312,17 +318,10 @@ class BorderSide with Diagnosticable {
   /// This will return 0 for a [strokeAlign] of 1, and the width of the stroke for
   /// a [strokeAlign] of -1.
   ///
-  /// Simplified example:
-  ///
-  /// ```dart
-  /// switch(strokeAlign) {
-  ///   case StrokeAlign.inside: // -1
-  ///     return width;
-  ///   case StrokeAlign.center: // 0
-  ///     return width / 2;
-  ///   case StrokeAlign.outside: // 1
-  ///     return 0;
-  /// }
+  /// Example of results:
+  /// StrokeAlign.inside (-1) => width
+  /// StrokeAlign.center  (0) => width / 2
+  /// StrokeAlign.outside (1) => 0
   /// ```
   double get strokeInset => width * (1 - (1 + strokeAlign) / 2);
 
@@ -331,17 +330,10 @@ class BorderSide with Diagnosticable {
   /// This will return 0 for a [strokeAlign] of -1, and the width of the stroke for
   /// a [strokeAlign] of 1.
   ///
-  /// Simplified example:
-  /// ```dart
-  /// switch(strokeAlign) {
-  ///   case StrokeAlign.inside: // -1
-  ///     return 0;
-  ///   case StrokeAlign.center: // 0
-  ///     return width / 2;
-  ///   case StrokeAlign.outside: // 1
-  ///     return width;
-  /// }
-  /// ```
+  /// Example of results:
+  /// StrokeAlign.inside (-1) => 0
+  /// StrokeAlign.center  (0) => width / 2
+  /// StrokeAlign.outside (1) => width
   double get strokeOutset => width * (1 + strokeAlign) / 2;
 
   /// The offset of the stroke, taking into account the stroke alignment.
@@ -349,17 +341,10 @@ class BorderSide with Diagnosticable {
   /// This will return half width of the stroke for a [strokeAlign] of 1, and the
   /// negative half width for a [strokeAlign] of -1.
   ///
-  /// Simplified example:
-  ///
-  /// ```dart
-  /// switch(strokeAlign) {
-  ///   case StrokeAlign.inside: // -1
-  ///     return -(width / 2);
-  ///   case StrokeAlign.center: // 0
-  ///     return 0;
-  ///   case StrokeAlign.outside: // 1
-  ///     return width / 2;
-  /// }
+  /// Example of results:
+  /// StrokeAlign.inside (-1) => - (width / 2)
+  /// StrokeAlign.center  (0) => 0
+  /// StrokeAlign.outside (1) => width / 2
   /// ```
   double get halfStrokeOffset => width * strokeAlign / 2;
 
