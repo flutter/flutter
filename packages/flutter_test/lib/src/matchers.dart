@@ -514,6 +514,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// See also:
 ///
 ///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+///   * [containsSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
   String? label,
   AttributedString? attributedLabel,
@@ -524,8 +525,8 @@ Matcher matchesSemantics({
   String? increasedValue,
   AttributedString? attributedIncreasedValue,
   String? decreasedValue,
-  String? tooltip,
   AttributedString? attributedDecreasedValue,
+  String? tooltip,
   TextDirection? textDirection,
   Rect? rect,
   Size? size,
@@ -588,67 +589,6 @@ Matcher matchesSemantics({
   List<CustomSemanticsAction>? customActions,
   List<Matcher>? children,
 }) {
-  final List<SemanticsFlag> flags = <SemanticsFlag>[
-    if (hasCheckedState) SemanticsFlag.hasCheckedState,
-    if (isChecked) SemanticsFlag.isChecked,
-    if (isSelected) SemanticsFlag.isSelected,
-    if (isButton) SemanticsFlag.isButton,
-    if (isSlider) SemanticsFlag.isSlider,
-    if (isKeyboardKey) SemanticsFlag.isKeyboardKey,
-    if (isLink) SemanticsFlag.isLink,
-    if (isTextField) SemanticsFlag.isTextField,
-    if (isReadOnly) SemanticsFlag.isReadOnly,
-    if (isFocused) SemanticsFlag.isFocused,
-    if (isFocusable) SemanticsFlag.isFocusable,
-    if (hasEnabledState) SemanticsFlag.hasEnabledState,
-    if (isEnabled) SemanticsFlag.isEnabled,
-    if (isInMutuallyExclusiveGroup) SemanticsFlag.isInMutuallyExclusiveGroup,
-    if (isHeader) SemanticsFlag.isHeader,
-    if (isObscured) SemanticsFlag.isObscured,
-    if (isMultiline) SemanticsFlag.isMultiline,
-    if (namesRoute) SemanticsFlag.namesRoute,
-    if (scopesRoute) SemanticsFlag.scopesRoute,
-    if (isHidden) SemanticsFlag.isHidden,
-    if (isImage) SemanticsFlag.isImage,
-    if (isLiveRegion) SemanticsFlag.isLiveRegion,
-    if (hasToggledState) SemanticsFlag.hasToggledState,
-    if (isToggled) SemanticsFlag.isToggled,
-    if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
-    if (isSlider) SemanticsFlag.isSlider,
-  ];
-
-  final List<SemanticsAction> actions = <SemanticsAction>[
-    if (hasTapAction) SemanticsAction.tap,
-    if (hasLongPressAction) SemanticsAction.longPress,
-    if (hasScrollLeftAction) SemanticsAction.scrollLeft,
-    if (hasScrollRightAction) SemanticsAction.scrollRight,
-    if (hasScrollUpAction) SemanticsAction.scrollUp,
-    if (hasScrollDownAction) SemanticsAction.scrollDown,
-    if (hasIncreaseAction) SemanticsAction.increase,
-    if (hasDecreaseAction) SemanticsAction.decrease,
-    if (hasShowOnScreenAction) SemanticsAction.showOnScreen,
-    if (hasMoveCursorForwardByCharacterAction) SemanticsAction.moveCursorForwardByCharacter,
-    if (hasMoveCursorBackwardByCharacterAction) SemanticsAction.moveCursorBackwardByCharacter,
-    if (hasSetSelectionAction) SemanticsAction.setSelection,
-    if (hasCopyAction) SemanticsAction.copy,
-    if (hasCutAction) SemanticsAction.cut,
-    if (hasPasteAction) SemanticsAction.paste,
-    if (hasDidGainAccessibilityFocusAction) SemanticsAction.didGainAccessibilityFocus,
-    if (hasDidLoseAccessibilityFocusAction) SemanticsAction.didLoseAccessibilityFocus,
-    if (customActions != null && customActions.isNotEmpty) SemanticsAction.customAction,
-    if (hasDismissAction) SemanticsAction.dismiss,
-    if (hasMoveCursorForwardByWordAction) SemanticsAction.moveCursorForwardByWord,
-    if (hasMoveCursorBackwardByWordAction) SemanticsAction.moveCursorBackwardByWord,
-    if (hasSetTextAction) SemanticsAction.setText,
-  ];
-  SemanticsHintOverrides? hintOverrides;
-  if (onTapHint != null || onLongPressHint != null) {
-    hintOverrides = SemanticsHintOverrides(
-      onTapHint: onTapHint,
-      onLongPressHint: onLongPressHint,
-    );
-  }
-
   return _MatchesSemanticsData(
     label: label,
     attributedLabel: attributedLabel,
@@ -657,12 +597,10 @@ Matcher matchesSemantics({
     value: value,
     attributedValue: attributedValue,
     increasedValue: increasedValue,
-    tooltip: tooltip,
     attributedIncreasedValue: attributedIncreasedValue,
     decreasedValue: decreasedValue,
     attributedDecreasedValue: attributedDecreasedValue,
-    actions: actions,
-    flags: flags,
+    tooltip: tooltip,
     textDirection: textDirection,
     rect: rect,
     size: size,
@@ -670,10 +608,231 @@ Matcher matchesSemantics({
     thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
-    hintOverrides: hintOverrides,
-    currentValueLength: currentValueLength,
     maxValueLength: maxValueLength,
+    currentValueLength: currentValueLength,
+    // Flags
+    hasCheckedState: hasCheckedState,
+    isChecked: isChecked,
+    isSelected: isSelected,
+    isButton: isButton,
+    isSlider: isSlider,
+    isKeyboardKey: isKeyboardKey,
+    isLink: isLink,
+    isFocused: isFocused,
+    isFocusable: isFocusable,
+    isTextField: isTextField,
+    isReadOnly: isReadOnly,
+    hasEnabledState: hasEnabledState,
+    isEnabled: isEnabled,
+    isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup,
+    isHeader: isHeader,
+    isObscured: isObscured,
+    isMultiline: isMultiline,
+    namesRoute: namesRoute,
+    scopesRoute: scopesRoute,
+    isHidden: isHidden,
+    isImage: isImage,
+    isLiveRegion: isLiveRegion,
+    hasToggledState: hasToggledState,
+    isToggled: isToggled,
+    hasImplicitScrolling: hasImplicitScrolling,
+    // Actions
+    hasTapAction: hasTapAction,
+    hasLongPressAction: hasLongPressAction,
+    hasScrollLeftAction: hasScrollLeftAction,
+    hasScrollRightAction: hasScrollRightAction,
+    hasScrollUpAction: hasScrollUpAction,
+    hasScrollDownAction: hasScrollDownAction,
+    hasIncreaseAction: hasIncreaseAction,
+    hasDecreaseAction: hasDecreaseAction,
+    hasShowOnScreenAction: hasShowOnScreenAction,
+    hasMoveCursorForwardByCharacterAction: hasMoveCursorForwardByCharacterAction,
+    hasMoveCursorBackwardByCharacterAction: hasMoveCursorBackwardByCharacterAction,
+    hasMoveCursorForwardByWordAction: hasMoveCursorForwardByWordAction,
+    hasMoveCursorBackwardByWordAction: hasMoveCursorBackwardByWordAction,
+    hasSetTextAction: hasSetTextAction,
+    hasSetSelectionAction: hasSetSelectionAction,
+    hasCopyAction: hasCopyAction,
+    hasCutAction: hasCutAction,
+    hasPasteAction: hasPasteAction,
+    hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
+    hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
+    hasDismissAction: hasDismissAction,
+    // Custom actions and overrides
     children: children,
+    onLongPressHint: onLongPressHint,
+    onTapHint: onTapHint,
+  );
+}
+
+/// Asserts that a [SemanticsNode] contains the specified information.
+///
+/// There are no default expected values, so no unspecified values will be
+/// validated.
+///
+/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
+/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// in order to use this method.
+///
+/// ## Sample code
+///
+/// ```dart
+/// final SemanticsHandle handle = tester.ensureSemantics();
+/// expect(tester.getSemantics(find.text('hello')), hasSemantics(label: 'hello'));
+/// handle.dispose();
+/// ```
+///
+/// See also:
+///
+///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+///   * [matchesSemantics], a similar matcher with default values for flags and actions.
+Matcher containsSemantics({
+  String? label,
+  AttributedString? attributedLabel,
+  String? hint,
+  AttributedString? attributedHint,
+  String? value,
+  AttributedString? attributedValue,
+  String? increasedValue,
+  AttributedString? attributedIncreasedValue,
+  String? decreasedValue,
+  AttributedString? attributedDecreasedValue,
+  String? tooltip,
+  TextDirection? textDirection,
+  Rect? rect,
+  Size? size,
+  double? elevation,
+  double? thickness,
+  int? platformViewId,
+  int? maxValueLength,
+  int? currentValueLength,
+  // Flags
+  bool? hasCheckedState,
+  bool? isChecked,
+  bool? isSelected,
+  bool? isButton,
+  bool? isSlider,
+  bool? isKeyboardKey,
+  bool? isLink,
+  bool? isFocused,
+  bool? isFocusable,
+  bool? isTextField,
+  bool? isReadOnly,
+  bool? hasEnabledState,
+  bool? isEnabled,
+  bool? isInMutuallyExclusiveGroup,
+  bool? isHeader,
+  bool? isObscured,
+  bool? isMultiline,
+  bool? namesRoute,
+  bool? scopesRoute,
+  bool? isHidden,
+  bool? isImage,
+  bool? isLiveRegion,
+  bool? hasToggledState,
+  bool? isToggled,
+  bool? hasImplicitScrolling,
+  // Actions
+  bool? hasTapAction,
+  bool? hasLongPressAction,
+  bool? hasScrollLeftAction,
+  bool? hasScrollRightAction,
+  bool? hasScrollUpAction,
+  bool? hasScrollDownAction,
+  bool? hasIncreaseAction,
+  bool? hasDecreaseAction,
+  bool? hasShowOnScreenAction,
+  bool? hasMoveCursorForwardByCharacterAction,
+  bool? hasMoveCursorBackwardByCharacterAction,
+  bool? hasMoveCursorForwardByWordAction,
+  bool? hasMoveCursorBackwardByWordAction,
+  bool? hasSetTextAction,
+  bool? hasSetSelectionAction,
+  bool? hasCopyAction,
+  bool? hasCutAction,
+  bool? hasPasteAction,
+  bool? hasDidGainAccessibilityFocusAction,
+  bool? hasDidLoseAccessibilityFocusAction,
+  bool? hasDismissAction,
+  // Custom actions and overrides
+  String? onTapHint,
+  String? onLongPressHint,
+  List<CustomSemanticsAction>? customActions,
+  List<Matcher>? children,
+}) {
+  return _MatchesSemanticsData(
+    label: label,
+    attributedLabel: attributedLabel,
+    hint: hint,
+    attributedHint: attributedHint,
+    value: value,
+    attributedValue: attributedValue,
+    increasedValue: increasedValue,
+    attributedIncreasedValue: attributedIncreasedValue,
+    decreasedValue: decreasedValue,
+    attributedDecreasedValue: attributedDecreasedValue,
+    tooltip: tooltip,
+    textDirection: textDirection,
+    rect: rect,
+    size: size,
+    elevation: elevation,
+    thickness: thickness,
+    platformViewId: platformViewId,
+    customActions: customActions,
+    maxValueLength: maxValueLength,
+    currentValueLength: currentValueLength,
+    // Flags
+    hasCheckedState: hasCheckedState,
+    isChecked: isChecked,
+    isSelected: isSelected,
+    isButton: isButton,
+    isSlider: isSlider,
+    isKeyboardKey: isKeyboardKey,
+    isLink: isLink,
+    isFocused: isFocused,
+    isFocusable: isFocusable,
+    isTextField: isTextField,
+    isReadOnly: isReadOnly,
+    hasEnabledState: hasEnabledState,
+    isEnabled: isEnabled,
+    isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup,
+    isHeader: isHeader,
+    isObscured: isObscured,
+    isMultiline: isMultiline,
+    namesRoute: namesRoute,
+    scopesRoute: scopesRoute,
+    isHidden: isHidden,
+    isImage: isImage,
+    isLiveRegion: isLiveRegion,
+    hasToggledState: hasToggledState,
+    isToggled: isToggled,
+    hasImplicitScrolling: hasImplicitScrolling,
+    // Actions
+    hasTapAction: hasTapAction,
+    hasLongPressAction: hasLongPressAction,
+    hasScrollLeftAction: hasScrollLeftAction,
+    hasScrollRightAction: hasScrollRightAction,
+    hasScrollUpAction: hasScrollUpAction,
+    hasScrollDownAction: hasScrollDownAction,
+    hasIncreaseAction: hasIncreaseAction,
+    hasDecreaseAction: hasDecreaseAction,
+    hasShowOnScreenAction: hasShowOnScreenAction,
+    hasMoveCursorForwardByCharacterAction: hasMoveCursorForwardByCharacterAction,
+    hasMoveCursorBackwardByCharacterAction: hasMoveCursorBackwardByCharacterAction,
+    hasMoveCursorForwardByWordAction: hasMoveCursorForwardByWordAction,
+    hasMoveCursorBackwardByWordAction: hasMoveCursorBackwardByWordAction,
+    hasSetTextAction: hasSetTextAction,
+    hasSetSelectionAction: hasSetSelectionAction,
+    hasCopyAction: hasCopyAction,
+    hasCutAction: hasCutAction,
+    hasPasteAction: hasPasteAction,
+    hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
+    hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
+    hasDismissAction: hasDismissAction,
+    // Custom actions and overrides
+    children: children,
+    onLongPressHint: onLongPressHint,
+    onTapHint: onTapHint,
   );
 }
 
@@ -1885,31 +2044,136 @@ class _MatchesReferenceImage extends AsyncMatcher {
 
 class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
-    this.label,
-    this.attributedLabel,
-    this.hint,
-    this.attributedHint,
-    this.value,
-    this.attributedValue,
-    this.increasedValue,
-    this.attributedIncreasedValue,
-    this.decreasedValue,
-    this.attributedDecreasedValue,
-    this.tooltip,
-    this.flags,
-    this.actions,
-    this.textDirection,
-    this.rect,
-    this.size,
-    this.elevation,
-    this.thickness,
-    this.platformViewId,
-    this.maxValueLength,
-    this.currentValueLength,
-    this.customActions,
-    this.hintOverrides,
-    this.children,
-  });
+    required this.label,
+    required this.attributedLabel,
+    required this.hint,
+    required this.attributedHint,
+    required this.value,
+    required this.attributedValue,
+    required this.increasedValue,
+    required this.attributedIncreasedValue,
+    required this.decreasedValue,
+    required this.attributedDecreasedValue,
+    required this.tooltip,
+    required this.textDirection,
+    required this.rect,
+    required this.size,
+    required this.elevation,
+    required this.thickness,
+    required this.platformViewId,
+    required this.maxValueLength,
+    required this.currentValueLength,
+    // Flags
+    required bool? hasCheckedState,
+    required bool? isChecked,
+    required bool? isSelected,
+    required bool? isButton,
+    required bool? isSlider,
+    required bool? isKeyboardKey,
+    required bool? isLink,
+    required bool? isFocused,
+    required bool? isFocusable,
+    required bool? isTextField,
+    required bool? isReadOnly,
+    required bool? hasEnabledState,
+    required bool? isEnabled,
+    required bool? isInMutuallyExclusiveGroup,
+    required bool? isHeader,
+    required bool? isObscured,
+    required bool? isMultiline,
+    required bool? namesRoute,
+    required bool? scopesRoute,
+    required bool? isHidden,
+    required bool? isImage,
+    required bool? isLiveRegion,
+    required bool? hasToggledState,
+    required bool? isToggled,
+    required bool? hasImplicitScrolling,
+    // Actions
+    required bool? hasTapAction,
+    required bool? hasLongPressAction,
+    required bool? hasScrollLeftAction,
+    required bool? hasScrollRightAction,
+    required bool? hasScrollUpAction,
+    required bool? hasScrollDownAction,
+    required bool? hasIncreaseAction,
+    required bool? hasDecreaseAction,
+    required bool? hasShowOnScreenAction,
+    required bool? hasMoveCursorForwardByCharacterAction,
+    required bool? hasMoveCursorBackwardByCharacterAction,
+    required bool? hasMoveCursorForwardByWordAction,
+    required bool? hasMoveCursorBackwardByWordAction,
+    required bool? hasSetTextAction,
+    required bool? hasSetSelectionAction,
+    required bool? hasCopyAction,
+    required bool? hasCutAction,
+    required bool? hasPasteAction,
+    required bool? hasDidGainAccessibilityFocusAction,
+    required bool? hasDidLoseAccessibilityFocusAction,
+    required bool? hasDismissAction,
+    // Custom actions and overrides
+    required String? onTapHint,
+    required String? onLongPressHint,
+    required this.customActions,
+    required this.children,
+  })  : flags = <SemanticsFlag, bool>{
+          if (hasCheckedState != null) SemanticsFlag.hasCheckedState: hasCheckedState,
+          if (isChecked != null) SemanticsFlag.isChecked: isChecked,
+          if (isSelected != null) SemanticsFlag.isSelected: isSelected,
+          if (isButton != null) SemanticsFlag.isButton: isButton,
+          if (isSlider != null) SemanticsFlag.isSlider: isSlider,
+          if (isKeyboardKey != null) SemanticsFlag.isKeyboardKey: isKeyboardKey,
+          if (isLink != null) SemanticsFlag.isLink: isLink,
+          if (isTextField != null) SemanticsFlag.isTextField: isTextField,
+          if (isReadOnly != null) SemanticsFlag.isReadOnly: isReadOnly,
+          if (isFocused != null) SemanticsFlag.isFocused: isFocused,
+          if (isFocusable != null) SemanticsFlag.isFocusable: isFocusable,
+          if (hasEnabledState != null) SemanticsFlag.hasEnabledState: hasEnabledState,
+          if (isEnabled != null) SemanticsFlag.isEnabled: isEnabled,
+          if (isInMutuallyExclusiveGroup != null) SemanticsFlag.isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup,
+          if (isHeader != null) SemanticsFlag.isHeader: isHeader,
+          if (isObscured != null) SemanticsFlag.isObscured: isObscured,
+          if (isMultiline != null) SemanticsFlag.isMultiline: isMultiline,
+          if (namesRoute != null) SemanticsFlag.namesRoute: namesRoute,
+          if (scopesRoute != null) SemanticsFlag.scopesRoute: scopesRoute,
+          if (isHidden != null) SemanticsFlag.isHidden: isHidden,
+          if (isImage != null) SemanticsFlag.isImage: isImage,
+          if (isLiveRegion != null) SemanticsFlag.isLiveRegion: isLiveRegion,
+          if (hasToggledState != null) SemanticsFlag.hasToggledState: hasToggledState,
+          if (isToggled != null) SemanticsFlag.isToggled: isToggled,
+          if (hasImplicitScrolling != null) SemanticsFlag.hasImplicitScrolling: hasImplicitScrolling,
+          if (isSlider != null) SemanticsFlag.isSlider: isSlider,
+        },
+        actions = <SemanticsAction, bool>{
+          if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
+          if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
+          if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
+          if (hasScrollRightAction != null) SemanticsAction.scrollRight: hasScrollRightAction,
+          if (hasScrollUpAction != null) SemanticsAction.scrollUp: hasScrollUpAction,
+          if (hasScrollDownAction != null) SemanticsAction.scrollDown: hasScrollDownAction,
+          if (hasIncreaseAction != null) SemanticsAction.increase: hasIncreaseAction,
+          if (hasDecreaseAction != null) SemanticsAction.decrease: hasDecreaseAction,
+          if (hasShowOnScreenAction != null) SemanticsAction.showOnScreen: hasShowOnScreenAction,
+          if (hasMoveCursorForwardByCharacterAction != null) SemanticsAction.moveCursorForwardByCharacter: hasMoveCursorForwardByCharacterAction,
+          if (hasMoveCursorBackwardByCharacterAction != null) SemanticsAction.moveCursorBackwardByCharacter: hasMoveCursorBackwardByCharacterAction,
+          if (hasSetSelectionAction != null) SemanticsAction.setSelection: hasSetSelectionAction,
+          if (hasCopyAction != null) SemanticsAction.copy: hasCopyAction,
+          if (hasCutAction != null) SemanticsAction.cut: hasCutAction,
+          if (hasPasteAction != null) SemanticsAction.paste: hasPasteAction,
+          if (hasDidGainAccessibilityFocusAction != null) SemanticsAction.didGainAccessibilityFocus: hasDidGainAccessibilityFocusAction,
+          if (hasDidLoseAccessibilityFocusAction != null) SemanticsAction.didLoseAccessibilityFocus: hasDidLoseAccessibilityFocusAction,
+          if (customActions != null) SemanticsAction.customAction: customActions.isNotEmpty,
+          if (hasDismissAction != null) SemanticsAction.dismiss: hasDismissAction,
+          if (hasMoveCursorForwardByWordAction != null) SemanticsAction.moveCursorForwardByWord: hasMoveCursorForwardByWordAction,
+          if (hasMoveCursorBackwardByWordAction != null) SemanticsAction.moveCursorBackwardByWord: hasMoveCursorBackwardByWordAction,
+          if (hasSetTextAction != null) SemanticsAction.setText: hasSetTextAction,
+        },
+        hintOverrides = onTapHint == null && onLongPressHint == null
+            ? null
+            : SemanticsHintOverrides(
+                onTapHint: onTapHint,
+                onLongPressHint: onLongPressHint,
+              );
 
   final String? label;
   final AttributedString? attributedLabel;
@@ -1923,9 +2187,7 @@ class _MatchesSemanticsData extends Matcher {
   final AttributedString? attributedDecreasedValue;
   final String? tooltip;
   final SemanticsHintOverrides? hintOverrides;
-  final List<SemanticsAction>? actions;
   final List<CustomSemanticsAction>? customActions;
-  final List<SemanticsFlag>? flags;
   final TextDirection? textDirection;
   final Rect? rect;
   final Size? size;
@@ -1935,6 +2197,14 @@ class _MatchesSemanticsData extends Matcher {
   final int? maxValueLength;
   final int? currentValueLength;
   final List<Matcher>? children;
+
+  /// There are three possible states for these two maps:
+  ///
+  ///  1. If the flag/action maps to `true`, then it must be present in the SemanticData
+  ///  2. If the flag/action maps to `false`, then it must not be present in the SemanticData
+  ///  3. If the flag/action is not in the map, then it will not be validated against
+  final Map<SemanticsAction, bool> actions;
+  final Map<SemanticsFlag, bool> flags;
 
   @override
   Description describe(Description description) {
@@ -1972,11 +2242,39 @@ class _MatchesSemanticsData extends Matcher {
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
     }
-    if (actions != null) {
-      description.add(' with actions: ').addDescriptionOf(actions);
+    if (actions.isNotEmpty) {
+      final List<SemanticsAction> expectedActions = actions.entries
+        .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
+        .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+        .toList();
+      final List<SemanticsAction> notExpectedActions = actions.entries
+        .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
+        .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+        .toList();
+
+      if (expectedActions.isNotEmpty) {
+        description.add(' with actions: ').addDescriptionOf(expectedActions);
+      }
+      if (notExpectedActions.isNotEmpty) {
+        description.add(' without actions: ').addDescriptionOf(notExpectedActions);
+      }
     }
-    if (flags != null) {
-      description.add(' with flags: ').addDescriptionOf(flags);
+    if (flags.isNotEmpty) {
+      final List<SemanticsFlag> expectedFlags = flags.entries
+        .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
+        .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+        .toList();
+      final List<SemanticsFlag> notExpectedFlags = flags.entries
+        .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
+        .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+        .toList();
+
+      if (expectedFlags.isNotEmpty) {
+        description.add(' with flags: ').addDescriptionOf(expectedFlags);
+      }
+      if (notExpectedFlags.isNotEmpty) {
+        description.add(' without flags: ').addDescriptionOf(notExpectedFlags);
+      }
     }
     if (textDirection != null) {
       description.add(' with textDirection: $textDirection ');
@@ -2116,18 +2414,18 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     }
-    if (actions != null) {
-      int actionBits = 0;
-      for (final SemanticsAction action in actions!) {
-        actionBits |= action.index;
-      }
-      if (actionBits != data.actions) {
-        final List<String> actionSummary = <String>[
-          for (final SemanticsAction action in SemanticsAction.values.values)
-            if ((data.actions & action.index) != 0)
-              describeEnum(action),
-        ];
-        return failWithDescription(matchState, 'actions were: $actionSummary');
+    if (actions.isNotEmpty) {
+      for (final MapEntry<ui.SemanticsAction, bool> actionEntry in actions.entries) {
+        final ui.SemanticsAction action = actionEntry.key;
+        final bool actionExpected = actionEntry.value;
+        final bool actionPresent = (action.index & data.actions) == action.index;
+        if (actionPresent != actionExpected) {
+          final List<String> actionSummary = <String>[
+            for (final int action in SemanticsAction.values.keys)
+              if ((data.actions & action) != 0) describeEnum(action),
+          ];
+          return failWithDescription(matchState, 'actions were: $actionSummary');
+        }
       }
     }
     if (customActions != null || hintOverrides != null) {
@@ -2142,7 +2440,7 @@ class _MatchesSemanticsData extends Matcher {
         expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides!.onLongPressHint!, action: SemanticsAction.longPress));
       }
       if (expectedCustomActions.length != providedCustomActions.length) {
-        return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
+        return failWithDescription(matchState, 'custom actions were: $providedCustomActions');
       }
       int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {
         return CustomSemanticsAction.getIdentifier(left) - CustomSemanticsAction.getIdentifier(right);
@@ -2151,22 +2449,22 @@ class _MatchesSemanticsData extends Matcher {
       providedCustomActions.sort(sortActions);
       for (int i = 0; i < expectedCustomActions.length; i++) {
         if (expectedCustomActions[i] != providedCustomActions[i]) {
-          return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
+          return failWithDescription(matchState, 'custom actions were: $providedCustomActions');
         }
       }
     }
-    if (flags != null) {
-      int flagBits = 0;
-      for (final SemanticsFlag flag in flags!) {
-        flagBits |= flag.index;
-      }
-      if (flagBits != data.flags) {
-        final List<String> flagSummary = <String>[
-          for (final SemanticsFlag flag in SemanticsFlag.values.values)
-            if ((data.flags & flag.index) != 0)
-              describeEnum(flag),
-        ];
-        return failWithDescription(matchState, 'flags were: $flagSummary');
+    if (flags.isNotEmpty) {
+      for (final MapEntry<ui.SemanticsFlag, bool> flagEntry in flags.entries) {
+        final ui.SemanticsFlag flag = flagEntry.key;
+        final bool flagExpected = flagEntry.value;
+        final bool flagPresent = flag.index & data.flags == flag.index;
+        if (flagPresent != flagExpected) {
+          final List<String> flagSummary = <String>[
+            for (final int flag in SemanticsFlag.values.keys)
+              if ((data.flags & flag) != 0) describeEnum(flag),
+          ];
+          return failWithDescription(matchState, 'flags were: $flagSummary');
+        }
       }
     }
     bool allMatched = true;
