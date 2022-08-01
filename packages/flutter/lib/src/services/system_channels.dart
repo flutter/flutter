@@ -242,7 +242,6 @@ class SystemChannels {
   ///     and the [Locale] for the text to be spell checked with.
   static const MethodChannel spellCheck = OptionalMethodChannel(
       'flutter/spellcheck',
-      StandardMethodCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for keyboard events.

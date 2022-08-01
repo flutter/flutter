@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
           style: const TextStyle(),
           cursorColor: Colors.red,
           spellCheckConfiguration:
-            SpellCheckConfiguration(
+            const SpellCheckConfiguration(
               misspelledTextStyle: TextField.materialMisspelledTextStyle,
             )
         )
