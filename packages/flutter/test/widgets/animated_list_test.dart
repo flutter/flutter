@@ -359,7 +359,7 @@ void main() {
     });
 
     testWidgets('passes correctly derived index of findChildIndexCallback to inner SliverChildBuilderDelegate', (WidgetTester tester) async {
-      final List<int> items = <int>[0, 1, 2];
+      final List<int> items = <int>[0, 1, 2, 3];
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
@@ -369,9 +369,12 @@ void main() {
             slivers: <Widget>[
               SliverAnimatedList(
                 key: listKey,
-                initialItemCount: items.length,
+                initialItemCount: items.length, // we will insert one item later
                 itemBuilder: (BuildContext context, int index, Animation<double> animation) {
-                    return Text(key: ValueKey(index), 'item ${items[index]}');
+                  return _StatefulListItem(
+                    key: ValueKey<int>(items[index]),
+                    index: index,
+                  );
                 },
                 findChildIndexCallback: (Key key) {
                   final int index = items.indexOf((key as ValueKey<int>).value);
@@ -390,21 +393,30 @@ void main() {
       expect(listEntries[0].data, equals('item 0'));
       expect(listEntries[1].data, equals('item 1'));
       expect(listEntries[2].data, equals('item 2'));
+      expect(listEntries[3].data, equals('item 3'));
 
-      // reorder the items
+
+      // delete one item
+      listKey.currentState?.removeItem(0, (BuildContext context, Animation<double> animation) {
+        return Container();
+      });
+
+      // delete from list
+      items.removeAt(0);
+
+      // reorder list
       items.insert(0, items.removeLast());
 
-      // trigger a re-render
-      listKey.currentState!.setState(() {});
+      // render with new list order
       await tester.pumpAndSettle();
 
       // get all list entries in order
       final List<Text> reorderedListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
 
-      // check that the list is rendered in the order provided by findChildIndexCallback
-      expect(reorderedListEntries[0].data, equals('item 2'));
-      expect(reorderedListEntries[1].data, equals('item 0'));
-      expect(reorderedListEntries[2].data, equals('item 1'));
+      // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
+      expect(reorderedListEntries[0].data, equals('item 3'));
+      expect(reorderedListEntries[1].data, equals('item 1'));
+      expect(reorderedListEntries[2].data, equals('item 2'));
     });
   });
 
@@ -476,4 +488,26 @@ void main() {
 
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
+}
+
+
+class _StatefulListItem extends StatefulWidget {
+  final int index;
+
+  const _StatefulListItem({
+    Key? key,
+    required this.index,
+  }) : super(key: key);
+
+  @override
+  _StatefulListItemState createState() => _StatefulListItemState();
+}
+
+class _StatefulListItemState extends State<_StatefulListItem> {
+  late final int number = widget.index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('item $number');
+  }
 }
