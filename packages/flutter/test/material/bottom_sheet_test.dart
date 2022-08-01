@@ -1384,6 +1384,7 @@ void main() {
     navigator.push(
       ModalBottomSheetRoute<void>(
         isScrollControlled: false,
+        builder: (context) => Container(),
         capturedThemes: InheritedTheme.capture(
           from: savedContext, to: navigator.context,
         ),
