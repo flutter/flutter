@@ -2830,7 +2830,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     try {
       final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
       final List<SuggestionSpan>? spellCheckResults = await
-        _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, text);
+        _spellCheckConfiguration!
+          .spellCheckService!
+            .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
       if (spellCheckResults == null) {
         // The request to fetch spell check suggestions was canceled due to ongoing request.

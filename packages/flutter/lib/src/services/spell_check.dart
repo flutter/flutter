@@ -184,13 +184,14 @@ class DefaultSpellCheckService implements SpellCheckService {
     List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
 
     for (final dynamic result in rawResults) {
-      final Map<String, dynamic> resultMap = Map<String,dynamic>.from(result);
+      final Map<String, dynamic> resultMap =
+        Map<String,dynamic>.from(result as Map<dynamic, dynamic>);
       suggestionSpans.add(
         SuggestionSpan(
           TextRange(
-            start: resultMap['startIndex'],
-            end: resultMap['endIndex']),
-          resultMap['suggestions'].cast<String>(),
+            start: resultMap['startIndex'] as int,
+            end: resultMap['endIndex'] as int),
+          (resultMap['suggestions'] as List<dynamic>).cast<String>(),
         )
       );
     }

@@ -5,6 +5,7 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
+import 'package:meta/meta.dart';
 
 /// Controls how spell check is performed for text input.
 ///

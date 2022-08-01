@@ -1179,7 +1179,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? TextField.materialMisspelledTextStyle)
-        : SpellCheckConfiguration.disabled();
+        : const SpellCheckConfiguration.disabled();
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
