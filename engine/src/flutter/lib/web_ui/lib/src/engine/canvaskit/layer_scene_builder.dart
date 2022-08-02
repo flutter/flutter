@@ -13,9 +13,9 @@ import 'path.dart';
 import 'picture.dart';
 
 class LayerScene implements ui.Scene {
-  final LayerTree layerTree;
-
   LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
+
+  final LayerTree layerTree;
 
   @override
   void dispose() {}

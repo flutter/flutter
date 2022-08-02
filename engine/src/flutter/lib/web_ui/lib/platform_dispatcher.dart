@@ -265,10 +265,10 @@ class FrameTiming {
     ]);
   }
 
-  static final int _dataLength = FramePhase.values.length + _FrameTimingInfo.values.length;
-
   FrameTiming._(this._data)
       : assert(_data.length == _dataLength);
+
+  static final int _dataLength = FramePhase.values.length + _FrameTimingInfo.values.length;
 
   int timestampInMicroseconds(FramePhase phase) => _data[phase.index];
 

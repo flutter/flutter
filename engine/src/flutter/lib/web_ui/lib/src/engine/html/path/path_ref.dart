@@ -27,6 +27,67 @@ class PathRef {
     _resetFields();
   }
 
+  /// Creates a copy of the path by pointing new path to a current
+  /// points,verbs and weights arrays. If original path is mutated by adding
+  /// more verbs, this copy only returns path at the time of copy and shares
+  /// typed arrays of original path.
+  PathRef.shallowCopy(PathRef ref)
+      : fPoints = ref.fPoints,
+        _fVerbs = ref._fVerbs {
+    _fVerbsCapacity = ref._fVerbsCapacity;
+    _fVerbsLength = ref._fVerbsLength;
+
+    _fPointsCapacity = ref._fPointsCapacity;
+    _fPointsLength = ref._fPointsLength;
+
+    _conicWeightsCapacity = ref._conicWeightsCapacity;
+    _conicWeightsLength = ref._conicWeightsLength;
+    _conicWeights = ref._conicWeights;
+    fBoundsIsDirty = ref.fBoundsIsDirty;
+    if (!fBoundsIsDirty) {
+      fBounds = ref.fBounds;
+      cachedBounds = ref.cachedBounds;
+      fIsFinite = ref.fIsFinite;
+    }
+    fSegmentMask = ref.fSegmentMask;
+    fIsOval = ref.fIsOval;
+    fIsRRect = ref.fIsRRect;
+    fIsRect = ref.fIsRect;
+    fRRectOrOvalIsCCW = ref.fRRectOrOvalIsCCW;
+    fRRectOrOvalStartIdx = ref.fRRectOrOvalStartIdx;
+    debugValidate();
+  }
+
+  /// Returns a new path by translating [source] by [offsetX], [offsetY].
+  PathRef.shiftedFrom(PathRef source, double offsetX, double offsetY)
+      : fPoints = _fPointsFromSource(source, offsetX, offsetY),
+        _fVerbs = _fVerbsFromSource(source) {
+    _conicWeightsCapacity = source._conicWeightsCapacity;
+    _conicWeightsLength = source._conicWeightsLength;
+    if (source._conicWeights != null) {
+      _conicWeights = Float32List(_conicWeightsCapacity);
+      _conicWeights!.setAll(0, source._conicWeights!);
+    }
+    _fVerbsCapacity = source._fVerbsCapacity;
+    _fVerbsLength = source._fVerbsLength;
+
+    _fPointsCapacity = source._fPointsCapacity;
+    _fPointsLength = source._fPointsLength;
+    fBoundsIsDirty = source.fBoundsIsDirty;
+    if (!fBoundsIsDirty) {
+      fBounds = source.fBounds!.translate(offsetX, offsetY);
+      cachedBounds = source.cachedBounds?.translate(offsetX, offsetY);
+      fIsFinite = source.fIsFinite;
+    }
+    fSegmentMask = source.fSegmentMask;
+    fIsOval = source.fIsOval;
+    fIsRRect = source.fIsRRect;
+    fIsRect = source.fIsRect;
+    fRRectOrOvalIsCCW = source.fRRectOrOvalIsCCW;
+    fRRectOrOvalStartIdx = source.fRRectOrOvalStartIdx;
+    debugValidate();
+  }
+
   // Value to use to check against to insert move(0,0) when a command
   // is added without moveTo.
   static const int kInitialLastMoveToIndex = -1;
@@ -83,37 +144,6 @@ class PathRef {
     final int index = pointIndex * 2;
     fPoints[index] = x;
     fPoints[index + 1] = y;
-  }
-
-  /// Creates a copy of the path by pointing new path to a current
-  /// points,verbs and weights arrays. If original path is mutated by adding
-  /// more verbs, this copy only returns path at the time of copy and shares
-  /// typed arrays of original path.
-  PathRef.shallowCopy(PathRef ref)
-      : fPoints = ref.fPoints,
-        _fVerbs = ref._fVerbs {
-    _fVerbsCapacity = ref._fVerbsCapacity;
-    _fVerbsLength = ref._fVerbsLength;
-
-    _fPointsCapacity = ref._fPointsCapacity;
-    _fPointsLength = ref._fPointsLength;
-
-    _conicWeightsCapacity = ref._conicWeightsCapacity;
-    _conicWeightsLength = ref._conicWeightsLength;
-    _conicWeights = ref._conicWeights;
-    fBoundsIsDirty = ref.fBoundsIsDirty;
-    if (!fBoundsIsDirty) {
-      fBounds = ref.fBounds;
-      cachedBounds = ref.cachedBounds;
-      fIsFinite = ref.fIsFinite;
-    }
-    fSegmentMask = ref.fSegmentMask;
-    fIsOval = ref.fIsOval;
-    fIsRRect = ref.fIsRRect;
-    fIsRect = ref.fIsRect;
-    fRRectOrOvalIsCCW = ref.fRRectOrOvalIsCCW;
-    fRRectOrOvalStartIdx = ref.fRRectOrOvalStartIdx;
-    debugValidate();
   }
 
   Float32List get points => fPoints;
@@ -393,36 +423,6 @@ class PathRef {
     final Uint8List verbs = Uint8List(source._fVerbsCapacity);
     verbs.setAll(0, source._fVerbs);
     return verbs;
-  }
-
-  /// Returns a new path by translating [source] by [offsetX], [offsetY].
-  PathRef.shiftedFrom(PathRef source, double offsetX, double offsetY)
-      : fPoints = _fPointsFromSource(source, offsetX, offsetY),
-        _fVerbs = _fVerbsFromSource(source) {
-    _conicWeightsCapacity = source._conicWeightsCapacity;
-    _conicWeightsLength = source._conicWeightsLength;
-    if (source._conicWeights != null) {
-      _conicWeights = Float32List(_conicWeightsCapacity);
-      _conicWeights!.setAll(0, source._conicWeights!);
-    }
-    _fVerbsCapacity = source._fVerbsCapacity;
-    _fVerbsLength = source._fVerbsLength;
-
-    _fPointsCapacity = source._fPointsCapacity;
-    _fPointsLength = source._fPointsLength;
-    fBoundsIsDirty = source.fBoundsIsDirty;
-    if (!fBoundsIsDirty) {
-      fBounds = source.fBounds!.translate(offsetX, offsetY);
-      cachedBounds = source.cachedBounds?.translate(offsetX, offsetY);
-      fIsFinite = source.fIsFinite;
-    }
-    fSegmentMask = source.fSegmentMask;
-    fIsOval = source.fIsOval;
-    fIsRRect = source.fIsRRect;
-    fIsRect = source.fIsRect;
-    fRRectOrOvalIsCCW = source.fRRectOrOvalIsCCW;
-    fRRectOrOvalStartIdx = source.fRRectOrOvalStartIdx;
-    debugValidate();
   }
 
   /// Copies contents from a source path [ref].
@@ -948,11 +948,6 @@ class PathRef {
 }
 
 class PathRefIterator {
-  final PathRef pathRef;
-  int _conicWeightIndex = -1;
-  int _verbIndex = 0;
-  int _pointIndex = 0;
-
   PathRefIterator(this.pathRef) {
     _pointIndex = 0;
     if (!pathRef.isFinite) {
@@ -961,6 +956,11 @@ class PathRefIterator {
       _verbIndex = pathRef.countVerbs();
     }
   }
+
+  final PathRef pathRef;
+  int _conicWeightIndex = -1;
+  int _verbIndex = 0;
+  int _pointIndex = 0;
 
   /// Maximum buffer size required for points in [next] calls.
   static const int kMaxBufferSize = 8;

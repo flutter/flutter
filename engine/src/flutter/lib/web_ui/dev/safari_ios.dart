@@ -22,11 +22,11 @@ import 'utils.dart';
 ///
 /// This is used to properly take screenshots of the browser.
 class SafariScreenInfo {
+  SafariScreenInfo(this.heightOfHeader, this.heightOfFooter, this.scaleFactor);
+
   final int heightOfHeader;
   final int heightOfFooter;
   final double scaleFactor;
-
-  SafariScreenInfo(this.heightOfHeader, this.heightOfFooter, this.scaleFactor);
 }
 
 /// Provides an environment for the mobile variant of Safari running in an iOS
@@ -78,8 +78,6 @@ class SafariIosEnvironment implements BrowserEnvironment {
 ///
 /// Any errors starting or running the process are reported through [onExit].
 class SafariIos extends Browser {
-  final BrowserProcess _process;
-  final SafariScreenInfo _screenInfo;
 
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri].
@@ -101,6 +99,8 @@ class SafariIos extends Browser {
   }
 
   SafariIos._(this._process, this._screenInfo);
+  final BrowserProcess _process;
+  final SafariScreenInfo _screenInfo;
 
   @override
   Future<void> get onExit => _process.onExit;

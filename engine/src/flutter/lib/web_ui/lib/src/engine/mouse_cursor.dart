@@ -7,6 +7,8 @@ import 'util.dart';
 
 /// Provides mouse cursor bindings, such as the `flutter/mousecursor` channel.
 class MouseCursor {
+  MouseCursor._();
+
   /// Initializes the [MouseCursor] singleton.
   ///
   /// Use the [instance] getter to get the singleton after calling this method.
@@ -17,8 +19,6 @@ class MouseCursor {
   /// The [MouseCursor] singleton.
   static MouseCursor? get instance => _instance;
   static MouseCursor? _instance;
-
-  MouseCursor._();
 
   // Map from Flutter's kind values to CSS's cursor values.
   //

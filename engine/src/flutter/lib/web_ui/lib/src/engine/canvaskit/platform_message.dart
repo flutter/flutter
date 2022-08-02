@@ -6,11 +6,11 @@ import 'dart:typed_data';
 
 // TODO(hterkelsen): Delete this once the slots change lands?
 class PlatformMessage {
+  PlatformMessage(this.channel, this.data, this.response);
+
   final String channel;
   final ByteData data;
   final PlatformMessageResponse response;
-
-  PlatformMessage(this.channel, this.data, this.response);
 }
 
 class PlatformMessageResponse {

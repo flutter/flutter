@@ -2497,7 +2497,7 @@ class _TouchEventContext extends _BasicEventContext
   @override
   bool get hasMouseEvents => false;
 
-  DomEventTarget _target;
+  final DomEventTarget _target;
 
   DomTouch _createTouch({
     int? identifier,

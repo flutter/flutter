@@ -1309,22 +1309,22 @@ extension DomScreenOrientationExtension on DomScreenOrientation {
 // remove the listener. Caller is still responsible for calling [allowInterop]
 // on the listener before creating the subscription.
 class DomSubscription {
-  final String type;
-  final DomEventTarget target;
-  final DomEventListener listener;
-
   DomSubscription(this.target, this.type, this.listener) {
     target.addEventListener(type, listener);
   }
+
+  final String type;
+  final DomEventTarget target;
+  final DomEventListener listener;
 
   void cancel() => target.removeEventListener(type, listener);
 }
 
 class DomPoint {
+  DomPoint(this.x, this.y);
+
   final num x;
   final num y;
-
-  DomPoint(this.x, this.y);
 }
 
 @JS()
@@ -1422,10 +1422,10 @@ extension DomListExtension on _DomList {
 }
 
 class _DomListIterator<T> extends Iterator<T> {
+  _DomListIterator(this.list);
+
   final _DomList list;
   int index = -1;
-
-  _DomListIterator(this.list);
 
   @override
   bool moveNext() {
@@ -1441,9 +1441,9 @@ class _DomListIterator<T> extends Iterator<T> {
 }
 
 class _DomListWrapper<T> extends Iterable<T> {
-  final _DomList list;
-
   _DomListWrapper._(this.list);
+
+  final _DomList list;
 
   @override
   Iterator<T> get iterator => _DomListIterator<T>(list);

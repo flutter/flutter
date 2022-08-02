@@ -1724,7 +1724,7 @@ class EngineSemanticsOwner {
   /// Callbacks are called synchronously. HTML DOM updates made in a callback
   /// take effect in the current animation frame and/or the current message loop
   /// event.
-  List<GestureModeCallback?> _gestureModeListeners = <GestureModeCallback?>[];
+  final List<GestureModeCallback?> _gestureModeListeners = <GestureModeCallback?>[];
 
   /// Calls the [callback] every time the current [GestureMode] changes.
   ///

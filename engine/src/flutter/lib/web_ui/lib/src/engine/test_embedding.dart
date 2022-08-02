@@ -37,11 +37,11 @@ Future<void> initializeTestFlutterViewEmbedder({double devicePixelRatio = 3.0}) 
 const bool _debugLogHistoryActions = false;
 
 class TestHistoryEntry {
+  const TestHistoryEntry(this.state, this.title, this.url);
+
   final dynamic state;
   final String? title;
   final String url;
-
-  const TestHistoryEntry(this.state, this.title, this.url);
 
   @override
   String toString() {

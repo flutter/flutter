@@ -21,8 +21,6 @@ import 'vertices.dart';
 
 /// An implementation of [ui.Canvas] that is backed by a CanvasKit canvas.
 class CanvasKitCanvas implements ui.Canvas {
-  final CkCanvas _canvas;
-
   factory CanvasKitCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
     assert(recorder != null); // ignore: unnecessary_null_comparison
     if (recorder.isRecording) {
@@ -35,6 +33,8 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   CanvasKitCanvas._(this._canvas);
+
+  final CkCanvas _canvas;
 
   @override
   void save() {

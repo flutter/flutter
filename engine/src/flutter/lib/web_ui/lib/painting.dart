@@ -768,7 +768,7 @@ class ImmutableBuffer {
   Uint8List? _list;
 
   int get length => _length;
-  int _length;
+  final int _length;
 
   bool get debugDisposed {
     late bool disposed;
@@ -782,17 +782,6 @@ class ImmutableBuffer {
 }
 
 class ImageDescriptor {
-  ImageDescriptor._()
-      : _width = null,
-        _height = null,
-        _rowBytes = null,
-        _format = null;
-  static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) async {
-    final ImageDescriptor descriptor = ImageDescriptor._();
-    descriptor._data = buffer._list;
-    return descriptor;
-  }
-
   // Not async because there's no expensive work to do here.
   ImageDescriptor.raw(
     ImmutableBuffer buffer, {
@@ -805,6 +794,18 @@ class ImageDescriptor {
         _rowBytes = rowBytes,
         _format = pixelFormat {
     _data = buffer._list;
+  }
+
+  ImageDescriptor._()
+      : _width = null,
+        _height = null,
+        _rowBytes = null,
+        _format = null;
+
+  static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) async {
+    final ImageDescriptor descriptor = ImageDescriptor._();
+    descriptor._data = buffer._list;
+    return descriptor;
   }
 
   Uint8List? _data;
@@ -840,6 +841,8 @@ class ImageDescriptor {
 }
 
 class FragmentProgram {
+  FragmentProgram._();
+
   static Future<FragmentProgram> fromAsset(String assetKey) {
     throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
   }
@@ -847,8 +850,6 @@ class FragmentProgram {
   static Future<FragmentProgram> fromAssetAsync(String assetKey) {
     return Future<FragmentProgram>.microtask(() => FragmentProgram.fromAsset(assetKey));
   }
-
-  FragmentProgram._();
 
   Shader shader({
     Float32List? floatUniforms,

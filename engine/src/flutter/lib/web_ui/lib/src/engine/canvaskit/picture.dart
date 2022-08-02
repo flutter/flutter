@@ -17,9 +17,6 @@ import 'skia_object_cache.dart';
 /// class may have their Skia counterparts deleted before finalization registry
 /// or [SkiaObjectCache] decide to delete it.
 class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
-  final ui.Rect? cullRect;
-  final CkPictureSnapshot? _snapshot;
-
   CkPicture(SkPicture super.picture, this.cullRect, this._snapshot) :
     assert(
       browserSupportsFinalizationRegistry && _snapshot == null ||
@@ -27,6 +24,8 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
       'If the browser does not support FinalizationRegistry (WeakRef), then we must have a picture snapshot to be able to resurrect it.',
     );
 
+  final ui.Rect? cullRect;
+  final CkPictureSnapshot? _snapshot;
 
   @override
   int get approximateBytesUsed => 0;

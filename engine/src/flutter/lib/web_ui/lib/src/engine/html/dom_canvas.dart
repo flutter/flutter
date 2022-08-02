@@ -22,10 +22,10 @@ import 'shaders/shader.dart';
 
 /// A canvas that renders to DOM elements and CSS properties.
 class DomCanvas extends EngineCanvas with SaveElementStackTracking {
+  DomCanvas(this.rootElement);
+
   @override
   final DomElement rootElement;
-
-  DomCanvas(this.rootElement);
 
   /// Prepare to reuse this canvas by clearing it's current contents.
   @override

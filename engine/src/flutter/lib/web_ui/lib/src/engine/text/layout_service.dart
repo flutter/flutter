@@ -1582,9 +1582,9 @@ class Spanometer {
   final CanvasParagraph paragraph;
   final DomCanvasRenderingContext2D context;
 
-  static RulerHost _rulerHost = RulerHost();
+  static final RulerHost _rulerHost = RulerHost();
 
-  static Map<TextHeightStyle, TextHeightRuler> _rulers =
+  static final Map<TextHeightStyle, TextHeightRuler> _rulers =
       <TextHeightStyle, TextHeightRuler>{};
 
   @visibleForTesting

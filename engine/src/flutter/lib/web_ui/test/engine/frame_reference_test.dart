@@ -75,6 +75,6 @@ void testMain() {
 }
 
 class TestItem {
-  final String label;
   TestItem(this.label);
+  final String label;
 }

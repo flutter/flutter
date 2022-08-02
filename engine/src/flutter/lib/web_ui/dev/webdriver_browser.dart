@@ -79,13 +79,13 @@ abstract class WebDriverBrowserEnvironment extends BrowserEnvironment {
 }
 
 class WebDriverBrowser extends Browser {
-  final WebDriver _driver;
-  final Uri _url;
-  final Completer<void> _onExitCompleter = Completer<void>();
-
   WebDriverBrowser(this._driver, this._url) {
     _driver.get(_url);
   }
+
+  final WebDriver _driver;
+  final Uri _url;
+  final Completer<void> _onExitCompleter = Completer<void>();
 
   @override
   Future<void> close() async {

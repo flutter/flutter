@@ -91,18 +91,18 @@ class FirefoxInstaller {
     );
   }
 
+  FirefoxInstaller._({
+    required this.version,
+    required this.firefoxInstallationDir,
+    required this.versionDir,
+  });
+
   static Future<FirefoxInstaller> latest() async {
     final String latestVersion = io.Platform.isLinux
         ? await fetchLatestFirefoxVersionLinux()
         : await fetchLatestFirefoxVersionMacOS();
     return FirefoxInstaller(version: latestVersion);
   }
-
-  FirefoxInstaller._({
-    required this.version,
-    required this.firefoxInstallationDir,
-    required this.versionDir,
-  });
 
   /// Firefox version managed by this installer.
   final String version;

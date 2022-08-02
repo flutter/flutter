@@ -16,8 +16,6 @@ import 'recording_canvas.dart';
 import 'render_vertices.dart';
 
 class SurfaceCanvas implements ui.Canvas {
-  RecordingCanvas _canvas;
-
   factory SurfaceCanvas(EnginePictureRecorder recorder, [ui.Rect? cullRect]) {
     if (recorder.isRecording) {
       throw ArgumentError(
@@ -28,6 +26,8 @@ class SurfaceCanvas implements ui.Canvas {
   }
 
   SurfaceCanvas._(this._canvas);
+
+  RecordingCanvas _canvas;
 
   @override
   void save() {

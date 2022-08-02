@@ -50,11 +50,11 @@ _CheckableKind _checkableKindFromSemanticsFlag(
 /// [ui.SemanticsFlag.isInMutuallyExclusiveGroup], [ui.SemanticsFlag.isToggled],
 /// [ui.SemanticsFlag.hasToggledState]
 class Checkable extends RoleManager {
-  final _CheckableKind _kind;
-
   Checkable(SemanticsObject semanticsObject)
       : _kind = _checkableKindFromSemanticsFlag(semanticsObject),
         super(Role.checkable, semanticsObject);
+
+  final _CheckableKind _kind;
 
   @override
   void update() {
