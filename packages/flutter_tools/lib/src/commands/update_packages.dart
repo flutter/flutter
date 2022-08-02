@@ -1439,7 +1439,7 @@ String generateFakePubspec(
 /// It ends up holding the full graph of dependencies, and the version number for
 /// each one.
 class PubDependencyTree {
-  final Map<String, String?> _versions = <String, String>{};
+  final Map<String, String?> _versions = <String, String?>{};
   final Map<String, Set<String>> _dependencyTree = <String, Set<String>>{};
 
   /// Handles the output from "pub deps --style=compact".
