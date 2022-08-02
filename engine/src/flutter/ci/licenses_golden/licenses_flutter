@@ -541,6 +541,8 @@ FILE: ../../../flutter/impeller/docs/assets/xcode_frame_capture/image6.png
 FILE: ../../../flutter/impeller/docs/assets/xcode_frame_capture/image7.png
 FILE: ../../../flutter/impeller/docs/assets/xcode_frame_capture/image8.png
 FILE: ../../../flutter/impeller/docs/assets/xcode_frame_capture/image9.png
+FILE: ../../../flutter/impeller/entity/contents/atlas_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/atlas_contents.h
 FILE: ../../../flutter/impeller/entity/contents/clip_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/clip_contents.h
 FILE: ../../../flutter/impeller/entity/contents/content_context.cc
@@ -593,6 +595,8 @@ FILE: ../../../flutter/impeller/entity/entity_playground.h
 FILE: ../../../flutter/impeller/entity/entity_unittests.cc
 FILE: ../../../flutter/impeller/entity/inline_pass_context.cc
 FILE: ../../../flutter/impeller/entity/inline_pass_context.h
+FILE: ../../../flutter/impeller/entity/shaders/atlas_fill.frag
+FILE: ../../../flutter/impeller/entity/shaders/atlas_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.glsl
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.vert
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_color.frag

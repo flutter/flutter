@@ -27,6 +27,8 @@
 #include "impeller/entity/advanced_blend_saturation.frag.h"
 #include "impeller/entity/advanced_blend_screen.frag.h"
 #include "impeller/entity/advanced_blend_softlight.frag.h"
+#include "impeller/entity/atlas_fill.frag.h"
+#include "impeller/entity/atlas_fill.vert.h"
 #include "impeller/entity/blend.frag.h"
 #include "impeller/entity/blend.vert.h"
 #include "impeller/entity/border_mask_blur.frag.h"
@@ -106,6 +108,7 @@ using GlyphAtlasPipeline =
     PipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
 using VerticesPipeline =
     PipelineT<VerticesVertexShader, VerticesFragmentShader>;
+using AtlasPipeline = PipelineT<AtlasFillVertexShader, AtlasFillFragmentShader>;
 // Instead of requiring new shaders for clips, the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
@@ -198,6 +201,10 @@ class ContentContext {
   std::shared_ptr<Pipeline> GetVerticesPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(vertices_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline> GetAtlasPipeline(ContentContextOptions opts) const {
+    return GetPipeline(atlas_pipelines_, opts);
   }
 
   // Advanced blends.
@@ -311,6 +318,7 @@ class ContentContext {
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
   mutable Variants<VerticesPipeline> vertices_pipelines_;
+  mutable Variants<AtlasPipeline> atlas_pipelines_;
   // Advanced blends.
   mutable Variants<BlendColorPipeline> blend_color_pipelines_;
   mutable Variants<BlendColorBurnPipeline> blend_colorburn_pipelines_;
