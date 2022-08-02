@@ -306,6 +306,10 @@ action("_generate_symlinks") {
     ":copy_framework_module_map",
     ":copy_license",
   ]
+  metadata = {
+    macos_framework_without_entitlement =
+        [ "FlutterMacOS.framework.zip/Versions/A/FlutterMacOS" ]
+  }
 }
 
 group("flutter_framework") {
@@ -332,8 +336,19 @@ zip_bundle("zip_macos_flutter_framework") {
   ]
 }
 
+generated_file("macos_framework_without_entitlement_config") {
+  outputs = [ "$target_gen_dir/framework_without_entitlements.txt" ]
+
+  data_keys = [ "macos_framework_without_entitlement" ]
+
+  deps = [ ":_generate_symlinks" ]
+}
+
 zip_bundle("macos_flutter_framework_archive") {
-  deps = [ ":zip_macos_flutter_framework" ]
+  deps = [
+    ":macos_framework_without_entitlement_config",
+    ":zip_macos_flutter_framework",
+  ]
   prefix = "$full_platform_name-$flutter_runtime_mode/"
   if (flutter_runtime_mode == "debug") {
     prefix = "$full_platform_name/"
@@ -343,6 +358,10 @@ zip_bundle("macos_flutter_framework_archive") {
     {
       source = "$root_out_dir/zip_archives/tmp/FlutterMacOS.framework.zip"
       destination = "FlutterMacOS.framework.zip"
+    },
+    {
+      source = "$target_gen_dir/framework_without_entitlements.txt"
+      destination = "without_entitlements.txt"
     },
   ]
 }
