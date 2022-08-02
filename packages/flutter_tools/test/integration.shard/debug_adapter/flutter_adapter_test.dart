@@ -99,6 +99,13 @@ void main() {
         '',
         startsWith('Exited'),
       ]);
+
+      // If we're running with an out-of-process debug adapter, ensure that its
+      // own process shuts down after we terminated.
+      final DapTestServer server = dap.server;
+      if (server is OutOfProcessDapTestServer) {
+        await server.exitCode;
+      }
     });
 
     testWithoutContext('outputs useful message on invalid DAP protocol messages', () async {
