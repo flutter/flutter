@@ -263,7 +263,7 @@ void testMain() {
               result.index,
               i,
               reason: 'Failed at test case number $t:\n'
-                  '${testCase.toString()}\n'
+                  '$testCase\n'
                   '"$text"\n'
                   '\nExpected line break at {$lastLineBreak - $i} but found line break at {$lastLineBreak - ${result.index}}.',
             );
@@ -283,7 +283,7 @@ void testMain() {
               result.index,
               greaterThan(i),
               reason: 'Failed at test case number $t:\n'
-                  '${testCase.toString()}\n'
+                  '$testCase\n'
                   '"$text"\n'
                   '\nUnexpected line break found at {$lastLineBreak - ${result.index}}.',
             );
