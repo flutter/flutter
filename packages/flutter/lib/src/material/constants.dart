@@ -4,6 +4,8 @@
 
 import 'package:flutter/painting.dart';
 
+import 'colors.dart';
+
 /// The minimum dimension of any interactive region according to Material
 /// guidelines.
 ///
@@ -47,3 +49,11 @@ const EdgeInsets kTabLabelPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
 /// The padding added around material list items.
 const EdgeInsets kMaterialListPadding = EdgeInsets.symmetric(vertical: 8.0);
+
+/// The default color for [IconTheme] with light brightness. This color is used in
+/// [IconButton] to detect whether it is the default value of [ThemeData.iconTheme].
+const Color kDefaultIconLightColor = Colors.white;
+
+/// The default color for [IconTheme] with dark brightness. This color is used in
+/// [IconButton] to detect whether it is the default value of [ThemeData.iconTheme].
+const Color kDefaultIconDarkColor = Colors.black87;

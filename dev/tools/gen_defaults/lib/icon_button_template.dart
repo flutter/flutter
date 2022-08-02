@@ -87,6 +87,10 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    ButtonStyleButton.allOrNull<double>(${tokens["md.comp.icon-button.icon.size"]});
 
   // No default side
 
