@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -1083,6 +1084,94 @@ TEST_P(EntityTest, DrawVerticesSolidColorTrianglesWithIndices) {
   std::shared_ptr<VerticesContents> contents =
       std::make_shared<VerticesContents>(vertices);
   contents->SetColor(Color::White());
+  Entity e;
+  e.SetTransformation(Matrix::MakeScale(GetContentScale()));
+  e.SetContents(contents);
+
+  ASSERT_TRUE(OpenPlaygroundHere(e));
+}
+
+TEST_P(EntityTest, DrawAtlasNoColor) {
+  // Draws the image as four squares stiched together.
+  auto atlas = CreateTextureForFixture("bay_bridge.jpg");
+  auto size = atlas->GetSize();
+  // Divide image into four quadrants.
+  Scalar half_width = size.width / 2;
+  Scalar half_height = size.height / 2;
+  std::vector<Rect> texture_coordinates = {
+      Rect::MakeLTRB(0, 0, half_width, half_height),
+      Rect::MakeLTRB(half_width, 0, size.width, half_height),
+      Rect::MakeLTRB(0, half_height, half_width, size.height),
+      Rect::MakeLTRB(half_width, half_height, size.width, size.height)};
+  // Position quadrants adjacent to eachother.
+  std::vector<Matrix> transforms = {
+      Matrix::MakeTranslation({0, 0, 0}),
+      Matrix::MakeTranslation({half_width, 0, 0}),
+      Matrix::MakeTranslation({0, half_height, 0}),
+      Matrix::MakeTranslation({half_width, half_height, 0})};
+  std::shared_ptr<AtlasContents> contents = std::make_shared<AtlasContents>();
+
+  contents->SetTransforms(std::move(transforms));
+  contents->SetTextureCoordinates(std::move(texture_coordinates));
+  contents->SetTexture(atlas);
+  contents->SetBlendMode(Entity::BlendMode::kSource);
+
+  Entity e;
+  e.SetTransformation(Matrix::MakeScale(GetContentScale()));
+  e.SetContents(contents);
+
+  ASSERT_TRUE(OpenPlaygroundHere(e));
+}
+
+TEST_P(EntityTest, DrawAtlasWithColor) {
+  // Draws the image as four squares stiched together. Because blend modes
+  // aren't implented this ends up as four solid color blocks.
+  auto atlas = CreateTextureForFixture("bay_bridge.jpg");
+  auto size = atlas->GetSize();
+  // Divide image into four quadrants.
+  Scalar half_width = size.width / 2;
+  Scalar half_height = size.height / 2;
+  std::vector<Rect> texture_coordinates = {
+      Rect::MakeLTRB(0, 0, half_width, half_height),
+      Rect::MakeLTRB(half_width, 0, size.width, half_height),
+      Rect::MakeLTRB(0, half_height, half_width, size.height),
+      Rect::MakeLTRB(half_width, half_height, size.width, size.height)};
+  // Position quadrants adjacent to eachother.
+  std::vector<Matrix> transforms = {
+      Matrix::MakeTranslation({0, 0, 0}),
+      Matrix::MakeTranslation({half_width, 0, 0}),
+      Matrix::MakeTranslation({0, half_height, 0}),
+      Matrix::MakeTranslation({half_width, half_height, 0})};
+  std::vector<Color> colors = {Color::Red(), Color::Green(), Color::Blue(),
+                               Color::Yellow()};
+  std::shared_ptr<AtlasContents> contents = std::make_shared<AtlasContents>();
+
+  contents->SetTransforms(std::move(transforms));
+  contents->SetTextureCoordinates(std::move(texture_coordinates));
+  contents->SetTexture(atlas);
+  contents->SetColors(colors);
+  contents->SetBlendMode(Entity::BlendMode::kSource);
+
+  Entity e;
+  e.SetTransformation(Matrix::MakeScale(GetContentScale()));
+  e.SetContents(contents);
+
+  ASSERT_TRUE(OpenPlaygroundHere(e));
+}
+
+TEST_P(EntityTest, DrawAtlasNoColorFullSize) {
+  auto atlas = CreateTextureForFixture("bay_bridge.jpg");
+  auto size = atlas->GetSize();
+  std::vector<Rect> texture_coordinates = {
+      Rect::MakeLTRB(0, 0, size.width, size.height)};
+  std::vector<Matrix> transforms = {Matrix::MakeTranslation({0, 0, 0})};
+  std::shared_ptr<AtlasContents> contents = std::make_shared<AtlasContents>();
+
+  contents->SetTransforms(std::move(transforms));
+  contents->SetTextureCoordinates(std::move(texture_coordinates));
+  contents->SetTexture(atlas);
+  contents->SetBlendMode(Entity::BlendMode::kSource);
+
   Entity e;
   e.SetTransformation(Matrix::MakeScale(GetContentScale()));
   e.SetContents(contents);

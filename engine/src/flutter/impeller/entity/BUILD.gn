@@ -8,6 +8,8 @@ impeller_shaders("entity_shaders") {
   name = "entity"
 
   shaders = [
+    "shaders/atlas_fill.frag",
+    "shaders/atlas_fill.vert",
     "shaders/blending/advanced_blend.vert",
     "shaders/blending/advanced_blend_color.frag",
     "shaders/blending/advanced_blend_colorburn.frag",
@@ -51,6 +53,8 @@ impeller_shaders("entity_shaders") {
 
 impeller_component("entity") {
   sources = [
+    "contents/atlas_contents.cc",
+    "contents/atlas_contents.h",
     "contents/clip_contents.cc",
     "contents/clip_contents.h",
     "contents/content_context.cc",

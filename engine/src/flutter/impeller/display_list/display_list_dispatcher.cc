@@ -190,6 +190,34 @@ static Color ToColor(const SkColor& color) {
   };
 }
 
+static std::vector<Color> ToColors(const flutter::DlColor colors[], int count) {
+  auto result = std::vector<Color>();
+  if (colors == nullptr) {
+    return result;
+  }
+  for (int i = 0; i < count; i++) {
+    result.push_back(ToColor(colors[i]));
+  }
+  return result;
+}
+
+static std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count) {
+  auto result = std::vector<Matrix>();
+  for (int i = 0; i < count; i++) {
+    auto form = xform[i];
+    // clang-format off
+    auto matrix = Matrix{
+      form.fSCos, form.fSSin, 0, 0,
+     -form.fSSin, form.fSCos, 0, 0,
+      0,          0,          1, 0,
+      form.fTx,   form.fTy,   0, 1
+    };
+    // clang-format on
+    result.push_back(matrix);
+  }
+  return result;
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setColorSource(
     const flutter::DlColorSource* source) {
@@ -391,6 +419,14 @@ static std::optional<Rect> ToRect(const SkRect* rect) {
     return std::nullopt;
   }
   return Rect::MakeLTRB(rect->fLeft, rect->fTop, rect->fRight, rect->fBottom);
+}
+
+static std::vector<Rect> ToRects(const SkRect tex[], int count) {
+  auto result = std::vector<Rect>();
+  for (int i = 0; i < count; i++) {
+    result.push_back(ToRect(&tex[i]).value());
+  }
+  return result;
 }
 
 // |flutter::Dispatcher|
@@ -839,8 +875,10 @@ void DisplayListDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                                       flutter::DlImageSampling sampling,
                                       const SkRect* cull_rect,
                                       bool render_with_attributes) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
+  canvas_.DrawAtlas(std::make_shared<Image>(atlas->impeller_texture()),
+                    ToRSXForms(xform, count), ToRects(tex, count),
+                    ToColors(colors, count), ToBlendMode(mode),
+                    ToSamplerDescriptor(sampling), ToRect(cull_rect), paint_);
 }
 
 // |flutter::Dispatcher|
