@@ -101,6 +101,11 @@ def process_framework(dst, args, fat_framework, fat_framework_binary):
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
     subprocess.check_call([DSYMUTIL, '-o', dsym_out, fat_framework_binary])
+    subprocess.check_call([
+        'zip', '-r',
+        '%s/FlutterMacOS.dSYM.zip' % dst,
+        '%s/FlutterMacOS.dSYM/Contents' % dst
+    ])
 
   if args.strip:
     # copy unstripped
