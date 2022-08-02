@@ -435,7 +435,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // _totalContentExtent >= viewportDimension, so (_totalContentExtent - _mainAxisPadding) > 0
     final double fractionVisible = clampDouble(
       (_lastMetrics!.extentInside - _totalTrackMainAxisOffsets)
-          / (_totalContentExtent - _totalTrackMainAxisOffsets),
+        / (_totalContentExtent - _totalTrackMainAxisOffsets),
       0.0,
       1.0,
     );
@@ -449,7 +449,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double safeMinLength = math.min(minLength, _traversableTrackExtent);
     final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
     // Thumb extent is no smaller than minLength if scrolling normally.
-        ? safeMinLength
+      ? safeMinLength
     // User is overscrolling. Thumb extent can be less than minLength
     // but no smaller than minOverscrollLength. We can't use the
     // fractionVisible to produce intermediate values between minLength and
@@ -483,34 +483,31 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The total size of the scrollable content.
   double get _totalContentExtent {
     return _lastMetrics!.maxScrollExtent
-        - _lastMetrics!.minScrollExtent
-        + _lastMetrics!.viewportDimension;
+      - _lastMetrics!.minScrollExtent
+      + _lastMetrics!.viewportDimension;
   }
 
   ScrollbarOrientation get _resolvedOrientation {
     if (scrollbarOrientation == null) {
       if (_isVertical) {
         return textDirection == TextDirection.ltr
-            ? ScrollbarOrientation.right
-            : ScrollbarOrientation.left;
-      } else {
-        return ScrollbarOrientation.bottom;
+          ? ScrollbarOrientation.right
+          : ScrollbarOrientation.left;
       }
+      return ScrollbarOrientation.bottom;
     }
-    else {
-      return scrollbarOrientation!;
-    }
+    return scrollbarOrientation!;
   }
 
   void _debugAssertIsValidOrientation(ScrollbarOrientation orientation) {
     bool isVerticalOrientation(ScrollbarOrientation orientation) =>
-        orientation == ScrollbarOrientation.left
-            || orientation == ScrollbarOrientation.right;
+      orientation == ScrollbarOrientation.left
+        || orientation == ScrollbarOrientation.right;
     assert(
-    (_isVertical && isVerticalOrientation(orientation))
+      (_isVertical && isVerticalOrientation(orientation))
         || (!_isVertical && !isVerticalOrientation(orientation)),
-    'The given ScrollbarOrientation: $orientation is incompatible with the '
-        'current AxisDirection: $_lastAxisDirection.'
+      'The given ScrollbarOrientation: $orientation is incompatible with the '
+      'current AxisDirection: $_lastAxisDirection.'
     );
   }
 
