@@ -9,7 +9,7 @@ import 'button_style.dart';
 import 'theme.dart';
 
 /// A [ButtonStyle] that overrides the default appearance of
-/// [IconButton]s when it's used with [IconButtonTheme] or with the
+/// [IconButton]s when it's used with the [IconButton], the [IconButtonTheme] or the
 /// overall [Theme]'s [ThemeData.iconButtonTheme].
 ///
 /// The [IconButton] will be affected by [IconButtonTheme] and [IconButtonThemeData]
