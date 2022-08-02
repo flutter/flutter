@@ -315,7 +315,7 @@ class BorderSide with Diagnosticable {
 
   /// Get the amount of the stroke width that lies inside of the [BorderSide].
   ///
-  /// For example, this will return the [wdith] for a [strokeAlign] of -1, half
+  /// For example, this will return the [width] for a [strokeAlign] of -1, half
   /// the [width] for a [strokeAlign] of 0, and 0 for a [strokeAlign] of 1.
   double get strokeInset => width * (1 - (1 + strokeAlign) / 2);
 
