@@ -102,6 +102,7 @@ export 'src/material/input_date_picker_form_field.dart';
 export 'src/material/input_decorator.dart';
 export 'src/material/list_tile.dart';
 export 'src/material/list_tile_theme.dart';
+export 'src/material/magnifier.dart';
 export 'src/material/material.dart';
 export 'src/material/material_button.dart';
 export 'src/material/material_localizations.dart';

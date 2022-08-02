@@ -5152,6 +5152,79 @@ void main() {
     expect(find.byType(SelectableText, skipOffstage: false), findsOneWidget);
   });
 
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
+
+    testWidgets(
+        'Can drag handles to show, unshow, and update magnifier',
+        (WidgetTester tester) async {
+      const String testValue = 'abc def ghi';
+      final SelectableText selectableText = SelectableText(
+            testValue,
+            magnifierConfiguration: TextMagnifierConfiguration(
+        magnifierBuilder: (
+          _,
+          MagnifierController controller,
+          ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+        ) {
+          infoBearer = localInfoBearer;
+          return fakeMagnifier;
+        },
+      )
+          );
+
+      await tester.pumpWidget(
+        overlay(
+          child: selectableText,
+        ),
+      );
+
+      await skipPastScrollingAnimation(tester);
+
+      // Double tap the 'e' to select 'def'.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+
+      final TextSelection selection = TextSelection(
+        baseOffset: testValue.indexOf('d'),
+        extentOffset: testValue.indexOf('f')
+      );
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+
+      // Drag the right handle 2 letters to the right.
+      final Offset handlePos = endpoints.last.point + const Offset(1.0, 1.0);
+      final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+
+      Offset? firstDragGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
+      await tester.pump();
+
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition,
+          isNot(infoBearer.value.globalGesturePosition));
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    });
+  });
+
   testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/71389
 
