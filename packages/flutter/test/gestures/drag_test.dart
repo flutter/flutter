@@ -466,7 +466,7 @@ void main() {
     expect(updateDelta, const Offset(20.0, 0.0));
   });
 
-  testGesture('Drag with multiple pointers in down behavior (the endOfBatch of event is always true)', (GestureTester tester) {
+  testGesture('Drag with multiple pointers in down behavior (events sent individually)', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 =
       HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     final VerticalDragGestureRecognizer drag2 =
@@ -538,11 +538,11 @@ void main() {
     ]);
   });
 
-  testGesture('Drag with multiple pointers in down behavior (the endOfBatch of event may be true)', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag1 =
-    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
-    final VerticalDragGestureRecognizer drag2 =
-    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+  testGesture('Drag with multiple pointers in down behavior (events sent in batches)', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(() => drag1.dispose);
     addTearDown(() => drag2.dispose);
 
@@ -564,13 +564,26 @@ void main() {
     drag2.addPointer(down5);
     tester.closeArena(5);
     tester.route(down5);
-    log.add('-a');
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+    ]);
+    log.clear();
 
     // only one pointer moves, the endOfBatch is true.
     tester.route(pointer5.move(const Offset(100.0, 0.0)));
-    log.add('-b');
+    expect(log, <String>[
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+    ]);
+    log.clear();
+
     tester.route(pointer5.move(const Offset(50.0, 50.0)));
-    log.add('-c');
+    expect(log, <String>[
+      'drag1-update',
+    ]);
+    log.clear();
 
     final TestPointer pointer6 = TestPointer(6);
     final PointerDownEvent down6 = pointer6.down(const Offset(20.0, 20.0));
@@ -578,46 +591,41 @@ void main() {
     drag2.addPointer(down6);
     tester.closeArena(6);
     tester.route(down6);
-    log.add('-d');
+    expect(log, <String>[
+      'drag2-down',
+      'drag2-cancel',
+    ]);
+    log.clear();
 
     // Two pointers down, pointer5 and pointer6 move, and the endOfBatch of pointer5 is false (for example Android).
     tester.route(pointer5.move(const Offset(0.0, 100.0), endOfBatch: false));
-    log.add('-e');
+    expect(log, <String>[]);
+
     tester.route(pointer6.move(const Offset(70.0, 70.0)));
-    log.add('-f');
+    expect(log, <String>[
+      'drag1-update',
+    ]);
+    log.clear();
 
     // Two pointers down, pointer5 and pointer6 move, and the endOfBatch of pointer6 is false.
     tester.route(pointer6.move(const Offset(0.0, 100.0), endOfBatch: false));
-    log.add('-g');
+    expect(log, <String>[]);
+
     tester.route(pointer5.move(const Offset(70.0, 70.0)));
-    log.add('-h');
+    expect(log, <String>[
+      'drag1-update',
+    ]);
+    log.clear();
 
     tester.route(pointer5.up());
-    tester.route(pointer6.up());
-
     expect(log, <String>[
-      'drag1-down',
-      'drag2-down',
-      '-a',
-      'drag2-cancel',
-      'drag1-start',
-      'drag1-update',
-      '-b',
-      'drag1-update',
-      '-c',
-      'drag2-down',
-      'drag2-cancel',
-      '-d',
-      '-e',
-      'drag1-update',
-      '-f',
-      '-g',
-      'drag1-update',
-      '-h',
       'drag1-end',
     ]);
-  });
+    log.clear();
 
+    tester.route(pointer6.up());
+    expect(log, <String>[]);
+  });
 
   testGesture('A pointer joins and leaves during a gesture', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
@@ -802,7 +810,7 @@ void main() {
     ]);
   });
 
-  testGesture('Two pointers down but only one moves (which endOfBatch is true, and another does not dispatch)', (GestureTester tester) {
+  testGesture('Two pointers down but only one moves and dispatches events', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.start;
     addTearDown(() => drag1.dispose);
@@ -858,7 +866,7 @@ void main() {
     ]);
   });
 
-  testGesture('Two pointers down but only one moves (which endOfBatch is false, and another dispatches)', (GestureTester tester) {
+  testGesture('Two pointers down but only one moves (both pointers dispatch events)', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.start;
     addTearDown(() => drag1.dispose);
@@ -1993,7 +2001,7 @@ void main() {
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
 
-    // one Pointer up, give up all pointers.
+    // One pointer up. Give up all pointers.
     tester.route(touchPointer.up());
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, isNull);
@@ -2050,7 +2058,7 @@ testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureT
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
 
-    // Let another pointer join.
+    // Another pointer joins.
     final PointerPanZoomStartEvent start = panZoomPointer.panZoomStart(const Offset(10.0, 10.0));
     pan.addPointerPanZoom(start);
     competingPan.addPointerPanZoom(start);
@@ -2064,8 +2072,8 @@ testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureT
     expect(updatedScrollDelta, isNull);
     expect(didEndPan, isFalse);
 
-    // Here are two pointers, so when they both moved, the gesture will move finally.
-    // one pointer moves (10, 10), and another moves (30, 30), the result is (30, 30).
+    // The touchPointer moves by (10, 10), and the panZoomPointer moves by (30, 30). As a result,
+    // the gesture moves by (30, 30).
     tester.route(touchPointer.move(const Offset(80.0, 80.0)));
     tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
     expect(didStartPan, isFalse);

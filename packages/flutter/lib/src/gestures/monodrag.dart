@@ -319,24 +319,23 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    // When multiple pointers are down and move, there may be the following
-    // situations depending on the current platform:
+    // When multiple pointers move, they dispatch the PointerEvents. The PointerMoveEvents
+    // of each individual pointer considered a batch. The last PointerEvent.endOfBatch
+    // is true. which means this batch event ends.
+    // When the endOfBatch is true, the gesture updates.
     //
-    // 1) All pointers move, and therefore each pointer dispatches a PointerMoveEvent
-    // (for example on Android and iOS).
-    //
-    //  * The gesture should only move after each pointer has dispatched one
-    //    PointerMoveEvent or PointerPanZoomUpdateEvent.
+    //  * The gesture should only move after the pointer dispatched the PointerMoveEvent or
+    //    PointerPanZoomUpdateEvent where the endOfBatch is true.
     //  * The scrolling distance (`delta`) should be delta(combined) =
     //     max(delta(i) which are positive) + min(delta(i) which are negative).
     //  * The drag location should be the average of all pointers.
     //
     // Logic:
     //
-    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the
+    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, where endOfBatch is false, add the
     //    PointerEvent to the _multiPointerMoveTrackers.
-    //  * When all pointers have dispatched PointerMoveEvent, they are considered
-    //    a batch, and the gesture will update by the rules above.
+    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, where endOfBatch is true,
+    //    they are considered a batch, and the gesture will update by the rules above.
     //
     // Example:
     //
@@ -347,55 +346,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     //     * p1 down (_multiPointerStartTrackers.add),
     //     * p2 down (_multiPointerStartTrackers.add),
     //     * p1 move +50 (_multiPointerMoveTrackers.add and the gesture wait),
-    //     * p2 move +10 (_multiPointerMoveTrackers.add, the gesture update +50,
-    //       and _multiPointerMoveTrackers.clear),
+    //     * p2 move +10, and the endOfBatch is true (_multiPointerMoveTrackers.add,
+    //       the gesture update +50, and _multiPointerMoveTrackers.clear),
     //     * p1 move +30 (_multiPointerMoveTrackers.add and the gesture wait),
-    //     * p2 move -10 (_multiPointerMoveTrackers.add, the gesture update +20,
-    //       and _multiPointerMoveTrackers.clear),
-    //     * p1 up (_multiPointerStartTrackers.clear),
-    //     * p2 up.
-    //
-    // 2) Only some pointers move, but each pointer still dispatch a PointerMoveEvent
-    //    (for example on Android).
-    //
-    //  * This means that the delta of the not moved pointers' PointerMoveEvent
-    //    or PointerPanZoomUpdateEvent is zero.
-    //    So the logic is the same as 1).
-    //
-    // 3) Only some pointers move, and only the moving pointers dispatch
-    //    PointerMoveEvents (for example on iOS).
-    //
-    //  * This means that the pointers that are not moving will not dispatch
-    //    PointerMoveEvents or PointerPanZoomUpdateEvents at all.
-    //  * The gesture should update if it encounters two PointerMoveEvents or
-    //    PointerPanZoomUpdateEvents from the same pointer.
-    //  * The scrolling distance should be delta(combined) =
-    //    max(delta(i) which are positive) + min(delta(i) which are negative).
-    //  * The drag location should be the average of the moving pointers.
-    //
-    // Logic:
-    //
-    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes, add the
-    //    PointerEvent in the _multiPointerMoveTrackers.
-    //  * When a PointerMoveEvent or PointerPanZoomUpdateEvent comes which pointer
-    //    has been in the _multiPointerMoveTrackers, the gesture will update immediately
-    //    then add this PointerEvent in the _multiPointerMoveTrackers.
-    //
-    // Example:
-    //
-    //  * When two pointers (p1 and p2) down, the sequence of PointerMoveEvents
-    //    is : p1 down, p2 down, p1 move +50, p1 move +10,
-    //    p1 move +30, p1 move -10 , p1 up and p2 up.
-    //    The handleEvent process will be:
-    //     * p1 down (_multiPointerStartTrackers.add),
-    //     * p2 down (_multiPointerStartTrackers.add),
-    //     * p1 move +50 (_multiPointerMoveTrackers.add and the gesture wait),
-    //     * p1 move +10 (_multiPointerMoveTrackers.clear, the gesture update +50,
-    //       and _multiPointerMoveTrackers.add,),
-    //     * p1 move +30 (_multiPointerMoveTrackers.clear, the gesture update +10,
-    //       and _multiPointerMoveTrackers.add,),
-    //     * p1 move -10 (_multiPointerMoveTrackers.clear, the gesture update +30,
-    //       and _multiPointerMoveTrackers.add,),
+    //     * p2 move -10, and the endOfBatch is true (_multiPointerMoveTrackers.add,
+    //       the gesture update +20, and _multiPointerMoveTrackers.clear),
     //     * p1 up (_multiPointerStartTrackers.clear),
     //     * p2 up.
     //
@@ -425,7 +380,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           _pointerMoveAccept = true;
           _multiPointerMoveTrackers.add(event);
           assert (_multiPointerMoveTrackers.length <= _multiPointerStartTrackers.length);
-          // If this event is the last event of a batch, update the pointers.
+          // If this event is the last event of a batch Or both the PointerEvents of tracking pointers dispatched,
+          // update the pointers.
           if (event.endOfBatch || _multiPointerMoveTrackers.length == _multiPointerStartTrackers.length) {
             _checkMultiPointerUpdate();
             _multiPointerMoveTrackers.clear();
