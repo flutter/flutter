@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -804,7 +805,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(debugCheckHasOverlay(context));
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
       child: RawGestureDetector(
