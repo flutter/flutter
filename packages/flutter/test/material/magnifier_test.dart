@@ -12,7 +12,7 @@ void main() {
   final MagnifierController magnifierController = MagnifierController();
   const Rect reasonableTextField = Rect.fromLTRB(50, 100, 200, 100);
   final Offset basicOffset = Offset(Magnifier.kDefaultMagnifierSize.width / 2,
-      Magnifier.kDefaultMagnifierSize.height - Magnifier.kStandardVerticalFocalPointShift);
+      Magnifier.kStandardVerticalFocalPointShift + Magnifier.kDefaultMagnifierSize.height);
 
   Offset getMagnifierPosition(WidgetTester tester, [bool animated = false]) {
     if (animated) {
@@ -239,8 +239,7 @@ void main() {
             greaterThanOrEqualTo(reasonableTextField.left));
       });
 
-      testWidgets('should position vertically at the center of the line',
-          (WidgetTester tester) async {
+      testWidgets('should position vertically at the center of the line', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
         ));
