@@ -12,10 +12,16 @@ import os
 
 from create_xcframework import create_xcframework
 
+buildroot_dir = os.path.abspath(
+    os.path.join(os.path.realpath(__file__), '..', '..', '..', '..')
+)
+
 DSYMUTIL = os.path.join(
     os.path.dirname(__file__), '..', '..', '..', 'buildtools', 'mac-x64',
     'clang', 'bin', 'dsymutil'
 )
+
+out_dir = os.path.join(buildroot_dir, 'out')
 
 
 def main():
@@ -31,9 +37,22 @@ def main():
 
   args = parser.parse_args()
 
-  fat_framework = os.path.join(args.dst, 'FlutterMacOS.framework')
-  arm64_framework = os.path.join(args.arm64_out_dir, 'FlutterMacOS.framework')
-  x64_framework = os.path.join(args.x64_out_dir, 'FlutterMacOS.framework')
+  dst = (
+      args.dst
+      if os.path.isabs(args.dst) else os.path.join(buildroot_dir, args.dst)
+  )
+  arm64_out_dir = (
+      args.arm64_out_dir if os.path.isabs(args.arm64_out_dir) else
+      os.path.join(buildroot_dir, args.arm64_out_dir)
+  )
+  x64_out_dir = (
+      args.x64_out_dir if os.path.isabs(args.x64_out_dir) else
+      os.path.join(buildroot_dir, args.x64_out_dir)
+  )
+
+  fat_framework = os.path.join(dst, 'FlutterMacOS.framework')
+  arm64_framework = os.path.join(arm64_out_dir, 'FlutterMacOS.framework')
+  x64_framework = os.path.join(x64_out_dir, 'FlutterMacOS.framework')
 
   arm64_dylib = os.path.join(arm64_framework, 'FlutterMacOS')
   x64_dylib = os.path.join(x64_framework, 'FlutterMacOS')
@@ -66,20 +85,26 @@ def main():
   )
 
   # Create the arm64/x64 fat framework.
-  subprocess.check_call([
+  result = subprocess.run([
       'lipo', arm64_dylib, x64_dylib, '-create', '-output', fat_framework_binary
   ])
-  process_framework(args, fat_framework, fat_framework_binary)
+  if result.returncode != 0:
+    print(
+        'Error processing command with stdout[%s] and stderr[%s]' %
+        (result.stdout, result.stderr)
+    )
+    return 1
+  process_framework(dst, args, fat_framework, fat_framework_binary)
 
 
-def process_framework(args, fat_framework, fat_framework_binary):
+def process_framework(dst, args, fat_framework, fat_framework_binary):
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
     subprocess.check_call([DSYMUTIL, '-o', dsym_out, fat_framework_binary])
 
   if args.strip:
     # copy unstripped
-    unstripped_out = os.path.join(args.dst, 'FlutterMacOS.unstripped')
+    unstripped_out = os.path.join(dst, 'FlutterMacOS.unstripped')
     shutil.copyfile(fat_framework_binary, unstripped_out)
 
     subprocess.check_call(["strip", "-x", "-S", fat_framework_binary])
