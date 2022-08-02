@@ -10,7 +10,6 @@ import 'expansion_tile_theme.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material.dart';
 import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
@@ -433,13 +432,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       offstage: closed,
       child: TickerMode(
         enabled: !closed,
-        child: Material(
-          child: Padding(
-            padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
-            child: Column(
-              crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-              children: widget.children,
-            ),
+        child: Padding(
+          padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+            children: widget.children,
           ),
         ),
       ),
