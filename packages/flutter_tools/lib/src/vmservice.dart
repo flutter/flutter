@@ -166,7 +166,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   CompileExpression? compileExpression,
   GetSkSLMethod? getSkSLMethod,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-  required io.CompressionOptions compression,
+  io.CompressionOptions compression,
   Device? device,
   required Logger logger,
 });

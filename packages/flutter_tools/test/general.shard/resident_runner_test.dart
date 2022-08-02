@@ -2038,7 +2038,7 @@ flutter:
   testUsingContext('Handle existing VM service clients DDS error', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
-      .._dds = DartDevelopmentService();
+      ..dds = DartDevelopmentService();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
@@ -2086,7 +2086,7 @@ flutter:
   testUsingContext('Host VM service ipv6 defaults', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
-      .._dds = DartDevelopmentService();
+      ..dds = DartDevelopmentService();
     final Completer<void>done = Completer<void>();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
@@ -2120,7 +2120,7 @@ flutter:
   testUsingContext('Context includes URI converter', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
-      .._dds = DartDevelopmentService();
+      ..dds = DartDevelopmentService();
     final Completer<void>done = Completer<void>();
     ddsLauncherCallback = (
       Uri uri, {
@@ -2162,7 +2162,7 @@ flutter:
   testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
     // See https://github.com/flutter/flutter/issues/72385 for context.
     final FakeDevice device = FakeDevice()
-      .._dds = DartDevelopmentService();
+      ..dds = DartDevelopmentService();
     ddsLauncherCallback = (
       Uri uri, {
       bool enableAuthCodes = false,
@@ -2590,9 +2590,7 @@ class FakeDevice extends Fake implements Device {
   String get name => 'FakeDevice';
 
   @override
-  DartDevelopmentService get dds => _dds!;
-
-  DartDevelopmentService? _dds;
+  late DartDevelopmentService dds;
 
   @override
   Future<void> dispose() async {
