@@ -229,16 +229,13 @@ if (enable_unittests) {
       ":shell_unittests_gpu_configuration_config",
     ]
 
-    # SwiftShader only supports x86/x86_64
-    if (target_cpu == "x86" || target_cpu == "x64") {
-      if (test_enable_gl) {
-        sources += [
-          "shell_test_platform_view_gl.cc",
-          "shell_test_platform_view_gl.h",
-        ]
+    if (test_enable_gl) {
+      sources += [
+        "shell_test_platform_view_gl.cc",
+        "shell_test_platform_view_gl.h",
+      ]
 
-        public_deps += [ "//flutter/testing:opengl" ]
-      }
+      public_deps += [ "//flutter/testing:opengl" ]
     }
 
     if (test_enable_vulkan) {
