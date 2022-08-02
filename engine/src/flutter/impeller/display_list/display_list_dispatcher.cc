@@ -21,6 +21,7 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
+#include "impeller/geometry/sigma.h"
 #include "impeller/geometry/vertices.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
@@ -324,7 +325,7 @@ void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
       auto blur = filter->asBlur();
 
       auto style = ToBlurStyle(blur->style());
-      auto sigma = FilterContents::Sigma(blur->sigma());
+      auto sigma = Sigma(blur->sigma());
 
       paint_.mask_filter = [style, sigma](FilterInput::Ref input,
                                           bool is_solid_color) {
@@ -350,8 +351,8 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
   switch (filter->type()) {
     case flutter::DlImageFilterType::kBlur: {
       auto blur = filter->asBlur();
-      auto sigma_x = FilterContents::Sigma(blur->sigma_x());
-      auto sigma_y = FilterContents::Sigma(blur->sigma_y());
+      auto sigma_x = Sigma(blur->sigma_x());
+      auto sigma_y = Sigma(blur->sigma_y());
 
       if (blur->tile_mode() != flutter::DlTileMode::kClamp) {
         // TODO(105072): Implement tile mode for blur filter.

@@ -654,6 +654,8 @@ FILE: ../../../flutter/impeller/geometry/rect.h
 FILE: ../../../flutter/impeller/geometry/scalar.h
 FILE: ../../../flutter/impeller/geometry/shear.cc
 FILE: ../../../flutter/impeller/geometry/shear.h
+FILE: ../../../flutter/impeller/geometry/sigma.cc
+FILE: ../../../flutter/impeller/geometry/sigma.h
 FILE: ../../../flutter/impeller/geometry/size.cc
 FILE: ../../../flutter/impeller/geometry/size.h
 FILE: ../../../flutter/impeller/geometry/type_traits.cc
