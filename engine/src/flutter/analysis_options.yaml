@@ -14,8 +14,6 @@ analyzer:
     deprecated_member_use_from_same_package: ignore
     # Turned off until null-safe rollout is complete.
     unnecessary_null_comparison: ignore
-    # TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/49563 is fixed.
-    ffi_native_unexpected_number_of_parameters: ignore # DIFFERENT FROM FLUTTER/FLUTTER
   exclude: # DIFFERENT FROM FLUTTER/FLUTTER
     # Fixture depends on dart:ui and raises false positives.
     - flutter_frontend_server/test/fixtures/lib/main.dart
