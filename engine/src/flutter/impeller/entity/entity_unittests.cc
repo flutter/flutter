@@ -20,6 +20,7 @@
 #include "impeller/entity/entity_playground.h"
 #include "impeller/geometry/geometry_unittests.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/sigma.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_pass.h"
@@ -913,13 +914,11 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     }
 
     auto blur = FilterContents::MakeGaussianBlur(
-        FilterInput::Make(input), FilterContents::Sigma{blur_amount[0]},
-        FilterContents::Sigma{blur_amount[1]},
+        FilterInput::Make(input), Sigma{blur_amount[0]}, Sigma{blur_amount[1]},
         blur_styles[selected_blur_style]);
 
     auto mask_blur = FilterContents::MakeBorderMaskBlur(
-        FilterInput::Make(input), FilterContents::Sigma{blur_amount[0]},
-        FilterContents::Sigma{blur_amount[1]},
+        FilterInput::Make(input), Sigma{blur_amount[0]}, Sigma{blur_amount[1]},
         blur_styles[selected_blur_style]);
 
     auto ctm = Matrix::MakeScale(GetContentScale()) *
@@ -1033,8 +1032,7 @@ TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
       PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
   fill->SetColor(Color::CornflowerBlue());
   auto border_mask_blur = FilterContents::MakeBorderMaskBlur(
-      FilterInput::Make(fill), FilterContents::Radius{3},
-      FilterContents::Radius{4});
+      FilterInput::Make(fill), Radius{3}, Radius{4});
 
   {
     Entity e;
