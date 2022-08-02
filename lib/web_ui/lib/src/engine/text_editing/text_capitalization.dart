@@ -32,8 +32,6 @@ enum TextCapitalization {
 /// See: https://developers.google.com/web/updates/2015/04/autocapitalize
 /// https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/autocapitalize
 class TextCapitalizationConfig {
-  final TextCapitalization textCapitalization;
-
   const TextCapitalizationConfig.defaultCapitalization()
       : textCapitalization = TextCapitalization.none;
 
@@ -46,6 +44,8 @@ class TextCapitalizationConfig {
                     : inputConfiguration == 'TextCapitalization.sentences'
                         ? TextCapitalization.sentences
                         : TextCapitalization.none;
+
+  final TextCapitalization textCapitalization;
 
   /// Sets `autocapitalize` attribute on input elements.
   ///

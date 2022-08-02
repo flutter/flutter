@@ -142,14 +142,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   Iterable<ui.FlutterView> get views => _windows.values;
   Map<Object, ui.FlutterWindow> get windows => _windows;
-  Map<Object, ui.FlutterWindow> _windows = <Object, ui.FlutterWindow>{};
+  final Map<Object, ui.FlutterWindow> _windows = <Object, ui.FlutterWindow>{};
 
   /// A map of opaque platform window identifiers to window configurations.
   ///
   /// This should be considered a protected member, only to be used by
   /// [PlatformDispatcher] subclasses.
   Map<Object, ui.ViewConfiguration> get windowConfigurations => _windowConfigurations;
-  Map<Object, ui.ViewConfiguration> _windowConfigurations =
+  final Map<Object, ui.ViewConfiguration> _windowConfigurations =
       <Object, ui.ViewConfiguration>{};
 
   /// A callback that is invoked whenever the platform's [devicePixelRatio],

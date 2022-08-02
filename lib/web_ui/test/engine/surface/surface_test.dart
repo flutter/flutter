@@ -378,9 +378,9 @@ void testMain() {
 }
 
 class _LoggingTestSurface extends PersistedContainerSurface {
-  final List<String> log = <String>[];
-
   _LoggingTestSurface() : super(null);
+
+  final List<String> log = <String>[];
 
   @override
   void build() {

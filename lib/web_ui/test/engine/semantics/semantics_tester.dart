@@ -380,17 +380,6 @@ DomElement? findScrollable() {
 
 /// Logs semantics actions dispatched to [ui.window].
 class SemanticsActionLogger {
-  late StreamController<int> _idLogController;
-  late StreamController<ui.SemanticsAction> _actionLogController;
-
-  /// Semantics object ids that dispatched the actions.
-  Stream<int> get idLog => _idLog;
-  late Stream<int> _idLog;
-
-  /// The actions that were dispatched to [ui.window].
-  Stream<ui.SemanticsAction> get actionLog => _actionLog;
-  late Stream<ui.SemanticsAction> _actionLog;
-
   SemanticsActionLogger() {
     _idLogController = StreamController<int>();
     _actionLogController = StreamController<ui.SemanticsAction>();
@@ -411,4 +400,15 @@ class SemanticsActionLogger {
       });
     };
   }
+
+  late StreamController<int> _idLogController;
+  late StreamController<ui.SemanticsAction> _actionLogController;
+
+  /// Semantics object ids that dispatched the actions.
+  Stream<int> get idLog => _idLog;
+  late Stream<int> _idLog;
+
+  /// The actions that were dispatched to [ui.window].
+  Stream<ui.SemanticsAction> get actionLog => _actionLog;
+  late Stream<ui.SemanticsAction> _actionLog;
 }

@@ -86,8 +86,6 @@ abstract class HostNode {
 /// supported in the current environment. In this case, a fallback [ElementHostNode]
 /// should be created instead.
 class ShadowDomHostNode implements HostNode {
-  late DomShadowRoot _shadow;
-
   /// Build a HostNode by attaching a [DomShadowRoot] to the `root` element.
   ///
   /// This also calls [applyGlobalCssRulesToSheet], defined in dom_renderer.
@@ -114,6 +112,8 @@ class ShadowDomHostNode implements HostNode {
       hasAutofillOverlay: browserHasAutofillOverlay(),
     );
   }
+
+  late DomShadowRoot _shadow;
 
   @override
   DomElement? get activeElement => _shadow.activeElement;
@@ -150,13 +150,13 @@ class ShadowDomHostNode implements HostNode {
 /// This is a fallback implementation, in case [ShadowDomHostNode] fails when
 /// being constructed.
 class ElementHostNode implements HostNode {
-  late DomElement _element;
-
   /// Build a HostNode by attaching a child [DomElement] to the `root` element.
   ElementHostNode(DomElement root) {
     _element = domDocument.createElement('flt-element-host-node');
     root.appendChild(_element);
   }
+
+  late DomElement _element;
 
   @override
   DomElement? get activeElement => _element.ownerDocument?.activeElement;

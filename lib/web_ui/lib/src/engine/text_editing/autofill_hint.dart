@@ -7,14 +7,6 @@
 /// See: https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/autofill.dart
 /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
 class BrowserAutofillHints {
-  static final BrowserAutofillHints _singletonInstance =
-      BrowserAutofillHints._();
-
-  /// The [BrowserAutofillHints] singleton.
-  static BrowserAutofillHints get instance => _singletonInstance;
-
-  final Map<String, String> _flutterToEngineMap;
-
   BrowserAutofillHints._()
       : _flutterToEngineMap = <String, String>{
           'birthday': 'bday',
@@ -72,6 +64,14 @@ class BrowserAutofillHints {
           'url': 'url',
           'username': 'username',
         };
+
+  static final BrowserAutofillHints _singletonInstance =
+      BrowserAutofillHints._();
+
+  /// The [BrowserAutofillHints] singleton.
+  static BrowserAutofillHints get instance => _singletonInstance;
+
+  final Map<String, String> _flutterToEngineMap;
 
   /// Converts the Flutter AutofillHint to the autofill hint value used by the
   /// browsers.

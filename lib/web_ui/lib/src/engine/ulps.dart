@@ -48,9 +48,6 @@ int twosComplimentToSignBit(int x) {
 }
 
 class _FloatBitConverter {
-  final Float32List float32List;
-  final Int32List int32List;
-
   factory _FloatBitConverter() {
     final Float32List float32List = Float32List(1);
     return _FloatBitConverter._(
@@ -58,6 +55,9 @@ class _FloatBitConverter {
   }
 
   _FloatBitConverter._(this.float32List, this.int32List);
+
+  final Float32List float32List;
+  final Int32List int32List;
 
   int toInt(Float32List source, int index) {
     float32List[0] = source[index];

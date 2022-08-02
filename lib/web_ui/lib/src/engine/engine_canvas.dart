@@ -116,10 +116,6 @@ class SaveStackEntry {
 
 /// Tagged union of clipping parameters used for canvas.
 class SaveClipEntry {
-  final ui.Rect? rect;
-  final ui.RRect? rrect;
-  final ui.Path? path;
-  final Matrix4 currentTransform;
   SaveClipEntry.rect(this.rect, this.currentTransform)
       : rrect = null,
         path = null;
@@ -129,6 +125,11 @@ class SaveClipEntry {
   SaveClipEntry.path(this.path, this.currentTransform)
       : rect = null,
         rrect = null;
+
+  final ui.Rect? rect;
+  final ui.RRect? rrect;
+  final ui.Path? path;
+  final Matrix4 currentTransform;
 }
 
 /// Provides save stack tracking functionality to implementations of

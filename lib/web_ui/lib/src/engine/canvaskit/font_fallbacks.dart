@@ -547,13 +547,13 @@ Set<NotoFont> findMinimumFontsForCodeUnits(
 }
 
 class NotoFont {
+  NotoFont(this.name, this.approximateUnicodeRanges);
+
   final String name;
   final List<CodeunitRange> approximateUnicodeRanges;
 
   Completer<void>? _decodingCompleter;
   _ResolvedNotoFont? resolvedFont;
-
-  NotoFont(this.name, this.approximateUnicodeRanges);
 
   String get googleFontsCssUrl =>
       'https://fonts.googleapis.com/css2?family=${name.replaceAll(' ', '+')}';
@@ -581,10 +581,10 @@ class NotoFont {
 }
 
 class CodeunitRange {
+  const CodeunitRange(this.start, this.end);
+
   final int start;
   final int end;
-
-  const CodeunitRange(this.start, this.end);
 
   bool contains(int codeUnit) {
     return start <= codeUnit && codeUnit <= end;
@@ -607,19 +607,19 @@ class CodeunitRange {
 }
 
 class _ResolvedNotoFont {
+  const _ResolvedNotoFont(this.name, this.subsets, this.tree);
+
   final String name;
   final List<_ResolvedNotoSubset> subsets;
   final IntervalTree<_ResolvedNotoSubset> tree;
-
-  const _ResolvedNotoFont(this.name, this.subsets, this.tree);
 }
 
 class _ResolvedNotoSubset {
+  _ResolvedNotoSubset(this.url, this.family, this.ranges);
+
   final String url;
   final String family;
   final List<CodeunitRange> ranges;
-
-  _ResolvedNotoSubset(this.url, this.family, this.ranges);
 
   @override
   String toString() => '_ResolvedNotoSubset($family, $url)';

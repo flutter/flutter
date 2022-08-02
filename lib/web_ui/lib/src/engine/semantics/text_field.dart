@@ -21,6 +21,11 @@ import 'semantics.dart';
 /// This class is still responsible for hooking up the DOM element with the
 /// [HybridTextEditing] instance so that changes are communicated to Flutter.
 class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
+  /// Creates a [SemanticsTextEditingStrategy] that eagerly instantiates
+  /// [domElement] so the caller can insert it before calling
+  /// [SemanticsTextEditingStrategy.enable].
+  SemanticsTextEditingStrategy(super.owner);
+
   /// Initializes the [SemanticsTextEditingStrategy] singleton.
   ///
   /// This method must be called prior to accessing [instance].
@@ -34,11 +39,6 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// The [SemanticsTextEditingStrategy] singleton.
   static SemanticsTextEditingStrategy get instance => _instance!;
   static SemanticsTextEditingStrategy? _instance;
-
-  /// Creates a [SemanticsTextEditingStrategy] that eagerly instantiates
-  /// [domElement] so the caller can insert it before calling
-  /// [SemanticsTextEditingStrategy.enable].
-  SemanticsTextEditingStrategy(super.owner);
 
   /// The text field whose DOM element is currently used for editing.
   ///

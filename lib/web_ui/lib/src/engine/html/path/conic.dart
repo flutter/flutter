@@ -17,11 +17,11 @@ import 'path_utils.dart';
 /// Skia implementation reference:
 /// https://github.com/google/skia/blob/main/src/core/SkGeometry.cpp
 class Conic {
+  Conic(this.p0x, this.p0y, this.p1x, this.p1y, this.p2x, this.p2y, this.fW);
+
   double p0x, p0y, p1x, p1y, p2x, p2y;
   final double fW;
   static const int _maxSubdivisionCount = 5;
-
-  Conic(this.p0x, this.p0y, this.p1x, this.p1y, this.p2x, this.p2y, this.fW);
 
   /// Returns array of points for the approximation of the conic as quad(s).
   ///

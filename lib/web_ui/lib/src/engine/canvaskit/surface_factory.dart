@@ -9,6 +9,18 @@ import '../../engine.dart';
 
 /// Caches surfaces used to overlay platform views.
 class SurfaceFactory {
+  SurfaceFactory(int maximumSurfaces)
+      : maximumSurfaces = math.max(maximumSurfaces, 1) {
+    if (assertionsEnabled) {
+      if (maximumSurfaces < 1) {
+        printWarning('Attempted to create a $SurfaceFactory with '
+            '$maximumSurfaces maximum surfaces. At least 1 surface is required '
+            'for rendering.');
+      }
+      registerHotRestartListener(debugClear);
+    }
+  }
+
   /// The lazy-initialized singleton surface factory.
   ///
   /// [debugClear] causes this singleton to be reinitialized.
@@ -28,18 +40,6 @@ class SurfaceFactory {
   }
 
   static SurfaceFactory? _instance;
-
-  SurfaceFactory(int maximumSurfaces)
-      : maximumSurfaces = math.max(maximumSurfaces, 1) {
-    if (assertionsEnabled) {
-      if (maximumSurfaces < 1) {
-        printWarning('Attempted to create a $SurfaceFactory with '
-            '$maximumSurfaces maximum surfaces. At least 1 surface is required '
-            'for rendering.');
-      }
-      registerHotRestartListener(debugClear);
-    }
-  }
 
   /// The base surface to paint on. This is the default surface which will be
   /// painted to. If there are no platform views, then this surface will receive

@@ -9,11 +9,11 @@ import 'scenario.dart';
 
 /// A scenario that sends back messages when touches are received.
 class TouchesScenario extends Scenario {
-  final Map<int, int> _knownDevices = <int, int>{};
-  int _sequenceNo = 0;
-
   /// Constructor for `TouchesScenario`.
   TouchesScenario(PlatformDispatcher dispatcher) : super(dispatcher);
+
+  final Map<int, int> _knownDevices = <int, int>{};
+  int _sequenceNo = 0;
 
   @override
   void onBeginFrame(Duration duration) {

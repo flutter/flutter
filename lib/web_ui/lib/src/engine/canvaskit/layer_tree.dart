@@ -86,6 +86,8 @@ class LayerTree {
 
 /// A single frame to be rendered.
 class Frame {
+  Frame(this.canvas, this.rasterCache, this.viewEmbedder);
+
   /// The canvas to render this frame to.
   final CkCanvas canvas;
 
@@ -94,8 +96,6 @@ class Frame {
 
   /// The platform view embedder.
   final HtmlViewEmbedder? viewEmbedder;
-
-  Frame(this.canvas, this.rasterCache, this.viewEmbedder);
 
   /// Rasterize the given layer tree into this frame.
   bool raster(LayerTree layerTree, {bool ignoreRasterCache = false}) {

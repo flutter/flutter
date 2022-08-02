@@ -25,6 +25,10 @@ import 'canvaskit_api.dart';
 /// JS-managed data structure when they are deleted so that when the associated
 /// object is garbage collected, so is the serialized data.
 class SkiaObjectCache {
+  SkiaObjectCache(this.maximumSize)
+      : _itemQueue = DoubleLinkedQueue<SkiaObject<Object>>(),
+        _itemMap = <SkiaObject<Object>, DoubleLinkedQueueEntry<SkiaObject<Object>>>{};
+
   final int maximumSize;
 
   /// A doubly linked list of the objects in the cache.
@@ -37,10 +41,6 @@ class SkiaObjectCache {
   /// This makes it fast to find the node in the queue when we need to
   /// move the object to the front of the queue.
   final Map<SkiaObject<Object>, DoubleLinkedQueueEntry<SkiaObject<Object>>> _itemMap;
-
-  SkiaObjectCache(this.maximumSize)
-      : _itemQueue = DoubleLinkedQueue<SkiaObject<Object>>(),
-        _itemMap = <SkiaObject<Object>, DoubleLinkedQueueEntry<SkiaObject<Object>>>{};
 
   /// The number of objects in the cache.
   int get length => _itemQueue.length;
@@ -90,6 +90,10 @@ class SkiaObjectCache {
 /// Like [SkiaObjectCache] but enforces the [maximumSize] of the cache
 /// synchronously instead of waiting until a post-frame callback.
 class SynchronousSkiaObjectCache {
+  SynchronousSkiaObjectCache(this.maximumSize)
+      : _itemQueue = DoubleLinkedQueue<SkiaObject<Object>>(),
+        _itemMap = <SkiaObject<Object>, DoubleLinkedQueueEntry<SkiaObject<Object>>>{};
+
   /// This cache will never exceed this limit, even temporarily.
   final int maximumSize;
 
@@ -103,10 +107,6 @@ class SynchronousSkiaObjectCache {
   /// This makes it fast to find the node in the queue when we need to
   /// move the object to the front of the queue.
   final Map<SkiaObject<Object>, DoubleLinkedQueueEntry<SkiaObject<Object>>> _itemMap;
-
-  SynchronousSkiaObjectCache(this.maximumSize)
-      : _itemQueue = DoubleLinkedQueue<SkiaObject<Object>>(),
-        _itemMap = <SkiaObject<Object>, DoubleLinkedQueueEntry<SkiaObject<Object>>>{};
 
   /// The number of objects in the cache.
   int get length => _itemQueue.length;

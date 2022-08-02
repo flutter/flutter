@@ -287,7 +287,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
     return originState['state'];
   }
 
-  Map<String, bool> _flutterState = <String, bool>{_kFlutterTag: true};
+  final Map<String, bool> _flutterState = <String, bool>{_kFlutterTag: true};
 
   /// The origin entry is the history entry that the Flutter app landed on. It's
   /// created by the browser when the user navigates to the url of the app.

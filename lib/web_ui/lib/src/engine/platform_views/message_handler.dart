@@ -39,16 +39,15 @@ typedef PlatformViewContentHandler = void Function(DomElement);
 /// some extra cleanup of its internal state, but it can do it automatically. See
 /// [HtmlViewEmbedder.disposeViews]
 class PlatformViewMessageHandler {
-  final MethodCodec _codec = const StandardMethodCodec();
-
-  final PlatformViewManager _contentManager;
-  final PlatformViewContentHandler? _contentHandler;
-
   PlatformViewMessageHandler({
     required PlatformViewManager contentManager,
     PlatformViewContentHandler? contentHandler,
   }) : _contentManager = contentManager,
        _contentHandler = contentHandler;
+
+  final MethodCodec _codec = const StandardMethodCodec();
+  final PlatformViewManager _contentManager;
+  final PlatformViewContentHandler? _contentHandler;
 
   /// Handle a `create` Platform View message.
   ///

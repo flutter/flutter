@@ -374,9 +374,9 @@ class TestDownloader extends NotoDownloader {
 }
 
 class LoggingDownloader implements NotoDownloader {
-  final List<String> log = <String>[];
-
   LoggingDownloader(this.delegate);
+
+  final List<String> log = <String>[];
 
   final NotoDownloader delegate;
 

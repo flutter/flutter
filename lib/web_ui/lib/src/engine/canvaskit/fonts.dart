@@ -222,6 +222,12 @@ class SkiaFontCollection {
 
 /// Represents a font that has been registered.
 class RegisteredFont {
+  RegisteredFont(this.bytes, this.family, this.typeface) {
+    // This is a hack which causes Skia to cache the decoded font.
+    final SkFont skFont = SkFont(typeface);
+    skFont.getGlyphBounds(<int>[0], null, null);
+  }
+
   /// The font family name for this font.
   final String family;
 
@@ -232,10 +238,4 @@ class RegisteredFont {
   ///
   /// This is used to determine which code points are supported by this font.
   final SkTypeface typeface;
-
-  RegisteredFont(this.bytes, this.family, this.typeface) {
-    // This is a hack which causes Skia to cache the decoded font.
-    final SkFont skFont = SkFont(typeface);
-    skFont.getGlyphBounds(<int>[0], null, null);
-  }
 }

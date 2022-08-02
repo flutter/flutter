@@ -183,8 +183,8 @@ abstract class RRectRenderer {
 
 /// Renders RRect to a 2d canvas.
 class RRectToCanvasRenderer extends RRectRenderer {
-  final DomCanvasRenderingContext2D context;
   RRectToCanvasRenderer(this.context);
+  final DomCanvasRenderingContext2D context;
   @override
   void beginPath() {
     context.beginPath();
@@ -210,8 +210,8 @@ class RRectToCanvasRenderer extends RRectRenderer {
 
 /// Renders RRect to a path.
 class RRectToPathRenderer extends RRectRenderer {
-  final ui.Path path;
   RRectToPathRenderer(this.path);
+  final ui.Path path;
   @override
   void beginPath() {}
 

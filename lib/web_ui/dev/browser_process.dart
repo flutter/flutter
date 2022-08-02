@@ -10,25 +10,6 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:typed_data/typed_buffers.dart';
 
 class BrowserProcess {
-  /// The underlying process.
-  ///
-  /// This will fire once the process has started successfully.
-  Future<Process> get _process => _processCompleter.future;
-  final Completer<Process> _processCompleter = Completer<Process>();
-
-  /// Whether [close] has been called.
-  bool _closed = false;
-
-  /// A future that completes when the browser exits.
-  ///
-  /// If there's a problem starting or running the browser, this will complete
-  /// with an error.
-  Future<void> get onExit => _onExitCompleter.future;
-  final Completer<void> _onExitCompleter = Completer<void>();
-
-  /// Standard IO streams for the underlying browser process.
-  final List<StreamSubscription<void>> _ioSubscriptions = <StreamSubscription<void>>[];
-
   /// Creates a new browser.
   ///
   /// Clients pass in [startBrowser], which asynchronously returns the browser
@@ -102,6 +83,25 @@ class BrowserProcess {
       );
     });
   }
+
+  /// The underlying process.
+  ///
+  /// This will fire once the process has started successfully.
+  Future<Process> get _process => _processCompleter.future;
+  final Completer<Process> _processCompleter = Completer<Process>();
+
+  /// Whether [close] has been called.
+  bool _closed = false;
+
+  /// A future that completes when the browser exits.
+  ///
+  /// If there's a problem starting or running the browser, this will complete
+  /// with an error.
+  Future<void> get onExit => _onExitCompleter.future;
+  final Completer<void> _onExitCompleter = Completer<void>();
+
+  /// Standard IO streams for the underlying browser process.
+  final List<StreamSubscription<void>> _ioSubscriptions = <StreamSubscription<void>>[];
 
   /// Kills the browser process.
   ///

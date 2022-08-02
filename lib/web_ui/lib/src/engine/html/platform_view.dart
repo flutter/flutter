@@ -8,13 +8,13 @@ import 'surface.dart';
 
 /// A surface containing a platform view, which is an HTML element.
 class PersistedPlatformView extends PersistedLeafSurface {
+  PersistedPlatformView(this.viewId, this.dx, this.dy, this.width, this.height);
+
   final int viewId;
   final double dx;
   final double dy;
   final double width;
   final double height;
-
-  PersistedPlatformView(this.viewId, this.dx, this.dy, this.width, this.height);
 
   @override
   DomElement createElement() {
