@@ -1049,6 +1049,20 @@ TEST(GeometryTest, RectMakePointBounds) {
   }
 }
 
+TEST(GeometryTest, RectGetPositive) {
+  {
+    Rect r{100, 200, 300, 400};
+    auto actual = r.GetPositive();
+    ASSERT_RECT_NEAR(r, actual);
+  }
+  {
+    Rect r{100, 200, -100, -100};
+    auto actual = r.GetPositive();
+    Rect expected(0, 100, 100, 100);
+    ASSERT_RECT_NEAR(expected, actual);
+  }
+}
+
 TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
   CubicPathComponent component({10, 10}, {20, 35}, {35, 20}, {40, 40});
   SmoothingApproximation approximation;

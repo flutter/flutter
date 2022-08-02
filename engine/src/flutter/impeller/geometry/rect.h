@@ -139,6 +139,14 @@ struct TRect {
     return {left, top, right, bottom};
   }
 
+  /// @brief  Get a version of this rectangle that has a non-negative size.
+  constexpr TRect GetPositive() const {
+    auto ltrb = GetLTRB();
+    return MakeLTRB(ltrb[0], ltrb[1], ltrb[2], ltrb[3]);
+  }
+
+  /// @brief  Get the points that represent the 4 corners of this rectangle. The
+  ///         order is: Top left, top right, bottom left, bottom right.
   constexpr std::array<TPoint<T>, 4> GetPoints() const {
     auto [left, top, right, bottom] = GetLTRB();
     return {TPoint(left, top), TPoint(right, top), TPoint(left, bottom),
