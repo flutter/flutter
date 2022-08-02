@@ -4694,7 +4694,7 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
     }
 
     // Composing text is not counted in history coalescing.
-    if (widget.controller.value.composing != null && !widget.controller.value.composing.isCollapsed) {
+    if (!widget.controller.value.composing.isCollapsed) {
       return;
     }
 
