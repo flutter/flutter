@@ -101,7 +101,7 @@ void main() {
         find.byKey(appKey),
         matchesGoldenFile('widgets.magnifier.styled.png'),
       );
-    }, skip: kIsWeb); // INTENTIONAL: Bdf does not display on web.
+    }, skip: kIsWeb);  // [intended] Bdf does not display on web.
 
     group('transition states', () {
       final AnimationController animationController = AnimationController(

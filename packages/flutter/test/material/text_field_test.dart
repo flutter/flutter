@@ -11874,10 +11874,10 @@ void main() {
                 )),
             isNull);
       },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{
-            TargetPlatform.iOS,
-            TargetPlatform.android
-          }));
+      variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.android
+      }));
     });
   });
 
@@ -11949,7 +11949,7 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
 
-group('TapRegion integration', () {
+  group('TapRegion integration', () {
     testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       await tester.pumpWidget(
@@ -12040,8 +12040,9 @@ group('TapRegion integration', () {
               ),
             ),
           ),
-        )
+        ),
       );
+
       // The selectWordsInRange with SelectionChangedCause.tap seems to be needed to show the toolbar.
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectWordsInRange(from: Offset.zero, cause: SelectionChangedCause.tap);
