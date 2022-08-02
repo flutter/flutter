@@ -1010,7 +1010,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
-    
+
   @override
   MaterialStateProperty<double>? get iconSize =>
     ButtonStyleButton.allOrNull<double>(24.0);
