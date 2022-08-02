@@ -748,6 +748,12 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
+  /// the pubRootDirectories that are currently configured for the widget inspector.
+  ///
+  /// This is for testing use only.
+  @visibleForTesting
+  @protected
+  List<String>? get pubRootDirectories => _pubRootDirectories == null ? const <String>[] : List<String>.from(_pubRootDirectories!);
   List<String>? _pubRootDirectories;
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
@@ -1106,6 +1112,20 @@ mixin WidgetInspectorService {
         return null;
       },
     );
+    _registerServiceExtensionVarArgs(
+      name: 'addPubRootDirectories',
+      callback: (List<String> args) async {
+        addPubRootDirectories(args);
+        return null;
+      },
+    );
+    _registerServiceExtensionVarArgs(
+      name: 'removePubRootDirectories',
+      callback: (List<String> args) async {
+        removePubRootDirectories(args);
+        return null;
+      },
+    );
     _registerServiceExtensionWithArg(
       name: 'setSelectionById',
       callback: setSelectionById,
@@ -1233,7 +1253,7 @@ mixin WidgetInspectorService {
   void resetAllState() {
     disposeAllGroups();
     selection.clear();
-    setPubRootDirectories(<String>[]);
+    resetPubRootDirectories();
   }
 
   /// Free all references to objects in a group.
@@ -1355,12 +1375,66 @@ mixin WidgetInspectorService {
   /// project.
   ///
   /// The local project directories are used to distinguish widgets created by
-  /// the local project over widgets created from inside the framework.
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
   @protected
+  @Deprecated(
+    'Use addPubRootDirectories instead. '
+    'This feature was deprecated after v3.1.0-9.0.pre.',
+  )
   void setPubRootDirectories(List<String> pubRootDirectories) {
-    _pubRootDirectories = pubRootDirectories
-      .map<String>((String directory) => Uri.parse(directory).path)
-      .toList();
+    addPubRootDirectories(pubRootDirectories);
+  }
+
+  /// Resets the list of directories, that should be considered part of the
+  /// local project, to the value passed in [pubRootDirectories].
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
+  @visibleForTesting
+  @protected
+  void resetPubRootDirectories() {
+    _pubRootDirectories = <String>[];
+    _isLocalCreationCache.clear();
+  }
+
+  /// Add a list of directories that should be considered part of the local
+  /// project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
+  @protected
+  void addPubRootDirectories(List<String> pubRootDirectories) {
+    pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
+
+    final Set<String> directorySet = Set<String>.from(pubRootDirectories);
+    if(_pubRootDirectories != null) {
+      directorySet.addAll(_pubRootDirectories!);
+    }
+
+    _pubRootDirectories = directorySet.toList();
+    _isLocalCreationCache.clear();
+  }
+
+  /// Remove a list of directories that should no longer be considered part
+  /// of the local project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
+  @protected
+  void removePubRootDirectories(List<String> pubRootDirectories) {
+    if (_pubRootDirectories == null) {
+      return;
+    }
+    pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
+
+    final Set<String> directorySet = Set<String>.from(_pubRootDirectories!);
+    directorySet.removeAll(pubRootDirectories);
+
+    _pubRootDirectories = directorySet.toList();
     _isLocalCreationCache.clear();
   }
 

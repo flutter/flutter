@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AccessibilityFeatures, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

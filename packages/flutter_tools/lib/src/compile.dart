@@ -276,6 +276,13 @@ class KernelCompiler {
         ? buildDir?.parent.childFile('dart_plugin_registrant.dart')
         : null;
 
+    String? dartPluginRegistrantUri;
+    if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
+      final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
+      dartPluginRegistrantUri = packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
+        toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
+    }
+
     final List<String> command = <String>[
       engineDartPath,
       '--disable-dart-dev',
@@ -315,6 +322,7 @@ class KernelCompiler {
         fileSystemScheme,
       ],
       if (initializeFromDill != null) ...<String>[
+        '--incremental',
         '--initialize-from-dill',
         initializeFromDill,
       ],
@@ -322,12 +330,12 @@ class KernelCompiler {
         '--platform',
         platformDill,
       ],
-      if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) ...<String>[
+      if (dartPluginRegistrantUri != null) ...<String>[
         '--source',
-        dartPluginRegistrant.path,
+        dartPluginRegistrantUri,
         '--source',
         'package:flutter/src/dart_plugin_registrant.dart',
-        '-Dflutter.dart_plugin_registrant=${dartPluginRegistrant.uri}',
+        '-Dflutter.dart_plugin_registrant=$dartPluginRegistrantUri',
       ],
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',
@@ -374,7 +382,7 @@ class _RecompileRequest extends _CompilationRequest {
     this.outputPath,
     this.packageConfig,
     this.suppressErrors,
-    {this.additionalSource}
+    {this.additionalSourceUri}
   );
 
   Uri mainUri;
@@ -382,7 +390,7 @@ class _RecompileRequest extends _CompilationRequest {
   String outputPath;
   PackageConfig packageConfig;
   bool suppressErrors;
-  final String? additionalSource;
+  final Uri? additionalSourceUri;
 
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
@@ -498,6 +506,7 @@ abstract class ResidentCompiler {
     String? projectRootPath,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File? dartPluginRegistrant,
   });
 
   Future<CompilerOutput?> compileExpression(
@@ -641,6 +650,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     required PackageConfig packageConfig,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File? dartPluginRegistrant,
     String? projectRootPath,
     FileSystem? fs,
   }) async {
@@ -648,20 +658,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
-    String? additionalSource;
+    Uri? additionalSourceUri;
     // `dart_plugin_registrant.dart` contains the Dart plugin registry.
-    if (checkDartPluginRegistry && projectRootPath != null && fs != null) {
-      final File dartPluginRegistrantDart = fs.file(
-        fs.path.join(
-          projectRootPath,
-          '.dart_tool',
-          'flutter_build',
-          'dart_plugin_registrant.dart',
-        ),
-      );
-      if (dartPluginRegistrantDart != null && dartPluginRegistrantDart.existsSync()) {
-        additionalSource = dartPluginRegistrantDart.path;
-      }
+    if (checkDartPluginRegistry && dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
+      additionalSourceUri = dartPluginRegistrant.uri;
     }
     final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(_RecompileRequest(
@@ -671,7 +671,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       outputPath,
       packageConfig,
       suppressErrors,
-      additionalSource: additionalSource,
+      additionalSourceUri: additionalSourceUri,
     ));
     return completer.future;
   }
@@ -684,9 +684,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
       toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
 
+    String? additionalSourceUri;
+    if (request.additionalSourceUri != null) {
+      additionalSourceUri = request.packageConfig.toPackageUri(request.additionalSourceUri!)?.toString() ??
+        toMultiRootPath(request.additionalSourceUri!, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+    }
+
     final Process? server = _server;
     if (server == null) {
-      return _compile(mainUri, request.outputPath, additionalSource: request.additionalSource);
+      return _compile(mainUri, request.outputPath, additionalSourceUri: additionalSourceUri);
     }
     final String inputKey = Uuid().generateV4();
 
@@ -732,7 +738,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput?> _compile(
     String scriptUri,
     String? outputPath,
-    {String? additionalSource}
+    {String? additionalSourceUri}
   ) async {
     final String frontendServer = _artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -785,12 +791,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
         initializeFromDill!,
       ],
       if (assumeInitializeFromDillUpToDate) '--assume-initialize-from-dill-up-to-date',
-      if (additionalSource != null) ...<String>[
+      if (additionalSourceUri != null) ...<String>[
         '--source',
-        additionalSource,
+        additionalSourceUri,
         '--source',
         'package:flutter/src/dart_plugin_registrant.dart',
-        '-Dflutter.dart_plugin_registrant=${Uri.file(additionalSource)}',
+        '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
       ],
       if (platformDill != null) ...<String>[
         '--platform',

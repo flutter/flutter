@@ -78,7 +78,7 @@ void main() {
           '1234',
           IOSDeviceConnectionInterface.usb,
         ), throwsA(anything));
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
@@ -101,7 +101,7 @@ void main() {
           '1234',
           IOSDeviceConnectionInterface.usb,
         );
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
@@ -124,7 +124,7 @@ void main() {
           '1234',
           IOSDeviceConnectionInterface.network,
         );
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
     });
   });

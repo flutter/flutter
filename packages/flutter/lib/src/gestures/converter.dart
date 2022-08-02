@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
+import 'dart:ui' as ui show PointerChange, PointerData, PointerSignalKind;
 
 import 'events.dart';
 
@@ -216,7 +216,6 @@ class PointerEventConverter {
                   return PointerPanZoomStartEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     embedderId: datum.embedderId,
@@ -230,7 +229,6 @@ class PointerEventConverter {
                   return PointerPanZoomUpdateEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     pan: pan,
@@ -244,7 +242,6 @@ class PointerEventConverter {
                   return PointerPanZoomEndEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     embedderId: datum.embedderId,
@@ -260,6 +257,14 @@ class PointerEventConverter {
                 device: datum.device,
                 position: position,
                 scrollDelta: scrollDelta,
+                embedderId: datum.embedderId,
+              );
+            case ui.PointerSignalKind.scrollInertiaCancel:
+              return PointerScrollInertiaCancelEvent(
+                timeStamp: timeStamp,
+                kind: kind,
+                device: datum.device,
+                position: position,
                 embedderId: datum.embedderId,
               );
             case ui.PointerSignalKind.unknown:

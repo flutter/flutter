@@ -27,8 +27,8 @@ export 'package:flutter/painting.dart' show
   FilterQuality,
   ImageConfiguration,
   ImageInfo,
-  ImageStream,
   ImageProvider,
+  ImageStream,
   MemoryImage,
   NetworkImage;
 

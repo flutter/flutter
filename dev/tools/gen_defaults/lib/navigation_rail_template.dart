@@ -5,16 +5,15 @@
 import 'template.dart';
 
 class NavigationRailTemplate extends TokenTemplate {
-  const NavigationRailTemplate(super.fileName, super.tokens)
-    : super(colorSchemePrefix: '_colors.',
-        textThemePrefix: '_textTheme.',
-      );
+  const NavigationRailTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.',
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends NavigationRailThemeData {
+  _${blockName}DefaultsM3(this.context)
       : super(
           elevation: ${elevation("md.comp.navigation-rail.container")},
           groupAlignment: -1,

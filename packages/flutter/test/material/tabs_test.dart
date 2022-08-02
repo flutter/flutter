@@ -238,6 +238,35 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  testWidgets('indicatorPadding update test', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/108102
+    const Tab tab = Tab(text: 'A');
+    const EdgeInsets indicatorPadding = EdgeInsets.only(left: 7.0, right: 7.0);
+
+    await tester.pumpWidget(boilerplate(
+      child: const DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: <Tab>[tab],
+          indicatorPadding: indicatorPadding,
+        ),
+      ),
+    ));
+
+    // Change the indicatorPadding
+    await tester.pumpWidget(boilerplate(
+      child: DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: const <Tab>[tab],
+          indicatorPadding: indicatorPadding + const EdgeInsets.all(7.0),
+        ),
+      ),
+    ), Duration.zero, EnginePhase.build);
+
+    expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
+  });
+
   testWidgets('Tab sizing - icon', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0))))),
@@ -1189,6 +1218,51 @@ void main() {
     expect(controller.index, 2);
     expect(controller.previousIndex, 0);
     expect(controller.indexIsChanging, false);
+  });
+
+  testWidgets('TabBar should not throw when animation is disabled in controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102600
+    final List<String> tabs = <String>['A'];
+
+    Widget buildWithTabBarView() {
+      return boilerplate(
+        child: DefaultTabController(
+          animationDuration: Duration.zero,
+          length: tabs.length,
+          child: Column(
+            children: <Widget>[
+              TabBar(
+                tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                isScrollable: true,
+              ),
+              Flexible(
+                child: TabBarView(
+                  children: List<Widget>.generate(
+                    tabs.length,
+                    (int index) => Text('Tab $index'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWithTabBarView());
+    TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 0);
+
+    tabs.add('B');
+    await tester.pumpWidget(buildWithTabBarView());
+    tabs.add('C');
+    await tester.pumpWidget(buildWithTabBarView());
+    await tester.tap(find.text('C'));
+    await tester.pumpAndSettle();
+    controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 2);
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('TabBarView skips animation when disabled in controller', (WidgetTester tester) async {
