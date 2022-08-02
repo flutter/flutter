@@ -2867,21 +2867,18 @@ void main() {
 
     // Popup menu with default icon size.
     await tester.pumpWidget(buildPopupMenu());
-    IconButton iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // Default PopupMenuButton icon size is 24.0.
     expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(24.0, 24.0));
 
     // Popup menu with custom theme icon size.
     await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0));
     await tester.pumpAndSettle();
-    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // PopupMenuButton icon inherits IconTheme's size.
     expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(30.0, 30.0));
 
     // Popup menu with custom icon size.
     await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0, iconSize: 50.0));
     await tester.pumpAndSettle();
-    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // PopupMenuButton icon size overrides IconTheme's size.
     expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(50.0, 50.0));
   });
