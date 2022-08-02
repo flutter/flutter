@@ -1475,6 +1475,7 @@ void main() {
               offset: 2,
             );
             await tester.pumpWidget(buildEditableText());
+            await tester.pump(); // Wait for autofocus to take effect.
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
             await tester.pump();
