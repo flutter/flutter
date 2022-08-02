@@ -2160,7 +2160,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
-      hideToolbar();
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
