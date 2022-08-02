@@ -2881,6 +2881,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Future<void> _performSpellCheck(final String text) async {
     try {
       final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+
+      assert(
+        localeForSpellChecking != null,
+        'Locale must be specified in widget or Localization widget must be in scope',
+      );
+
       final List<SuggestionSpan>? spellCheckResults = await
         _spellCheckConfiguration!
           .spellCheckService!
