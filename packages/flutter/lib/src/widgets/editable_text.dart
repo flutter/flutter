@@ -641,6 +641,7 @@ class EditableText extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckConfiguration,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1571,6 +1572,12 @@ class EditableText extends StatefulWidget {
   /// If this configuration is left null, then spell check is diabled by default.
   /// {@endtemplate}
   final SpellCheckConfiguration? spellCheckConfiguration;
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2720,6 +2727,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
+      magnifierConfiguration: widget.magnifierConfiguration,
     );
   }
 

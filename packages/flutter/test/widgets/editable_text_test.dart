@@ -12729,6 +12729,40 @@ void main() {
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
   });
+
+  group('magnifier', () {
+    testWidgets('should build nothing by default', (WidgetTester tester) async {
+      final EditableText editableText = EditableText(
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: editableText,
+        ),
+      );
+
+      final BuildContext context = tester.firstElement(find.byType(EditableText));
+
+      expect(
+        editableText.magnifierConfiguration.magnifierBuilder(
+          context,
+          MagnifierController(),
+          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty())
+        ),
+        isNull
+      );
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {

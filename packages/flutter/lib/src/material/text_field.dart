@@ -15,7 +15,7 @@ import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'input_decorator.dart';
-import 'material.dart';
+import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
@@ -332,6 +332,7 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckConfiguration,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -393,6 +394,17 @@ class TextField extends StatefulWidget {
                        selectAll: true,
                        paste: true,
                      )));
+
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
+  /// Android, and builds nothing on all other platforms. If it is desired to supress
+  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// Controls the text being edited.
   ///
@@ -1341,6 +1353,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
           spellCheckConfiguration: spellCheckConfiguration,
+          magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
         ),
       ),
     );
