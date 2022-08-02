@@ -1349,7 +1349,6 @@ targets:
       task_name: channels_integration_test
 
   - name: Linux_android clipper_cache_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
