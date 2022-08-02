@@ -479,7 +479,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The amount of scroll distance before and after the current position.
   double get _beforeExtent => _isReversed ? _lastMetrics!.extentAfter : _lastMetrics!.extentBefore;
   double get _afterExtent => _isReversed ? _lastMetrics!.extentBefore : _lastMetrics!.extentAfter;
-  
+
   // The total size of the scrollable content.
   double get _totalContentExtent {
     return _lastMetrics!.maxScrollExtent
