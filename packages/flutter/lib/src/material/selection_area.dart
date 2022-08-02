@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -36,8 +37,20 @@ class SelectionArea extends StatefulWidget {
     this.focusNode,
     this.selectionControls,
     this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.magnifierConfiguration,
     required this.child,
   });
+
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
+  /// Android, and builds nothing on all other platforms. If it is desired to supress
+  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -125,6 +138,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       selectionControls: controls,
       focusNode: _effectiveFocusNode,
       contextMenuBuilder: widget.contextMenuBuilder,
+      magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       child: widget.child,
     );
   }

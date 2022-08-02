@@ -152,12 +152,15 @@ void main() {
   testWidgets('StarBorder lerped with CircleBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
     const ShapeBorder otherBorder = CircleBorder();
+    const ShapeBorder eccentricCircle = CircleBorder(eccentricity: 0.6);
     await testBorder(tester, 'to_circle_border_2', from, lerpTo: otherBorder, lerpAmount: 0.2);
     await testBorder(tester, 'to_circle_border_7', from, lerpTo: otherBorder, lerpAmount: 0.7);
     await testBorder(tester, 'to_circle_border_10', from, lerpTo: otherBorder, lerpAmount: 1.0);
     await testBorder(tester, 'from_circle_border_2', from, lerpFrom: otherBorder, lerpAmount: 0.2);
     await testBorder(tester, 'from_circle_border_7', from, lerpFrom: otherBorder, lerpAmount: 0.7);
     await testBorder(tester, 'from_circle_border_10', from, lerpFrom: otherBorder, lerpAmount: 1.0);
+    await testBorder(tester, 'to_eccentric_circle_border', from, lerpTo: eccentricCircle, lerpAmount: 0.4);
+    await testBorder(tester, 'from_eccentric_circle_border', from, lerpFrom: eccentricCircle, lerpAmount: 0.4);
   });
 
   testWidgets('StarBorder lerped with RoundedRectangleBorder', (WidgetTester tester) async {

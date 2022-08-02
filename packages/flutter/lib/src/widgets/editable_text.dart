@@ -651,6 +651,7 @@ class EditableText extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1591,6 +1592,13 @@ class EditableText extends StatefulWidget {
   ///
   /// If not provided, no context menu will be shown.
   final EditableTextToolbarBuilder? contextMenuBuilder;
+
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2717,6 +2725,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           secondaryAnchor,
         );
       },
+      magnifierConfiguration: widget.magnifierConfiguration,
     );
   }
 

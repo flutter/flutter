@@ -4,7 +4,7 @@
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show DebugSemanticsDumpOrder, debugDumpLayerTree, debugDumpRenderTree, debugDumpSemanticsTree;
+import 'package:flutter/rendering.dart' show debugDumpLayerTree, debugDumpRenderTree, debugDumpSemanticsTree;
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'i18n/stock_strings.dart';
@@ -136,7 +136,7 @@ class StockHomeState extends State<StockHome> {
                 debugDumpApp();
                 debugDumpRenderTree();
                 debugDumpLayerTree();
-                debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
+                debugDumpSemanticsTree();
               } catch (e, stack) {
                 debugPrint('Exception while dumping app:\n$e\n$stack');
               }

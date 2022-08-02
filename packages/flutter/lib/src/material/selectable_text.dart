@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -209,6 +210,7 @@ class SelectableText extends StatefulWidget {
     this.textWidthBasis,
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.magnifierConfiguration,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -266,6 +268,7 @@ class SelectableText extends StatefulWidget {
     this.textWidthBasis,
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.magnifierConfiguration,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -445,6 +448,17 @@ class SelectableText extends StatefulWidget {
       ),
     );
   }
+
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
+  /// Android, and builds nothing on all other platforms. If it is desired to supress
+  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -724,6 +738,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         paintCursorAboveText: paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         enableInteractiveSelection: widget.enableInteractiveSelection,
+        magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
