@@ -350,7 +350,8 @@ Future<void> _runGeneralToolTests() async {
   final List<dynamic> allSubShards = fileContent['general.shard'] as List<dynamic>;
 
   for (final dynamic shardsDynamic in allSubShards) {
-    final List<String> shards = (shardsDynamic as List<dynamic>).map((dynamic e) => e.toString()).toList();
+    final List<String> shards = (shardsDynamic as List<dynamic>)
+      .map((dynamic e) => path.join('test', 'general.shard', e.toString())).toList();
     await _dartRunTest(
       _toolsPath,
       testPaths: shards,
