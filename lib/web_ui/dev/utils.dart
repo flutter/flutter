@@ -276,7 +276,7 @@ Future<void> runFlutter(
   if (exitCode != 0) {
     throw ToolExit(
       'ERROR: Failed to run $executable with '
-      'arguments ${arguments.toString()}. Exited with exit code $exitCode',
+      'arguments $arguments. Exited with exit code $exitCode',
       exitCode: exitCode,
     );
   }

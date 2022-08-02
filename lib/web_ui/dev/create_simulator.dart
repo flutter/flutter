@@ -27,7 +27,7 @@ class CreateSimulatorCommand extends Command<bool> with ArgUtils<bool> {
         lock.minorVersion,
         lock.device,
       );
-      print('INFO: Simulator created ${simulator.toString()}');
+      print('INFO: Simulator created $simulator');
     } catch (e) {
       throw Exception('Error creating requested simulator. You can use Xcode '
           'to install more versions: XCode > Preferences > Components.'
