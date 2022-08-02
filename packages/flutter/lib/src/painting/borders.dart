@@ -321,14 +321,15 @@ class BorderSide with Diagnosticable {
 
   /// Get the amount of the stroke width that lies outside of the [BorderSide].
   ///
-  /// This will return 0 for a [strokeAlign] of -1, half the [width] for a
-  /// [strokeAlign] of 0, and the [width] for a [strokeAlign] of 1.
+  /// For example, this will return 0 for a [strokeAlign] of -1, half the
+  /// [width] for a [strokeAlign] of 0, and the [width] for a [strokeAlign]
+  /// of 1.
   double get strokeOutset => width * (1 + strokeAlign) / 2;
 
   /// The offset of the stroke, taking into account the stroke alignment.
   ///
-  /// This will return the negative half [width] of the stroke for a
-  /// [strokeAlign] of -1, 0 for a [strokeAlign] of 0, and half the
+  /// For example, this will return the negative half [width] of the stroke
+  /// for a [strokeAlign] of -1, 0 for a [strokeAlign] of 0, and half the
   /// [width] for a [strokeAlign] of -1.
   double get halfStrokeOffset => width * strokeAlign / 2;
 
