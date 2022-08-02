@@ -58,11 +58,6 @@ class ChromeEnvironment implements BrowserEnvironment {
 ///
 /// Any errors starting or running the process are reported through [onExit].
 class Chrome extends Browser {
-  final BrowserProcess _process;
-
-  @override
-  final Future<Uri> remoteDebuggerUrl;
-
   /// Starts a new instance of Chrome open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Chrome(Uri url, BrowserInstallation installation, {bool debug = false}) {
@@ -121,6 +116,11 @@ class Chrome extends Browser {
   }
 
   Chrome._(this._process, this.remoteDebuggerUrl);
+
+  final BrowserProcess _process;
+
+  @override
+  final Future<Uri> remoteDebuggerUrl;
 
   @override
   Future<void> get onExit => _process.onExit;

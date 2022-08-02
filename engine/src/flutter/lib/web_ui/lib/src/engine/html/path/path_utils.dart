@@ -115,10 +115,10 @@ class SPathSegmentState {
 ///    x1 = Q / A
 ///    x2 = C / Q
 class QuadRoots {
+  QuadRoots();
+
   double? root0;
   double? root1;
-
-  QuadRoots();
 
   /// Returns roots as list.
   List<double> get roots => (root0 == null)

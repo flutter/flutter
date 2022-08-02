@@ -141,10 +141,10 @@ class PlatformDispatcher {
   ///
   /// If any of their configurations change, [onMetricsChanged] will be called.
   Iterable<FlutterView> get views => _views.values;
-  Map<Object, FlutterView> _views = <Object, FlutterView>{};
+  final Map<Object, FlutterView> _views = <Object, FlutterView>{};
 
   // A map of opaque platform view identifiers to view configurations.
-  Map<Object, ViewConfiguration> _viewConfigurations = <Object, ViewConfiguration>{};
+  final Map<Object, ViewConfiguration> _viewConfigurations = <Object, ViewConfiguration>{};
 
   /// A callback that is invoked whenever the [ViewConfiguration] of any of the
   /// [views] changes.
@@ -1454,8 +1454,6 @@ class FrameTiming {
     ]);
   }
 
-  static final int _dataLength = FramePhase.values.length + _FrameTimingInfo.values.length;
-
   /// Construct [FrameTiming] with raw timestamps in microseconds.
   ///
   /// List [timestamps] must have the same number of elements as
@@ -1463,8 +1461,9 @@ class FrameTiming {
   ///
   /// This constructor is usually only called by the Flutter engine, or a test.
   /// To get the [FrameTiming] of your app, see [PlatformDispatcher.onReportTimings].
-  FrameTiming._(this._data)
-      : assert(_data.length == _dataLength);
+  FrameTiming._(this._data) : assert(_data.length == _dataLength);
+
+  static final int _dataLength = FramePhase.values.length + _FrameTimingInfo.values.length;
 
   /// This is a raw timestamp in microseconds from some epoch. The epoch in all
   /// [FrameTiming] is the same, but it may not match [DateTime]'s epoch.

@@ -252,8 +252,6 @@ const int kOperatorArithmetic = 6;
 
 /// Builds an [SvgFilter].
 class SvgFilterBuilder {
-  static int _filterIdCounter = 0;
-
   SvgFilterBuilder() : id = '_fcf${++_filterIdCounter}' {
     filter.id = id;
 
@@ -267,6 +265,8 @@ class SvgFilterBuilder {
     filter.width!.baseVal!.valueAsString = '100%';
     filter.height!.baseVal!.valueAsString = '100%';
   }
+
+  static int _filterIdCounter = 0;
 
   final String id;
   final SVGSVGElement root = kSvgResourceHeader.cloneNode(false) as

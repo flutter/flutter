@@ -9,14 +9,6 @@ analyzer:
     strict-casts: true
     strict-raw-types: true
   errors:
-    # treat missing required parameters as a warning (not a hint)
-    missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
-    # allow having TODO comments in the code
-    todo: ignore
-    # allow dart:ui to import dart:_internal
-    import_internal_library: ignore # DIFFERENT FROM FLUTTER/FLUTTER
     # allow self-reference to deprecated members (we do this because otherwise we have
     # to annotate every member in every test, assert, etc, when we deprecate something)
     deprecated_member_use_from_same_package: ignore
@@ -150,7 +142,7 @@ linter:
     # - prefer_double_quotes # opposite of prefer_single_quotes
     - prefer_equal_for_default_values
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
-    # - prefer_final_fields # DIFFERENT FROM FLUTTER/FLUTTER (we do weird things with private fields, especially on the PlatformDispatcher object)
+    - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
     # - prefer_final_parameters # we should enable this one day when it can be auto-fixed (https://github.com/dart-lang/linter/issues/3104), see also parameter_assignments
@@ -185,7 +177,7 @@ linter:
     # - sized_box_shrink_expand # not yet tested
     - slash_for_doc_comments
     - sort_child_properties_last
-    # - sort_constructors_first # DIFFERENT FROM FLUTTER/FLUTTER (we have private fake constructors)
+    - sort_constructors_first
     # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
     - test_types_in_equals

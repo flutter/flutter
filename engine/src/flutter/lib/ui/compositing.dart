@@ -240,7 +240,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   //
   // The key is the layer used. The value is the description of what the layer
   // is used for, e.g. "pushOpacity" or "addRetained".
-  Map<EngineLayer, String> _usedLayers = <EngineLayer, String>{};
+  final Map<EngineLayer, String> _usedLayers = <EngineLayer, String>{};
 
   // In debug mode checks that the `layer` is only used once in a given scene.
   bool _debugCheckUsedOnce(EngineLayer layer, String usage) {

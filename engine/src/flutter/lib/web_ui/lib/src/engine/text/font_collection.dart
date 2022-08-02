@@ -112,6 +112,16 @@ class FontCollection {
 
 /// Manages a collection of fonts and ensures they are loaded.
 class FontManager {
+  factory FontManager() {
+    if (supportsFontLoadingApi) {
+      return FontManager._();
+    } else {
+      return _PolyfillFontManager();
+    }
+  }
+
+  FontManager._();
+
   final List<Future<void>> _fontLoadingFutures = <Future<void>>[];
 
   // Regular expression to detect a string with no punctuations.
@@ -123,16 +133,6 @@ class FontManager {
   // For example font family 'Goudy Bookletter 1911' falls into this
   // category.
   static final RegExp startWithDigit = RegExp(r'\b\d');
-
-  factory FontManager() {
-    if (supportsFontLoadingApi) {
-      return FontManager._();
-    } else {
-      return _PolyfillFontManager();
-    }
-  }
-
-  FontManager._();
 
   /// Registers assets to Flutter Web Engine.
   ///

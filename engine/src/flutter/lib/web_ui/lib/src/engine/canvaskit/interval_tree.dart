@@ -8,9 +8,6 @@ import 'font_fallbacks.dart' show CodeunitRange;
 
 /// A tree which stores a set of intervals that can be queried for intersection.
 class IntervalTree<T> {
-  /// The root node of the interval tree.
-  final IntervalTreeNode<T> root;
-
   IntervalTree._(this.root);
 
   /// Creates an interval tree from a mapping of [T] values to a list of ranges.
@@ -76,6 +73,9 @@ class IntervalTree<T> {
     return IntervalTree<T>._(root);
   }
 
+  /// The root node of the interval tree.
+  final IntervalTreeNode<T> root;
+
   /// Returns the list of objects which have been associated with intervals that
   /// intersect with [x].
   List<T> intersections(int x) {
@@ -91,6 +91,8 @@ class IntervalTree<T> {
 }
 
 class IntervalTreeNode<T> {
+  IntervalTreeNode(this.value, this.low, this.high) : computedHigh = high;
+
   final T value;
   final int low;
   final int high;
@@ -98,8 +100,6 @@ class IntervalTreeNode<T> {
 
   IntervalTreeNode<T>? left;
   IntervalTreeNode<T>? right;
-
-  IntervalTreeNode(this.value, this.low, this.high) : computedHigh = high;
 
   Iterable<T> enumerateAllElements() sync* {
     if (left != null) {

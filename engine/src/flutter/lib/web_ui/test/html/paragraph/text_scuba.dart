@@ -14,10 +14,10 @@ import 'package:web_engine_tester/golden_tester.dart';
 ///
 /// (For Googlers: Not really related with internal Scuba anymore)
 class EngineScubaTester {
+  EngineScubaTester(this.viewportSize);
+
   /// The size of the browser window used in this scuba test.
   final ui.Size viewportSize;
-
-  EngineScubaTester(this.viewportSize);
 
   static Future<EngineScubaTester> initialize(
       {ui.Size viewportSize = const ui.Size(2400, 1800)}) async {

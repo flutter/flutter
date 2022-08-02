@@ -42,6 +42,14 @@ void debugRestoreWebDecoderExpireDuration() {
 
 /// Image decoder backed by the browser's `ImageDecoder`.
 class CkBrowserImageDecoder implements ui.Codec {
+  CkBrowserImageDecoder._({
+    required this.contentType,
+    required this.targetWidth,
+    required this.targetHeight,
+    required this.data,
+    required this.debugSource,
+  });
+
   static Future<CkBrowserImageDecoder> create({
     required Uint8List data,
     required String debugSource,
@@ -78,14 +86,6 @@ class CkBrowserImageDecoder implements ui.Codec {
     await decoder._getOrCreateWebDecoder();
     return decoder;
   }
-
-  CkBrowserImageDecoder._({
-    required this.contentType,
-    required this.targetWidth,
-    required this.targetHeight,
-    required this.data,
-    required this.debugSource,
-  });
 
   final String contentType;
   final int? targetWidth;

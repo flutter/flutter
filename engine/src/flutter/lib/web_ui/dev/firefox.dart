@@ -54,11 +54,6 @@ class FirefoxEnvironment implements BrowserEnvironment {
 ///
 /// Any errors starting or running the process are reported through [onExit].
 class Firefox extends Browser {
-  final BrowserProcess _process;
-
-  @override
-  final Future<Uri> remoteDebuggerUrl;
-
   /// Starts a new instance of Firefox open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Firefox(Uri url, FirefoxEnvironment firefoxEnvironment, {bool debug = false}) {
@@ -115,6 +110,11 @@ user_pref("dom.max_script_run_time", 0);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  final BrowserProcess _process;
+
+  @override
+  final Future<Uri> remoteDebuggerUrl;
 
   @override
   Future<void> get onExit => _process.onExit;

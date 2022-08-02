@@ -86,9 +86,9 @@ class CrossFrameCache<T> {
 }
 
 class _CrossFrameCacheItem<T> {
+  _CrossFrameCacheItem(this.value, this.evictCallback);
   final T value;
   final CrossFrameCacheEvictCallback<T>? evictCallback;
-  _CrossFrameCacheItem(this.value, this.evictCallback);
   void evict() {
     if (evictCallback != null) {
       evictCallback!(value);

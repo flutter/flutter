@@ -13,6 +13,21 @@ import 'services.dart';
 
 /// Provides keyboard bindings, such as the `flutter/keyevent` channel.
 class Keyboard {
+  Keyboard._(this._onMacOs) {
+    _keydownListener = allowInterop((DomEvent event) {
+      _handleHtmlEvent(event);
+    });
+    domWindow.addEventListener('keydown', _keydownListener);
+
+    _keyupListener = allowInterop((DomEvent event) {
+      _handleHtmlEvent(event);
+    });
+    domWindow.addEventListener('keyup', _keyupListener);
+    registerHotRestartListener(() {
+      dispose();
+    });
+  }
+
   /// Initializes the [Keyboard] singleton.
   ///
   /// Use the [instance] getter to get the singleton after calling this method.
@@ -32,21 +47,6 @@ class Keyboard {
 
   DomEventListener? _keydownListener;
   DomEventListener? _keyupListener;
-
-  Keyboard._(this._onMacOs) {
-    _keydownListener = allowInterop((DomEvent event) {
-      _handleHtmlEvent(event);
-    });
-    domWindow.addEventListener('keydown', _keydownListener);
-
-    _keyupListener = allowInterop((DomEvent event) {
-      _handleHtmlEvent(event);
-    });
-    domWindow.addEventListener('keyup', _keyupListener);
-    registerHotRestartListener(() {
-      dispose();
-    });
-  }
 
   /// Uninitializes the [Keyboard] singleton.
   ///
@@ -73,7 +73,7 @@ class Keyboard {
   /// Initializing with `0x0` which means no meta keys are pressed.
   int _lastMetaState = 0x0;
 
-  bool _onMacOs;
+  final bool _onMacOs;
 
   // When the user enters a browser/system shortcut (e.g. `cmd+alt+i`) on macOS,
   // the browser doesn't send a keyup for it. This puts the framework in a

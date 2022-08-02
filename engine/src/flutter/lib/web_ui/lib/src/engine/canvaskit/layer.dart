@@ -47,6 +47,8 @@ abstract class Layer implements ui.EngineLayer {
 
 /// A context shared by all layers during the preroll pass.
 class PrerollContext {
+  PrerollContext(this.rasterCache, this.viewEmbedder);
+
   /// A raster cache. Used to register candidates for caching.
   final RasterCache? rasterCache;
 
@@ -54,8 +56,6 @@ class PrerollContext {
   final HtmlViewEmbedder? viewEmbedder;
 
   final MutatorsStack mutatorsStack = MutatorsStack();
-
-  PrerollContext(this.rasterCache, this.viewEmbedder);
 
   ui.Rect get cullRect {
     ui.Rect cullRect = ui.Rect.largest;
@@ -82,6 +82,13 @@ class PrerollContext {
 
 /// A context shared by all layers during the paint pass.
 class PaintContext {
+  PaintContext(
+    this.internalNodesCanvas,
+    this.leafNodesCanvas,
+    this.rasterCache,
+    this.viewEmbedder,
+  );
+
   /// A multi-canvas that applies clips, transforms, and opacity
   /// operations to all canvases (root canvas and overlay canvases for the
   /// platform views).
@@ -95,13 +102,6 @@ class PaintContext {
 
   /// A compositor for embedded HTML views.
   final HtmlViewEmbedder? viewEmbedder;
-
-  PaintContext(
-    this.internalNodesCanvas,
-    this.leafNodesCanvas,
-    this.rasterCache,
-    this.viewEmbedder,
-  );
 }
 
 /// A layer that contains child layers.
@@ -167,10 +167,10 @@ class RootLayer extends ContainerLayer {
 
 class BackdropFilterEngineLayer extends ContainerLayer
     implements ui.BackdropFilterEngineLayer {
+  BackdropFilterEngineLayer(this._filter, this._blendMode);
+
   final ui.ImageFilter _filter;
   final ui.BlendMode _blendMode;
-
-  BackdropFilterEngineLayer(this._filter, this._blendMode);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -194,12 +194,12 @@ class BackdropFilterEngineLayer extends ContainerLayer
 /// A layer that clips its child layers by a given [Path].
 class ClipPathEngineLayer extends ContainerLayer
     implements ui.ClipPathEngineLayer {
+  ClipPathEngineLayer(this._clipPath, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
+
   /// The path used to clip child layers.
   final CkPath _clipPath;
   final ui.Clip _clipBehavior;
-
-  ClipPathEngineLayer(this._clipPath, this._clipBehavior)
-      : assert(_clipBehavior != ui.Clip.none);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -234,12 +234,12 @@ class ClipPathEngineLayer extends ContainerLayer
 /// A layer that clips its child layers by a given [Rect].
 class ClipRectEngineLayer extends ContainerLayer
     implements ui.ClipRectEngineLayer {
+  ClipRectEngineLayer(this._clipRect, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
+
   /// The rectangle used to clip child layers.
   final ui.Rect _clipRect;
   final ui.Clip _clipBehavior;
-
-  ClipRectEngineLayer(this._clipRect, this._clipBehavior)
-      : assert(_clipBehavior != ui.Clip.none);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -275,12 +275,12 @@ class ClipRectEngineLayer extends ContainerLayer
 /// A layer that clips its child layers by a given [RRect].
 class ClipRRectEngineLayer extends ContainerLayer
     implements ui.ClipRRectEngineLayer {
+  ClipRRectEngineLayer(this._clipRRect, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
+
   /// The rounded rectangle used to clip child layers.
   final ui.RRect _clipRRect;
   final ui.Clip? _clipBehavior;
-
-  ClipRRectEngineLayer(this._clipRRect, this._clipBehavior)
-      : assert(_clipBehavior != ui.Clip.none);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -313,10 +313,10 @@ class ClipRRectEngineLayer extends ContainerLayer
 /// A layer that paints its children with the given opacity.
 class OpacityEngineLayer extends ContainerLayer
     implements ui.OpacityEngineLayer {
+  OpacityEngineLayer(this._alpha, this._offset);
+
   final int _alpha;
   final ui.Offset _offset;
-
-  OpacityEngineLayer(this._alpha, this._offset);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -354,10 +354,10 @@ class OpacityEngineLayer extends ContainerLayer
 /// A layer that transforms its child layers by the given transform matrix.
 class TransformEngineLayer extends ContainerLayer
     implements ui.TransformEngineLayer {
+  TransformEngineLayer(this._transform);
+
   /// The matrix with which to transform the child layers.
   final Matrix4 _transform;
-
-  TransformEngineLayer(this._transform);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -447,6 +447,8 @@ class ShaderMaskEngineLayer extends ContainerLayer
 
 /// A layer containing a [Picture].
 class PictureLayer extends Layer {
+  PictureLayer(this.picture, this.offset, this.isComplex, this.willChange);
+
   /// The picture to paint into the canvas.
   final CkPicture picture;
 
@@ -458,8 +460,6 @@ class PictureLayer extends Layer {
 
   /// A hint to the compositor that this picture is likely to change.
   final bool willChange;
-
-  PictureLayer(this.picture, this.offset, this.isComplex, this.willChange);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -485,12 +485,6 @@ class PictureLayer extends Layer {
 /// on the given elevation.
 class PhysicalShapeEngineLayer extends ContainerLayer
     implements ui.PhysicalShapeEngineLayer {
-  final double _elevation;
-  final ui.Color _color;
-  final ui.Color? _shadowColor; // ignore: use_late_for_private_fields_and_variables
-  final CkPath _path;
-  final ui.Clip _clipBehavior;
-
   PhysicalShapeEngineLayer(
     this._elevation,
     this._color,
@@ -498,6 +492,12 @@ class PhysicalShapeEngineLayer extends ContainerLayer
     this._path,
     this._clipBehavior,
   );
+
+  final double _elevation;
+  final ui.Color _color;
+  final ui.Color? _shadowColor; // ignore: use_late_for_private_fields_and_variables
+  final CkPath _path;
+  final ui.Clip _clipBehavior;
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {

@@ -27,6 +27,12 @@ final AccessibilityAnnouncements accessibilityAnnouncements =
 /// Attaches accessibility announcements coming from the 'flutter/accessibility'
 /// channel as temporary elements to the DOM.
 class AccessibilityAnnouncements {
+  AccessibilityAnnouncements._() {
+    registerHotRestartListener(() {
+      _removeElementTimer?.cancel();
+    });
+  }
+
   /// Initializes the [AccessibilityAnnouncements] singleton if it is not
   /// already initialized.
   static AccessibilityAnnouncements get instance {
@@ -34,12 +40,6 @@ class AccessibilityAnnouncements {
   }
 
   static AccessibilityAnnouncements? _instance;
-
-  AccessibilityAnnouncements._() {
-    registerHotRestartListener(() {
-      _removeElementTimer?.cancel();
-    });
-  }
 
   /// Timer that times when the accessibility element should be removed from the
   /// DOM.

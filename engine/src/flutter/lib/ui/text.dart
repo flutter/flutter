@@ -2976,7 +2976,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
 
   /// The scales of the placeholders in the paragraph.
   List<double> get placeholderScales => _placeholderScales;
-  List<double> _placeholderScales = <double>[];
+  final List<double> _placeholderScales = <double>[];
 
   final TextLeadingDistribution _defaultLeadingDistribution;
   /// Applies the given style to the added text until [pop] is called.

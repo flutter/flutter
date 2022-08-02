@@ -88,6 +88,10 @@ Duration _eventTimeStampToDuration(num milliseconds) {
 }
 
 class KeyboardBinding {
+  KeyboardBinding._(this.glassPaneElement) {
+    _setup();
+  }
+
   /// The singleton instance of this object.
   static KeyboardBinding? get instance => _instance;
   static KeyboardBinding? _instance;
@@ -100,10 +104,6 @@ class KeyboardBinding {
         return true;
       }());
     }
-  }
-
-  KeyboardBinding._(this.glassPaneElement) {
-    _setup();
   }
 
   final DomElement glassPaneElement;

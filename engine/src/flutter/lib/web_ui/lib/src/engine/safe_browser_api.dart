@@ -403,12 +403,34 @@ void vertexAttribPointerGlContext(
 
 /// Compiled and cached gl program.
 class GlProgram {
-  final Object program;
   GlProgram(this.program);
+  final Object program;
 }
 
 /// JS Interop helper for webgl apis.
 class GlContext {
+  factory GlContext(OffScreenCanvas offScreenCanvas) {
+    return OffScreenCanvas.supported
+        ? GlContext._fromOffscreenCanvas(offScreenCanvas.offScreenCanvas!)
+        : GlContext._fromCanvasElement(
+        offScreenCanvas.canvasElement!, webGLVersion == WebGLVersion.webgl1);
+  }
+
+  GlContext._fromOffscreenCanvas(DomOffscreenCanvas canvas)
+      : glContext = canvas.getContext('webgl2', <String, dynamic>{'premultipliedAlpha': false})!,
+        isOffscreen = true {
+    _programCache = <String, GlProgram?>{};
+    _canvas = canvas;
+  }
+
+  GlContext._fromCanvasElement(DomCanvasElement canvas, bool useWebGl1)
+      : glContext = canvas.getContext(useWebGl1 ? 'webgl' : 'webgl2',
+      <String, dynamic>{'premultipliedAlpha': false})!,
+        isOffscreen = false {
+    _programCache = <String, GlProgram?>{};
+    _canvas = canvas;
+  }
+
   final Object glContext;
   final bool isOffscreen;
   Object? _kCompileStatus;
@@ -436,28 +458,6 @@ class GlContext {
   int? _widthInPixels;
   int? _heightInPixels;
   static late Map<String, GlProgram?> _programCache;
-
-  factory GlContext(OffScreenCanvas offScreenCanvas) {
-    return OffScreenCanvas.supported
-        ? GlContext._fromOffscreenCanvas(offScreenCanvas.offScreenCanvas!)
-        : GlContext._fromCanvasElement(
-        offScreenCanvas.canvasElement!, webGLVersion == WebGLVersion.webgl1);
-  }
-
-  GlContext._fromOffscreenCanvas(DomOffscreenCanvas canvas)
-      : glContext = canvas.getContext('webgl2', <String, dynamic>{'premultipliedAlpha': false})!,
-        isOffscreen = true {
-    _programCache = <String, GlProgram?>{};
-    _canvas = canvas;
-  }
-
-  GlContext._fromCanvasElement(DomCanvasElement canvas, bool useWebGl1)
-      : glContext = canvas.getContext(useWebGl1 ? 'webgl' : 'webgl2',
-      <String, dynamic>{'premultipliedAlpha': false})!,
-        isOffscreen = false {
-    _programCache = <String, GlProgram?>{};
-    _canvas = canvas;
-  }
 
   void setViewportSize(int width, int height) {
     _widthInPixels = width;
@@ -949,12 +949,6 @@ dynamic tileModeToGlWrapping(GlContext gl, ui.TileMode tileMode) {
 
 /// Polyfill for DomOffscreenCanvas that is not supported on some browsers.
 class OffScreenCanvas {
-  DomOffscreenCanvas? offScreenCanvas;
-  DomCanvasElement? canvasElement;
-  int width;
-  int height;
-  static bool? _supported;
-
   OffScreenCanvas(this.width, this.height) {
     if (OffScreenCanvas.supported) {
       offScreenCanvas = createDomOffscreenCanvas(width, height);
@@ -967,6 +961,12 @@ class OffScreenCanvas {
       _updateCanvasCssSize(canvasElement!);
     }
   }
+
+  DomOffscreenCanvas? offScreenCanvas;
+  DomCanvasElement? canvasElement;
+  int width;
+  int height;
+  static bool? _supported;
 
   void _updateCanvasCssSize(DomCanvasElement element) {
     final double cssWidth = width / EnginePlatformDispatcher.browserDevicePixelRatio;

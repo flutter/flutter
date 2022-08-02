@@ -34,7 +34,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   DomElement get rootElement => _rootElement;
-  DomElement _rootElement = createDomHTMLDivElement();
+  final DomElement _rootElement = createDomHTMLDivElement();
 
   void _called(String methodName, {dynamic arguments}) {
     methodCallLog.add(MockCanvasCall._(

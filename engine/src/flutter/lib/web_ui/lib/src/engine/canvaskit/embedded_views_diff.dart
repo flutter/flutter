@@ -5,6 +5,10 @@
 /// The results of diffing the current composition order with the active
 /// composition order.
 class ViewListDiffResult {
+  const ViewListDiffResult(
+      this.viewsToRemove, this.viewsToAdd, this.addToBeginning,
+      {this.viewToInsertBefore});
+
   /// Views which should be removed from the scene.
   final List<int> viewsToRemove;
 
@@ -20,10 +24,6 @@ class ViewListDiffResult {
   ///
   /// `null` if [addToBeginning] is `false`.
   final int? viewToInsertBefore;
-
-  const ViewListDiffResult(
-      this.viewsToRemove, this.viewsToAdd, this.addToBeginning,
-      {this.viewToInsertBefore});
 }
 
 /// Diff the composition order with the active composition order. It is

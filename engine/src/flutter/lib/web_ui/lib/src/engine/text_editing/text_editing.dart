@@ -352,6 +352,24 @@ class AutofillInfo {
     this.placeholder,
   });
 
+  factory AutofillInfo.fromFrameworkMessage(Map<String, dynamic> autofill,
+      {TextCapitalizationConfig textCapitalization =
+          const TextCapitalizationConfig.defaultCapitalization()}) {
+    assert(autofill != null); // ignore: unnecessary_null_comparison
+    final String uniqueIdentifier = autofill.readString('uniqueIdentifier');
+    final List<dynamic>? hintsList = autofill.tryList('hints');
+    final String? firstHint = (hintsList == null || hintsList.isEmpty) ? null : hintsList.first as String;
+    final EditingState editingState =
+        EditingState.fromFrameworkMessage(autofill.readJson('editingValue'));
+    return AutofillInfo(
+      uniqueIdentifier: uniqueIdentifier,
+      autofillHint: (firstHint != null) ? BrowserAutofillHints.instance.flutterToEngine(firstHint) : null,
+      editingState: editingState,
+      placeholder: autofill.tryString('hintText'),
+      textCapitalization: textCapitalization,
+    );
+  }
+
   /// The current text and selection state of a text field.
   final EditingState editingState;
 
@@ -389,24 +407,6 @@ class AutofillInfo {
   /// can be a useful indication to the platform autofill service as to what
   /// information is expected in this field.
   final String? placeholder;
-
-  factory AutofillInfo.fromFrameworkMessage(Map<String, dynamic> autofill,
-      {TextCapitalizationConfig textCapitalization =
-          const TextCapitalizationConfig.defaultCapitalization()}) {
-    assert(autofill != null); // ignore: unnecessary_null_comparison
-    final String uniqueIdentifier = autofill.readString('uniqueIdentifier');
-    final List<dynamic>? hintsList = autofill.tryList('hints');
-    final String? firstHint = (hintsList == null || hintsList.isEmpty) ? null : hintsList.first as String;
-    final EditingState editingState =
-        EditingState.fromFrameworkMessage(autofill.readJson('editingValue'));
-    return AutofillInfo(
-      uniqueIdentifier: uniqueIdentifier,
-      autofillHint: (firstHint != null) ? BrowserAutofillHints.instance.flutterToEngine(firstHint) : null,
-      editingState: editingState,
-      placeholder: autofill.tryString('hintText'),
-      textCapitalization: textCapitalization,
-    );
-  }
 
   void applyToDomElement(DomHTMLElement domElement,
       {bool focusedElement = false}) {
@@ -1084,9 +1084,9 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
 /// Unless a formfactor/browser requires specific implementation for a specific
 /// strategy the methods in this class should be used.
 abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements TextEditingStrategy  {
-  final HybridTextEditing owner;
-
   DefaultTextEditingStrategy(this.owner);
+
+  final HybridTextEditing owner;
 
   bool isEnabled = false;
 

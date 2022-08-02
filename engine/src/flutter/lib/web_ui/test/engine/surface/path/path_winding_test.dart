@@ -442,10 +442,10 @@ void testMain() {
 }
 
 class LineTestCase {
+  LineTestCase(this.pathContent, this.convexity, this.direction);
   final String pathContent;
   final int convexity;
   final int? direction;
-  LineTestCase(this.pathContent, this.convexity, this.direction);
 }
 
 /// Parses a string of the format "mx my lx1 ly1 lx2 ly2..." into a path

@@ -46,8 +46,6 @@ class EdgeEnvironment implements BrowserEnvironment {
 ///
 /// Any errors starting or running the process are reported through [onExit].
 class Edge extends Browser {
-  final BrowserProcess _process;
-
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Edge(Uri url) {
@@ -74,6 +72,8 @@ class Edge extends Browser {
   }
 
   Edge._(this._process);
+
+  final BrowserProcess _process;
 
   @override
   Future<void> get onExit => _process.onExit;

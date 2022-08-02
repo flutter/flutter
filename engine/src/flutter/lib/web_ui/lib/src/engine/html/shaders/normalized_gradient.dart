@@ -22,12 +22,6 @@ import 'shader_builder.dart';
 ///              scale = (c2 - c1) / (t2 - t1)
 ///              bias = c1 - t1 / (t2 - t1) * (c2 - c1)
 class NormalizedGradient {
-  final Float32List _thresholds;
-  final Float32List _bias;
-  final Float32List _scale;
-  final int thresholdCount;
-  final bool isOpaque;
-
   factory NormalizedGradient(List<ui.Color> colors, {List<double>? stops}) {
     // If colorStops is not provided, then only two stops, at 0.0 and 1.0,
     // are implied (and colors must therefore only have two entries).
@@ -101,6 +95,12 @@ class NormalizedGradient {
 
   NormalizedGradient._(
       this.thresholdCount, this._thresholds, this._scale, this._bias, this.isOpaque);
+
+  final Float32List _thresholds;
+  final Float32List _bias;
+  final Float32List _scale;
+  final int thresholdCount;
+  final bool isOpaque;
 
   /// Sets uniforms for threshold, bias and scale for program.
   void setupUniforms(GlContext gl, GlProgram glProgram) {

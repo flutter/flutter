@@ -25,10 +25,10 @@ typedef WebOnlyImageCodecChunkCallback = void Function(
     int cumulativeBytesLoaded, int expectedTotalBytes);
 
 class HtmlCodec implements ui.Codec {
+  HtmlCodec(this.src, {this.chunkCallback});
+
   final String src;
   final WebOnlyImageCodecChunkCallback? chunkCallback;
-
-  HtmlCodec(this.src, {this.chunkCallback});
 
   @override
   int get frameCount => 1;
@@ -119,9 +119,9 @@ class HtmlCodec implements ui.Codec {
 }
 
 class HtmlBlobCodec extends HtmlCodec {
-  final DomBlob blob;
-
   HtmlBlobCodec(this.blob) : super(domWindow.URL.createObjectURL(blob));
+
+  final DomBlob blob;
 
   @override
   void dispose() {
@@ -140,9 +140,10 @@ class SingleFrameInfo implements ui.FrameInfo {
 }
 
 class HtmlImage implements ui.Image {
+  HtmlImage(this.imgElement, this.width, this.height);
+
   final DomHTMLImageElement imgElement;
   bool _requiresClone = false;
-  HtmlImage(this.imgElement, this.width, this.height);
 
   bool _disposed = false;
   @override

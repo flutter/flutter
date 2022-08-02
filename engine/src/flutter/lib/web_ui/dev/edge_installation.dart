@@ -70,6 +70,8 @@ Future<BrowserInstallation> getEdgeInstallation(
 ///
 /// See: https://github.com/MicrosoftEdge/edge-launcher
 class EdgeLauncher {
+  EdgeLauncher();
+
   /// Path to the directory that contains `MicrosoftEdgeLauncher.exe`.
   io.Directory get launcherInstallationDir => io.Directory(
         path.join(environment.webUiDartToolDir.path, 'microsoftedgelauncher',
@@ -89,8 +91,6 @@ class EdgeLauncher {
   /// Only useful in Windows, hence not added to [PlatformBinding].
   String get windowsEdgeLauncherDownloadUrl =>
       'https://github.com/MicrosoftEdge/edge-launcher/releases/download/$version/MicrosoftEdgeLauncher.exe';
-
-  EdgeLauncher();
 
   /// Install the launcher if it does not exist in this system.
   Future<void> install() async {

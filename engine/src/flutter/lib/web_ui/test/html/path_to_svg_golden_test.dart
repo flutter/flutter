@@ -210,13 +210,13 @@ DomElement pathToSvgElement(Path path, Paint paint, bool enableFill) {
 }
 
 class ArcSample {
+  ArcSample(this.offset,
+      {this.largeArc = false, this.clockwise = false, this.distance = 0});
+
   final Offset offset;
   final bool largeArc;
   final bool clockwise;
   final double distance;
-
-  ArcSample(this.offset,
-      {this.largeArc = false, this.clockwise = false, this.distance = 0});
 
   Path createPath() {
     final Offset startP =

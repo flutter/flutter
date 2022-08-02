@@ -154,7 +154,7 @@ class _FakePlatformViewManager extends PlatformViewManager {
   _FakePlatformViewManager(void Function(int) clearFunction)
       : _clearPlatformView = clearFunction;
 
-  void Function(int) _clearPlatformView;
+  final void Function(int) _clearPlatformView;
 
   @override
   void clearPlatformView(int viewId) {

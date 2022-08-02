@@ -567,7 +567,7 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
   final List<ParagraphSpan> _spans = <ParagraphSpan>[];
   final List<StyleNode> _styleStack = <StyleNode>[];
 
-  RootStyleNode _rootStyleNode;
+  final RootStyleNode _rootStyleNode;
   StyleNode get _currentStyleNode => _styleStack.isEmpty
       ? _rootStyleNode
       : _styleStack[_styleStack.length - 1];

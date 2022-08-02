@@ -637,7 +637,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   //                lot of paragraphs are laid out _and_ rendered. To support
   //                this use-case without blowing up memory usage we need this:
   //                https://github.com/flutter/flutter/issues/81224
-  static SynchronousSkiaObjectCache _paragraphCache =
+  static final SynchronousSkiaObjectCache _paragraphCache =
       SynchronousSkiaObjectCache(500);
 
   /// Marks this paragraph as having been used this frame.
@@ -835,13 +835,6 @@ class CkLineMetrics implements ui.LineMetrics {
 }
 
 class CkParagraphBuilder implements ui.ParagraphBuilder {
-  final SkParagraphBuilder _paragraphBuilder;
-  final CkParagraphStyle _style;
-  final List<_ParagraphCommand> _commands;
-  int _placeholderCount;
-  final List<double> _placeholderScales;
-  final List<CkTextStyle> _styleStack;
-
   CkParagraphBuilder(ui.ParagraphStyle style)
       : _commands = <_ParagraphCommand>[],
         _style = style as CkParagraphStyle,
@@ -854,6 +847,13 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
         ) {
     _styleStack.add(_style.getTextStyle());
   }
+
+  final SkParagraphBuilder _paragraphBuilder;
+  final CkParagraphStyle _style;
+  final List<_ParagraphCommand> _commands;
+  int _placeholderCount;
+  final List<double> _placeholderScales;
+  final List<CkTextStyle> _styleStack;
 
   @override
   void addPlaceholder(
@@ -1019,11 +1019,6 @@ class _CkParagraphPlaceholder {
 }
 
 class _ParagraphCommand {
-  final _ParagraphCommandType type;
-  final String? text;
-  final CkTextStyle? style;
-  final _CkParagraphPlaceholder? placeholderStyle;
-
   const _ParagraphCommand._(
     this.type,
     this.text,
@@ -1044,6 +1039,11 @@ class _ParagraphCommand {
       _CkParagraphPlaceholder placeholderStyle)
       : this._(
             _ParagraphCommandType.addPlaceholder, null, null, placeholderStyle);
+
+  final _ParagraphCommandType type;
+  final String? text;
+  final CkTextStyle? style;
+  final _CkParagraphPlaceholder? placeholderStyle;
 }
 
 enum _ParagraphCommandType {
