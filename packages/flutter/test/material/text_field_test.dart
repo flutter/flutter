@@ -7107,6 +7107,57 @@ void main() {
     expect(editableText.style.color, isNull);
   });
 
+  testWidgets('TextField style is merged with theme in Material 3', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/23994
+
+    final ThemeData themeData = ThemeData(
+      useMaterial3: true,
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(
+          color: Colors.blue[500],
+        ),
+      ),
+    );
+
+    Widget buildFrame(TextStyle style) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: TextField(
+              style: style,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Empty TextStyle is overridden by theme
+    await tester.pumpWidget(buildFrame(const TextStyle()));
+    EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, themeData.textTheme.bodyLarge!.color);
+    expect(editableText.style.background, themeData.textTheme.bodyLarge!.background);
+    expect(editableText.style.shadows, themeData.textTheme.bodyLarge!.shadows);
+    expect(editableText.style.decoration, themeData.textTheme.bodyLarge!.decoration);
+    expect(editableText.style.locale, themeData.textTheme.bodyLarge!.locale);
+    expect(editableText.style.wordSpacing, themeData.textTheme.bodyLarge!.wordSpacing);
+
+    // Properties set on TextStyle override theme
+    const Color setColor = Colors.red;
+    await tester.pumpWidget(buildFrame(const TextStyle(color: setColor)));
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, setColor);
+
+    // inherit: false causes nothing to be merged in from theme
+    await tester.pumpWidget(buildFrame(const TextStyle(
+      fontSize: 24.0,
+      textBaseline: TextBaseline.alphabetic,
+      inherit: false,
+    )));
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, isNull);
+  });
+
   testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
@@ -11733,5 +11784,225 @@ void main() {
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  });
+  group('TapRegion integration', () {
+    testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Opacity(
+                  opacity: 0.5,
+                  child: TextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      hintText: 'Placeholder',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets("Tapping outside doesn't lose focus on mobile", (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Opacity(
+                  opacity: 0.5,
+                  child: TextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      hintText: 'Placeholder',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pump();
+
+      // Focus is lost on mobile browsers, but not mobile apps.
+      expect(focusNode.hasPrimaryFocus, kIsWeb ? isFalse : isTrue);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets("Tapping on toolbar doesn't lose focus", (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      final TextEditingController controller  = TextEditingController(text: 'A B C');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Opacity(
+                  opacity: 0.5,
+                  child: TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(hintText: 'Placeholder'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The selectWordsInRange with SelectionChangedCause.tap seems to be needed to show the toolbar.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.renderEditable.selectWordsInRange(from: Offset.zero, cause: SelectionChangedCause.tap);
+
+      final Offset aPosition = textOffsetToPosition(tester, 1);
+
+      // Right clicking shows the menu.
+      final TestGesture gesture = await tester.startGesture(
+        aPosition,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Sanity check that the toolbar widget exists.
+      expect(find.text('Copy'), findsOneWidget);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      // Now tap on it to see if we lose focus.
+      await tester.tap(find.text('Copy'));
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: isBrowser, // [intended] On the web, the toolbar isn't rendered by Flutter.
+    );
+
+    testWidgets("Tapping on input decorator doesn't lose focus", (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Opacity(
+                  opacity: 0.5,
+                  child: TextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      hintText: 'Placeholder',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      final Rect decorationBox = tester.getRect(find.byType(TextField));
+      // Tap just inside the decoration, but not inside the EditableText.
+      await tester.tapAt(decorationBox.topLeft + const Offset(1, 1));
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    }, variant: TargetPlatformVariant.all());
+
+    // PointerDownEvents can't be trackpad events, apparently, so we skip that one.
+    for (final PointerDeviceKind pointerDeviceKind in PointerDeviceKind.values.toSet()..remove(PointerDeviceKind.trackpad)) {
+      testWidgets('Default TextField handling of onTapOutside follows platform conventions for ${pointerDeviceKind.name}', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test');
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: <Widget>[
+                  const Text('Outside'),
+                  TextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        Future<void> click(Finder finder) async {
+          final TestGesture gesture = await tester.startGesture(
+            tester.getCenter(finder),
+            kind: pointerDeviceKind,
+          );
+          await gesture.up();
+          await gesture.removePointer();
+        }
+
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        await click(find.text('Outside'));
+
+        switch(pointerDeviceKind) {
+          case PointerDeviceKind.touch:
+            switch(defaultTargetPlatform) {
+              case TargetPlatform.iOS:
+              case TargetPlatform.android:
+              case TargetPlatform.fuchsia:
+                expect(focusNode.hasPrimaryFocus, equals(!kIsWeb));
+                break;
+              case TargetPlatform.linux:
+              case TargetPlatform.macOS:
+              case TargetPlatform.windows:
+                expect(focusNode.hasPrimaryFocus, isFalse);
+                break;
+            }
+            break;
+          case PointerDeviceKind.mouse:
+          case PointerDeviceKind.stylus:
+          case PointerDeviceKind.invertedStylus:
+          case PointerDeviceKind.trackpad:
+          case PointerDeviceKind.unknown:
+            expect(focusNode.hasPrimaryFocus, isFalse);
+            break;
+        }
+    }, variant: TargetPlatformVariant.all());
+  }
   });
 }

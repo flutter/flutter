@@ -65,7 +65,7 @@ void main() {
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
     expect(await androidDevices.getDiagnostics(), isEmpty);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
