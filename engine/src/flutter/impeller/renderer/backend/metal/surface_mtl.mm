@@ -24,7 +24,11 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
     return nullptr;
   }
 
-  auto current_drawable = [layer nextDrawable];
+  id<CAMetalDrawable> current_drawable = nil;
+  {
+    TRACE_EVENT0("impeller", "WaitForNextDrawable");
+    current_drawable = [layer nextDrawable];
+  }
 
   if (!current_drawable) {
     VALIDATION_LOG << "Could not acquire current drawable.";
