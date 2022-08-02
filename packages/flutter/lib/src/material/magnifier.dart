@@ -293,14 +293,12 @@ class Magnifier extends StatelessWidget {
   static const double _borderRadius = 40;
   static const double _magnification = 1.25;
 
-
   /// Any additional offset the focal point requires to "point"
   /// to the correct place.
   ///
   /// This is useful for instances where the magnifier is not pointing to something
   /// directly below it.
   final Offset additionalFocalPointOffset;
-
 
   /// The border radius for this magnifier.
   final BorderRadius borderRadius;
