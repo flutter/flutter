@@ -1100,7 +1100,6 @@ void main() {
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
-
     group('magnifier', () {
       late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
       final Widget fakeMagnifier = Container(key: UniqueKey());
