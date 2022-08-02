@@ -42,7 +42,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && checkboxTheme == ''"
     - kind: 'addParameter'
       index: 97
@@ -59,7 +59,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && checkboxTheme != ''"
     - kind: 'addParameter'
       index: 98
@@ -76,7 +76,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf:  "toggleableActiveColor != '' && radioTheme == ''"
     - kind: 'addParameter'
       index: 99
@@ -93,7 +93,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && radioTheme != ''"
     - kind: 'addParameter'
       index: 100
@@ -186,7 +186,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && checkboxTheme == ''"
     - kind: 'addParameter'
       index: 97
@@ -203,7 +203,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && checkboxTheme != ''"
     - kind: 'addParameter'
       index: 98
@@ -220,7 +220,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf:  "toggleableActiveColor != '' && radioTheme == ''"
     - kind: 'addParameter'
       index: 99
@@ -237,7 +237,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && radioTheme != ''"
     - kind: 'addParameter'
       index: 100
@@ -330,7 +330,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && checkboxTheme == ''"
     - kind: 'addParameter'
       index: 97
@@ -347,7 +347,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && checkboxTheme != ''"
     - kind: 'addParameter'
       index: 98
@@ -364,7 +364,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf:  "toggleableActiveColor != '' && radioTheme == ''"
     - kind: 'addParameter'
       index: 99
@@ -433,7 +433,7 @@ transforms:
                          }\n
                          return null;\n
                        }),\n
-                     ),"
+                     )"
         requiredIf: "toggleableActiveColor != '' && switchTheme != ''"
     variables:
       checkboxTheme:

@@ -542,6 +542,16 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/97972
   ThemeData themeData = ThemeData();
   themeData = ThemeData(checkboxTheme: CheckboxThemeData(
+ 	  fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return Colors.black;
+      }
+ 	    return null;
+ 	  }),
+ 	  )radioTheme: RadioThemeData(
  	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
        if (states.contains(MaterialState.disabled)) {
          return null;
@@ -551,17 +561,7 @@ void main() {
        }
  	     return null;
  	   }),
- 	 ),radioTheme: RadioThemeData(
- 	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
-         return null;
-       }
-       if (states.contains(MaterialState.selected)) {
-         return Colors.black;
-       }
- 	     return null;
- 	   }),
- 	 ),switchTheme: SwitchThemeData(
+ 	  )switchTheme: SwitchThemeData(
  	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
        if (states.contains(MaterialState.disabled)) {
          return null;
@@ -592,7 +592,7 @@ void main() {
        }
  	     return null;
       }),
-      ),radioTheme: RadioThemeData(
+    )radioTheme: RadioThemeData(
       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
        if (states.contains(MaterialState.disabled)) {
          return null;
@@ -602,7 +602,7 @@ void main() {
        }
  	     return null;
       }),
-      ),switchTheme: SwitchThemeData(
+    )switchTheme: SwitchThemeData(
       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
@@ -633,7 +633,7 @@ void main() {
        }
  	     return null;
  	   }),
- 	 ),radioTheme: RadioThemeData(
+ 	  )radioTheme: RadioThemeData(
  	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
        if (states.contains(MaterialState.disabled)) {
          return null;
@@ -643,7 +643,7 @@ void main() {
        }
  	     return null;
  	   }),
- 	 ),switchTheme: SwitchThemeData(
+ 	  )switchTheme: SwitchThemeData(
  	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
        if (states.contains(MaterialState.disabled)) {
          return null;
@@ -663,7 +663,7 @@ void main() {
  	     return null;
  	   }),
  	));
-  themeData = ThemeData.raw(
+ themeData = ThemeData.raw(
     checkboxTheme: CheckboxThemeData(
       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
@@ -674,7 +674,7 @@ void main() {
         }
  	      return null;
       }),
-      ),radioTheme: RadioThemeData(
+    )radioTheme: RadioThemeData(
       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
@@ -684,7 +684,7 @@ void main() {
         }
  	      return null;
       }),
-      ),switchTheme: SwitchThemeData(
+    )switchTheme: SwitchThemeData(
       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
@@ -715,7 +715,7 @@ void main() {
         }
  	      return null;
       }),
-      ),radioTheme: RadioThemeData(
+    )radioTheme: RadioThemeData(
       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
@@ -725,7 +725,7 @@ void main() {
         }
  	      return null;
       }),
- 	 ),switchTheme: SwitchThemeData(
+ 	  )switchTheme: SwitchThemeData(
  	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
        if (states.contains(MaterialState.disabled)) {
          return null;
@@ -756,7 +756,7 @@ void main() {
         }
  	      return null;
       }),
-      ),radioTheme: RadioThemeData(
+    )radioTheme: RadioThemeData(
       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
@@ -766,7 +766,7 @@ void main() {
         }
  	      return null;
       }),
-      ),switchTheme: SwitchThemeData(
+    )switchTheme: SwitchThemeData(
       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
