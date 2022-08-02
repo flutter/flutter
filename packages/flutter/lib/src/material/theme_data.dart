@@ -313,7 +313,6 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     Color? shadowColor,
     Color? splashColor,
-    Color? toggleableActiveColor,
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
     String? fontFamily,
@@ -405,6 +404,13 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after v2.13.0-0.4.pre.',
+    )
+    Color? toggleableActiveColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -614,7 +620,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor: selectedRowColor,
       shadowColor: shadowColor,
       splashColor: splashColor,
-      toggleableActiveColor: toggleableActiveColor,
       unselectedWidgetColor: unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: iconTheme,
@@ -665,6 +670,7 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator,
+      toggleableActiveColor: toggleableActiveColor,
     );
   }
 
@@ -719,7 +725,6 @@ class ThemeData with Diagnosticable {
     required this.selectedRowColor,
     required this.shadowColor,
     required this.splashColor,
-    required this.toggleableActiveColor,
     required this.unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
     required this.iconTheme,
@@ -810,6 +815,13 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
     this.androidOverscrollIndicator,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after v2.13.0-0.4.pre.',
+    )
+    Color? toggleableActiveColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
@@ -819,6 +831,7 @@ class ThemeData with Diagnosticable {
        _buttonColor = buttonColor,
        _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
        _primaryColorBrightness = primaryColorBrightness,
+       _toggleableActiveColor = toggleableActiveColor,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -1341,7 +1354,8 @@ class ThemeData with Diagnosticable {
 
   /// The color used to highlight the active states of toggleable widgets like
   /// [Switch], [Radio], and [Checkbox].
-  final Color toggleableActiveColor;
+  Color get toggleableActiveColor => _toggleableActiveColor!;
+  final Color? _toggleableActiveColor;
 
   /// The color used for widgets in their inactive (but enabled)
   /// state. For example, an unchecked checkbox. See also [disabledColor].
@@ -1673,7 +1687,6 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     Color? shadowColor,
     Color? splashColor,
-    Color? toggleableActiveColor,
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
     IconThemeData? iconTheme,
@@ -1764,6 +1777,13 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after v2.13.0-0.4.pre.',
+    )
+    Color? toggleableActiveColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1807,7 +1827,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor: selectedRowColor ?? this.selectedRowColor,
       shadowColor: shadowColor ?? this.shadowColor,
       splashColor: splashColor ?? this.splashColor,
-      toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: iconTheme ?? this.iconTheme,
@@ -1858,6 +1877,7 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
+      toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
     );
   }
 
@@ -2005,7 +2025,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t)!,
       shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
       splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
-      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t)!,
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
@@ -2056,6 +2075,7 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
+      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
     );
   }
 
@@ -2105,7 +2125,6 @@ class ThemeData with Diagnosticable {
         other.selectedRowColor == selectedRowColor &&
         other.shadowColor == shadowColor &&
         other.splashColor == splashColor &&
-        other.toggleableActiveColor == toggleableActiveColor &&
         other.unselectedWidgetColor == unselectedWidgetColor &&
         // TYPOGRAPHY & ICONOGRAPHY
         other.iconTheme == iconTheme &&
@@ -2155,7 +2174,8 @@ class ThemeData with Diagnosticable {
         other.buttonColor == buttonColor &&
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
         other.primaryColorBrightness == primaryColorBrightness &&
-        other.androidOverscrollIndicator == androidOverscrollIndicator;
+        other.androidOverscrollIndicator == androidOverscrollIndicator &&
+        other.toggleableActiveColor == toggleableActiveColor;
   }
 
   @override
@@ -2202,7 +2222,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor,
       shadowColor,
       splashColor,
-      toggleableActiveColor,
       unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme,
@@ -2253,6 +2272,7 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
       androidOverscrollIndicator,
+      toggleableActiveColor,
     ];
     return Object.hashAll(values);
   }
@@ -2301,7 +2321,6 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.debug));
     // TYPOGRAPHY & ICONOGRAPHY
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, level: DiagnosticLevel.debug));
@@ -2352,6 +2371,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
   }
 }
 
