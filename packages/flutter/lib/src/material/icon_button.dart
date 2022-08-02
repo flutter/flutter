@@ -111,9 +111,9 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// null then it will behave as a toggle button. If [isSelected] is true then it will
 /// show [selectedIcon], if it false it will show the normal [icon].
 ///
-/// In Material Design 3, both [IconTheme] and [IconButtonTheme] is used to override the default style
+/// In Material Design 3, both [IconTheme] and [IconButtonTheme] are used to override the default style
 /// of [IconButton]. If both themes exist, the [IconButtonTheme] will override [IconTheme] no matter
-/// which is closer to [IconButton]. Each [IconButton]'s property is resolved by the order of
+/// which is closer to the [IconButton]. Each [IconButton]'s property is resolved by the order of
 /// precedence: widget property, [IconButtonTheme] property, [IconTheme] property and
 /// Material 3 [ButtonStyle] default property.
 ///
