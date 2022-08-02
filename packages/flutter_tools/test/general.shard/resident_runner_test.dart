@@ -2059,7 +2059,7 @@ flutter:
     runZonedGuarded(() {
       flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
     }, (Object e, StackTrace st) {
-      expect(e is ToolExit, true);
+      expect(e, isA<ToolExit>());
       expect((e as ToolExit).message,
         contains('Existing VM service clients prevent DDS from taking control.',
       ));
@@ -2077,7 +2077,7 @@ flutter:
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      required io.CompressionOptions compression,
+      io.CompressionOptions? compression,
       Device? device,
       required Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
@@ -2111,7 +2111,7 @@ flutter:
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      required io.CompressionOptions compression,
+      io.CompressionOptions? compression,
       Device? device,
       required Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
@@ -2152,7 +2152,7 @@ flutter:
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      required io.CompressionOptions compression,
+      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
       Device? device,
       required Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
@@ -2188,7 +2188,7 @@ flutter:
     runZonedGuarded(() {
       flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
     }, (Object e, StackTrace st) {
-      expect(e is StateError, true);
+      expect(e, isA<StateError>());
       expect((e as StateError).message, contains('No URI'));
       expect(testLogger.errorText, contains(
         'DDS has failed to start and there is not an existing DDS instance',
@@ -2207,7 +2207,7 @@ flutter:
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      required io.CompressionOptions compression,
+      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
       Device? device,
       required Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
