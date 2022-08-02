@@ -747,7 +747,7 @@ class TextSelectionOverlay {
     }
 
     _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
-      currentTextPosition: newSelection.extent,
+      currentTextPosition: newSelection.extent.offset < newSelection.base.offset ? newSelection.extent : newSelection.base,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
     ));
