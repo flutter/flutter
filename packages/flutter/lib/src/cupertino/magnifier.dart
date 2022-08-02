@@ -110,6 +110,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   @override
   void dispose() {
     widget.controller.animationController = null;
+    _ioAnimationController.dispose();
     widget.magnifierOverlayInfoBearer
         .removeListener(_determineMagnifierPositionAndFocalPoint);
     super.dispose();
@@ -119,7 +120,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   void didUpdateWidget(CupertinoTextMagnifier oldWidget) {
     if (oldWidget.magnifierOverlayInfoBearer != widget.magnifierOverlayInfoBearer) {
       oldWidget.magnifierOverlayInfoBearer.removeListener(_determineMagnifierPositionAndFocalPoint);
-      widget.magnifierOverlayInfoBearer.removeListener(_determineMagnifierPositionAndFocalPoint);
+      widget.magnifierOverlayInfoBearer.addListener(_determineMagnifierPositionAndFocalPoint);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -260,7 +261,7 @@ class CupertinoMagnifier extends StatelessWidget {
   /// The vertical offset that the magnifier is along the Y axis above
   /// the focal point.
   @visibleForTesting
-  static const double kMagnifierAboveFocalPoint = -30;
+  static const double kMagnifierAboveFocalPoint = -26;
 
   /// The default size of the magnifier.
   ///

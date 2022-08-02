@@ -125,7 +125,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   void didUpdateWidget(TextMagnifier oldWidget) {
     if (oldWidget.magnifierInfo != widget.magnifierInfo) {
       oldWidget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
-      widget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
+      widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -288,7 +288,7 @@ class Magnifier extends StatelessWidget {
   /// [kStandardVerticalFocalPointShift] is an unmodifiable constant so that positioning of this
   /// [Magnifier] can be done with a garunteed size, as opposed to an estimate.
   @visibleForTesting
-  static const double kStandardVerticalFocalPointShift = 18;
+  static const double kStandardVerticalFocalPointShift = 22;
 
   static const double _borderRadius = 40;
   static const double _magnification = 1.25;
