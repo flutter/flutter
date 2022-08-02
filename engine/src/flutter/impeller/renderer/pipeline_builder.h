@@ -93,6 +93,13 @@ struct PipelineBuilder {
             << VertexShader::kLabel << "'.";
         return false;
       }
+      if (!vertex_descriptor->SetDescriptorSetLayouts(
+              VertexShader::kDescriptorSetLayouts)) {
+        VALIDATION_LOG << "Cound not configure vertex descriptor set layout for"
+                          " pipeline named '"
+                       << VertexShader::kLabel << "'.";
+        return false;
+      }
       desc.SetVertexDescriptor(std::move(vertex_descriptor));
     }
 
