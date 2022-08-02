@@ -34,6 +34,10 @@ impeller_shaders("entity_shaders") {
     "shaders/glyph_atlas.vert",
     "shaders/gradient_fill.frag",
     "shaders/gradient_fill.vert",
+    "shaders/radial_gradient_fill.vert",
+    "shaders/radial_gradient_fill.frag",
+    "shaders/rrect_blur.vert",
+    "shaders/rrect_blur.frag",
     "shaders/solid_fill.frag",
     "shaders/solid_fill.vert",
     "shaders/solid_stroke.frag",
@@ -42,8 +46,6 @@ impeller_shaders("entity_shaders") {
     "shaders/texture_fill.vert",
     "shaders/vertices.vert",
     "shaders/vertices.frag",
-    "shaders/radial_gradient_fill.vert",
-    "shaders/radial_gradient_fill.frag",
   ]
 }
 
@@ -77,6 +79,8 @@ impeller_component("entity") {
     "contents/path_contents.h",
     "contents/radial_gradient_contents.cc",
     "contents/radial_gradient_contents.h",
+    "contents/rrect_shadow_contents.cc",
+    "contents/rrect_shadow_contents.h",
     "contents/solid_color_contents.cc",
     "contents/solid_color_contents.h",
     "contents/solid_stroke_contents.cc",

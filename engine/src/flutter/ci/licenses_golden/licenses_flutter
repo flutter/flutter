@@ -570,6 +570,8 @@ FILE: ../../../flutter/impeller/entity/contents/path_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/path_contents.h
 FILE: ../../../flutter/impeller/entity/contents/radial_gradient_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/radial_gradient_contents.h
+FILE: ../../../flutter/impeller/entity/contents/rrect_shadow_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/rrect_shadow_contents.h
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.h
 FILE: ../../../flutter/impeller/entity/contents/solid_stroke_contents.cc
@@ -621,6 +623,8 @@ FILE: ../../../flutter/impeller/entity/shaders/gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/gradient_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/radial_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/radial_gradient_fill.vert
+FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.frag
+FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.vert
 FILE: ../../../flutter/impeller/entity/shaders/solid_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/solid_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/solid_stroke.frag

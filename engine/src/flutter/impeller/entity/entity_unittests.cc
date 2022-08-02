@@ -10,6 +10,7 @@
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
+#include "impeller/entity/contents/rrect_shadow_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -1172,6 +1173,62 @@ TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
     auto restore = std::make_shared<ClipRestoreContents>();
     ASSERT_TRUE(restore->ShouldRender(Entity{}, {100, 100}));
   }
+}
+
+TEST_P(EntityTest, RRectShadowTest) {
+  bool first_frame = true;
+  auto callback = [&](ContentContext& context, RenderPass& pass) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowPos({10, 10});
+    }
+
+    static Color color = Color::Red();
+    static float corner_radius = 100;
+    static float blur_radius = 100;
+    static bool show_coverage = false;
+    static Color coverage_color = Color::Green().WithAlpha(0.2);
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Corner radius", &corner_radius, 0, 300);
+    ImGui::SliderFloat("Blur radius", &blur_radius, 0, 300);
+    ImGui::ColorEdit4("Color", reinterpret_cast<Scalar*>(&color));
+    ImGui::Checkbox("Show coverage", &show_coverage);
+    if (show_coverage) {
+      ImGui::ColorEdit4("Coverage color",
+                        reinterpret_cast<Scalar*>(&coverage_color));
+    }
+    ImGui::End();
+
+    auto [top_left, bottom_right] = IMPELLER_PLAYGROUND_LINE(
+        Point(200, 200), Point(600, 400), 30, Color::White(), Color::White());
+    auto rect =
+        Rect::MakeLTRB(top_left.x, top_left.y, bottom_right.x, bottom_right.y);
+
+    auto contents = std::make_unique<RRectShadowContents>();
+    contents->SetRRect(rect, corner_radius);
+    contents->SetColor(color);
+    contents->SetSigma(Radius(blur_radius));
+
+    Entity entity;
+    entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
+    entity.SetContents(std::move(contents));
+    entity.Render(context, pass);
+
+    auto coverage = entity.GetCoverage();
+    if (show_coverage && coverage.has_value()) {
+      auto bounds_contents = std::make_unique<SolidColorContents>();
+      bounds_contents->SetPath(
+          PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath());
+      bounds_contents->SetColor(coverage_color.Premultiply());
+      Entity bounds_entity;
+      bounds_entity.SetContents(std::move(bounds_contents));
+      bounds_entity.Render(context, pass);
+    }
+
+    return true;
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing
