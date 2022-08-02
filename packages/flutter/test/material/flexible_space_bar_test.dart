@@ -11,29 +11,52 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
+final Key blockKey = UniqueKey();
+
 void main() {
   testWidgets('FlexibleSpaceBar use backgroundBuilder build background', (WidgetTester tester) async {
+    const ValueKey<String> backgroundKey1 = ValueKey<String>('backgroundKey1');
+    const ValueKey<String> backgroundKey2 = ValueKey<String>('backgroundKey2');
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(
-            toolbarHeight: 300,
-            flexibleSpace: FlexibleSpaceBar(
-              title: const Text('Title'),
-              backgroundBuilder: (BuildContext context,
-                  FlexibleSpaceBarSettings settings,
-                  BoxConstraints constraints){
-                return const Text('Background');
-              },
-              collapseMode: CollapseMode.pin,
-            ),
+          body: CustomScrollView(
+            key: blockKey,
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: 300,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: const Text('Title'),
+                  backgroundBuilder: (BuildContext context,
+                      FlexibleSpaceBarSettings settings,
+                      BoxConstraints constraints) {
+                    if (settings.currentExtent >= 100) {
+                      return const Text('Background1', key: backgroundKey1);
+                    }
+                    return const Text('Background2', key: backgroundKey2);
+                  },
+                  collapseMode: CollapseMode.pin,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 10000.0,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
-
-    final Finder background = find.text('Background');
-    expect(background.precache(), true);
+    Finder background1 = find.byKey(backgroundKey1);
+    Finder background2 = find.byKey(backgroundKey2);
+    expect(background1.precache(), true);
+    expect(background2.precache(), false);
+    await slowDrag(tester, blockKey, const Offset(0.0, -205.0));
+    background1 = find.byKey(backgroundKey1);
+    background2 = find.byKey(backgroundKey2);
+    expect(background1.precache(), false);
+    expect(background2.precache(), true);
   });
 
 
@@ -837,4 +860,12 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => false;
+}
+
+Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {
+  final Offset target = tester.getCenter(find.byKey(widget));
+  final TestGesture gesture = await tester.startGesture(target);
+  await gesture.moveBy(offset);
+  await tester.pump(const Duration(milliseconds: 10));
+  await gesture.up();
 }
