@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -201,8 +200,9 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (final Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem'))) {
       expect(Theme.of(item).brightness, equals(Brightness.light));
+    }
   });
 
   testWidgets('ModalBottomSheet inherits shadowed app theme', (WidgetTester tester) async {

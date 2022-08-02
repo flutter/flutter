@@ -101,6 +101,8 @@ class Xcode {
 
   Version? get currentVersion => _xcodeProjectInterpreter.version;
 
+  String? get buildVersion => _xcodeProjectInterpreter.build;
+
   String? get versionText => _xcodeProjectInterpreter.versionText;
 
   bool? _eulaSigned;
@@ -134,7 +136,7 @@ class Xcode {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
         final RunResult result = _processUtils.runSync(
-          <String>[...xcrunCommand(), 'simctl', 'list'],
+          <String>[...xcrunCommand(), 'simctl', 'list', 'devices', 'booted'],
         );
         _isSimctlInstalled = result.exitCode == 0;
       } on ProcessException {

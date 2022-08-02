@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -600,7 +598,6 @@ Future<void> main() async {
 
     final Offset tabItem = tester.getCenter(find.text('Tab 1'));
     await gesture.moveTo(tabItem);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

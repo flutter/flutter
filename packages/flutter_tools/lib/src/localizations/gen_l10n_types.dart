@@ -124,6 +124,9 @@ class L10nException implements Exception {
   L10nException(this.message);
 
   final String message;
+
+  @override
+  String toString() => message;
 }
 
 // One optional named parameter to be used by a NumberFormat.

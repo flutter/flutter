@@ -89,8 +89,9 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (event is PointerHoverEvent)
+    if (event is PointerHoverEvent) {
       onHover?.call(event);
+    }
   }
 }
 

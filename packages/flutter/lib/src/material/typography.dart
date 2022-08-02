@@ -77,6 +77,7 @@ enum ScriptCategory {
 /// See also:
 ///
 ///  * <https://material.io/design/typography/>
+///  * <https://m3.material.io/styles/typography>
 @immutable
 class Typography with Diagnosticable {
   /// Creates a typography instance.
@@ -157,6 +158,9 @@ class Typography with Diagnosticable {
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2021], [dense2021], and [tall2021].
+  ///
+  /// See also:
+  ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
     TargetPlatform? platform = TargetPlatform.android,
     TextTheme? black,
@@ -322,10 +326,12 @@ class Typography with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Typography
         && other.black == black
         && other.white == white
@@ -723,13 +729,15 @@ class Typography with Diagnosticable {
   static const TextTheme tall2021 = _M3Typography.tall;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - Typography
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Token database version: v0_101
+
 class _M3Typography {
   _M3Typography._();
 
@@ -788,4 +796,4 @@ class _M3Typography {
   );
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - Typography

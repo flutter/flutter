@@ -100,53 +100,74 @@ class _AndroidSemanticsMatcher extends Matcher {
   @override
   Description describe(Description description) {
     description.add('AndroidSemanticsNode');
-    if (text != null)
+    if (text != null) {
       description.add(' with text: $text');
-    if (contentDescription != null)
+    }
+    if (contentDescription != null) {
       description.add( 'with contentDescription $contentDescription');
-    if (className != null)
+    }
+    if (className != null) {
       description.add(' with className: $className');
-    if (id != null)
+    }
+    if (id != null) {
       description.add(' with id: $id');
-    if (actions != null)
+    }
+    if (actions != null) {
       description.add(' with actions: $actions');
-    if (rect != null)
+    }
+    if (rect != null) {
       description.add(' with rect: $rect');
-    if (size != null)
+    }
+    if (size != null) {
       description.add(' with size: $size');
-    if (isChecked != null)
+    }
+    if (isChecked != null) {
       description.add(' with flag isChecked: $isChecked');
-    if (isEditable != null)
+    }
+    if (isEditable != null) {
       description.add(' with flag isEditable: $isEditable');
-    if (isEnabled != null)
+    }
+    if (isEnabled != null) {
       description.add(' with flag isEnabled: $isEnabled');
-    if (isFocusable != null)
+    }
+    if (isFocusable != null) {
       description.add(' with flag isFocusable: $isFocusable');
-    if (isFocused != null)
+    }
+    if (isFocused != null) {
       description.add(' with flag isFocused: $isFocused');
-    if (isHeading != null)
+    }
+    if (isHeading != null) {
       description.add(' with flag isHeading: $isHeading');
-    if (isPassword != null)
+    }
+    if (isPassword != null) {
       description.add(' with flag isPassword: $isPassword');
-    if (isLongClickable != null)
+    }
+    if (isLongClickable != null) {
       description.add(' with flag isLongClickable: $isLongClickable');
+    }
     return description;
   }
 
   @override
   bool matches(covariant AndroidSemanticsNode item, Map<Object, Object> matchState) {
-    if (text != null && text != item.text)
+    if (text != null && text != item.text) {
       return _failWithMessage('Expected text: $text', matchState);
-    if (contentDescription != null && contentDescription != item.contentDescription)
+    }
+    if (contentDescription != null && contentDescription != item.contentDescription) {
       return _failWithMessage('Expected contentDescription: $contentDescription', matchState);
-    if (className != null && className != item.className)
+    }
+    if (className != null && className != item.className) {
       return _failWithMessage('Expected className: $className', matchState);
-    if (id != null && id != item.id)
+    }
+    if (id != null && id != item.id) {
       return _failWithMessage('Expected id: $id', matchState);
-    if (rect != null && rect != item.getRect())
+    }
+    if (rect != null && rect != item.getRect()) {
       return _failWithMessage('Expected rect: $rect', matchState);
-    if (size != null && size != item.getSize())
+    }
+    if (size != null && size != item.getSize()) {
       return _failWithMessage('Expected size: $size', matchState);
+    }
     if (actions != null) {
       final List<AndroidSemanticsAction> itemActions = item.getActions();
       if (!unorderedEquals(actions).matches(itemActions, matchState)) {
@@ -161,25 +182,34 @@ class _AndroidSemanticsMatcher extends Matcher {
         return _failWithMessage('Expected actions: $actionsString\nActual actions: $itemActionsString\nUnexpected: $unexpectedInString\nMissing: $missingInString', matchState);
       }
     }
-    if (isChecked != null && isChecked != item.isChecked)
+    if (isChecked != null && isChecked != item.isChecked) {
       return _failWithMessage('Expected isChecked: $isChecked', matchState);
-    if (isCheckable != null && isCheckable != item.isCheckable)
+    }
+    if (isCheckable != null && isCheckable != item.isCheckable) {
       return _failWithMessage('Expected isCheckable: $isCheckable', matchState);
-    if (isEditable != null && isEditable != item.isEditable)
+    }
+    if (isEditable != null && isEditable != item.isEditable) {
       return _failWithMessage('Expected isEditable: $isEditable', matchState);
-    if (isEnabled != null && isEnabled != item.isEnabled)
+    }
+    if (isEnabled != null && isEnabled != item.isEnabled) {
       return _failWithMessage('Expected isEnabled: $isEnabled', matchState);
-    if (isFocusable != null && isFocusable != item.isFocusable)
+    }
+    if (isFocusable != null && isFocusable != item.isFocusable) {
       return _failWithMessage('Expected isFocusable: $isFocusable', matchState);
-    if (isFocused != null && isFocused != item.isFocused)
+    }
+    if (isFocused != null && isFocused != item.isFocused) {
       return _failWithMessage('Expected isFocused: $isFocused', matchState);
+    }
     // Heading is not available in all Android versions, so match anything if it is not set by the platform
-    if (isHeading != null && isHeading != item.isHeading && item.isHeading != null)
+    if (isHeading != null && isHeading != item.isHeading && item.isHeading != null) {
       return _failWithMessage('Expected isHeading: $isHeading', matchState);
-    if (isPassword != null && isPassword != item.isPassword)
+    }
+    if (isPassword != null && isPassword != item.isPassword) {
       return _failWithMessage('Expected isPassword: $isPassword', matchState);
-    if (isLongClickable != null && isLongClickable != item.isLongClickable)
+    }
+    if (isLongClickable != null && isLongClickable != item.isLongClickable) {
       return _failWithMessage('Expected longClickable: $isLongClickable', matchState);
+    }
     return true;
   }
 

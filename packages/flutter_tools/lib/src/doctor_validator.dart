@@ -252,6 +252,8 @@ class ValidationMessage {
 
   bool get isHint => type == ValidationMessageType.hint;
 
+  bool get isInformation => type == ValidationMessageType.information;
+
   String get indicator {
     switch (type) {
       case ValidationMessageType.error:

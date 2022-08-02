@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'simulation.dart';
 import 'utils.dart';
 
+export 'tolerance.dart' show Tolerance;
+
 /// Structure that describes a spring's constants.
 ///
 /// Used to configure a [SpringSimulation].
@@ -158,10 +160,12 @@ abstract class _SpringSolution {
     assert(initialPosition != null);
     assert(initialVelocity != null);
     final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
-    if (cmk == 0.0)
+    if (cmk == 0.0) {
       return _CriticalSolution(spring, initialPosition, initialVelocity);
-    if (cmk > 0.0)
+    }
+    if (cmk > 0.0) {
       return _OverdampedSolution(spring, initialPosition, initialVelocity);
+    }
     return _UnderdampedSolution(spring, initialPosition, initialVelocity);
   }
 

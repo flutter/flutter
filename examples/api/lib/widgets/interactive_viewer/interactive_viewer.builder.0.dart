@@ -19,13 +19,15 @@ class IVBuilderExampleApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('IV Builder Example'),
         ),
-        body: _IVBuilderExample(),
+        body: const _IVBuilderExample(),
       ),
     );
   }
 }
 
 class _IVBuilderExample extends StatefulWidget {
+  const _IVBuilderExample();
+
   @override
   State<_IVBuilderExample> createState() => _IVBuilderExampleState();
 }

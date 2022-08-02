@@ -2839,8 +2839,9 @@ void main() {
             },
             onAccept: accepted.add,
             onWillAccept: (int? data) {
-              if (data == null)
+              if (data == null) {
                 isReceiveNullDataForCheck = true;
+              }
               return data != null;
             },
           ),
@@ -3096,7 +3097,6 @@ void main() {
     final Offset location = tester.getCenter(find.text('Target'));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: location);
-    addTearDown(gesture.removePointer);
 
     await gesture.down(location);
     await tester.pump();

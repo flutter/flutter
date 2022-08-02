@@ -126,7 +126,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           ],
         ),
       ],
-      body: Center(
+      child: Center(
         child: Text(_showMessage
             ? _message
             : 'This space intentionally left blank.\n'

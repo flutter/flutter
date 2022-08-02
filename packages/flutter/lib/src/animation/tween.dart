@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Size, Rect;
+import 'dart:ui' show Color, Rect, Size;
 
 import 'package:flutter/foundation.dart';
 
-import 'animation.dart';
 import 'animations.dart';
-import 'curves.dart';
+
+export 'dart:ui' show Color, Rect, Size;
+
+export 'animation.dart' show Animation;
+export 'curves.dart' show Curve;
 
 // Examples can assume:
 // late Animation<Offset> _animation;
@@ -320,10 +323,12 @@ class Tween<T extends Object?> extends Animatable<T> {
   /// subclass.
   @override
   T transform(double t) {
-    if (t == 0.0)
+    if (t == 0.0) {
       return begin as T;
-    if (t == 1.0)
+    }
+    if (t == 1.0) {
       return end as T;
+    }
     return lerp(t);
   }
 

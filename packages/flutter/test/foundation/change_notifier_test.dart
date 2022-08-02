@@ -475,6 +475,29 @@ void main() {
     );
   });
 
+  test('Calling debugAssertNotDisposed works as intended', () {
+    final TestNotifier testNotifier = TestNotifier();
+    expect(ChangeNotifier.debugAssertNotDisposed(testNotifier), isTrue);
+    testNotifier.dispose();
+    FlutterError? error;
+    try {
+      ChangeNotifier.debugAssertNotDisposed(testNotifier);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    expect(
+      error!.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A TestNotifier was used after being disposed.\n'
+        '   Once you have called dispose() on a TestNotifier, it can no\n'
+        '   longer be used.\n',
+      ),
+    );
+  });
+
   test('notifyListener can be called recursively', () {
     final Counter counter = Counter();
     final List<String> log = <String>[];

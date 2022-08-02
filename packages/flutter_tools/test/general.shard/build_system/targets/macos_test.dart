@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,28 +11,31 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  Environment environment;
-  FileSystem fileSystem;
-  Artifacts artifacts;
-  FakeProcessManager processManager;
-  File binary;
-  BufferLogger logger;
-  FakeCommand copyFrameworkCommand;
-  FakeCommand lipoInfoNonFatCommand;
-  FakeCommand lipoInfoFatCommand;
-  FakeCommand lipoVerifyX86_64Command;
+  late Environment environment;
+  late FileSystem fileSystem;
+  late Artifacts artifacts;
+  late FakeProcessManager processManager;
+  late File binary;
+  late BufferLogger logger;
+  late FakeCommand copyFrameworkCommand;
+  late FakeCommand lipoInfoNonFatCommand;
+  late FakeCommand lipoInfoFatCommand;
+  late FakeCommand lipoVerifyX86_64Command;
+  late TestUsage usage;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
+    usage = TestUsage();
     environment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -47,7 +48,8 @@ void main() {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      engineVersion: '2'
+      engineVersion: '2',
+      usage: usage,
     );
 
     binary = environment.outputDir
@@ -316,6 +318,37 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('ReleaseMacOSBundleFlutterAssets sends archive success event', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kXcodeAction] = 'install';
+
+    fileSystem.file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem.file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
+        .createSync(recursive: true);
+
+    await const ReleaseMacOSBundleFlutterAssets().build(environment);
+    expect(usage.events, contains(const TestUsageEvent('assemble', 'macos-archive', label: 'success')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('ReleaseMacOSBundleFlutterAssets sends archive fail event', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kXcodeAction] = 'install';
+
+    // Throws because the project files are not set up.
+    await expectLater(() => const ReleaseMacOSBundleFlutterAssets().build(environment),
+        throwsA(const TypeMatcher<FileSystemException>()));
+    expect(usage.events, contains(const TestUsageEvent('assemble', 'macos-archive', label: 'fail')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('DebugMacOSFramework creates expected binary with arm64 only arch', () async {
     environment.defines[kDarwinArchs] = 'arm64';
     processManager.addCommand(
@@ -340,7 +373,7 @@ void main() {
     );
 
     await const DebugMacOSFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -372,7 +405,7 @@ void main() {
     );
 
     await const DebugMacOSFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -436,7 +469,7 @@ void main() {
     ]);
 
     await const CompileMacOSFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
 
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

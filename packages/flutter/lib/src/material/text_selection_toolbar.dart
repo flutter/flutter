@@ -612,8 +612,9 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
           return child!.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
       child = childParentData.previousSibling;
     }
     return false;

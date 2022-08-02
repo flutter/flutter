@@ -229,17 +229,20 @@ class UnderlineInputBorder extends InputBorder {
     double gapPercentage = 0.0,
     TextDirection? textDirection,
   }) {
-    if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero)
+    if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
       canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
+    }
     canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is InputBorder
         && other.borderSide == borderSide;
   }
@@ -425,8 +428,9 @@ class OutlineInputBorder extends InputBorder {
     final Path path = Path()
       ..addArc(tlCorner, math.pi, tlCornerArcSweep);
 
-    if (start > scaledRRect.tlRadiusX)
+    if (start > scaledRRect.tlRadiusX) {
       path.lineTo(scaledRRect.left + start, scaledRRect.top);
+    }
 
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
@@ -495,10 +499,12 @@ class OutlineInputBorder extends InputBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is OutlineInputBorder
         && other.borderSide == borderSide
         && other.borderRadius == borderRadius

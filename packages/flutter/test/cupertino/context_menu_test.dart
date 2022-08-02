@@ -221,7 +221,6 @@ void main() {
 
       final Offset contextMenu = tester.getCenter(find.byWidget(child));
       await gesture.moveTo(contextMenu);
-      addTearDown(gesture.removePointer);
       await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

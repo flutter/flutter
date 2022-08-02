@@ -16,21 +16,21 @@ import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 
-export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
 
-void tryToDelete(Directory directory) {
+void tryToDelete(FileSystemEntity fileEntity) {
   // This should not be necessary, but it turns out that
   // on Windows it's common for deletions to fail due to
   // bogus (we think) "access denied" errors.
   try {
-    if (directory.existsSync()) {
-      directory.deleteSync(recursive: true);
+    if (fileEntity.existsSync()) {
+      fileEntity.deleteSync(recursive: true);
     }
   } on FileSystemException catch (error) {
     // We print this so that it's visible in the logs, to get an idea of how
     // common this problem is, and if any patterns are ever noticed by anyone.
     // ignore: avoid_print
-    print('Failed to delete ${directory.path}: $error');
+    print('Failed to delete ${fileEntity.path}: $error');
   }
 }
 

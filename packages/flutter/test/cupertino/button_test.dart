@@ -473,7 +473,6 @@ void main() {
 
     final Offset button = tester.getCenter(find.byType(CupertinoButton));
     await gesture.moveTo(button);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

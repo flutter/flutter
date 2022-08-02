@@ -14,7 +14,11 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
-export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
+export 'package:flutter/physics.dart' show Simulation, SpringDescription;
+export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
+
+export 'animation.dart' show Animation, AnimationStatus;
+export 'curves.dart' show Curve;
 
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
@@ -389,8 +393,9 @@ class AnimationController extends Animation<double>
   /// If [isAnimating] is false, then [value] is not changing and the rate of
   /// change is zero.
   double get velocity {
-    if (!isAnimating)
+    if (!isAnimating) {
       return 0.0;
+    }
     return _simulation!.dx(lastElapsedDuration!.inMicroseconds.toDouble() / Duration.microsecondsPerSecond);
   }
 
@@ -456,8 +461,9 @@ class AnimationController extends Animation<double>
       'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.forward;
-    if (from != null)
+    if (from != null) {
       value = from;
+    }
     return _animateToInternal(upperBound);
   }
 
@@ -489,8 +495,9 @@ class AnimationController extends Animation<double>
       'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.reverse;
-    if (from != null)
+    if (from != null) {
       value = from;
+    }
     return _animateToInternal(lowerBound);
   }
 
@@ -856,12 +863,13 @@ class _InterpolationSimulation extends Simulation {
   @override
   double x(double timeInSeconds) {
     final double t = clampDouble(timeInSeconds / _durationInSeconds, 0.0, 1.0);
-    if (t == 0.0)
+    if (t == 0.0) {
       return _begin;
-    else if (t == 1.0)
+    } else if (t == 1.0) {
       return _end;
-    else
+    } else {
       return _begin + (_end - _begin) * _curve.transform(t);
+    }
   }
 
   @override
