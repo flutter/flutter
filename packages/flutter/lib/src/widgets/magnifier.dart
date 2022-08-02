@@ -337,15 +337,18 @@ class RawMagnifier extends StatelessWidget {
       clipBehavior: Clip.none,
       alignment: Alignment.center,
       children: <Widget>[
-        Opacity(
-          opacity: decoration.opacity,
-          child: _Magnifier(
-            shape: decoration.shape,
-            focalPointOffset: focalPointOffset,
-            magnificationScale: magnificationScale,
-            child: SizedBox.fromSize(
-              size: size,
-              child: child,
+        ClipPath.shape(
+          shape: decoration.shape,
+          child: Opacity(
+            opacity: decoration.opacity,
+            child: _Magnifier(
+              shape: decoration.shape,
+              focalPointOffset: focalPointOffset,
+              magnificationScale: magnificationScale,
+              child: SizedBox.fromSize(
+                size: size,
+                child: child,
+              ),
             ),
           ),
         ),
@@ -505,124 +508,29 @@ class _RenderMagnification extends RenderProxyBox {
   }
 
   @override
-  _MagnificationLayer? get layer => super.layer as _MagnificationLayer?;
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  BackdropFilterLayer? get layer => super.layer as BackdropFilterLayer?;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (layer == null) {
-      layer = _MagnificationLayer(
-          size: size,
-          globalPosition: offset,
-          focalPointOffset: focalPointOffset,
-          shape: shape,
-          magnificationScale: magnificationScale);
-    } else {
-      layer!
-        ..magnificationScale = magnificationScale
-        ..size = size
-        ..globalPosition = offset
-        ..focalPointOffset = focalPointOffset;
-    }
-
-    context.pushLayer(layer!, super.paint, offset);
-  }
-}
-
-class _MagnificationLayer extends ContainerLayer {
-  _MagnificationLayer({
-    required Size size,
-    required Offset globalPosition,
-    required ShapeBorder shape,
-    required Offset focalPointOffset,
-    required double magnificationScale,
-  })  : _size = size,
-        _globalPosition = globalPosition,
-        _shape = shape,
-        _focalPointOffset = focalPointOffset,
-        _magnificationScale = magnificationScale;
-
-  RRect? get clipRRect => _clipRRect;
-  RRect? _clipRRect;
-  set clipRRect(RRect? value) {
-    if (value != _clipRRect) {
-      _clipRRect = value;
-      markNeedsAddToScene();
-    }
-  }
-
-  Offset get globalPosition => _globalPosition;
-  Offset _globalPosition;
-  set globalPosition(Offset value) {
-    if (_globalPosition == value) {
-      return;
-    }
-
-    _globalPosition = value;
-    markNeedsAddToScene();
-  }
-
-  Size get size => _size;
-  Size _size;
-  set size(Size value) {
-    if (_size == value) {
-      return;
-    }
-    _size = value;
-    markNeedsAddToScene();
-  }
-
-  Offset get focalPointOffset => _focalPointOffset;
-  Offset _focalPointOffset;
-  set focalPointOffset(Offset value) {
-    if (_focalPointOffset == value) {
-      return;
-    }
-    _focalPointOffset = value;
-    markNeedsAddToScene();
-  }
-
-  double get magnificationScale => _magnificationScale;
-  double _magnificationScale;
-  set magnificationScale(double value) {
-    if (_magnificationScale == value) {
-      return;
-    }
-    _magnificationScale = value;
-    markNeedsAddToScene();
-  }
-
-  ShapeBorder get shape => _shape;
-  ShapeBorder _shape;
-  set shape(ShapeBorder value) {
-    if (_shape == value) {
-      return;
-    }
-    _shape = value;
-    markNeedsAddToScene();
-  }
-
-  BackdropFilterEngineLayer? _backdropFilterEngineLayer;
-
-  @override
-  void addToScene(SceneBuilder builder) {
-    engineLayer = builder.pushClipPath(
-        shape.getOuterPath(globalPosition & size),
-        oldLayer: engineLayer as ClipPathEngineLayer?,
-    );
-
-    final Offset thisCenter = Alignment.center.alongSize(size) + globalPosition;
+    final Offset thisCenter = Alignment.center.alongSize(size) + offset;
     final Matrix4 matrix = Matrix4.identity()
       ..translate(
           magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
           magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
-    _backdropFilterEngineLayer = builder.pushBackdropFilter(
-      ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high),
-      oldLayer: _backdropFilterEngineLayer
-    );
-    builder.pop();
+    final ImageFilter filter = ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high);
 
-    super.addToScene(builder);
-    builder.pop();
+    if (layer == null) {
+      layer = BackdropFilterLayer(
+        filter: filter,
+      );
+    } else {
+      layer!.filter = filter;
+    }
+
+    context.pushLayer(layer!, super.paint, offset);
   }
 }
