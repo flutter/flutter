@@ -22,6 +22,7 @@ impeller_component("renderer") {
     "command_buffer.h",
     "context.cc",
     "context.h",
+    "descriptor_set_layout.h",
     "device_buffer.cc",
     "device_buffer.h",
     "formats.cc",
