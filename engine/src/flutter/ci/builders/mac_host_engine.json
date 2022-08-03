@@ -4,6 +4,7 @@
             "archives": [
                 {
                     "base_path": "out/host_debug/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/host_debug/zip_archives/darwin-x64/FlutterMacOS.framework.zip",
                         "out/host_debug/zip_archives/darwin-x64/gen_snapshot.zip",
@@ -49,6 +50,7 @@
             "archives": [
                 {
                     "base_path": "out/host_profile/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/host_profile/zip_archives/darwin-x64-profile/FlutterMacOS.framework.zip",
                         "out/host_profile/zip_archives/darwin-x64-profile/gen_snapshot.zip",
@@ -102,6 +104,7 @@
             "archives": [
                 {
                     "base_path": "out/host_release/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/host_release/zip_archives/darwin-x64-release/FlutterMacOS.framework.zip",
                         "out/host_release/zip_archives/darwin-x64-release/gen_snapshot.zip",
@@ -142,6 +145,7 @@
             "archives": [
                 {
                     "base_path": "out/mac_debug_arm64/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/mac_debug_arm64/zip_archives/dart-sdk-darwin-arm64.zip",
                         "out/mac_debug_arm64/zip_archives/darwin-x64/gen_snapshot.zip"
@@ -182,6 +186,7 @@
             "archives": [
                 {
                     "base_path": "out/mac_profile_arm64/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/mac_profile_arm64/zip_archives/darwin-x64-profile/gen_snapshot.zip"
                     ],
@@ -219,6 +224,7 @@
             "archives": [
                 {
                     "base_path": "out/mac_release_arm64/zip_archives/",
+                    "type": "gcs",
                     "include_paths": [
                         "out/mac_release_arm64/zip_archives/darwin-x64-release/gen_snapshot.zip"
                     ],
