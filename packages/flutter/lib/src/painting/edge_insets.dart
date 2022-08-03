@@ -511,7 +511,6 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// See also:
   ///
   ///  * [deflateRRect], to deflate a [RRect] rather than inflating it.
-  ///  * [RRect.inflate], to inflate a RRect with a single double value.
   ///  * [inflateSize], to inflate a [Size] rather than a [RRect].
   ///  * [inflateRect], to inflate a [Rect] rather than a [RRect].
   RRect inflateRRect(RRect rect) {
@@ -539,7 +538,6 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// See also:
   ///
   ///  * [inflateRRect], to inflate a [RRect] rather than deflating it.
-  ///  * [RRect.deflate], to deflate a [RRect] with a single double value.
   ///  * [deflateSize], to deflate a [Size] rather than a [RRect].
   ///  * [deflateRect], to deflate a [Rect] rather than a [RRect].
   RRect deflateRRect(RRect rect) {
