@@ -21,36 +21,6 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
-/// The relative position of the stroke on a [BorderSide] in an
-/// [OutlinedBorder] or [Border].
-///
-/// When set to [inside], the stroke is drawn completely inside the widget.
-/// For [center] and [outside], a property such as [Container.clipBehavior]
-/// can be used in an outside widget to clip it.
-/// If [Container.decoration] has a border, the container may incorporate
-/// [BorderSide.width] as additional padding:
-/// - [inside] provides padding with full [BorderSide.width].
-/// - [center] provides padding with half [BorderSide.width].
-/// - [outside] provides zero padding, as stroke is drawn entirely outside.
-@immutable
-class StrokeAlign {
-  /// Acts as a shortcut.
-  const StrokeAlign();
-
-  /// The border is drawn on the inside of the border path.
-  ///
-  /// This is the default.
-  static const double inside = -1.0;
-
-  /// The border is drawn on the center of the border path, with half of the
-  /// [BorderSide.width] on the inside, and the other half on the outside
-  /// of the path.
-  static const double center = 0.0;
-
-  /// The border is drawn on the outside of the border path.
-  static const double outside = 1.0;
-}
-
 /// A side of a border of a box.
 ///
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
@@ -96,7 +66,7 @@ class BorderSide with Diagnosticable {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
-    this.strokeAlign = StrokeAlign.inside,
+    this.strokeAlign = strokeAlignInside,
   }) : assert(color != null),
        assert(width != null),
        assert(width >= 0.0),
@@ -169,12 +139,28 @@ class BorderSide with Diagnosticable {
   /// 1.0 (outside border), without any bound constraints (e.g., a
   /// value of -2.0 is is not typical, but allowed).
   ///
-  /// See also:
-  ///
-  ///  * [StrokeAlign], a class that acts as a shortcut for specifying
-  ///    strokeAlign values. It provides [StrokeAlign.inside] for -1.0,
-  ///    [StrokeAlign.center] for 0.0, and [StrokeAlign.outside] for 1.0.
+  /// When set to [strokeAlignInside], the stroke is drawn completely inside
+  /// the widget. For [strokeAlignCenter] and [strokeAlignOutside], a property
+  /// such as [Container.clipBehavior] can be used in an outside widget to clip
+  /// it. If [Container.decoration] has a border, the container may incorporate
+  /// [width] as additional padding:
+  /// - [strokeAlignInside] provides padding with full [width].
+  /// - [strokeAlignCenter] provides padding with half [width].
+  /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
   final double strokeAlign;
+
+  /// The border is drawn fully inside of the border path.
+  ///
+  /// This is the default.
+  static const double strokeAlignInside = -1.0;
+
+  /// The border is drawn on the center of the border path, with half of the
+  /// [BorderSide.width] on the inside, and the other half on the outside of
+  /// the path.
+  static const double strokeAlignCenter = 0.0;
+
+  /// The border is drawn on the outside of the border path.
+  static const double strokeAlignOutside = 1.0;
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
@@ -359,7 +345,7 @@ class BorderSide with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: const Color(0xFF000000)));
     properties.add(DoubleProperty('width', width, defaultValue: 1.0));
-    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: StrokeAlign.inside));
+    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: strokeAlignInside));
     properties.add(EnumProperty<BorderStyle>('style', style, defaultValue: BorderStyle.solid));
   }
 }
