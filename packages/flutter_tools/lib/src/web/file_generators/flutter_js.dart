@@ -104,7 +104,7 @@ _flutter.loader = null;
      * awaiting to be installed/updated.
      *
      * @param {Promise<ServiceWorkerRegistration>} serviceWorkerRegistrationPromise
-     * @returns {Promise<ServiceWorker?>}
+     * @returns {Promise<ServiceWorker>}
      */
     async _getNewServiceWorker(serviceWorkerRegistrationPromise) {
       const reg = await serviceWorkerRegistrationPromise;
@@ -179,9 +179,9 @@ _flutter.loader = null;
      * object when it's done.
      *
      * @param {*} options
-     * @returns {Promise?} that will eventually resolve with an EngineInitializer,
-     * or will be rejected with the error caused by the loader. If the user supplies
-     * an `onEntrypointLoaded` callback, this returns null.
+     * @returns {Promise | undefined} that will eventually resolve with an
+     * EngineInitializer, or will be rejected with the error caused by the loader.
+     * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
      */
     async loadEntrypoint(options) {
       const { entrypointUrl = "main.dart.js", onEntrypointLoaded } =
@@ -220,8 +220,9 @@ _flutter.loader = null;
      * @param {Function} onEntrypointLoaded a callback that will be called when
      *                   Flutter web notifies this object that the entrypoint is
      *                   loaded.
-     * @returns {Promise?} a promise that resolves when the entrypoint is loaded
-     *                     (if `onEntrypointLoaded` is not a function), or null.
+     * @returns {Promise | undefined} a Promise that resolves when the entrypoint
+     *                                is loaded, or undefined if `onEntrypointLoaded`
+     *                                is a function.
      */
     _loadEntrypoint(entrypointUrl, onEntrypointLoaded) {
       const useCallback = typeof onEntrypointLoaded === "function";
@@ -248,7 +249,6 @@ _flutter.loader = null;
             document.body.append(scriptTag);
           });
         }
-        return null;
       }
     }
 
