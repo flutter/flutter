@@ -18,7 +18,7 @@ dependencies:
   file: 6.1.2
   flutter_template_images: 4.2.0
   html: 0.15.0
-  http: 0.13.4
+  http: 0.13.5
   intl: 0.17.0
   meta: 1.8.0
   multicast_dns: 0.3.2+1
@@ -103,4 +103,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 676f
+# PUBSPEC CHECKSUM: 8770
