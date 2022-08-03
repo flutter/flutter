@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
@@ -703,6 +704,20 @@ void main() {
       contains(isA<WebWorkflow>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => fakeProcessManager,
+  });
+
+  testUsingContext('CustomDevicesWorkflow is a part of validator workflows if enabled', () async {
+    final List<Workflow> workflows = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      platform: FakePlatform(),
+    ).workflows;
+    expect(
+      workflows,
+      contains(isA<CustomDeviceWorkflow>()),
+    );
+  }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => fakeProcessManager,
   });
