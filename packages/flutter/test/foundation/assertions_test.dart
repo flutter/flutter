@@ -60,7 +60,7 @@ void main() {
     );
     expect(
       FlutterErrorDetails(
-        exception: NullThrownError(), 
+        exception: NullThrownError(),
         library: 'LIBRARY',
         context: ErrorDescription('CONTEXTING'),
         informationCollector: () sync* {

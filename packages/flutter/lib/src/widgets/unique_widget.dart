@@ -28,7 +28,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
        super(key: key);
 
   @override
-  T createState(); 
+  T createState();
 
   /// The state for the unique inflated instance of this widget.
   ///

@@ -297,7 +297,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); 
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

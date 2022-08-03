@@ -978,7 +978,7 @@ mixin WidgetInspectorService {
     bool enabled = false;
     assert(() {
       // TODO(kenz): add support for structured errors on the web.
-      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb); 
+      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb);
       return true;
     }());
     return enabled;

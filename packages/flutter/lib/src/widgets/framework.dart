@@ -781,7 +781,7 @@ abstract class StatefulWidget extends Widget {
   /// [State] objects.
   @protected
   @factory
-  State createState(); 
+  State createState();
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
