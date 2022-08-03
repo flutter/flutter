@@ -806,6 +806,12 @@ class TextField extends StatefulWidget {
   final SpellCheckConfiguration? spellCheckConfiguration;
 
   /// The [TextStyle] used to indicate misspelled words in the Material style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.misspelledTextStyle], the style configured to
+  ///    mark misspelled words with.
+  ///  * [CupertinoTextField.cupertinoMisspelledTextStyle], the style configured
+  ///    to mark misspelled words with in the Cupertino style.
   static const TextStyle materialMisspelledTextStyle =
     TextStyle(
       decoration: TextDecoration.underline,

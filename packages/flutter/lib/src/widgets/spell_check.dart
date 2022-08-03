@@ -41,14 +41,21 @@ class SpellCheckConfiguration {
   /// assertion error.
   final TextStyle? misspelledTextStyle;
 
-  /// Whether or not the configuration should enable or disable spell check.
   final bool _spellCheckEnabled;
+
+  /// Whether or not the configuration should enable or disable spell check.
+  bool get spellCheckEnabled => _spellCheckEnabled;
 
   /// Returns a copy of the current [SpellCheckConfiguration] instance with
   /// specified overrides.
   SpellCheckConfiguration copyWith({
     SpellCheckService? spellCheckService,
     TextStyle? misspelledTextStyle}) {
+    if (!_spellCheckEnabled) {
+      // A new configuration should be constructed to enable spell check.
+      return const SpellCheckConfiguration.disabled();
+    }
+
     return SpellCheckConfiguration(
       spellCheckService: spellCheckService ?? this.spellCheckService,
       misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
@@ -57,11 +64,12 @@ class SpellCheckConfiguration {
 
   @override
   String toString() {
-    final List<String> properties = <String>[
-      '$spellCheckService',
-      '$misspelledTextStyle',
-    ];
-    return 'SpellCheckConfiguration(${properties.join(', ')})';
+    return '''
+  spell check enabled   : $_spellCheckEnabled
+  spell check service   : $spellCheckService
+  misspelled text style : $misspelledTextStyle
+'''
+        .trim();
   }
 
   @override
@@ -85,8 +93,7 @@ class SpellCheckConfiguration {
 ///
 /// Any widget may use this handler to build a [TextSpan] tree with
 /// [SpellCheckResults] indicated in a style based on the platform by calling
-/// `buildTextSpanWithSpellCheckSuggestions(...)` with an instance of this
-/// class.
+/// `buildTextSpanWithSpellCheckSuggestions(...)`.
 ///
 /// See also:
 ///
@@ -184,7 +191,7 @@ class SpellCheckSuggestionsHandler {
   /// and the [misspelledTextStyle] is the [TextStyle] to render misspelled
   /// words within the [value]'s text with. The [spellCheckResults] are the
   /// results of spell checking the [value]'s text.
-  TextSpan buildTextSpanWithSpellCheckSuggestions(
+  static TextSpan buildTextSpanWithSpellCheckSuggestions(
       TextEditingValue value,
       bool composingWithinCurrentTextRange,
       TextStyle? style,

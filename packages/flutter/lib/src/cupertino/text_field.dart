@@ -816,6 +816,26 @@ class CupertinoTextField extends StatefulWidget {
   // docs with images of what a magnifier is.
   final TextMagnifierConfiguration? magnifierConfiguration;
 
+  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  ///
+  /// If the misspelled [TextStyle] is not specified in this configuration,
+  /// then [cupertinoMisspelledTextStyle] is used by default.
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.misspelledTextStyle], the style configured to
+  ///    mark misspelled words with.
+  ///  * [TextField.materialMisspelledTextStyle], the style configured
+  ///    to mark misspelled words with in the Material style.
+  static const TextStyle cupertinoMisspelledTextStyle =
+    TextStyle(
+      decoration: TextDecoration.underline,
+      decorationColor: CupertinoColors.systemRed,
+      decorationStyle: TextDecorationStyle.dotted,
+  );
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 

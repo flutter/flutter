@@ -1566,8 +1566,8 @@ class EditableText extends StatefulWidget {
   /// [TextStyle] used to style text with misspelled words.
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
-  /// default unless the [DefaultSpellCheckService] is used, in which case it is
-  /// used. It is currently supported only on Android.
+  /// default unless the [DefaultSpellCheckService] is supported, in which case
+  /// it is used. It is currently supported only on Android.
   ///
   /// If this configuration is left null, then spell check is diabled by default.
   /// {@endtemplate}
@@ -1792,9 +1792,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
 
-  late SpellCheckConfiguration? _spellCheckConfiguration;
-
-  late SpellCheckSuggestionsHandler? _spellCheckSuggestionsHandler;
+  late SpellCheckConfiguration _spellCheckConfiguration;
 
   /// Configuration that determines how spell check will be performed.
   ///
@@ -1804,29 +1802,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// See also:
   ///  * [DefaultSpellCheckService], the default spell check service.
   @visibleForTesting
-  SpellCheckConfiguration? get spellCheckConfiguration => _spellCheckConfiguration;
-
-  /// The hander used to display spell check results.
-  ///
-  /// This is only initialized if spell check is enabled.
-  @visibleForTesting
-  SpellCheckSuggestionsHandler? get spellCheckSuggestionsHandler => _spellCheckSuggestionsHandler;
-
-  bool _spellCheckEnabled = false;
+  SpellCheckConfiguration get spellCheckConfiguration => _spellCheckConfiguration;
 
   /// Whether or not spell check is enabled.
   ///
   /// Spell check is enabled when a [SpellCheckConfiguration] has been specified
   /// for the widget.
   @visibleForTesting
-  bool get spellCheckEnabled => _spellCheckEnabled;
+  bool get spellCheckEnabled => _spellCheckConfiguration.spellCheckEnabled;
 
   /// The most up-to-date spell check results for text input.
   ///
   /// These results will be updated via calls to spell check through a
-  /// [SpellCheckService] and used by the [SpellCheckSuggestionsHandler] to
-  /// build the [TextSpan] tree for text input and menus for replacement
-  /// suggestions of misspelled words.
+  /// [SpellCheckService] and used by this widget to build the [TextSpan] tree
+  /// for text input and menus for replacement suggestions of misspelled words.
   SpellCheckResults? _spellCheckResults;
 
   /// Whether to create an input connection with the platform for text editing
@@ -2029,16 +2018,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// If spell check is enabled, this will try to infer a value for
-  /// [SpellCheckService] if left unspecified and initialize the
-  /// [SpellCheckSuggestionsHandler] used to mark misspelled words and display
-  /// suggestions.
-  SpellCheckConfiguration? _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
+  /// [SpellCheckService] if left unspecified.
+  SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
-      // Spell check is disabled.
-      return null;
+      return const SpellCheckConfiguration.disabled();
     }
 
-    _spellCheckEnabled = true;
     SpellCheckService? spellCheckService = configuration.spellCheckService;
 
     assert(
@@ -2048,9 +2033,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
 
     spellCheckService = spellCheckService ?? DefaultSpellCheckService();
-
-    // Initialize handler for displaying spell check results.
-    _spellCheckSuggestionsHandler = SpellCheckSuggestionsHandler();
 
     return configuration.copyWith(spellCheckService: spellCheckService);
   }
@@ -2896,7 +2878,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
 
       final List<SuggestionSpan>? spellCheckResults = await
-        _spellCheckConfiguration!
+        _spellCheckConfiguration
           .spellCheckService!
             .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
@@ -2938,7 +2920,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
 
-        if (_spellCheckEnabled && value.text.isNotEmpty && _value.text != value.text) {
+        if (spellCheckEnabled && value.text.isNotEmpty && _value.text != value.text) {
           _performSpellCheck(value.text);
         }
       } catch (exception, stack) {
@@ -3824,9 +3806,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ],
       );
     }
-    final bool spellCheckEnabled = _spellCheckEnabled && _spellCheckResults != null;
+    final bool spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null;
     final bool withComposing = !widget.readOnly && _hasFocus;
-    if (spellCheckEnabled) {
+    if (spellCheckResultsReceived) {
       // If the composing range is out of range for the current text, ignore it to
       // preserve the tree integrity, otherwise in release mode a RangeError will
       // be thrown and this EditableText will be built with a broken subtree.
@@ -3834,12 +3816,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final bool composingRegionOutOfRange = !_value.isComposingRangeValid || !withComposing;
 
-      return _spellCheckSuggestionsHandler!
+      return SpellCheckSuggestionsHandler
                 .buildTextSpanWithSpellCheckSuggestions(
                   _value,
                   composingRegionOutOfRange,
                   widget.style,
-                  _spellCheckConfiguration!.misspelledTextStyle!,
+                  _spellCheckConfiguration.misspelledTextStyle!,
                   _spellCheckResults!,
       );
     }
