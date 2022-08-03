@@ -87,6 +87,7 @@ abstract class EdgeInsetsGeometry {
   ///  * [EdgeInsets.inflateRect], to inflate a [Rect] rather than a [Size] (for
   ///    [EdgeInsetsDirectional], requires first calling [resolve] to establish
   ///    how the start and end map to the left or right).
+  ///  * [EdgeInsets.inflateRRect], to inflate a [RRect] rather than a [Size].
   ///  * [deflateSize], to deflate a [Size] rather than inflating it.
   Size inflateSize(Size size) {
     return Size(size.width + horizontal, size.height + vertical);
@@ -103,6 +104,7 @@ abstract class EdgeInsetsGeometry {
   ///  * [EdgeInsets.deflateRect], to deflate a [Rect] rather than a [Size]. (for
   ///    [EdgeInsetsDirectional], requires first calling [resolve] to establish
   ///    how the start and end map to the left or right).
+  ///  * [EdgeInsets.deflateRRect], to deflate a [RRect] rather than a [Size].
   ///  * [inflateSize], to inflate a [Size] rather than deflating it.
   Size deflateSize(Size size) {
     return Size(size.width - horizontal, size.height - vertical);
@@ -473,6 +475,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// See also:
   ///
   ///  * [inflateSize], to inflate a [Size] rather than a [Rect].
+  ///  * [inflateRRect], to inflate a [RRect] rather than a [Rect].
   ///  * [deflateRect], to deflate a [Rect] rather than inflating it.
   Rect inflateRect(Rect rect) {
     return Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
@@ -490,9 +493,66 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// See also:
   ///
   ///  * [deflateSize], to deflate a [Size] rather than a [Rect].
+  ///  * [deflateRRect], to deflate a [RRect] rather than a [Rect].
   ///  * [inflateRect], to inflate a [Rect] rather than deflating it.
   Rect deflateRect(Rect rect) {
     return Rect.fromLTRB(rect.left + left, rect.top + top, rect.right - right, rect.bottom - bottom);
+  }
+
+  /// Returns a new rect that is bigger than the given rect in each direction
+  /// by the amount of inset in each direction, while also increasing the
+  /// corner radius. Specifically, the left edge of the rrect is moved left
+  /// by [left], the top edge of the rrect is moved up by [top], the right
+  /// edge of the rrect is moved right by [right], and the bottom edge of
+  /// the rrect is moved down by [bottom]. The radii of the corners are
+  /// increased by each corresponding side. For example, the topLeft radius
+  /// is increased by an elliptical Radius containing [left] and [top].
+  ///
+  /// See also:
+  ///
+  ///  * [deflateRRect], to deflate a [RRect] rather than inflating it.
+  ///  * [RRect.inflate], to inflate a RRect with a single double value.
+  ///  * [inflateSize], to inflate a [Size] rather than a [RRect].
+  ///  * [inflateRect], to inflate a [Rect] rather than a [RRect].
+  RRect inflateRRect(RRect rect) {
+    return RRect.fromLTRBAndCorners(
+      rect.left - left,
+      rect.top - top,
+      rect.right + right,
+      rect.bottom + bottom,
+      topLeft: rect.tlRadius + Radius.elliptical(left, top),
+      topRight: rect.trRadius + Radius.elliptical(right, top),
+      bottomRight: rect.brRadius + Radius.elliptical(right, bottom),
+      bottomLeft: rect.blRadius + Radius.elliptical(left, bottom),
+    );
+  }
+
+  /// Returns a new rect that is smaller than the given rect in each direction
+  /// by the amount of inset in each direction, while also decreasing the
+  /// corner radius. Specifically, the left edge of the rect is moved right
+  /// by [left], the top edge of the rect is moved down by [top], the right
+  /// edge of the rect is moved left by [right], and the bottom edge of the
+  /// rect is moved up by [bottom]. The radii of the corners are decreased
+  /// by each corresponding side. For example, the topLeft radius is decreased
+  /// by an elliptical Radius containing [left] and [top].
+  ///
+  /// See also:
+  ///
+  ///  * [inflateRRect], to inflate a [RRect] rather than deflating it.
+  ///  * [RRect.deflate], to deflate a [RRect] with a single double value.
+  ///  * [deflateSize], to deflate a [Size] rather than a [RRect].
+  ///  * [deflateRect], to deflate a [Rect] rather than a [RRect].
+  RRect deflateRRect(RRect rect) {
+    return RRect.fromLTRBAndCorners(
+      rect.left + left,
+      rect.top + top,
+      rect.right - right,
+      rect.bottom - bottom,
+      topLeft: rect.tlRadius - Radius.elliptical(left, top),
+      topRight: rect.trRadius - Radius.elliptical(right, top),
+      bottomRight: rect.brRadius - Radius.elliptical(right, bottom),
+      bottomLeft: rect.blRadius - Radius.elliptical(left, bottom),
+    );
   }
 
   @override

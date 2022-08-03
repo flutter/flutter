@@ -33,6 +33,28 @@ void main() {
       const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0),
     );
 
+    expect(
+      insets.inflateRRect(const RRect.fromLTRBXY(23.0, 32.0, 124.0, 143.0, 20, 20)),
+      RRect.fromRectAndCorners(
+        const Rect.fromLTRB(18.0, 25.0, 135.0, 156.0),
+        topLeft: const Radius.elliptical(25.0, 27.0),
+        topRight: const Radius.elliptical(31.0, 27.0),
+        bottomRight: const Radius.elliptical(31.0, 33.0),
+        bottomLeft: const Radius.elliptical(25.0, 33.0),
+      ),
+    );
+
+    expect(
+      insets.deflateRRect(const RRect.fromLTRBXY(23.0, 32.0, 124.0, 143.0, 20, 20)),
+      RRect.fromRectAndCorners(
+        const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0),
+        topLeft: const Radius.elliptical(15.0, 13.0),
+        topRight: const Radius.elliptical(9.0, 13.0),
+        bottomRight: const Radius.elliptical(9.0, 7.0),
+        bottomLeft: const Radius.elliptical(15.0, 7.0),
+      ),
+    );
+
     expect(insets.inflateSize(const Size(100.0, 125.0)), const Size(116.0, 145.0));
     expect(insets.deflateSize(const Size(100.0, 125.0)), const Size(84.0, 105.0));
 
