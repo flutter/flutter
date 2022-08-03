@@ -11785,6 +11785,170 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
+  group('magnifier builder', () {
+    testWidgets('should build custom magnifier if given',
+        (WidgetTester tester) async {
+      final Widget customMagnifier = Container(
+        key: UniqueKey(),
+      );
+      final TextField textField = TextField(
+        magnifierConfiguration: TextMagnifierConfiguration(
+          magnifierBuilder: (_, __, ___) => customMagnifier,
+        ),
+      );
+
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
+
+      expect(
+          textField.magnifierConfiguration!.magnifierBuilder(
+              context,
+              MagnifierController(),
+              ValueNotifier<MagnifierOverlayInfoBearer>(
+                const MagnifierOverlayInfoBearer.empty(),
+              )),
+          isA<Widget>().having(
+              (Widget widget) => widget.key,
+              'built magnifier key equal to passed in magnifier key',
+              equals(customMagnifier.key)));
+    });
+
+    group('defaults', () {
+      testWidgets('should build Magnifier on Android', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(body: TextField()))
+        );
+
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+        expect(
+            editableText.magnifierConfiguration.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isA<TextMagnifier>());
+      }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+      testWidgets('should build CupertinoMagnifier on iOS',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(body: TextField()))
+        );
+
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+        expect(
+            editableText.magnifierConfiguration.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isA<CupertinoTextMagnifier>());
+      }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+      testWidgets('should build nothing on Android and iOS',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(body: TextField()))
+        );
+
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+        expect(
+            editableText.magnifierConfiguration.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isNull);
+      },
+      variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.android
+      }));
+    });
+  });
+
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
+
+    testWidgets(
+        'Can drag handles to show, unshow, and update magnifier',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            magnifierConfiguration: TextMagnifierConfiguration(
+              magnifierBuilder: (
+                  _,
+                  MagnifierController controller,
+                  ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                ) {
+                  infoBearer = localInfoBearer;
+                  return fakeMagnifier;
+                },
+              ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Double tap the 'e' to select 'def'.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+
+      final TextSelection selection = controller.selection;
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+
+      // Drag the right handle 2 letters to the right.
+      final Offset handlePos = endpoints.last.point + const Offset(1.0, 1.0);
+      final TestGesture gesture = await tester.startGesture(handlePos);
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      final Offset firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
+      await tester.pump();
+
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition,
+          isNot(infoBearer.value.globalGesturePosition));
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    });
+
   group('TapRegion integration', () {
     testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
@@ -12001,8 +12165,9 @@ void main() {
           case PointerDeviceKind.unknown:
             expect(focusNode.hasPrimaryFocus, isFalse);
             break;
-        }
-    }, variant: TargetPlatformVariant.all());
-  }
+          }
+        }, variant: TargetPlatformVariant.all());
+      }
+    });
   });
 }

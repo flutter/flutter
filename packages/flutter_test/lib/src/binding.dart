@@ -494,8 +494,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// When [handlePointerEvent] is called directly, [pointerEventSource]
   /// is [TestBindingEventSource.device].
+  ///
+  /// This means that pointer events triggered by the [WidgetController] (e.g.
+  /// via [WidgetController.tap]) will result in actual interactions with the
+  /// UI, but other pointer events such as those from physical taps will be
+  /// dropped. See also [shouldPropagateDevicePointerEvents] if this is
+  /// undesired.
   TestBindingEventSource get pointerEventSource => _pointerEventSource;
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
+
+  /// Whether pointer events from [TestBindingEventSource.device] will be
+  /// propagated to the framework, or dropped.
+  ///
+  /// Setting this can be useful to interact with the app in some other way
+  /// besides through the [WidgetController], such as with `adb shell input tap`
+  /// on Android.
+  ///
+  /// See also [pointerEventSource].
+  bool shouldPropagateDevicePointerEvents = false;
 
   /// Dispatch an event to the targets found by a hit test on its position,
   /// and remember its source as [pointerEventSource].
@@ -836,6 +852,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
     final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
+    final bool shouldPropagateDevicePointerEventsBeforeTest = shouldPropagateDevicePointerEvents;
 
     // run the test
     await testBody();
@@ -854,6 +871,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
+      _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
       _verifyInvariants();
     }
 
@@ -934,6 +952,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.reportError(FlutterErrorDetails(
           exception: FlutterError(
               'The value of ErrorWidget.builder was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
+  }
+
+  void _verifyShouldPropagateDevicePointerEventsUnset(bool valueBeforeTest) {
+    assert(() {
+      if (shouldPropagateDevicePointerEvents != valueBeforeTest) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: FlutterError(
+              'The value of shouldPropagateDevicePointerEvents was changed by the test.',
           ),
           stack: StackTrace.current,
           library: 'Flutter test framework',
@@ -1595,7 +1628,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// Normally, device events are silently dropped. However, if this property is
   /// set to a non-null value, then the events will be routed to its
-  /// [HitTestDispatcher.dispatchEvent] method instead.
+  /// [HitTestDispatcher.dispatchEvent] method instead, unless
+  /// [shouldPropagateDevicePointerEvents] is true.
   ///
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
@@ -1630,6 +1664,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         super.handlePointerEvent(event);
         break;
       case TestBindingEventSource.device:
+        if (shouldPropagateDevicePointerEvents) {
+          super.handlePointerEvent(event);
+          break;
+        }
         if (deviceEventDispatcher != null) {
           // The pointer events received with this source has a global position
           // (see [handlePointerEventForSource]). Transform it to the local
@@ -1651,6 +1689,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         break;
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
+        if (shouldPropagateDevicePointerEvents) {
+          super.dispatchEvent(event, hitTestResult);
+          break;
+        }
         assert(deviceEventDispatcher != null);
         if (hitTestResult != null) {
           deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
