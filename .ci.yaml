@@ -294,6 +294,14 @@ targets:
       jazzy_version: "0.14.1"
     timeout: 75
 
+  - name: Mac mac_android_aot_engine
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 60
+    properties:
+      config_name: mac_android_aot_engine
+      environment: Staging
+
   - name: Mac mac_host_engine
     recipe: engine_v2/engine_v2
     bringup: true
