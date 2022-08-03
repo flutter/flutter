@@ -346,6 +346,7 @@ void Canvas::DrawAtlas(std::shared_ptr<Image> atlas,
   contents->SetTexture(atlas->GetTexture());
   contents->SetSamplerDescriptor(std::move(sampler));
   contents->SetBlendMode(blend_mode);
+  contents->SetAlpha(paint.color.alpha);
   // TODO(jonahwilliams): set cull rect.
 
   Entity entity;

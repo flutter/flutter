@@ -35,6 +35,8 @@ class AtlasContents final : public Contents {
 
   void SetSamplerDescriptor(SamplerDescriptor desc);
 
+  void SetAlpha(Scalar alpha);
+
   const SamplerDescriptor& GetSamplerDescriptor() const;
 
   // |Contents|
@@ -51,6 +53,7 @@ class AtlasContents final : public Contents {
   std::vector<Color> colors_;
   std::vector<Matrix> transforms_;
   Entity::BlendMode blend_mode_;
+  Scalar alpha_ = 1.0;
   SamplerDescriptor sampler_descriptor_ = {};
 
   FML_DISALLOW_COPY_AND_ASSIGN(AtlasContents);
