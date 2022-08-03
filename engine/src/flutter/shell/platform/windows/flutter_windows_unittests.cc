@@ -9,6 +9,7 @@
 #include "gtest/gtest.h"
 
 namespace flutter {
+namespace testing {
 
 TEST(FlutterWindowsTest, GetTextureRegistrar) {
   FlutterDesktopEngineProperties properties;
@@ -22,4 +23,5 @@ TEST(FlutterWindowsTest, GetTextureRegistrar) {
   FlutterDesktopEngineDestroy(engine);
 }
 
+}  // namespace testing
 }  // namespace flutter
