@@ -1,0 +1,215 @@
+{
+    "builds": [
+        {
+            "archives": [
+                {
+                    "base_path": "out/android_profile/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_profile/zip_archives/android-arm-profile/darwin-x64.zip"
+                    ],
+                    "name": "android_profile"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "profile",
+                "--android"
+            ],
+            "name": "android_profile",
+            "ninja": {
+                "config": "android_profile",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/android_profile_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_profile_arm64/zip_archives/android-arm64-profile/darwin-x64.zip"
+                    ],
+                    "name": "android_profile_arm64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "profile",
+                "--android",
+                "--android-cpu=arm64"
+            ],
+            "name": "android_profile_arm64",
+            "ninja": {
+                "config": "android_profile_arm64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/android_profile_x64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_profile_x64/zip_archives/android-x64-profile/darwin-x64.zip"
+                    ],
+                    "name": "android_profile_x64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "profile",
+                "--android",
+                "--android-cpu=x64"
+            ],
+            "name": "android_profile_x64",
+            "ninja": {
+                "config": "android_profile_x64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/android_release/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_release/zip_archives/android-arm-release/darwin-x64.zip"
+                    ],
+                    "name": "android_release"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "release",
+                "--android"
+            ],
+            "name": "android_release",
+            "ninja": {
+                "config": "android_release",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/android_release_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_release_arm64/zip_archives/android-arm64-release/darwin-x64.zip"
+                    ],
+                    "name": "android_release_arm64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "release",
+                "--android",
+                "--android-cpu=arm64"
+            ],
+            "name": "android_release_arm64",
+            "ninja": {
+                "config": "android_release_arm64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/android_release_x64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_release_x64/zip_archives/android-x64-release/darwin-x64.zip"
+                    ],
+                    "name": "android_release_x64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "release",
+                "--android",
+                "--android-cpu=x64"
+            ],
+            "name": "android_release_x64",
+            "ninja": {
+                "config": "android_release_x64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            },
+            "tests": []
+        }
+    ],
+    "tests": [],
+    "generators": [],
+    "archives": []
+}
