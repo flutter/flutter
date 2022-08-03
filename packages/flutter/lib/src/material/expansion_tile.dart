@@ -68,6 +68,8 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedTextColor,
     this.iconColor,
     this.collapsedIconColor,
+    this.borderColor,
+    this.collapsedBorderColor,
     this.controlAffinity,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
@@ -254,6 +256,30 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final Color? collapsedTextColor;
 
+  /// The color of the tile's vertical border when the sublist is expanded.
+  ///
+  /// Used to override to the [Theme.dividerColor].
+  ///
+  /// If this property is null then [ExpansionTileThemeData.borderColor] is used. If that
+  /// is also null then the value of [Theme.dividerColor] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final Color? borderColor;
+
+  /// The color of the tile's vertical border when the sublist is collapsed.
+  ///
+  /// If this property is null then [ExpansionTileThemeData.collapsedBorderColor] is used. If that
+  /// is also null then [Colors.transparent] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final Color? collapsedBorderColor;
+
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
   ///
   /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform],
@@ -405,7 +431,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    _borderColorTween.end = theme.dividerColor;
+    _borderColorTween
+      ..begin = widget.collapsedBorderColor
+        ?? expansionTileTheme.collapsedBorderColor
+        ?? theme.dividerColor
+      ..end = widget.borderColor ?? expansionTileTheme.borderColor ?? Colors.transparent;
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor
