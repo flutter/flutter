@@ -417,7 +417,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   late double _thumbOffset;
   // The fraction visible in relation to the trversable length of the track.
   late double _thumbExtent;
-  // Thumb Insetting
+  // Thumb Offsets
   // The thumb is offset by padding and margins.
   double get _leadingThumbMainAxisOffset {
     switch(_resolvedOrientation) {
@@ -500,12 +500,14 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _debugAssertIsValidOrientation(ScrollbarOrientation orientation) {
-    bool isVerticalOrientation(ScrollbarOrientation orientation) =>
-      orientation == ScrollbarOrientation.left
-        || orientation == ScrollbarOrientation.right;
     assert(
-      (_isVertical && isVerticalOrientation(orientation))
-        || (!_isVertical && !isVerticalOrientation(orientation)),
+      () {
+        bool isVerticalOrientation(ScrollbarOrientation orientation) =>
+          orientation == ScrollbarOrientation.left
+            || orientation == ScrollbarOrientation.right;
+        return (_isVertical && isVerticalOrientation(orientation))
+           || (!_isVertical && !isVerticalOrientation(orientation));
+      }(),
       'The given ScrollbarOrientation: $orientation is incompatible with the '
       'current AxisDirection: $_lastAxisDirection.'
     );
@@ -520,7 +522,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   void update(
     ScrollMetrics metrics,
     AxisDirection axisDirection,
-    ) {
+  ) {
     if (_lastMetrics != null &&
         _lastMetrics!.extentBefore == metrics.extentBefore &&
         _lastMetrics!.extentInside == metrics.extentInside &&
