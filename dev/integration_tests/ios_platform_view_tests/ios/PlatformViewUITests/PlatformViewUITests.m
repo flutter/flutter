@@ -29,9 +29,13 @@ static const CGFloat kStandardTimeOut = 60.0;
   [self.app launch];
 }
 - (void)testPlatformViewFocus {
-  XCUIElement *entranceButton = self.app.buttons[@"platform view focus test"];
-  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut]);
-  [entranceButton tap];
+  [self waitForAndTapElement:self.app.buttons[@"platform view focus test"]];
+  /// Tries to wait and tap the button the second time, if the first time failed.
+  /// https://github.com/flutter/flutter/pull/90535
+  BOOL newPageAppeared = [self.app.textFields[@"platform_view[0]"] waitForExistenceWithTimeout:kStandardTimeOut];
+  if (!newPageAppeared) {
+    [self waitForAndTapElement:self.app.buttons[@"platform view focus test"]];
+  }
 
   XCUIElement *platformView = self.app.textFields[@"platform_view[0]"];
   XCTAssertTrue([platformView waitForExistenceWithTimeout:kStandardTimeOut]);
@@ -47,6 +51,13 @@ static const CGFloat kStandardTimeOut = 60.0;
   [platformView tap];
   XCTAssertTrue(platformView.flt_hasKeyboardFocus);
   XCTAssertFalse(flutterTextField.flt_hasKeyboardFocus);
+}
+
+- (void)waitForAndTapElement:(XCUIElement *)element {
+  NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
+  [self expectationForPredicate:hittable evaluatedWithObject:element handler:nil];
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
+  [element tap];
 }
 
 @end
