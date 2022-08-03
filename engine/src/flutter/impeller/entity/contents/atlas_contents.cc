@@ -41,6 +41,10 @@ void AtlasContents::SetColors(std::vector<Color> colors) {
   colors_ = colors;
 }
 
+void AtlasContents::SetAlpha(Scalar alpha) {
+  alpha_ = alpha;
+}
+
 void AtlasContents::SetBlendMode(Entity::BlendMode blend_mode) {
   // TODO(jonahwilliams): blending of colors with texture.
   blend_mode_ = blend_mode;
@@ -116,7 +120,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
 
   FS::FragInfo frag_info;
   frag_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
-  frag_info.has_color = colors_.size() > 0 ? 1.0 : 0.0;
+  frag_info.has_vertex_color = colors_.size() > 0 ? 1.0 : 0.0;
+  frag_info.alpha = alpha_;
 
   Command cmd;
   cmd.label = "DrawAtlas";
