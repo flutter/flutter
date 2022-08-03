@@ -21,6 +21,15 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 
+/// Exception thrown when an error is returned from the [SkiaClient].
+class SkiaException implements Exception {
+  /// Creates a new `SkiaException` with a required error [message].
+  const SkiaException(this.message);
+
+  /// A message describing the error.
+  final String message;
+}
+
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
@@ -103,10 +112,10 @@ class SkiaGoldClient {
         ..writeln('Luci environments authenticate using the file provided '
           'by LUCI_CONTEXT. There may be an error with this file or Gold '
           'authentication.')
-        ..writeln('Debug information for Gold:')
+        ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+      throw SkiaException(buf.toString());
     }
   }
 
@@ -155,7 +164,7 @@ class SkiaGoldClient {
         ..writeln('Please confirm the settings of your golden file test.')
         ..writeln('Arguments provided:');
       imgtestInitCommand.forEach(buf.writeln);
-      throw Exception(buf.toString());
+      throw SkiaException(buf.toString());
     }
 
     final io.ProcessResult result = await process.run(imgtestInitCommand);
@@ -167,10 +176,10 @@ class SkiaGoldClient {
         ..writeln('An error occurred when initializing golden file test with ')
         ..writeln('goldctl.')
         ..writeln()
-        ..writeln('Debug information for Gold:')
+        ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+      throw SkiaException(buf.toString());
     }
     _initialized = true;
   }
@@ -202,6 +211,14 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       // If an unapproved image has made it to post-submit, throw to close the
       // tree.
+      String? resultContents;
+      final File resultFile = workDirectory.childFile(fs.path.join(
+        'result-state.json',
+      ));
+      if(await resultFile.exists()) {
+        resultContents = await resultFile.readAsString();
+      }
+
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold received an unapproved image in post-submit ')
         ..writeln('testing. Golden file images in flutter/flutter are triaged ')
@@ -212,10 +229,12 @@ class SkiaGoldClient {
         ..writeln('information, visit the wiki: ')
         ..writeln('https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter')
         ..writeln()
-        ..writeln('Debug information for Gold:')
+        ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+        ..writeln('stderr: ${result.stderr}')
+        ..writeln()
+        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+      throw SkiaException(buf.toString());
     }
 
     return true;
@@ -269,7 +288,7 @@ class SkiaGoldClient {
         ..writeln('Please confirm the settings of your golden file test.')
         ..writeln('Arguments provided:');
       imgtestInitCommand.forEach(buf.writeln);
-      throw Exception(buf.toString());
+      throw SkiaException(buf.toString());
     }
 
     final io.ProcessResult result = await process.run(imgtestInitCommand);
@@ -281,10 +300,10 @@ class SkiaGoldClient {
         ..writeln('An error occurred when initializing golden file tryjob with ')
         ..writeln('goldctl.')
         ..writeln()
-        ..writeln('Debug information for Gold:')
+        ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+      throw SkiaException(buf.toString());
     }
     _tryjobInitialized = true;
   }
@@ -320,11 +339,11 @@ class SkiaGoldClient {
         ..writeln('Tryjob execution for golden file test $testName failed for')
         ..writeln('a reason unrelated to pixel comparison.')
         ..writeln()
-        ..writeln('Debug information for Gold:')
+        ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}')
         ..writeln();
-      throw Exception(buf.toString());
+      throw SkiaException(buf.toString());
     }
   }
 
@@ -432,14 +451,14 @@ class SkiaGoldClient {
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
     if (!_flutterRoot.existsSync()) {
-      throw Exception('Flutter root could not be found: $_flutterRoot\n');
+      throw SkiaException('Flutter root could not be found: $_flutterRoot\n');
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: _flutterRoot.path,
       );
       if (revParse.exitCode != 0) {
-        throw Exception('Current commit of Flutter can not be found.');
+        throw const SkiaException('Current commit of Flutter can not be found.');
       }
       return (revParse.stdout as String/*!*/).trim();
     }
