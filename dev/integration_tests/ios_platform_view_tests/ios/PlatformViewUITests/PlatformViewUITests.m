@@ -34,6 +34,7 @@ static const CGFloat kStandardTimeOut = 60.0;
   /// https://github.com/flutter/flutter/pull/90535
   BOOL newPageAppeared = [self.app.textFields[@"platform_view[0]"] waitForExistenceWithTimeout:kStandardTimeOut];
   if (!newPageAppeared) {
+    NSLog(@"First try failed. The tree is %@", self.app.debugDescription);
     [self waitForAndTapElement:self.app.buttons[@"platform view focus test"]];
   }
 
