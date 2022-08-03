@@ -1082,12 +1082,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     });
   }
 
-
-  bool _isOnlyAffinityChanged(TextSelection selection, TextSelection other) {
-    return selection.affinity != other.affinity &&
-        selection.copyWith(affinity: TextAffinity.upstream) == other.copyWith(affinity: TextAffinity.upstream);
-  }
-
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
