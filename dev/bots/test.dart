@@ -340,13 +340,13 @@ Future<void> _runTestHarnessTests() async {
 final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
 Future<void> _runGeneralToolTests() async {
-  const String fileName = 'output.json';
-  if (!File(path.join(flutterRoot, 'dev', 'bots', 'output.json')).existsSync()) {
+  final String pathOutput = path.join(flutterRoot, 'dev', 'bots', 'output.json');
+  if (!File(pathOutput).existsSync()) {
     throw Exception('TODO');
     // TODO(jasguerrero): create output file, https://github.com/flutter/flutter/issues/97539
   }
 
-  final Map<String, dynamic> fileContent = readJsonTestsSubShardFile(fileName);
+  final Map<String, dynamic> fileContent = readJsonTestsSubShardFile(pathOutput);
   final List<dynamic> allSubShards = fileContent['general.shard'] as List<dynamic>;
 
   for (final dynamic shardsDynamic in allSubShards) {
