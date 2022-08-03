@@ -187,6 +187,10 @@ void main() {
       isNot(equalsIgnoringHashCodes(<String>['Bar#00000', 'Foo#00000'])),
     );
     expect(<String>['Foo#a3b4d'], isNot(equalsIgnoringHashCodes(<String>['Foo'])));
+    expect(
+      <String>['Foo#a3b4d'],
+      isNot(equalsIgnoringHashCodes(<String>['Foo#00000', 'Bar#00000'])),
+    );
   });
 
   test('moreOrLessEquals', () {

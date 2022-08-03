@@ -1011,7 +1011,10 @@ void main() {
       expect(description.length, equals(2));
       expect(
         description,
-        equalsIgnoringHashCodes(<String>['dispatcher: ActionDispatcher#00000', 'actions: {}']),
+        equalsIgnoringHashCodes(<String>[
+          'dispatcher: ActionDispatcher#00000',
+          'actions: {}',
+        ]),
       );
     });
     testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
