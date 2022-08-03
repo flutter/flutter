@@ -993,6 +993,48 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
 
+  testWidgets('IconTheme opacity test', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              color: Colors.purple,
+              onPressed: () {},
+            )
+          ),
+        ),
+      )
+    );
+
+    Color? iconColor() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColor(), Colors.purple);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: IconTheme.merge(
+              data: const IconThemeData(opacity: 0.5),
+              child: IconButton(
+                icon: const Icon(Icons.add),
+                color: Colors.purple,
+                onPressed: () {},
+              ),
+            )
+          ),
+        ),
+      )
+    );
+
+    Color? iconColorWithOpacity() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColorWithOpacity(), Colors.purple.withOpacity(0.5));
+  });
 
   testWidgets('IconButton defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);

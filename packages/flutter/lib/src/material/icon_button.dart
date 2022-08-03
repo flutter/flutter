@@ -39,7 +39,8 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// will not react to touch.
 ///
 /// Requires one of its ancestors to be a [Material] widget. In Material Design 3,
-/// this requirement no longer exists because it becomes a subclass of [ButtonStyleButton].
+/// this requirement no longer exists because this widget builds a subclass of
+/// [ButtonStyleButton].
 ///
 /// The hit region of an icon button will, if possible, be at least
 /// kMinInteractiveDimension pixels in size, regardless of the actual
@@ -115,7 +116,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// of [IconButton]. If both themes exist, the [IconButtonTheme] will override [IconTheme] no matter
 /// which is closer to the [IconButton]. Each [IconButton]'s property is resolved by the order of
 /// precedence: widget property, [IconButtonTheme] property, [IconTheme] property and
-/// Material 3 [ButtonStyle] default property.
+/// internal default property value.
 ///
 /// {@tool dartpad}
 /// This sample shows creation of [IconButton] widgets for standard, filled,
@@ -148,7 +149,7 @@ class IconButton extends StatelessWidget {
   /// be used in many other places as well.
   ///
   /// Requires one of its ancestors to be a [Material] widget. This requirement
-  /// no longer exist if [ThemeData.useMaterial3] is set to true.
+  /// no longer exists if [ThemeData.useMaterial3] is set to true.
   ///
   /// [autofocus] argument must not be null (though it has default value).
   ///
@@ -194,9 +195,9 @@ class IconButton extends StatelessWidget {
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
   ///
-  /// If [ThemeData.useMaterial3] is set to true and this is null, the default size
-  /// comes from Material 3 default [ButtonStyle]. The size given here is passed
-  /// down to the [ButtonStyle.iconSize] property.
+  /// If [ThemeData.useMaterial3] is set to true and this is null, the size of the
+  /// [IconButton] would default to 24.0. The size given here is passed down to the
+  /// [ButtonStyle.iconSize] property.
   final double? iconSize;
 
   /// Defines how compact the icon button's layout will be.
@@ -795,35 +796,24 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// in both [IconButtonTheme] and [IconTheme], [IconTheme] will be overridden.
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
+    final IconThemeData iconTheme = IconTheme.of(context);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final IconThemeData overallIconTheme = IconTheme.of(context);
 
-    final bool isDefaultIconThemeSize = overallIconTheme.size == const IconThemeData.fallback().size;
-    final double? iconThemeSize = isDefaultIconThemeSize ? null : overallIconTheme.size;
-
-    bool identical(Color color) {
+    bool isIconThemeDefault(Color? color) {
       if (isDark) {
         return color == kDefaultIconLightColor;
       }
       return color == kDefaultIconDarkColor;
     }
-    final bool isDefaultIconThemeColor = identical(overallIconTheme.color!);
-    final Color? iconThemeColor = isDefaultIconThemeColor ? null : overallIconTheme.color;
+    final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
+    final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
 
-    ButtonStyle? iconButtonThemeStyle = IconButtonTheme.of(context).style;
-    if (iconButtonThemeStyle == null) {
-      return IconButton.styleFrom(foregroundColor: iconThemeColor, iconSize: iconThemeSize);
-    }
-    if (iconButtonThemeStyle.iconSize == null) {
-      iconButtonThemeStyle = iconButtonThemeStyle.copyWith(iconSize: ButtonStyleButton.allOrNull<double>(iconThemeSize));
-    }
-    if (iconButtonThemeStyle.foregroundColor == null) {
-      final MaterialStateProperty<Color?>? foregroundColor = iconThemeColor == null
-        ? null
-        : _IconButtonDefaultForeground(iconThemeColor, null);
-      iconButtonThemeStyle = iconButtonThemeStyle.copyWith(foregroundColor: foregroundColor);
-    }
-    return iconButtonThemeStyle;
+    final ButtonStyle iconThemeStyle = IconButton.styleFrom(
+      foregroundColor: isDefaultColor ? null : iconTheme.color,
+      iconSize: isDefaultSize ? null : iconTheme.size
+    );
+
+    return IconButtonTheme.of(context).style?.merge(iconThemeStyle) ?? iconThemeStyle;
   }
 }
 
