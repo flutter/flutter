@@ -781,7 +781,7 @@ abstract class StatefulWidget extends Widget {
   /// [State] objects.
   @protected
   @factory
-  State createState(); // ignore: no_logic_in_create_state, this is the original sin
+  State createState();
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
