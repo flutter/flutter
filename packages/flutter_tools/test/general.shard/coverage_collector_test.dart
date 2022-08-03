@@ -8,6 +8,7 @@ import 'dart:io' show Directory, File;
 import 'package:coverage/src/hitmap.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/test_device.dart' show TestDevice;
+import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:stream_channel/stream_channel.dart' show StreamChannel;
 import 'package:vm_service/vm_service.dart';
 
@@ -341,26 +342,13 @@ void main() {
     Directory? tempDir;
     try {
       tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
-      final File file = File('${tempDir.path}/packages.json');
-      file.writeAsStringSync(jsonEncode(<String, dynamic>{
-        'configVersion': 2,
-        'packages': <Map<String, String>>[
-          <String, String>{
-            'name': 'foo',
-            'rootUri': 'foo',
-          },
-          <String, String>{
-            'name': 'bar',
-            'rootUri': 'bar',
-          },
-        ],
-      }));
+      final File packagesFile = writeFooBarPackagesJson(tempDir);
       final Directory fooDir = Directory('${tempDir.path}/foo/');
       fooDir.createSync();
       final File fooFile = File('${fooDir.path}/foo.dart');
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
-      final String packagesPath = file.path;
+      final String packagesPath = packagesFile.path;
       final CoverageCollector collector = CoverageCollector(
           libraryNames: <String>{'foo', 'bar'},
           verbose: false,
@@ -408,6 +396,60 @@ void main() {
       tempDir?.deleteSync(recursive: true);
     }
   });
+
+  testWithoutContext('Coverage collector records test timings when provided TestTimeRecorder', () async {
+    Directory? tempDir;
+    try {
+      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      final File packagesFile = writeFooBarPackagesJson(tempDir);
+      final Directory fooDir = Directory('${tempDir.path}/foo/');
+      fooDir.createSync();
+      final File fooFile = File('${fooDir.path}/foo.dart');
+      fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
+
+      final String packagesPath = packagesFile.path;
+      final TestTimeRecorder testTimeRecorder = TestTimeRecorder();
+      final CoverageCollector collector = CoverageCollector(
+          libraryNames: <String>{'foo', 'bar'},
+          verbose: false,
+          packagesPath: packagesPath,
+          resolver: await CoverageCollector.getResolver(packagesPath),
+          testTimeRecorder: testTimeRecorder
+        );
+      await collector.collectCoverage(TestTestDevice(), connector: (Uri? uri) async {
+        return createFakeVmServiceHostWithFooAndBar().vmService;
+      });
+
+      // Expect one message for each phase.
+      final List<String> logPhaseMessages = testTimeRecorder.getPrintAsListForTesting().where((String m) => m.startsWith('Runtime for phase ')).toList();
+      expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
+
+      // Several phases actually does something, but here we just expect at
+      // least one phase to take a non-zero amount of time.
+      final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+      expect(logPhaseMessagesNonZero, isNotEmpty);
+    } finally {
+      tempDir?.deleteSync(recursive: true);
+    }
+  });
+}
+
+File writeFooBarPackagesJson(Directory tempDir) {
+  final File file = File('${tempDir.path}/packages.json');
+  file.writeAsStringSync(jsonEncode(<String, dynamic>{
+    'configVersion': 2,
+    'packages': <Map<String, String>>[
+      <String, String>{
+        'name': 'foo',
+        'rootUri': 'foo',
+      },
+      <String, String>{
+        'name': 'bar',
+        'rootUri': 'bar',
+      },
+    ],
+  }));
+  return file;
 }
 
 FakeVmServiceHost createFakeVmServiceHostWithFooAndBar() {

@@ -21,6 +21,7 @@ import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
+import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
@@ -64,6 +65,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
+    this.verbose = false,
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
@@ -220,6 +222,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  final bool verbose;
+
   @visibleForTesting
   bool get isIntegrationTest => _isIntegrationTest;
   bool _isIntegrationTest = false;
@@ -302,6 +306,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final String? excludeTags = stringArgDeprecated('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
+    TestTimeRecorder? testTimeRecorder;
+    if (verbose) {
+      testTimeRecorder = TestTimeRecorder();
+    }
+
     if (buildInfo.packageConfig['test_api'] == null) {
       throwToolExit(
         'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
@@ -375,7 +384,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         verbose: !machine,
         libraryNames: <String>{projectName},
         packagesPath: buildInfo.packagesPath,
-        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath)
+        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
+        testTimeRecorder: testTimeRecorder,
       );
     }
 
@@ -427,6 +437,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
+    final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.TestRunner);
     final int result = await testRunner.runTests(
       testWrapper,
       _testFiles,
@@ -452,17 +463,24 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       totalShards: totalShards,
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArgDeprecated(FlutterOptions.kDeviceUser),
+      testTimeRecorder: testTimeRecorder,
     );
+    testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
     if (collector != null) {
+      final Stopwatch? collectTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageDataCollect);
       final bool collectionResult = await collector.collectCoverageData(
         stringArgDeprecated('coverage-path'),
         mergeCoverageData: boolArgDeprecated('merge-coverage'),
       );
+      testTimeRecorder?.stop(TestTimePhases.CoverageDataCollect, collectTimeRecorderStopwatch!);
       if (!collectionResult) {
+        testTimeRecorder?.print();
         throwToolExit(null);
       }
     }
+
+    testTimeRecorder?.print();
 
     if (result != 0) {
       throwToolExit(null);
