@@ -498,8 +498,14 @@ class HotRunner extends ResidentRunner {
 
   void _resetDirtyAssets() {
     for (final FlutterDevice? device in flutterDevices) {
-      device!.devFS?.assetPathsToEvict.clear();
-      device.devFS?.shaderPathsToEvict.clear();
+      final DevFS? devFS = device!.devFS;
+      if (devFS == null) {
+        // This is sometimes null, however we don't know why and have not been
+        // able to reproduce, https://github.com/flutter/flutter/issues/108653
+        continue;
+      }
+      devFS.assetPathsToEvict.clear();
+      devFS.shaderPathsToEvict.clear();
     }
   }
 
