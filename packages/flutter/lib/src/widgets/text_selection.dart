@@ -1943,7 +1943,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.unknown:
               // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
               final TextSelection previousSelection = editableText.textEditingValue.selection;
-              // If the tap was within the previous selection, then the selection should stay the same. 
+              // If the tap was within the previous selection, then the selection should stay the same.
               if (!_tapWasOnSelection(details.globalPosition)) {
                 renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
               }
