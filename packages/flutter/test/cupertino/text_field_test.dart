@@ -1746,7 +1746,7 @@ void main() {
       await tester.tapAt(pos);
       await tester.pump(const Duration(milliseconds: 500));
       await tester.tapAt(pos);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Plain collapsed selection.
       expect(controller.selection.isCollapsed, isTrue);
