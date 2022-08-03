@@ -1344,7 +1344,7 @@ class FakeEditableTextState extends EditableTextState {
   }
 
   @override
-  void toggleToolbar() {
+  void toggleToolbar([bool hideHandles = true]) {
     return;
   }
 
