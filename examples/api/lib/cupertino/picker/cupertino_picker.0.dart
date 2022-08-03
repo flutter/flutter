@@ -19,7 +19,7 @@ const List<String> _fruitNames = <String>[
 void main() => runApp(const CupertinoPickerApp());
 
 class CupertinoPickerApp extends StatelessWidget {
-  const CupertinoPickerApp({Key? key}) : super(key: key);
+  const CupertinoPickerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class CupertinoPickerApp extends StatelessWidget {
   }
 }
 class CupertinoPickerExample extends StatefulWidget {
-  const CupertinoPickerExample({Key? key}) : super(key: key);
+  const CupertinoPickerExample({super.key});
 
   @override
   State<CupertinoPickerExample> createState() => _CupertinoPickerExampleState();

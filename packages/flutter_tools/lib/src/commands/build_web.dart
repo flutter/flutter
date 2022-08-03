@@ -118,10 +118,10 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      boolArg('csp'),
+      boolArgDeprecated('csp'),
       stringArgDeprecated('pwa-strategy')!,
-      boolArg('source-maps'),
-      boolArg('native-null-assertions'),
+      boolArgDeprecated('source-maps'),
+      boolArgDeprecated('native-null-assertions'),
       baseHref,
       stringArgDeprecated('dart2js-optimization'),
     );

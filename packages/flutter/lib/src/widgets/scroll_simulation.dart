@@ -212,13 +212,13 @@ class ClampingScrollSimulation extends Simulation {
 
   @override
   double x(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
     return position + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 
   @override
   double dx(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
     return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
   }
 

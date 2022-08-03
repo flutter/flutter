@@ -389,7 +389,19 @@ class TestChromiumLauncher implements ChromiumLauncher {
   bool get hasChromeInstance => _hasInstance;
 
   @override
-  Future<Chromium> launch(String url, {bool headless = false, int? debugPort, bool skipCheck = false, Directory? cacheDir}) async {
+  Future<Chromium> launch(
+    String url, {
+    bool headless = false,
+    int? debugPort,
+    bool skipCheck = false,
+    Directory? cacheDir,
+    List<String> webBrowserFlags = const <String>[],
+  }) async {
+    return currentCompleter.future;
+  }
+
+  @override
+  Future<Chromium> connect(Chromium chrome, bool skipCheck) {
     return currentCompleter.future;
   }
 }

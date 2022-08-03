@@ -23,7 +23,7 @@ List<Data> test(int length) {
 }
 
 Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   // Warm up lap
   for (int i = 0; i < _kNumWarmUp; i += 1) {

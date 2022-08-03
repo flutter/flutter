@@ -8,6 +8,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+export 'dart:ui' show Offset;
+
 /// An abstract class providing an interface for evaluating a parametric curve.
 ///
 /// A parametric curve transforms a parameter (hence the name) `t` along a curve
@@ -182,16 +184,18 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
-    if (t == 0.0 || t == 1.0)
+    t = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
+    if (t == 0.0 || t == 1.0) {
       return t;
+    }
     return curve.transform(t);
   }
 
   @override
   String toString() {
-    if (curve is! _Linear)
+    if (curve is! _Linear) {
       return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)\u27A9$curve';
+    }
     return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)';
   }
 }
@@ -302,7 +306,7 @@ class Cubic extends Curve {
   /// Rather than creating a new instance, consider using one of the common
   /// cubic curves in [Curves].
   ///
-  /// The [a] (x1), [b](x2), [c](y1), and [d](y2) arguments must not be null.
+  /// The [a] (x1), [b] (y1), [c] (x2) and [d] (y2) arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d)
     : assert(a != null),
       assert(b != null),
@@ -348,12 +352,14 @@ class Cubic extends Curve {
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
-      if ((t - estimate).abs() < _cubicErrorBound)
+      if ((t - estimate).abs() < _cubicErrorBound) {
         return _evaluateCubic(b, d, midpoint);
-      if (estimate < t)
+      }
+      if (estimate < t) {
         start = midpoint;
-      else
+      } else {
         end = midpoint;
+      }
     }
   }
 
@@ -1219,10 +1225,11 @@ class _BounceInOutCurve extends Curve {
 
   @override
   double transformInternal(double t) {
-    if (t < 0.5)
+    if (t < 0.5) {
       return (1.0 - _bounce(1.0 - t * 2.0)) * 0.5;
-    else
+    } else {
       return _bounce(t * 2.0 - 1.0) * 0.5 + 0.5;
+    }
   }
 }
 
@@ -1304,10 +1311,11 @@ class ElasticInOutCurve extends Curve {
   double transformInternal(double t) {
     final double s = period / 4.0;
     t = 2.0 * t - 1.0;
-    if (t < 0.0)
+    if (t < 0.0) {
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
-    else
+    } else {
       return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
+    }
   }
 
   @override

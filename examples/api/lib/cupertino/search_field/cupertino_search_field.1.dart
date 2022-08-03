@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const SearchTextFieldApp());
 
 class SearchTextFieldApp extends StatelessWidget {
-  const SearchTextFieldApp({Key? key}) : super(key: key);
+  const SearchTextFieldApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class SearchTextFieldApp extends StatelessWidget {
 }
 
 class SearchTextFieldExample extends StatefulWidget {
-  const SearchTextFieldExample({Key? key}) : super(key: key);
+  const SearchTextFieldExample({super.key});
 
   @override
   State<SearchTextFieldExample> createState() => _SearchTextFieldExampleState();
@@ -60,9 +60,9 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
 
 class SearchTextField extends StatelessWidget {
   const SearchTextField({
-    Key? key,
+    super.key,
     required this.fieldValue,
-  }) : super(key: key);
+  });
 
   final ValueChanged<String> fieldValue;
 

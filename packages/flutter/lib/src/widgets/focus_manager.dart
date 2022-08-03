@@ -753,8 +753,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Use [nearestScope] to start at this node instead of above it.
   FocusScopeNode? get enclosingScope {
     for (final FocusNode node in ancestors) {
-      if (node is FocusScopeNode)
+      if (node is FocusScopeNode) {
         return node;
+      }
     }
     return null;
   }
@@ -1319,8 +1320,9 @@ class FocusScopeNode extends FocusNode {
     assert(findFirstFocus != null);
 
     // It is possible that a previously focused child is no longer focusable.
-    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus)
+    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus) {
       _focusedChildren.removeLast();
+    }
 
     final FocusNode? focusedChild = this.focusedChild;
     // If findFirstFocus is false, then the request is to make this scope the
@@ -1464,7 +1466,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void dispose() {
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == _handleKeyMessage) {
-      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     }
     super.dispose();
@@ -1798,10 +1799,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         _dirtyNodes.add(_primaryFocus!);
       }
     }
-    assert(_focusDebug('Notifying ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
     for (final FocusNode node in _dirtyNodes) {
       node._notify();
     }
+    assert(_focusDebug('Notified ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
     _dirtyNodes.clear();
     if (previousFocus != _primaryFocus) {
       notifyListeners();

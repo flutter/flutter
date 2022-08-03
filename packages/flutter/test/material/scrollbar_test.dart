@@ -962,7 +962,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
@@ -1027,7 +1026,6 @@ void main() {
     // Now trigger hover with a mouse.
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 
@@ -1067,8 +1065,9 @@ void main() {
             return states.contains(MaterialState.hovered);
           }),
           thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered))
+            if (states.contains(MaterialState.hovered)) {
               return 40.0;
+            }
             // Default thickness
             return 8.0;
           }),
@@ -1092,7 +1091,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 
@@ -1133,8 +1131,9 @@ void main() {
         theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
           isAlwaysShown: true,
           trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered))
+            if (states.contains(MaterialState.hovered)) {
               return true;
+            }
             return false;
           }),
         )),
@@ -1157,7 +1156,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 
@@ -1218,7 +1216,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 

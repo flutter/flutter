@@ -11,8 +11,8 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+Future<List<double>> runBuildBenchmark() async {
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
@@ -52,11 +52,14 @@ Future<void> main() async {
       values.add(watch.elapsedMicroseconds.toDouble());
     }
   });
+  return values;
+}
 
+Future<void> main() async {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResultStatistics(
     description: 'Stock build',
-    values: values,
+    values: await runBuildBenchmark(),
     unit: 'µs per iteration',
     name: 'stock_build_iteration',
   );

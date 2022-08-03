@@ -54,15 +54,6 @@ test:${fileSystem.path.join(fileSystem.currentDirectory.path, 'lib')}/
 ''');
 }
 
-void writePubspec(String folder) {
-  writeFile(fileSystem.path.join(folder, 'pubspec.yaml'), '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-''');
-}
-
 Future<void> getPackages(String folder) async {
   final List<String> command = <String>[
     fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),

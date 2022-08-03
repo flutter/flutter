@@ -29,7 +29,7 @@ class IntegrationTestTestDevice implements TestDevice {
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
-  final String userIdentifier;
+  final String? userIdentifier;
 
   ApplicationPackage? _applicationPackage;
   final Completer<void> _finished = Completer<void>();
@@ -50,7 +50,7 @@ class IntegrationTestTestDevice implements TestDevice {
     }
 
     final LaunchResult launchResult = await device.startApp(
-      _applicationPackage!,
+      _applicationPackage,
       mainPath: entrypointPath,
       platformArgs: <String, dynamic>{},
       debuggingOptions: debuggingOptions,

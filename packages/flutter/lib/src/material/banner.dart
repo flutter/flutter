@@ -332,8 +332,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     // This provides a static banner for backwards compatibility.
-    if (widget.animation == null)
+    if (widget.animation == null) {
       return materialBanner;
+    }
 
     materialBanner = SafeArea(
       child: materialBanner,

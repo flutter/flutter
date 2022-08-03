@@ -144,8 +144,8 @@ class AndroidView extends StatefulWidget {
   ///     child: AndroidView(
   ///       viewType: 'webview',
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),
@@ -284,8 +284,8 @@ class UiKitView extends StatefulWidget {
   ///     child: UiKitView(
   ///       viewType: 'webview',
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),
@@ -562,19 +562,25 @@ class _UiKitViewState extends State<UiKitView> {
   UiKitViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
+  late FocusNode _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null) {
+    final UiKitViewController? controller = _controller;
+    if (controller == null) {
       return const SizedBox.expand();
     }
-    return _UiKitPlatformView(
-      controller: _controller!,
-      hitTestBehavior: widget.hitTestBehavior,
-      gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
+      child: _UiKitPlatformView(
+        controller: _controller!,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+      ),
     );
   }
 
@@ -639,13 +645,32 @@ class _UiKitViewState extends State<UiKitView> {
       layoutDirection: _layoutDirection!,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        _focusNode.requestFocus();
+      }
     );
     if (!mounted) {
       controller.dispose();
       return;
     }
     widget.onPlatformViewCreated?.call(id);
-    setState(() { _controller = controller; });
+    setState(() {
+      _controller = controller;
+      _focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
+    });
+  }
+
+  void _onFocusChange(bool isFocused, UiKitViewController controller) {
+    if (!isFocused) {
+      // Unlike Android, we do not need to send "clearFocus" channel message
+      // to the engine, because focusing on another view will automatically
+      // cancel the focus on the previously focused platform view.
+      return;
+    }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      <String, dynamic>{'platformViewId': controller.id},
+    );
   }
 }
 
@@ -979,8 +1004,8 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///     height: 100.0,
   ///     child: PlatformViewSurface(
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),

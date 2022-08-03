@@ -289,7 +289,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
-  ///   const TitleColorThemeCopy({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorThemeCopy({super.key, required this.titleColor, required this.child});
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -399,7 +399,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
-  ///   const TitleColorTheme({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorTheme({super.key, required this.child, required this.titleColor});
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -426,8 +426,9 @@ class TextTheme with Diagnosticable {
   ///    individual fields in the [TextTheme] instead of merging all of the
   ///    fields of two [TextTheme]s.
   TextTheme merge(TextTheme? other) {
-    if (other == null)
+    if (other == null) {
       return this;
+    }
     return copyWith(
       displayLarge: displayLarge?.merge(other.displayLarge) ?? other.displayLarge,
       displayMedium: displayMedium?.merge(other.displayMedium) ?? other.displayMedium,
@@ -632,10 +633,12 @@ class TextTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextTheme
       && displayLarge == other.displayLarge
       && displayMedium == other.displayMedium

@@ -21,7 +21,6 @@ const Set<String> kCorePackageAllowList = <String>{
   'async',
   'boolean_selector',
   'characters',
-  'charcode',
   'clock',
   'collection',
   'crypto',

@@ -25,14 +25,24 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     required this.fileSystem,
     required this.platform,
     super.ipv6,
-    super.enableDds,
+    bool enableDds = true,
     super.enableAuthCodes,
     super.logger,
-  });
+    super.onError,
+  })  : _enableDds = enableDds,
+        // Always disable in the DAP layer as it's handled in the spawned
+        // 'flutter' process.
+        super(enableDds: false);
 
   FileSystem fileSystem;
   Platform platform;
   Process? _process;
+
+  /// Whether DDS should be enabled in the Flutter process.
+  ///
+  /// We never enable DDS in the DAP process for Flutter, so this value is not
+  /// the same as what is passed to the base class, which is always provided 'false'.
+  final bool _enableDds;
 
   @override
   final FlutterLaunchRequestArguments Function(Map<String, Object?> obj)
@@ -78,6 +88,22 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     terminatePids(ProcessSignal.sigkill);
   }
 
+  /// Whether or not the user requested debugging be enabled.
+  ///
+  /// For debugging to be enabled, the user must have chosen "Debug" (and not
+  /// "Run") in the editor (which maps to the DAP `noDebug` field).
+  bool get enableDebugger {
+    final DartCommonLaunchAttachRequestArguments args = this.args;
+    if (args is FlutterLaunchRequestArguments) {
+      // Invert DAP's noDebug flag, treating it as false (so _do_ debug) if not
+      // provided.
+      return !(args.noDebug ?? false);
+    }
+
+    // Otherwise (attach), always debug.
+    return true;
+  }
+
   /// Called by [launchRequest] to request that we actually start the tests to be run/debugged.
   ///
   /// For debugging, this should start paused, connect to the VM Service, set
@@ -86,12 +112,13 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
 
-    final bool debug = !(args.noDebug ?? false);
+    final bool debug = enableDebugger;
     final String? program = args.program;
 
     final List<String> toolArgs = <String>[
       'test',
       '--machine',
+      if (!_enableDds) '--no-dds',
       if (debug) '--start-paused',
     ];
 
@@ -109,7 +136,11 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
       ...?args.args,
     ];
 
-    await launchAsProcess(executable, processArgs);
+    await launchAsProcess(
+      executable: executable,
+      processArgs: processArgs,
+      env: args.env,
+    );
 
     // Delay responding until the debugger is connected.
     if (debug) {
@@ -118,12 +149,17 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
   }
 
   @visibleForOverriding
-  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
+  Future<void> launchAsProcess({
+    required String executable,
+    required List<String> processArgs,
+    required Map<String, String>? env,
+  }) async {
     logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
       executable,
       processArgs,
       workingDirectory: args.cwd,
+      environment: env,
     );
     _process = process;
     pidsToTerminate.add(process.pid);
@@ -207,11 +243,12 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
   /// Handles the test.processStarted event from Flutter that provides the VM Service URL.
   void _handleTestStartedProcess(Map<String, Object?> params) {
     final String? vmServiceUriString = params['observatoryUri'] as String?;
-    // For no-debug mode, this event is still sent, but has a null URI.
-    if (vmServiceUriString == null) {
+    // For no-debug mode, this event may be still sent so ignore it if we know
+    // we're not debugging, or its URI is null.
+    if (!enableDebugger || vmServiceUriString == null) {
       return;
     }
     final Uri vmServiceUri = Uri.parse(vmServiceUriString);
-    connectDebugger(vmServiceUri, resumeIfStarting: true);
+    connectDebugger(vmServiceUri);
   }
 }

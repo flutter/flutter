@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show window;
-import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures, Brightness;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, Size, WindowPadding;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';

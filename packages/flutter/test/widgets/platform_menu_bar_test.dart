@@ -51,7 +51,6 @@ void main() {
         MaterialApp(
           home: Material(
             child: PlatformMenuBar(
-              body: const Center(child: Text('Body')),
               menus: createTestMenus(
                 onActivate: onActivate,
                 onOpen: onOpen,
@@ -63,6 +62,7 @@ void main() {
                   subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
                 },
               ),
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -163,11 +163,11 @@ void main() {
         const MaterialApp(
           home: Material(
             child: PlatformMenuBar(
-              body: PlatformMenuBar(
-                body: SizedBox(),
-                menus: <MenuItem>[],
-              ),
               menus: <MenuItem>[],
+              child: PlatformMenuBar(
+                menus: <MenuItem>[],
+                child: SizedBox(),
+              ),
             ),
           ),
         ),
@@ -180,8 +180,8 @@ void main() {
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
       const PlatformMenuBar menuBar = PlatformMenuBar(
-        body: SizedBox(),
         menus: <MenuItem>[item],
+        child: SizedBox(),
       );
 
       await tester.pumpWidget(
@@ -197,7 +197,7 @@ void main() {
         menuBar.toStringDeep(),
         equalsIgnoringHashCodes(
           'PlatformMenuBar#00000\n'
-          ' └─PlatformMenuItem#00000\n'
+          ' └─PlatformMenuItem#00000(label2)\n'
           '     label: "label2"\n'
           '     shortcut: SingleActivator#00000(keys: Key A)\n'
           '     DISABLED\n',

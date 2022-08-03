@@ -104,6 +104,7 @@ class CategoryView extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return Scrollbar(
       child: ListView(
+        primary: true,
         key: PageStorageKey<Category?>(category),
         padding: const EdgeInsets.symmetric(
           vertical: 16.0,
@@ -293,23 +294,26 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // the user must either tap its heading or the backdrop's menu icon.
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
+    if (_controller.isAnimating || _controller.status == AnimationStatus.completed) {
       return;
+    }
 
     _controller.value -= details.primaryDelta! / _backdropHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
+    if (_controller.isAnimating || _controller.status == AnimationStatus.completed) {
       return;
+    }
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
-    if (flingVelocity < 0.0)
+    if (flingVelocity < 0.0) {
       _controller.fling(velocity: math.max(2.0, -flingVelocity));
-    else if (flingVelocity > 0.0)
+    } else if (flingVelocity > 0.0) {
       _controller.fling(velocity: math.min(-2.0, -flingVelocity));
-    else
+    } else {
       _controller.fling(velocity: _controller.value < 0.5 ? -2.0 : 2.0);
+    }
   }
 
   // Stacks a BackdropPanel, which displays the selected category, on top

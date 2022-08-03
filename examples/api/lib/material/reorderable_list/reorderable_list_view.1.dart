@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const ReorderableApp());
 
 class ReorderableApp extends StatelessWidget {
-  const ReorderableApp({Key? key}) : super(key: key);
+  const ReorderableApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class ReorderableApp extends StatelessWidget {
 }
 
 class ReorderableExample extends StatefulWidget {
-  const ReorderableExample({Key? key}) : super(key: key);
+  const ReorderableExample({super.key});
 
   @override
   State<ReorderableExample> createState() => _ReorderableExampleState();

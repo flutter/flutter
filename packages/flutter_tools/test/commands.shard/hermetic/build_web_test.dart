@@ -92,7 +92,9 @@ void main() {
     setupFileSystemForEndToEndTest(fileSystem);
     await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a', '--dart2js-optimization=O3']);
 
-    expect(fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
+    final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
+
+    expect(buildDir.existsSync(), true);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

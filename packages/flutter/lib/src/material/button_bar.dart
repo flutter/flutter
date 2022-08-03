@@ -308,8 +308,9 @@ class _RenderButtonBarRow extends RenderFlex {
 
   @override
   BoxConstraints get constraints {
-    if (_hasCheckedLayoutWidth)
+    if (_hasCheckedLayoutWidth) {
       return super.constraints;
+    }
     return super.constraints.copyWith(maxWidth: double.infinity);
   }
 
@@ -326,8 +327,9 @@ class _RenderButtonBarRow extends RenderFlex {
       final Size childSize = child.getDryLayout(childConstraints);
       currentHeight += childSize.height;
       child = childAfter(child);
-      if (overflowButtonSpacing != null && child != null)
+      if (overflowButtonSpacing != null && child != null) {
         currentHeight += overflowButtonSpacing!;
+      }
     }
     return constraints.constrain(Size(constraints.maxWidth, currentHeight));
   }
@@ -420,8 +422,9 @@ class _RenderButtonBarRow extends RenderFlex {
             break;
         }
 
-        if (overflowButtonSpacing != null && child != null)
+        if (overflowButtonSpacing != null && child != null) {
           currentHeight += overflowButtonSpacing!;
+        }
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
     }

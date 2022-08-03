@@ -72,14 +72,14 @@ class UpgradeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() {
     _commandRunner.workingDirectory = stringArgDeprecated('working-directory') ?? Cache.flutterRoot!;
     return _commandRunner.runCommand(
-      force: boolArg('force'),
-      continueFlow: boolArg('continue'),
+      force: boolArgDeprecated('force'),
+      continueFlow: boolArgDeprecated('continue'),
       testFlow: stringArgDeprecated('working-directory') != null,
       gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
       flutterVersion: stringArgDeprecated('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
-      verifyOnly: boolArg('verify-only'),
+      verifyOnly: boolArgDeprecated('verify-only'),
     );
   }
 }

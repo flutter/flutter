@@ -22,6 +22,24 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
+  // Regression test for https://github.com/flutter/flutter/issues/83668
+  testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
+    Widget buildFrame(Widget? bottomSheet) {
+      return MaterialApp(
+        home: Scaffold(
+          body: const Placeholder(),
+          bottomSheet: bottomSheet,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
+    await tester.pumpWidget(buildFrame(null));
+
+    // The disappearing animation has not yet been completed.
+    await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
+  });
+
   testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     int buildCount = 0;

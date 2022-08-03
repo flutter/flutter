@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -16,9 +14,9 @@ import 'test_utils.dart';
 // This test verifies that we can hot reload a stateless widget into a
 // stateful one and back.
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
   final HotReloadProject project = HotReloadProject();
-  FlutterRunTestDriver flutter;
+  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_reload_test.');
@@ -27,7 +25,7 @@ void main() {
   });
 
   tearDown(() async {
-    await flutter?.stop();
+    await flutter.stop();
     tryToDelete(tempDir);
   });
 

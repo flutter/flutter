@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const HeroApp());
 
 class HeroApp extends StatelessWidget {
-  const HeroApp({Key? key}) : super(key: key);
+  const HeroApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class HeroApp extends StatelessWidget {
 }
 
 class HeroExample extends StatelessWidget {
-  const HeroExample({Key? key}) : super(key: key);
+  const HeroExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class HeroExample extends StatelessWidget {
 }
 
 class BoxWidget extends StatelessWidget {
-  const BoxWidget({Key? key, required this.size}) : super(key: key);
+  const BoxWidget({super.key, required this.size});
 
   final Size size;
 

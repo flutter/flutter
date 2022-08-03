@@ -135,8 +135,9 @@ class BannerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!_prepared)
+    if (!_prepared) {
       _prepare();
+    }
     canvas
       ..translate(_translationX(size.width), _translationY(size.height))
       ..rotate(_rotation)
@@ -326,6 +327,7 @@ class Banner extends StatelessWidget {
 
 /// Displays a [Banner] saying "DEBUG" when running in debug mode.
 /// [MaterialApp] builds one of these by default.
+///
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
   /// Creates a const debug mode banner.

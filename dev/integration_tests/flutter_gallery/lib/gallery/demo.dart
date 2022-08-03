@@ -28,8 +28,9 @@ class ComponentDemoTabData {
 
   @override
   bool operator==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ComponentDemoTabData
         && other.tabName == tabName
         && other.description == description
@@ -67,11 +68,13 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
 
   Future<void> _showApiDocumentation(BuildContext context) async {
     final String? url = demos![DefaultTabController.of(context)!.index].documentationUrl;
-    if (url == null)
+    if (url == null) {
       return;
+    }
 
-    if (await canLaunch(url)) {
-      await launch(url);
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       showDialog<void>(
         context: context,
@@ -230,7 +233,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.library_books),
       tooltip: 'API documentation',
-      onPressed: () => launch(documentationUrl!, forceWebView: true),
+      onPressed: () => launchUrl(Uri.parse(documentationUrl!), mode: LaunchMode.inAppWebView),
     );
   }
 }
@@ -253,7 +256,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
         label: 'API documentation',
         child: const Icon(CupertinoIcons.book),
       ),
-      onPressed: () => launch(documentationUrl!, forceWebView: true),
+      onPressed: () => launchUrl(Uri.parse(documentationUrl!), mode: LaunchMode.inAppWebView),
     );
   }
 }

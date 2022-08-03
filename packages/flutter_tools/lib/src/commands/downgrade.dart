@@ -129,7 +129,7 @@ class DowngradeCommand extends FlutterCommand {
     final Stdio stdio = _stdio!;
     final Terminal terminal = _terminal!;
     final Logger logger = _logger!;
-    if (stdio.hasTerminal && boolArg('prompt')) {
+    if (stdio.hasTerminal && boolArgDeprecated('prompt')) {
       terminal.usesTerminalUi = true;
       final String result = await terminal.promptForCharInput(
         const <String>['y', 'n'],

@@ -128,8 +128,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
   @override
   Widget build(BuildContext context) {
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
+    final bool hasFab = Scaffold.of(context).hasFloatingActionButton;
     final NotchedShape? notchedShape = widget.shape ?? babTheme.shape;
-    final CustomClipper<Path> clipper = notchedShape != null
+    final CustomClipper<Path> clipper = notchedShape != null && hasFab
       ? _BottomAppBarClipper(
           geometry: geometryListenable,
           shape: notchedShape,
@@ -179,8 +180,9 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   // Material widget.
   double get bottomNavigationBarTop {
     final double? bottomNavigationBarTop = geometry.value.bottomNavigationBarTop;
-    if (bottomNavigationBarTop != null)
+    if (bottomNavigationBarTop != null) {
       return bottomNavigationBarTop;
+    }
     final RenderBox? box = materialKey.currentContext?.findRenderObject() as RenderBox?;
     return box?.localToGlobal(Offset.zero).dy ?? 0;
   }

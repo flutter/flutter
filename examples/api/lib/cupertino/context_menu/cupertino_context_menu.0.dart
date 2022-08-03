@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const ContextMenuApp());
 
 class ContextMenuApp extends StatelessWidget {
-  const ContextMenuApp({Key? key}) : super(key: key);
+  const ContextMenuApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class ContextMenuApp extends StatelessWidget {
 }
 
 class ContextMenuExample extends StatelessWidget {
-  const ContextMenuExample({Key? key}) : super(key: key);
+  const ContextMenuExample({super.key});
 
   @override
   Widget build(BuildContext context) {

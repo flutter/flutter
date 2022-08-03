@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';

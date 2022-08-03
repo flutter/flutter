@@ -32,7 +32,7 @@ import 'constants.dart';
 ///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
-///   const MyTabbedPage({ Key? key }) : super(key: key);
+///   const MyTabbedPage({ super.key });
 ///   @override
 ///   State<MyTabbedPage> createState() => _MyTabbedPageState();
 /// }
@@ -181,8 +181,9 @@ class TabController extends ChangeNotifier {
     assert(value >= 0 && (value < length || length == 0));
     assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
-    if (value == _index || length < 2)
+    if (value == _index || length < 2) {
       return;
+    }
     _previousIndex = index;
     _index = value;
     if (duration != null && duration > Duration.zero) {
@@ -256,8 +257,9 @@ class TabController extends ChangeNotifier {
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
-    if (value == offset)
+    if (value == offset) {
       return;
+    }
     _animationController!.value = value + _index.toDouble();
   }
 

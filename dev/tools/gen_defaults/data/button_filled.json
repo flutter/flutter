@@ -1,5 +1,5 @@
 {
-  "version": "v0_92",
+  "version": "v0_101",
 
   "md.comp.filled-button.container.color": "primary",
   "md.comp.filled-button.container.elevation": "md.sys.elevation.level0",
@@ -11,10 +11,6 @@
   "md.comp.filled-button.disabled.container.opacity": 0.12,
   "md.comp.filled-button.disabled.label-text.color": "onSurface",
   "md.comp.filled-button.disabled.label-text.opacity": 0.38,
-  "md.comp.filled-button.dragged.container.elevation": "md.sys.elevation.level3",
-  "md.comp.filled-button.dragged.label-text.color": "onPrimary",
-  "md.comp.filled-button.dragged.state-layer.color": "onPrimary",
-  "md.comp.filled-button.dragged.state-layer.opacity": "md.sys.state.dragged.state-layer-opacity",
   "md.comp.filled-button.focus.container.elevation": "md.sys.elevation.level0",
   "md.comp.filled-button.focus.label-text.color": "onPrimary",
   "md.comp.filled-button.focus.state-layer.color": "onPrimary",
@@ -31,7 +27,6 @@
   "md.comp.filled-button.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
   "md.comp.filled-button.with-icon.disabled.icon.color": "onSurface",
   "md.comp.filled-button.with-icon.disabled.icon.opacity": 0.38,
-  "md.comp.filled-button.with-icon.dragged.icon.color": "onPrimary",
   "md.comp.filled-button.with-icon.focus.icon.color": "onPrimary",
   "md.comp.filled-button.with-icon.hover.icon.color": "onPrimary",
   "md.comp.filled-button.with-icon.icon.color": "onPrimary",

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -66,8 +64,8 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 
 // The command used to actually launch the app and attach the debugger with args in debug.
 FakeCommand attachDebuggerCommand({
-  IOSink stdin,
-  Completer<void>/*?*/ completer,
+  IOSink? stdin,
+  Completer<void>? completer,
 }) {
   return FakeCommand(
     command: const <String>[
@@ -290,6 +288,7 @@ void main() {
             '--enable-checked-mode',
             '--verify-entry-points',
             '--enable-software-rendering',
+            '--trace-systrace',
             '--skia-deterministic-rendering',
             '--trace-skia',
             '--endless-trace-buffer',
@@ -359,10 +358,10 @@ void main() {
 
 IOSDevice setUpIOSDevice({
   String sdkVersion = '13.0.1',
-  FileSystem fileSystem,
-  Logger logger,
-  ProcessManager processManager,
-  IOSDeploy iosDeploy,
+  FileSystem? fileSystem,
+  Logger? logger,
+  ProcessManager? processManager,
+  IOSDeploy? iosDeploy,
 }) {
   final Artifacts artifacts = Artifacts.test();
   final FakePlatform macPlatform = FakePlatform(
@@ -377,24 +376,24 @@ IOSDevice setUpIOSDevice({
     ],
     processManager: FakeProcessManager.any(),
   );
-
+  logger ??= BufferLogger.test();
   return IOSDevice('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
-    logger: logger ?? BufferLogger.test(),
+    logger: logger,
     iosDeploy: iosDeploy ??
         IOSDeploy(
-          logger: logger ?? BufferLogger.test(),
+          logger: logger,
           platform: macPlatform,
           processManager: processManager ?? FakeProcessManager.any(),
           artifacts: artifacts,
           cache: cache,
         ),
     iMobileDevice: IMobileDevice(
-      logger: logger ?? BufferLogger.test(),
+      logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
       artifacts: artifacts,
       cache: cache,

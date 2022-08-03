@@ -98,7 +98,7 @@ class _ScrollableRepaintBoundaryNotifier extends InheritedWidget {
 ///
 /// This widget attempts to address these cases, by making the repaint boundary used
 /// to wrap scrollable children conditional on whether the scrollable has ever
-/// scrolled before. This is a comprompose solution, and could be adjusted to take
+/// scrolled before. This solution is only a heuristic, and could be adjusted to take
 /// into account whether or not the child has repainted or whether the scrollable
 /// is likely to scroll again.
 class ScrollableRepaintBoundary extends StatefulWidget {

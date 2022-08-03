@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:io' hide Directory, File;
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -11,13 +13,16 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:logging/logging.dart' as logging;
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
@@ -76,28 +81,26 @@ void main() {
     });
   });
 
-  test('.log() filters events', () => testbed.run(() {
-    // harmless warning that should be filtered out
-    const String harmlessMessage = 'Unresolved uri: dart:ui';
-    // serious warning
-    const String seriousMessage = 'Something bad happened';
+  test('.log() reports warnings', () => testbed.run(() {
+    const String unresolvedUriMessage = 'Unresolved uri:';
+    const String otherMessage = 'Something bad happened';
 
     final List<logging.LogRecord> events = <logging.LogRecord>[
       logging.LogRecord(
         logging.Level.WARNING,
-        harmlessMessage,
+        unresolvedUriMessage,
         'DartUri',
       ),
       logging.LogRecord(
         logging.Level.WARNING,
-        seriousMessage,
+        otherMessage,
         'DartUri',
       ),
     ];
 
     events.forEach(log);
-    expect(logger.warningText, contains(seriousMessage));
-    expect(logger.warningText, isNot(contains(harmlessMessage)));
+    expect(logger.warningText, contains(unresolvedUriMessage));
+    expect(logger.warningText, contains(otherMessage));
   }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {
@@ -721,6 +724,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: 'out.dill',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -832,6 +836,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: '',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -1120,7 +1125,20 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     FileSystem fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File dartPluginRegistrant,
   }) async {
     return output;
+  }
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
   }
 }

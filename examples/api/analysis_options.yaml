@@ -1,8 +1,8 @@
+# This file is also used by dev/bots/analyze_snippet_code.dart to analyze code snippets (`{@tool snippet}` sections).
+
 include: ../../analysis_options.yaml
 
 linter:
   rules:
-    # TODO(goderbauer): enable when super params are more established and
-    #   seeing them in the API samples is no longer surprising,
-    #   https://github.com/flutter/flutter/issues/101068
-    use_super_parameters: false
+    # Samples want to print things pretty often.
+    avoid_print: false

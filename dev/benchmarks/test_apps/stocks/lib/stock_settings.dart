@@ -93,8 +93,9 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   void sendUpdates(StockConfiguration value) {
-    if (widget.updater != null)
+    if (widget.updater != null) {
       widget.updater(value);
+    }
   }
 
   AppBar buildAppBar(BuildContext context) {
@@ -143,7 +144,7 @@ class StockSettingsState extends State<StockSettings> {
       ),
     ];
     assert(() {
-      // material grid and size construction lines are only available in checked mode
+      // material grid and size construction lines are only available in debug mode
       rows.addAll(<Widget>[
         ListTile(
           leading: const Icon(Icons.border_clear),

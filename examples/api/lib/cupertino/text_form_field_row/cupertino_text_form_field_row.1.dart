@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const FormSectionApp());
 
 class FormSectionApp extends StatelessWidget {
-  const FormSectionApp({Key? key}) : super(key: key);
+  const FormSectionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class FormSectionApp extends StatelessWidget {
 }
 
 class FromSectionExample extends StatelessWidget {
-  const FromSectionExample({Key? key}) : super(key: key);
+  const FromSectionExample({super.key});
 
   @override
   Widget build(BuildContext context) {

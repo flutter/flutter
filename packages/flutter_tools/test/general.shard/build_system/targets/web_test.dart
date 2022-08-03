@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/web/flutter_js.dart' as flutter_js;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/web/file_generators/flutter_js.dart' as flutter_js;
+import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -27,9 +28,9 @@ const List<String> kDart2jsLinuxArgs = <String>[
 ];
 
 void main() {
-  Testbed testbed;
-  Environment environment;
-  FakeProcessManager processManager;
+  late Testbed testbed;
+  late Environment environment;
+  late FakeProcessManager processManager;
   final Platform linux = FakePlatform(
     environment: <String, String>{},
   );
@@ -37,7 +38,7 @@ void main() {
     operatingSystem: 'windows',
     environment: <String, String>{},
   );
-  DepfileService depfileService;
+  late DepfileService depfileService;
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -80,8 +81,8 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+    expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -89,6 +90,8 @@ void main() {
     // Main
     expect(generated, contains('ui.webOnlyWarmupEngine('));
     expect(generated, contains('entrypoint.main as _'));
+  }, overrides: <Type, Generator>{
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
   test('version.json is created after release build', () => testbed.run(() async {
@@ -196,6 +199,8 @@ void main() {
 
     // Import.
     expect(generated, contains("import 'file:///other/lib/main.dart' as entrypoint;"));
+  }, overrides: <Type, Generator>{
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
   test('WebEntrypointTarget generates a plugin registrant for a file outside of main', () => testbed.run(() async {
@@ -210,7 +215,9 @@ void main() {
 
     // Import.
     expect(generated, contains("import 'file:///other/lib/main.dart' as entrypoint;"));
-    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+  }, overrides: <Type, Generator>{
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
 
@@ -226,8 +233,8 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+    expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -237,6 +244,7 @@ void main() {
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     Platform: () => windows,
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and init platform', () => testbed.run(() async {
@@ -249,9 +257,9 @@ void main() {
 
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
-    // Plugins
-    expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
+    // Plugins (the generated file is a noop)
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+    expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -259,7 +267,8 @@ void main() {
     // Main
     expect(generated, contains('ui.webOnlyWarmupEngine('));
     expect(generated, contains('entrypoint.main as _'));
-
+  }, overrides: <Type, Generator>{
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
   test('WebEntrypointTarget generates an entrypoint with a language version', () => testbed.run(() async {
@@ -273,6 +282,8 @@ void main() {
 
     // Language version
     expect(generated, contains('// @dart=2.8'));
+  }, overrides: <Type, Generator>{
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
   test('WebEntrypointTarget generates an entrypoint with a language version from a package config', () => testbed.run(() async {
@@ -288,6 +299,8 @@ void main() {
 
     // Language version
     expect(generated, contains('// @dart=2.7'));
+  }, overrides: <Type, Generator>{
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and without init platform', () => testbed.run(() async {
@@ -301,8 +314,8 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+    expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -310,6 +323,8 @@ void main() {
     // Main
     expect(generated, contains('ui.webOnlyWarmupEngine('));
     expect(generated, contains('entrypoint.main as _'));
+  }, overrides: <Type, Generator>{
+    TemplateRenderer: () => const MustacheTemplateRenderer(),
   }));
 
   test('Dart2JSTarget calls dart2js with expected args with csp', () => testbed.run(() async {
@@ -322,7 +337,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -358,7 +373,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -391,7 +406,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -423,7 +438,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -456,7 +471,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -489,7 +504,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -520,7 +535,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ], onRun: () {
@@ -552,7 +567,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
        '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -585,7 +600,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
        '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -619,7 +634,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.packages',
+        '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -676,9 +691,9 @@ void main() {
     // Depends on resource file.
     expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(),
       contains('a/a.txt'));
-    // Contains NOTICES
+    // Does NOT contain NOTICES
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('NOTICES'));
+      isNot(contains('NOTICES')));
   }));
 
   test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
