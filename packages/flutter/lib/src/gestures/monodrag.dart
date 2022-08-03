@@ -319,10 +319,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    // When multiple pointers move, they dispatch the PointerEvents. The PointerMoveEvents
-    // of each individual pointer considered a batch. The last PointerEvent.endOfBatch
-    // is true. which means this batch event ends.
-    // When the endOfBatch is true, the gesture updates.
+    // When multiple pointers move together, each pointer dispatches a PointerMoveEvent.
+    // They constitute a "batch". The last event of a batch has `endOfBatch` true, indicating
+    // the end of a batch, which is when the gesture updates.
     //
     //  * The gesture should only move after the pointer dispatched the PointerMoveEvent or
     //    PointerPanZoomUpdateEvent where the endOfBatch is true.
