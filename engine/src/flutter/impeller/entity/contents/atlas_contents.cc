@@ -50,7 +50,15 @@ void AtlasContents::SetBlendMode(Entity::BlendMode blend_mode) {
   blend_mode_ = blend_mode;
 }
 
+void AtlasContents::SetCullRect(std::optional<Rect> cull_rect) {
+  cull_rect_ = cull_rect;
+}
+
 std::optional<Rect> AtlasContents::GetCoverage(const Entity& entity) const {
+  if (cull_rect_.has_value()) {
+    return cull_rect_.value().TransformBounds(entity.GetTransformation());
+  }
+
   Rect bounding_box = {};
   for (size_t i = 0; i < texture_coords_.size(); i++) {
     auto matrix = transforms_[i];

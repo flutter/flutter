@@ -33,6 +33,8 @@ class AtlasContents final : public Contents {
 
   void SetColors(std::vector<Color> colors);
 
+  void SetCullRect(std::optional<Rect> cull_rect);
+
   void SetSamplerDescriptor(SamplerDescriptor desc);
 
   void SetAlpha(Scalar alpha);
@@ -53,6 +55,7 @@ class AtlasContents final : public Contents {
   std::vector<Color> colors_;
   std::vector<Matrix> transforms_;
   Entity::BlendMode blend_mode_;
+  std::optional<Rect> cull_rect_;
   Scalar alpha_ = 1.0;
   SamplerDescriptor sampler_descriptor_ = {};
 
