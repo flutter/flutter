@@ -341,7 +341,7 @@ final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
 Future<void> _runGeneralToolTests() async {
   const String fileName = 'output.json';
-  if (!File(fileName).existsSync()) {
+  if (!File(path.join(flutterRoot, 'dev', 'bots', 'output.json')).existsSync()) {
     throw Exception('TODO');
     // TODO(jasguerrero): create output file, https://github.com/flutter/flutter/issues/97539
   }
