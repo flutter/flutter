@@ -173,6 +173,7 @@ executable("flutter_windows_unittests") {
     "flutter_window_unittests.cc",
     "flutter_windows_engine_unittests.cc",
     "flutter_windows_texture_registrar_unittests.cc",
+    "flutter_windows_unittests.cc",
     "flutter_windows_view_unittests.cc",
     "keyboard_key_channel_handler_unittests.cc",
     "keyboard_key_embedder_handler_unittests.cc",
