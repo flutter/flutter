@@ -1752,8 +1752,8 @@ void main() {
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
 
-      // No toolbar.
-      expect(find.byType(CupertinoButton), findsNothing);
+      // Toolbar shows on mobile.
+      expect(find.byType(CupertinoButton), isTargetPlatformMobile ? findsNWidgets(2) : findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -2701,11 +2701,13 @@ void main() {
       // Double tap selecting the same word somewhere else is fine.
       await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
+      // First tap hides the toolbar, and retains the selection.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
+        const TextSelection(baseOffset: 0, extentOffset: 7),
       );
+      expect(find.byType(CupertinoButton), findsNothing);
+      // Second tap shows the toolbar, and retains the selection.
       await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
       await tester.pumpAndSettle();
       expect(
@@ -2716,11 +2718,12 @@ void main() {
 
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
+      // First tap moved the cursor and hides the toolbar.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8),
       );
+      expect(find.byType(CupertinoButton), findsNothing);
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
       expect(
