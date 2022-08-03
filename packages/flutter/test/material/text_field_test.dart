@@ -7324,7 +7324,7 @@ void main() {
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
 
       // Toolbar shows on iOS.
-      expect(find.byType(CupertinoButton), defaultTargetPlatform == TargetPlatform.macOS ? findsNothing : findsNWidgets(2));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(2) : findsNothing);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );

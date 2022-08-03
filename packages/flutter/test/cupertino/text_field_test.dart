@@ -1746,14 +1746,14 @@ void main() {
       await tester.tapAt(pos);
       await tester.pump(const Duration(milliseconds: 500));
       await tester.tapAt(pos);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Plain collapsed selection.
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
 
       // Toolbar shows on mobile.
-      expect(find.byType(CupertinoButton), isTargetPlatformMobile ? findsNWidgets(2) : findsNothing);
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(2) : findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
