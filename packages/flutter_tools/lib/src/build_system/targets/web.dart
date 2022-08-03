@@ -225,10 +225,12 @@ class Dart2JSTarget extends Target {
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
       if (csp) '--csp',
+      '--dump-info',
       '-o',
       outputJSFile.path,
       environment.buildDir.childFile('app.dill').path, // dartfile
     ]);
+    globals.logger.printError(javaScriptResult.stdout.toString());
     if (javaScriptResult.exitCode != 0) {
       throw Exception(_collectOutput(javaScriptResult));
     }
