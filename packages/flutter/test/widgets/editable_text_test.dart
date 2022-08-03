@@ -12661,10 +12661,6 @@ void main() {
           state.spellCheckConfiguration!.spellCheckService.runtimeType,
           equals(DefaultSpellCheckService),
         );
-        expect(
-          state.spellCheckSuggestionsHandler.runtimeType,
-          equals(SpellCheckSuggestionsHandler),
-        );
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
@@ -12697,10 +12693,6 @@ void main() {
       expect(
         state.spellCheckConfiguration!.spellCheckService.runtimeType,
         equals(FakeSpellCheckService),
-      );
-      expect(
-        state.spellCheckSuggestionsHandler.runtimeType,
-        equals(SpellCheckSuggestionsHandler),
       );
     });
 
