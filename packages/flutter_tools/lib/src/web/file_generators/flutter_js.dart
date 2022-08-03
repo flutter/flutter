@@ -18,7 +18,7 @@ if (!_flutter) {
 }
 _flutter.loader = null;
 
-(function() {
+(function () {
   "use strict";
   /**
    * Wraps `promise` in a timeout of the given `duration` in ms.
@@ -27,27 +27,32 @@ _flutter.loader = null;
    * if `promise` takes longer to complete than `duration`. In that case,
    * `debugName` is used to compose a legible error message.
    *
-   * If `duration` is <= 0, the original `promise` is returned unchanged.
+   * If `duration` is < 0, the original `promise` is returned unchanged.
    * @param {Promise} promise
    * @param {number} duration
    * @param {string} debugName
    * @returns {Promise} a wrapped promise.
    */
   async function timeout(promise, duration, debugName) {
-    if (duration <= 0) {
+    if (duration < 0) {
       return promise;
     }
-    let _timeoutId;
+    let timeoutId;
     const _clock = new Promise((_, reject) => {
-      _timeoutId = setTimeout(() => {
-        reject(new Error(`${debugName} took more than ${duration}ms to resolve. Moving on.`, {
-          cause: timeout,
-        }));
+      timeoutId = setTimeout(() => {
+        reject(
+          new Error(
+            `${debugName} took more than ${duration}ms to resolve. Moving on.`,
+            {
+              cause: timeout,
+            }
+          )
+        );
       }, duration);
     });
 
     return Promise.race([promise, _clock]).finally(() => {
-      clearTimeout(_timeoutId);
+      clearTimeout(timeoutId);
     });
   }
 
@@ -68,20 +73,28 @@ _flutter.loader = null;
     loadServiceWorker(settings) {
       if (!("serviceWorker" in navigator) || settings == null) {
         // In the future, settings = null -> uninstall service worker?
-        return Promise.reject(new Error("Service worker not supported (or configured)."));
+        return Promise.reject(
+          new Error("Service worker not supported (or configured).")
+        );
       }
       const {
         serviceWorkerVersion,
-        serviceWorkerUrl = "flutter_service_worker.js?v=" + serviceWorkerVersion,
+        serviceWorkerUrl = "flutter_service_worker.js?v=" +
+          serviceWorkerVersion,
         timeoutMillis = 4000,
       } = settings;
 
-      const serviceWorkerActivation = navigator.serviceWorker.register(serviceWorkerUrl)
+      const serviceWorkerActivation = navigator.serviceWorker
+        .register(serviceWorkerUrl)
         .then(this._getNewServiceWorker)
         .then(this._waitForServiceWorkerActivation);
 
-        // Timeout race promise
-      return timeout(serviceWorkerActivation, timeoutMillis, "prepareServiceWorker");
+      // Timeout race promise
+      return timeout(
+        serviceWorkerActivation,
+        timeoutMillis,
+        "prepareServiceWorker"
+      );
     }
 
     /**
@@ -126,7 +139,9 @@ _flutter.loader = null;
 
       if (!serviceWorker || serviceWorker.state == "activated") {
         if (!serviceWorker) {
-          return Promise.reject(new Error("Cannot activate a null service worker!"));
+          return Promise.reject(
+            new Error("Cannot activate a null service worker!")
+          );
         } else {
           console.debug("Service worker already active.");
           return Promise.resolve();
@@ -143,111 +158,151 @@ _flutter.loader = null;
     }
   }
 
-  class FlutterLoader {
+  /**
+   * Handles injecting the main Flutter web entrypoint (main.dart.js), and notifying
+   * the user when Flutter is ready, through `didCreateEngineInitializer`.
+   *
+   * @see https://docs.flutter.dev/development/platform-integration/web/initialization
+   */
+  class FlutterEntrypointLoader {
     /**
-     * Creates a FlutterLoader, and initializes its instance methods.
+     * Creates a FlutterEntrypointLoader.
      */
     constructor() {
-      // TODO: Move the below methods to "#private" once supported by all the browsers
-      // we support. In the meantime, we use the "revealing module" pattern.
-
       // Watchdog to prevent injecting the main entrypoint multiple times.
-      this._scriptLoaded = null;
-
-      // Resolver for the pending promise returned by loadEntrypoint.
-      this._didCreateEngineInitializerResolve = null;
-
-      // TODO: Make FlutterLoader extend EventTarget once Safari is mature enough
-      // to support EventTarget() constructor.
-      // @see: https://caniuse.com/mdn-api_eventtarget_eventtarget
-      this._eventTarget = document.createElement("custom-event-target");
-
-      // The event of the synthetic CustomEvent that we use to signal that the
-      // entrypoint is loaded.
-      this._eventName = "flutter:entrypoint-loaded";
-
-      // Called by Flutter web.
-      // Bound to `this` now, so "this" is preserved across JS <-> Flutter jumps.
-      this.didCreateEngineInitializer = this._didCreateEngineInitializer.bind(this);
+      this._scriptLoaded = false;
     }
 
     /**
-     * Initializes the main.dart.js with/without serviceWorker.
+     * Loads flutter main entrypoint, specified by `entrypointUrl`, and calls a
+     * user-specified `onEntrypointLoaded` callback with an EngineInitializer
+     * object when it's done.
+     *
      * @param {*} options
-     * @returns a Promise that will eventually resolve with an EngineInitializer,
-     * or will be rejected with the error caused by the loader.
+     * @returns {Promise?} that will eventually resolve with an EngineInitializer,
+     * or will be rejected with the error caused by the loader. If the user supplies
+     * an `onEntrypointLoaded` callback, this returns null.
      */
     async loadEntrypoint(options) {
-      const {
-        entrypointUrl = "main.dart.js",
-        serviceWorker,
-      } = (options || {});
+      const { entrypointUrl = "main.dart.js", onEntrypointLoaded } =
+        options || {};
 
-      try {
-        // This method could be injected as loadEntrypoint config instead, also
-        // dynamically imported when this becomes a ESModule.
-        await new FlutterServiceWorkerLoader().loadServiceWorker(serviceWorker);
-      } catch (e) {
-        // Regardless of what happens with the injection of the SW, the show must go on
-        console.warn(e);
-      }
-      // This method could also be configurable, to attach new load techniques
-      return this._loadEntrypoint(entrypointUrl);
+      return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded);
     }
 
     /**
-     * Registers a listener for the entrypoint-loaded events fired from this loader.
+     * Resolves the promise created by loadEntrypoint, and calls the `onEntrypointLoaded`
+     * function supplied by the user (if needed).
      *
-     * @param {Function} entrypointLoadedCallback
-     * @returns {undefined}
-     */
-    onEntrypointLoaded(entrypointLoadedCallback) {
-      this._eventTarget.addEventListener(this._eventName, entrypointLoadedCallback);
-      // Disable the promise resolution
-      this._didCreateEngineInitializerResolve = null;
-    }
-
-    /**
-     * Resolves the promise created by loadEntrypoint once, and dispatches an
-     * `this._eventName` event.
+     * Called by Flutter through `_flutter.loader.didCreateEngineInitializer` method,
+     * which is bound to the correct instance of the FlutterEntrypointLoader by
+     * the FlutterLoader object.
      *
-     * Called by Flutter through the public `didCreateEngineInitializer` method,
-     * which is bound to the correct instance of the FlutterLoader on the page.
-     * @param {Function} engineInitializer
+     * @param {Function} engineInitializer @see https://github.com/flutter/engine/blob/main/lib/web_ui/lib/src/engine/js_interop/js_loader.dart#L42
      */
-    _didCreateEngineInitializer(engineInitializer) {
-      if (typeof this._didCreateEngineInitializerResolve == "function") {
+    didCreateEngineInitializer(engineInitializer) {
+      if (typeof this._didCreateEngineInitializerResolve === "function") {
         this._didCreateEngineInitializerResolve(engineInitializer);
         // Remove the resolver after the first time, so Flutter Web can hot restart.
         this._didCreateEngineInitializerResolve = null;
       }
-      this._eventTarget.dispatchEvent(new CustomEvent(this._eventName, {
-        detail: engineInitializer
-      }));
+      if (typeof this._onEntrypointLoaded === "function") {
+        this._onEntrypointLoaded(engineInitializer);
+      }
     }
 
-    _loadEntrypoint(entrypointUrl) {
-      if (!this._scriptLoaded) {
-        console.debug("Injecting <script> tag.");
-        this._scriptLoaded = new Promise((resolve, reject) => {
-          let scriptTag = document.createElement("script");
-          scriptTag.src = entrypointUrl;
-          scriptTag.type = "application/javascript";
-          // Cache the resolve, so it can be called from Flutter.
-          // Note: Flutter hot restart doesn't re-create this promise, so this
-          // can only be called once. Use onEngineInitialized for a stream of
-          // engineInitialized events, that handle hot restart better!
-          this._didCreateEngineInitializerResolve = resolve;
-          scriptTag.addEventListener("error", reject);
-          document.body.append(scriptTag);
-        });
-      }
+    /**
+     * Injects a script tag into the DOM, and configures this loader to be able to
+     * handle the "entrypoint loaded" notifications received from Flutter web.
+     *
+     * @param {string} entrypointUrl the URL of the script that will initialize
+     *                 Flutter.
+     * @param {Function} onEntrypointLoaded a callback that will be called when
+     *                   Flutter web notifies this object that the entrypoint is
+     *                   loaded.
+     * @returns {Promise?} a promise that resolves when the entrypoint is loaded
+     *                     (if `onEntrypointLoaded` is not a function), or null.
+     */
+    _loadEntrypoint(entrypointUrl, onEntrypointLoaded) {
+      const useCallback = typeof onEntrypointLoaded === "function";
 
-      return this._scriptLoaded;
+      if (!this._scriptLoaded) {
+        this._scriptLoaded = true;
+        const scriptTag = this._createScriptTag(entrypointUrl);
+        if (useCallback) {
+          // Just inject the script tag, and return nothing; Flutter will call
+          // `didCreateEngineInitializer` when it's done.
+          console.debug("Injecting <script> tag. Using callback.");
+          this._onEntrypointLoaded = onEntrypointLoaded;
+          document.body.append(scriptTag);
+        } else {
+          // Inject the script tag and return a promise that will get resolved
+          // with the EngineInitializer object from Flutter when it calls
+          // `didCreateEngineInitializer` later.
+          return new Promise((resolve, reject) => {
+            console.debug(
+              "Injecting <script> tag. Using Promises. Use the callback approach instead!"
+            );
+            this._didCreateEngineInitializerResolve = resolve;
+            scriptTag.addEventListener("error", reject);
+            document.body.append(scriptTag);
+          });
+        }
+        return null;
+      }
+    }
+
+    /**
+     * Creates a script tag for the given URL.
+     * @param {string} url
+     * @returns {HTMLScriptElement}
+     */
+    _createScriptTag(url) {
+      const scriptTag = document.createElement("script");
+      scriptTag.type = "application/javascript";
+      scriptTag.src = url;
+      return scriptTag;
+    }
+  }
+
+  /**
+   * The public interface of _flutter.loader. Exposes two methods:
+   * * loadEntrypoint (which coordinates the default Flutter web loading procedure)
+   * * didCreateEngineInitializer (which is called by Flutter to notify that its
+   *                              Engine is ready to be initialized)
+   */
+  class FlutterLoader {
+    /**
+     * Initializes the Flutter web app.
+     * @param {*} options
+     * @returns {Promise?} a (Deprecated) Promise that will eventually resolve
+     *                     with an EngineInitializer, or will be rejected with
+     *                     any error caused by the loader. Or Null, if the user
+     *                     supplies an `onEntrypointLoaded` Function as an option.
+     */
+    async loadEntrypoint(options) {
+      const { serviceWorker, ...entrypoint } = options || {};
+
+      // The FlutterServiceWorkerLoader instance could be injected as a dependency
+      // (and dynamically imported from a module if not present).
+      const serviceWorkerLoader = new FlutterServiceWorkerLoader();
+      await serviceWorkerLoader.loadServiceWorker(serviceWorker).catch(e => {
+        // Regardless of what happens with the injection of the SW, the show must go on
+        console.warn("Exception while loading service worker:", e);
+      });
+
+      // The FlutterEntrypointLoader instance could be injected as a dependency
+      // (and dynamically imported from a module if not present).
+      const entrypointLoader = new FlutterEntrypointLoader();
+      // Install the `didCreateEngineInitializer` listener where Flutter web expects it to be.
+      this.didCreateEngineInitializer =
+        entrypointLoader.didCreateEngineInitializer.bind(entrypointLoader);
+      return entrypointLoader.loadEntrypoint(entrypoint);
     }
   }
 
   _flutter.loader = new FlutterLoader();
-}());
+})();
+
 ''';
 }

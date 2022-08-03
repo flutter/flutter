@@ -25,16 +25,17 @@ found in the LICENSE file. -->
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
+        onEntrypointLoaded: onEntrypointLoaded,
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         }
       });
+
       // Once the entrypoint is ready, do things!
-      _flutter.loader.onEntrypointLoaded(async function(event) {
-        const engineInitializer = event.detail;
+      async function onEntrypointLoaded(engineInitializer) {
         const appRunner = await engineInitializer.initializeEngine();
         appRunner.runApp();
-      });
+      }
     });
   </script>
 </body>
