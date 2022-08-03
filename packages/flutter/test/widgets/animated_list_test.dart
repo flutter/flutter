@@ -358,7 +358,7 @@ void main() {
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
     });
 
-    testWidgets('passes correctly derived index of findChildIndexCallback to inner SliverChildBuilderDelegate', (WidgetTester tester) async {
+    testWidgets('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
       final List<int> items = <int>[0, 1, 2, 3];
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
@@ -369,7 +369,7 @@ void main() {
             slivers: <Widget>[
               SliverAnimatedList(
                 key: listKey,
-                initialItemCount: items.length, // we will insert one item later
+                initialItemCount: items.length,
                 itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return _StatefulListItem(
                     key: ValueKey<int>(items[index]),
