@@ -686,6 +686,10 @@ class WebDevFS implements DevFS {
   Future<ConnectionResult?> connect(bool useDebugExtension) {
     final Completer<ConnectionResult> firstConnection =
         Completer<ConnectionResult>();
+    // Note there is an asynchronous gap between this being set to true and
+    // [firstConnection] completing; thus test the boolean to determine if
+    // the current connection is the first.
+    bool foundFirstConnection = false;
     _connectedApps =
         dwds.connectedApps.listen((AppConnection appConnection) async {
       try {
@@ -693,9 +697,10 @@ class WebDevFS implements DevFS {
             ? await (_cachedExtensionFuture ??=
                 dwds.extensionDebugConnections.stream.first)
             : await dwds.debugConnection(appConnection);
-        if (firstConnection.isCompleted) {
+        if (foundFirstConnection) {
           appConnection.runMain();
         } else {
+          foundFirstConnection = true;
           final vm_service.VmService vmService = await createVmServiceDelegate(
             Uri.parse(debugConnection.uri),
             logger: globals.logger,
