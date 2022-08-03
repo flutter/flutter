@@ -29,14 +29,13 @@ static const CGFloat kStandardTimeOut = 60.0;
   [self.app launch];
 }
 - (void)testPlatformViewFocus {
-  [self waitForAndTapElement:self.app.buttons[@"platform view focus test"]];
-  /// Tries to wait and tap the button the second time, if the first time failed.
-  /// https://github.com/flutter/flutter/pull/90535
-  BOOL newPageAppeared = [self.app.textFields[@"platform_view[0]"] waitForExistenceWithTimeout:kStandardTimeOut];
-  if (!newPageAppeared) {
-    NSLog(@"First try failed. The tree is %@", self.app.debugDescription);
-    [self waitForAndTapElement:self.app.buttons[@"platform view focus test"]];
+  XCUIElement *entranceButton = self.app.buttons[@"platform view focus test"];
+  BOOL entranceButtonAppeared = [entranceButton waitForExistenceWithTimeout:kStandardTimeOut];
+  if (!entranceButtonAppeared) {
+    NSLog(@"The element tree is %@", self.app.debugDescription);
+    XCTFail(@"Entrance button should have appeared by now.");
   }
+  [entranceButton tap];
 
   XCUIElement *platformView = self.app.textFields[@"platform_view[0]"];
   XCTAssertTrue([platformView waitForExistenceWithTimeout:kStandardTimeOut]);
@@ -52,13 +51,6 @@ static const CGFloat kStandardTimeOut = 60.0;
   [platformView tap];
   XCTAssertTrue(platformView.flt_hasKeyboardFocus);
   XCTAssertFalse(flutterTextField.flt_hasKeyboardFocus);
-}
-
-- (void)waitForAndTapElement:(XCUIElement *)element {
-  NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
-  [self expectationForPredicate:hittable evaluatedWithObject:element handler:nil];
-  [self waitForExpectationsWithTimeout:30.0 handler:nil];
-  [element tap];
 }
 
 @end
