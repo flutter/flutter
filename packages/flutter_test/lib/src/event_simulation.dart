@@ -36,7 +36,6 @@ String? _keyLabel(LogicalKeyboardKey key) {
   return null;
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// A class that serves as a namespace for a bunch of keyboard-key generation
 /// utilities.
 class KeyEventSimulator {
