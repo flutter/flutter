@@ -28,6 +28,12 @@ class SkiaException implements Exception {
 
   /// A message describing the error.
   final String message;
+
+  /// Returns a description of the Skia exception.
+  ///
+  /// The description always contains the [message].
+  @override
+  String toString() => 'SkiaException: $message';
 }
 
 /// A client for uploading image tests and making baseline requests to the
@@ -334,6 +340,13 @@ class SkiaGoldClient {
     final String/*!*/ resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
+      String? resultContents;
+      final File resultFile = workDirectory.childFile(fs.path.join(
+        'result-state.json',
+      ));
+      if(await resultFile.exists()) {
+        resultContents = await resultFile.readAsString();
+      }
       final StringBuffer buf = StringBuffer()
         ..writeln('Unexpected Gold tryjobAdd failure.')
         ..writeln('Tryjob execution for golden file test $testName failed for')
@@ -342,7 +355,9 @@ class SkiaGoldClient {
         ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}')
-        ..writeln();
+        ..writeln()
+        ..writeln()
+        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
       throw SkiaException(buf.toString());
     }
   }
