@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonDecode;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -395,6 +396,53 @@ void main() {
       action: TextInputAction.emergencyCall,
       serializedActionName: 'TextInputAction.emergencyCall',
     );
+  });
+
+  testWidgets('onAppPrivateCommand does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+
+    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'args': <dynamic>[
+        -1, // The magic clint id that points to the current client.
+        jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}'),
+      ],
+      'method': 'TextInputClient.performPrivateCommand',
+    });
+
+    Object? error;
+    try {
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
   });
 
   group('Infer keyboardType from autofillHints', () {
@@ -11185,38 +11233,13 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
-  testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+  group('Selection changed scroll into view', () {
     final String text = List<int>.generate(64, (int index) => index).join('\n');
     final TextEditingController controller = TextEditingController(text: text);
     final ScrollController scrollController = ScrollController();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SizedBox(
-              height: 32,
-              child: EditableText(
-                key: key,
-                focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                controller: controller,
-                scrollController: scrollController,
-                maxLines: 2,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final TextSelectionDelegate textSelectionDelegate = key.currentState!;
-
     late double maxScrollExtent;
-    Future<void> resetSelectionAndScrollOffset([bool setMaxScrollExtent = true]) async {
+
+    Future<void> resetSelectionAndScrollOffset(WidgetTester tester, {required bool setMaxScrollExtent}) async {
       controller.value = controller.value.copyWith(
         text: text,
         selection: controller.selection.copyWith(baseOffset: 0, extentOffset: 1),
@@ -11229,49 +11252,93 @@ void main() {
       expect(scrollController.offset, targetOffset);
     }
 
-    // Cut
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, maxScrollExtent);
 
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), 0.0);
+    Future<TextSelectionDelegate> pumpLongScrollableText(WidgetTester tester) async {
+      final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
 
-    // Paste
-    await resetSelectionAndScrollOffset();
-    await textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, maxScrollExtent);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                height: 32,
+                child: EditableText(
+                  key: key,
+                  focusNode: focusNode,
+                  style: Typography.material2018().black.subtitle1!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  scrollController: scrollController,
+                  maxLines: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 
-    await resetSelectionAndScrollOffset();
-    await textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), 0.0);
+      // Populate [maxScrollExtent].
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      return key.currentState!;
+    }
 
-    // Select all
-    await resetSelectionAndScrollOffset(false);
-    textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, 0.0);
+    testWidgets('SelectAll toolbar action will not set max scroll on designated platforms', (WidgetTester tester) async {
+      final TextSelectionDelegate textSelectionDelegate = await pumpLongScrollableText(tester);
 
-    await resetSelectionAndScrollOffset(false);
-    textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), maxScrollExtent);
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset, 0.0);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    // Copy
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
-    await tester.pump();
-    expect(scrollController.offset, maxScrollExtent);
+    testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
+      final TextSelectionDelegate textSelectionDelegate = await pumpLongScrollableText(tester);
 
-    await resetSelectionAndScrollOffset();
-    textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(scrollController.offset.roundToDouble(), 0.0);
+      // Cut
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, maxScrollExtent);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), 0.0);
+
+      // Paste
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      await textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, maxScrollExtent);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      await textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), 0.0);
+
+      // Select all
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, 0.0);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
+      textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), maxScrollExtent);
+
+      // Copy
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
+      await tester.pump();
+      expect(scrollController.offset, maxScrollExtent);
+
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), 0.0);
+    }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
   testWidgets('Should not scroll on paste if caret already visible', (WidgetTester tester) async {
@@ -12496,6 +12563,40 @@ void main() {
       );
     });
   });
+
+  group('magnifier', () {
+    testWidgets('should build nothing by default', (WidgetTester tester) async {
+      final EditableText editableText = EditableText(
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: editableText,
+        ),
+      );
+
+      final BuildContext context = tester.firstElement(find.byType(EditableText));
+
+      expect(
+        editableText.magnifierConfiguration.magnifierBuilder(
+          context,
+          MagnifierController(),
+          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty())
+        ),
+        isNull
+      );
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -12547,13 +12648,22 @@ class MockTextFormatter extends TextInputFormatter {
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
-    return Container();
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox();
   }
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    return Container();
+    return const SizedBox();
   }
 
   @override
@@ -12623,7 +12733,16 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   final VoidCallback? onCut;
 
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
     final Offset selectionMidpoint = position;
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
     final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1

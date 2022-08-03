@@ -109,6 +109,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   /// Sets a new Android view controller.
   @override
   set controller(AndroidViewController controller) {
+    assert(!_isDisposed);
     assert(_viewController != null);
     assert(controller != null);
     if (_viewController == controller) {
@@ -140,6 +141,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   }
 
   void _onPlatformViewCreated(int id) {
+    assert(!_isDisposed);
     markNeedsSemanticsUpdate();
   }
 
@@ -179,8 +181,14 @@ class RenderAndroidView extends PlatformViewRenderBox {
       targetSize = size;
       if (_viewController.isCreated) {
         _currentTextureSize = await _viewController.setSize(targetSize);
+        if (_isDisposed) {
+          return;
+        }
       } else {
         await _viewController.create(size: targetSize);
+        if (_isDisposed) {
+          return;
+        }
         _currentTextureSize = targetSize;
       }
       // We've resized the platform view to targetSize, but it is possible that
@@ -248,6 +256,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void dispose() {
     _isDisposed = true;
     _clipRectLayer.layer = null;
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     super.dispose();
   }
 

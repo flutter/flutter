@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:io' show SocketException, WebSocket, HttpClient;
+import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';

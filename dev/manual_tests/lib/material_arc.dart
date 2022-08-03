@@ -68,18 +68,20 @@ class _PointDemoPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint();
 
-    if (arc.center != null)
+    if (arc.center != null) {
       drawPoint(canvas, arc.center!, Colors.grey.shade400);
+    }
 
     paint
       ..isAntiAlias = false // Work-around for github.com/flutter/flutter/issues/5720
       ..color = Colors.green.withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
-    if (arc.center != null && arc.radius != null)
+    if (arc.center != null && arc.radius != null) {
       canvas.drawCircle(arc.center!, arc.radius!, paint);
-    else
+    } else {
       canvas.drawLine(arc.begin!, arc.end!, paint);
+    }
 
     drawPoint(canvas, arc.begin!, Colors.green);
     drawPoint(canvas, arc.end!, Colors.red);
@@ -132,19 +134,21 @@ class _PointDemoState extends State<_PointDemo> {
 
   Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
-    if (_dragTarget != null)
+    if (_dragTarget != null) {
       return _IgnoreDrag();
+    }
 
     final RenderBox? box = _painterKey.currentContext!.findRenderObject() as RenderBox?;
     final double startOffset = (box!.localToGlobal(_begin!) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end!) - position).distanceSquared;
     setState(() {
-      if (startOffset < endOffset && startOffset < _kTargetSlop)
+      if (startOffset < endOffset && startOffset < _kTargetSlop) {
         _dragTarget = _DragTarget.start;
-      else if (endOffset < _kTargetSlop)
+      } else if (endOffset < _kTargetSlop) {
         _dragTarget = _DragTarget.end;
-      else
+      } else {
         _dragTarget = null;
+      }
     });
 
     return _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
@@ -293,19 +297,21 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
-    if (_dragTarget != null)
+    if (_dragTarget != null) {
       return _IgnoreDrag();
+    }
 
     final RenderBox? box = _painterKey.currentContext?.findRenderObject() as RenderBox?;
     final double startOffset = (box!.localToGlobal(_begin!.center) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end!.center) - position).distanceSquared;
     setState(() {
-      if (startOffset < endOffset && startOffset < _kTargetSlop)
+      if (startOffset < endOffset && startOffset < _kTargetSlop) {
         _dragTarget = _DragTarget.start;
-      else if (endOffset < _kTargetSlop)
+      } else if (endOffset < _kTargetSlop) {
         _dragTarget = _DragTarget.end;
-      else
+      } else {
         _dragTarget = null;
+      }
     });
     return _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
@@ -424,8 +430,9 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 
   Future<void> _play(_ArcDemo demo) async {
     await demo.controller.forward();
-    if (demo.key.currentState != null && demo.key.currentState!.mounted)
+    if (demo.key.currentState != null && demo.key.currentState!.mounted) {
       demo.controller.reverse();
+    }
   }
 
   @override

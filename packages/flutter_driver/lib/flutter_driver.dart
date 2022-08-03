@@ -26,6 +26,7 @@ export 'src/common/render_tree.dart';
 export 'src/common/request_data.dart';
 export 'src/common/semantics.dart';
 export 'src/common/text.dart';
+export 'src/common/text_input_action.dart';
 export 'src/common/wait.dart';
 export 'src/driver/common.dart';
 export 'src/driver/driver.dart';
