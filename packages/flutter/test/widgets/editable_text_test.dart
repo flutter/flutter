@@ -12658,7 +12658,7 @@ void main() {
           tester.state<EditableTextState>(find.byType(EditableText));
         expect(state.spellCheckEnabled, isTrue);
         expect(
-          state.spellCheckConfiguration!.spellCheckService.runtimeType,
+          state.spellCheckConfiguration.spellCheckService.runtimeType,
           equals(DefaultSpellCheckService),
         );
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
@@ -12691,7 +12691,7 @@ void main() {
       final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
       expect(
-        state.spellCheckConfiguration!.spellCheckService.runtimeType,
+        state.spellCheckConfiguration.spellCheckService.runtimeType,
         equals(FakeSpellCheckService),
       );
     });
