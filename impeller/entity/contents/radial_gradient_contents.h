@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/path_contents.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
@@ -36,6 +37,8 @@ class RadialGradientContents final : public PathContents {
 
   void SetColors(std::vector<Color> colors);
 
+  void SetTileMode(Entity::TileMode tile_mode);
+
   const std::vector<Color>& GetColors() const;
 
  private:
@@ -43,6 +46,7 @@ class RadialGradientContents final : public PathContents {
   Point center_;
   Scalar radius_;
   std::vector<Color> colors_;
+  Entity::TileMode tile_mode_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RadialGradientContents);
 };
