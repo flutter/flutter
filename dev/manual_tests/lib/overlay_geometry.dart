@@ -105,8 +105,9 @@ class CardBuilder extends SliverChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (index >= cardModels.length)
+    if (index >= cardModels.length) {
       return null;
+    }
     final CardModel cardModel = cardModels[index];
     return GestureDetector(
       key: cardModel.key,
