@@ -17,8 +17,8 @@ class CkVertices extends ManagedSkiaObject<SkVertices> implements ui.Vertices {
     List<ui.Color>? colors,
     List<int>? indices,
   }) {
-    assert(mode != null); // ignore: unnecessary_null_comparison
-    assert(positions != null); // ignore: unnecessary_null_comparison
+    assert(mode != null);
+    assert(positions != null);
     if (textureCoordinates != null &&
         textureCoordinates.length != positions.length) {
       throw ArgumentError(
@@ -49,8 +49,8 @@ class CkVertices extends ManagedSkiaObject<SkVertices> implements ui.Vertices {
     Int32List? colors,
     Uint16List? indices,
   }) {
-    assert(mode != null); // ignore: unnecessary_null_comparison
-    assert(positions != null); // ignore: unnecessary_null_comparison
+    assert(mode != null);
+    assert(positions != null);
     if (textureCoordinates != null &&
         textureCoordinates.length != positions.length) {
       throw ArgumentError(

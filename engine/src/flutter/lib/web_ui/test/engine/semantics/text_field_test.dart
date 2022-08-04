@@ -122,7 +122,7 @@ void testMain() {
       expect(domDocument.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
       expect(textField.editableElement, strategy.domElement);
-      expect((textField.editableElement as dynamic).value, 'hello'); // ignore: avoid_dynamic_calls
+      expect((textField.editableElement as dynamic).value, 'hello');
       expect(textField.editableElement.getAttribute('aria-label'), 'greeting');
       expect(textField.editableElement.style.width, '10px');
       expect(textField.editableElement.style.height, '15px');
@@ -137,7 +137,7 @@ void testMain() {
       expect(domDocument.activeElement, domDocument.body);
       expect(appHostNode.activeElement, null);
       expect(strategy.domElement, null);
-      expect((textField.editableElement as dynamic).value, 'bye'); // ignore: avoid_dynamic_calls
+      expect((textField.editableElement as dynamic).value, 'bye');
       expect(textField.editableElement.getAttribute('aria-label'), 'farewell');
       expect(textField.editableElement.style.width, '12px');
       expect(textField.editableElement.style.height, '17px');

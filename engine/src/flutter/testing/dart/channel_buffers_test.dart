@@ -52,7 +52,6 @@ void main() {
 
     // Ignoring the returned future because the completion of the drain is
     // communicated using the `completer`.
-    // ignore: unawaited_futures
     buffers.drain(channel, (ByteData? drainedData, ui.PlatformMessageResponseCallback drainedCallback) async {
       log.add('callback');
       completer.complete();

@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:async_helper/async_minitest.dart'; // ignore: unused_import
-import 'package:expect/expect.dart'; // ignore: unused_import
-
-import 'src/matchers.dart'; // ignore: unused_import
 import 'src/test_suite.dart';
 
 export 'package:async_helper/async_minitest.dart' hide test;

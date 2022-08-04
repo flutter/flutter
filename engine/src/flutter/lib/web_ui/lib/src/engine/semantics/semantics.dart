@@ -382,7 +382,7 @@ abstract class RoleManager {
   ///
   /// A single role object manages exactly one [SemanticsObject].
   RoleManager(this.role, this.semanticsObject)
-      : assert(semanticsObject != null); // ignore: unnecessary_null_comparison
+      : assert(semanticsObject != null);
 
   /// Role identifier.
   final Role role;
@@ -869,7 +869,7 @@ class SemanticsObject {
   void updateSelf(SemanticsNodeUpdate update) {
     // Update all field values and their corresponding dirty flags before
     // applying the updates to the DOM.
-    assert(update.flags != null); // ignore: unnecessary_null_comparison
+    assert(update.flags != null);
     if (_flags != update.flags) {
       _flags = update.flags;
       _markFlagsDirty();
@@ -1473,8 +1473,8 @@ class EngineSemanticsOwner {
   /// allows the same node to be detached from one parent in the tree and
   /// reattached to another parent.
   void _attachObject({required SemanticsObject parent, required SemanticsObject child}) {
-    assert(child != null); // ignore: unnecessary_null_comparison
-    assert(parent != null); // ignore: unnecessary_null_comparison
+    assert(child != null);
+    assert(parent != null);
     child._parent = parent;
     _attachments[child.id] = parent;
   }
@@ -1549,8 +1549,6 @@ class EngineSemanticsOwner {
 
   /// The top-level DOM element of the semantics DOM element tree.
   DomElement? _rootSemanticsElement;
-
-  // ignore: prefer_function_declarations_over_variables
   TimestampFunction _now = () => DateTime.now();
 
   void debugOverrideTimestampFunction(TimestampFunction value) {
@@ -1615,7 +1613,7 @@ class EngineSemanticsOwner {
   /// The default mode is [AccessibilityMode.unknown].
   AccessibilityMode get mode => _mode;
   set mode(AccessibilityMode value) {
-    assert(value != null); // ignore: unnecessary_null_comparison
+    assert(value != null);
     _mode = value;
   }
 

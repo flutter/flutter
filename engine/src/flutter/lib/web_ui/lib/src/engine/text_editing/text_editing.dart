@@ -355,7 +355,7 @@ class AutofillInfo {
   factory AutofillInfo.fromFrameworkMessage(Map<String, dynamic> autofill,
       {TextCapitalizationConfig textCapitalization =
           const TextCapitalizationConfig.defaultCapitalization()}) {
-    assert(autofill != null); // ignore: unnecessary_null_comparison
+    assert(autofill != null);
     final String uniqueIdentifier = autofill.readString('uniqueIdentifier');
     final List<dynamic>? hintsList = autofill.tryList('hints');
     final String? firstHint = (hintsList == null || hintsList.isEmpty) ? null : hintsList.first as String;

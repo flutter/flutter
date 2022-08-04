@@ -151,6 +151,6 @@ class PointerData {
 
 class PointerDataPacket {
   const PointerDataPacket({this.data = const <PointerData>[]})
-      : assert(data != null); // ignore: unnecessary_null_comparison
+      : assert(data != null);
   final List<PointerData> data;
 }

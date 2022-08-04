@@ -167,7 +167,7 @@ enum Brightness {
 // TODO(dit): see https://github.com/flutter/flutter/issues/33614.
 class CallbackHandle {
   CallbackHandle.fromRawHandle(this._handle)
-    : assert(_handle != null, "'_handle' must not be null."); // ignore: unnecessary_null_comparison
+    : assert(_handle != null, "'_handle' must not be null.");
 
   final int _handle;
 

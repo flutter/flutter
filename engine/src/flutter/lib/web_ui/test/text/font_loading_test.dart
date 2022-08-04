@@ -97,7 +97,7 @@ Future<void> testMain() async {
           fontFamily: 'Blehm');
       final Completer<void> completer = Completer<void>();
       domWindow.requestAnimationFrame(allowInterop((_) { completer.complete();}) );
-      await (completer.future); // ignore: unnecessary_parenthesis
+      await completer.future;
       window.onPlatformMessage = oldHandler;
       expect(actualName, 'flutter/system');
       expect(message, '{"type":"fontsChange"}');

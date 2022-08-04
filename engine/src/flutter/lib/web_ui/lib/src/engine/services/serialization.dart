@@ -122,7 +122,7 @@ class WriteBuffer {
 /// The byte order used is [Endian.host] throughout.
 class ReadBuffer {
   /// Creates a [ReadBuffer] for reading from the specified [data].
-  ReadBuffer(this.data) : assert(data != null); // ignore: unnecessary_null_comparison
+  ReadBuffer(this.data) : assert(data != null);
 
   /// The underlying data being read.
   final ByteData data;
