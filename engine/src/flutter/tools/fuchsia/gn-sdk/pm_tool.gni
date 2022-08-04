@@ -84,7 +84,10 @@ template("fuchsia_pm_tool") {
       package_name,
     ]
     if (command == "build") {
+      assert(fuchsia_target_api_level != -1,
+             "Must set a target api level when creating an archive")
       args += [
+        "--api-level=${fuchsia_target_api_level}",
         command,
         "-output-package-manifest",
         rebase_path(_pkg_output_manifest, root_build_dir),
