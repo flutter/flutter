@@ -94,8 +94,9 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({ required Widget child }) {
+Widget boilerplate({ required Widget child, ThemeData? theme }) {
   return MaterialApp(
+    theme: theme,
     home: Localizations(
       locale: const Locale('en', 'US'),
       delegates: <LocalizationsDelegate<dynamic>>[
@@ -4632,6 +4633,38 @@ void main() {
     await tester.pumpWidget(boilerplate(
       child: TextField(
         decoration: const InputDecoration(errorStyle: testStyle),
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforcement: MaxLengthEnforcement.none,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pump();
+
+    expect(textController.text, '0123456789101112');
+    expect(find.text('16/10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16/10'));
+    expect(counterTextWidget.style!.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '0123456789');
+    await tester.pump();
+
+    expect(textController.text, '0123456789');
+    expect(find.text('10/10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10/10'));
+    expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
+  });
+
+  testWidgets('maxLength shows warning in Material 3', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+    final ThemeData theme = ThemeData.from(
+      colorScheme: const ColorScheme.light().copyWith(error: Colors.deepPurpleAccent),
+      useMaterial3: true,
+    );
+    await tester.pumpWidget(boilerplate(
+      theme: theme,
+      child: TextField(
         controller: textController,
         maxLength: 10,
         maxLengthEnforcement: MaxLengthEnforcement.none,

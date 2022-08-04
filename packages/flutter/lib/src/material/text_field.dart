@@ -962,7 +962,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',
         counterStyle: effectiveDecoration.errorStyle
-          ?? themeData.textTheme.caption!.copyWith(color: themeData.errorColor),
+          ?? (themeData.useMaterial3 ? _m3CounterErrorStyle(context): _m2CounterErrorStyle(context)),
         counterText: counterText,
         semanticCounterText: semanticCounterText,
       );
@@ -1436,6 +1436,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
+TextStyle _m2CounterErrorStyle(BuildContext context) =>
+  Theme.of(context).textTheme.caption!.copyWith(color: Theme.of(context).errorColor);
+
 // BEGIN GENERATED TOKEN PROPERTIES - TextField
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
@@ -1448,5 +1451,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 // Generated version v0_101
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
+
+TextStyle _m3CounterErrorStyle(BuildContext context) =>
+  Theme.of(context).textTheme.bodySmall!.copyWith(color:Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
