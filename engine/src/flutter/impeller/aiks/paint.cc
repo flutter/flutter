@@ -43,9 +43,9 @@ std::shared_ptr<Contents> Paint::WithFilters(
     std::optional<bool> is_solid_color) const {
   bool is_solid_color_val = is_solid_color.value_or(!contents);
 
-  if (mask_filter.has_value()) {
-    const MaskFilterProc& filter = mask_filter.value();
-    input = filter(FilterInput::Make(input), is_solid_color_val);
+  if (mask_blur_descriptor.has_value()) {
+    input = mask_blur_descriptor->CreateMaskBlur(FilterInput::Make(input),
+                                                 is_solid_color_val);
   }
 
   if (image_filter.has_value()) {
@@ -59,6 +59,15 @@ std::shared_ptr<Contents> Paint::WithFilters(
   }
 
   return input;
+}
+
+std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
+    FilterInput::Ref input,
+    bool is_solid_color) const {
+  if (is_solid_color) {
+    return FilterContents::MakeGaussianBlur(input, sigma, sigma, style);
+  }
+  return FilterContents::MakeBorderMaskBlur(input, sigma, sigma, style);
 }
 
 }  // namespace impeller

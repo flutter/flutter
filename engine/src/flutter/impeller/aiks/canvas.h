@@ -70,6 +70,8 @@ class Canvas {
 
   void DrawRect(Rect rect, Paint paint);
 
+  void DrawRRect(Rect rect, Scalar corner_radius, Paint paint);
+
   void DrawCircle(Point center, Scalar radius, Paint paint);
 
   void DrawImage(std::shared_ptr<Image> image,
@@ -125,6 +127,10 @@ class Canvas {
             Entity::BlendMode = Entity::BlendMode::kSourceOver);
 
   void RestoreClip();
+
+  bool AttemptDrawBlurredRRect(const Rect& rect,
+                               Scalar corner_radius,
+                               Paint& paint);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

@@ -30,6 +30,14 @@ struct Paint {
     kStroke,
   };
 
+  struct MaskBlurDescriptor {
+    FilterContents::BlurStyle style;
+    Sigma sigma;
+
+    std::shared_ptr<FilterContents> CreateMaskBlur(FilterInput::Ref input,
+                                                   bool is_solid_color) const;
+  };
+
   Color color = Color::Black();
   std::shared_ptr<PathContents> contents;
 
@@ -42,7 +50,7 @@ struct Paint {
 
   std::optional<ImageFilterProc> image_filter;
   std::optional<ColorFilterProc> color_filter;
-  std::optional<MaskFilterProc> mask_filter;
+  std::optional<MaskBlurDescriptor> mask_blur_descriptor;
 
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
