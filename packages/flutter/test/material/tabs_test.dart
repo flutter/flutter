@@ -4950,21 +4950,19 @@ class GroupOfTabs extends StatefulWidget {
 }
 
 class _GroupOfTabsState extends State<GroupOfTabs> with TickerProviderStateMixin {
-  late List<TabController> _controllers;
-  late List<List<Tab>> _tabGroups;
-  late List<List<Widget>> _tabContents;
+  late List<TabController> _controllers = [];
+  late List<List<Tab>> _tabGroups = [];
+  late List<List<Widget>> _tabContents = [];
   int _index = 0;
 
   @override
   void initState() {
     super.initState();
-    _controllers = [];
-    _tabGroups = [];
-    _tabContents = [];
+
     for (int i = 0; i < 5; i++) {
 
-      final List<Tab> tabs = List<Tab>.generate(10, (j) => Tab(text: 'Tab $i-$j'));
-      final List<Widget> contents = List<Widget>.generate(10, (j) => Text('Content $i-$j'));
+      final List<Tab> tabs = List<Tab>.generate(10, (int j) => Tab(text: 'Tab $i-$j'));
+      final List<Widget> contents = List<Widget>.generate(10, (int j) => Text('Content $i-$j'));
 
       _tabGroups.add(tabs);
       _tabContents.add(contents);
@@ -4994,12 +4992,12 @@ class _GroupOfTabsState extends State<GroupOfTabs> with TickerProviderStateMixin
       bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: _index,
-          onTap: (value) {
+          onTap: (int value) {
             setState(() {
               _index = value;
             });
           },
-          items: const [
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),
               label: 'Group 1',
