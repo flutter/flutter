@@ -203,18 +203,51 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderLinearGradient) {
+  Canvas canvas;
+  Paint paint;
+  std::vector<Vector3> offsets = {
+      {0, 0, 0}, {0, 300, 0}, {300, 0, 0}, {300, 300, 0}};
+  std::vector<Entity::TileMode> tile_modes = {
+      Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+      Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+  for (int i = 0; i < 4; i++) {
+    canvas.Save();
+    canvas.Translate(offsets[i]);
+    auto contents = std::make_shared<LinearGradientContents>();
+    contents->SetEndPoints({0, 0}, {100, 100});
+    std::vector<Color> colors = {Color{0.9019, 0.3921, 0.3960, 1.0},
+                                 Color{0.5686, 0.5960, 0.8980, 1.0}};
+    contents->SetColors(std::move(colors));
+    contents->SetTileMode(tile_modes[i]);
+    paint.contents = contents;
+    canvas.DrawRect({0, 0, 200, 200}, paint);
+    canvas.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderRadialGradient) {
   Canvas canvas;
-
   Paint paint;
-  auto contents = std::make_shared<RadialGradientContents>();
-  contents->SetCenterAndRadius({125, 125}, 100);
-  std::vector<Color> colors = {Color{0.9019, 0.3921, 0.3960, 1.0},
-                               Color{0.5686, 0.5960, 0.8980, 1.0}};
-  contents->SetColors(std::move(colors));
-  paint.contents = contents;
-
-  canvas.DrawRect({25, 25, 200, 200}, paint);
+  std::vector<Vector3> offsets = {
+      {0, 0, 0}, {0, 300, 0}, {300, 0, 0}, {300, 300, 0}};
+  std::vector<Entity::TileMode> tile_modes = {
+      Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+      Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+  for (int i = 0; i < 4; i++) {
+    canvas.Save();
+    canvas.Translate(offsets[i]);
+    auto contents = std::make_shared<RadialGradientContents>();
+    contents->SetCenterAndRadius({50, 50}, 50);
+    std::vector<Color> colors = {Color{0.9019, 0.3921, 0.3960, 1.0},
+                                 Color{0.5686, 0.5960, 0.8980, 1.0}};
+    contents->SetColors(std::move(colors));
+    contents->SetTileMode(tile_modes[i]);
+    paint.contents = contents;
+    canvas.DrawRect({0, 0, 200, 200}, paint);
+    canvas.Restore();
+  }
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }

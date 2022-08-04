@@ -35,6 +35,10 @@ void RadialGradientContents::SetColors(std::vector<Color> colors) {
   }
 }
 
+void RadialGradientContents::SetTileMode(Entity::TileMode tile_mode) {
+  tile_mode_ = tile_mode;
+}
+
 const std::vector<Color>& RadialGradientContents::GetColors() const {
   return colors_;
 }
@@ -77,6 +81,7 @@ bool RadialGradientContents::Render(const ContentContext& renderer,
   gradient_info.radius = radius_;
   gradient_info.center_color = colors_[0].Premultiply();
   gradient_info.edge_color = colors_[1].Premultiply();
+  gradient_info.tile_mode = static_cast<Scalar>(tile_mode_);
 
   Command cmd;
   cmd.label = "RadialGradientFill";

@@ -62,6 +62,28 @@ class Entity {
     kLastAdvancedBlendMode = kLuminosity,
   };
 
+  /// An enum to define how to repeat, fold, or omit colors outside of the
+  /// typically defined range of the source of the colors (such as the
+  /// bounds of an image or the defining geometry of a gradient).
+  enum class TileMode {
+    /// Replicate the edge color if the shader draws outside of its original
+    /// bounds.
+    kClamp,
+
+    /// Repeat the shader's image horizontally and vertically (or both along and
+    /// perpendicular to a gradient's geometry).
+    kRepeat,
+
+    /// Repeat the shader's image horizontally and vertically, seamlessly
+    /// alternating mirrored images.
+    kMirror,
+
+    /// Render the shader's image pixels only within its original bounds. If the
+    /// shader draws outside of its original bounds, transparent black is drawn
+    /// instead.
+    kDecal,
+  };
+
   enum class ClipOperation {
     kDifference,
     kIntersect,

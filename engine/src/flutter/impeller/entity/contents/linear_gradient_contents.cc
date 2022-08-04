@@ -35,6 +35,10 @@ void LinearGradientContents::SetColors(std::vector<Color> colors) {
   }
 }
 
+void LinearGradientContents::SetTileMode(Entity::TileMode tile_mode) {
+  tile_mode_ = tile_mode;
+}
+
 const std::vector<Color>& LinearGradientContents::GetColors() const {
   return colors_;
 }
@@ -77,6 +81,7 @@ bool LinearGradientContents::Render(const ContentContext& renderer,
   gradient_info.end_point = end_point_;
   gradient_info.start_color = colors_[0].Premultiply();
   gradient_info.end_color = colors_[1].Premultiply();
+  gradient_info.tile_mode = static_cast<Scalar>(tile_mode_);
 
   Command cmd;
   cmd.label = "LinearGradientFill";

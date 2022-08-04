@@ -246,6 +246,7 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(linear->colors()[i]));
       }
       contents->SetColors(std::move(colors));
+      contents->SetTileMode(static_cast<Entity::TileMode>(linear->tile_mode()));
       paint_.contents = std::move(contents);
       return;
     }
@@ -261,6 +262,8 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(radialGradient->colors()[i]));
       }
       contents->SetColors(std::move(colors));
+      contents->SetTileMode(
+          static_cast<Entity::TileMode>(radialGradient->tile_mode()));
       paint_.contents = std::move(contents);
       return;
     }
