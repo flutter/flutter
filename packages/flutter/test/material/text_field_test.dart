@@ -6119,6 +6119,60 @@ void main() {
     semantics.dispose();
   });
 
+  // Regressing test for https://github.com/flutter/flutter/issues/99763
+  testWidgets('Update textField semantics when obscureText changes', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(_ObscureTextTestWidget(controller: controller));
+
+    controller.text = 'Hello';
+    await tester.pump();
+
+    expect(
+        semantics,
+        includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          value: 'Hello',
+        )
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        textDirection: TextDirection.ltr,
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isObscured,
+        ],
+      )
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(
+        semantics,
+        includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          value: 'Hello',
+        )
+    );
+
+    semantics.dispose();
+  });
+
   testWidgets('TextField semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController();
@@ -12203,4 +12257,41 @@ void main() {
       }
     });
   });
+}
+
+/// A Simple widget for testing the obscure text.
+class _ObscureTextTestWidget extends StatefulWidget {
+   const _ObscureTextTestWidget({ required this.controller });
+
+  final TextEditingController controller;
+  @override
+  _ObscureTextTestWidgetState createState() => _ObscureTextTestWidgetState();
+}
+
+class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
+
+  bool _obscureText = false;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (_) {
+            return Column(
+              children: <Widget>[
+                TextField(
+                    obscureText: _obscureText,
+                    controller: widget.controller,
+                ),
+                ElevatedButton(
+                  onPressed: () => setState(() {_obscureText = !_obscureText;}),
+                  child: const SizedBox.shrink(),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
