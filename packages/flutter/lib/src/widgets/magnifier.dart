@@ -31,7 +31,7 @@ import 'overlay.dart';
 typedef MagnifierBuilder = Widget? Function(
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer
+    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
 );
 
 /// A data class that allows the [SelectionOverlay] to delegate
@@ -90,7 +90,7 @@ class MagnifierOverlayInfoBearer {
     globalGesturePosition,
     caretRect,
     fieldBounds,
-    currentLineBoundries
+    currentLineBoundries,
   );
 }
 

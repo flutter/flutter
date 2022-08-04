@@ -517,14 +517,14 @@ class TextSelectionOverlay {
 
     final Rect lineBoundries = Rect.fromPoints(
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
-      renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter
+      renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
 
     return MagnifierOverlayInfoBearer(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
       caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
-      currentLineBoundries: lineBoundries.shift(globalRenderEditableTopLeft)
+      currentLineBoundries: lineBoundries.shift(globalRenderEditableTopLeft),
     );
   }
 
