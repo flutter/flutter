@@ -71,8 +71,7 @@ void testMain() {
       ) as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
     });
-  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }
 
 const List<ui.Color> testColors = <ui.Color>[ui.Color(0xFFFFFF00), ui.Color(0xFFFFFFFF)];

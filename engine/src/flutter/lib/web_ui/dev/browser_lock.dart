@@ -27,13 +27,11 @@ class BrowserLock {
   BrowserLock._fromYaml(YamlMap yaml) :
     chromeLock = ChromeLock._fromYaml(yaml['chrome'] as YamlMap),
     firefoxLock = FirefoxLock._fromYaml(yaml['firefox'] as YamlMap),
-    edgeLock = EdgeLock._fromYaml(yaml['edge'] as YamlMap),
-    safariIosLock = SafariIosLock._fromYaml(yaml['safari_ios'] as YamlMap);
+    edgeLock = EdgeLock._fromYaml(yaml['edge'] as YamlMap);
 
   final ChromeLock chromeLock;
   final FirefoxLock firefoxLock;
   final EdgeLock edgeLock;
-  final SafariIosLock safariIosLock;
 }
 
 class ChromeLock {
@@ -67,23 +65,4 @@ class EdgeLock {
       launcherVersion = yaml['launcher_version'] as String;
 
   final String launcherVersion;
-}
-
-class SafariIosLock {
-  SafariIosLock._fromYaml(YamlMap yaml) :
-    majorVersion = yaml['major_version'] as int,
-    minorVersion = yaml['minor_version'] as int,
-    device = yaml['device'] as String,
-    heightOfHeader = yaml['height_of_header'] as int,
-    heightOfFooter = yaml['height_of_footer'] as int,
-    scaleFactor = yaml['scale_factor'] as double;
-
-  final int majorVersion;
-  final int minorVersion;
-  final String device;
-  final int heightOfHeader;
-  final int heightOfFooter;
-  final double scaleFactor;
-
-  String get simulatorDescription => '$device with iOS $majorVersion.$minorVersion';
 }

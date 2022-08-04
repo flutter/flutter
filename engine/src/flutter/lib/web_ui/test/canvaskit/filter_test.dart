@@ -46,10 +46,7 @@ void testMain() {
     ];
   }
 
-  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  if (!isIosSafari) {
-    setUpCanvasKitTest();
-  }
+  setUpCanvasKitTest();
 
   group('ImageFilters', () {
     test('can be constructed', () {
@@ -92,8 +89,7 @@ void testMain() {
       expect((paint.imageFilter! as ManagedSkiaObject<Object>).skiaObject, same(skiaFilter));
     });
 
-  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 
   group('MaskFilter', () {
     test('with 0 sigma can be set on a Paint', () {
@@ -103,6 +99,5 @@ void testMain() {
       expect(() => paint.maskFilter = filter, isNot(throwsException));
     });
 
-  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }

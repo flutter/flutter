@@ -136,7 +136,6 @@ void testMain() {
 
       await matchSceneGolden('canvaskit_inverse_colormatrix.png', builder.build(), write: true);
     });
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }

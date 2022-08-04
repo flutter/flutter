@@ -4,7 +4,6 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'common.dart';
@@ -66,6 +65,5 @@ void testMain() {
       // because the directionality of the 'h' is LTR.
       expect(boxes.single.direction, equals(ui.TextDirection.ltr));
     });
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }

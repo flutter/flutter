@@ -1060,8 +1060,7 @@ void testMain() {
         _overlay,
       ]);
     });
-    // TODO(dit): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }
 
 // Used to test that the platform views and overlays are in the correct order in

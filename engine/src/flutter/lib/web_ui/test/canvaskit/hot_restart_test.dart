@@ -26,7 +26,5 @@ void testMain() {
 
     // Should find the existing instance and reuse it.
     expect(firstCanvasKitInstance, windowFlutterCanvasKit);
-
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }

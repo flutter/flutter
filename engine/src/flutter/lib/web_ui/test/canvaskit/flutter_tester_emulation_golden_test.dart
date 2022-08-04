@@ -112,7 +112,6 @@ void testMain() {
         region: kDefaultRegion,
       );
     });
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/60040
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }

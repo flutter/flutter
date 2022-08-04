@@ -1927,11 +1927,7 @@ void _testPlatformView() {
     expect(shadowRoot.elementFromPoint(10, 50), child3);
 
     semantics().semanticsEnabled = false;
-    // TODO(yjbanov): unable to debug this test on iOS Safari as hacking on a
-    //                Linux machine. iOS Safari returns getBoundingClientRect
-    //                values that are half of desktop browsers, possibly due to
-    //                devicePixelRatio but need to confirm.
-  }, skip: isIosSafari);
+  });
 }
 
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that

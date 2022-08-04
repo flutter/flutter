@@ -36,8 +36,7 @@ void testMain() {
       );
       vertices.delete();
     });
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 
   test('Vertices are not anti-aliased by default', () async {
     const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 500);
@@ -63,8 +62,6 @@ void testMain() {
     EnginePlatformDispatcher.instance.rasterizer!
         .draw(builder.build().layerTree);
     await matchGoldenFile('canvaskit_vertices_antialiased.png', region: region);
-
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isSafari);
 }
 

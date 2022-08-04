@@ -91,7 +91,6 @@ void testMain() {
         recorder.endRecording(),
         region: kDefaultRegion,
       );
-      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isSafari || isFirefox);
 
@@ -201,7 +200,6 @@ void testMain() {
         recorder.endRecording(),
         region: kDefaultRegion,
       );
-      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isSafari || isFirefox);
 
@@ -356,7 +354,6 @@ void testMain() {
         }
       }
     });
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isSafari);
 }
 

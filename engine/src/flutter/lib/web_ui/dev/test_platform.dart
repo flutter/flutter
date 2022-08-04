@@ -323,7 +323,7 @@ class BrowserPlatform extends PlatformPlugin {
 
     if (!(await browserManager).supportsScreenshots) {
       print(
-        'INFO: Skipping screenshot check for $filename. Current browser/OS '
+        'Skipping screenshot check for $filename. Current browser/OS '
         'combination does not support screenshots.',
       );
       return shelf.Response.ok(json.encode('OK'));

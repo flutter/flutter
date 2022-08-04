@@ -108,27 +108,6 @@ Changing parameters in the browser lock is effective immediately when running
 tests locally. To make changes effective on LUCI follow instructions in
 [Rolling Browsers][#rolling-browsers].
 
-#### Local testing in Safari using the iOS Simulator
-
-1. If you haven't already, install Xcode.
-2. The iOS version and device type used by web engine tests are specified in
-   the [browser_lock.yaml][2] file. Install the iOS Simulator version using:
-   Xcode > Preferences > Components
-3. Run `xcrun simctl list devices`. If the simulator you want is not installed
-   use step 4.
-4. Use felt to create a simulator:
-
-```
-felt create_simulator
-```
-
-To run tests on ios-safari use the one of the following commands:
-
-```
-felt test --browser=ios-safari
-felt test --browser=ios-safari test/alarm_clock_test.dart
-```
-
 ### Rolling browsers
 
 When running tests on LUCI using Chromium, LUCI uses the version of Chromium

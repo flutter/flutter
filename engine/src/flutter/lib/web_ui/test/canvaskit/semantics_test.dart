@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/browser_detection.dart';
 
 import '../engine/semantics/semantics_test.dart';
 import 'common.dart';
@@ -25,6 +24,5 @@ Future<void> testMain() async {
     setUpCanvasKitTest();
 
     runSemanticsTests();
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }
