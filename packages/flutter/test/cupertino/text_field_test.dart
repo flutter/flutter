@@ -1774,7 +1774,7 @@ void main() {
       );
 
       final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
-      final Offset ePos = textOffsetToPosition(tester, 35) + Offset(7.0, 0.0); // Index of 'Bonaventure|' + Offset(7.0,0), which taps slightly to the right of the end of the text.
+      final Offset ePos = textOffsetToPosition(tester, 35) + const Offset(7.0, 0.0); // Index of 'Bonaventure|' + Offset(7.0,0), which taps slightly to the right of the end of the text.
       final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'.
 
       // This tap just puts the cursor somewhere different than where the double
