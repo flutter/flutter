@@ -8,6 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
+#include "impeller/renderer/descriptor_set_layout.h"
 #include "impeller/renderer/shader_types.h"
 
 namespace impeller {
@@ -36,10 +37,21 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
     return SetStageInputs(inputs.data(), inputs.size());
   }
 
+  template <size_t Size>
+  bool SetDescriptorSetLayouts(
+      const std::array<DescriptorSetLayout, Size>& inputs) {
+    return SetDescriptorSetLayouts(inputs.data(), inputs.size());
+  }
+
   bool SetStageInputs(const ShaderStageIOSlot* const stage_inputs[],
                       size_t count);
 
+  bool SetDescriptorSetLayouts(const DescriptorSetLayout desc_set_layout[],
+                               size_t count);
+
   const std::vector<ShaderStageIOSlot>& GetStageInputs() const;
+
+  const std::vector<DescriptorSetLayout>& GetDescriptorSetLayouts() const;
 
   // |Comparable<VertexDescriptor>|
   std::size_t GetHash() const override;
@@ -49,6 +61,7 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
 
  private:
   std::vector<ShaderStageIOSlot> inputs_;
+  std::vector<DescriptorSetLayout> desc_set_layouts_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptor);
 };
