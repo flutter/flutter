@@ -160,7 +160,7 @@ class JSONMethodCodec implements MethodCodec {
   @override
   ByteData? encodeErrorEnvelope(
       {required String code, String? message, dynamic details}) {
-    assert(code != null); // ignore: unnecessary_null_comparison
+    assert(code != null);
     return const JSONMessageCodec()
         .encodeMessage(<dynamic>[code, message, details]);
   }

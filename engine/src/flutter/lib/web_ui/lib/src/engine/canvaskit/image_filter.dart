@@ -135,7 +135,7 @@ class _CkBlurImageFilter extends CkImageFilter {
 class _CkMatrixImageFilter extends CkImageFilter {
   _CkMatrixImageFilter(
       {required Float64List matrix, required this.filterQuality})
-      : this.matrix = Float64List.fromList(matrix), // ignore: unnecessary_this
+      : matrix = Float64List.fromList(matrix),
         super._();
 
   final Float64List matrix;

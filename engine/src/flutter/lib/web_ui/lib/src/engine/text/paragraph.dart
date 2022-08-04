@@ -726,8 +726,8 @@ void applyTextStyleToElement({
   required EngineTextStyle style,
   bool isSpan = false,
 }) {
-  assert(element != null); // ignore: unnecessary_null_comparison
-  assert(style != null); // ignore: unnecessary_null_comparison
+  assert(element != null);
+  assert(style != null);
   bool updateDecoration = false;
   final DomCSSStyleDeclaration cssStyle = element.style;
 

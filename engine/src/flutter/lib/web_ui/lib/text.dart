@@ -44,7 +44,7 @@ class FontWeight {
     w900
   ];
   static FontWeight? lerp(FontWeight? a, FontWeight? b, double t) {
-    assert(t != null); // ignore: unnecessary_null_comparison
+    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -74,10 +74,10 @@ class FontWeight {
 
 class FontFeature {
   const FontFeature(this.feature, [this.value = 1])
-      : assert(feature != null), // ignore: unnecessary_null_comparison
+      : assert(feature != null),
         assert(feature.length == 4,
             'Feature tag must be exactly four characters long.'),
-        assert(value != null), // ignore: unnecessary_null_comparison
+        assert(value != null),
         assert(value >= 0, 'Feature value must be zero or a positive integer.');
   const FontFeature.enable(String feature) : this(feature, 1);
   const FontFeature.disable(String feature) : this(feature, 0);
@@ -579,8 +579,8 @@ class TextPosition {
   const TextPosition({
     required this.offset,
     this.affinity = TextAffinity.downstream,
-  })  : assert(offset != null), // ignore: unnecessary_null_comparison
-        assert(affinity != null); // ignore: unnecessary_null_comparison
+  })  : assert(offset != null),
+        assert(affinity != null);
   final int offset;
   final TextAffinity affinity;
 
@@ -655,7 +655,7 @@ class TextRange {
 class ParagraphConstraints {
   const ParagraphConstraints({
     required this.width,
-  }) : assert(width != null); // ignore: unnecessary_null_comparison
+  }) : assert(width != null);
   final double width;
 
   @override

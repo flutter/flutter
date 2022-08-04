@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // For member documentation see https://api.flutter.dev/flutter/dart-ui/Canvas-class.html
-// ignore_for_file: public_member_api_docs
 
 import 'dart:typed_data';
 

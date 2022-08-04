@@ -17,8 +17,8 @@ import 'vertex_shaders.dart';
 class EngineImageShader implements ui.ImageShader {
   EngineImageShader(ui.Image image, this.tileModeX, this.tileModeY,
       Float64List matrix4, this.filterQuality)
-      : this.image = image as HtmlImage, // ignore: unnecessary_this
-        this.matrix4 = Float32List.fromList(matrix4); // ignore: unnecessary_this
+      : image = image as HtmlImage,
+        matrix4 = Float32List.fromList(matrix4);
 
   final ui.TileMode tileModeX;
   final ui.TileMode tileModeY;
@@ -187,7 +187,7 @@ class EngineImageShader implements ui.ImageShader {
     ///
     /// Create buffer for vertex coordinates.
     final Object positionsBuffer = gl.createBuffer()!;
-    assert(positionsBuffer != null); // ignore: unnecessary_null_comparison
+    assert(positionsBuffer != null);
 
     Object? vao;
     if (isWebGl2) {

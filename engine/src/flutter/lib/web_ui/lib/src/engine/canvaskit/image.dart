@@ -83,7 +83,6 @@ class ImageCodecException implements Exception {
 const String _kNetworkImageMessage = 'Failed to load network image.';
 
 typedef HttpRequestFactory = DomXMLHttpRequest Function();
-// ignore: prefer_function_declarations_over_variables
 HttpRequestFactory httpRequestFactory = () => createDomXMLHttpRequest();
 void debugRestoreHttpRequestFactory() {
   httpRequestFactory = () => createDomXMLHttpRequest();

@@ -266,7 +266,6 @@ FontCollection get fontCollection => _fontCollection!;
 FontCollection? _fontCollection;
 
 Future<void> _setAssetManager(AssetManager assetManager) async {
-  // ignore: unnecessary_null_comparison
   assert(assetManager != null, 'Cannot set assetManager to null');
   if (assetManager == _assetManager) {
     return;
