@@ -351,6 +351,36 @@ class _OverlayChildIterator extends Iterator<_RenderDeferredLayoutBox> {
   }
 }
 
+T Function(T) _fix<T>(T Function(T) Function(T Function(T)) f) => f(_fix(f));
+
+abstract class _DoublyLinked<T extends _DoublyLinked<T>> {
+  _DoublyLinked();
+
+  _Links<T> get _links;
+
+  U _fold<U>(U initial, U Function(U, T) f) {
+    final U newValue = f(initial, this as T);
+    final T? next = _links.next;
+    return next == null
+      ? newValue
+      : next._fold(newValue, f);
+  }
+
+  bool _any(bool Function(T) f) {
+    return f(this as T) || (_links.prev?._any(f) ?? false);
+  }
+}
+
+class _Links<T extends _DoublyLinked<T>> {
+  _Links(this.prev);
+  final T? prev;
+  T? next;
+}
+
+class _LocationIterator extends _Links<OverlayLocation> {
+  _LocationIterator(super.prev);
+}
+
 /// A location in a particular [Overlay].
 ///
 /// An [OverlayLocation] is an immutable object that contains information about
@@ -360,20 +390,20 @@ class _OverlayChildIterator extends Iterator<_RenderDeferredLayoutBox> {
 /// An [OverlayLocation] created for one [Overlay] can not be used in another
 /// [Overlay]. If multiple children in the same [Overlay] occupy the same
 /// [OverlayLocation], their paint order relative to one another is undefined.
-class OverlayLocation {
+class OverlayLocation implements _DoublyLinked<OverlayLocation> {
   OverlayLocation._above({
     required OverlayLocation referenceLocation,
   }) : //_overlayEntryIdentifier = referenceLocation._overlayEntryIdentifier,
        _overlayRenderObject = referenceLocation._overlayRenderObject,
        _relativeZIndex = referenceLocation._relativeZIndex + 1,
-       _before = referenceLocation;
+       _links = _LocationIterator(referenceLocation);
 
   OverlayLocation._root(
     //this._overlayEntryIdentifier,
     this._overlayRenderObject, {
     String? debugLabel,
   }) : _relativeZIndex = 0,
-       _before = null {
+       _links = _LocationIterator(null) {
     assert(() {
       _debugLabel = debugLabel;
       return true;
@@ -400,15 +430,8 @@ class OverlayLocation {
   /// paint order (and the earlier in hit-test order) the [OverlayLocation] is.
   final int _relativeZIndex;
 
-  final OverlayLocation? _before;
-
-  OverlayLocation? _after;
-  /// Creates an [OverlayLocation] that represents a location in the same
-  /// [Overlay], but later in paint order than this [OverlayLocation].
-  ///
-  /// Widgets painted at the [afterLocation] will be painted above widgets
-  /// painted at this [OverlayLocation].
-  OverlayLocation get afterLocation => _after ??= OverlayLocation._above(referenceLocation: this);
+  @override
+  final _LocationIterator _links;
 
   /// Returns an [OverlayLocation] that represents a location in the same
   /// [Overlay] as the enclosing [OverlayEntry] or [OverlayPortal], but later in
@@ -423,7 +446,7 @@ class OverlayLocation {
   /// This method returns null when no enclosing [Overlay] can be found in the
   /// given [context].
   static OverlayLocation? above(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.overlayLocation.afterLocation;
+    return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.overlayLocation;
   }
 
   bool _debugDisposed = false;
@@ -469,6 +492,14 @@ class OverlayLocation {
   _OverlayChildIterator? get _backwardIterator {
     final _LocationOccupants? children = _children;
     return children == null ? _before?._backwardIterator : _OverlayChildIterator(this, children._lastChild);
+  }
+
+  void activate(_RenderDeferredLayoutBox child) {
+    assert(!_debugDisposed);
+  }
+
+  void deactivate(_RenderDeferredLayoutBox child) {
+    assert(!_debugDisposed);
   }
 
   void _dispose() {
@@ -1666,17 +1697,18 @@ class _OverlayPortalElement extends RenderObjectElement {
   void activate() {
     super.activate();
     final _OverlayChild? overlayChild = _overlayChild;
-    final RenderBox? box = _overlayChild?.element.renderObject as RenderBox?;
+    final _RenderDeferredLayoutBox? box = _overlayChild?.element.renderObject as _RenderDeferredLayoutBox?;
     if (overlayChild != null && box != null) {
       assert(!box.attached);
-      insertRenderObjectChild(box, overlayChild.slot);
+      assert(renderObject._deferredLayoutChild == box);
+      overlayChild.slot.activate(box);
     }
   }
 
   @override
   void deactivate() {
     final _OverlayChild? overlayChild = _overlayChild;
-    final RenderBox? box = _overlayChild?.element.renderObject as RenderBox?;
+    final _RenderDeferredLayoutBox? box = _overlayChild?.element.renderObject as _RenderDeferredLayoutBox?;
     // Instead of just detaching the render objects, removing them from the
     // render subtree entirely such that if the widget gets reparented to a
     // different overlay entry, the overlay child is inserted in the right
@@ -1685,7 +1717,7 @@ class _OverlayPortalElement extends RenderObjectElement {
     // This is also a workaround for the !renderObject.attached assert in the
     // `RenderObjectElement.deactive()` method.
     if (overlayChild != null && box != null) {
-      removeRenderObjectChild(box, overlayChild.slot);
+      overlayChild.slot.deactivate(box);
     }
     super.deactivate();
   }
