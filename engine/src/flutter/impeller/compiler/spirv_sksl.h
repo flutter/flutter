@@ -38,6 +38,8 @@ class CompilerSkSL : public spirv_cross::CompilerGLSL {
 
   void emit_uniform(const spirv_cross::SPIRVariable& var) override;
 
+  void fixup_user_functions();
+
   void detect_unsupported_resources();
   bool emit_constant_resources();
   bool emit_struct_resources();

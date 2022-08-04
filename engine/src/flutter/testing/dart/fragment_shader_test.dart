@@ -118,6 +118,16 @@ void main() async {
     expect(throws, equals(true));
   });
 
+  test('user defined functions do not redefine builtins', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'no_builtin_redefinition.frag.iplr',
+    );
+    final Shader shader = program.shader(
+      floatUniforms: Float32List.fromList(<double>[1.0]),
+    );
+    await _expectShaderRendersGreen(shader);
+  });
+
   test('fromAsset accepts a shader with no uniforms', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'no_uniforms.frag.iplr',
