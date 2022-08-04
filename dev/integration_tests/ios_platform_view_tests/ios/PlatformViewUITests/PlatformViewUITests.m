@@ -30,11 +30,7 @@ static const CGFloat kStandardTimeOut = 60.0;
 }
 - (void)testPlatformViewFocus {
   XCUIElement *entranceButton = self.app.buttons[@"platform view focus test"];
-  BOOL entranceButtonAppeared = [entranceButton waitForExistenceWithTimeout:kStandardTimeOut];
-  if (!entranceButtonAppeared) {
-    NSLog(@"The element tree is %@", self.app.debugDescription);
-    XCTFail(@"Entrance button should have appeared by now.");
-  }
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut], @"The element tree is %@", self.app.debugDescription);
   [entranceButton tap];
 
   XCUIElement *platformView = self.app.textFields[@"platform_view[0]"];
