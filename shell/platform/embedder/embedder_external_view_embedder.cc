@@ -111,15 +111,16 @@ std::vector<SkCanvas*> EmbedderExternalViewEmbedder::GetCurrentCanvases() {
 }
 
 // |ExternalViewEmbedder|
-SkCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
+EmbedderPaintContext EmbedderExternalViewEmbedder::CompositeEmbeddedView(
+    int view_id) {
   auto vid = EmbedderExternalView::ViewIdentifier(view_id);
   auto found = pending_views_.find(vid);
   if (found == pending_views_.end()) {
     FML_DCHECK(false) << "Attempted to composite a view that was not "
                          "pre-rolled.";
-    return nullptr;
+    return {nullptr, nullptr};
   }
-  return found->second->GetCanvas();
+  return {found->second->GetCanvas(), nullptr};
 }
 
 static FlutterBackingStoreConfig MakeBackingStoreConfig(

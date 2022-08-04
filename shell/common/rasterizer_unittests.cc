@@ -66,7 +66,7 @@ class MockExternalViewEmbedder : public ExternalViewEmbedder {
                PostPrerollResult(
                    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger));
   MOCK_METHOD0(GetCurrentCanvases, std::vector<SkCanvas*>());
-  MOCK_METHOD1(CompositeEmbeddedView, SkCanvas*(int view_id));
+  MOCK_METHOD1(CompositeEmbeddedView, EmbedderPaintContext(int view_id));
   MOCK_METHOD2(SubmitFrame,
                void(GrDirectContext* context,
                     std::unique_ptr<SurfaceFrame> frame));

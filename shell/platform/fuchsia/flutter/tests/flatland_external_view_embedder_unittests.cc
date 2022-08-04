@@ -306,7 +306,7 @@ void DrawFrameWithView(FlatlandExternalViewEmbedder& external_view_embedder,
     external_view_embedder.PostPrerollAction(nullptr);
     background_draw_callback(root_canvas);
     SkCanvas* overlay_canvas =
-        external_view_embedder.CompositeEmbeddedView(view_id);
+        external_view_embedder.CompositeEmbeddedView(view_id).canvas;
     overlay_draw_callback(overlay_canvas);
   }
   external_view_embedder.EndFrame(false, nullptr);

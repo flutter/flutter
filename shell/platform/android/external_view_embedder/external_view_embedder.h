@@ -42,7 +42,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       std::unique_ptr<flutter::EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id) override;
+  EmbedderPaintContext CompositeEmbeddedView(int view_id) override;
 
   // |ExternalViewEmbedder|
   std::vector<SkCanvas*> GetCurrentCanvases() override;
@@ -115,18 +115,14 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // view.
   std::vector<int64_t> composition_order_;
 
-  // The platform view's picture recorder keyed off the platform view id, which
-  // contains any subsequent operation until the next platform view or the end
-  // of the last leaf node in the layer tree.
-  std::unordered_map<int64_t, std::unique_ptr<SkPictureRecorder>>
-      picture_recorders_;
+  // The |EmbedderViewSlice| implementation keyed off the platform view id,
+  // which contains any subsequent operations until the next platform view or
+  // the end of the last leaf node in the layer tree.
+  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
 
   // The params for a platform view, which contains the size, position and
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
-
-  // The r-tree that captures the operations for the picture recorders.
-  std::unordered_map<int64_t, sk_sp<RTree>> view_rtrees_;
 
   // The number of platform views in the previous frame.
   int64_t previous_frame_view_count_;
@@ -146,7 +142,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Finally, draws the picture on the frame's canvas.
   std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
                                                       int64_t view_id,
-                                                      sk_sp<SkPicture> picture,
+                                                      EmbedderViewSlice* slice,
                                                       const SkRect& rect);
 };
 
