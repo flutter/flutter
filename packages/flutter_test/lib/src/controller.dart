@@ -453,7 +453,7 @@ abstract class WidgetController {
   /// fling sends PointerPanZoom events instead of a sequence of touch events.
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
-  /// 
+  ///
   /// {@macro flutter.flutter_test.WidgetController.fling}
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
