@@ -45,6 +45,7 @@ void main() {
     String? errorInvalidText,
     String? fieldHintText,
     String? fieldLabelText,
+    FocusNode? focusNode,
     bool autofocus = false,
     Key? formKey,
     ThemeData? theme,
@@ -68,6 +69,7 @@ void main() {
             errorInvalidText: errorInvalidText,
             fieldHintText: fieldHintText,
             fieldLabelText: fieldLabelText,
+            focusNode: focusNode,
             autofocus: autofocus,
           ),
         ),
@@ -345,5 +347,28 @@ void main() {
         )
       );
     });
+  });
+
+  testWidgets('FocusNode can request focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(inputDatePickerField(
+      focusNode: focusNode,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(inputDatePickerField(
+      focusNode: focusNode,
+      autofocus: true,
+    ));
+
+    expect(focusNode.hasFocus, isTrue);
   });
 }
