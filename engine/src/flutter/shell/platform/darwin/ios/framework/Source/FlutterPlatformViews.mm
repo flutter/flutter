@@ -324,11 +324,15 @@ void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
   // All the CATransactions should be committed by the end of the last frame,
   // so catransaction_added_ must be false.
   FML_DCHECK(!catransaction_added_);
-  picture_recorders_[view_id] = std::make_unique<SkPictureRecorder>();
 
-  auto rtree_factory = RTreeFactory();
-  platform_view_rtrees_[view_id] = rtree_factory.getInstance();
-  picture_recorders_[view_id]->beginRecording(SkRect::Make(frame_size_), &rtree_factory);
+  SkRect view_bounds = SkRect::Make(frame_size_);
+  std::unique_ptr<EmbedderViewSlice> view;
+  if (params->display_list_enabled()) {
+    view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
+  } else {
+    view = std::make_unique<SkPictureEmbedderViewSlice>(view_bounds);
+  }
+  slices_.insert_or_assign(view_id, std::move(view));
 
   composition_order_.push_back(view_id);
 
@@ -361,7 +365,7 @@ std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
   std::vector<SkCanvas*> canvases;
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t view_id = composition_order_[i];
-    canvases.push_back(picture_recorders_[view_id]->getRecordingCanvas());
+    canvases.push_back(slices_[view_id]->canvas());
   }
   return canvases;
 }
@@ -459,16 +463,16 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
   ApplyMutators(mutatorStack, touchInterceptor);
 }
 
-SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
+EmbedderPaintContext FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
   // Any UIKit related code has to run on main thread.
   FML_DCHECK([[NSThread currentThread] isMainThread]);
   // Do nothing if the view doesn't need to be composited.
   if (views_to_recomposite_.count(view_id) == 0) {
-    return picture_recorders_[view_id]->getRecordingCanvas();
+    return {slices_[view_id]->canvas(), slices_[view_id]->builder()};
   }
   CompositeWithParams(view_id, current_composition_params_[view_id]);
   views_to_recomposite_.erase(view_id);
-  return picture_recorders_[view_id]->getRecordingCanvas();
+  return {slices_[view_id]->canvas(), slices_[view_id]->builder()};
 }
 
 void FlutterPlatformViewsController::Reset() {
@@ -481,8 +485,7 @@ void FlutterPlatformViewsController::Reset() {
   views_.clear();
   composition_order_.clear();
   active_composition_order_.clear();
-  picture_recorders_.clear();
-  platform_view_rtrees_.clear();
+  slices_.clear();
   current_composition_params_.clear();
   clip_count_.clear();
   views_to_recomposite_.clear();
@@ -513,12 +516,15 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
   DisposeViews();
 
   SkCanvas* background_canvas = frame->SkiaCanvas();
+  DisplayListBuilder* background_builder = frame->GetDisplayListBuilder().get();
 
   // Resolve all pending GPU operations before allocating a new surface.
   background_canvas->flush();
+
   // Clipping the background canvas before drawing the picture recorders requires to
   // save and restore the clip context.
   SkAutoCanvasRestore save(background_canvas, /*doSave=*/true);
+
   // Maps a platform view id to a vector of `FlutterPlatformViewLayer`.
   LayersMap platform_view_layers;
 
@@ -527,8 +533,8 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
 
   for (size_t i = 0; i < num_platform_views; i++) {
     int64_t platform_view_id = composition_order_[i];
-    sk_sp<RTree> rtree = platform_view_rtrees_[platform_view_id];
-    sk_sp<SkPicture> picture = picture_recorders_[platform_view_id]->finishRecordingAsPicture();
+    EmbedderViewSlice* slice = slices_[platform_view_id].get();
+    slice->end_recording();
 
     // Check if the current picture contains overlays that intersect with the
     // current platform view or any of the previous platform views.
@@ -536,7 +542,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
       int64_t current_platform_view_id = composition_order_[j - 1];
       SkRect platform_view_rect = GetPlatformViewRect(current_platform_view_id);
       std::list<SkRect> intersection_rects =
-          rtree->searchNonOverlappingDrawnRects(platform_view_rect);
+          slice->searchNonOverlappingDrawnRects(platform_view_rect);
       auto allocation_size = intersection_rects.size();
 
       // For testing purposes, the overlay id is used to find the overlay view.
@@ -573,7 +579,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
         // Get a new host layer.
         std::shared_ptr<FlutterPlatformViewLayer> layer = GetLayer(gr_context,                //
                                                                    ios_context,               //
-                                                                   picture,                   //
+                                                                   slice,                     //
                                                                    joined_rect,               //
                                                                    current_platform_view_id,  //
                                                                    overlay_id                 //
@@ -583,8 +589,16 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
         overlay_id++;
       }
     }
-    background_canvas->drawPicture(picture);
+    if (background_builder) {
+      slice->render_into(background_builder);
+    } else {
+      slice->render_into(background_canvas);
+    }
   }
+
+  // Manually trigger the SkAutoCanvasRestore before we submit the frame
+  save.restore();
+
   // If a layer was allocated in the previous frame, but it's not used in the current frame,
   // then it can be removed from the scene.
   RemoveUnusedLayers();
@@ -636,7 +650,7 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
     GrDirectContext* gr_context,
     std::shared_ptr<IOSContext> ios_context,
-    sk_sp<SkPicture> picture,
+    EmbedderViewSlice* slice,
     SkRect rect,
     int64_t view_id,
     int64_t overlay_id) {
@@ -669,7 +683,11 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
   }
   SkCanvas* overlay_canvas = frame->SkiaCanvas();
   overlay_canvas->clear(SK_ColorTRANSPARENT);
-  overlay_canvas->drawPicture(picture);
+  if (frame->GetDisplayListBuilder()) {
+    slice->render_into(frame->GetDisplayListBuilder().get());
+  } else {
+    slice->render_into(overlay_canvas);
+  }
 
   layer->did_submit_last_frame = frame->Submit();
   return layer;
@@ -730,7 +748,7 @@ void FlutterPlatformViewsController::CommitCATransactionIfNeeded() {
 }
 
 void FlutterPlatformViewsController::ResetFrameState() {
-  picture_recorders_.clear();
+  slices_.clear();
   composition_order_.clear();
 }
 

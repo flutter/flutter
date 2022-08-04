@@ -93,7 +93,7 @@ class GfxExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
       std::unique_ptr<flutter::EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id) override;
+  flutter::EmbedderPaintContext CompositeEmbeddedView(int view_id) override;
 
   // |ExternalViewEmbedder|
   flutter::PostPrerollResult PostPrerollAction(

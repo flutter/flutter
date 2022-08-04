@@ -147,8 +147,8 @@ TEST(AndroidExternalViewEmbedder, GetCurrentCanvasesCompositeOrder) {
 
   auto canvases = embedder->GetCurrentCanvases();
   ASSERT_EQ(2UL, canvases.size());
-  ASSERT_EQ(embedder->CompositeEmbeddedView(0), canvases[0]);
-  ASSERT_EQ(embedder->CompositeEmbeddedView(1), canvases[1]);
+  ASSERT_EQ(embedder->CompositeEmbeddedView(0).canvas, canvases[0]);
+  ASSERT_EQ(embedder->CompositeEmbeddedView(1).canvas, canvases[1]);
 }
 
 TEST(AndroidExternalViewEmbedder, CompositeEmbeddedView) {
@@ -156,15 +156,15 @@ TEST(AndroidExternalViewEmbedder, CompositeEmbeddedView) {
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
       android_context, nullptr, nullptr, GetTaskRunnersForFixture());
 
-  ASSERT_EQ(nullptr, embedder->CompositeEmbeddedView(0));
+  ASSERT_EQ(nullptr, embedder->CompositeEmbeddedView(0).canvas);
   embedder->PrerollCompositeEmbeddedView(
       0, std::make_unique<EmbeddedViewParams>());
-  ASSERT_NE(nullptr, embedder->CompositeEmbeddedView(0));
+  ASSERT_NE(nullptr, embedder->CompositeEmbeddedView(0).canvas);
 
-  ASSERT_EQ(nullptr, embedder->CompositeEmbeddedView(1));
+  ASSERT_EQ(nullptr, embedder->CompositeEmbeddedView(1).canvas);
   embedder->PrerollCompositeEmbeddedView(
       1, std::make_unique<EmbeddedViewParams>());
-  ASSERT_NE(nullptr, embedder->CompositeEmbeddedView(1));
+  ASSERT_NE(nullptr, embedder->CompositeEmbeddedView(1).canvas);
 }
 
 TEST(AndroidExternalViewEmbedder, CancelFrame) {
@@ -391,7 +391,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
 
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
     // This is the recording canvas flow writes to.
-    auto canvas_1 = embedder->CompositeEmbeddedView(0);
+    auto canvas_1 = embedder->CompositeEmbeddedView(0).canvas;
 
     auto rect_paint = SkPaint();
     rect_paint.setColor(SkColors::kCyan);
@@ -458,7 +458,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
 
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
     // This is the recording canvas flow writes to.
-    auto canvas_1 = embedder->CompositeEmbeddedView(0);
+    auto canvas_1 = embedder->CompositeEmbeddedView(0).canvas;
 
     auto rect_paint = SkPaint();
     rect_paint.setColor(SkColors::kCyan);
@@ -560,7 +560,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
   rect_paint.setStyle(SkPaint::Style::kFill_Style);
 
   // This simulates Flutter UI that intersects with the first Android view.
-  embedder->CompositeEmbeddedView(0)->drawRect(
+  embedder->CompositeEmbeddedView(0).canvas->drawRect(
       SkRect::MakeXYWH(25, 25, 80, 150), rect_paint);
 
   {
@@ -577,10 +577,10 @@ TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
   }
   // This simulates Flutter UI that intersects with the first and second Android
   // views.
-  embedder->CompositeEmbeddedView(1)->drawRect(SkRect::MakeXYWH(25, 25, 80, 50),
-                                               rect_paint);
+  embedder->CompositeEmbeddedView(1).canvas->drawRect(
+      SkRect::MakeXYWH(25, 25, 80, 50), rect_paint);
 
-  embedder->CompositeEmbeddedView(1)->drawRect(
+  embedder->CompositeEmbeddedView(1).canvas->drawRect(
       SkRect::MakeXYWH(75, 75, 30, 100), rect_paint);
 
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
@@ -745,7 +745,7 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
 
     // This simulates Flutter UI that intersects with the Android view.
-    embedder->CompositeEmbeddedView(0)->drawRect(
+    embedder->CompositeEmbeddedView(0).canvas->drawRect(
         SkRect::MakeXYWH(50, 50, 200, 200), SkPaint());
 
     // Create a new overlay surface.
@@ -832,7 +832,7 @@ TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
 
     // This simulates Flutter UI that intersects with the Android view.
-    embedder->CompositeEmbeddedView(0)->drawRect(
+    embedder->CompositeEmbeddedView(0).canvas->drawRect(
         SkRect::MakeXYWH(50, 50, 200, 200), SkPaint());
 
     // Create a new overlay surface.
@@ -948,7 +948,7 @@ TEST(AndroidExternalViewEmbedder, Teardown) {
   embedder->PrerollCompositeEmbeddedView(0, std::move(view_params));
 
   // This simulates Flutter UI that intersects with the Android view.
-  embedder->CompositeEmbeddedView(0)->drawRect(
+  embedder->CompositeEmbeddedView(0).canvas->drawRect(
       SkRect::MakeXYWH(50, 50, 200, 200), SkPaint());
 
   // Create a new overlay surface.

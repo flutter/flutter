@@ -60,7 +60,9 @@ class TesterExternalViewEmbedder : public ExternalViewEmbedder {
   std::vector<SkCanvas*> GetCurrentCanvases() override { return {&canvas_}; }
 
   // |ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id) override { return &canvas_; }
+  EmbedderPaintContext CompositeEmbeddedView(int view_id) override {
+    return {&canvas_, nullptr};
+  }
 
  private:
   SkCanvas canvas_;
