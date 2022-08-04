@@ -2810,7 +2810,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             .writeAsStringSync(emptyKeyArbFile);
 
         expect(
-              () {
+          () {
             LocalizationsGenerator(
               fileSystem: fs,
               inputPathString: defaultL10nPathString,
