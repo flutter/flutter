@@ -149,8 +149,8 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // to always stay between line start and end.
     final double magnifierX = clampDouble(
         selectionInfo.globalGesturePosition.dx,
-        selectionInfo.currentLineBoundries.left,
-        selectionInfo.currentLineBoundries.right);
+        selectionInfo.currentLineBoundaries.left,
+        selectionInfo.currentLineBoundaries.right);
 
     // Place the magnifier at the previously calculated X, and the Y should be
     // exactly at the center of the handle.
@@ -160,7 +160,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
 
     // Shift the magnifier so that, if we are ever out of the screen, we become in bounds.
     // This probably won't have much of an effect on the X, since it is already bound
-    // to the currentLineBoundries, but will shift vertically if the magnifier is out of bounds.
+    // to the currentLineBoundaries, but will shift vertically if the magnifier is out of bounds.
     final Rect screenBoundsAdjustedMagnifierRect =
         MagnifierController.shiftWithinBounds(
             bounds: screenRect, rect: unadjustedMagnifierRect);

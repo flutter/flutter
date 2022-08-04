@@ -515,7 +515,7 @@ class TextSelectionOverlay {
       offset: lineAtOffset.baseOffset,
     );
 
-    final Rect lineBoundries = Rect.fromPoints(
+    final Rect lineBoundaries = Rect.fromPoints(
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
@@ -524,7 +524,7 @@ class TextSelectionOverlay {
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
       caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
-      currentLineBoundries: lineBoundries.shift(globalRenderEditableTopLeft),
+      currentLineBoundaries: lineBoundaries.shift(globalRenderEditableTopLeft),
     );
   }
 

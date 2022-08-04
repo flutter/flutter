@@ -157,7 +157,7 @@ void main() {
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierInfo =
             ValueNotifier<MagnifierOverlayInfoBearer>(
                 MagnifierOverlayInfoBearer(
-          currentLineBoundries: fakeTextFieldRect,
+          currentLineBoundaries: fakeTextFieldRect,
           fieldBounds: fakeTextFieldRect,
           caretRect: fakeTextFieldRect,
           // The tap position is dragBelow units below the text field.
@@ -191,9 +191,9 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: reasonableTextField,
+              currentLineBoundaries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
-              // current line boundries, not anything else.
+              // current line boundaries, not anything else.
               fieldBounds: reasonableTextField.inflate(gestureOutsideLine),
               caretRect: reasonableTextField.inflate(gestureOutsideLine),
               // The tap position is far out of the right side of the app.
@@ -224,9 +224,9 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: reasonableTextField,
+              currentLineBoundaries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
-              // current line boundries, not anything else.
+              // current line boundaries, not anything else.
               fieldBounds: reasonableTextField.inflate(gestureOutsideLine),
               caretRect: reasonableTextField.inflate(gestureOutsideLine),
               // The tap position is far out of the left side of the app.
@@ -252,7 +252,7 @@ void main() {
             tester,
             ValueNotifier<MagnifierOverlayInfoBearer>(
                 MagnifierOverlayInfoBearer(
-              currentLineBoundries: reasonableTextField,
+              currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
               globalGesturePosition: reasonableTextField.center,
@@ -279,7 +279,7 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: topOfScreenTextFieldRect,
+              currentLineBoundaries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
               caretRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
@@ -312,7 +312,7 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: reasonableTextField,
+              currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
               // Gesture on the far right of the magnifier.
@@ -343,7 +343,7 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: topOfScreenTextFieldRect,
+              currentLineBoundaries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
               caretRect: topOfScreenTextFieldRect,
               globalGesturePosition: topOfScreenTextFieldRect.topCenter,
@@ -376,7 +376,7 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: reasonableTextField,
+              currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
               globalGesturePosition: reasonableTextField.center,
@@ -399,7 +399,7 @@ void main() {
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
             ValueNotifier<MagnifierOverlayInfoBearer>(
           MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             globalGesturePosition: reasonableTextField.center,
@@ -410,7 +410,7 @@ void main() {
 
         // New position has a horizontal shift.
         magnifierPositioner.value = MagnifierOverlayInfoBearer(
-          currentLineBoundries: reasonableTextField,
+          currentLineBoundaries: reasonableTextField,
           fieldBounds: reasonableTextField,
           caretRect: reasonableTextField,
           globalGesturePosition:
@@ -435,7 +435,7 @@ void main() {
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
             ValueNotifier<MagnifierOverlayInfoBearer>(
           MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             globalGesturePosition: reasonableTextField.center,
@@ -446,7 +446,7 @@ void main() {
 
         // New position has a vertical shift.
         magnifierPositioner.value = MagnifierOverlayInfoBearer(
-          currentLineBoundries: reasonableTextField.shift(verticalShift),
+          currentLineBoundaries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
           caretRect: reasonableTextField.shift(verticalShift),
@@ -471,7 +471,7 @@ void main() {
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
             ValueNotifier<MagnifierOverlayInfoBearer>(
           MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             globalGesturePosition: reasonableTextField.center,
@@ -482,7 +482,7 @@ void main() {
 
         // New position has a vertical shift.
         magnifierPositioner.value = MagnifierOverlayInfoBearer(
-          currentLineBoundries: reasonableTextField.shift(verticalShift),
+          currentLineBoundaries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
           caretRect: reasonableTextField.shift(verticalShift),

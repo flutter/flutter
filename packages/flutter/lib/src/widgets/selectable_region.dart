@@ -536,7 +536,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         globalGesturePosition: globalGesturePosition,
         caretRect: caretRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,
-        currentLineBoundries: globalTransformAsOffset & _selectable!.size,
+        currentLineBoundaries: globalTransformAsOffset & _selectable!.size,
       );
   }
 

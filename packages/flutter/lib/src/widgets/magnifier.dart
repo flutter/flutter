@@ -44,7 +44,7 @@ class MagnifierOverlayInfoBearer {
     required this.globalGesturePosition,
     required this.caretRect,
     required this.fieldBounds,
-    required this.currentLineBoundries,
+    required this.currentLineBoundaries,
   });
 
   /// Construct an empty [MagnifierOverlayInfoBearer], with all
@@ -52,7 +52,7 @@ class MagnifierOverlayInfoBearer {
   const MagnifierOverlayInfoBearer.empty() :
     globalGesturePosition = Offset.zero,
     caretRect = Rect.zero,
-    currentLineBoundries = Rect.zero,
+    currentLineBoundaries = Rect.zero,
     fieldBounds = Rect.zero;
 
   /// The offset of the gesture position that the magnifier should be shown at.
@@ -61,7 +61,7 @@ class MagnifierOverlayInfoBearer {
   /// The rect of the current line the magnifier should be shown at. Do not take
   /// into account any padding of the field; only the position of the first
   /// and last character.
-  final Rect currentLineBoundries;
+  final Rect currentLineBoundaries;
 
   /// The rect of the handle that the magnifier should follow.
   final Rect caretRect;
@@ -77,7 +77,7 @@ class MagnifierOverlayInfoBearer {
     return other is MagnifierOverlayInfoBearer
         && other.globalGesturePosition == globalGesturePosition
         && other.caretRect == caretRect
-        && other.currentLineBoundries == currentLineBoundries
+        && other.currentLineBoundaries == currentLineBoundaries
         && other.fieldBounds == fieldBounds;
   }
 
@@ -86,7 +86,7 @@ class MagnifierOverlayInfoBearer {
     globalGesturePosition,
     caretRect,
     fieldBounds,
-    currentLineBoundries,
+    currentLineBoundaries,
   );
 }
 
