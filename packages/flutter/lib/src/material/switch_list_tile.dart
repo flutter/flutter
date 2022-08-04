@@ -6,7 +6,9 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
+import 'material_state.dart';
 import 'switch.dart';
+import 'switch_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -37,7 +39,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
 /// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+/// the theme's [SwitchThemeData.overlayColor] if [activeColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the
 /// [value]; to have the list tile appear selected when the
@@ -423,29 +425,35 @@ class SwitchListTile extends StatelessWidget {
         break;
     }
 
+    final ThemeData theme = Theme.of(context);
+    final SwitchThemeData switchTheme = SwitchTheme.of(context);
+    final Set<MaterialState> states = <MaterialState>{
+      if (selected) MaterialState.selected,
+    };
+    final Color effectiveActiveColor = activeColor
+      ?? switchTheme.thumbColor?.resolve(states)
+      ?? theme.colorScheme.secondary;
     return MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          contentPadding: contentPadding,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged!(!value); } : null,
-          selected: selected,
-          selectedTileColor: selectedTileColor,
-          autofocus: autofocus,
-          shape: shape,
-          tileColor: tileColor,
-          visualDensity: visualDensity,
-          focusNode: focusNode,
-          enableFeedback: enableFeedback,
-          hoverColor: hoverColor,
-        ),
+      child: ListTile(
+        selectedColor: effectiveActiveColor,
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        contentPadding: contentPadding,
+        enabled: onChanged != null,
+        onTap: onChanged != null ? () { onChanged!(!value); } : null,
+        selected: selected,
+        selectedTileColor: selectedTileColor,
+        autofocus: autofocus,
+        shape: shape,
+        tileColor: tileColor,
+        visualDensity: visualDensity,
+        focusNode: focusNode,
+        enableFeedback: enableFeedback,
+        hoverColor: hoverColor,
       ),
     );
   }

@@ -148,11 +148,9 @@ void main() {
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
     );
-    // ignore: avoid_dynamic_calls
     scrollPainter!.update(metrics, AxisDirection.down);
 
     final TestCanvas canvas = TestCanvas();
-    // ignore: avoid_dynamic_calls
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
 
     // Scrollbar is not supposed to draw anything if there isn't enough content.
