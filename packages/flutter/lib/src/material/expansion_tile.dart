@@ -261,7 +261,7 @@ class ExpansionTile extends StatefulWidget {
   final Border? border;
 
   /// Tile's border when the sublist is collapsed.
-  /// If this property is null then a [Border] with all the sides default to [BorderSide.none] is used
+  /// If this property is null then a [Border] with vertical direction sides default to Color [Colors.transparent] is used
   final Border? collapsedBorder;
 
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
@@ -413,7 +413,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     _borderTween
-      ..begin = widget.collapsedBorder ?? const Border()
+      ..begin = widget.collapsedBorder ?? const Border(
+        top: BorderSide(color: Colors.transparent),
+        bottom: BorderSide(color: Colors.transparent)
+      )
       ..end = widget.border ?? Border(
         top: BorderSide(color: theme.dividerColor),
         bottom: BorderSide(color: theme.dividerColor),

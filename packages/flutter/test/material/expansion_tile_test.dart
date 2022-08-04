@@ -130,8 +130,8 @@ void main() {
     final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
     // Opacity should change but color component should remain the same.
-    expect(collapsingContainerDecoration.border!.top.color, const Color(0x15333333));
-    expect(collapsingContainerDecoration.border!.bottom.color, const Color(0x15333333));
+    expect(collapsingContainerDecoration.border!.top.color, const Color(0x15222222));
+    expect(collapsingContainerDecoration.border!.bottom.color, const Color(0x15222222));
 
     // Pump all the way to the end now.
     await tester.pump(const Duration(seconds: 1));
@@ -553,6 +553,54 @@ void main() {
 
     expect(getIconColor(), iconColor);
     expect(getTextColor(), textColor);
+  });
+
+  testWidgets('ExpansionTile Border', (WidgetTester tester) async {
+    const Key expansionTileKey = PageStorageKey<String>('expansionTile');
+
+    const Border collapsedBorder = Border(
+      top: BorderSide(color: Colors.blue),
+      bottom: BorderSide(color: Colors.green)
+    );
+    final Border border = Border.all(color: Colors.red);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ExpansionTile(
+                key: expansionTileKey,
+                title: const Text('ExpansionTile'),
+                collapsedBorder: collapsedBorder,
+                border: border,
+                children: const <Widget>[
+                  ListTile(
+                    title: Text('0'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    Container getContainer(Key key) => tester.firstWidget(find.descendant(
+      of: find.byKey(key),
+      matching: find.byType(Container),
+    ));
+
+    // expansionTile should be Collapsed now.
+    BoxDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as BoxDecoration;
+    expect(expandedContainerDecoration.border, collapsedBorder);
+
+    await tester.tap(find.text('ExpansionTile'));
+    await tester.pumpAndSettle();
+
+    // expansionTile should be Expanded now.
+    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as BoxDecoration;
+    expect(expandedContainerDecoration.border, border);
   });
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
