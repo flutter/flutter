@@ -64,6 +64,7 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       .checkerboard_offscreen_layers = checkerboard_offscreen_layers_,
       .frame_device_pixel_ratio      = device_pixel_ratio_,
       .raster_cached_entries         = &raster_cache_items_,
+      .display_list_enabled          = frame.display_list_builder() != nullptr,
       // clang-format on
   };
 

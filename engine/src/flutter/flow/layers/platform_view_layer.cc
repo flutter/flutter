@@ -25,7 +25,8 @@ void PlatformViewLayer::Preroll(PrerollContext* context,
   set_subtree_has_platform_view(true);
   std::unique_ptr<EmbeddedViewParams> params =
       std::make_unique<EmbeddedViewParams>(matrix, size_,
-                                           context->mutators_stack);
+                                           context->mutators_stack,
+                                           context->display_list_enabled);
   context->view_embedder->PrerollCompositeEmbeddedView(view_id_,
                                                        std::move(params));
 }
@@ -36,8 +37,10 @@ void PlatformViewLayer::Paint(PaintContext& context) const {
                       "does not support embedding";
     return;
   }
-  SkCanvas* canvas = context.view_embedder->CompositeEmbeddedView(view_id_);
-  context.leaf_nodes_canvas = canvas;
+  EmbedderPaintContext embedder_context =
+      context.view_embedder->CompositeEmbeddedView(view_id_);
+  context.leaf_nodes_canvas = embedder_context.canvas;
+  context.leaf_nodes_builder = embedder_context.builder;
 }
 
 }  // namespace flutter

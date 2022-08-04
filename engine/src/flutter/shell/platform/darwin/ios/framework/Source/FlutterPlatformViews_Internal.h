@@ -165,7 +165,7 @@ class FlutterPlatformViewsController {
 
   std::vector<SkCanvas*> GetCurrentCanvases();
 
-  SkCanvas* CompositeEmbeddedView(int view_id);
+  EmbedderPaintContext CompositeEmbeddedView(int view_id);
 
   // The rect of the platform view at index view_id. This rect has been translated into the
   // host view coordinate system. Units are device screen pixels.
@@ -227,7 +227,7 @@ class FlutterPlatformViewsController {
   // the picture on the layer's canvas.
   std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
                                                      std::shared_ptr<IOSContext> ios_context,
-                                                     sk_sp<SkPicture> picture,
+                                                     EmbedderViewSlice* slice,
                                                      SkRect rect,
                                                      int64_t view_id,
                                                      int64_t overlay_id);
@@ -251,15 +251,11 @@ class FlutterPlatformViewsController {
   // The pool of reusable view layers. The pool allows to recycle layer in each frame.
   std::unique_ptr<FlutterPlatformViewLayerPool> layer_pool_;
 
-  // The platform view's R-tree keyed off the view id, which contains any subsequent
-  // draw operation until the next platform view or the last leaf node in the layer tree.
-  //
-  // The R-trees are deleted by the FlutterPlatformViewsController.reset().
-  std::map<int64_t, sk_sp<RTree>> platform_view_rtrees_;
-
-  // The platform view's picture recorder keyed off the view id, which contains any subsequent
+  // The platform view's |EmbedderViewSlice| keyed off the view id, which contains any subsequent
   // operation until the next platform view or the end of the last leaf node in the layer tree.
-  std::map<int64_t, std::unique_ptr<SkPictureRecorder>> picture_recorders_;
+  //
+  // The Slices are deleted by the FlutterPlatformViewsController.reset().
+  std::map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
 
   fml::scoped_nsobject<FlutterMethodChannel> channel_;
   fml::scoped_nsobject<UIView> flutter_view_;

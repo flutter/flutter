@@ -6,6 +6,69 @@
 
 namespace flutter {
 
+SkPictureEmbedderViewSlice::SkPictureEmbedderViewSlice(SkRect view_bounds) {
+  auto rtree_factory = RTreeFactory();
+  rtree_ = rtree_factory.getInstance();
+
+  recorder_ = std::make_unique<SkPictureRecorder>();
+  recorder_->beginRecording(view_bounds, &rtree_factory);
+}
+
+SkCanvas* SkPictureEmbedderViewSlice::canvas() {
+  return recorder_->getRecordingCanvas();
+}
+
+DisplayListBuilder* SkPictureEmbedderViewSlice::builder() {
+  return nullptr;
+}
+
+void SkPictureEmbedderViewSlice::end_recording() {
+  picture_ = recorder_->finishRecordingAsPicture();
+}
+
+std::list<SkRect> SkPictureEmbedderViewSlice::searchNonOverlappingDrawnRects(
+    const SkRect& query) const {
+  return rtree_->searchNonOverlappingDrawnRects(query);
+}
+
+void SkPictureEmbedderViewSlice::render_into(SkCanvas* canvas) {
+  canvas->drawPicture(picture_);
+}
+
+void SkPictureEmbedderViewSlice::render_into(DisplayListBuilder* builder) {
+  builder->drawPicture(picture_, nullptr, false);
+}
+
+DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(SkRect view_bounds) {
+  recorder_ = std::make_unique<DisplayListCanvasRecorder>(view_bounds);
+}
+
+SkCanvas* DisplayListEmbedderViewSlice::canvas() {
+  return recorder_ ? recorder_.get() : nullptr;
+}
+
+DisplayListBuilder* DisplayListEmbedderViewSlice::builder() {
+  return recorder_ ? recorder_->builder().get() : nullptr;
+}
+
+void DisplayListEmbedderViewSlice::end_recording() {
+  display_list_ = recorder_->Build();
+  recorder_ = nullptr;
+}
+
+std::list<SkRect> DisplayListEmbedderViewSlice::searchNonOverlappingDrawnRects(
+    const SkRect& query) const {
+  return display_list_->rtree()->searchNonOverlappingDrawnRects(query);
+}
+
+void DisplayListEmbedderViewSlice::render_into(SkCanvas* canvas) {
+  display_list_->RenderTo(canvas);
+}
+
+void DisplayListEmbedderViewSlice::render_into(DisplayListBuilder* builder) {
+  builder->drawDisplayList(display_list_);
+}
+
 void ExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
                                        std::unique_ptr<SurfaceFrame> frame) {
   frame->Submit();
