@@ -11,6 +11,7 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
 import io.flutter.embedding.engine.loader.FlutterLoader;
+import io.flutter.plugin.platform.PlatformViewsController;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,20 +143,39 @@ public class FlutterEngineGroup {
     DartEntrypoint dartEntrypoint = options.getDartEntrypoint();
     String initialRoute = options.getInitialRoute();
     List<String> dartEntrypointArgs = options.getDartEntrypointArgs();
+    PlatformViewsController platformViewsController = options.getPlatformViewsController();
+    platformViewsController =
+        platformViewsController != null ? platformViewsController : new PlatformViewsController();
+    boolean automaticallyRegisterPlugins = options.getAutomaticallyRegisterPlugins();
+    boolean waitForRestorationData = options.getWaitForRestorationData();
 
     if (dartEntrypoint == null) {
       dartEntrypoint = DartEntrypoint.createDefault();
     }
 
     if (activeEngines.size() == 0) {
-      engine = createEngine(context);
+      engine =
+          createEngine(
+              context,
+              platformViewsController,
+              automaticallyRegisterPlugins,
+              waitForRestorationData);
       if (initialRoute != null) {
         engine.getNavigationChannel().setInitialRoute(initialRoute);
       }
       engine.getDartExecutor().executeDartEntrypoint(dartEntrypoint, dartEntrypointArgs);
     } else {
       engine =
-          activeEngines.get(0).spawn(context, dartEntrypoint, initialRoute, dartEntrypointArgs);
+          activeEngines
+              .get(0)
+              .spawn(
+                  context,
+                  dartEntrypoint,
+                  initialRoute,
+                  dartEntrypointArgs,
+                  platformViewsController,
+                  automaticallyRegisterPlugins,
+                  waitForRestorationData);
     }
 
     activeEngines.add(engine);
@@ -178,8 +198,19 @@ public class FlutterEngineGroup {
   }
 
   @VisibleForTesting
-  /* package */ FlutterEngine createEngine(Context context) {
-    return new FlutterEngine(context);
+  /* package */ FlutterEngine createEngine(
+      Context context,
+      @NonNull PlatformViewsController platformViewsController,
+      boolean automaticallyRegisterPlugins,
+      boolean waitForRestorationData) {
+    return new FlutterEngine(
+        context, // Context.
+        null, // FlutterLoader.
+        null, // FlutterJNI.
+        platformViewsController, // PlatformViewsController.
+        null, // String[]. The Dart VM has already started, this arguments will have no effect.
+        automaticallyRegisterPlugins, // boolean.
+        waitForRestorationData); // boolean.
   }
 
   /** Options that control how a FlutterEngine should be created. */
@@ -188,6 +219,9 @@ public class FlutterEngineGroup {
     @Nullable private DartEntrypoint dartEntrypoint;
     @Nullable private String initialRoute;
     @Nullable private List<String> dartEntrypointArgs;
+    @NonNull private PlatformViewsController platformViewsController;
+    private boolean automaticallyRegisterPlugins = true;
+    private boolean waitForRestorationData = false;
 
     public Options(@NonNull Context context) {
       this.context = context;
@@ -217,6 +251,28 @@ public class FlutterEngineGroup {
     /** Arguments passed as a list of string to Dart's entrypoint function. */
     public List<String> getDartEntrypointArgs() {
       return dartEntrypointArgs;
+    }
+
+    /** Manages platform views. */
+    public PlatformViewsController getPlatformViewsController() {
+      return platformViewsController;
+    }
+
+    /**
+     * If plugins are automatically registered, then they are registered during the {@link
+     * io.flutter.embedding.engine.FlutterEngine}'s constructor.
+     */
+    public boolean getAutomaticallyRegisterPlugins() {
+      return automaticallyRegisterPlugins;
+    }
+
+    /**
+     * The waitForRestorationData flag controls whether the engine delays responding to requests
+     * from the framework for restoration data until that data has been provided to the engine via
+     * {@code RestorationChannel.setRestorationData(byte[] data)}.
+     */
+    public boolean getWaitForRestorationData() {
+      return waitForRestorationData;
     }
 
     /**
@@ -249,6 +305,42 @@ public class FlutterEngineGroup {
      */
     public Options setDartEntrypointArgs(List<String> dartEntrypointArgs) {
       this.dartEntrypointArgs = dartEntrypointArgs;
+      return this;
+    }
+
+    /**
+     * Setter for `platformViewsController` property.
+     *
+     * @param platformViewsController Manages platform views.
+     */
+    public Options setPlatformViewsController(
+        @NonNull PlatformViewsController platformViewsController) {
+      this.platformViewsController = platformViewsController;
+      return this;
+    }
+
+    /**
+     * Setter for `automaticallyRegisterPlugins` property.
+     *
+     * @param automaticallyRegisterPlugins If plugins are automatically registered, then they are
+     *     registered during the execution of {@link io.flutter.embedding.engine.FlutterEngine}'s
+     *     constructor.
+     */
+    public Options setAutomaticallyRegisterPlugins(boolean automaticallyRegisterPlugins) {
+      this.automaticallyRegisterPlugins = automaticallyRegisterPlugins;
+      return this;
+    }
+
+    /**
+     * Setter for `waitForRestorationData` property.
+     *
+     * @param waitForRestorationData The waitForRestorationData flag controls whether the engine
+     *     delays responding to requests from the framework for restoration data until that data has
+     *     been provided to the engine via {@code RestorationChannel.setRestorationData(byte[]
+     *     data)}.
+     */
+    public Options setWaitForRestorationData(boolean waitForRestorationData) {
+      this.waitForRestorationData = waitForRestorationData;
       return this;
     }
   }
