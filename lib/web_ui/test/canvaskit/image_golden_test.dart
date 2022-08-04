@@ -54,7 +54,6 @@ void testMain() {
         isTrue,
       );
     });
-  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isSafari);
 }
 
