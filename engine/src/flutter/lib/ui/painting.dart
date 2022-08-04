@@ -4760,7 +4760,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///   canvas.clipPath(Path()
   ///     ..addRect(const Rect.fromLTRB(80, 10, 100, 20))
   ///     ..addRect(const Rect.fromLTRB(10, 80, 20, 100)));
-  ///   ...
+  ///   // ...
   /// }
   /// ```
   ///
@@ -5243,7 +5243,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///     ], null, null, null, paint);
   ///   }
   ///
-  ///   ...
+  ///   // ...
   /// }
   /// ```
   ///
@@ -5289,7 +5289,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///     ], BlendMode.srcIn, null, paint);
   ///   }
   ///
-  ///   ...
+  ///   // ...
   /// }
   /// ```
   ///
@@ -5427,7 +5427,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///     canvas.drawRawAtlas(spriteAtlas, transformList, rectList, null, null, null, paint);
   ///   }
   ///
-  ///   ...
+  ///   // ...
   /// }
   /// ```
   ///
@@ -5496,7 +5496,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///     canvas.drawRawAtlas(spriteAtlas, transformList, rectList, colorList, BlendMode.srcIn, null, paint);
   ///   }
   ///
-  ///   ...
+  ///   // ...
   /// }
   /// ```
   ///
