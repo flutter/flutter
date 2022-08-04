@@ -16,10 +16,10 @@ import 'dart:collection' as collection;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:ffi';
-import 'dart:io'; // ignore: unused_import
+import 'dart:io';
 import 'dart:isolate' show SendPort;
 import 'dart:math' as math;
-import 'dart:nativewrappers'; // ignore: unused_import
+import 'dart:nativewrappers';
 import 'dart:typed_data';
 
 part 'annotations.dart';

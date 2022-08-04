@@ -5,7 +5,6 @@
 part of ui;
 
 // For documentation see https://github.com/flutter/engine/blob/main/lib/ui/painting.dart
-// ignore_for_file: public_member_api_docs
 
 abstract class Path {
   factory Path() {
@@ -64,8 +63,8 @@ abstract class Path {
   // see https://skia.org/user/api/SkPath_Reference#SkPath_getBounds
   Rect getBounds();
   static Path combine(PathOperation operation, Path path1, Path path2) {
-    assert(path1 != null); // ignore: unnecessary_null_comparison
-    assert(path2 != null); // ignore: unnecessary_null_comparison
+    assert(path1 != null);
+    assert(path2 != null);
     if (engine.useCanvasKit) {
       return engine.CkPath.combine(operation, path1, path2);
     }

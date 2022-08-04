@@ -5,7 +5,6 @@
 part of dart.ui;
 
 @pragma('vm:entry-point')
-// ignore: unused_element
 void _updateWindowMetrics(
   Object id,
   double devicePixelRatio,

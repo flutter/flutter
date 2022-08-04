@@ -26,14 +26,11 @@ class SurfaceVertices implements ui.Vertices {
     List<ui.Offset> positions, {
     List<ui.Color>? colors,
     List<int>? indices,
-  })  : assert(mode != null), // ignore: unnecessary_null_comparison
-        assert(positions != null), // ignore: unnecessary_null_comparison
-        // ignore: unnecessary_this
-        this.colors = colors != null ? _int32ListFromColors(colors) : null,
-        // ignore: unnecessary_this
-        this.indices = indices != null ? Uint16List.fromList(indices) : null,
-        // ignore: unnecessary_this
-        this.positions = offsetListToFloat32List(positions) {
+  })  : assert(mode != null),
+        assert(positions != null),
+        colors = colors != null ? _int32ListFromColors(colors) : null,
+        indices = indices != null ? Uint16List.fromList(indices) : null,
+        positions = offsetListToFloat32List(positions) {
     initWebGl();
   }
 
@@ -42,15 +39,15 @@ class SurfaceVertices implements ui.Vertices {
     this.positions, {
     this.colors,
     this.indices,
-  })  : assert(mode != null), // ignore: unnecessary_null_comparison
-        assert(positions != null) { // ignore: unnecessary_null_comparison
+  })  : assert(mode != null),
+        assert(positions != null) {
     initWebGl();
   }
 
   final ui.VertexMode mode;
   final Float32List positions;
   final Int32List? colors;
-  final Uint16List? indices; // ignore: unused_field
+  final Uint16List? indices;
 
   static Int32List _int32ListFromColors(List<ui.Color> colors) {
     final Int32List list = Int32List(colors.length);
@@ -180,7 +177,7 @@ class _WebGlRenderer implements GlRenderer {
     //
     // Create buffer for vertex coordinates.
     final Object positionsBuffer = gl.createBuffer()!;
-    assert(positionsBuffer != null); // ignore: unnecessary_null_comparison
+    assert(positionsBuffer != null);
 
     Object? vao;
     if (imageShader != null) {
@@ -372,7 +369,7 @@ class _WebGlRenderer implements GlRenderer {
 
     // Setup geometry.
     final Object positionsBuffer = gl.createBuffer()!;
-    assert(positionsBuffer != null); // ignore: unnecessary_null_comparison
+    assert(positionsBuffer != null);
     gl.bindArrayBuffer(positionsBuffer);
     gl.bufferData(vertices, gl.kStaticDraw);
     // Point an attribute to the currently bound vertex buffer object.
@@ -447,7 +444,7 @@ class _WebGlRenderer implements GlRenderer {
   @override
   void drawHairline(
       DomCanvasRenderingContext2D? ctx, Float32List positions) {
-    assert(positions != null); // ignore: unnecessary_null_comparison
+    assert(positions != null);
     final int pointCount = positions.length ~/ 2;
     ctx!.lineWidth = 1.0;
     ctx.beginPath();

@@ -212,8 +212,8 @@ abstract class _TypedDataBuffer<E> extends ListBase<E> {
 
   /// Like [insertAll], but with a guaranteed non-`null` [start] and [end].
   void _insertKnownLength(int index, Iterable<E> values, int start, int end) {
-    assert(values != null); // ignore: unnecessary_null_comparison
-    assert(end != null); // ignore: unnecessary_null_comparison
+    assert(values != null);
+    assert(end != null);
     if (start > values.length || end > values.length) {
       throw StateError('Too few elements');
     }

@@ -43,7 +43,7 @@ class _Jenkins {
 /// For example:
 ///
 /// ```dart
-/// int get hashCode => hashValues(foo, bar, hashList(quux), baz); // ignore: deprecated_member_use
+/// int get hashCode => hashValues(foo, bar, hashList(quux), baz);
 /// ```
 ///
 /// ## Deprecation

@@ -60,10 +60,10 @@ class GradientSweep extends EngineGradient {
   GradientSweep(this.center, this.colors, this.colorStops, this.tileMode,
       this.startAngle, this.endAngle, this.matrix4)
       : assert(offsetIsValid(center)),
-        assert(colors != null), // ignore: unnecessary_null_comparison
-        assert(tileMode != null), // ignore: unnecessary_null_comparison
-        assert(startAngle != null), // ignore: unnecessary_null_comparison
-        assert(endAngle != null), // ignore: unnecessary_null_comparison
+        assert(colors != null),
+        assert(tileMode != null),
+        assert(startAngle != null),
+        assert(endAngle != null),
         assert(startAngle < endAngle),
         super._() {
     validateColorStops(colors, colorStops);
@@ -180,8 +180,8 @@ class GradientLinear extends EngineGradient {
     Float32List? matrix,
   )   : assert(offsetIsValid(from)),
         assert(offsetIsValid(to)),
-        assert(colors != null), // ignore: unnecessary_null_comparison
-        assert(tileMode != null), // ignore: unnecessary_null_comparison
+        assert(colors != null),
+        assert(tileMode != null),
         matrix4 = matrix == null ? null : FastMatrix32(matrix),
         super._() {
     if (assertionsEnabled) {
