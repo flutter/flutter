@@ -2323,8 +2323,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -2612,8 +2610,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -2666,8 +2662,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -2724,8 +2718,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -3082,10 +3074,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_ios__compile
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3095,10 +3083,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_ios__start_up
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3108,10 +3092,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     recipe: devicelab/devicelab_drone
