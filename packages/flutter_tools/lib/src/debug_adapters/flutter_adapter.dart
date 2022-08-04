@@ -28,6 +28,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     bool enableDds = true,
     super.enableAuthCodes,
     super.logger,
+    super.onError,
   })  : _enableDds = enableDds,
         // Always disable in the DAP layer as it's handled in the spawned
         // 'flutter' process.
@@ -305,7 +306,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       ...?userArgs,
     ];
 
-    await launchAsProcess(executable, processArgs);
+    await launchAsProcess(
+      executable: executable,
+      processArgs: processArgs,
+      env: args.env,
+    );
 
     // Delay responding until the app is launched and (optionally) the debugger
     // is connected.
@@ -316,12 +321,17 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   }
 
   @visibleForOverriding
-  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
+  Future<void> launchAsProcess({
+    required String executable,
+    required List<String> processArgs,
+    required Map<String, String>? env,
+  }) async {
     logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
       executable,
       processArgs,
       workingDirectory: args.cwd,
+      environment: env,
     );
     _process = process;
     pidsToTerminate.add(process.pid);
@@ -390,6 +400,16 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     if (isAttach) {
       await preventBreakingAndResume();
     }
+
+    // Send a request to stop/detach to give Flutter chance to do some cleanup.
+    // It's possible the Flutter process will terminate before we process the
+    // response, so accept either a response or the process exiting.
+    final String method = isAttach ? 'app.detach' : 'app.stop';
+    await Future.any<void>(<Future<void>>[
+      sendFlutterRequest(method, <String, Object?>{'appId': _appId}),
+      _process?.exitCode ?? Future<void>.value(),
+    ]);
+
     terminatePids(ProcessSignal.sigterm);
     await _process?.exitCode;
   }
@@ -400,7 +420,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
     if (_receivedAppStarted && serviceUri != null) {
       if (enableDebugger) {
-        connectDebugger(serviceUri, resumeIfStarting: true);
+        connectDebugger(serviceUri);
       } else {
         // Usually, `connectDebugger` (in the base Dart adapter) will send this
         // event when it connects a debugger. Since we're not connecting a

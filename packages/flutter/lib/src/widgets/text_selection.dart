@@ -16,10 +16,13 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'magnifier.dart';
 import 'overlay.dart';
+import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -67,6 +70,159 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
+}
+
+/// {@template flutter.widgets.textSelection.MagnifierBuilder}
+/// Signature for a builder that builds a Widget with a [MagnifierController].
+///
+/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
+/// required, although if a Widget intends to have entry or exit animations, it should take
+/// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
+/// can wait before removing it from the overlay.
+/// {@endtemplate}
+///
+/// See also:
+///
+/// - [MagnifierOverlayInfoBearer], the dataclass that updates the
+///   magnifier.
+typedef MagnifierBuilder = Widget? Function(
+    BuildContext context,
+    MagnifierController controller,
+    ValueNotifier<MagnifierOverlayInfoBearer> textSelectionData
+);
+
+/// A data class that allows the [SelectionOverlay] to delegate
+/// the magnifier's positioning to the magnifier itself, based on the
+/// info in [MagnifierOverlayInfoBearer].
+@immutable
+class MagnifierOverlayInfoBearer {
+  /// Construct a [MagnifierOverlayInfoBearer] from raw values.
+  const MagnifierOverlayInfoBearer({
+    required this.globalGesturePosition,
+    required this.caretRect,
+    required this.fieldBounds,
+    required this.currentLineBoundries,
+  });
+
+  factory MagnifierOverlayInfoBearer._fromRenderEditable({
+    required RenderEditable renderEditable,
+    required Offset globalGesturePosition,
+    required TextPosition currentTextPosition,
+  }) {
+    final Offset globalRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero);
+    final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+
+    final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
+    final TextPosition positionAtEndOfLine = TextPosition(
+        offset: lineAtOffset.extentOffset,
+        affinity: TextAffinity.upstream,
+    );
+
+    // Default affinity is downstream.
+    final TextPosition positionAtBeginningOfLine = TextPosition(
+      offset: lineAtOffset.baseOffset,
+    );
+
+    final Rect lineBoundries = Rect.fromPoints(
+      renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
+      renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter
+    );
+
+    return MagnifierOverlayInfoBearer(
+      fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
+      globalGesturePosition: globalGesturePosition,
+      caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
+      currentLineBoundries: lineBoundries.shift(globalRenderEditableTopLeft)
+    );
+  }
+
+  /// Construct an empty [MagnifierOverlayInfoBearer], with all
+  /// values set to 0.
+  const MagnifierOverlayInfoBearer.empty() :
+    globalGesturePosition = Offset.zero,
+    caretRect = Rect.zero,
+    currentLineBoundries = Rect.zero,
+    fieldBounds = Rect.zero;
+
+  /// The offset of the gesture position that the magnifier should be shown at.
+  final Offset globalGesturePosition;
+
+  /// The rect of the current line the magnifier should be shown at. Do not take
+  /// into account any padding of the field; only the position of the first
+  /// and last character.
+  final Rect currentLineBoundries;
+
+  /// The rect of the handle that the magnifier should follow.
+  final Rect caretRect;
+
+  /// The bounds of the entire text field that the magnifier is bound to.
+  final Rect fieldBounds;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (other is! MagnifierOverlayInfoBearer) {
+      return false;
+    }
+
+    return other.globalGesturePosition == globalGesturePosition &&
+        other.caretRect == caretRect &&
+        other.currentLineBoundries == currentLineBoundries &&
+        other.fieldBounds == fieldBounds;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    globalGesturePosition,
+    caretRect,
+    fieldBounds,
+    currentLineBoundries
+  );
+}
+
+/// {@template flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+/// A configuration object for a magnifier.
+/// {@endtemplate}
+///
+/// {@macro flutter.widgets.magnifier.intro}
+///
+/// {@template flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+/// In general, most features of the magnifier can be configured through
+/// [MagnifierBuilder]. [TextMagnifierConfiguration] is used to configure
+/// the magnifier's behavior through the [SelectionOverlay].
+/// {@endtemplate}
+class TextMagnifierConfiguration {
+  /// Construct a [TextMagnifierConfiguration] from parts.
+  ///
+  /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
+  /// that never builds a magnifier.
+  const TextMagnifierConfiguration({
+    MagnifierBuilder? magnifierBuilder,
+    this.shouldDisplayHandlesInMagnifier = true
+  }) : _magnifierBuilder = magnifierBuilder;
+
+  /// The passed in [MagnifierBuilder].
+  ///
+  /// This is nullable because [disabled] needs to be static const,
+  /// so that it can be used as a default parameter. If left null,
+  /// the [magnifierBuilder] getter will be a function that always returns
+  /// null.
+  final MagnifierBuilder? _magnifierBuilder;
+
+  /// {@macro flutter.widgets.textSelection.MagnifierBuilder}
+  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
+
+  /// Determines whether a magnifier should show the text editing handles or not.
+  final bool shouldDisplayHandlesInMagnifier;
+
+  /// A constant for a [TextMagnifierConfiguration] that is disabled.
+  ///
+  /// In particular, this [TextMagnifierConfiguration] is considered disabled
+  /// because it never builds anything, regardless of platform.
+  static const TextMagnifierConfiguration disabled = TextMagnifierConfiguration();
 }
 
 /// An interface for building the selection UI, to be provided by the
@@ -207,7 +363,6 @@ abstract class TextSelectionControls {
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
 
@@ -223,7 +378,7 @@ class TextSelectionOverlay {
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
     required TextEditingValue value,
-    required BuildContext context,
+    required this.context,
     Widget? debugRequiredFor,
     required LayerLink toolbarLayerLink,
     required LayerLink startHandleLayerLink,
@@ -235,6 +390,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
+    required TextMagnifierConfiguration magnifierConfiguration,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -244,6 +400,7 @@ class TextSelectionOverlay {
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
+      magnifierConfiguration: magnifierConfiguration,
       context: context,
       debugRequiredFor: debugRequiredFor,
       // The metrics will be set when show handles.
@@ -252,13 +409,15 @@ class TextSelectionOverlay {
       lineHeightAtStart: 0.0,
       onStartHandleDragStart: _handleSelectionStartHandleDragStart,
       onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
+      onEndHandleDragEnd: _handleAnyDragEnd,
       endHandleType: TextSelectionHandleType.collapsed,
       endHandlesVisible: _effectiveEndHandleVisibility,
       lineHeightAtEnd: 0.0,
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
+      onStartHandleDragEnd: _handleAnyDragEnd,
       toolbarVisible: _effectiveToolbarVisibility,
-      selectionEndPoints: const <TextSelectionPoint>[],
+      selectionEndpoints: const <TextSelectionPoint>[],
       selectionControls: selectionControls,
       selectionDelegate: selectionDelegate,
       clipboardStatus: clipboardStatus,
@@ -302,6 +461,13 @@ class TextSelectionOverlay {
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
+
+  /// The context in which the selection handles should appear.
+  ///
+  /// This context must have an [Overlay] as an ancestor because this object
+  /// will display the text selection handles in that [Overlay].
+  final BuildContext context;
+
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
@@ -373,7 +539,7 @@ class TextSelectionOverlay {
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
-      ..selectionEndPoints = renderObject.getEndpointsForSelection(_selection)
+      ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
@@ -444,18 +610,40 @@ class TextSelectionOverlay {
   late Offset _dragEndPosition;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
+
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+    final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
+
+    _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+      currentTextPosition: position,
+      globalGesturePosition: details.globalPosition,
+      renderEditable: renderObject,
+    ));
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     _dragEndPosition += details.delta;
+
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
+    final TextSelection currentSelection = TextSelection.fromPosition(position);
 
     if (_selection.isCollapsed) {
-      _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: true);
+      _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+        currentTextPosition: position,
+        globalGesturePosition: details.globalPosition,
+        renderEditable: renderObject,
+      ));
+
+      _handleSelectionHandleChanged(currentSelection, isEnd: true);
       return;
     }
 
@@ -487,22 +675,47 @@ class TextSelectionOverlay {
     }
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
+
+     _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+      currentTextPosition: newSelection.extent,
+      globalGesturePosition: details.globalPosition,
+      renderEditable: renderObject,
+    ));
   }
 
   late Offset _dragStartPosition;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+    final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
+
+    _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+      currentTextPosition: position,
+      globalGesturePosition: details.globalPosition,
+      renderEditable: renderObject,
+    ));
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
+    if (!renderObject.attached) {
+      return;
+    }
     _dragStartPosition += details.delta;
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
+      _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+        currentTextPosition: position,
+        globalGesturePosition: details.globalPosition,
+        renderEditable: renderObject,
+      ));
+
       _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: false);
       return;
     }
@@ -534,8 +747,16 @@ class TextSelectionOverlay {
         break;
     }
 
+    _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+      currentTextPosition: newSelection.extent.offset < newSelection.base.offset ? newSelection.extent : newSelection.base,
+      globalGesturePosition: details.globalPosition,
+      renderEditable: renderObject,
+    ));
+
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
+
+  void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideMagnifier(shouldShowToolbar: !_selection.isCollapsed);
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
@@ -565,7 +786,7 @@ class TextSelectionOverlay {
   }
 }
 
-/// An object that manages a pair of selection handles.
+/// An object that manages a pair of selection handles and a toolbar.
 ///
 /// The selection handles are displayed in the [Overlay] that most closely
 /// encloses the given [BuildContext].
@@ -589,7 +810,7 @@ class SelectionOverlay {
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
     this.toolbarVisible,
-    required List<TextSelectionPoint> selectionEndPoints,
+    required List<TextSelectionPoint> selectionEndpoints,
     required this.selectionControls,
     required this.selectionDelegate,
     required this.clipboardStatus,
@@ -599,26 +820,95 @@ class SelectionOverlay {
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
     Offset? toolbarLocation,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
-       _selectionEndPoints = selectionEndPoints,
-       _toolbarLocation = toolbarLocation {
-    final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
-    assert(
-      overlay != null,
-      'No Overlay widget exists above $context.\n'
-      'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
-      'app content was created above the Navigator with the WidgetsApp builder parameter.',
-    );
-  }
+       _selectionEndpoints = selectionEndpoints,
+       _toolbarLocation = toolbarLocation,
+       assert(debugCheckHasOverlay(context));
 
   /// The context in which the selection handles should appear.
   ///
   /// This context must have an [Overlay] as an ancestor because this object
   /// will display the text selection handles in that [Overlay].
   final BuildContext context;
+
+
+  final ValueNotifier<MagnifierOverlayInfoBearer> _magnifierOverlayInfoBearer =
+          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty());
+
+  /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
+  /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,
+  /// call [showMagnifier] or [hideMagnifier]. This is because the magnifier needs to orchestrate
+  /// with other properties in [SelectionOverlay].
+  final MagnifierController _magnifierController = MagnifierController();
+
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// By default, [SelectionOverlay]'s [TextMagnifierConfiguration] is disabled.
+  ///
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
+
+  /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]
+  /// was called. This is safe to call on platforms not mobile, since
+  /// a magnifierBuilder will not be provided, or the magnifierBuilder will return null
+  /// on platforms not mobile.
+  ///
+  /// This is NOT the souce of truth for if the magnifier is up or not,
+  /// since magnifiers may hide themselves. If this info is needed, check
+  /// [MagnifierController.shown].
+  void showMagnifier(MagnifierOverlayInfoBearer initalInfoBearer) {
+    if (_toolbar != null) {
+      hideToolbar();
+    }
+
+    // Start from empty, so we don't utilize any rememnant values.
+    _magnifierOverlayInfoBearer.value = initalInfoBearer;
+
+    // Pre-build the magnifiers so we can tell if we've built something
+    // or not. If we don't build a magnifiers, then we should not
+    // insert anything in the overlay.
+    final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
+      context,
+      _magnifierController,
+      _magnifierOverlayInfoBearer,
+    );
+
+    if (builtMagnifier == null) {
+      return;
+    }
+
+    _magnifierController.show(
+        context: context,
+        below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
+            ? null
+            : _handles!.first,
+        builder: (_) => builtMagnifier);
+  }
+
+  /// Hide the current magnifier, optionally immediately showing
+  /// the toolbar.
+  ///
+  /// This does nothing if there is no magnifier.
+  void hideMagnifier({required bool shouldShowToolbar}) {
+    // This cannot be a check on `MagnifierController.shown`, since
+    // it's possible that the magnifier is still in the overlay, but
+    // not shown in cases where the magnifier hides itself.
+    if (_magnifierController.overlayEntry == null) {
+      return;
+    }
+
+    _magnifierController.hide();
+
+    if (shouldShowToolbar) {
+      showToolbar();
+    }
+  }
 
   /// The type of start selection handle.
   ///
@@ -721,13 +1011,13 @@ class SelectionOverlay {
   final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.
-  List<TextSelectionPoint> get selectionEndPoints => _selectionEndPoints;
-  List<TextSelectionPoint> _selectionEndPoints;
-  set selectionEndPoints(List<TextSelectionPoint> value) {
-    if (!listEquals(_selectionEndPoints, value)) {
+  List<TextSelectionPoint> get selectionEndpoints => _selectionEndpoints;
+  List<TextSelectionPoint> _selectionEndpoints;
+  set selectionEndpoints(List<TextSelectionPoint> value) {
+    if (!listEquals(_selectionEndpoints, value)) {
       _markNeedsBuild();
     }
-    _selectionEndPoints = value;
+    _selectionEndpoints = value;
   }
 
   /// Debugging information for explaining why the [Overlay] is required.
@@ -800,7 +1090,7 @@ class SelectionOverlay {
   /// The location of where the toolbar should be drawn in relative to the
   /// location of [toolbarLayerLink].
   ///
-  /// If this is null, the toolbar is drawn based on [selectionEndPoints] and
+  /// If this is null, the toolbar is drawn based on [selectionEndpoints] and
   /// the rect of render object of [context].
   ///
   /// This is useful for displaying toolbars at the mouse right-click locations
@@ -897,6 +1187,7 @@ class SelectionOverlay {
   /// Hides the entire overlay including the toolbar and the handles.
   /// {@endtemplate}
   void hide() {
+    _magnifierController.hide();
     if (_handles != null) {
       _handles![0].remove();
       _handles![1].remove();
@@ -946,8 +1237,10 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return ExcludeSemantics(
-      child: handle,
+    return TextFieldTapRegion(
+      child: ExcludeSemantics(
+        child: handle,
+      ),
     );
   }
 
@@ -971,8 +1264,10 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return ExcludeSemantics(
-      child: handle,
+    return TextFieldTapRegion(
+      child: ExcludeSemantics(
+        child: handle,
+      ),
     );
   }
 
@@ -988,36 +1283,54 @@ class SelectionOverlay {
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
     );
 
-    final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
+    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
         lineHeightAtEnd / 2;
 
     // If the selected text spans more than 1 line, horizontally center the toolbar.
     // Derived from both iOS and Android.
     final double midX = isMultiline
       ? editingRegion.width / 2
-      : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+      : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
 
     final Offset midpoint = Offset(
       midX,
       // The y-coordinate won't be made use of most likely.
-      selectionEndPoints.first.point.dy - lineHeightAtStart,
+      selectionEndpoints.first.point.dy - lineHeightAtStart,
     );
 
-    return Directionality(
-      textDirection: Directionality.of(this.context),
-      child: _SelectionToolbarOverlay(
-        preferredLineHeight: lineHeightAtStart,
-        toolbarLocation: toolbarLocation,
-        layerLink: toolbarLayerLink,
-        editingRegion: editingRegion,
-        selectionControls: selectionControls,
-        midpoint: midpoint,
-        selectionEndpoints: selectionEndPoints,
-        visibility: toolbarVisible,
-        selectionDelegate: selectionDelegate,
-        clipboardStatus: clipboardStatus,
+    return TextFieldTapRegion(
+      child: Directionality(
+        textDirection: Directionality.of(this.context),
+        child: _SelectionToolbarOverlay(
+          preferredLineHeight: lineHeightAtStart,
+          toolbarLocation: toolbarLocation,
+          layerLink: toolbarLayerLink,
+          editingRegion: editingRegion,
+          selectionControls: selectionControls,
+          midpoint: midpoint,
+          selectionEndpoints: selectionEndpoints,
+          visibility: toolbarVisible,
+          selectionDelegate: selectionDelegate,
+          clipboardStatus: clipboardStatus,
+        ),
       ),
     );
+  }
+
+  /// Update the current magnifier with new selection data, so the magnifier
+  /// can respond accordingly.
+  ///
+  /// If the magnifier is not shown, this still updates the magnifier position
+  /// because the magnifier may have hidden itself and is looking for a cue to reshow
+  /// itself.
+  ///
+  /// If there is no magnifier in the overlay, this does nothing,
+  void updateMagnifier(MagnifierOverlayInfoBearer magnifierOverlayInfoBearer) {
+    if (_magnifierController.overlayEntry == null) {
+      return;
+    }
+
+    _magnifierOverlayInfoBearer.value = magnifierOverlayInfoBearer;
   }
 }
 
@@ -1454,6 +1767,9 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
   void onTapDown(TapDownDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
     renderEditable.handleTapDown(details);
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
@@ -1465,13 +1781,21 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    if (_isShiftPressed && renderEditable.selection?.baseOffset != null) {
-      _isShiftTapping = true;
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          // On these platforms, a shift-tapped unfocused field expands from 0,
-          // not from the previous selection.
+    final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // On mobile platforms the selection is set on tap up.
+        if (_isShiftTapping) {
+          _isShiftTapping = false;
+        }
+        break;
+      case TargetPlatform.macOS:
+        // On macOS, a shift-tapped unfocused field expands from 0, not from the
+        // previous selection.
+        if (isShiftPressedValid) {
+          _isShiftTapping = true;
           final TextSelection? fromSelection = renderEditable.hasFocus
               ? null
               : const TextSelection.collapsed(offset: 0);
@@ -1480,14 +1804,23 @@ class TextSelectionGestureDetectorBuilder {
             SelectionChangedCause.tap,
             fromSelection,
           );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
+          return;
+        }
+        // On macOS, a tap/click places the selection in a precise position.
+        // This differs from iOS/iPadOS, where if the gesture is done by a touch
+        // then the selection moves to the closest word edge, instead of a
+        // precise position.
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        if (isShiftPressedValid) {
+          _isShiftTapping = true;
           _extendSelection(details.globalPosition, SelectionChangedCause.tap);
-          break;
-      }
+          return;
+        }
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+        break;
     }
   }
 
@@ -1547,15 +1880,42 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleTapUp(TapUpDetails details) {
-    if (_isShiftTapping) {
-      _isShiftTapping = false;
-      return;
-    }
-
     if (delegate.selectionEnabled) {
+      // Handle shift + click selection if needed.
+      final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
         case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          // On desktop platforms the selection is set on tap down.
+          if (_isShiftTapping) {
+            _isShiftTapping = false;
+          }
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          if (isShiftPressedValid) {
+            _isShiftTapping = true;
+            _extendSelection(details.globalPosition, SelectionChangedCause.tap);
+            return;
+          }
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
+        case TargetPlatform.iOS:
+          if (isShiftPressedValid) {
+            // On iOS, a shift-tapped unfocused field expands from 0, not from
+            // the previous selection.
+            _isShiftTapping = true;
+            final TextSelection? fromSelection = renderEditable.hasFocus
+                ? null
+                : const TextSelection.collapsed(offset: 0);
+            _expandSelection(
+              details.globalPosition,
+              SelectionChangedCause.tap,
+              fromSelection,
+            );
+            return;
+          }
           switch (details.kind) {
             case PointerDeviceKind.mouse:
             case PointerDeviceKind.trackpad:
@@ -1566,17 +1926,10 @@ class TextSelectionGestureDetectorBuilder {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
+              // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
               break;
           }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           break;
       }
     }

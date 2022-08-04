@@ -376,6 +376,22 @@ void main() {
     expect(box.size, const Size(96.0, 96.0));
   });
 
+  testWidgets('test default alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        useMaterial3: theme.useMaterial3,
+        child: IconButton(
+          onPressed: mockOnPressedFunction.handler,
+          icon: const Icon(Icons.ac_unit),
+          iconSize: 80.0,
+        ),
+      ),
+    );
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+  });
+
   testWidgets('test tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -977,6 +993,48 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
 
+  testWidgets('IconTheme opacity test', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              color: Colors.purple,
+              onPressed: () {},
+            )
+          ),
+        ),
+      )
+    );
+
+    Color? iconColor() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColor(), Colors.purple);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: IconTheme.merge(
+              data: const IconThemeData(opacity: 0.5),
+              child: IconButton(
+                icon: const Icon(Icons.add),
+                color: Colors.purple,
+                onPressed: () {},
+              ),
+            )
+          ),
+        ),
+      )
+    );
+
+    Color? iconColorWithOpacity() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColorWithOpacity(), Colors.purple.withOpacity(0.5));
+  });
 
   testWidgets('IconButton defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
@@ -1013,6 +1071,7 @@ void main() {
 
     final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
     expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
 
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.startGesture(center);
@@ -1034,7 +1093,7 @@ void main() {
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
 
-    // Disabled TextButton
+    // Disabled IconButton
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
@@ -1108,12 +1167,14 @@ void main() {
   );
 
   testWidgets('IconButton uses stateful color for icon color in different states - M3', (WidgetTester tester) async {
+    bool isSelected = false;
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
+    const Color selectedColor = Color(0x00000005);
 
     Color getIconColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -1125,23 +1186,35 @@ void main() {
       if (states.contains(MaterialState.focused)) {
         return focusedColor;
       }
+      if (states.contains(MaterialState.selected)) {
+        return selectedColor;
+      }
       return defaultColor;
     }
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
-        home: Scaffold(
-          body: Center(
-            child: IconButton(
-              style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: Center(
+                child: IconButton(
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                  ),
+                  isSelected: isSelected,
+                  onPressed: () {
+                    setState(() {
+                      isSelected = !isSelected;
+                    });
+                  },
+                  focusNode: focusNode,
+                  icon: const Icon(Icons.ac_unit),
+                ),
               ),
-              onPressed: () {},
-              focusNode: focusNode,
-              icon: const Icon(Icons.ac_unit),
-            ),
-          ),
+            );
+          }
         ),
       ),
     );
@@ -1150,6 +1223,12 @@ void main() {
 
     // Default, not disabled.
     expect(iconColor(), equals(defaultColor));
+
+    // Selected
+    final Finder button = find.byType(IconButton);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(iconColor(), selectedColor);
 
     // Focused.
     focusNode.requestFocus();
@@ -1318,6 +1397,424 @@ void main() {
       ),
     );
     expect(paddingWidget3.padding, const EdgeInsets.all(22));
+  });
+
+  testWidgets('Default IconButton is not selectable - M3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: IconButton(icon: const Icon(Icons.ac_unit), onPressed: (){},)
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+
+    Material buttonMaterial() {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(IconButton),
+          matching: find.byType(Material),
+        )
+      );
+    }
+
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(buttonWidget().isSelected, null);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The non-toggle IconButton should not change appearance after clicking
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, null);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+  });
+
+  testWidgets('Icon button is selectable when isSelected is not null - M3', (WidgetTester tester) async {
+    bool isSelected = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              icon: const Icon(Icons.ac_unit),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+
+    Material buttonMaterial() {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(IconButton),
+          matching: find.byType(Material),
+        )
+      );
+    }
+
+    expect(buttonWidget().isSelected, false);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The toggle IconButton should change appearance after clicking
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, true);
+    expect(iconColor(), equals(const ColorScheme.light().primary));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The IconButton should be unselected if it's clicked again
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, false);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+  });
+
+  testWidgets('The IconButton is in selected status if isSelected is true by default - M3', (WidgetTester tester) async {
+    bool isSelected = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              icon: const Icon(Icons.ac_unit),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+
+    Material buttonMaterial() {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(IconButton),
+          matching: find.byType(Material),
+        )
+      );
+    }
+
+    expect(buttonWidget().isSelected, true);
+    expect(iconColor(), equals(const ColorScheme.light().primary));
+    expect(buttonMaterial().color, Colors.transparent);
+
+    await tester.tap(button); // The IconButton becomes unselected if it's clicked
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, false);
+    expect(iconColor(), equals(const ColorScheme.light().onSurfaceVariant));
+    expect(buttonMaterial().color, Colors.transparent);
+  });
+
+  testWidgets("The selectedIcon is used if it's not null and the button is clicked" , (WidgetTester tester) async {
+    bool isSelected = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              selectedIcon: const Icon(Icons.account_box),
+              icon: const Icon(Icons.account_box_outlined),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+
+    expect(find.byIcon(Icons.account_box_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.account_box), findsNothing);
+
+    await tester.tap(button); // The icon becomes to selectedIcon
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.account_box), findsOneWidget);
+    expect(find.byIcon(Icons.account_box_outlined), findsNothing);
+
+    await tester.tap(button); // The icon becomes the original icon when it's clicked again
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.account_box_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.account_box), findsNothing);
+  });
+
+  testWidgets('The original icon is used for selected and unselected status when selectedIcon is null' , (WidgetTester tester) async {
+    bool isSelected = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+              isSelected: isSelected,
+              icon: const Icon(Icons.account_box),
+              onPressed: (){
+                setState(() {
+                  isSelected = !isSelected;
+                });
+              },
+            );
+          }
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+
+    expect(buttonWidget().isSelected, false);
+    expect(buttonWidget().selectedIcon, null);
+    expect(find.byIcon(Icons.account_box), findsOneWidget);
+
+    await tester.tap(button); // The icon becomes the original icon when it's clicked again
+    await tester.pumpAndSettle();
+
+    expect(buttonWidget().isSelected, true);
+    expect(buttonWidget().selectedIcon, null);
+    expect(find.byIcon(Icons.account_box), findsOneWidget);
+  });
+
+  testWidgets('The selectedIcon is used for disabled button if isSelected is true - M3' , (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: const IconButton(
+          isSelected: true,
+          icon: Icon(Icons.account_box),
+          selectedIcon: Icon(Icons.ac_unit),
+          onPressed: null,
+        )
+      )
+    );
+
+    final Finder button = find.byType(IconButton);
+    IconButton buttonWidget() => tester.widget<IconButton>(button);
+
+    expect(buttonWidget().isSelected, true);
+    expect(find.byIcon(Icons.account_box), findsNothing);
+    expect(find.byIcon(Icons.ac_unit), findsOneWidget);
+  });
+
+  group('IconTheme tests in Material 3', () {
+    testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
+      // Theme's IconTheme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ).copyWith(
+            iconTheme: const IconThemeData(color: Colors.red, size: 37),
+          ),
+          home: IconButton(
+            icon: const Icon(Icons.account_box),
+            onPressed: () {},
+          )
+        )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), Colors.red);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(37, 37)),);
+
+      // custom IconTheme outside of IconButton
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ),
+          home: IconTheme.merge(
+            data: const IconThemeData(color: Colors.pink, size: 35),
+            child: IconButton(
+              icon: const Icon(Icons.account_box),
+              onPressed: () {},
+            ),
+          )
+        )
+      );
+
+      Color? iconColor1() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor1(), Colors.pink);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(35, 35)),);
+    });
+
+    testWidgets('Theme IconButtonTheme overrides IconTheme in Material3', (WidgetTester tester) async {
+      // When IconButtonTheme and IconTheme both exist in ThemeData, the IconButtonTheme can override IconTheme.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ).copyWith(
+            iconTheme: const IconThemeData(color: Colors.red, size: 25),
+            iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.green, iconSize: 27),)
+          ),
+          home: IconButton(
+            icon: const Icon(Icons.account_box),
+            onPressed: () {},
+          )
+        )
+      );
+
+      Color? iconColor() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor(), Colors.green);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(27, 27)),);
+    });
+
+    testWidgets('Button IconButtonTheme always overrides IconTheme in Material3', (WidgetTester tester) async {
+      // When IconButtonTheme is closer to IconButton, IconButtonTheme overrides IconTheme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ),
+          home: IconTheme.merge(
+            data: const IconThemeData(color: Colors.orange, size: 36),
+            child: IconButtonTheme(
+              data: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.blue, iconSize: 35)),
+              child: IconButton(
+                icon: const Icon(Icons.account_box),
+                onPressed: () {},
+              ),
+            ),
+          )
+        )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), Colors.blue);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(35, 35)),);
+
+      // When IconTheme is closer to IconButton, IconButtonTheme still overrides IconTheme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ),
+          home: IconTheme.merge(
+            data: const IconThemeData(color: Colors.blue, size: 35),
+            child: IconButtonTheme(
+              data: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.orange, iconSize: 36)),
+              child: IconButton(
+                icon: const Icon(Icons.account_box),
+                onPressed: () {},
+              ),
+            ),
+          )
+        )
+      );
+
+      Color? iconColor1() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor1(), Colors.orange);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(36, 36)),);
+    });
+
+    testWidgets('White icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.dark(),
+            useMaterial3: true,
+          ).copyWith(
+              iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          home: IconButton(
+            icon: const Icon(Icons.account_box),
+            onPressed: () {},
+          )
+        )
+      );
+
+      Color? iconColor1() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor1(), Colors.white);
+    });
+
+    testWidgets('In light mode, icon color is M3 default color instead of IconTheme.of(context).color, '
+        'if only setting color in IconTheme', (WidgetTester tester) async {
+      final ColorScheme darkScheme = const ColorScheme.dark().copyWith(onSurfaceVariant: const Color(0xffe91e60));
+      // Brightness.dark
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(colorScheme: darkScheme, useMaterial3: true,),
+          home: Scaffold(
+            body: IconTheme.merge(
+              data: const IconThemeData(size: 26),
+              child: IconButton(
+                icon: const Icon(Icons.account_box),
+                onPressed: () {},
+              ),
+            ),
+          )
+        )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), darkScheme.onSurfaceVariant); // onSurfaceVariant
+    });
+
+    testWidgets('In dark mode, icon color is M3 default color instead of IconTheme.of(context).color, '
+        'if only setting color in IconTheme', (WidgetTester tester) async {
+      final ColorScheme lightScheme = const ColorScheme.light().copyWith(onSurfaceVariant: const Color(0xffe91e60));
+      // Brightness.dark
+      await tester.pumpWidget(
+          MaterialApp(
+              theme: ThemeData(colorScheme: lightScheme, useMaterial3: true,),
+              home: Scaffold(
+                body: IconTheme.merge(
+                  data: const IconThemeData(size: 26),
+                  child: IconButton(
+                    icon: const Icon(Icons.account_box),
+                    onPressed: () {},
+                  ),
+                ),
+              )
+          )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), lightScheme.onSurfaceVariant); // onSurfaceVariant
+    });
+
+    testWidgets('black87 icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
+
+    });
   });
 }
 

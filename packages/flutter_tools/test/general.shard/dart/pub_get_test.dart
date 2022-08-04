@@ -658,7 +658,7 @@ void main() {
       );
     });
     expect(logger.errorText, isEmpty);
-    expect(error, 'test failed unexpectedly: Exception: pub get failed (69; no message)');
+    expect(error, contains('test failed unexpectedly: Exception: pub get failed'));
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -692,12 +692,22 @@ void main() {
       stdio: mockStdio,
       processManager: processManager,
     );
+    const String toolExitMessage = '''
+pub get failed
+command: "bin/cache/dart-sdk/bin/dart __deprecated_pub --verbosity=warning get --no-precompile"
+pub env: {
+  "FLUTTER_ROOT": "",
+  "PUB_ENVIRONMENT": "flutter_cli:flutter_tests",
+}
+exit code: 66
+last line of pub output: "err3"
+''';
     await expectLater(
       () => pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
       ),
-      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', toolExitMessage)),
     );
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(
@@ -787,13 +797,12 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('pub cache in root is used', () async {
+  testWithoutContext('pub cache in flutter root is ignored', () async {
     String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Directory pubCache = fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache')..createSync();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>[
+      const FakeCommand(
+        command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
           '--directory',
@@ -805,7 +814,6 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
-          'PUB_CACHE': pubCache.path,
         },
       ),
     ]);
@@ -832,6 +840,81 @@ void main() {
       time.elapse(const Duration(milliseconds: 500));
       expect(error, isNull);
       expect(processManager, hasNoRemainingExpectations);
+    });
+  });
+
+  testWithoutContext('pub cache local is merge to global', () async {
+    String? error;
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory local = fileSystem.currentDirectory.childDirectory('.pub-cache');
+    final Directory global = fileSystem.currentDirectory.childDirectory('/global');
+    global.createSync();
+    for (final Directory dir in <Directory>[global.childDirectory('.pub-cache'), local]) {
+      dir.createSync();
+      dir.childDirectory('hosted').createSync();
+      dir.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
+    }
+
+    final Directory globalHosted = global.childDirectory('.pub-cache').childDirectory('hosted').childDirectory('pub.dartlang.org');
+    globalHosted.childFile('first.file').createSync();
+    globalHosted.childDirectory('dir').createSync();
+
+    final Directory localHosted = local.childDirectory('hosted').childDirectory('pub.dartlang.org');
+    localHosted.childFile('second.file').writeAsBytesSync(<int>[0]);
+    localHosted.childDirectory('dir').createSync();
+    localHosted.childDirectory('dir').childFile('third.file').writeAsBytesSync(<int>[0]);
+    localHosted.childDirectory('dir_2').createSync();
+    localHosted.childDirectory('dir_2').childFile('fourth.file').writeAsBytesSync(<int>[0]);
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 69,
+        environment: <String, String>{
+          'FLUTTER_ROOT': '',
+          'PUB_CACHE': '/global/.pub-cache',
+          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+        },
+      ),
+    ]);
+
+    final Platform platform = FakePlatform(
+      environment: <String, String>{'HOME': '/global'}
+    );
+    final Pub pub = Pub(
+      platform: platform,
+      usage: TestUsage(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
+    );
+
+    FakeAsync().run((FakeAsync time) {
+      pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+      ).then((void value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = thrownError.toString();
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(error, isNull);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(local.existsSync(), false);
+      expect(globalHosted.childFile('second.file').existsSync(), false);
+      expect(
+          globalHosted.childDirectory('dir').childFile('third.file').existsSync(), false
+      ); // do not copy dependencies that are already downloaded
+      expect(globalHosted.childDirectory('dir_2').childFile('fourth.file').existsSync(), true);
     });
   });
 

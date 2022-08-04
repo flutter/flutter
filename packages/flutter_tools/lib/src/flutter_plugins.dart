@@ -436,7 +436,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
+            'the Android embedding v2. Follow the steps on the migration doc above '
             'and re-run this command.'
           );
         }
@@ -1106,6 +1106,11 @@ Future<void> refreshPluginsList(
 ///
 /// In the Web platform, `destination` can point to a real filesystem (`flutter build`)
 /// or an in-memory filesystem (`flutter run`).
+///
+/// This method is also used by [WebProject.ensureReadyForPlatformSpecificTooling]
+/// to inject a copy of the plugin registrant for web into .dart_tool/dartpad so
+/// dartpad can get the plugin registrant without needing to build the complete
+/// project. See: https://github.com/dart-lang/dart-services/pull/874
 Future<void> injectBuildTimePluginFiles(
   FlutterProject project, {
   required Directory destination,

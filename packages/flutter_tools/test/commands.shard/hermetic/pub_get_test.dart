@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -18,8 +16,8 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  FakePub pub;
+  late FileSystem fileSystem;
+  late FakePub pub;
 
   setUp(() {
     Cache.disableLocking();
@@ -123,14 +121,14 @@ class FakePub extends Fake implements Pub {
 
   @override
   Future<void> get({
-    PubContext context,
-    FlutterProject project,
+    required PubContext context,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
     bool generateSyntheticPackageForExample = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,

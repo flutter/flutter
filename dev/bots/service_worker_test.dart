@@ -29,6 +29,7 @@ enum ServiceWorkerTestType {
   withoutFlutterJs,
   withFlutterJs,
   withFlutterJsShort,
+  withFlutterJsEntrypointLoadedEvent,
 }
 
 // Run a web service worker test as a standalone Dart program.
@@ -36,9 +37,11 @@ Future<void> main() async {
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
+  await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
+  await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent);
   await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
 }
 
@@ -66,6 +69,9 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
       break;
     case ServiceWorkerTestType.withFlutterJsShort:
       indexFile = 'index_with_flutterjs_short.html';
+      break;
+    case ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent:
+      indexFile = 'index_with_flutterjs_entrypoint_loaded.html';
       break;
   }
   return indexFile;

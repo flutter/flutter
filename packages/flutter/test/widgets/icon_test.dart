@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -206,5 +208,43 @@ void main() {
     expect(const IconData(123).hashCode, isNot(const IconData(123, fontFamily: 'f').hashCode));
     expect(const IconData(123).hashCode, isNot(const IconData(123, fontPackage: 'p').hashCode));
     expect(const IconData(123).toString(), 'IconData(U+0007B)');
+  });
+
+
+  testWidgets('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Icon(Icons.abc),
+      ),
+    );
+
+    RichText text = tester.widget(find.byType(RichText));
+    expect(text.text.style!.fontVariations, <FontVariation>[]);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Icon(Icons.abc, fill: 0.5, weight: 300, grade: 200, opticalSize: 48),
+      ),
+    );
+
+    text = tester.widget(find.byType(RichText));
+    expect(text.text.style!.fontVariations, isNotNull);
+    expect(text.text.style!.fontVariations, <FontVariation>[
+      const FontVariation('FILL', 0.5),
+      const FontVariation('wght', 300.0),
+      const FontVariation('GRAD', 200.0),
+      const FontVariation('opsz', 48.0)
+    ]);
+  });
+
+  test('Throws if given invalid values', () {
+    expect(() => Icon(Icons.abc, fill: -0.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, fill: 1.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, weight: -0.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, weight: 0.0), throwsAssertionError);
+    expect(() => Icon(Icons.abc, opticalSize: -0.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, opticalSize: 0), throwsAssertionError);
   });
 }

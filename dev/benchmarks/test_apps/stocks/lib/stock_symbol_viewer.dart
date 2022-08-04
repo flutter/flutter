@@ -21,8 +21,9 @@ class _StockSymbolView extends StatelessWidget {
     assert(stock != null);
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
-    if (stock.percentChange > 0)
+    if (stock.percentChange > 0) {
       changeInPrice = '+$changeInPrice';
+    }
 
     final TextStyle headings = Theme.of(context).textTheme.bodyText1!;
     return Container(

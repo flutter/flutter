@@ -413,25 +413,26 @@ class DaemonDomain extends Domain {
     final List<String> result = <String>[];
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
-      if (featureFlags.isLinuxEnabled && flutterProject.linux.existsSync()) {
+      final Set<SupportedPlatform> supportedPlatforms = flutterProject.getSupportedPlatforms().toSet();
+      if (featureFlags.isLinuxEnabled && supportedPlatforms.contains(SupportedPlatform.linux)) {
         result.add('linux');
       }
-      if (featureFlags.isMacOSEnabled && flutterProject.macos.existsSync()) {
+      if (featureFlags.isMacOSEnabled && supportedPlatforms.contains(SupportedPlatform.macos)) {
         result.add('macos');
       }
-      if (featureFlags.isWindowsEnabled && flutterProject.windows.existsSync()) {
+      if (featureFlags.isWindowsEnabled && supportedPlatforms.contains(SupportedPlatform.windows)) {
         result.add('windows');
       }
-      if (featureFlags.isIOSEnabled && flutterProject.ios.existsSync()) {
+      if (featureFlags.isIOSEnabled && supportedPlatforms.contains(SupportedPlatform.ios)) {
         result.add('ios');
       }
-      if (featureFlags.isAndroidEnabled && flutterProject.android.existsSync()) {
+      if (featureFlags.isAndroidEnabled && supportedPlatforms.contains(SupportedPlatform.android)) {
         result.add('android');
       }
-      if (featureFlags.isWebEnabled && flutterProject.web.existsSync()) {
+      if (featureFlags.isWebEnabled && supportedPlatforms.contains(SupportedPlatform.web)) {
         result.add('web');
       }
-      if (featureFlags.isFuchsiaEnabled && flutterProject.fuchsia.existsSync()) {
+      if (featureFlags.isFuchsiaEnabled && supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
         result.add('fuchsia');
       }
       if (featureFlags.areCustomDevicesEnabled) {
@@ -498,6 +499,7 @@ class AppDomain extends Domain {
     bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
+    String? userIdentifier,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -516,6 +518,7 @@ class AppDomain extends Domain {
       target: target,
       buildInfo: options.buildInfo,
       platform: globals.platform,
+      userIdentifier: userIdentifier,
     );
 
     ResidentRunner runner;

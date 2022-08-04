@@ -7,23 +7,30 @@ import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
   Offset,
-  Size,
   Rect,
+  Size,
   TextAlign,
   TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-import '../../services.dart' show Clipboard;
 import 'autofill.dart';
+import 'clipboard.dart' show Clipboard;
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'text_editing.dart';
 import 'text_editing_delta.dart';
 
-export 'dart:ui' show TextAffinity;
+export 'dart:ui' show Brightness, FontWeight, Offset, Rect, Size, TextAlign, TextDirection, TextPosition, TextRange;
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'autofill.dart' show AutofillConfiguration, AutofillScope;
+export 'text_editing.dart' show TextSelection;
+// TODO(a14n): the following export leads to Segmentation fault, see https://github.com/flutter/flutter/issues/106332
+// export 'text_editing_delta.dart' show TextEditingDelta;
 
 /// Indicates how to handle the intelligent replacement of dashes in text input.
 ///
@@ -251,6 +258,9 @@ class TextInputType {
 ///
 ///  * [TextInput], which configures the platform's keyboard setup.
 ///  * [EditableText], which invokes callbacks when the action button is pressed.
+//
+// This class has been cloned to `flutter_driver/lib/src/common/action.dart` as `TextInputAction`,
+// and must be kept in sync.
 enum TextInputAction {
   /// Logical meaning: There is no relevant input action for the current input
   /// source, e.g., [TextField].
@@ -1086,11 +1096,7 @@ mixin TextSelectionDelegate {
 ///  * [EditableText], a [TextInputClient] implementation.
 ///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
 ///    granular information from the platform's text input.
-abstract class TextInputClient {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const TextInputClient();
-
+mixin TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue? get currentTextEditingValue;
 
@@ -1159,6 +1165,11 @@ abstract class TextInputClient {
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
+
+  /// Performs the specified MacOS-specific selector from the
+  /// `NSStandardKeyBindingResponding` protocol or user-specified selector
+  /// from `DefaultKeyBinding.Dict`.
+  void performSelector(String selectorName) {}
 }
 
 /// An interface to receive focus from the engine.
@@ -1225,7 +1236,7 @@ class SelectionRect {
 ///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
 ///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
 ///    to true.
-abstract class DeltaTextInputClient extends TextInputClient {
+mixin DeltaTextInputClient implements TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
   ///
@@ -1812,6 +1823,10 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performSelectors':
+        final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
+        selectors.forEach(_currentConnection!._client.performSelector);
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;

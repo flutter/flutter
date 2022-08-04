@@ -176,6 +176,105 @@ void main() {
     );
   }
 
+  testWidgets('throw if no Overlay widget exists above', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: SelectableText('I love Flutter!'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset textFieldStart = tester.getTopLeft(find.byType(SelectableText));
+    final TestGesture gesture = await tester.startGesture(textFieldStart, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final FlutterError error = tester.takeException() as FlutterError;
+    expect(
+      error.message,
+      contains('EditableText widgets require an Overlay widget ancestor'),
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNotNull);  // side effect exception
+  });
+
+  testWidgets('Do not crash when remove SelectableText during handle drag', (WidgetTester tester) async {
+    // Regression test https://github.com/flutter/flutter/issues/108242
+    bool isShow = true;
+    late StateSetter setter;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              setter = setState;
+              if (isShow) {
+                return const SelectableText(
+                  'abc def ghi',
+                  dragStartBehavior: DragStartBehavior.down,
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText));
+    final TextEditingController controller = editableTextWidget.controller;
+
+    // Long press the 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    final TextSelection selection = controller.selection;
+    expect(selection.baseOffset, 4);
+    expect(selection.extentOffset, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the left handle to the left.
+    final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, 1);
+    final Offset newHandlePos1 = textOffsetToPosition(tester, 0);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+
+    // Unmount the SelectableText during handle drag
+    setter(() {
+      isShow = false;
+    });
+    await tester.pump();
+
+    await gesture.moveTo(newHandlePos1);
+    await tester.pump(); // Do not crash here
+
+    await gesture.up();
+    await tester.pump();
+  });
+
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
@@ -5051,5 +5150,98 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Regular Text', skipOffstage: false), findsOneWidget);
     expect(find.byType(SelectableText, skipOffstage: false), findsOneWidget);
+  });
+
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
+
+    testWidgets(
+        'Can drag handles to show, unshow, and update magnifier',
+        (WidgetTester tester) async {
+      const String testValue = 'abc def ghi';
+      final SelectableText selectableText = SelectableText(
+            testValue,
+            magnifierConfiguration: TextMagnifierConfiguration(
+        magnifierBuilder: (
+          _,
+          MagnifierController controller,
+          ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+        ) {
+          infoBearer = localInfoBearer;
+          return fakeMagnifier;
+        },
+      )
+          );
+
+      await tester.pumpWidget(
+        overlay(
+          child: selectableText,
+        ),
+      );
+
+      await skipPastScrollingAnimation(tester);
+
+      // Double tap the 'e' to select 'def'.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+
+      final TextSelection selection = TextSelection(
+        baseOffset: testValue.indexOf('d'),
+        extentOffset: testValue.indexOf('f')
+      );
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+
+      // Drag the right handle 2 letters to the right.
+      final Offset handlePos = endpoints.last.point + const Offset(1.0, 1.0);
+      final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+
+      Offset? firstDragGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
+      await tester.pump();
+
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition,
+          isNot(infoBearer.value.globalGesturePosition));
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    });
+  });
+
+  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/71389
+
+    const TextStyle textStyle = TextStyle(color: Color(0xff00ff00), fontSize: 12.0);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SelectableText.rich(
+          TextSpan(
+            text: 'Abcd',
+            style: textStyle,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.fontSize, textStyle.fontSize);
   });
 }
