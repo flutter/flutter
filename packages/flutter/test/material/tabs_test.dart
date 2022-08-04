@@ -4946,13 +4946,13 @@ class GroupOfTabs extends StatefulWidget {
   const GroupOfTabs({super.key});
 
   @override
-  _GroupOfTabsState createState() => _GroupOfTabsState();
+  State<GroupOfTabs> createState() => _GroupOfTabsState();
 }
 
 class _GroupOfTabsState extends State<GroupOfTabs> with TickerProviderStateMixin {
-  late List<TabController> _controllers = [];
-  late List<List<Tab>> _tabGroups = [];
-  late List<List<Widget>> _tabContents = [];
+  final List<TabController> _controllers = <TabController>[];
+  final List<List<Tab>> _tabGroups = <List<Tab>>[];
+  final List<List<Widget>> _tabContents = <List<Widget>>[];
   int _index = 0;
 
   @override
@@ -4997,7 +4997,7 @@ class _GroupOfTabsState extends State<GroupOfTabs> with TickerProviderStateMixin
               _index = value;
             });
           },
-          items: [
+          items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),
               label: 'Group 1',
