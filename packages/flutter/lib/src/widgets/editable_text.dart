@@ -2143,7 +2143,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (value.selection.isCollapsed && value.selection.affinity != _value.selection.affinity) {
-      // The text input server does not know the text affinity, so should repect the client value.
+      // The text input server does not know the text affinity, so should respect the client value.
       value = value.copyWith(selection: value.selection.copyWith(affinity: _value.selection.affinity));
     }
 
